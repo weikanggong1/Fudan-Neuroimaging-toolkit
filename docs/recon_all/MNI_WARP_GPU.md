@@ -59,7 +59,7 @@ print(warp_outputs["forward"])  # 完整目标网格上的 pull 位移路径
 
 两个 warp 使用 NIfTI displacement-vector intent，并带 FS ecode 14 的 source/target 几何、位移解释、节点间距及零标签扩展；逆场交换 source/target。NIfTI source 几何沿用原生 sform 列归一化和普通 FP32 `MatrixMultiply` 的中心累加顺序，再恢复 voxel-to-RAS 矩阵。转换采样范围为 crop 网格 `[0,size)`，最后一个单元内复制最后邻点，真正越界时把**绝对源体素坐标**置零，随后转换为位移。检查图在双精度上执行 native `nint`（半整数远离零）；先按 `rint` 检查边界，再夹到合法体素索引，保留 `GCAMmorphToAtlas` 的源坐标域检查，真正越界填零。坐标先提升为双精度再加 0.5，避免 FP32 加法把邻近半整数的值提前舍入。输入必须是单向量帧 `(X,Y,Z,1,3)`、NIfTI intent 1006、FS `DISP_RAS` 编码且 spacing=1；其他编码不会被当成毫米位移。检查图还要求原图 scanner RAS affine 与 source 几何在 1e-4 容差内相符，不能只比较 shape。MGZ 大端多字节数据转成本机字节序后传入 Torch，保留 nibabel 已应用的 scale/intercept 和输出 dtype。缺失文件、非有限值、空控制点、不支持的扩展/几何或运行失败均明确报错，不静默回退 CPU。
 
-现有 `run_mni_nonlinear_chain` 提供 `postprocess_backend="conda" | "gpu"` 和 `chunk_slices=16`。独立函数的兼容默认值保留Conda路径；当前 `native_free.py` 已让CUDA recon-all显式选择GPU，CPU运行选择Conda。GPU选项调用上述三个算子。模型、文件名、原有计时键和其余参数保持兼容，已有FP32例外仍记录实际设置。
+`run_mni_nonlinear_chain` 默认且只支持 `postprocess_backend="gpu"`，`chunk_slices=16`。它复用上述三个完整算子，保留旧程序路径参数用于调用签名兼容，不读取或执行这些程序。完整 recon-all 在入口校验时拒绝CPU设备，避免先完成前段后才因MNI缺少GPU失败。模型、文件名与原有计时键保持，已有FP32例外仍记录实际前向设置。旧Conda程序仅用于独立参考验证。
 
 ## 命令行
 
@@ -101,6 +101,10 @@ mri_convert -rt nearest orig.mgz -at forward.nii.gz test.nii.gz
 2026-10-09 补充 `fill_inverse_fields(averages, control, *, device="cuda:0")` 的目标设备修复。`averages` 为 CPU FP32 `(3,X,Y,Z)` 目标体素绝对坐标，`control` 为同网格 bool 控制点；返回 CPU FP32 同形坐标及原有 Voronoi/soap 迭代统计。原函数在当前CUDA0、输入放在CUDA1时，Triton使用当前stream而报指针不可访问，并非OOM。现在仅为CUDA分配、完整expand/soap迭代和下载增加 `torch.cuda.device(selected)` 局部作用域，正常与异常退出均恢复原设备，不改变TF32、allocator、公式或停止阈值。参数、输入检查和失败传播保持。双GPU正常/异常合同及两例真实同输入完整逆场对照见 [MNI与网格并行说明](MNI_MESH_PARALLEL.md)；旧失败日志也保留。本函数属于 `GCAMinvert` 内部填充，没有独立官方CLI。
 
 ## 当前版本、真实 benchmark 与验证
+
+2026-10-11 的两例冻结真实输入验证中，新默认GPU与旧GPU的三张MNI输出均零数值差异，厚度相对源码构建参考的最大差为9.54e-7 mm；完整MNI阶段分别65.662→52.218秒、54.644→61.587秒。共享环境的两次排序不同，本轮不宣称稳定提速。实测源码为`22d4e0aa`，详细分步、参考程序迁移哈希及显存观测见[最新阶段报告](../../validation/recon_all/optimizations/20261011_metrics_install/README.md)。
+
+本次整合取消主调度的CPU→Conda旧分支，完整API、batch和测评入口提前拒绝CPU，MNI报告固定记录自有GPU后处理。52项本地入口/缓存/失败回归及25个子检查通过，保留CUDA默认与非默认设备传递、调用方精度恢复和通用CPU子函数。源码SHA与[机器报告](../../validation/recon_all/optimizations/20261011_mni_entry_integration/contract_checks.json)绑定；这些合同测试不分配CUDA，不是集成版本的真实MRI或整例测量。
 
 2026-10-02 两例、两轮自产完整阶段 GPU 为 36.173–38.675 秒，Conda 对照为 122.813–130.526 秒，四个配对的本次观察加速 3.247×–3.608×；两例新模型的 deform、前向场、完整逆向场和检查图直接数值零差异，几何及类型一致。14 项单元回归通过；最新四个完整阶段均直接观测到两次内部 FP32 前向、TF32 与 autocast 关闭。进程树采样峰值 13.103 GB，Torch 全命令累计 allocated / reserved 峰值 9.269 / 12.273 GB，缓存未清空。最新专项证据见 [任务 5 报告](../../validation/recon_all/optimizations/20261002_parallel/task_05/README.md)。算子和完整阶段同输入回归已通过；阶段结果不替代整例验收。两个完整原始 T1 整例与 138 项严格诊断由协调者执行。
 

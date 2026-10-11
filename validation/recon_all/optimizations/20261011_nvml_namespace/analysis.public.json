@@ -1,0 +1,109 @@
+{
+  "status": "controlled_probe_passed_namespace_mapping_unresolved",
+  "scope": "two small FP32 CUDA controls; no whole reconstruction or <20GB conclusion",
+  "analysis_source_sha256": "d9e6105ecf8c9c108d3af0e609ae35c528065265bc95eeeb7f949680384698ea",
+  "analysis_correction": "NVML rows appear on actual allocation, not cuda.init; derive from unchanged original snapshots; raw execution SHA and original derived fields preserved",
+  "controls": {
+    "cache_enabled": {
+      "raw_report_sha256": "5da44618bc2ca1f0031f272bfba78f234758535e34fbc24c112692ef4fa9e97f",
+      "executed_probe_sha256": "91d99aa0fae44546838d59044f37d2db8a21abed9f53018bc958faf9d5681c7c",
+      "correlated_candidates": {
+        "parent": [
+          63907
+        ],
+        "child": [
+          65239
+        ],
+        "classification": "empirical temporal correlation only; not trusted host/local PID binding"
+      },
+      "parent_identity": {
+        "local_pid": 54710,
+        "pid_namespace": "pid:[4026542021]",
+        "starttime_ticks": 446822635,
+        "nspid_chain": null,
+        "errors": []
+      },
+      "child_identity": {
+        "local_pid": 54796,
+        "pid_namespace": "pid:[4026542021]",
+        "starttime_ticks": 446823385,
+        "nspid_chain": null,
+        "errors": []
+      },
+      "held_payload_total_bytes": 402653184,
+      "observed_nvml_process_sum_bytes": 1430257664,
+      "attributed_tree_total_bytes": null,
+      "raw_torch_parent_allocated_bytes": 134217728,
+      "raw_torch_child_allocated_bytes": 268435456,
+      "torch_stats_valid_for_peak": true,
+      "precision_before": {
+        "matmul_tf32": false,
+        "cudnn_tf32": true,
+        "autocast": false
+      },
+      "precision_after": {
+        "matmul_tf32": false,
+        "cudnn_tf32": true,
+        "autocast": false
+      },
+      "sampler_source_sha256": {
+        "fnit.recon_all.profiling": "43fd54dd7217d789ff4eac0b6b9be702112444e9caf545f7f2f1c3f81acf09f8",
+        "fnit.recon_all.nvml_process_memory": "1879606b4af4c10e088cff3c665255511dee872da91d4a9c8b2b1cb07550b348"
+      }
+    },
+    "cache_disabled": {
+      "raw_report_sha256": "9c1e8fe6aca01b5f84e75b46781a810d4e91031acad90ac094b59ae5e7accf15",
+      "executed_probe_sha256": "91d99aa0fae44546838d59044f37d2db8a21abed9f53018bc958faf9d5681c7c",
+      "correlated_candidates": {
+        "parent": [
+          67027
+        ],
+        "child": [
+          68070
+        ],
+        "classification": "empirical temporal correlation only; not trusted host/local PID binding"
+      },
+      "parent_identity": {
+        "local_pid": 54889,
+        "pid_namespace": "pid:[4026542021]",
+        "starttime_ticks": 446824387,
+        "nspid_chain": null,
+        "errors": []
+      },
+      "child_identity": {
+        "local_pid": 54977,
+        "pid_namespace": "pid:[4026542021]",
+        "starttime_ticks": 446824878,
+        "nspid_chain": null,
+        "errors": []
+      },
+      "held_payload_total_bytes": 402653184,
+      "observed_nvml_process_sum_bytes": 1430257664,
+      "attributed_tree_total_bytes": null,
+      "raw_torch_parent_allocated_bytes": 0,
+      "raw_torch_child_allocated_bytes": 0,
+      "torch_stats_valid_for_peak": false,
+      "precision_before": {
+        "matmul_tf32": false,
+        "cudnn_tf32": true,
+        "autocast": false
+      },
+      "precision_after": {
+        "matmul_tf32": false,
+        "cudnn_tf32": true,
+        "autocast": false
+      },
+      "sampler_source_sha256": {
+        "fnit.recon_all.profiling": "43fd54dd7217d789ff4eac0b6b9be702112444e9caf545f7f2f1c3f81acf09f8",
+        "fnit.recon_all.nvml_process_memory": "1879606b4af4c10e088cff3c665255511dee872da91d4a9c8b2b1cb07550b348"
+      }
+    }
+  },
+  "post_exit": {
+    "scope": "post-probe target device observation; not ownership proof",
+    "processes": [],
+    "device_used_bytes": 925302784,
+    "device_error_type": null,
+    "monotonic": 4468259.892310633
+  }
+}

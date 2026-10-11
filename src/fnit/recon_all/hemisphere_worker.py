@@ -43,12 +43,17 @@ def main():
     torch = None
     try:
         import torch
-        from .profiling import StageProfiler, configure_cuda_allocator
+        from .profiling import StageProfiler, configure_cuda_allocator, autocast_state
         from .thread_budget import thread_budget
+        from .execution_recipe import original_stage_guard
         phase = 'policy'
         # 精度按调度方当前状态传递，进程内互不影响；不启用 autocast。
         torch.backends.cuda.matmul.allow_tf32 = request['precision']['matmul_tf32']
         torch.backends.cudnn.allow_tf32 = request['precision']['cudnn_tf32']
+        report['precision_actual_at_entry'] = {
+            'matmul_tf32': bool(torch.backends.cuda.matmul.allow_tf32),
+            'cudnn_tf32': bool(torch.backends.cudnn.allow_tf32),
+            'autocast': {kind: autocast_state(kind) for kind in ('cpu', 'cuda')}}
         torch.set_num_interop_threads(1)
         allocator = configure_cuda_allocator(request['device'], request.get('allocator_policy', 'auto'))
         report['cuda_allocator'] = allocator
@@ -81,7 +86,8 @@ def main():
                                  synchronize=request['profile_stages'], allocator=allocator)
         module, name = request['callable'].rsplit(':', 1)
         function = getattr(importlib.import_module(module), name)
-        with thread_budget(threads=request['threads']) as budget:
+        with original_stage_guard(enabled=os.environ.get('FNIT_RECON_FORBID_ORIGINAL_STAGES') == '1') as program_guard, \
+                thread_budget(threads=request['threads']) as budget:
             try:
                 phase = 'operation'
                 report['operation_entered'] = True
@@ -96,6 +102,12 @@ def main():
             finally:
                 report['stage'] = profiler.last_row
                 report['thread_budget'] = budget
+                if program_guard is not None:
+                    report['stage_program_boundary'] = program_guard
+                report['precision_actual_after_operation'] = {
+                    'matmul_tf32': bool(torch.backends.cuda.matmul.allow_tf32),
+                    'cudnn_tf32': bool(torch.backends.cudnn.allow_tf32),
+                    'autocast': {kind: autocast_state(kind) for kind in ('cpu', 'cuda')}}
         report['status'] = 'complete'
         report['precision'] = request['precision']
     except BaseException as error:
@@ -103,6 +115,9 @@ def main():
                       cuda_oom=_is_cuda_oom(error),
                       error=repr(error),
                       traceback=traceback.format_exc())
+        quality = getattr(error, 'diagnostics', None)
+        if isinstance(quality, dict):
+            report['quality_failure'] = quality
         # is_initialized reads Python state only; no CUDA query after failure.
         try:
             report['cuda_initialized_after_failure'] = (

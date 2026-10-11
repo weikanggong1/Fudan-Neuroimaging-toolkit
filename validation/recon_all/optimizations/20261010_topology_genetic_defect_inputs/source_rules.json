@@ -1,0 +1,47 @@
+{
+  "upstream_commit": "d932c45b7941662ea380a05efef580568b98d41a",
+  "upstream_source_sha256": "55ace70ab09b1868a8cb152a9547879abdce790635b484bef1bf056986958187",
+  "topology_source_sha256": "b3bad6af7aae45f29e1db345395e2ea8c20a0e02762e0d6f8db0464957b8bdfd",
+  "reference_only_original_program": true,
+  "original_cpp_published": false,
+  "rules": [
+    {
+      "function": "mrisTessellateDefect_wkr",
+      "lines": [
+        11195,
+        11547
+      ],
+      "geometry_and_MRI": "original mris origXYZ/original normals/val2/val2bak; raw original edges penalty",
+      "dynamic_base_state": "edgeExists(mris_corrected) and edgesIntersect(mris_corrected), then ES from dynamic used2"
+    },
+    {
+      "function": "edgeExists",
+      "file": "utils/mrisurf_topology.cpp",
+      "lines": [
+        320,
+        329
+      ],
+      "behavior": "scan vertex1 current one-ring v[:vnum], directed; no rip filter"
+    },
+    {
+      "function": "mrisComputeOptimalRetessellation_wkr",
+      "lines": [
+        12259,
+        12320
+      ],
+      "edge_table_policy": "standard GA edge_table=0 means disabled",
+      "maximum_saved_overlap_edges": 1000,
+      "discovered_1001_marks_incomplete": true
+    },
+    {
+      "function": "MRIScorrectTopology",
+      "lines": [
+        8439,
+        8701
+      ],
+      "behavior": "sequential defects mutate corrected state; initial all25 tables cannot be fixed for subsequent search"
+    }
+  ],
+  "sorting_scope": "existing tested FNIT score/vno1/enumeration; upstream comparator has no valid equal-key branch",
+  "standalone_original_ETable_CLI": false
+}

@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="24" time="6.526" timestamp="2026-10-10T17:07:07.707427+08:00" hostname="local_contract_validation"><testcase classname="tests.recon_all.test_topology_patch_fitness" name="test_source_order_own_distance_and_unmodified_feedback" time="0.003" /><testcase classname="tests.recon_all.test_topology_patch_fitness" name="test_reference_output_or_caller_distance_rejected_before_computation[reference_scores]" time="0.001" /><testcase classname="tests.recon_all.test_topology_patch_fitness" name="test_reference_output_or_caller_distance_rejected_before_computation[reference_results]" time="0.001" /><testcase classname="tests.recon_all.test_topology_patch_fitness" name="test_reference_output_or_caller_distance_rejected_before_computation[reference_curvbak]" time="0.001" /><testcase classname="tests.recon_all.test_topology_patch_fitness" name="test_reference_output_or_caller_distance_rejected_before_computation[reference_anything]" time="0.001" /><testcase classname="tests.recon_all.test_topology_patch_fitness" name="test_reference_output_or_caller_distance_rejected_before_computation[signed_distance_mm]" time="0.001" /><testcase classname="tests.recon_all.test_topology_patch_fitness" name="test_candidate_versions_must_match_before_any_component[normal_inputs-original_vertices]" time="0.002" /><testcase classname="tests.recon_all.test_topology_patch_fitness" name="test_candidate_versions_must_match_before_any_component[normal_inputs-vertex_normals]" time="0.001" /><testcase classname="tests.recon_all.test_topology_patch_fitness" name="test_candidate_versions_must_match_before_any_component[normal_inputs-vertex_areas_mm2]" time="0.001" /><testcase classname="tests.recon_all.test_topology_patch_fitness" name="test_candidate_versions_must_match_before_any_component[normal_inputs-patch_vertices]" time="0.001" /><testcase classname="tests.recon_all.test_topology_patch_fitness" name="test_candidate_versions_must_match_before_any_component[curvature_inputs-vertex_areas_mm2]" time="0.001" /><testcase classname="tests.recon_all.test_topology_patch_fitness" name="test_candidate_versions_must_match_before_any_component[curvature_inputs-patch_vertices]" time="0.002" /><testcase classname="tests.recon_all.test_topology_patch_fitness" name="test_candidate_versions_must_match_before_any_component[distance_inputs-faces]" time="0.001" /><testcase classname="tests.recon_all.test_topology_patch_fitness" name="test_candidate_versions_must_match_before_any_component[distance_inputs-face_normals]" time="0.001" /><testcase classname="tests.recon_all.test_topology_patch_fitness" name="test_candidate_versions_must_match_before_any_component[distance_inputs-volume_origin_mm]" time="0.002" /><testcase classname="tests.recon_all.test_topology_patch_fitness" name="test_candidate_versions_must_match_before_any_component[distance_inputs-volume_index_scale_per_mm]" time="0.001" /><testcase classname="tests.recon_all.test_topology_patch_fitness" name="test_source_small_volume_skips_only_unmri[shape0]" time="0.002" /><testcase classname="tests.recon_all.test_topology_patch_fitness" name="test_source_small_volume_skips_only_unmri[shape1]" time="0.003" /><testcase classname="tests.recon_all.test_topology_patch_fitness" name="test_source_small_volume_skips_only_unmri[shape2]" time="0.002" /><testcase classname="tests.recon_all.test_topology_patch_fitness" name="test_weights_keep_source_epsilon_and_negative_values" time="0.003" /><testcase classname="tests.recon_all.test_topology_patch_fitness" name="test_face_penalty_is_source_scoring_and_not_mesh_qc" time="0.002" /><testcase classname="tests.recon_all.test_topology_patch_fitness" name="test_full_vertex_state_order_required[initial_vertex_curvbak]" time="0.002" /><testcase classname="tests.recon_all.test_topology_patch_fitness" name="test_missing_field_and_wrong_mapping_fail_explicitly" time="0.003" /><testcase classname="tests.recon_all.test_topology_patch_fitness" name="test_complete_api_calls_existing_kernels_and_preserves_nan_diagnostics" time="0.003"><failure message="ValueError: uint8 MRI, (4,4) matrix, float32 (256,256,1) PDF required">def test_complete_api_calls_existing_kernels_and_preserves_nan_diagnostics():
+        args = arguments()
+&gt;       result = stage.evaluate_prepared_patch_fitness(**args)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/recon_all/test_topology_patch_fitness.py:181: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/fnit/recon_all/topology_patch_fitness.py:100: in evaluate_prepared_patch_fitness
+    components["mri"] = patch_mri_likelihood(**mri_inputs)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+original_vertices = array([[0., 0., 0.],
+       [4., 0., 0.],
+       [0., 4., 0.]], dtype=float32)
+faces = array([[0, 1, 2]], dtype=int32)
+vertex_normals = array([[0., 0., 1.],
+       [0., 0., 1.],
+       [0., 0., 1.]], dtype=float32)
+face_normals = array([[0., 0., 1.]], dtype=float32)
+vertex_areas_mm2 = array([0., 0., 0.], dtype=float32)
+face_areas_mm2 = array([0.], dtype=float32)
+patch_vertices = array([0, 1, 2], dtype=int32)
+patch_faces = array([0], dtype=int32)
+volume = array([[[100, 100, 100, 100, 100, 100, 100, 100, 100],
+        [100, 100, 100, 100, 100, 100, 100, 100, 100],
+        ...   [100, 100, 100, 100, 100, 100, 100, 100, 100],
+        [100, 100, 100, 100, 100, 100, 100, 100, 100]]], dtype=uint8)
+ras_to_voxel = array([[1., 0., 0., 3.],
+       [0., 1., 0., 3.],
+       [0., 0., 1., 3.],
+       [0., 0., 0., 1.]], dtype=float32)
+gray_white_pdf = array([[1.5258789e-05, 1.5258789e-05, 1.5258789e-05, ..., 1.5258789e-05,
+        1.5258789e-05, 1.5258789e-05],
+      ...1.5258789e-05, 1.5258789e-05, 1.5258789e-05, ..., 1.5258789e-05,
+        1.5258789e-05, 1.5258789e-05]], dtype=float32)
+
+    def patch_mri_likelihood(*, original_vertices, faces, vertex_normals, face_normals,
+                             vertex_areas_mm2, face_areas_mm2, patch_vertices, patch_faces,
+                             volume, ras_to_voxel, gray_white_pdf) -&gt; dict:
+        """已拟合patch几何/MRI/自产PDF→完整face_ll、vertex_ll及面积加权诊断。
+    
+        original_vertices(N,3)为本候选的surface RAS/mm坐标；faces(F,3)为同序
+        整数面，vertex_normals(N,3)/face_normals(F,3)为当前已计算的无量纲
+        法向，vertex_areas_mm2(N,)/face_areas_mm2(F,)为源metric字段的面积。
+        topology仍处于球面status时面面积可有方向符号，须完整保留，
+        不能丢弃负面或把本诊断加权值解释为物理脑区面积。
+        patch_vertices(K,)/patch_faces(M,)为完整、有序、唯一的修改索引；
+        不能只选择质量好的子集。volume为3D uint8 MRI，ras_to_voxel为
+        本MRI的tkregister RAS到连续体素的4×4矩阵（调用
+        source_topology_ras_to_voxel生成，不用placement的scanner桥）。gray_white_pdf为自产正值float32
+        (256,256,1)联合PDF。±0.5mm采样、face centroid FP32及累计规则固定。
+        返回Python字典face_ll/vertex_ll（源float32子项转Python float）、
+        mri_ll（两子项相加的double）、area_weighted_face_ll和vertex_ll；
+        加权项仅为诊断，不替换原fitness子项。其分母为零时保留源 IEEE
+        NaN/Inf，并返回 area_weighted_*_defined=False 及源 float32 *_bits；
+        不把未定义诊断改成0，也不据此拒绝主似然有限的中间候选。
+        空patch的源诊断仍为0且defined=True。JSON调用者应将未定义值
+        写成null并保留bits。非法形状/索引、非有限输入、非正PDF抛
+        ValueError；采样后非有限主似然抛FloatingPointError。
+        不移动几何、不修交、不组合unMRI/曲率/normal项，不写文件、不运行
+        原软件。只有本MRI子项完成，不能把它作为完整GA或质量通过。
+        """
+        xyz = np.asarray(original_vertices, np.float32); triangles = np.asarray(faces)
+        normal = np.asarray(vertex_normals, np.float32); fnormal = np.asarray(face_normals, np.float32)
+        area = np.asarray(vertex_areas_mm2, np.float32); farea = np.asarray(face_areas_mm2, np.float32)
+        vertices = np.asarray(patch_vertices); selected_faces = np.asarray(patch_faces)
+        image = np.asarray(volume); matrix = np.asarray(ras_to_voxel, np.float32); pdf = np.asarray(gray_white_pdf)
+        if xyz.ndim != 2 or xyz.shape[1] != 3 or normal.shape != xyz.shape or area.shape != (len(xyz),):
+            raise ValueError('matching vertex coordinates/normals/areas required')
+        if triangles.ndim != 2 or triangles.shape[1] != 3 or not np.issubdtype(triangles.dtype, np.integer) or fnormal.shape != (len(triangles), 3) or farea.shape != (len(triangles),):
+            raise ValueError('matching integer faces, normals and areas required')
+        if triangles.size and (triangles.min() &lt; 0 or triangles.max() &gt;= len(xyz)):
+            raise ValueError('face indices outside vertex range')
+        for indices, limit in [(vertices, len(xyz)), (selected_faces, len(triangles))]:
+            if indices.ndim != 1 or not np.issubdtype(indices.dtype, np.integer) or len(np.unique(indices)) != len(indices) or indices.size and (indices.min() &lt; 0 or indices.max() &gt;= limit):
+                raise ValueError('unique ordered integer patch indices required')
+        if image.ndim != 3 or image.dtype != np.uint8 or not all(image.shape) or matrix.shape != (4, 4) or pdf.shape != (256, 256, 1) or pdf.dtype != np.float32:
+&gt;           raise ValueError('uint8 MRI, (4,4) matrix, float32 (256,256,1) PDF required')
+E           ValueError: uint8 MRI, (4,4) matrix, float32 (256,256,1) PDF required
+
+src/fnit/recon_all/topology_mri_likelihood.py:134: ValueError</failure></testcase></testsuite></testsuites>

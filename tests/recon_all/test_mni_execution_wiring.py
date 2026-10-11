@@ -18,6 +18,7 @@ class MNIExecutionWiringTest(unittest.TestCase):
     def test_invalid_execution_fails_before_setup_or_output(self):
         with tempfile.TemporaryDirectory() as directory:
             for execution, device, threads in (("bad", "cuda:0", 4),
+                    ("in-process", "cpu", 4), ("in-process", "mps", 4),
                     ("parallel-late", "cpu", 4), ("parallel-late", "cuda", 4),
                     ("parallel-late", "cuda:0", 1), ("parallel-late", "cuda:0", True)):
                 subject = Path(directory) / "subject"
@@ -29,7 +30,18 @@ class MNIExecutionWiringTest(unittest.TestCase):
                             threads=threads, mni_execution=execution)
                     budget.assert_not_called()
                     self.assertFalse(subject.exists())
-        native_free._validate_mni_execution("in-process", "cpu", 1)
+        native_free._validate_mni_execution("in-process", "cuda:0", 1)
+        native_free._validate_mni_execution("in-process", "cuda", 1)
+
+    def test_direct_white_mri_helper_rejects_cpu_before_auxiliary_calculation(self):
+        with patch("fnit.recon_all.mni_aux_chain.run_mni_aux_chain") as auxiliary, \
+                patch("fnit.recon_all.finalsurfs_python.run_finalsurfs") as final:
+            with self.assertRaisesRegex(ValueError, "Complete MNI"):
+                native_free._run_white_mri_chain(
+                    subject=Path("subject"), weights=Path("weights"), assets=Path("assets"),
+                    threads=4, warp_binaries=(None, None, None), stage=Mock(), device="cpu")
+        auxiliary.assert_not_called()
+        final.assert_not_called()
 
     def test_single_hemisphere_api_rejects_parent_autocast_before_thread_setup(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -62,6 +74,8 @@ class MNIExecutionWiringTest(unittest.TestCase):
                 auxiliary.assert_called_once()
                 final.assert_called_once_with(Path("subject"), device="cuda:1")
                 self.assertEqual(nonlinear.call_count, int(not deferred))
+                if not deferred:
+                    self.assertEqual(nonlinear.call_args.kwargs["postprocess_backend"], "gpu")
                 self.assertEqual(value, {"actual_precision": "FP32"})
 
     def test_complete_output_checks_run_after_late_worker_join(self):

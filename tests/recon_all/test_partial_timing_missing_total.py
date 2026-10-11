@@ -40,7 +40,7 @@ def test_between_stage_import_failure_finalizes_partial_report_and_restores_thre
     with pytest.raises(ModuleNotFoundError) as raised:
         native_free.run_recon_all_python(
             t1="raw.nii.gz", subject_dir=subject, weights_dir="weights",
-            assets_dir="assets", device="cpu", threads=requested)
+            assets_dir="assets", device="cuda:0", threads=requested)
 
     assert raised.value is original
     assert raised.value.name == "tifffile"
@@ -73,7 +73,7 @@ def test_missing_tifffile_is_checked_before_pipeline_imports_and_outputs(
     with pytest.raises(ModuleNotFoundError) as raised:
         native_free._run_recon_all_python(
             t1=t1, subject_dir=subject, weights_dir=weights,
-            assets_dir=assets, device="cpu", threads=1)
+            assets_dir=assets, device="cuda:0", threads=1)
     assert raised.value is original
     preflight.assert_called_once_with()
     assert not subject.exists()
@@ -98,5 +98,5 @@ def test_invalid_input_preserves_validation_error_before_dependency_preflight(
         native_free._run_recon_all_python(
             t1=tmp_path / "missing.nii.gz", subject_dir=tmp_path / "subject",
             weights_dir=tmp_path / "weights", assets_dir=tmp_path / "assets",
-            device="cpu", threads=1)
+            device="cuda:0", threads=1)
     preflight.assert_not_called()

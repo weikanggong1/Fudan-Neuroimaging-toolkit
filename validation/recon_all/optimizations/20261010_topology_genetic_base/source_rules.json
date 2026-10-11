@@ -1,0 +1,75 @@
+{
+  "fixed_source_commit": "d932c45b7941662ea380a05efef580568b98d41a",
+  "source_files": {
+    "utils/mrisurf_defect.cpp": {
+      "sha256": "55ace70ab09b1868a8cb152a9547879abdce790635b484bef1bf056986958187",
+      "lines": [
+        8155,
+        8408
+      ],
+      "rules": [
+        "GA retains all original vertices, including DISCARD vertices; only DISCARD receives new rip=1",
+        "outside vertices first in original index order, then each defect's original ordered vertices",
+        "restore TMP and compute metric properties before copied current positions/normals",
+        "copy five vectors and fifteen scalar fields explicitly; original coordinates remain smoothed original",
+        "filter all marked-vertex faces in source face order",
+        "filter original incident face/corner rows and original one-ring rows independently",
+        "retain outside-outside neighbor entries even if no surviving incident face",
+        "inside topology stays zero; outside nsizeCur/Max=1 and vtotal=vnum",
+        "do not copy original rip, marks, border, vertex area, tangent vectors or flattened positions"
+      ]
+    },
+    "utils/mrisurf_base.cpp": {
+      "sha256": "f21ce5a02b2d25537b48ec52e3012ed8120832cb018beeb6dca1ee1c66943dba",
+      "lines": [
+        514,
+        751
+      ],
+      "rules": [
+        "new vertex and topology storage is zeroed before logical growth",
+        "new face, face-normal cache and deferred-normal storage is zeroed",
+        "surface global nsize and max_nsize initialize to 1",
+        "base capacity is original N+10 and 2F; only logical arrays are outputs"
+      ]
+    },
+    "include/mrisurf.h": {
+      "sha256": "810f60f832a19d07580f7ce2e4d8c04e899069b03726eb9cca4e8553491907be",
+      "lines": [
+        1539,
+        1544
+      ],
+      "rules": [
+        "MRIS_TRIANGULAR_SURFACE aliases MRIS_ICO_SURFACE, integer code 3"
+      ]
+    },
+    "include/mri.h": {
+      "sha256": "1965dae1d366c788a10439b8ac1dca58c3da9f4056d7e1cd6a1b0f61ef7b83ce",
+      "lines": [
+        185,
+        307
+      ],
+      "rules": [
+        "VOL_GEOM assignment copies ras_good_flag and three shear fields with dimensions/spacing/direction/center",
+        "fname and two existing transforms are copied",
+        "register_mat is not assigned; destination fresh null remains null"
+      ]
+    },
+    "include/affine.h": {
+      "sha256": "17ecc3b07e7218127bf8e2da6dbf5c88cc0cc32bac296279d612a025313857dc",
+      "lines": [
+        78,
+        119
+      ],
+      "rules": [
+        "AffineMatrix has 16 float values in native storage order; observer reads without calling transform computation"
+      ]
+    }
+  },
+  "after_reference_is_production_input": false,
+  "source_capture_status": "pending_explicit_observer_upload_authorization",
+  "raw_tmp_normals_not_smoothed_original_normals": true,
+  "benchmark_boundary": "declared complete before-state fields to independently constructed initial GA base",
+  "whole_ga": false,
+  "whole_recon_all": false,
+  "overall_equivalence": "not_assessed"
+}

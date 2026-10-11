@@ -8,8 +8,8 @@ from fnit.recon_all.native_free import _run_white_mri_chain
 
 
 class WhiteMriDeviceWiringTest(unittest.TestCase):
-    def test_nonlinear_receives_cpu_and_nondefault_cuda_device(self):
-        for device in ("cpu", "cuda:1"):
+    def test_nonlinear_receives_default_and_nondefault_cuda_device(self):
+        for device in ("cuda:0", "cuda:1"):
             with self.subTest(device=device):
                 calls = {}
 
@@ -28,8 +28,7 @@ class WhiteMriDeviceWiringTest(unittest.TestCase):
                     self.assertTrue(torch.backends.cudnn.allow_tf32)
                 self.assertEqual(result, {"device": device})
                 self.assertEqual(calls["mni_nonlinear"]["device"], device)
-                self.assertEqual(calls["mni_nonlinear"]["postprocess_backend"],
-                                 "gpu" if device.startswith("cuda") else "conda")
+                self.assertEqual(calls["mni_nonlinear"]["postprocess_backend"], "gpu")
                 self.assertEqual(calls["mni_aux"]["device"], device)
                 self.assertEqual(calls["brain_finalsurfs"]["device"], device)
                 self.assertFalse(calls["mni_aux"]["actual_cudnn_tf32"])

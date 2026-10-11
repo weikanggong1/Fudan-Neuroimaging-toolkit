@@ -39,6 +39,8 @@ def thread_budget(*, threads: int = 4) -> Iterator[dict]:
     抛出原异常或 RuntimeError。正常退出和函数抛异常时均恢复调用方设置。
     Torch intraop 是进程设置，本作用域不能与其他线程的线程预算修改并发。
     Numba 掩码不是进程的总线程数，也不保证多个库合计只使用 threads 个线程。
+    Numba首次OpenMP初始化可能改变共享运行时的Torch线程数；读取掩码后
+    重新检查实际Torch状态，并在退出时恢复首次读取的调用方设置。
     """
     requested = _validate_threads(threads)
     capacity = int(numba.config.NUMBA_NUM_THREADS)
@@ -49,10 +51,12 @@ def thread_budget(*, threads: int = 4) -> Iterator[dict]:
         )
     before_torch = int(torch.get_num_threads())
     before_numba = int(numba.get_num_threads())
+    torch_after_numba_init = int(torch.get_num_threads())
     report = {
         "requested_threads": requested,
         "scope": "Torch process intraop and current caller Numba thread mask",
         "torch": {"before": before_torch, "effective": None,
+                  "after_numba_initialization": torch_after_numba_init,
                   "interop_unchanged": int(torch.get_num_interop_threads()),
                   "restored": None},
         "numba": {"before": before_numba, "effective": None,
@@ -61,7 +65,7 @@ def thread_budget(*, threads: int = 4) -> Iterator[dict]:
         "environment_modified": False,
         "restoration_complete": False,
     }
-    change_torch = before_torch != requested
+    change_torch = before_torch != requested or torch_after_numba_init != requested
     change_numba = before_numba != requested
     try:
         if change_torch:

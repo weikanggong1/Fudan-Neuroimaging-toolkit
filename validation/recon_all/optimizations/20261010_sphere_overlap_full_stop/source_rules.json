@@ -1,0 +1,75 @@
+{
+  "scope": "fixed upstream source audit; not executable reference benchmark",
+  "upstream_commit": "d932c45b7941662ea380a05efef580568b98d41a",
+  "files": {
+    "utils/mrisurf_timeStep.cpp": {
+      "bytes": 89119,
+      "sha256": "402bfd0bfdb5cf0bc59600f30592facf6a60890e78cdff3fa696f7fcec4ca553",
+      "inspected_lines": [
+        2415,
+        2486,
+        2490,
+        2510
+      ],
+      "upstream_url": "https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/utils/mrisurf_timeStep.cpp"
+    },
+    "mris_sphere/mris_sphere.cpp": {
+      "bytes": 23923,
+      "sha256": "a3c9540ba926ead9541ff3703fb1ad9a2cdd431ff09804c234f5328054edcb2d",
+      "inspected_lines": [
+        417,
+        420
+      ],
+      "upstream_url": "https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/mris_sphere/mris_sphere.cpp"
+    },
+    "mris_register/mris_register.cpp": {
+      "bytes": 39628,
+      "sha256": "f728018bef459b65b70e40d2b789e15cbdf9584fd9389e8fa0ce145850c0a7f5",
+      "inspected_lines": [
+        626,
+        629
+      ],
+      "upstream_url": "https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/mris_register/mris_register.cpp"
+    },
+    "include/mrisurf.h": {
+      "bytes": 119481,
+      "sha256": "810f60f832a19d07580f7ce2e4d8c04e899069b03726eb9cca4e8553491907be",
+      "inspected_lines": [
+        368,
+        380
+      ],
+      "upstream_url": "https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/include/mrisurf.h"
+    },
+    "utils/mrisurf_project.cpp": {
+      "bytes": 11407,
+      "sha256": "f35fe05edd8ef3774a62fd6521ea5023fcb22e5c32e1fc0ec92bd3679714e127",
+      "inspected_lines": [
+        94,
+        140
+      ],
+      "upstream_url": "https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/utils/mrisurf_project.cpp"
+    },
+    "utils/mrisurf_vals.cpp": {
+      "bytes": 103509,
+      "sha256": "edc3cffa7baad30f93924c700ef694601617895ffc096635311b75eb34e126d5",
+      "inspected_lines": [
+        206,
+        246
+      ],
+      "upstream_url": "https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/utils/mrisurf_vals.cpp"
+    }
+  },
+  "rules": {
+    "actual_function": "MRISremoveOverlapWithSmoothing (MRISremoveNegativeArea name not found in these fixed source files)",
+    "both_command_callers_niterations": 1000,
+    "hard_stop": "t-start_t > niterations; permits 1001 updates",
+    "no_progress_stop": "t > min_neg_iter+1000, separate source condition; not arbitrary new cap",
+    "dt": "double .99; multiply .95 when current dt>.01 every 10 stagnating iterations",
+    "source_position_width": "vertex coordinate float loaded into double x/y/z; neighbor subtraction and sum double; mean stored in float dx/dy/dz; double dt update then float coordinate store",
+    "dilation": "negative-face corners; expansion at most one full vnum ring; snapshot tx followed by marked copy",
+    "source_count": "non-ripped faces with float signed area<0, not double area and not history[-1]",
+    "final_history": "FNIT history records pre-update counts; actual final count requires post-update recomputation"
+  },
+  "native_reference_status": "declared relocated FNIT native/bin inventory lacks mris_sphere and mris_register; no original executable comparison claimed",
+  "source_redistribution": "original files remain only private temporary copies; repository contains hashes/rules"
+}

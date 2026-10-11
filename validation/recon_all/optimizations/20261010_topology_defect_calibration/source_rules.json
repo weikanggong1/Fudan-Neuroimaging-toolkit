@@ -1,0 +1,52 @@
+{
+  "upstream_commit": "d932c45b7941662ea380a05efef580568b98d41a",
+  "upstream_source_file": "utils/mrisurf_defect.cpp",
+  "upstream_source_sha256": "55ace70ab09b1868a8cb152a9547879abdce790635b484bef1bf056986958187",
+  "border_sampling": {
+    "function": "mrisFindGrayWhiteBorderMean",
+    "offsets_mm": [
+      -0.5,
+      0.5
+    ],
+    "two_median_passes": 2,
+    "skip_all_marked_defects": true
+  },
+  "calibration": {
+    "function": "mrisComputeGrayWhiteBorderDistributions",
+    "source_lines": [
+      15214,
+      15365
+    ],
+    "hull": "actual ordered chull, not one-ring border",
+    "neighborhood": "two nested vtotal two-ring neighborhoods; count each initially unmarked vertex once",
+    "bins": 256,
+    "white_gray_bins": "float32 integers 0..255",
+    "white_gray_bin_size": 0.0,
+    "zero_count_pseudocount": 0.1,
+    "count_divisor": "source nvertices cast to float32",
+    "sigma": 2.0,
+    "selected_output": "existing function returns sorted original indices; source processing order inspected separately"
+  },
+  "histogram_source": {
+    "file": "utils/histo.cpp",
+    "sha256": "f5a630b5ea6c2a67af52bb49ee976d176dd90e53aea55ee416eadd02b83680a7",
+    "function": "HISTOsmooth",
+    "kernel_length": 17,
+    "sigma": 2.0,
+    "normalization": "float32 ordered kernel normalization then per-bin edge normalization",
+    "bin_size": "preserve source metadata, including zero"
+  },
+  "translated_local_geometry": "original vertices after two ordered averages are permuted by explicit original-to-corrected mapping; full actual array checked against creation reference",
+  "reused_modules": [
+    "topology_edge_mri_score",
+    "topology_intensity_histogram",
+    "topology_defect_volume_priors",
+    "topology_preflight_python"
+  ],
+  "tissue_patch_recipe": "independent experimental sampling recipe; not used as source-equivalent calibration",
+  "stage_input_boundary": "self-produced original nofix/qsphere/normalized uint8 brain and defect state; no reference calibration PDF/local volume consumed",
+  "production_changed": false,
+  "full_ga": false,
+  "whole_reconstruction": false,
+  "overall_metric_equivalence": "not_assessed"
+}

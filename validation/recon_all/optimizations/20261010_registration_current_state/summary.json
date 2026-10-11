@@ -1,0 +1,95 @@
+{
+  "scope": "real full same-input left-hemisphere registration ABBA; not raw-T1 recon-all",
+  "baseline_git_commit": "86ae36bde8c0ec5960fbb9142af2b060c24d1d25",
+  "source_files_per_frozen_version": 603,
+  "only_source_changes": {
+    "src/fnit/recon_all/mris_register_smoothwm_run.py": {
+      "baseline": "e347bcff4991875bba6ef5300230429ecc2570e8241a60d0671e3d6d9cea4d27",
+      "candidate": "3060cc6da170d27796220633ea8222fd95f1b7131dff7335328c8b3620590ab2"
+    },
+    "src/fnit/recon_all/mris_register_sulc_run.py": {
+      "baseline": "c0faa8b852e75079d7b7da00f2a19db9637f2f308c94c34422c9a484886da1a1",
+      "candidate": "b70b141a3ff6f73751ede98d0c7eab5fdc50890fff01f67ba28139773946c0c5"
+    }
+  },
+  "same_hardware_thread_budget": true,
+  "gpu_model": "NVIDIA A100 80GB",
+  "physical_gpu": 6,
+  "logical_gpu": "cuda:0",
+  "threads": 4,
+  "affinity": [
+    96,
+    97,
+    98,
+    99
+  ],
+  "precision": "float32 with existing FP64 intermediates; TF32 enabled; no FP16/BF16",
+  "cases": {
+    "sub06": {
+      "complete_children": 4,
+      "complete_calls": 4,
+      "artifact_status": "complete",
+      "numeric_replacement_regression_passed": true,
+      "all_mesh_quality_passed": true,
+      "baseline_stage_api_median_seconds": 130.79018589109182,
+      "candidate_stage_api_median_seconds": 123.49511600518599,
+      "stage_api_reduction_percent": 5.577689056868829,
+      "baseline_fresh_process_wall_median_seconds": 144.75758683076128,
+      "candidate_fresh_process_wall_median_seconds": 138.037323910743,
+      "fresh_process_wall_reduction_percent": 4.64242535893823,
+      "final_negative_radial_faces": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "inputs_sha256": {
+        "sphere": "3221d14a2832fdc593b2ad86aff8d4ce34a6f0fe0eb16311e78fefb42b0a0107",
+        "smoothwm": "c9657a1443b23531ec7fee1817d372de18717432c320640b6110ce9f6dd47d06",
+        "sulc": "b2e1dc5c1349ad82f85239edea3ada5353900bbd0249dbffb79ba43cbc8ad1c5",
+        "atlas": "92f1dc820d778a67c143d4ea82597fd71a89ddc738dfa555b7ca32ed21e95c97"
+      },
+      "producer_driver_sha256": "c7c632c1f06fce57c6639d4ba71f8323c6e25dcfd9745d05aadeef37b8365ab0",
+      "report_public_sha256": "548b18dd42688d3cff910cb6d96a92e725708b9bcaf8c5044e1be8f206ea6e32"
+    },
+    "sub07": {
+      "complete_children": 4,
+      "complete_calls": 4,
+      "artifact_status": "failed_mesh_quality",
+      "numeric_replacement_regression_passed": true,
+      "all_mesh_quality_passed": false,
+      "baseline_stage_api_median_seconds": 142.98825199157,
+      "candidate_stage_api_median_seconds": 136.45579033903778,
+      "stage_api_reduction_percent": 4.568530324377518,
+      "baseline_fresh_process_wall_median_seconds": 155.1294231377542,
+      "candidate_fresh_process_wall_median_seconds": 150.608453837689,
+      "fresh_process_wall_reduction_percent": 2.914320964147843,
+      "final_negative_radial_faces": [
+        42,
+        42,
+        42,
+        42
+      ],
+      "inputs_sha256": {
+        "sphere": "242e06261ad8b5a579b711b4d2dbfe4edfbc65cce14307dc8fb1d27b4b1317af",
+        "smoothwm": "1e4028a94a214e07d5b8397fba0891d5736397725cf59a003b29f0aefaf10ba6",
+        "sulc": "1db585f2290e35f7e467a41a445979b0e38b3c6361f13dc92cd640a507d4eed4",
+        "atlas": "92f1dc820d778a67c143d4ea82597fd71a89ddc738dfa555b7ca32ed21e95c97"
+      },
+      "producer_driver_sha256": "ba6eb8a3cc1c26d82c78e83ea9b0fe67d83a5a50e27ecfb2301b9b33be69d9ab",
+      "report_public_sha256": "7b74a8181ee7e118ace6161a1bb0b0c14c8522b8ffd3ea5fda199c6c184fe589"
+    }
+  },
+  "strict_reproduction_scope": "bitwise same-input FNIT before/after; not whole official equivalence",
+  "optimization_numeric_regression": "passed for 8 complete stage calls",
+  "mesh_quality": "sub06 passed; sub07 existing 42 folds in all 4 old/new calls, strict failure retained",
+  "whole_pipeline_speedup": "not_measured",
+  "overall_metric_equivalence": "not_assessed",
+  "isolated_OS_deployment": "not_verified",
+  "twenty_billion_byte_whole_GPU_budget": "not_measured",
+  "gpu_process_tree_ownership": "unresolved: peak is null, not zero",
+  "public_export_manifests": {
+    "sub06": "ccdf99d73c403dec0fd2b4e2167dbc057f4eefd9ba504a49c2d1988edd89a43f",
+    "sub07": "f2d825a05a82a6ec5ddebc0049d85e7e413f0323b006fbca41171f35c1759530"
+  }
+}

@@ -13,10 +13,29 @@ import time
 import nibabel.freesurfer.io as fsio
 import numpy as np
 import torch
+from numba import njit
 
 from .curvature_stats_torch import curvature_derivatives_tensor
 from .mris_register_objective import _atan_table
 from .place_surface_normals import ordered_face_csr
+
+
+@njit(cache=True)
+def _source_acosf(values):
+    """固定源acosf内部步骤；FP32输入/输出，Numba调用系统libm，不调用FS。"""
+    result = np.empty_like(values)
+    for index in range(values.size):
+        result[index] = np.arccos(values[index])
+    return result
+
+
+@njit(cache=True)
+def _source_sqrtf(values):
+    """CPU源sqrtf；不采用Torch CPU向量sqrt的近似求倒数路径。"""
+    result = np.empty_like(values)
+    for index in range(values.size):
+        result[index] = np.sqrt(values[index])
+    return result
 
 
 def _dot(first, second):
@@ -32,6 +51,21 @@ def _cross(first, second):
 def _length(vector):
     # V3_LEN先以float计算平方和，再调用double sqrt。
     return _dot(vector, vector).double().sqrt().float()
+
+
+def _principal_curvatures(mean, gaussian, signed_principals, *, cpu_source_math=False):
+    """固定源sqrt(float)及float加减；输入/输出同设备FP32、负delta置零。"""
+    delta = mean * mean - gaussian
+    delta_negative = delta < 0
+    clipped = delta.clamp_min(0)
+    if cpu_source_math and mean.device.type == "cpu":
+        root = torch.from_numpy(_source_sqrtf(np.ascontiguousarray(clipped.numpy())))
+    else:
+        root = clipped.sqrt()
+    a, b = mean + root, mean - root
+    first_larger = a >= b if signed_principals else a.abs() >= b.abs()
+    first_smaller = a <= b if signed_principals else a.abs() <= b.abs()
+    return torch.where(first_larger, a, b), torch.where(first_smaller, a, b), delta_negative
 
 
 def _triangle_angle(y, x):
@@ -118,11 +152,14 @@ class DiscreteCurvatureTopology:
         self.width = width
 
     @torch.inference_mode()
-    def evaluate(self, *, vertices: torch.Tensor, signed_principals: bool = False) -> dict[str, torch.Tensor]:
+    def evaluate(self, *, vertices: torch.Tensor, signed_principals: bool = False,
+                 angle_backend: str = "torch") -> dict[str, torch.Tensor]:
         """surface RAS/mm的FP32(N,3)→K(mm⁻²)、H/K1/K2(mm⁻¹)及逐面几何。
 
         vertices必须在缓存目标设备、同N且有限；signed_principals=False按绝对值排K1/K2，
-        True按带符号值。使用源码float累计、double sqrt/最后表达式，不改全局TF32。
+        True按带符号值。angle_backend默认torch保持既有设备acos；source_libm把
+        FP32法向夹角参数下载，以Numba/system acosf计算再上传，以核对固定源码
+        数学实现。该显式混合路径不调用原程序、不改变全局TF32或半精度设置。
         面积退化/非有限值抛ValueError，不截断面积、不改变网格、不静默回退。
         返回均为同设备Tensor，调用者负责同步/传输；此内部算子没有独立官方CLI。
         """
@@ -131,6 +168,8 @@ class DiscreteCurvatureTopology:
             raise ValueError("vertices must be same-device float32 (N,3) matching cached topology")
         if not isinstance(signed_principals, bool) or not bool(torch.isfinite(vertices).all()):
             raise ValueError("finite coordinates and a bool signed_principals are required")
+        if angle_backend not in ("torch", "source_libm"):
+            raise ValueError("angle_backend must be torch or source_libm")
         triangle = vertices[self.faces]
         cross = _cross(triangle[:, 1] - triangle[:, 0], triangle[:, 2] - triangle[:, 0])
         length = _length(cross)
@@ -147,7 +186,12 @@ class DiscreteCurvatureTopology:
         angles = torch.stack(face_angles, dim=1)
         ni, nj = normal[self.face_ids], normal[self.next_faces]
         ratio = (_dot(ni, nj) / (_length(ni) * _length(nj))).clamp(-1, 1)
-        normal_angle = torch.acos(ratio)
+        if angle_backend == "source_libm":
+            host_ratio = np.ascontiguousarray(ratio.cpu().numpy()).reshape(-1)
+            host_angle = _source_acosf(host_ratio).reshape(ratio.shape)
+            normal_angle = torch.as_tensor(host_angle, device=vertices.device)
+        else:
+            normal_angle = torch.acos(ratio)
         outer, inner = vertices[self.outer_vertices], vertices[self.inner_vertices]
         positive = _length((outer + ni) - (inner + nj))
         negative = _length((outer - ni) - (inner - nj))
@@ -165,16 +209,14 @@ class DiscreteCurvatureTopology:
         gaussian = ((numerator / area_sum).double() * (2 * math.pi - angle_sum.double())).float()
         mean_numerator = torch.tensor(.75, dtype=torch.float64, device=vertices.device)
         mean = (mean_numerator / area_sum.double() * normal_sum.double()).float()
-        delta = mean * mean - gaussian
-        delta_negative = delta < 0
-        root = delta.clamp_min(0).double().sqrt()
-        a, b = (mean.double() + root).float(), (mean.double() - root).float()
-        first_larger = a >= b if signed_principals else a.abs() >= b.abs()
-        first_smaller = a <= b if signed_principals else a.abs() <= b.abs()
-        k1, k2 = torch.where(first_larger, a, b), torch.where(first_smaller, a, b)
+        # 固定Conda C++源码 sqrt(float)选择float重载，加/减也在float执行。
+        # Double求根后再舍入会使K1/K2出现1ULP，退化网格派生BE/FI放大该差异。
+        k1, k2, delta_negative = _principal_curvatures(mean, gaussian, signed_principals,
+            cpu_source_math=angle_backend == "source_libm")
         result = {"K": gaussian, "H": mean, "K1": k1, "K2": k2,
                   "face_area": area, "face_normal": normal, "face_angles": angles,
-                  "delta_negative": delta_negative}
+                  "delta_negative": delta_negative, "normal_angle": normal_angle,
+                  "normal_angle_ratio": ratio}
         if not all(bool(torch.isfinite(result[name]).all()) for name in ("K", "H", "K1", "K2")):
             raise ValueError("nonfinite curvature output")
         return result

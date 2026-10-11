@@ -9,7 +9,9 @@ from numba import njit
 
 from .place_surface_normals import initial_vertex_normals
 from .smooth_surface_python import ordered_neighbors
-from .sphere_standard_line_search import _distance_sse, first_epoch_line_search
+from .sphere_standard_line_search import (
+    _distance_sse, _source_sse_scales, first_epoch_line_search,
+)
 from .sphere_standard_unfold import _distance_force, _face_geometry
 
 
@@ -142,15 +144,21 @@ def nonlinear_epoch_sse(vertices: np.ndarray, faces: np.ndarray,
                         distance_weight: float = 1e-6,
                         nonlinear_weight: float = 1.0,
                         k: float = 10.0) -> dict:
-    """Evaluate native logistic-area plus distance objective at one trial."""
+    """计算标准球面一个固定非线性面积/距离SSE，surface RAS/mm。
+
+    vertices为float32(N,3)，faces为同序int32(F,3)，offsets/neighbors为
+    同顶点序CSR，original_distances为float32毫米，original_total_area为
+    float32总mm²。distance_weight默认1e-6、nonlinear_weight默认1、k默认10，
+    均保留源参数及logistic定义；距离尺度复用源float sqrt后double累加。
+    返回total、weighted_distance、weighted_nonlinear_area、negative_faces
+    和无量纲distance_scale/area_scale字典。非法网格/CSR沿既有NumPy/Numba
+    异常暴露，调用者必须提供合法索引；不裁剪非有限坐标或面积。
+    属于mris_sphere内部步骤，没有独立CLI，不改变TF32/存储精度。
+    """
     xyz = np.asarray(vertices, np.float32)
     area, _ = _face_geometry(xyz, np.asarray(faces, np.int32))
     negative_area = np.float32(-np.sum(area[area < 0], dtype=np.float64))
-    total_area = np.float32(4 * math.pi * 100 * 100)
-    denominator = (np.float32(total_area - negative_area)
-                   if negative_area < total_area else total_area)
-    distance_scale = math.sqrt(float(np.float32(original_total_area / denominator)))
-    area_scale = float(np.float32(original_total_area / total_area))
+    distance_scale, area_scale = _source_sse_scales(original_total_area, negative_area)
     distance = _distance_sse(xyz, offsets, neighbors, original_distances,
                              distance_scale)
     nonlinear = _nonlinear_area_sse(area, area_scale, k)

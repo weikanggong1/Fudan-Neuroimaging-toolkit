@@ -19,11 +19,13 @@ from .sphere_standard_python import write_standard_sphere_surface
 
 
 def run_standard_inflate(*, input_surface: str | Path, inflated_output: str | Path,
-                         sulc_output: str | Path, backend: str = "numpy",
-                         device: str = "cpu", profile: bool = False) -> dict:
+                         sulc_output: str | Path | None = None, backend: str = "numpy",
+                         device: str = "cpu", profile: bool = False, save_sulc: bool = True) -> dict:
     """三角网格surface RAS/mm→同序inflated及(N,)FP32 sulc/mm。
 
-    input_surface为声明自产smoothwm；两个输出为不同的明确路径。backend
+    input_surface为声明自产smoothwm或smoothwm.nofix。save_sulc默认True，
+    此时sulc_output必填且两个输出路径不同；False对应-no-save-sulc，
+    sulc_output须None，仍执行完整积分/最终几何，不写sulc占位文件。backend
     默认numpy（已有CPU算法），可显式torch，device默认cpu，CUDA不回退。
     profile默认False；True同步Torch子段计时。自动沿固定源码由voxelsize
     调整高分辨率每档步数，其余默认16/8/4/2/1/0、dt=momentum=0.9、
@@ -33,9 +35,13 @@ def run_standard_inflate(*, input_surface: str | Path, inflated_output: str | Pa
     留部分输出，不读参考修复、不生成占位sulc。生产默认尚未接入。
     """
     started = time.perf_counter()
-    input_surface, inflated_output, sulc_output = map(Path, (input_surface, inflated_output, sulc_output))
-    if len({path.resolve() for path in (input_surface, inflated_output, sulc_output)}) != 3:
-        raise ValueError("input and two output paths must differ")
+    if not isinstance(save_sulc, bool) or save_sulc and sulc_output is None or not save_sulc and sulc_output is not None:
+        raise ValueError("save_sulc=True requires sulc_output; False requires sulc_output=None")
+    input_surface, inflated_output = Path(input_surface), Path(inflated_output)
+    sulc_output = Path(sulc_output) if sulc_output is not None else None
+    paths = (input_surface, inflated_output) + ((sulc_output,) if sulc_output is not None else ())
+    if len({path.resolve() for path in paths}) != len(paths):
+        raise ValueError("input and output paths must differ")
     if backend not in ("numpy", "torch"):
         raise ValueError("backend must be numpy or torch")
     if backend == "numpy" and device != "cpu":
@@ -82,13 +88,16 @@ def run_standard_inflate(*, input_surface: str | Path, inflated_output: str | Pa
         raise FloatingPointError("inflation coordinates or sulc became nonfinite")
     write_start = time.perf_counter()
     inflated_output.parent.mkdir(parents=True, exist_ok=True)
-    sulc_output.parent.mkdir(parents=True, exist_ok=True)
+    if save_sulc:
+        sulc_output.parent.mkdir(parents=True, exist_ok=True)
     write_standard_sphere_surface(output=inflated_output, vertices=coordinates, faces=faces,
                                   source_surface=input_surface,
                                   create_stamp="created by FNIT standard inflation")
-    fsio.write_morph_data(str(sulc_output), sulc, fnum=len(faces))
+    if save_sulc:
+        fsio.write_morph_data(str(sulc_output), sulc, fnum=len(faces))
     return {"input_surface": str(input_surface), "inflated_output": str(inflated_output),
-            "sulc_output": str(sulc_output), "backend": backend, "device": device,
+            "sulc_output": str(sulc_output) if sulc_output is not None else None,
+            "save_sulc": save_sulc, "backend": backend, "device": device,
             "profile_synchronizes_substages": profile, "vertices": len(vertices), "faces": len(faces),
             "niterations_per_scale": niterations, "read_validation_seconds": read_validation_seconds,
             "setup_and_transfer_seconds": setup_seconds,
@@ -102,7 +111,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input-surface", type=Path, required=True)
     parser.add_argument("--inflated-output", type=Path, required=True)
-    parser.add_argument("--sulc-output", type=Path, required=True)
+    parser.add_argument("--sulc-output", type=Path)
+    parser.add_argument("--no-save-sulc", action="store_true")
     parser.add_argument("--backend", choices=("numpy", "torch"), default="numpy")
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--profile", action="store_true")
@@ -122,7 +132,7 @@ def main() -> None:
     cuda_initialized_before_api = torch.cuda.is_initialized()
     report = run_standard_inflate(input_surface=args.input_surface, inflated_output=args.inflated_output,
                                   sulc_output=args.sulc_output, backend=args.backend,
-                                  device=args.device, profile=args.profile)
+                                  device=args.device, profile=args.profile, save_sulc=not args.no_save_sulc)
     import hashlib
     from . import inflate_torch, inflate_topology, place_surface_normals, mris_register_average_numba
     modules = (Path(__file__), Path(inflate_torch.__file__), Path(inflate_topology.__file__),

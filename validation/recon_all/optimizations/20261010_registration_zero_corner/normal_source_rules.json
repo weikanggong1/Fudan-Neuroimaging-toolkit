@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "scope": "read-only exact fixed upstream normal/tangent rule check; no MRI or original executable run",
+  "upstream_commit": "d932c45b7941662ea380a05efef580568b98d41a",
+  "source_files": {
+    "include/mrisurf_base.h": {
+      "bytes": 10869,
+      "sha256": "ddd2a74582be9252481edda50f04df0b48b0546d032b54fce2416167ad08ec79",
+      "official_raw_URL": "https://raw.githubusercontent.com/freesurfer/freesurfer/d932c45b7941662ea380a05efef580568b98d41a/include/mrisurf_base.h",
+      "regions": {
+        "mrisNormalize": {
+          "line": 156,
+          "end_line": 168,
+          "sha256": "289df28f9778e49ee3be4a32dad1a985ef9bdb4a48c0955f750f8163b8dadadc"
+        }
+      }
+    },
+    "include/matrix.h": {
+      "bytes": 15321,
+      "sha256": "fb15f02a123a6b5a69034e32e2bc87985cb1a5881067a93889463b47263d0317",
+      "official_raw_URL": "https://raw.githubusercontent.com/freesurfer/freesurfer/d932c45b7941662ea380a05efef580568b98d41a/include/matrix.h",
+      "regions": {
+        "V3_NORMALIZE": {
+          "line": 283,
+          "end_line": 286,
+          "sha256": "e9bad9b65caacc76940e3d237d0bae642a204eb364794c794112e7adf4f6ffc7"
+        }
+      }
+    },
+    "include/macros.h": {
+      "bytes": 2831,
+      "sha256": "ef58f66e501111c5f061edd4cf071c2ea4fe3062f83896c75cebcb61cab40143",
+      "official_raw_URL": "https://raw.githubusercontent.com/freesurfer/freesurfer/d932c45b7941662ea380a05efef580568b98d41a/include/macros.h",
+      "regions": {
+        "FZERO": {
+          "line": 80,
+          "end_line": 80,
+          "sha256": "bfb7cf8f4bd3c8f0f6a3532513fc35637200c42637ee25b183723a9431644ea8"
+        },
+        "DZERO": {
+          "line": 82,
+          "end_line": 82,
+          "sha256": "640c4d6f9d0fe68f8433958280f7636fdb63031216f7766d64ff4695bcce6c14"
+        }
+      }
+    },
+    "utils/mrisurf_metricProperties_slow.h": {
+      "bytes": 28766,
+      "sha256": "92c4017c0402b9e1bf502bfe032b04306f0956bb41532e980fad9288dd8171e1",
+      "official_raw_URL": "https://raw.githubusercontent.com/freesurfer/freesurfer/d932c45b7941662ea380a05efef580568b98d41a/utils/mrisurf_metricProperties_slow.h",
+      "regions": {
+        "mrisNormalFace": {
+          "line": 119,
+          "end_line": 167,
+          "sha256": "425c121376ca49ae50de3a5e4d3fb6cd48bd94d0d4022553ece91a342daabd4f"
+        },
+        "vertex_normal_success": {
+          "line": 298,
+          "end_line": 313,
+          "sha256": "7656d607b889a1db287692617e9f2ef105c335793cfffa7fb3e67e1abdd8976b"
+        },
+        "pending_retry": {
+          "line": 319,
+          "end_line": 409,
+          "sha256": "fe684f38e74c946e129e10e95b022fd8873117983d29ff09f1c42538dda5dc48"
+        }
+      }
+    },
+    "utils/mrisurf_metricProperties.cpp": {
+      "bytes": 393451,
+      "sha256": "458f896e7d2bdcbcdd7c9e73b2a396823d2015c723117d604bb06e3e8f27ba17",
+      "official_raw_URL": "https://raw.githubusercontent.com/freesurfer/freesurfer/d932c45b7941662ea380a05efef580568b98d41a/utils/mrisurf_metricProperties.cpp",
+      "regions": {
+        "mrisComputeTangentPlanes": {
+          "line": 3508,
+          "end_line": 3567,
+          "sha256": "48c2d0ef0a4927561cf492b0213e012d12b1c61128cb81fa090658f5970e9502"
+        }
+      }
+    },
+    "utils/MRIScomputeTriangleProperties_extracted.h": {
+      "bytes": 6460,
+      "sha256": "35e1e62c8b6d3e3abb81f09f0f8014cb9f6c17c4236c9c63bef85151dca04b2d",
+      "official_raw_URL": "https://raw.githubusercontent.com/freesurfer/freesurfer/d932c45b7941662ea380a05efef580568b98d41a/utils/MRIScomputeTriangleProperties_extracted.h",
+      "regions": {
+        "face_area_and_normal": {
+          "line": 123,
+          "end_line": 150,
+          "sha256": "da280c2c8e75fa0d3f8ecd0059b7ca79aa1b71dbad00f8dc121dba5c8867712a"
+        }
+      }
+    },
+    "utils/mrisurf_timeStep.cpp": {
+      "bytes": 89119,
+      "sha256": "402bfd0bfdb5cf0bc59600f30592facf6a60890e78cdff3fa696f7fcec4ca553",
+      "official_raw_URL": "https://raw.githubusercontent.com/freesurfer/freesurfer/d932c45b7941662ea380a05efef580568b98d41a/utils/mrisurf_timeStep.cpp",
+      "regions": {
+        "MRISremoveOverlapWithSmoothing": {
+          "line": 2415,
+          "end_line": 2501,
+          "sha256": "24c80264566462ff733f2bdf7d4bb67eee7d38269556aed68f5dd3a45e160079"
+        }
+      }
+    }
+  },
+  "rules": {
+    "corner_and_edge_mrisNormalize": "float d from square sum; only d>0 divides components. d==0 retains zero and returns zero. No FZERO threshold or epsilon.",
+    "corner_normal": "two edges use mrisNormalize; cross result uses mrisNormalize when UnitizeNormalFace is enabled, so true zero cross remains zero.",
+    "vertex_normal": "incident corner normals accumulated in ordered float buffer; positive normalized length succeeds; actual zero sum enters pending retry rather than immediate 0/0.",
+    "tangent_normalize": "V3_NORMALIZE uses float length and FZERO; if abs(length)<FLT_EPSILON multiplier is 1, else reciprocal length.",
+    "FZERO": "abs(value)<FLT_EPSILON",
+    "vertex_retry": "up to five trials; sorted pending vertices; deterministic fnv_hash perturbation with 0.001mm radius applied to affected vertices/neighbours. This is a separate branch and is not justified merely by zero corner normals.",
+    "face_unit_normal": "Triangle area is V3_LEN(cross)*0.5; V3_NORMALIZE uses FZERO(length) to retain the unnormalized cross when abs(length)<FLT_EPSILON, otherwise divides by length. True zero cross remains zero, area remains zero. This differs from corner mrisNormalize(d>0).",
+    "overlap_stop": "Both source stops exist: parms->t > min_neg_iter + 1000, and parms->t - parms->start_t > parms->niterations. The source caller must set niterations; default1000 cannot be assumed source-equivalent without checking the caller."
+  },
+  "current_FNIT_first_NaN": "root isolated replay reports 6 actual zero corner crosses; this receipt independently verifies source rules only, does not reproduce that MRI diagnostic",
+  "production_change": "parent owns the implementation; this receipt audits fixed source rules only",
+  "source_redistribution": "original C++/headers retained privately in temporary directory; receipt contains hashes/rules only"
+}

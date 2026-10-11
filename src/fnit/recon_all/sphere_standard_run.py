@@ -31,7 +31,10 @@ from .sphere_standard_unfold import _face_geometry, first_epoch_gradient
 def run_standard_sphere(inflated: str | Path, smoothwm: str | Path,
                         output: str | Path, *, finish_device: str = "cpu",
                         averaging_device: str = "cpu",
-                        normals_device: str | None = None) -> dict:
+                        normals_device: str | None = None,
+                        bbox_mode: str = "source_float",
+                        require_unfolded: bool = False,
+                        overlap_diagnostics: bool = False) -> dict:
     """Read same-face-order inflated/smoothwm meshes and write an ordered sphere.
 
     averaging_device默认cpu；显式CUDA时复用RegistrationGradientAverager，
@@ -42,6 +45,14 @@ def run_standard_sphere(inflated: str | Path, smoothwm: str | Path,
     Return paths, device, negative-area fraction, setup/finish/total seconds,
     ordered update dicts (index, stage, weight, averages, dt, seconds), and
     final overlap-repair negative-face counts. Only cleanup uses finish_device.
+    require_unfolded默认False保留原命令停止语义；True要求清理后FP32
+    与double径向均无负面，失败抛SphereOverlapQualityError，不写output。
+    overlap_diagnostics默认False；True或严格门开启时返回overlap_diagnostics
+    字典：实际停止原因、更新前/最终计数、负面积mm²及质量状态。
+    坐标surface RAS/mm；非法路径/网格形状/索引及非有限数据抛异常。
+    bbox_mode默认source_float复现固定Conda源码的浮点跨度；legacy_integer为
+    历史整数截断对照。两组完整同输入逐步坐标与固定Conda参考一致，
+    残余翻折仍按严格门检查；禁止用参考检查点取代自产初始化。
     """
     started = time.perf_counter()
     inflated, smoothwm, output = Path(inflated), Path(smoothwm), Path(output)
@@ -50,7 +61,8 @@ def run_standard_sphere(inflated: str | Path, smoothwm: str | Path,
     if not np.array_equal(faces, metric_faces):
         raise ValueError("inflated and smoothwm face order differs")
     faces = np.asarray(faces, np.int32)
-    xyz = project_radially(project_before_standard_unfold(xyz_input), already_sphere=True)
+    xyz = project_radially(project_before_standard_unfold(xyz_input, bbox_mode=bbox_mode),
+                           already_sphere=True)
     area, _ = _face_geometry(xyz, faces)
     negative_area = float(np.float32(-np.sum(area[area < 0], dtype=np.float64)))
     negative_pct = 100 * negative_area / (4 * math.pi * 10000 + negative_area)
@@ -136,19 +148,23 @@ def run_standard_sphere(inflated: str | Path, smoothwm: str | Path,
     else:
         raise RuntimeError("conventional sphere integration did not converge")
     t0 = time.perf_counter()
+    overlap_report = {} if overlap_diagnostics or require_unfolded else None
     finished, negative_counts = finish_standard_sphere(
-        xyz, faces, start_iteration=len(updates), device=finish_device)
+        xyz, faces, start_iteration=len(updates), device=finish_device,
+        diagnostics=overlap_report, require_unfolded=require_unfolded)
     finish_seconds = time.perf_counter() - t0
     write_standard_sphere_surface(output, finished, faces, inflated)
     return {"inflated": str(inflated), "smoothwm": str(smoothwm),
             "output": str(output), "finish_device": finish_device, "averaging_device": averaging_device,
-            "normals_device": normals_device,
+            "normals_device": normals_device, "bbox_mode": bbox_mode,
             "normals_backend": "numba" if normals_device is None else "torch-ordered",
             "initial_negative_area_pct": negative_pct,
             "projection_seconds": setup_projection_seconds,
             "metric_seconds_including_jit": setup_metric_seconds,
             "topology_and_gpu_prepare_seconds": topology_seconds,
             "updates": updates, "negative_counts": negative_counts,
+            "overlap_diagnostics": overlap_report,
+            "require_unfolded": require_unfolded,
             "finish_seconds": finish_seconds,
             "total_seconds_including_io": time.perf_counter() - started}
 
@@ -162,12 +178,19 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--averaging-device", default="cpu")
     parser.add_argument("--normals-device", default=None,
                         help="explicit experimental ordered Torch normals backend")
+    parser.add_argument("--bbox-mode", choices=("legacy_integer", "source_float"), default="source_float",
+                        help="source_float matches the fixed source; legacy_integer is the historical diagnostic")
+    parser.add_argument("--require-unfolded", action="store_true",
+                        help="fail before output write when radial folds remain")
+    parser.add_argument("--overlap-diagnostics", action="store_true",
+                        help="report saved final counts, area and actual source stop reason")
     parser.add_argument("--report", type=Path)
     args = parser.parse_args(argv)
     report = run_standard_sphere(
         args.inflated, args.smoothwm, args.output,
         finish_device=args.finish_device, averaging_device=args.averaging_device,
-        normals_device=args.normals_device)
+        normals_device=args.normals_device, bbox_mode=args.bbox_mode, require_unfolded=args.require_unfolded,
+        overlap_diagnostics=args.overlap_diagnostics)
     content = json.dumps(report, indent=2) + "\n"
     if args.report:
         args.report.write_text(content)

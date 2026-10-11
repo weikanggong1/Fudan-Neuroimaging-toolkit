@@ -1,0 +1,36 @@
+{
+  "source_commit": "d932c45b7941662ea380a05efef580568b98d41a",
+  "source_file": "utils/mrisurf_defect.cpp",
+  "source_file_sha256": "55ace70ab09b1868a8cb152a9547879abdce790635b484bef1bf056986958187",
+  "source_functions": {
+    "mrisComputeDefectNormalDotLogLikelihood": {
+      "first_line": 1502,
+      "last_line": 1557,
+      "exact_line_bytes_sha256": "09fe0f18153292ffee9a9348d74288ebbb8f6bdecdd6487645762077e6c3728a"
+    },
+    "mrisComputeDefectCurvatureLogLikelihood": {
+      "first_line": 1560,
+      "last_line": 1623,
+      "exact_line_bytes_sha256": "ae847f60d849aaa8748b06d2c2001a105772ac6efc86865e384261498c5e5977"
+    }
+  },
+  "header_evidence": {
+    "TP_fields": "float32; actual observer sizeof fields=4 for all eight",
+    "include/topo_parms.h": "c0538333ca85affab6c585c29a706aaceee106c7f9c67f6b77ff36b43f3ede3e",
+    "include/mri.h": "1965dae1d366c788a10439b8ac1dca58c3da9f4056d7e1cd6a1b0f61ef7b83ce",
+    "utils/utils.cpp": "c19ae738cd9d22fada40c2f5f89ff790512fcbeab1d7c08059b249134db2eac5",
+    "include/utils.h": "415cce0be5eb3ac7b41aa8fc774509179cdabbda5f9657c362f9fc19e87c7d03",
+    "verification": "fixed headers inspected by companion full statistics observer task; TP sizes independently verified from actual same-input capture"
+  },
+  "numerical_contract": {
+    "normal_geometry_arithmetic": "float32 stored fields promoted to double before subtraction/projection; ordered double log sums; final TP float32",
+    "normal_weighted_order": "area * neighbor_log_sum / neighbor_count",
+    "histogram_nint": "nearest integer, half away from zero; clamp to 0..nbins-1",
+    "curvature_histogram_ratio_dtype": "float32",
+    "joint_index": "float32 quotient truncated toward zero then clamped; x=k1 y=k2",
+    "final_curvature_field": "joint mean overwrites marginal histogram score",
+    "marginal_diagnostic": "source intermediate contains 2*log(Pk1)+log(Pk2); not final fitness"
+  },
+  "license": "licenses/FreeSurfer.txt and THIRD_PARTY_NOTICES.md; no upstream source/binary published",
+  "scope": "likelihood functions only; no full GA or whole reconstruction"
+}

@@ -1,0 +1,327 @@
+{
+  "scope": "frozen_same_input_file_API_not_raw_T1_whole_case",
+  "code_commit": "54f681dc-plus-hashed-nofix-nosulc-v4",
+  "candidate_source_sha256": {
+    "mrisp_paint_python": "3dd7515a8759371ccec1a4c6b4f280310a252708396debdfb822abac2cdae163",
+    "mris_register_atlas": "38170e443c7ed83d7c145cf4a9cef3daf34f4da1177363cd7841677b1177ca74",
+    "place_surface_smoothing": "5e413a3df69833020be34fdbf8e4b2b6b80e00ddc6b54ac09717527dbf718d07",
+    "mris_remove_intersection_python": "011e6482cc32bdb02156dd15f24e0b1d24f3a2318c148deb5def1366dcd6f210",
+    "place_surface_final_cleanup": "cee87f5e12e48d12a9aadd0198f2b06e68a9eca875cefa0d91b3b7f93ff2f8c0",
+    "place_surface_intersection_marking": "63ea29f2af2183abc2ded01a6cf0053aa659a753d158c4710f8212c5e4fe4e71",
+    "place_surface_collision": "f36213cfa1c8e65b2dfa69490ab4978e140d7852cbefb0834ed3f991ac84b166",
+    "place_surface_collision_torch": "adac1598f162d5c0fb27afeac6d8625c8da7d66ae781205c1153b00403ba799a",
+    "place_surface_candidates_torch": "502b5da1aaa2275d48b106885a603fe797c74fb24fadcca1a53e0a641db243b8",
+    "inflate_standard_run": "7eb0100a9b2e2fc8dd1a6e1da66ee37da0c29c71ec2cd2b207ef74687535dfb4",
+    "inflate_python": "01561d309ae100b86f15b5c7b677d4b60302864b8c75cd6fa87436358e9aae98",
+    "inflate_torch": "a782b5ec493d4c390131e8882b0b07ebf3d5b5e9ad39da59328b964500550aab",
+    "inflate_topology": "52245a1f107cf0f39f828dc334c3b033b3f57089454ccbcae83936883206c8f5",
+    "place_surface_normals": "82d3c174f892f146f6a2b937cda8d457ca6f07f274ed146d5e5bc37f5e48e6b9",
+    "sphere_standard_python": "017172cae935775f3e55ec7cdee72c54d6db904021c78896a77d99690a23cc97"
+  },
+  "script_sha256": "6beb13a194f95e5a507e8e33fc54c6b4a83581b84300aaf9cacb27147b7338af",
+  "host": "A100-8-shared",
+  "platform": "Linux-3.10.0-1160.el7.x86_64-x86_64-with-glibc2.27",
+  "cpu_affinity": [
+    12,
+    13,
+    14,
+    15
+  ],
+  "threads": 4,
+  "device": "cuda:0",
+  "torch_version": "2.5.1",
+  "precision": {
+    "matmul_tf32": true,
+    "cudnn_tf32": true,
+    "autocast": false,
+    "image_coordinate_dtype": "float32",
+    "intersection_predicate_dtype": "float64"
+  },
+  "allocator_environment": {
+    "PYTORCH_NO_CUDA_MEMORY_CACHING": null,
+    "PYTORCH_ALLOC_CONF": null,
+    "PYTORCH_CUDA_ALLOC_CONF": null
+  },
+  "paint": [],
+  "intersection": [],
+  "nofix_inflate": [
+    {
+      "case_number": 0,
+      "hemisphere": "lh",
+      "candidate": {
+        "input_surface": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub06-candidate/subject/surf/lh.smoothwm.nofix",
+        "inflated_output": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/nofix_gpu_v4/lh.nofix_case0.candidate",
+        "sulc_output": null,
+        "save_sulc": false,
+        "backend": "torch",
+        "device": "cuda:0",
+        "profile_synchronizes_substages": false,
+        "vertices": 126952,
+        "faces": 253976,
+        "niterations_per_scale": 10,
+        "read_validation_seconds": 0.05824503023177385,
+        "setup_and_transfer_seconds": 4.367199743166566,
+        "compute_transfer_finalize_seconds": 7.205335533246398,
+        "write_seconds": 0.019863740541040897,
+        "integration": {
+          "steps": 60,
+          "final_rms": 0.03755426844487271,
+          "stopped_by_rms": false,
+          "timings_seconds": {},
+          "integration_wall_seconds": 2.8003221517428756
+        },
+        "total_seconds_including_io": 7.283717832528055,
+        "production_default_changed": false
+      },
+      "input_sha256": "cf67b83a9863476fd9e8b40d2e59c802f5f5690010470f5705180586dccea582",
+      "reference": {
+        "command": [
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/native/bin/mris_inflate",
+          "-no-save-sulc",
+          "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub06-candidate/subject/surf/lh.smoothwm.nofix",
+          "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/nofix_gpu_v4/lh.nofix_case0.reference"
+        ],
+        "returncode": 0,
+        "seconds_including_process_start_and_io": 8.452733683399856
+      },
+      "reference_repeat": {
+        "command": [
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/native/bin/mris_inflate",
+          "-no-save-sulc",
+          "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub06-candidate/subject/surf/lh.smoothwm.nofix",
+          "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/nofix_gpu_v4/lh.nofix_case0.repeat"
+        ],
+        "returncode": 0,
+        "seconds_including_process_start_and_io": 8.481123372912407
+      },
+      "reference_program_sha256": "8c3e5f688a635a4bf7e1c49efec9737bef2310a2fcc5b221332fffc54667be17",
+      "ordered_faces_equal": true,
+      "candidate_reference_coordinate_error": {
+        "different_elements": 0,
+        "maximum": 0.0,
+        "p99": 0.0,
+        "mean": 0.0
+      },
+      "reference_repeat_coordinate_error": {
+        "different_elements": 0,
+        "maximum": 0.0,
+        "p99": 0.0,
+        "mean": 0.0
+      },
+      "reference_repeat_ordered_faces_equal": true,
+      "geometry_header_equal": true,
+      "output_directory_sulc_files": []
+    },
+    {
+      "case_number": 0,
+      "hemisphere": "rh",
+      "candidate": {
+        "input_surface": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub06-candidate/subject/surf/rh.smoothwm.nofix",
+        "inflated_output": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/nofix_gpu_v4/rh.nofix_case0.candidate",
+        "sulc_output": null,
+        "save_sulc": false,
+        "backend": "torch",
+        "device": "cuda:0",
+        "profile_synchronizes_substages": false,
+        "vertices": 127626,
+        "faces": 255312,
+        "niterations_per_scale": 10,
+        "read_validation_seconds": 0.05376495514065027,
+        "setup_and_transfer_seconds": 0.14697622880339622,
+        "compute_transfer_finalize_seconds": 1.2591876741498709,
+        "write_seconds": 0.02272360771894455,
+        "integration": {
+          "steps": 60,
+          "final_rms": 0.029389771202316336,
+          "stopped_by_rms": false,
+          "timings_seconds": {},
+          "integration_wall_seconds": 1.1104604816064239
+        },
+        "total_seconds_including_io": 1.3359632976353168,
+        "production_default_changed": false
+      },
+      "input_sha256": "c15552f0245f7cba189516501b04a432f40008b0d324724654f9515e7d698182",
+      "reference": {
+        "command": [
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/native/bin/mris_inflate",
+          "-no-save-sulc",
+          "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub06-candidate/subject/surf/rh.smoothwm.nofix",
+          "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/nofix_gpu_v4/rh.nofix_case0.reference"
+        ],
+        "returncode": 0,
+        "seconds_including_process_start_and_io": 8.553410454653203
+      },
+      "reference_repeat": {
+        "command": [
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/native/bin/mris_inflate",
+          "-no-save-sulc",
+          "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub06-candidate/subject/surf/rh.smoothwm.nofix",
+          "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/nofix_gpu_v4/rh.nofix_case0.repeat"
+        ],
+        "returncode": 0,
+        "seconds_including_process_start_and_io": 8.465423942543566
+      },
+      "reference_program_sha256": "8c3e5f688a635a4bf7e1c49efec9737bef2310a2fcc5b221332fffc54667be17",
+      "ordered_faces_equal": true,
+      "candidate_reference_coordinate_error": {
+        "different_elements": 0,
+        "maximum": 0.0,
+        "p99": 0.0,
+        "mean": 0.0
+      },
+      "reference_repeat_coordinate_error": {
+        "different_elements": 0,
+        "maximum": 0.0,
+        "p99": 0.0,
+        "mean": 0.0
+      },
+      "reference_repeat_ordered_faces_equal": true,
+      "geometry_header_equal": true,
+      "output_directory_sulc_files": []
+    },
+    {
+      "case_number": 1,
+      "hemisphere": "lh",
+      "candidate": {
+        "input_surface": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject/surf/lh.smoothwm.nofix",
+        "inflated_output": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/nofix_gpu_v4/lh.nofix_case1.candidate",
+        "sulc_output": null,
+        "save_sulc": false,
+        "backend": "torch",
+        "device": "cuda:0",
+        "profile_synchronizes_substages": false,
+        "vertices": 110534,
+        "faces": 221116,
+        "niterations_per_scale": 10,
+        "read_validation_seconds": 0.04969068430364132,
+        "setup_and_transfer_seconds": 0.12155775912106037,
+        "compute_transfer_finalize_seconds": 1.2758259931579232,
+        "write_seconds": 0.008055310696363449,
+        "integration": {
+          "steps": 60,
+          "final_rms": 0.036110462036166566,
+          "stopped_by_rms": false,
+          "timings_seconds": {},
+          "integration_wall_seconds": 1.150527480058372
+        },
+        "total_seconds_including_io": 1.33381256647408,
+        "production_default_changed": false
+      },
+      "input_sha256": "c0ca96666d491fd799bd5f8139af11d4bd86334839ebc180a3db66829d0ae412",
+      "reference": {
+        "command": [
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/native/bin/mris_inflate",
+          "-no-save-sulc",
+          "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject/surf/lh.smoothwm.nofix",
+          "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/nofix_gpu_v4/lh.nofix_case1.reference"
+        ],
+        "returncode": 0,
+        "seconds_including_process_start_and_io": 6.7514697620645165
+      },
+      "reference_repeat": {
+        "command": [
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/native/bin/mris_inflate",
+          "-no-save-sulc",
+          "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject/surf/lh.smoothwm.nofix",
+          "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/nofix_gpu_v4/lh.nofix_case1.repeat"
+        ],
+        "returncode": 0,
+        "seconds_including_process_start_and_io": 6.994926024228334
+      },
+      "reference_program_sha256": "8c3e5f688a635a4bf7e1c49efec9737bef2310a2fcc5b221332fffc54667be17",
+      "ordered_faces_equal": true,
+      "candidate_reference_coordinate_error": {
+        "different_elements": 0,
+        "maximum": 0.0,
+        "p99": 0.0,
+        "mean": 0.0
+      },
+      "reference_repeat_coordinate_error": {
+        "different_elements": 0,
+        "maximum": 0.0,
+        "p99": 0.0,
+        "mean": 0.0
+      },
+      "reference_repeat_ordered_faces_equal": true,
+      "geometry_header_equal": true,
+      "output_directory_sulc_files": []
+    },
+    {
+      "case_number": 1,
+      "hemisphere": "rh",
+      "candidate": {
+        "input_surface": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject/surf/rh.smoothwm.nofix",
+        "inflated_output": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/nofix_gpu_v4/rh.nofix_case1.candidate",
+        "sulc_output": null,
+        "save_sulc": false,
+        "backend": "torch",
+        "device": "cuda:0",
+        "profile_synchronizes_substages": false,
+        "vertices": 111546,
+        "faces": 223136,
+        "niterations_per_scale": 10,
+        "read_validation_seconds": 0.05587106756865978,
+        "setup_and_transfer_seconds": 0.12264320719987154,
+        "compute_transfer_finalize_seconds": 1.2351486198604107,
+        "write_seconds": 0.006548227742314339,
+        "integration": {
+          "steps": 60,
+          "final_rms": 0.038064200730887884,
+          "stopped_by_rms": false,
+          "timings_seconds": {},
+          "integration_wall_seconds": 1.110846869647503
+        },
+        "total_seconds_including_io": 1.297822866588831,
+        "production_default_changed": false
+      },
+      "input_sha256": "ee352b500f0608d3a262bcbfd278fbb32fca60688d97e10d27e510d670069931",
+      "reference": {
+        "command": [
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/native/bin/mris_inflate",
+          "-no-save-sulc",
+          "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject/surf/rh.smoothwm.nofix",
+          "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/nofix_gpu_v4/rh.nofix_case1.reference"
+        ],
+        "returncode": 0,
+        "seconds_including_process_start_and_io": 6.988931776955724
+      },
+      "reference_repeat": {
+        "command": [
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/native/bin/mris_inflate",
+          "-no-save-sulc",
+          "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject/surf/rh.smoothwm.nofix",
+          "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/nofix_gpu_v4/rh.nofix_case1.repeat"
+        ],
+        "returncode": 0,
+        "seconds_including_process_start_and_io": 7.0605166321620345
+      },
+      "reference_program_sha256": "8c3e5f688a635a4bf7e1c49efec9737bef2310a2fcc5b221332fffc54667be17",
+      "ordered_faces_equal": true,
+      "candidate_reference_coordinate_error": {
+        "different_elements": 0,
+        "maximum": 0.0,
+        "p99": 0.0,
+        "mean": 0.0
+      },
+      "reference_repeat_coordinate_error": {
+        "different_elements": 0,
+        "maximum": 0.0,
+        "p99": 0.0,
+        "mean": 0.0
+      },
+      "reference_repeat_ordered_faces_equal": true,
+      "geometry_header_equal": true,
+      "output_directory_sulc_files": []
+    }
+  ],
+  "overall_equivalence": "not_assessed",
+  "memory": {
+    "target_device": "cuda:0",
+    "torch_allocated_peak_bytes": 480955392,
+    "torch_reserved_peak_bytes": 633339904,
+    "parent_child_simultaneous_process_tree_peak_bytes": null,
+    "process_tree_observation": "not_measured_in_this_stage_script"
+  },
+  "benchmark_total_seconds_including_loading_transfers_io_and_references": 74.38702248502523,
+  "execution_status": "complete"
+}

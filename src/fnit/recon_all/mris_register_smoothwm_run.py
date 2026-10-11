@@ -20,7 +20,7 @@ from .mris_register_kernels import normalize_mean_curvature, project_sphere
 from .mris_register_line_search import first_registration_line_search, first_registration_sse
 from .mris_register_nonlinear import (
     apply_spherical_gradient, correlation_gradient_add,
-    face_area_normals, first_area_gradient, first_distance_gradient,
+    distance_gradient, face_area_normals, first_area_gradient, first_distance_gradient,
     prepare_registration_force_cache, registration_total_area,
     sphere_arc_distances, sphere_vertex_normals, spring_gradient_add,
     tangent_basis,
@@ -37,7 +37,9 @@ def run_register_smoothwm(sphere: str | Path, smoothwm: str | Path,
                           sulc_seed: str | Path, atlas_file: str | Path,
                           output: str | Path, *, seed_iteration: int,
                           overlap_device: str = "cpu", max_updates: int = 1024,
-                          averaging_device: str = "cpu") -> dict:
+                          averaging_device: str = "cpu",
+                          require_unfolded: bool = False,
+                          overlap_diagnostics: bool = False) -> dict:
     """Continue an already registered sulc sphere through smoothwm and repair.
 
     The optimizer uses source-order PyTorch/Numba CPU arithmetic. The final
@@ -47,6 +49,13 @@ def run_register_smoothwm(sphere: str | Path, smoothwm: str | Path,
     步长接受和顺序更新不变。所有输入表面是 surface RAS/mm 的同序网格，
     atlas_file 是半球图谱 TIFF。max_updates 默认 1024，未收敛直接报错。
     返回 dict 包含逐轮状态、负面积清理轨迹、输出路径及嵌套耗时。
+    require_unfolded 默认 False 保留参考命令停止语义；True 要求最终
+    FP32 和双精度径向翻折均为零，否则在写出前抛带诊断的
+    SphereOverlapQualityError。overlap_diagnostics 默认 False；显式开启
+    或严格检查时返回实际停止原因、最后更新前/后计数及负面积 mm²。
+    质量检查不延长原迭代次数、不修改坐标，也不判定整体指标等效。
+    除首轮原有重复投影分支外，距离力复用本轮projected对应的法向
+    和弧距；调用成熟distance_gradient，不跨坐标版本或轮次复用。
     """
     started = time.perf_counter()
     sphere, smoothwm = Path(sphere), Path(smoothwm)
@@ -112,8 +121,9 @@ def run_register_smoothwm(sphere: str | Path, smoothwm: str | Path,
         else:
             force = first_area_gradient(
                 vertices, original, projected, triangles,
-                first_distance_gradient(vertices, original, projected, triangles,
-                                        project=False, weight=l_dist, cache=cache),
+                distance_gradient(projected, normals, neighbors, degrees,
+                                  distances, original_distances, cache.three_hop_neighbors,
+                                  original_area, total_area, l_dist),
                 project=False, l_nlarea=l_nlarea, l_parea=l_parea, cache=cache)
         e1, e2 = tangent_basis(normals)
         force = correlation_gradient_add(force, projected, curvature, e1, e2,
@@ -154,9 +164,11 @@ def run_register_smoothwm(sphere: str | Path, smoothwm: str | Path,
         raise RuntimeError("smoothwm registration did not converge within max_updates")
     integration_seconds = time.perf_counter() - started - setup_seconds
     repair_start = time.perf_counter()
+    overlap_report = {} if overlap_diagnostics or require_unfolded else None
     repaired, negative_counts = remove_overlap_sphere(
         current.to(overlap_device), triangles.to(overlap_device),
-        start_iteration=seed_iteration + len(updates))
+        start_iteration=seed_iteration + len(updates),
+        diagnostics=overlap_report, require_unfolded=require_unfolded)
     repair_seconds = time.perf_counter() - repair_start
     write_standard_sphere_surface(
         output, repaired.cpu().numpy(), faces, sphere,
@@ -168,6 +180,8 @@ def run_register_smoothwm(sphere: str | Path, smoothwm: str | Path,
             "averaging_device": str(average.device),
             "integration_seconds": integration_seconds, "updates": updates,
             "negative_counts": negative_counts, "repair_seconds": repair_seconds,
+            "overlap_diagnostics": overlap_report,
+            "require_unfolded": require_unfolded,
             "total_seconds_including_io": time.perf_counter() - started}
 
 
@@ -178,12 +192,18 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--seed-iteration", type=int, required=True)
     parser.add_argument("--overlap-device", default="cpu")
     parser.add_argument("--averaging-device", default="cpu")
+    parser.add_argument("--require-unfolded", action="store_true",
+                        help="最终球面有翻折时失败，不写输出")
+    parser.add_argument("--overlap-diagnostics", action="store_true",
+                        help="记录实际停止原因与最终负面积")
     parser.add_argument("--report", type=Path)
     args = parser.parse_args(argv)
     report = run_register_smoothwm(
         args.sphere, args.smoothwm, args.sulc_seed, args.atlas, args.output,
         seed_iteration=args.seed_iteration, overlap_device=args.overlap_device,
-        averaging_device=args.averaging_device)
+        averaging_device=args.averaging_device,
+        require_unfolded=args.require_unfolded,
+        overlap_diagnostics=args.overlap_diagnostics)
     content = json.dumps(report, indent=2) + "\n"
     if args.report:
         args.report.write_text(content)

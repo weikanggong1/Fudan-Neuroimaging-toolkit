@@ -1,0 +1,57 @@
+{
+  "upstream_commit": "d932c45b7941662ea380a05efef580568b98d41a",
+  "upstream_file_sha256": "55ace70ab09b1868a8cb152a9547879abdce790635b484bef1bf056986958187",
+  "rules": [
+    {
+      "function": "MRISreadOriginalProperties / MRISstoreMetricProperties",
+      "meaning": "raw original surface metric stores origarea, not canonical or base area",
+      "source": "utils/mrisurf_io.cpp:2512-2538; utils/mrisurf_metricProperties.cpp:3046-3057"
+    },
+    {
+      "function": "MRISreadOverAlloc_new / MRISoverAlloc",
+      "meaning": "fresh valbak/imag_val/curvbak/stat/mean/mean_imag/std_error are bzero and not assigned before base copy",
+      "source": "utils/mrisurf_io.cpp / utils/mrisurf_base.cpp"
+    },
+    {
+      "function": "mrisSegmentDefect",
+      "meaning": "original component ordered float32 area sum writes val before merge; initial border normal uses startup precenter sphere metric",
+      "source": "utils/mrisurf_defect.cpp:9234-9363"
+    },
+    {
+      "function": "MRIScorrectTopology",
+      "meaning": "canonical metric follows segmentation; merge then retention precede two orig averages; merge does not rewrite initial component val",
+      "source": "utils/mrisurf_defect.cpp:7899-7923"
+    },
+    {
+      "function": "mrisFindGrayWhiteBorderMean",
+      "meaning": "ripped inside retains previous canonical normal; double sample mean is rounded once independently of white/gray; separate median passes",
+      "source": "utils/mrisurf_defect.cpp:3539-3595; utils/mrisurf_metricProperties_slow.h:230-318"
+    },
+    {
+      "function": "MRIScorrectTopology",
+      "meaning": "SFF1 uses raw TMP/mixed normals and vtotal2; subsequent source statistics SFF2 modifies original after base copy, not clone K/H",
+      "source": "utils/mrisurf_defect.cpp:7990-8014,8183-8305,8435,15384"
+    },
+    {
+      "function": "mris_fix_topology main",
+      "meaning": "startup restore precenter canonical then compute metric; correctTopology centers sphere before segmentation, recomputes metric only afterward",
+      "source": "mris_fix_topology/mris_fix_topology.cpp:263-271; utils/mrisurf_defect.cpp:7875-7913"
+    },
+    {
+      "function": "create_genetic_base",
+      "meaning": "merged ordered inside union need not be directly connected; explicit concat order, no reference mapping and no repeat BFS",
+      "source": "utils/mrisurf_defect.cpp:8180-8408"
+    }
+  ],
+  "source_macros": {
+    "ADD_EXTRA_VERTICES": 0,
+    "FIND_ENCLOSING_LOOP": 0,
+    "MERGE_NEIGHBORING_DEFECTS": 1,
+    "UnitizeNormalFace": 1,
+    "fix_vertex_area": 1
+  },
+  "original_cpp_published": false,
+  "before_after_all_fields_reference": "pending authorization",
+  "complete_ga": false,
+  "overall_metric_equivalence": "not_assessed"
+}

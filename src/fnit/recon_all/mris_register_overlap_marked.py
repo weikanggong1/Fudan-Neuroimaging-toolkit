@@ -11,6 +11,7 @@ import numpy as np
 import torch
 
 from .mris_register_kernels import project_sphere
+from .mris_register_overlap import _validate_overlap_inputs, _finish_overlap_report
 
 
 @torch.no_grad()
@@ -62,7 +63,9 @@ CPU整数CSR/Numba一环，再返回原设备int64邻居(N,K)、度数(N)、
 @torch.no_grad()
 def remove_overlap_sphere_marked(positions: torch.Tensor, faces: torch.Tensor, *,
                                 start_iteration: int = 0, max_iterations: int = 1000,
-                                topology: OverlapTopology | None = None
+                                topology: OverlapTopology | None = None,
+                                diagnostics: dict | None = None,
+                                require_unfolded: bool = False
                                 ) -> tuple[torch.Tensor, list[int]]:
     """完整清理，返回同设备FP32新坐标及每步更新前负面数。
 
@@ -72,8 +75,12 @@ positions=(N,3)，faces=(F,3)同设备；与原实现一致转换FP32并clone，
 默认None每次构造；可显式复用同有序面/设备/顶点数的整数缓存，
 不满足身份条件直接报错。所有顶点仍执行每轮原径向投影，包括未标
 顶点；只省略被torch.where丢弃的未标顶点邻居位移，不改变dt或扩张。
-没有独立CLI；对应mris_sphere/mris_register末段内部清理。
+diagnostics默认None；传字典补充实际末态/停止原因与负面积mm²。
+require_unfolded默认False，True遇残余FP32或double翻折抛
+SphereOverlapQualityError并携带报告。非有限/非法形状索引参数抛
+ValueError。没有独立CLI；对应mris_sphere/mris_register末段内部清理。
     """
+    _validate_overlap_inputs(positions, faces, start_iteration, max_iterations)
     xyz = positions.float().clone()
     if topology is not None and (
             topology.nvertices != len(xyz) or topology.faces.device != xyz.device
@@ -83,13 +90,18 @@ positions=(N,3)，faces=(F,3)同设备；与原实现一致转换FP32并clone，
     count = int(negative.sum())
     history: list[int] = []
     if count == 0:
-        return xyz, history
+        return _finish_overlap_report(
+            xyz, faces, history, diagnostics=diagnostics, require_unfolded=require_unfolded,
+            count=count, iteration=start_iteration, start_iteration=start_iteration,
+            max_iterations=max_iterations, stop_reason="no_negative_faces",
+            minimum_negative=0, minimum_iteration=0, dt=0.99, max_neighbors=0)
     if topology is None:
         topology = OverlapTopology(triangles=faces, nvertices=len(xyz))
     neighbors, degrees, active = topology.neighbors, topology.degrees, topology.active
     min_negative, min_iteration = count, 0
     iteration, last_expand, same, max_neighbors = start_iteration, 0, 0, 0
     dt = 0.99
+    stop_reason = "no_negative_faces"
     while count > 0:
         history.append(count)
         marked = torch.zeros(len(xyz), dtype=torch.bool, device=xyz.device)
@@ -126,6 +138,7 @@ positions=(N,3)，faces=(F,3)同设备；与原实现一致转换FP32并clone，
                 dt, max_neighbors = 0.99, 1
             last_expand, same = iteration, 0
         if iteration > min_iteration + 1000:
+            stop_reason = "source_lack_of_progress"
             break
         if old_count == count:
             if same > 25 and max_neighbors < 1:
@@ -135,5 +148,11 @@ positions=(N,3)，faces=(F,3)同设备；与原实现一致转换FP32并clone，
         else:
             same = 0
         if iteration - start_iteration > max_iterations:
+            stop_reason = "source_niterations_limit"
             break
-    return xyz, history
+    return _finish_overlap_report(
+        xyz, faces, history, diagnostics=diagnostics, require_unfolded=require_unfolded,
+        count=count, iteration=iteration, start_iteration=start_iteration,
+        max_iterations=max_iterations, stop_reason=stop_reason,
+        minimum_negative=min_negative, minimum_iteration=min_iteration,
+        dt=dt, max_neighbors=max_neighbors)

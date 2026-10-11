@@ -19,6 +19,7 @@ def run_recon_all_python_batch(
     native_optimizations: str = "auto",
     n4_backend: str = "native",
     n4_execution: str = "in-process",
+    input_execution: str = "serial",
     normalization_controls_backend: str = "cpu",
     normalization_initial_bias_backend: str = "cpu",
     wm_backend: str = "native",
@@ -28,6 +29,8 @@ def run_recon_all_python_batch(
     sphere_normals_backend: str = "numba",
     inflate_backend: str = "native",
     sphere_finish_backend: str = "cpu",
+    surface_placement_backend: str = "native",
+    topology_backend: str = "native",
     annotation_gibbs_backend: str = "python",
     remesh_scalar_storage: str = "numpy",
     mni_execution: str = "in-process",
@@ -40,7 +43,7 @@ def run_recon_all_python_batch(
     """每设备独立子进程执行单 T1，按 jobs 顺序返回完整报告列表。
 
     jobs 每项含 t1 原始影像和 subject_dir 空目录；weights_dir/assets_dir
-    为已校验资源，devices 为互不重复的逻辑 CPU/CUDA 设备，threads 为
+    为已校验资源，devices 为互不重复的逻辑 CUDA 设备，threads 为
     每个被试线程预算（默认4），native_bin_dir 默认当前 Conda bin。
     profile_stages=False 不增加阶段同步；cuda_allocator_cache=auto
     延续低显存默认，也可在子进程初始化前选择 enabled/disabled。
@@ -48,13 +51,26 @@ def run_recon_all_python_batch(
     单例入口。输入非法抛 ValueError/FileNotFoundError，任务失败汇总为
     RuntimeError。每设备仅执行一个被试；hemisphere_workers 默认1，设2时被试内部
     独立进程并行双侧，threads 在双侧之间分配（总预算不翻倍）。
-    backend=python-gpu使用严格纯Python/CUDA profile；只要仍有未完成阶段就
-    在创建被试目录前失败，不回退到原生程序。native_optimizations=auto在CUDA选择已有Torch GCA，CPU查询GCA缓存能力；
+    backend=python在每个CLI选择完整独立Python候选配方，允许CPU核、
+    先复用单例22键配方再校验与构造CLI，固定双侧worker2和总threads>=2。
+    配方覆盖的阶段选项与单例一致，显式N4选择及input_execution保留；
+    显式topology_backend=python-ga保留自有完整有序GA；不被配方解析
+    覆盖，也不启动原拓扑程序。双侧各使用threads//2，最终orig必须通过
+    标准remesh与相交门；scripts内的GA状态/收据按半球保留目录层级。
+    数字拓扑与FS GA不同；不读取原版
+    程序目录，整例指标/严格复现另测。topology_backend默认native；
+    python只替换完整修复算法，仍需自产pretess并产生真实缺陷标签。
+    backend=python-gpu使用历史严格纯Python/CUDA profile；只要仍有未完成阶段就
+    在创建被试目录前失败，不回退到原生程序。完整MNI只支持自有GPU后处理，
+    CPU设备在创建输出或启动被试前拒绝；通用CPU核仍可独立调用。
+    native_optimizations=auto在CUDA选择已有Torch GCA；
     white使用专用快速程序，pial保持原生；
     original用于原生阶段配对控制，原样传递给每个被试CLI。
     n4_backend=native与n4_execution=in-process保持默认；torch复用完整N4，
     isolated只允许cuda:N设备，以缓存exec保留父策略及完整子阶段报告。
     这两个选项原样传入CLI，非法组合在调度/创建输出前拒绝。
+    input_execution默认serial；parallel须总4线程且完整SimpleITK N4，
+    以1+3线程和SynthSeg GPU并行，原样传CLI，分割/CSV不重复计算。
     normalization_controls_backend 默认cpu；torch复用两轮的同规则GPU邻域，
     仅支持显式cuda:N设备；其余控制点选择与偏置流程保持，原样传给CLI。
     normalization_initial_bias_backend 默认cpu；torch仅迁移第二轮初始
@@ -68,14 +84,20 @@ def run_recon_all_python_batch(
     原样传入CLI，GPU几何、缓存版本/随机序列/总线程不变；首次JIT计入。
     remesh_scalar_storage默认numpy；python仅优化已有CPU完整remesh的双精度
     标量存储，原有拆缩顺序、堆规则及平滑保持，原样传入每个被试CLI。
+    surface_placement_backend默认native；python复用完整四轮自有preaparc/
+    white/pial，CPU有序计算与CUDA完整候选/清理结合，不调用放置程序。
+    原样传入被试CLI；其他未替代阶段另记录，不称整个pipeline纯Python。
     mni_execution默认in-process；parallel-late在所有半球写出后，将完整
     MNI非线性与CPU网格检查并行，所有设备须cuda:N且threads至少2。
     总线程在这两个任务间分配，join后才检查138输出；原样传入CLI。
     defects_backend 默认 native；torch 将缺陷投射交给同设备 PyTorch，
     保持左清零/右合并顺序和标签含义，调色板采用确定性颜色。
     wm_backend 默认 native；torch 选择已有完整混合 WM segmentation。
-    wm_edit_backend 默认 native；torch-hybrid 选择静态 CUDA 子步骤与有序
-    Numba WM/aseg 核心。sphere_normals_backend 默认 numba；torch 只迁移
+    wm_edit_backend 默认 native；python选择完整CPU编辑，torch-hybrid选择
+    静态CUDA子步骤与有序Numba核心。路径不可达证明失败时执行完整搜索，
+    保留原4字节存储typed/byte语义；不支持的输入仍失败。两例完整同输入
+    解码0差、十例无active触发见WM_REMOVE_PATHS.md，未评价新MRI batch整例。
+    sphere_normals_backend 默认 numba；torch 只迁移
     标准球面法向。后三种 Torch 选择均要求 CUDA，失败不静默回退。
     wm_backend=torch-optimized复用Torch直方图和缓存平面几何，有序反馈为CPU。
     wm_execution默认in-process；isolated只允许torch-optimized，以新exec
@@ -89,9 +111,40 @@ def run_recon_all_python_batch(
     from .native_free import (_normalization_controls_options, _normalization_initial_bias_options,
                               _validate_inflate_backend, _validate_mni_execution,
                               _validate_sphere_finish_backend, _validate_annotation_gibbs_backend,
-                              _validate_remesh_scalar_storage)
+                              _validate_remesh_scalar_storage, _validate_surface_placement_backend)
+    from .native_free import _validate_input_execution
+    if backend == "python":
+        from .python_profile import python_profile_options
+        options = None
+        for target in devices:
+            options = python_profile_options(device=target, threads=threads,
+                n4_backend="simpleitk" if n4_backend == "native" else n4_backend,
+                n4_execution=n4_execution,
+                topology_backend="python" if topology_backend == "native" else topology_backend,
+                input_execution=input_execution)
+        if options is not None:
+            # 与公开单例先解析再校验的顺序一致；不在batch另建第二套默认。
+            native_optimizations = options["native_optimizations"]
+            n4_backend, n4_execution = options["n4_backend"], options["n4_execution"]
+            wm_backend, wm_execution = options["wm_backend"], options["wm_execution"]
+            wm_edit_backend, defects_backend = options["wm_edit_backend"], options["defects_backend"]
+            inflate_backend = options["inflate_backend"]
+            surface_placement_backend, topology_backend = options["surface_placement_backend"], options["topology_backend"]
+            annotation_gibbs_backend, remesh_scalar_storage = options["annotation_gibbs_backend"], options["remesh_scalar_storage"]
+            gca_execution, gca_inverse_backend = options["gca_execution"], options["gca_inverse_backend"]
+            gca_candidate_chunk = options["gca_candidate_chunk"]
+            normalization_controls_backend = options["normalization_controls_backend"]
+            normalization_initial_bias_backend = options["normalization_initial_bias_backend"]
+            sphere_finish_backend, mni_execution = options["sphere_finish_backend"], options["mni_execution"]
+            fill_backend, hemisphere_workers = options["fill_backend"], options["hemisphere_workers"]
+    for target in devices:
+        _validate_input_execution(input_execution,
+            n4_backend=n4_backend,
+            n4_execution=n4_execution,
+            device=target, threads=threads)
     _validate_annotation_gibbs_backend(annotation_gibbs_backend)
     _validate_remesh_scalar_storage(remesh_scalar_storage)
+    _validate_surface_placement_backend(surface_placement_backend)
     for target in devices:
         _normalization_controls_options(normalization_controls_backend, target)
         _normalization_initial_bias_options(normalization_initial_bias_backend, target)
@@ -145,8 +198,8 @@ def run_recon_all_python_batch(
         raise ValueError("fill_backend must be python, numba or torch-numba")
     if fill_backend == "torch-numba" and any(device == "cpu" for device in devices):
         raise ValueError("fill_backend='torch-numba' requires CUDA devices")
-    if wm_edit_backend not in {"native", "torch-hybrid"}:
-        raise ValueError("wm_edit_backend must be native or torch-hybrid")
+    if wm_edit_backend not in {"native", "python", "torch-hybrid"}:
+        raise ValueError("wm_edit_backend must be native, python or torch-hybrid")
     if wm_edit_backend == "torch-hybrid" and any(device == "cpu" for device in devices):
         raise ValueError("wm_edit_backend='torch-hybrid' requires CUDA devices")
     if defects_backend not in {"native", "torch"}:
@@ -155,8 +208,10 @@ def run_recon_all_python_batch(
         raise ValueError("sphere_normals_backend must be numba or torch")
     if sphere_normals_backend == "torch" and any(device == "cpu" for device in devices):
         raise ValueError("sphere_normals_backend='torch' requires CUDA devices")
-    if backend not in {"native", "python-gpu"}:
-        raise ValueError("backend must be native or python-gpu")
+    if backend not in {"native", "python", "python-gpu"}:
+        raise ValueError("backend must be native, python or python-gpu")
+    if topology_backend not in {"native", "python", "python-ga"}:
+        raise ValueError("topology_backend must be native, python or python-ga")
     weights, assets = Path(weights_dir).resolve(), Path(assets_dir).resolve()
     if not weights.is_dir() or not assets.is_dir():
         raise FileNotFoundError("weights_dir and assets_dir must exist")
@@ -186,6 +241,8 @@ def run_recon_all_python_batch(
                 command += ["--n4-backend", n4_backend]
             if n4_execution != "in-process":
                 command += ["--n4-execution", n4_execution]
+            if input_execution != "serial":
+                command += ["--input-execution", input_execution]
             if normalization_controls_backend != "cpu":
                 command += ["--normalization-controls-backend", normalization_controls_backend]
             if normalization_initial_bias_backend != "cpu":
@@ -194,6 +251,10 @@ def run_recon_all_python_batch(
                 command += ["--inflate-backend", inflate_backend]
             if sphere_finish_backend != "cpu":
                 command += ["--sphere-finish-backend", sphere_finish_backend]
+            if surface_placement_backend != "native":
+                command += ["--surface-placement-backend", surface_placement_backend]
+            if topology_backend != "native":
+                command += ["--topology-backend", topology_backend]
             if annotation_gibbs_backend != "python":
                 command += ["--annotation-gibbs-backend", annotation_gibbs_backend]
             if remesh_scalar_storage != "numpy":

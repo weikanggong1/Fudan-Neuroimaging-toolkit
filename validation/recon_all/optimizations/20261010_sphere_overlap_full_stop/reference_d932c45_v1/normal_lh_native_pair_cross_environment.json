@@ -1,0 +1,116 @@
+{
+  "status": "complete",
+  "scope": "fixed-source Conda reference twice on identical frozen FNIT inputs; not raw T1 E2E",
+  "script_sha256": "670bb77f055fbe7ba137bf68c676ef28bb9402b19702ca5a5191c47baf002a07",
+  "reference_program_sha256": "5d487630dbb5b5dac25a50ddf9ca3c1a3a3661c7c7ca86d8f437ca4c4d9c3cc6",
+  "threads": 4,
+  "affinity": [
+    88,
+    89,
+    90,
+    91
+  ],
+  "random_seed": 1234,
+  "inputs_sha256": {
+    "inflated": "a8ff9644b5ef8183d08daaedff69c6ae74ef3270f0b54d9db88aaf788a9e52ed",
+    "smoothwm": "36e199e4d971a39457a4ad1d0b8eed3a84feb236ada29c05e297ffdd865a5002"
+  },
+  "candidate_sphere_sha256": "ac65443ffbff136379d0dc7a275f3444651bdc4d14cec16fdb59bbce31a28eff",
+  "runs": [
+    {
+      "repeat": 1,
+      "argv": [
+        "${FNIT_ROOT}/workspaces/sphere_reference_d932c45_20261010_v4/reference_prefix/bin/mris_sphere",
+        "-seed",
+        "1234",
+        "-threads",
+        "4",
+        "${FNIT_ROOT}/runs/sphere_reference_d932c45_20261010_v4/normal-frozen-lh-v1/repeat-1/surf/lh.inflated",
+        "${FNIT_ROOT}/runs/sphere_reference_d932c45_20261010_v4/normal-frozen-lh-v1/repeat-1/surf/lh.sphere"
+      ],
+      "returncode": 0,
+      "full_cli_seconds_including_loader_and_IO": 185.02090272773057,
+      "status": "complete",
+      "output_sha256": "c16c3d4657f66edd6d5961bde7cb03fd9efddbce7e34c5f6c14c787fc84096f1",
+      "quality": {
+        "vertices": 106622,
+        "faces": 213240,
+        "finite": true,
+        "negative_radial_faces_double": 0,
+        "negative_area_mm2_sum": 0.0,
+        "negative_area_mm2_max": 0.0,
+        "negative_area_mm2_p99": 0,
+        "zero_area_faces": 0,
+        "coordinate_sha256": "6b8593022eb278d176b2f95eab270337ab472949d8f92f251dec96f03f9b5f77",
+        "ordered_faces_sha256": "080b517b63231b9851c713a5d96d449a0ef16605cb08afebedda04252b8727ea"
+      },
+      "comparison_to_frozen_candidate": {
+        "same_ordered_faces_and_vertex_count": true,
+        "coordinate_elements_differing": 319865,
+        "mean_vertex_mm": 3.415484398981491,
+        "p99_vertex_mm": 5.863463697379437,
+        "max_vertex_mm": 7.483533671171465
+      }
+    },
+    {
+      "repeat": 2,
+      "argv": [
+        "${FNIT_ROOT}/workspaces/sphere_reference_d932c45_20261010_v4/reference_prefix/bin/mris_sphere",
+        "-seed",
+        "1234",
+        "-threads",
+        "4",
+        "${FNIT_ROOT}/runs/sphere_reference_d932c45_20261010_v4/normal-frozen-lh-v1/repeat-2/surf/lh.inflated",
+        "${FNIT_ROOT}/runs/sphere_reference_d932c45_20261010_v4/normal-frozen-lh-v1/repeat-2/surf/lh.sphere"
+      ],
+      "returncode": 0,
+      "full_cli_seconds_including_loader_and_IO": 185.4864466767758,
+      "status": "complete",
+      "output_sha256": "c04e22524bf067bedf2254f4dfffafe5c23e027eb94209a630460d777ba71a55",
+      "quality": {
+        "vertices": 106622,
+        "faces": 213240,
+        "finite": true,
+        "negative_radial_faces_double": 0,
+        "negative_area_mm2_sum": 0.0,
+        "negative_area_mm2_max": 0.0,
+        "negative_area_mm2_p99": 0,
+        "zero_area_faces": 0,
+        "coordinate_sha256": "6b8593022eb278d176b2f95eab270337ab472949d8f92f251dec96f03f9b5f77",
+        "ordered_faces_sha256": "080b517b63231b9851c713a5d96d449a0ef16605cb08afebedda04252b8727ea"
+      },
+      "comparison_to_frozen_candidate": {
+        "same_ordered_faces_and_vertex_count": true,
+        "coordinate_elements_differing": 319865,
+        "mean_vertex_mm": 3.415484398981491,
+        "p99_vertex_mm": 5.863463697379437,
+        "max_vertex_mm": 7.483533671171465
+      }
+    }
+  ],
+  "child_library_policy": "private reference/lib plus system base; no LD_PRELOAD",
+  "overall_metric_equivalence": "not_assessed",
+  "frozen_candidate_quality": {
+    "vertices": 106622,
+    "faces": 213240,
+    "finite": true,
+    "negative_radial_faces_double": 0,
+    "negative_area_mm2_sum": 0.0,
+    "negative_area_mm2_max": 0.0,
+    "negative_area_mm2_p99": 0,
+    "zero_area_faces": 0,
+    "coordinate_sha256": "f9a2cc64dba14160b1bcb6b1d983928f566d53294d1e3033a5c5daff4492b15c",
+    "ordered_faces_sha256": "080b517b63231b9851c713a5d96d449a0ef16605cb08afebedda04252b8727ea"
+  },
+  "repeat_comparison": {
+    "same_ordered_faces_and_vertex_count": true,
+    "coordinate_elements_differing": 0,
+    "mean_vertex_mm": 0.0,
+    "p99_vertex_mm": 0.0,
+    "max_vertex_mm": 0.0
+  },
+  "full_harness_seconds": 370.79232567269355,
+  "candidate_reference_scope": "single hemisphere fixed same-input stage; file headers contain different command paths",
+  "private_raw_report_sha256": "6ec960ec375a36232ca1ea5fb0e5993f1731b7d4dd1681f60884c2208b90a9fe",
+  "public_path_policy": "private server roots replaced by FNIT_ROOT placeholders; no original source or program distributed"
+}

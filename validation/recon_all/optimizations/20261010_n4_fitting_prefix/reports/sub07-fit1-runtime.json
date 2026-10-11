@@ -1,0 +1,1036 @@
+{
+  "profile": "single-t1-standard",
+  "input": "$FNIT_ROOT/workspaces/recon_torch_surface_20261009/public_inputs_v1/raw_t1/sub07_ses-test_T1w.nii.gz",
+  "subject_dir": "$FNIT_ROOT/runs/n4_fitting_prefix_20261010_v2/prefixes/sub07-fit1/subject",
+  "device": "cuda:0",
+  "backend": "python",
+  "n4_binary": null,
+  "threads": 4,
+  "precision": {
+    "matmul_tf32_default": true,
+    "cudnn_tf32_default": true,
+    "cuda_policy_applied": true,
+    "fp16_or_bf16_requested_by_fnit": false,
+    "caller_autocast": {
+      "cpu": {
+        "enabled": false,
+        "dtype": "torch.bfloat16"
+      },
+      "cuda": {
+        "enabled": false,
+        "dtype": "torch.float16"
+      }
+    },
+    "fp16_or_bf16_enabled": false,
+    "fp32_exceptions": [
+      "SynthStrip",
+      "SynthSeg",
+      "Talairach affine",
+      "MNI nonlinear CUDA",
+      "MNI152 affine matmul",
+      "EntoWM/MCA-dura/vsinus cuDNN"
+    ],
+    "auxiliary_convolution_policy": "scoped cuDNN FP32; same-input GPU/CPU label regression; matmul TF32 preserved",
+    "SynthSeg_actual_forward": {
+      "requested_cudnn_tf32": false,
+      "forwards": [
+        {
+          "pass": "original",
+          "device": "cuda:0",
+          "matmul_tf32": true,
+          "cudnn_tf32": false,
+          "input_dtype": "torch.float32",
+          "model_dtypes": [
+            "torch.float32"
+          ],
+          "autocast": {
+            "cpu": {
+              "enabled": false,
+              "dtype": "torch.bfloat16"
+            },
+            "cuda": {
+              "enabled": false,
+              "dtype": "torch.float16"
+            }
+          },
+          "output_dtype": "torch.float32"
+        },
+        {
+          "pass": "flipped",
+          "device": "cuda:0",
+          "matmul_tf32": true,
+          "cudnn_tf32": false,
+          "input_dtype": "torch.float32",
+          "model_dtypes": [
+            "torch.float32"
+          ],
+          "autocast": {
+            "cpu": {
+              "enabled": false,
+              "dtype": "torch.bfloat16"
+            },
+            "cuda": {
+              "enabled": false,
+              "dtype": "torch.float16"
+            }
+          },
+          "output_dtype": "torch.float32"
+        }
+      ],
+      "posterior_buffer_reused": true,
+      "posterior_ensemble_dtype": "torch.float32"
+    },
+    "EntoWM_actual_forwards": [
+      {
+        "model": "$FNIT_ROOT/assets/recon_resources_20261009_v1/weights/entowm.fsm31.t1.nstd00-30.nstd21-108.h5",
+        "device": "cuda:0",
+        "input_dtype": "torch.float32",
+        "model_devices": [
+          "cuda:0"
+        ],
+        "model_dtypes": [
+          "torch.float32"
+        ],
+        "matmul_tf32": true,
+        "cudnn_tf32": false,
+        "cudnn_enabled": true,
+        "cudnn_benchmark": false,
+        "cudnn_deterministic": false,
+        "autocast": {
+          "enabled": false,
+          "dtype": "torch.float16"
+        }
+      }
+    ]
+  },
+  "gpu_memory_mode": "disabled",
+  "cuda_allocator": {
+    "requested": "auto",
+    "cuda_initialized_at_entry": false,
+    "environment_at_entry": "1",
+    "environment_after_selection": "1",
+    "effective": "disabled",
+    "torch_stats_known_valid": false,
+    "torch_stats_known_unavailable": true
+  },
+  "timing": {
+    "profile_stages": true,
+    "total_scope": "API entry through validation, thread restoration, loading, transfers and output writes; excludes final public metadata write",
+    "validation_seconds": 7.5079472521319985,
+    "thread_setup_and_restore_seconds": 0.44824525993317366,
+    "thread_setup_and_restore_scope": "public-wrapper residual including thread setup/restoration and internal final report write/return overhead"
+  },
+  "stages": [
+    {
+      "name": "input_talairach",
+      "seconds": 46.988670563325286,
+      "function_seconds": 46.988539571873844,
+      "cuda_pre_sync_seconds": 0.0,
+      "cuda_post_sync_seconds": 6.084330379962921e-05,
+      "cuda_synchronized": true,
+      "cuda_synchronization_requested": true,
+      "parent_cpu_seconds": 11.987360503999998,
+      "child_cpu_seconds": 10.2524,
+      "torch_memory_stats_status": "unavailable",
+      "algorithm_substep_seconds": {
+        "import_seconds": 0.570598378777504,
+        "single_run_copy_seconds": 0.037277975119650364,
+        "conform_and_xform_tag_seconds": 28.61128780245781,
+        "synthstrip_seconds": 3.9097195686772466,
+        "talairach_seconds": 13.858019025996327
+      },
+      "algorithm_substep_scope": "original function timers, possibly asynchronous and nested; not additive with the synchronized stage wall",
+      "actual_forwards": [
+        {
+          "model": "SynthStrip",
+          "device": "cuda:0",
+          "input_dtype": "torch.float32",
+          "model_devices": [
+            "cuda:0"
+          ],
+          "model_dtypes": [
+            "torch.float32"
+          ],
+          "matmul_tf32": true,
+          "cudnn_tf32": false,
+          "cudnn_enabled": true,
+          "cudnn_benchmark": false,
+          "cudnn_deterministic": true,
+          "autocast": {
+            "enabled": false,
+            "dtype": "torch.float16"
+          }
+        }
+      ],
+      "talairach_child_gpu": {
+        "device": "cuda:0",
+        "actual_forwards": [
+          {
+            "model": "affine",
+            "compute_inverse": true,
+            "device": "cuda:0",
+            "input_dtype": "torch.float32",
+            "model_devices": [
+              "cuda:0"
+            ],
+            "model_dtypes": [
+              "torch.float32"
+            ],
+            "matmul_tf32": false,
+            "cudnn_tf32": false,
+            "cudnn_enabled": true,
+            "cudnn_benchmark": true,
+            "cudnn_deterministic": true,
+            "autocast": {
+              "enabled": false,
+              "dtype": "torch.float16"
+            }
+          }
+        ],
+        "gpu_peak_allocated_bytes": 4690513920,
+        "gpu_peak_reserved_bytes": 7168065536
+      }
+    },
+    {
+      "name": "n4",
+      "seconds": 185.3275619391352,
+      "function_seconds": 185.32733397744596,
+      "cuda_pre_sync_seconds": 2.8177164494991302e-05,
+      "cuda_post_sync_seconds": 0.0001061558723449707,
+      "cuda_synchronized": true,
+      "cuda_synchronization_requested": true,
+      "parent_cpu_seconds": 186.09667443799998,
+      "child_cpu_seconds": 0.0,
+      "torch_memory_stats_status": "unavailable",
+      "algorithm_substep_seconds": {
+        "total_seconds": 185.31435198429972,
+        "array_stage_seconds": 180.5664847176522
+      },
+      "algorithm_substep_scope": "original function timers, possibly asynchronous and nested; not additive with the synchronized stage wall",
+      "n4_runtime": {
+        "backend": "simpleitk_python",
+        "used_native_programs": false,
+        "simpleitk_version": "2.5.6",
+        "itk_version": "5.4",
+        "library_sha256": "c25cd8cf7053c8224c246744e1f1bc9af12db0c95a8221b27e9546cc4511b62c",
+        "fitting_threads": 1,
+        "reconstruction_threads": 4,
+        "actual_fitting_work_units": 1,
+        "actual_fitting_filter_threads": 1,
+        "recipe": {
+          "shrink": [
+            4,
+            4,
+            4
+          ],
+          "iterations": [
+            50,
+            50,
+            50,
+            50
+          ],
+          "convergence_threshold": 0.0,
+          "spline_order": 3,
+          "initial_control_points": [
+            4,
+            4,
+            4
+          ],
+          "histogram_bins": 200,
+          "fwhm": 0.15,
+          "wiener_noise": 0.01,
+          "mask": "all ones",
+          "mask_label": 1
+        },
+        "internal_geometry": {
+          "origin_mm": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "direction": "identity",
+          "spacing_mm": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "current_level": 4,
+        "elapsed_last_level_iterations": 51,
+        "timing_parts_seconds": {
+          "array_prepare_and_shrink": 0.03536159172654152,
+          "fitting": 180.06888774130493,
+          "full_bspline_reconstruction": 0.2624689256772399,
+          "exp_divide_and_array_download": 0.1997664589434862
+        },
+        "total_seconds": 185.31435198429972,
+        "restored_global_threads": 4,
+        "original_global_threads": 4,
+        "array_stage_seconds": 180.5664847176522,
+        "file_io_included": true,
+        "output": "$FNIT_ROOT/runs/n4_fitting_prefix_20261010_v2/prefixes/sub07-fit1/subject/mri/tmp/nu0.mgz",
+        "input_sha256": "3ead516a7a54c9fb952d7f7159fc96ef6a586822cac0e778b10b7e5fe7c22d86",
+        "output_sha256": "f6f5631b45c485eb9a671fc2e1255fff5caacd146fdb2649373f55c6dbae78e6",
+        "implementation_sha256": "c14e8eb46fb408926ddb9a7fe3d35d97bb5201382928e87226f71f8e01041b90",
+        "execution": "in-process",
+        "device": "cpu"
+      }
+    },
+    {
+      "name": "nu",
+      "seconds": 4.811985331587493,
+      "function_seconds": 4.811855505220592,
+      "cuda_pre_sync_seconds": 2.2709369659423828e-05,
+      "cuda_post_sync_seconds": 5.623605102300644e-05,
+      "cuda_synchronized": true,
+      "cuda_synchronization_requested": true,
+      "parent_cpu_seconds": 4.810734224000015,
+      "child_cpu_seconds": 0.0,
+      "torch_memory_stats_status": "unavailable"
+    },
+    {
+      "name": "T1_normalize",
+      "seconds": 24.99241942819208,
+      "function_seconds": 24.992292220704257,
+      "cuda_pre_sync_seconds": 2.4490058422088623e-05,
+      "cuda_post_sync_seconds": 3.094412386417389e-05,
+      "cuda_synchronized": true,
+      "cuda_synchronization_requested": true,
+      "parent_cpu_seconds": 24.227794449000015,
+      "child_cpu_seconds": 0.0054680000000004725,
+      "torch_memory_stats_status": "unavailable",
+      "algorithm_substep_seconds": {
+        "total_seconds": 24.96365821082145,
+        "steps/one_d_seconds": 0.1363615281879902,
+        "steps/controls_seconds": 2.281326973810792,
+        "steps/voronoi_seconds": 1.9191610794514418,
+        "steps/smoothing_seconds": 0.1335935117676854,
+        "steps/gentle_apply_seconds": 0.11116747464984655,
+        "steps/three_d_1_controls_seconds": 7.1007883828133345,
+        "steps/three_d_1_voronoi_seconds": 1.2996098631992936,
+        "steps/three_d_1_smoothing_seconds": 0.027934880927205086,
+        "steps/three_d_1_apply_seconds": 0.008828777819871902,
+        "steps/three_d_2_controls_seconds": 6.50957606267184,
+        "steps/three_d_2_voronoi_seconds": 1.2979862140491605,
+        "steps/three_d_2_smoothing_seconds": 0.0628255046904087,
+        "steps/three_d_2_apply_seconds": 0.005255827680230141,
+        "steps/apply_write_seconds": 3.8479155460372567
+      },
+      "algorithm_substep_scope": "original function timers, possibly asynchronous and nested; not additive with the synchronized stage wall"
+    },
+    {
+      "name": "brainmask",
+      "seconds": 0.6918187960982323,
+      "function_seconds": 0.6917013032361865,
+      "cuda_pre_sync_seconds": 2.274010330438614e-05,
+      "cuda_post_sync_seconds": 4.535261541604996e-05,
+      "cuda_synchronized": true,
+      "cuda_synchronization_requested": true,
+      "parent_cpu_seconds": 0.6496534690000146,
+      "child_cpu_seconds": 0.0,
+      "torch_memory_stats_status": "unavailable"
+    },
+    {
+      "name": "SynthSeg",
+      "seconds": 14.932316265068948,
+      "function_seconds": 14.932216095738113,
+      "cuda_pre_sync_seconds": 2.3292377591133118e-05,
+      "cuda_post_sync_seconds": 3.243889659643173e-05,
+      "cuda_synchronized": true,
+      "cuda_synchronization_requested": true,
+      "parent_cpu_seconds": 8.466194708999979,
+      "child_cpu_seconds": 0.0,
+      "torch_memory_stats_status": "unavailable"
+    },
+    {
+      "name": "mri_em_register",
+      "seconds": 36.79762974381447,
+      "function_seconds": 36.79751765727997,
+      "cuda_pre_sync_seconds": 3.063958138227463e-05,
+      "cuda_post_sync_seconds": 3.921147435903549e-05,
+      "cuda_synchronized": true,
+      "cuda_synchronization_requested": true,
+      "parent_cpu_seconds": 0.026059540000005654,
+      "child_cpu_seconds": 43.501661999999996,
+      "torch_memory_stats_status": "unavailable",
+      "algorithm_substep_seconds": {
+        "isolated_cli_wall_seconds": 36.68428435642272
+      },
+      "algorithm_substep_scope": "original function timers, possibly asynchronous and nested; not additive with the synchronized stage wall",
+      "substep_seconds": {
+        "prepare_seconds": 12.269018691964447,
+        "translation_seconds": 0.6174960043281317,
+        "linear_search_seconds": 8.764074130915105,
+        "em_seconds": 7.125980908051133,
+        "write_seconds": 0.10742910485714674,
+        "total_seconds": 29.29351365752518
+      }
+    },
+    {
+      "name": "mri_ca_normalize",
+      "seconds": 24.49357205722481,
+      "function_seconds": 24.493329317308962,
+      "cuda_pre_sync_seconds": 2.7789734303951263e-05,
+      "cuda_post_sync_seconds": 0.00011508073657751083,
+      "cuda_synchronized": true,
+      "cuda_synchronization_requested": true,
+      "parent_cpu_seconds": 36.47209131699998,
+      "child_cpu_seconds": 0.0,
+      "torch_memory_stats_status": "unavailable",
+      "algorithm_substep_seconds": {
+        "setup_seconds": 4.072376560419798,
+        "write_seconds": 3.2677470361813903,
+        "total_seconds": 24.23563238698989
+      },
+      "algorithm_substep_scope": "original function timers, possibly asynchronous and nested; not additive with the synchronized stage wall"
+    },
+    {
+      "name": "mri_cc",
+      "seconds": 9.569091974757612,
+      "function_seconds": 9.568962595425546,
+      "cuda_pre_sync_seconds": 2.9577873647212982e-05,
+      "cuda_post_sync_seconds": 5.264393985271454e-05,
+      "cuda_synchronized": true,
+      "cuda_synchronization_requested": true,
+      "parent_cpu_seconds": 17.570781934999957,
+      "child_cpu_seconds": 0.0,
+      "torch_memory_stats_status": "unavailable"
+    },
+    {
+      "name": "brain_second_normalize",
+      "seconds": 28.962401553988457,
+      "function_seconds": 28.962267907336354,
+      "cuda_pre_sync_seconds": 3.554578870534897e-05,
+      "cuda_post_sync_seconds": 4.423316568136215e-05,
+      "cuda_synchronized": true,
+      "cuda_synchronization_requested": true,
+      "parent_cpu_seconds": 28.155223203000048,
+      "child_cpu_seconds": 0.0,
+      "torch_memory_stats_status": "unavailable",
+      "algorithm_substep_seconds": {
+        "ridge_seconds": 10.933479636907578,
+        "initial_bias_seconds": 1.5930417878553271,
+        "total_seconds": 28.758291418664157,
+        "completion/steps/gentle_controls_seconds": 1.6470543332397938,
+        "completion/steps/gentle_bias_seconds": 1.213464181870222,
+        "completion/steps/three_d_1_controls_seconds": 5.0535043785348535,
+        "completion/steps/three_d_1_bias_seconds": 1.2712623961269855,
+        "completion/steps/three_d_2_controls_seconds": 4.814505533315241,
+        "completion/steps/three_d_2_bias_seconds": 1.2533647613599896
+      },
+      "algorithm_substep_scope": "original function timers, possibly asynchronous and nested; not additive with the synchronized stage wall"
+    },
+    {
+      "name": "entowm",
+      "seconds": 1.4128893511369824,
+      "function_seconds": 1.4127733539789915,
+      "cuda_pre_sync_seconds": 2.703070640563965e-05,
+      "cuda_post_sync_seconds": 4.491303116083145e-05,
+      "cuda_synchronized": true,
+      "cuda_synchronization_requested": true,
+      "parent_cpu_seconds": 1.4899411409999743,
+      "child_cpu_seconds": 0.0,
+      "torch_memory_stats_status": "unavailable"
+    },
+    {
+      "name": "ants_denoise",
+      "seconds": 16.482388116419315,
+      "function_seconds": 16.482262266799808,
+      "cuda_pre_sync_seconds": 2.2365711629390717e-05,
+      "cuda_post_sync_seconds": 4.815123975276947e-05,
+      "cuda_synchronized": true,
+      "cuda_synchronization_requested": true,
+      "parent_cpu_seconds": 16.481920325999965,
+      "child_cpu_seconds": 0.0,
+      "torch_memory_stats_status": "unavailable",
+      "algorithm_substep_seconds": {
+        "total_seconds": 16.481793929822743
+      },
+      "algorithm_substep_scope": "original function timers, possibly asynchronous and nested; not additive with the synchronized stage wall"
+    },
+    {
+      "name": "mri_segment",
+      "seconds": 35.01322675216943,
+      "function_seconds": 35.013086586259305,
+      "cuda_pre_sync_seconds": 3.3239834010601044e-05,
+      "cuda_post_sync_seconds": 5.393754690885544e-05,
+      "cuda_synchronized": true,
+      "cuda_synchronization_requested": true,
+      "parent_cpu_seconds": 0.022917918000018744,
+      "child_cpu_seconds": 30.26298099999999,
+      "torch_memory_stats_status": "unavailable",
+      "algorithm_substep_seconds": {
+        "isolated_cli_wall_seconds": 34.979347626678646
+      },
+      "algorithm_substep_scope": "original function timers, possibly asynchronous and nested; not additive with the synchronized stage wall"
+    },
+    {
+      "name": "mri_edit_wm_with_aseg",
+      "seconds": 15.068005087785423,
+      "function_seconds": 15.067802986130118,
+      "cuda_pre_sync_seconds": 3.906991332769394e-05,
+      "cuda_post_sync_seconds": 9.229965507984161e-05,
+      "cuda_synchronized": true,
+      "cuda_synchronization_requested": true,
+      "parent_cpu_seconds": 14.934409990000006,
+      "child_cpu_seconds": 0.0,
+      "torch_memory_stats_status": "unavailable",
+      "algorithm_substep_seconds": {
+        "total_seconds": 15.033945254981518,
+        "array_stage_seconds": 12.913020164705813
+      },
+      "algorithm_substep_scope": "original function timers, possibly asynchronous and nested; not additive with the synchronized stage wall"
+    },
+    {
+      "name": "wm_pretess",
+      "seconds": 5.21605581510812,
+      "function_seconds": 5.21594223100692,
+      "cuda_pre_sync_seconds": 2.6774592697620392e-05,
+      "cuda_post_sync_seconds": 4.164688289165497e-05,
+      "cuda_synchronized": true,
+      "cuda_synchronization_requested": true,
+      "parent_cpu_seconds": 5.192402032000018,
+      "child_cpu_seconds": 0.0,
+      "torch_memory_stats_status": "unavailable"
+    },
+    {
+      "name": "wm_fix_ento",
+      "seconds": 1.0271353079006076,
+      "function_seconds": 1.0270256670191884,
+      "cuda_pre_sync_seconds": 3.3321790397167206e-05,
+      "cuda_post_sync_seconds": 2.902001142501831e-05,
+      "cuda_synchronized": true,
+      "cuda_synchronization_requested": true,
+      "parent_cpu_seconds": 0.98820796199999,
+      "child_cpu_seconds": 0.0,
+      "torch_memory_stats_status": "unavailable"
+    },
+    {
+      "name": "wm_fix_acj",
+      "seconds": 1.624464513733983,
+      "function_seconds": 1.6243625208735466,
+      "cuda_pre_sync_seconds": 2.7056783437728882e-05,
+      "cuda_post_sync_seconds": 2.7175992727279663e-05,
+      "cuda_synchronized": true,
+      "cuda_synchronization_requested": true,
+      "parent_cpu_seconds": 1.3298962229999916,
+      "child_cpu_seconds": 0.0,
+      "torch_memory_stats_status": "unavailable"
+    },
+    {
+      "name": "mri_fill",
+      "seconds": 25.774018175899982,
+      "function_seconds": 25.77387659344822,
+      "cuda_pre_sync_seconds": 2.985447645187378e-05,
+      "cuda_post_sync_seconds": 5.88148832321167e-05,
+      "cuda_synchronized": true,
+      "cuda_synchronization_requested": true,
+      "parent_cpu_seconds": 25.76395394100001,
+      "child_cpu_seconds": 0.0,
+      "torch_memory_stats_status": "unavailable"
+    },
+    {
+      "name": "filled_auto_checkpoint",
+      "seconds": 0.0012514078989624977,
+      "function_seconds": 0.0011752638965845108,
+      "cuda_pre_sync_seconds": 3.0870549380779266e-05,
+      "cuda_post_sync_seconds": 1.917220652103424e-05,
+      "cuda_synchronized": true,
+      "cuda_synchronization_requested": true,
+      "parent_cpu_seconds": 0.0004757089999998243,
+      "child_cpu_seconds": 0.0,
+      "torch_memory_stats_status": "unavailable"
+    }
+  ],
+  "status": "complete_prefix",
+  "hemisphere_scheduling": {
+    "workers": 2,
+    "total_thread_budget": 4,
+    "groups": [],
+    "mode": "independent-exec-private-subjects"
+  },
+  "implementation_profile": {
+    "name": "python",
+    "declared_original_stage_programs": [],
+    "options": {
+      "native_optimizations": "torch",
+      "n4_backend": "simpleitk",
+      "n4_execution": "in-process",
+      "wm_backend": "torch-optimized",
+      "gca_execution": "isolated",
+      "gca_inverse_backend": "torch",
+      "gca_candidate_chunk": 1024,
+      "normalization_controls_backend": "torch",
+      "normalization_initial_bias_backend": "torch",
+      "sphere_finish_backend": "torch",
+      "mni_execution": "parallel-late",
+      "wm_execution": "isolated",
+      "wm_edit_backend": "python",
+      "defects_backend": "torch",
+      "inflate_backend": "torch",
+      "surface_placement_backend": "python",
+      "topology_backend": "python",
+      "annotation_gibbs_backend": "numba",
+      "remesh_scalar_storage": "python",
+      "fill_backend": "numba",
+      "hemisphere_workers": 2
+    },
+    "cpu_python_kernels_allowed": true,
+    "generic_python_libraries_allowed": true,
+    "topology_algorithm": "ordered digital topology; different from GA",
+    "strict_reproduction": "reported_separately",
+    "overall_metric_equivalence": "not_assessed"
+  },
+  "n4_configuration": {
+    "backend": "simpleitk",
+    "execution": "in-process",
+    "implementation": "SimpleITK Python API; generic ITK library, no stage executable",
+    "device": "cpu",
+    "production_default_changed": false,
+    "known_strict_intensity_differences": true
+  },
+  "normalization_configuration": {
+    "controls_neighbor_backend": "torch",
+    "initial_bias_backend": "torch",
+    "requested_device": "cuda:0",
+    "stages": [
+      "T1_normalize",
+      "brain_second_normalize"
+    ],
+    "implementation": "FNIT resident PyTorch/Triton neighbor buffers",
+    "ordered_control_selection": "CPU; original update and rejection rules",
+    "remaining_bias_steps": "existing implementation; device unchanged",
+    "production_default_changed": false
+  },
+  "gca_registration": {
+    "implementation": "FNIT PyTorch candidate scorer + Python EM",
+    "binary": null,
+    "sha256": null,
+    "backend": "torch",
+    "inverse_backend": "torch",
+    "candidate_chunk": 1024,
+    "execution": "isolated",
+    "device": "cuda:0",
+    "strict_native_em": false,
+    "stage_result": {
+      "output": "$FNIT_ROOT/runs/n4_fitting_prefix_20261010_v2/prefixes/sub07-fit1/subject/mri/transforms/talairach.lta",
+      "matrix": [
+        [
+          1.1199768781661987,
+          0.03196442127227783,
+          -0.00330263189971447,
+          -20.886865615844727
+        ],
+        [
+          -0.0276108980178833,
+          1.2350587844848633,
+          0.2686343193054199,
+          -40.61320495605469
+        ],
+        [
+          0.008245470002293587,
+          -0.21437324583530426,
+          0.9960576891899109,
+          8.258819580078125
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "em_cost": 3.696977138519287,
+      "em_trials": 20,
+      "linear_iterations": 7,
+      "timing": {
+        "prepare_seconds": 12.269018691964447,
+        "translation_seconds": 0.6174960043281317,
+        "linear_search_seconds": 8.764074130915105,
+        "em_seconds": 7.125980908051133,
+        "write_seconds": 0.10742910485714674,
+        "total_seconds": 29.29351365752518
+      },
+      "search_backend": "torch",
+      "device": "cuda:0",
+      "candidate_chunk": 1024,
+      "sample_chunk": 8192,
+      "reduce_on_device": true,
+      "inverse_backend": "torch",
+      "scope": "same-input complete FNIT GCA in isolated cached worker; not raw-T1 end-to-end",
+      "code_version": "FNIT-source-hashes",
+      "worker_pid": 34554,
+      "cuda_allocator": {
+        "requested": "enabled",
+        "cuda_initialized_at_entry": false,
+        "environment_at_entry": null,
+        "environment_after_selection": null,
+        "effective": "enabled",
+        "torch_stats_known_valid": true,
+        "torch_stats_known_unavailable": false
+      },
+      "inputs_sha256": {
+        "nu": "fb79116190ca7e8d086ce26a1954901af7685b10bd4b546db85455a722d88e3f",
+        "mask": "1d720cf4e856afcec4565565f7a41cc77170ecaca3b78cc344afe7cf9927b1a0",
+        "atlas": "2fcd276a39800f01f93a4c8828ae6d0a8cea3d8b8b9fe1599d4ee54e806be93e"
+      },
+      "threads": {
+        "torch": 4,
+        "cpu_affinity": [
+          100,
+          101,
+          102,
+          103
+        ],
+        "environment": {
+          "OMP_NUM_THREADS": "4",
+          "MKL_NUM_THREADS": "4",
+          "OPENBLAS_NUM_THREADS": "4",
+          "NUMBA_NUM_THREADS": "4"
+        }
+      },
+      "torch_version": "2.5.1",
+      "logical_device": "cuda:0",
+      "cuda_visible_devices": "5",
+      "source_sha256": {
+        "worker": "823dc7be2ed9fe2b149ade62d7e32850511358b140916c045bf6d2e453dbdb87",
+        "registration": "0e3c39684314f84b47a158266550f35baaf1ef67e5c7bb36df8f145aed772aef",
+        "scorer": "d6c9092cbad86c147ecd8e1c2443132eeb7904b5de5b5fab23e284dba14de719"
+      },
+      "precision": {
+        "matmul_tf32": true,
+        "cudnn_tf32": true,
+        "autocast": {
+          "enabled": false,
+          "dtype": "torch.float16"
+        },
+        "half_requested": false
+      },
+      "gpu_name": "NVIDIA A100-SXM4-80GB",
+      "allocated_peak_bytes": 219581440,
+      "reserved_peak_bytes": 257949696,
+      "scoring_profile": {
+        "calls": 1326,
+        "candidates": 1339766,
+        "wall_seconds": 4.4837068216875196,
+        "scope": "existing score_many including its final CPU copy; no added CUDA synchronization"
+      },
+      "worker_api_wall_seconds_including_validation_init_read_transfer_write": 33.916524389758706,
+      "overall_metric_equivalence": "not_assessed",
+      "isolated_cli_wall_seconds": 36.68428435642272,
+      "isolation": "fresh exec; child cache enabled; parent allocator preserved"
+    }
+  },
+  "native_optimizations": {
+    "mode": "torch",
+    "em_backend": "torch",
+    "white_binary": "$FNIT_ROOT/envs/recon_main_20261009_v3/bin/mris_place_surface",
+    "pial_binary": "$FNIT_ROOT/envs/recon_main_20261009_v3/bin/mris_place_surface",
+    "gca_capabilities": null,
+    "white_capabilities": null,
+    "gca_reason": "FNIT PyTorch chunked candidate scoring; EM refinement remains Python FP32"
+  },
+  "topology_repair": {
+    "implementation": "FNIT ordered digital topology; different complete algorithm",
+    "backend": "python",
+    "strict_GA_reproduction": false,
+    "metric_equivalence": "not_assessed",
+    "binary": null,
+    "sha256": null,
+    "intersection_implementation": "FNIT Python/Numba complete SOAP; residual intersections fail",
+    "intersection_binary": null,
+    "intersection_sha256": null,
+    "upstream": "intensity-derived WM and aseg-guided fill"
+  },
+  "white_matter_chain": {
+    "implementation": "FNIT PyTorch hybrid segmentation + Conda C++ edit",
+    "mri_segment_sha256": null,
+    "segmentation_backend": "torch-optimized",
+    "segmentation_execution": "isolated",
+    "edit_backend": "python",
+    "edit_implementation": "Python/Numba CPU",
+    "mri_edit_wm_with_aseg_sha256": null,
+    "post_edit_implementation": "FNIT PyTorch CUDA",
+    "segmentation_runtime": {
+      "scope": "complete FNIT WM in isolated cached worker; not raw T1 whole recon",
+      "code_version": "FNIT-source-hashes",
+      "worker_pid": 35602,
+      "input_sha256": "d3151937c58a1ec2110e35cc12c524c21e314459fca1f23fb434847dd73c73aa",
+      "output_sha256": "6fe83d780af885c24434695cabc923510a85aa7ded9d87343a6489831ab01200",
+      "source_sha256": {
+        "worker": "2ee098c485c62cc9a848df27a3c8489dc5961897a1477a4ba58edd7de66dd42d",
+        "segmentation": "abee3136f2c88409746b817a845ad48afbf326005f242f4eabc123c6544613bb",
+        "histogram": "73e3b832da7f81ff944a75c69b056f63fc591aeb5877c26ec104c4d5b63a152e",
+        "planar": "40a1a10dd6421b6b11b7d3561f1cc1e28c4a3fc2219d23175fd68e93513fb587",
+        "profiling": "a4b1cc19794c1af90d6218f7d757cede491ade7da9406e3a3012a628fa2bf3ec"
+      },
+      "cuda_allocator": {
+        "requested": "enabled",
+        "cuda_initialized_at_entry": false,
+        "environment_at_entry": null,
+        "environment_after_selection": null,
+        "effective": "enabled",
+        "torch_stats_known_valid": true,
+        "torch_stats_known_unavailable": false
+      },
+      "logical_device": "cuda:0",
+      "cuda_visible_devices": "5",
+      "threads": {
+        "torch": 4,
+        "requested": 4,
+        "cpu_affinity": [
+          100,
+          101,
+          102,
+          103
+        ],
+        "environment": {
+          "OMP_NUM_THREADS": "4",
+          "MKL_NUM_THREADS": "4",
+          "OPENBLAS_NUM_THREADS": "4",
+          "NUMBA_NUM_THREADS": "4"
+        }
+      },
+      "precision": {
+        "matmul_tf32": true,
+        "cudnn_tf32": true,
+        "autocast": {
+          "enabled": false,
+          "dtype": "torch.float16"
+        },
+        "half_requested": false
+      },
+      "torch_version": "2.5.1",
+      "gpu_name": "NVIDIA A100-SXM4-80GB",
+      "api": {
+        "implementation": "FNIT PyTorch hybrid",
+        "device": "cuda:0",
+        "histogram_backend": "torch",
+        "histogram_batch_size": 2048,
+        "planar_backend": "cached",
+        "planar_batch_size": 256,
+        "ordered_cpu_rules": true,
+        "output": "$FNIT_ROOT/runs/n4_fitting_prefix_20261010_v2/prefixes/sub07-fit1/subject/mri/wm.seg.mgz"
+      },
+      "stage_profile": {
+        "name": "complete_wm_cached",
+        "seconds": 28.465932552702725,
+        "function_seconds": 26.89819085225463,
+        "cuda_pre_sync_seconds": 1.567042799666524,
+        "cuda_post_sync_seconds": 4.880223423242569e-05,
+        "cuda_synchronized": true,
+        "cuda_synchronization_requested": true,
+        "parent_cpu_seconds": 26.912218585999998,
+        "child_cpu_seconds": 0.0,
+        "torch_memory_stats_status": "available",
+        "gpu_peak_allocated_bytes": 211383296,
+        "gpu_peak_reserved_bytes": 257949696,
+        "gpu_peak_scope": "stage"
+      },
+      "allocated_peak_bytes": 211383296,
+      "reserved_peak_bytes": 257949696,
+      "process_tree_GPU_memory": "caller benchmark uses shared ProcessTreeDeviceSampler",
+      "worker_api_wall_seconds_including_validation_init_read_transfer_write": 32.70223230402917,
+      "overall_metric_equivalence": "not_assessed",
+      "isolated_cli_wall_seconds": 34.979347626678646,
+      "isolation": "fresh exec; worker cache enabled; parent policy preserved"
+    },
+    "edit_runtime": {
+      "implementation": "FNIT ordered Numba and Python standard WM profile",
+      "device": "cpu",
+      "used_native_programs": false,
+      "fill_seg_wm": true,
+      "fill_insertion": "first ordered WM-case scan; late fill disabled",
+      "path_proof_changed": 0,
+      "total_seconds": 15.033945254981518,
+      "timing_parts_seconds": {
+        "remove_paths_proof": 0.7915012249723077,
+        "ordered_core": 10.432935946621,
+        "superior_mtl": 0.5039352774620056,
+        "late_edits": 1.1846477156504989
+      },
+      "array_stage_seconds": 12.913020164705813,
+      "output": "$FNIT_ROOT/runs/n4_fitting_prefix_20261010_v2/prefixes/sub07-fit1/subject/mri/wm.asegedit.mgz",
+      "file_io_included": true
+    }
+  },
+  "white_preaparc": {
+    "implementation": "FNIT Python/Numba + Torch candidates/cleanup",
+    "backend": "python",
+    "binary": null,
+    "sha256": null,
+    "final_smoothwm": "Python 3 passes on CPU",
+    "final_white_pial": "FNIT complete Python/Numba white and pial after annotation"
+  },
+  "surface_metrics": {
+    "implementation": "FNIT PyTorch cuda:0",
+    "binary": null,
+    "sha256": null,
+    "upstream": "placed final white/pial"
+  },
+  "annotation": {
+    "gibbs_backend": "numba",
+    "geometry_device": "cuda:0",
+    "ordered_feedback_device": "cpu",
+    "implementation": "FNIT Torch geometry + ordered numba",
+    "random_sequence": "existing VnlRandom/permutation; no seed or order change"
+  },
+  "remesh": {
+    "implementation": "FNIT ordered Python/Numba CPU",
+    "scalar_storage": "python",
+    "precision": "float64; no precision reduction",
+    "iterations": 3,
+    "topology_and_update_order": "unchanged"
+  },
+  "sphere_generation": {
+    "implementation": "FNIT quick/standard sphere; explicit nofix and standard inflation backends",
+    "mris_inflate": {
+      "binary": null,
+      "sha256": null
+    },
+    "normals_backend": "numba",
+    "standard_inflate_backend": "torch",
+    "nofix_inflate_backend": "torch",
+    "surface_worker_cache": "enabled",
+    "normals_device": "cpu",
+    "finish_backend": "torch",
+    "finish_device": "cuda:0",
+    "upstream": "repaired topology"
+  },
+  "sphere_registration": {
+    "implementation": "Python/Numba + ordered CUDA averaging",
+    "averaging_device": "cuda:0",
+    "overlap_device": "cpu",
+    "hemisphere_seconds": {},
+    "reports": {}
+  },
+  "extra_curvature": {
+    "mrisp_paint_sha256": null,
+    "paint_backend": "python-numba-cpu",
+    "mris_curvature_stats_sha256": null,
+    "statistics_backend": "python",
+    "reports": {}
+  },
+  "defects_volume": {
+    "backend": "torch",
+    "device": "cuda:0",
+    "palette": "deterministic colors; original label names and values",
+    "source_sha256": "807b123d7e1ac47021864dfe5b486fa1ca3e9dd6eecbef792d469fe8552d12e5"
+  },
+  "mni_nonlinear": {
+    "implementation": "PyTorch deform + FNIT GPU warp conversion/inversion/check",
+    "postprocess_backend": "gpu",
+    "native_programs_used": false,
+    "execution": "parallel-late",
+    "device": "cuda:0",
+    "precision": "FP32 CUDA exception",
+    "native_sha256": {}
+  },
+  "gpu_peak_allocated_bytes": 4690513920,
+  "gpu_peak_reserved_bytes": 7168065536,
+  "n4_runtime": {
+    "backend": "simpleitk_python",
+    "used_native_programs": false,
+    "simpleitk_version": "2.5.6",
+    "itk_version": "5.4",
+    "library_sha256": "c25cd8cf7053c8224c246744e1f1bc9af12db0c95a8221b27e9546cc4511b62c",
+    "fitting_threads": 1,
+    "reconstruction_threads": 4,
+    "actual_fitting_work_units": 1,
+    "actual_fitting_filter_threads": 1,
+    "recipe": {
+      "shrink": [
+        4,
+        4,
+        4
+      ],
+      "iterations": [
+        50,
+        50,
+        50,
+        50
+      ],
+      "convergence_threshold": 0.0,
+      "spline_order": 3,
+      "initial_control_points": [
+        4,
+        4,
+        4
+      ],
+      "histogram_bins": 200,
+      "fwhm": 0.15,
+      "wiener_noise": 0.01,
+      "mask": "all ones",
+      "mask_label": 1
+    },
+    "internal_geometry": {
+      "origin_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "direction": "identity",
+      "spacing_mm": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "current_level": 4,
+    "elapsed_last_level_iterations": 51,
+    "timing_parts_seconds": {
+      "array_prepare_and_shrink": 0.03536159172654152,
+      "fitting": 180.06888774130493,
+      "full_bspline_reconstruction": 0.2624689256772399,
+      "exp_divide_and_array_download": 0.1997664589434862
+    },
+    "total_seconds": 185.31435198429972,
+    "restored_global_threads": 4,
+    "original_global_threads": 4,
+    "array_stage_seconds": 180.5664847176522,
+    "file_io_included": true,
+    "output": "$FNIT_ROOT/runs/n4_fitting_prefix_20261010_v2/prefixes/sub07-fit1/subject/mri/tmp/nu0.mgz",
+    "input_sha256": "3ead516a7a54c9fb952d7f7159fc96ef6a586822cac0e778b10b7e5fe7c22d86",
+    "output_sha256": "f6f5631b45c485eb9a671fc2e1255fff5caacd146fdb2649373f55c6dbae78e6",
+    "implementation_sha256": "c14e8eb46fb408926ddb9a7fe3d35d97bb5201382928e87226f71f8e01041b90",
+    "execution": "in-process",
+    "device": "cpu"
+  },
+  "corpus_callosum": {
+    "best_slice": 128,
+    "plane_score": 43612,
+    "plane_y_degrees": -0.6315809427205681,
+    "plane_z_degrees": -1.9380983008979096,
+    "changed_voxels": 3415
+  },
+  "fill": {
+    "backend": "numba",
+    "marching_device": "cpu",
+    "ordered_feedback_preserved": true,
+    "initial_boundary_device": "cpu"
+  },
+  "full_workflow_complete": false,
+  "stopping_point": "filled_auto_checkpoint",
+  "scope": "raw T1 empty-directory continuous conform-to-filled diagnostic",
+  "total_seconds": 487.3046693885699,
+  "thread_budget": {
+    "requested_threads": 4,
+    "scope": "Torch process intraop and current caller Numba thread mask",
+    "torch": {
+      "before": 4,
+      "effective": 4,
+      "interop_unchanged": 64,
+      "restored": 4
+    },
+    "numba": {
+      "before": 4,
+      "effective": 4,
+      "initial_capacity": 4,
+      "mask_only": true,
+      "threading_layer": "tbb",
+      "restored": 4
+    },
+    "environment_modified": false,
+    "restoration_complete": true
+  }
+}

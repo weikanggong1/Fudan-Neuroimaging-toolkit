@@ -1,0 +1,27 @@
+{
+  "scope": "local WSL fresh-process first thread context only; no MRI or GPU computation",
+  "tested_candidate_identity": "uncommitted working-tree snapshot, bound by module SHA256; not relabelled as a historical commit",
+  "code_snapshots": "exact frozen module files remain in the local diagnostic run; public reports retain both source SHA256 values",
+  "benchmark_script_sha256": "5584ccce5795c66e97062a7f75c30de52b431a997cf612636f497df94beec962",
+  "runtime": "same Python executable; new Python child per baseline/candidate; Numba OpenMP initial capacity 36; affinity 0..35",
+  "fixed_environment": {
+    "OMP_NUM_THREADS": "4",
+    "NUMBA_NUM_THREADS": null,
+    "CUDA_VISIBLE_DEVICES": "",
+    "OPENBLAS_NUM_THREADS": "4",
+    "MKL_NUM_THREADS": "4",
+    "NUMEXPR_NUM_THREADS": "4"
+  },
+  "tf32_and_interop_unchanged": true,
+  "first_initialization_reproduced": true,
+  "whole_pipeline_speedup": "not_measured",
+  "gpu_memory": "not_measured_no_CUDA_initialization",
+  "v1_history": "v1 completed locally with the same old/new module SHAs. v2 fixes the benchmark driver start/completion timestamp fields; the v1 receipt is not relabelled as v2.",
+  "payloads": {
+    "fresh_v2/baseline.json": "6a7bff126f81d507aed489abfc3d78f000255ef8907960c7e11485143455908e",
+    "fresh_v2/candidate.json": "b6a138713e08ce0b5e3219f2c0e55fb48cb2da25ccc342b9aca53ec2d0f38d49",
+    "fresh_v2/comparison.json": "fa613b919b69e1822344822d102304dd5c63d5242e555d20b0ae812c94d6c45f",
+    "fresh_v2/frozen_modules.json": "74ae5349c9e5708b0cd0059bfc1e135adbacccf8abc83c55640306af1bf45de8",
+    "fresh_v2/parent_contracts.json": "860235840a977606654485857f424d23bee5e4956db3b3a4da8a879f42081cdd"
+  }
+}

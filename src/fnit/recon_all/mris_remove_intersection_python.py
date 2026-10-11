@@ -1,12 +1,14 @@
-"""检测表面自相交；非零相交交由 Conda 源码构建的迭代修复程序处理。"""
+"""自有有向相交检测与完整SOAP清理文件接口，不执行原生程序。"""
 
 from __future__ import annotations
 
 import argparse
-import os
+import hashlib
+import json
 import shutil
-import subprocess
-import sys
+import struct
+import tempfile
+import time
 from pathlib import Path
 
 import nibabel.freesurfer as fs
@@ -90,12 +92,21 @@ def _triangles_intersect(v: np.ndarray, u: np.ndarray) -> bool:
     return iv[0] <= iu[1] and iu[0] <= iv[1]
 
 
-def mark_intersections(vertices: np.ndarray, faces: np.ndarray) -> tuple[np.ndarray, int]:
+def mark_intersections(vertices: np.ndarray, faces: np.ndarray, *,
+                       separation_backend: str = "python", device: str | None = None,
+                       chunk_size: int = 65536) -> tuple[np.ndarray, int]:
     """Return native-style marked vertices and intersecting face count.
 
     The bounding-sphere and axis-aligned box filters cannot discard a true
     triangle intersection. Faces sharing a vertex are excluded as in FreeSurfer.
+
+    separation_backend默认python，保留全部原逐对谓词；numba/torch用
+    F64误差区间排除确定平面分离的对，其余仍按原顺序执行原谓词。
+    torch要求显式cuda:N device，chunk_size是正整数分块预算；不改变
+    原候选球/盒筛选、1e-6平面容差、共面规则或返回的标记/面数。
     """
+    if separation_backend not in ("python", "numba", "torch"):
+        raise ValueError("separation_backend must be python, numba or torch")
     vertices = np.asarray(vertices, dtype=np.float64)
     faces = np.asarray(faces, dtype=np.int32)
     triangles = vertices[faces]
@@ -117,43 +128,154 @@ def mark_intersections(vertices: np.ndarray, faces: np.ndarray) -> tuple[np.ndar
     pairs = pairs[overlap]
     a, b = pairs.T
     disjoint = np.all(faces[a, :, None] != faces[b, None, :], axis=(1, 2))
+    pairs = pairs[disjoint]
+    if separation_backend != "python" and len(pairs):
+        from .topology_triangle_plane_filter import separated_triangle_pairs
+        keep = ~separated_triangle_pairs(triangles_a=triangles[pairs[:, 0]],
+            triangles_b=triangles[pairs[:, 1]], backend=separation_backend,
+            device=device, chunk_size=chunk_size)
+        pairs = pairs[keep]
     intersecting_faces = np.zeros(len(faces), dtype=bool)
-    for fa, fb in pairs[disjoint]:
+    for fa, fb in pairs:
         if _triangles_intersect(triangles[fa], triangles[fb]):
             intersecting_faces[fa] = intersecting_faces[fb] = True
     marks[faces[intersecting_faces].ravel()] = True
     return marks, int(intersecting_faces.sum())
 
 
-def remove_intersection_surface(input_path: str | Path, output_path: str | Path,
-                                *, binary: str | Path | None = None,
-                                assets_dir: str | Path | None = None) -> tuple[int, int]:
-    """写出修复表面；返回输入相交面数和受影响顶点数。"""
+def _write_preserving_surface(input_path: Path, output_path: Path, vertices: np.ndarray) -> None:
+    """只替换坐标字节，保留nibabel已读取的有序面、几何头和所有尾标记。"""
+    with input_path.open("rb") as stream:
+        if stream.read(3) != b"\xff\xff\xfe":
+            raise ValueError("expected FreeSurfer triangle surface")
+        stream.readline()
+        stream.readline()
+        counts = stream.read(8)
+        if len(counts) != 8:
+            raise ValueError("truncated triangle surface counts")
+        count, _ = struct.unpack(">ii", counts)
+        start = stream.tell()
+    if vertices.shape != (count, 3):
+        raise ValueError("intersection cleanup changed vertex count")
+    original = input_path.read_bytes()
+    if len(original) < start + 12 * count:
+        raise ValueError("truncated triangle surface coordinates")
+    output_path.write_bytes(original[:start] + np.asarray(vertices, dtype=">f4").tobytes()
+                            + original[start + 12 * count:])
+
+
+def run_remove_intersection(*, input_path: str | Path, output_path: str | Path,
+                            marking_backend: str = "source_numba", device: str | None = None,
+                            candidate_grid_cells_per_axis: int = 2, require_zero: bool = True,
+                            ordered_neighbor_offsets: np.ndarray | None = None,
+                            ordered_neighbors: np.ndarray | None = None,
+                            report_path: str | Path | None = None) -> dict:
+    """完整读取→自有有向标记→100次SOAP/轮→停止/复检→原子写出。
+
+    input_path/output_path为三角表面，可同路径；坐标为surface RAS/mm。
+    marking_backend默认source_numba，source_torch需明确device(cpu/cuda:N)，
+    都复用既有完整清理器；不调用原版C++。candidate_grid_cells_per_axis
+    默认2，3仅供source_torch完整候选；require_zero默认True，停滞残余
+    非零时抛RuntimeError并保留输入/已有输出。False仅供与原命令停止
+    语义诊断，不应绕过生产质量门。零相交保持源文件字节；修复只替换
+    坐标，不改变面/顶点编号、几何头或尾标记。report_path默认None，给出
+    写JSON；报告含输入/输出SHA、读/计算/写/总秒、完整清理轨迹与复检。
+    ordered_neighbor_offsets/ordered_neighbors默认同时None，完整保持既有
+    文件路径；压缩后源vt一环可显式给整数(N+1,)/(E,)CSR，两者须同时
+    传入并与文件顶点编号一致。按原序保留非面支持边，不从面重建，
+    非法CSR在写出前ValueError；不更改100SOAP、停滞或严格双重复检。
+    非法输入、索引、后端和CUDA失败传播，不静默回退、不降低精度。
+    """
+    if marking_backend not in {"source_numba", "source_torch"}:
+        raise ValueError("file repair requires source_numba or source_torch")
+    if not isinstance(require_zero, bool):
+        raise ValueError("require_zero must be bool")
+    from .place_surface_final_cleanup import repair_intersections
+    from .place_surface_intersection_marking import mark_source_intersections
+    input_path, output_path = Path(input_path), Path(output_path)
+    started = time.perf_counter()
+    input_sha256 = hashlib.sha256(input_path.read_bytes()).hexdigest()
     vertices, faces = fs.read_geometry(str(input_path))
-    marks, count = mark_intersections(vertices, faces)
-    if count:
-        executable = Path(binary or Path(sys.prefix) / "bin/mris_remove_intersection")
-        if not executable.is_file():
-            raise FileNotFoundError(f"intersection repair binary not found: {executable}")
-        output = Path(output_path)
-        temporary = output.with_name(output.name + ".fnit-intersection")
+    read_done = time.perf_counter()
+    corrected, diagnostics = repair_intersections(
+        vertices=vertices, faces=faces, ripped=np.zeros(len(vertices), dtype=bool),
+        marking_backend=marking_backend, device=device,
+        candidate_grid_cells_per_axis=candidate_grid_cells_per_axis,
+        ordered_neighbor_offsets=ordered_neighbor_offsets, ordered_neighbors=ordered_neighbors)
+    compute_done = time.perf_counter()
+    # 单独复检当前坐标；不能把旧标记缓存或停止计数代替最终质量检查。
+    _, remaining = mark_source_intersections(
+        vertices=corrected, faces=faces,
+        predicate_backend="torch" if marking_backend == "source_torch" else "numba",
+        device=device, candidate_grid_cells_per_axis=candidate_grid_cells_per_axis)
+    _, geometric_remaining = mark_intersections(corrected, faces)
+    report = {"scope": "complete_intersection_file_API_not_recon_all",
+              "input_path": str(input_path), "output_path": str(output_path),
+              "input_sha256": input_sha256, "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+              "vertices": len(vertices), "faces": len(faces), "coordinate_units": "surface_RAS_mm",
+              "marking_backend": marking_backend, "device": device,
+              "candidate_grid_cells_per_axis": candidate_grid_cells_per_axis,
+              "require_zero": require_zero, "cleanup": diagnostics,
+              "source_intersecting_faces_after_independent_recheck": remaining,
+              "geometric_intersecting_faces_after_independent_recheck": geometric_remaining,
+              "read_seconds": read_done - started, "compute_seconds": compute_done - read_done,
+              "recheck_seconds": time.perf_counter() - compute_done,
+              "native_program_called": False, "execution_status": "complete"}
+    if ordered_neighbor_offsets is not None:
+        report["ordered_neighbor_csr_sha256"] = {
+            "offsets": hashlib.sha256(np.asarray(ordered_neighbor_offsets, dtype=np.int32).tobytes()).hexdigest(),
+            "neighbors": hashlib.sha256(np.asarray(ordered_neighbors, dtype=np.int32).tobytes()).hexdigest()}
+    if require_zero and (remaining or geometric_remaining):
+        report.update(execution_status="failed", output_written=False,
+                      total_seconds_including_io=time.perf_counter() - started)
+        if report_path is not None:
+            Path(report_path).parent.mkdir(parents=True, exist_ok=True)
+            Path(report_path).write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n")
+        raise RuntimeError(f"intersection repair left {remaining} source / {geometric_remaining} geometric intersecting faces")
+    write_started = time.perf_counter()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    if np.array_equal(np.float32(vertices), corrected):
+        if input_path.resolve() != output_path.resolve():
+            shutil.copyfile(input_path, output_path)
+    else:
+        with tempfile.NamedTemporaryFile(prefix=output_path.name + ".fnit-intersection-",
+                                         dir=output_path.parent, delete=False) as stream:
+            temporary = Path(stream.name)
         try:
-            env = dict(os.environ)
-            if assets_dir is not None:
-                env["FREESURFER_HOME"] = str(Path(assets_dir).resolve())
-            subprocess.run([str(executable), str(input_path), str(temporary)],
-                           env=env, check=True)
-            corrected, corrected_faces = fs.read_geometry(str(temporary))
-            _, remaining = mark_intersections(corrected, corrected_faces)
-            if remaining:
-                raise RuntimeError(f"intersection repair left {remaining} intersecting faces")
-            temporary.replace(output)
+            _write_preserving_surface(input_path, temporary, corrected)
+            temporary.replace(output_path)
         finally:
             temporary.unlink(missing_ok=True)
-        return count, int(marks.sum())
-    if Path(input_path).resolve() != Path(output_path).resolve():
-        shutil.copyfile(input_path, output_path)
-    return count, int(marks.sum())
+    report.update(output_written=True, output_sha256=hashlib.sha256(output_path.read_bytes()).hexdigest(),
+                  write_seconds=time.perf_counter() - write_started,
+                  total_seconds_including_io=time.perf_counter() - started)
+    if report_path is not None:
+        Path(report_path).parent.mkdir(parents=True, exist_ok=True)
+        Path(report_path).write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n")
+    return report
+
+
+def remove_intersection_surface(input_path: str | Path, output_path: str | Path,
+                                *, binary: str | Path | None = None,
+                                assets_dir: str | Path | None = None,
+                                marking_backend: str = "source_numba", device: str | None = None,
+                                candidate_grid_cells_per_axis: int = 2,
+                                ordered_neighbor_offsets: np.ndarray | None = None,
+                                ordered_neighbors: np.ndarray | None = None,
+                                report_path: str | Path | None = None) -> tuple[int, int]:
+    """自有完整修复，返回输入相交面数/标记顶点数；非零残余报错。
+
+    路径/坐标/参数与run_remove_intersection相同；binary与assets_dir保留
+    旧调用兼容但不读取或执行，也不查找系统程序。详细轨迹可写report_path。
+    两项ordered neighbor CSR显式传递同完整接口，不改变既有None默认。
+    """
+    report = run_remove_intersection(input_path=input_path, output_path=output_path,
+                                   marking_backend=marking_backend, device=device,
+                                   candidate_grid_cells_per_axis=candidate_grid_cells_per_axis,
+                                   ordered_neighbor_offsets=ordered_neighbor_offsets,
+                                   ordered_neighbors=ordered_neighbors,
+                                   require_zero=True, report_path=report_path)
+    return report["cleanup"]["intersecting_faces_before"], report["cleanup"]["marked_vertices"]
 
 
 def main() -> None:
@@ -161,9 +283,16 @@ def main() -> None:
     parser.add_argument("input", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--binary", type=Path)
+    parser.add_argument("--marking-backend", choices=("source_numba", "source_torch"), default="source_numba")
+    parser.add_argument("--device")
+    parser.add_argument("--candidate-grid-cells-per-axis", type=int, default=2)
+    parser.add_argument("--report-path", type=Path)
     args = parser.parse_args()
     faces, vertices = remove_intersection_surface(args.input, args.output,
-                                                  binary=args.binary)
+                                                  binary=args.binary, marking_backend=args.marking_backend,
+                                                  device=args.device,
+                                                  candidate_grid_cells_per_axis=args.candidate_grid_cells_per_axis,
+                                                  report_path=args.report_path)
     print(f"Found {faces} intersecting faces; marked {vertices} vertices")
 
 

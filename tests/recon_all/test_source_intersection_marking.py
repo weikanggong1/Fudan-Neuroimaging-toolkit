@@ -30,6 +30,62 @@ def test_shared_vertex_is_excluded_before_predicate(crossing):
     assert count == 0 and not marked.any()
 
 
+def test_compiled_candidate_filter_preserves_order_and_exact_boundaries():
+    # fa=0；4mm边界保留，下一double排除；面冻结/共享顶点/桶不交各自排除。
+    centers = np.zeros((7, 3), np.float64)
+    centers[1, 0] = 4.
+    centers[2, 0] = np.nextafter(4., np.inf)
+    radii = np.zeros(7, np.float64)
+    faces = np.arange(21, dtype=np.int32).reshape(7, 3)
+    faces[4, 2] = faces[0, 0]
+    flags = np.zeros(7, bool)
+    flags[3] = True
+    lows = np.zeros((7, 3), np.int64)
+    highs = np.zeros((7, 3), np.int64)
+    lows[5, 0] = highs[5, 0] = 1
+    candidates = np.array([6, 1, 0, 2, 3, 4, 5], np.int64)
+    first, second = marking._candidate_pairs_from_csr(
+        centers, radii, lows, highs, faces, flags, 0,
+        np.array([0, 7], np.int64), candidates)
+    np.testing.assert_array_equal(first, [0, 0])
+    np.testing.assert_array_equal(second, [6, 1])
+
+
+def test_compiled_candidate_filter_respects_chunk_origin_and_empty_rows():
+    # CSR首行为空；实际查询面从3起，不能误按局部行号匹配共享顶点。
+    centers = np.zeros((6, 3), np.float64)
+    faces = np.arange(18, dtype=np.int32).reshape(6, 3)
+    radii = np.zeros(6, np.float64)
+    cells = np.zeros((6, 3), np.int64)
+    first, second = marking._candidate_pairs_from_csr(
+        centers, radii, cells, cells, faces, np.zeros(6, bool), 3,
+        np.array([0, 0, 2], np.int64), np.array([5, 2], np.int64))
+    np.testing.assert_array_equal(first, [4])
+    np.testing.assert_array_equal(second, [5])
+
+
+def test_compiled_radius_and_bucket_filter_matches_numpy_at_boundary():
+    # 同原NumPy的sum/<=判定比较：半径相等与±1ULP、整数桶接触和不交。
+    radii = np.array([.25, .125, .375, .5, .125, .375, .5], np.float64)
+    limit = radii[1:] + radii[0] + 4.
+    centers = np.zeros((7, 3), np.float64)
+    centers[1:, 0] = limit
+    centers[2, 0] = np.nextafter(centers[2, 0], np.inf)
+    centers[3, 0] = np.nextafter(centers[3, 0], 0.)
+    low = np.zeros((7, 3), np.int64)
+    high = np.ones((7, 3), np.int64)
+    low[4, 1] = high[4, 1] = 1  # exactly touching integer boundary
+    low[5, 1] = high[5, 1] = 2  # one whole bucket apart
+    order = np.array([6, 5, 4, 3, 2, 1], np.int64)
+    near = np.sum((centers[order]-centers[0])**2, axis=1) <= (radii[order]+radii[0]+4.)**2
+    overlap = np.all(low[0] <= high[order], axis=1) & np.all(low[order] <= high[0], axis=1)
+    first, second = marking._candidate_pairs_from_csr(
+        centers, radii, low, high, np.arange(21, dtype=np.int32).reshape(7, 3),
+        np.zeros(7, bool), 0, np.array([0, 6], np.int64), order)
+    np.testing.assert_array_equal(first, np.zeros(np.count_nonzero(near & overlap), np.int64))
+    np.testing.assert_array_equal(second, order[near & overlap])
+
+
 def test_explicit_smaller_complete_grid_preserves_source_rules(crossing):
     xyz,faces=crossing
     for flags in (None,np.array([True,False])):

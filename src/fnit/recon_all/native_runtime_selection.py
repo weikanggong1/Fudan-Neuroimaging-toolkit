@@ -8,7 +8,8 @@ import subprocess
 
 
 def select_native_optimizations(native_bin_dir: str | Path, *, threads: int,
-                                mode: str = "auto", device: str = "cpu") -> dict:
+                                mode: str = "auto", device: str = "cpu",
+                                include_white: bool = True) -> dict:
     """返回完整 GCA 后端与 white 专用程序的实际选择。
 
     native_bin_dir 为 FNIT Conda 程序目录，threads 为当前总线程预算；
@@ -19,7 +20,8 @@ def select_native_optimizations(native_bin_dir: str | Path, *, threads: int,
     返回 em_backend、white_binary、pial_binary、能力字典和选择原因；路径
     为绝对路径，程序哈希由主调度独立记录。没有独立官方命令；实际阶段
     仍运行完整 mri_em_register / mris_place_surface，空间与单位不变。
-    模式非法、线程非正、CUDA torch 模式无 CUDA 设备或已安装 white 快速程序能力不符时明确抛异常。
+    include_white默认True；False只选择GCA，不查询或执行white原生程序，
+    用于Python表面放置。模式非法、线程非正或已安装white能力不符时抛异常。
     旧 GCA 无能力入口时保持 original，不按文件名猜测缓存版本。
     """
     if mode not in ("auto", "original", "torch") or threads < 1:
@@ -57,7 +59,7 @@ def select_native_optimizations(native_bin_dir: str | Path, *, threads: int,
         if valid and threads == 4:
             result["em_backend"] = "cpu_cached"
     fast = directory / "mris_place_surface_white_fast"
-    if fast.exists():
+    if include_white and fast.exists():
         query = subprocess.run([str(fast), "--fnit-placement-capabilities"],
                                capture_output=True, text=True, timeout=30, check=True)
         capability = json.loads(query.stdout)

@@ -19,13 +19,21 @@ from .sphere_python import initial_scale, project_radially
 from .smooth_surface_python import ordered_neighbors
 
 
-def project_before_standard_unfold(vertices: np.ndarray) -> np.ndarray:
-    """Return the ordered vertices passed to native ``MRISunfold``.
+def project_before_standard_unfold(vertices: np.ndarray, *,
+                                   bbox_mode: str = "source_float") -> np.ndarray:
+    """返回标准球面优化前float32(N,3)有序坐标。
 
-    Source order: cap the input bounding-box span using ``MRISscaleBrain``,
-    then center and radially project to the default 100 mm sphere.
+    vertices为非空有限(N,3) surface RAS/mm。显式复用initial_scale的
+    bbox_mode='source_float'默认使用固定Conda编译单元的float跨度；
+    'legacy_integer'仅供历史截断规则对照。随后居中并投影到100mm球面。
+    返回不改顶点顺序的NumPy float32数组，不读写文件。非法shape/非有限
+    输入抛ValueError；原点投影沿已有project_radially零半径处理。
+    属于mris_sphere内部初始化，无独立CLI；真实相位检查点见说明页。
+    两组完整同输入逐步坐标与固定Conda参考一致；参考自产网格仍有
+    残余翻折，调用者必须另行检查质量，不能由一致性推断质量通过。
+    旧quick球面保留initial_scale默认legacy_integer，不受本调用影响。
     """
-    return project_radially(initial_scale(vertices))
+    return project_radially(initial_scale(vertices, bbox_mode=bbox_mode))
 
 
 

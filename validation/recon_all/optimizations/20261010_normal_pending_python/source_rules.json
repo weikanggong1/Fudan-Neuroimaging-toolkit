@@ -1,0 +1,38 @@
+{
+  "upstream_commit": "d932c45b7941662ea380a05efef580568b98d41a",
+  "scope": "fixed source semantic audit only; original CPP not built or published",
+  "files": {
+    "include/fnv_hash.h": {
+      "bytes": 1416,
+      "sha256": "f06423fb11ba1a45c7eab26e25465d254914ef71b51921a397b8bb562131f7e4",
+      "original_URL": "https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/include/fnv_hash.h"
+    },
+    "utils/mrisurf_metricProperties_slow.h": {
+      "bytes": 28766,
+      "sha256": "92c4017c0402b9e1bf502bfe032b04306f0956bb41532e980fad9288dd8171e1",
+      "original_URL": "https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/utils/mrisurf_metricProperties_slow.h"
+    },
+    "utils/mrisurf_metricProperties_fast.h": {
+      "bytes": 33786,
+      "sha256": "169530749aafbe1454b5de6202afc66af899cc32f1d95b22b20a01354e5c4a6a",
+      "original_URL": "https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/utils/mrisurf_metricProperties_fast.h"
+    },
+    "utils/mrisurf_metricProperties.cpp": {
+      "bytes": 393451,
+      "sha256": "458f896e7d2bdcbcdd7c9e73b2a396823d2015c723117d604bb06e3e8f27ba17",
+      "original_URL": "https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/utils/mrisurf_metricProperties.cpp"
+    }
+  },
+  "rules": {
+    "trials": "trial=0..4; fifth unresolved pass still moves coordinates, no sixth calculation",
+    "normal_success": "active incidence count==0 or normalized sum length>0",
+    "pending_order": "initial vertices ascending, next pending sorted",
+    "neighbor_updates": "failed vertex and ordered one-ring move sequentially; moved successful neighbors not reevaluated",
+    "plane_cut": "only failed vertex x/y moves; z/neighbors/face cache stay unchanged",
+    "face_cache": "initial ripped face marks all vertices border; active nonfullyripped face stores raw area cross; after3D jitter only failed-vertex incident active faces recomputed",
+    "original_area": "assigned only when stored origarea<0; successful area divide3 fix=true else2",
+    "FNV": "three uint32 trial/vertex/counter; little endian bytes, FNV1a lower32 bits, fixed \u00b10.001mm float32; counter resets perfailedvertex and continues into neighboraxis updates",
+    "unresolved": "source finishes after five rounds even if pending remains; return explicit unresolvedlist, no approximate repair",
+    "shared_geometry": "return coordinates and stale-by-source successful normals; caller must invalidate coordinate metrics and cannot replace only normal output"
+  }
+}

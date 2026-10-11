@@ -19,6 +19,7 @@ import torch
 from .mri_em_register_python import register_t1
 from .mri_em_register_score_gpu import GCASearchScorer
 from .profiling import configure_cuda_allocator, autocast_state
+from .worker_program_guard import inherit_original_stage_guard
 
 
 def _sha256(path: Path) -> str:
@@ -73,6 +74,7 @@ def run_isolated_registration(*, nu_path: Path, mask_path: Path, atlas_path: Pat
     return result
 
 
+@inherit_original_stage_guard
 def run_worker(*, nu_path: Path, mask_path: Path, atlas_path: Path,
                output_path: Path, report_path: Path, device: str = "cuda:0",
                threads: int = 4, candidate_chunk: int = 1024,
@@ -89,6 +91,8 @@ def run_worker(*, nu_path: Path, mask_path: Path, atlas_path: Path,
     及评分时间/候选数；allocated/reserved不是整个进程占用。
     内部计时含读入/传输/全部搜索/EM/输出，不含进程导入，完整CLI另计。
     输入/参数、CUDA或注册失败抛异常，不原生回退；原命令mri_em_register。
+    继承生产环境禁令时，在任何阶段调用前启用原程序守卫；返回和异常
+    均恢复守卫环境/作用域，不改变本阶段既有线程、TF32和注册参数。
     """
     if torch.cuda.is_initialized():
         raise ValueError("worker must be a fresh exec process before CUDA initialization")
@@ -146,7 +150,10 @@ def run_worker(*, nu_path: Path, mask_path: Path, atlas_path: Path,
         source_sha256={name: hashlib.sha256(Path(module.__file__).read_bytes()).hexdigest()
                        for name, module in (("worker", __import__(__name__, fromlist=["_"])),
                                             ("registration", __import__(register_t1.__module__, fromlist=["_"])),
-                                            ("scorer", __import__(GCASearchScorer.__module__, fromlist=["_"])))},
+                                            ("scorer", __import__(GCASearchScorer.__module__, fromlist=["_"])),
+                                            ("complete_em", __import__("fnit.recon_all.mri_em_register_complete", fromlist=["_"])),
+                                            ("objective_gradient", __import__("fnit.recon_all.mri_em_register_em_candidate", fromlist=["_"])),
+                                            ("GCA_preprocessing", __import__("fnit.recon_all.mri_em_register", fromlist=["_"])))},
         precision={"matmul_tf32": torch.backends.cuda.matmul.allow_tf32,
                    "cudnn_tf32": torch.backends.cudnn.allow_tf32,
                    "autocast": autocast_state("cuda"), "half_requested": False},
@@ -163,6 +170,7 @@ def run_worker(*, nu_path: Path, mask_path: Path, atlas_path: Path,
     return report
 
 
+@inherit_original_stage_guard
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("nu", "mask", "atlas", "output", "report"):

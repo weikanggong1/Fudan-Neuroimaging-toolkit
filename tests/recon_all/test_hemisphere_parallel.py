@@ -32,6 +32,16 @@ def execute(subject, hemi, device, threads, operation):
         time.sleep(30)
     if operation == 'undeclared':
         (subject / 'mri/shared-input.mgz').write_bytes(b'changed')
+    if operation == 'topology':
+        (subject / 'mri' / ('filled-topology-' + hemi + '.mgz')).write_bytes(hemi.encode())
+    if operation in ('genetic', 'genetic-cross-write'):
+        owner = ('rh' if hemi == 'lh' else 'lh') if operation == 'genetic-cross-write' else hemi
+        folder = subject / 'scripts' / (owner + '.topology.genetic')
+        (folder / 'states').mkdir(parents=True)
+        (folder / 'report.json').write_text(hemi)
+        (folder / 'states/report.json').write_text('state-' + hemi)
+        return dict(report=str(folder / 'report.json'), state=str(folder / 'states/report.json'),
+                    threads=threads)
     (subject / 'surf' / (hemi + '.white')).write_bytes(hemi.encode())
     (subject / 'mri/mrisps.white.mgz').write_bytes(hemi.encode())
     (subject / 'scripts/fixed.log').write_text(hemi)
@@ -63,6 +73,7 @@ class HemisphereParallelTests(unittest.TestCase):
     def test_real_exec_private_writes_and_right_overwrite(self):
         report = self.run_group()
         self.assertEqual(report['status'], 'complete')
+
         self.assertEqual((self.subject / 'mri/mrisps.white.mgz').read_bytes(), b'rh')
         self.assertEqual((self.subject / 'mri/shared-input.mgz').read_bytes(), b'original')
         self.assertEqual((self.subject / 'scripts/test.lh.fixed.log').read_text(), 'lh')
@@ -84,6 +95,15 @@ class HemisphereParallelTests(unittest.TestCase):
             self.assertTrue(child['operation_entered'])
         self.assertFalse(list((self.subject / 'scripts').glob('hemi-*')))
 
+    def test_digital_topology_volumes_publish_per_hemisphere_without_shared_overwrite(self):
+        report = self.run_group(operation='topology')
+        self.assertEqual(report['status'], 'complete')
+        for hemi in ('lh', 'rh'):
+            path = f'mri/filled-topology-{hemi}.mgz'
+            self.assertEqual((self.subject / path).read_bytes(), hemi.encode())
+            self.assertIn(path, report['published'])
+        self.assertEqual((self.subject / 'mri/shared-input.mgz').read_bytes(), b'original')
+
     def test_failure_cancels_sibling_and_does_not_publish(self):
         with self.assertRaises(HemisphereGroupError) as caught:
             self.run_group('failure')
@@ -95,6 +115,24 @@ class HemisphereParallelTests(unittest.TestCase):
         self.assertIn('intentional worker error', (self.subject / 'scripts/failure.lh.worker.log').read_text())
         for pid in report['device_process_tree']['worker_pids']:
             self.assertFalse(Path(f'/proc/{pid}').exists())
+
+    def test_genetic_receipts_retain_nested_paths_and_distinct_basenames(self):
+        report = self.run_group(operation='genetic')
+        self.assertEqual(report['status'], 'complete')
+        for hemi in ('lh', 'rh'):
+            root = self.subject / 'scripts' / f'{hemi}.topology.genetic'
+            self.assertEqual((root / 'report.json').read_text(), hemi)
+            self.assertEqual((root / 'states/report.json').read_text(), 'state-' + hemi)
+            self.assertEqual(report['values'][hemi]['report'], str(root / 'report.json'))
+            self.assertEqual(report['values'][hemi]['state'], str(root / 'states/report.json'))
+            self.assertEqual(report['values'][hemi]['threads'], 2)
+        self.assertFalse(list((self.subject / 'scripts').glob('hemi-*')))
+
+    def test_genetic_cross_hemisphere_writes_fail_before_publication(self):
+        with self.assertRaisesRegex(HemisphereGroupError, 'undeclared genetic topology write'):
+            self.run_group(operation='genetic-cross-write')
+        for hemi in ('lh', 'rh'):
+            self.assertFalse((self.subject / 'scripts' / f'{hemi}.topology.genetic').exists())
 
     def test_undeclared_shared_mutation_is_rejected_before_publish(self):
         with self.assertRaisesRegex(HemisphereGroupError, 'undeclared shared write'):
@@ -467,14 +505,16 @@ class HemisphereParallelTests(unittest.TestCase):
              patch('torch.cuda.is_initialized',return_value=False), \
              patch('subprocess.check_output',side_effect=[gpu_list,'155, '+complete+', 10\n']), \
              patch.object(ProcessTreeDeviceSampler,'_tree',return_value={155}):
-            sampler=ProcessTreeDeviceSampler(device='cuda:0',parent_pid=155)
+            sampler=ProcessTreeDeviceSampler(device='cuda:0',parent_pid=155,query_backend='nvidia-smi')
             sampler.sample_if_due(force=True)
         self.assertEqual(sampler.report()['target_gpu_uuid'],complete)
-        self.assertEqual(sampler.report()['peak_tree_total_bytes'],10*1024*1024)
+        # UUID 匹配不构成 PID namespace 映射证据。
+        self.assertIsNone(sampler.report()['peak_tree_total_bytes'])
+        self.assertEqual(sampler.report()['peak_target_compute_process_sum_bytes'],10*1024*1024)
         with patch.dict(os.environ,{'CUDA_VISIBLE_DEVICES':'GPU-'}), \
              patch('torch.cuda.is_initialized',return_value=False), \
              patch('subprocess.check_output',return_value=gpu_list):
-            sampler=ProcessTreeDeviceSampler(device='cuda:0',parent_pid=155)
+            sampler=ProcessTreeDeviceSampler(device='cuda:0',parent_pid=155,query_backend='nvidia-smi')
             sampler.sample_if_due(force=True)
         self.assertEqual(sampler.report()['status'],'unavailable')
         self.assertIsNone(sampler.report()['peak_tree_total_bytes'])

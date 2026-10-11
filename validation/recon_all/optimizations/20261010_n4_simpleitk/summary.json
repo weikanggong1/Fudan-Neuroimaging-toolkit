@@ -1,0 +1,511 @@
+{
+  "scope": "complete frozen same-input N4 array and file APIs; not raw-T1 continuous chain",
+  "strict_reproduction": "different: 28/99 uint8 voxels at half-rounding boundaries",
+  "overall_metric_equivalence": "not_assessed",
+  "continuous_prefix": "not_run_for_this_backend",
+  "memory_process_ownership": null,
+  "cases": {
+    "sub07": {
+      "array": {
+        "status": "complete",
+        "scope": "complete frozen same-input N4; not continuous recon-all",
+        "source_sha256": "713cec3c45edb17eec664dce2d939986a41481eae59c4575079c19f9e14e32e2",
+        "code_version": "54f681dcab210a22c2e6862b2854a7033b5a208d:N4-SimpleITK2.5.6-overlay",
+        "driver_sha256": "72543753741efa9a24c7ffc5f97c100bc97af489e79f04ff7fb48bfa3947726b",
+        "module_sha256": "185c0864e777796c828a6edf4d230375a8dd5953fc23ea44edf6c8c820bdc02a",
+        "reference_program_sha256": "5c6156bd2e05806dee387abea24050a4bbb92b16ea4988747ca1ddd60d9c437b",
+        "reference_source_sha256": "c281204beb21ba756257449c564c23a3f0efc0a15387b7d3527cf858042fca8f",
+        "threads": 4,
+        "host": "A100_BENCHMARK_HOST",
+        "cpu_affinity": [
+          24,
+          25,
+          26,
+          27
+        ],
+        "input_shape": [
+          256,
+          256,
+          256
+        ],
+        "input_dtype": "uint8",
+        "input_affine_mm": [
+          [
+            -1.0,
+            0.0,
+            2.3283064365386963e-10,
+            124.00959777832031
+          ],
+          [
+            2.3283064365386963e-10,
+            0.0,
+            0.9999999403953552,
+            -105.79763793945312
+          ],
+          [
+            0.0,
+            -1.0,
+            0.0,
+            101.8306655883789
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "comparisons": {
+          "float_python_vs_native": {
+            "different_voxels": 6416123,
+            "maximum_absolute_error": 6.103515625e-05,
+            "p99_absolute_error": 3.4332275390625e-05,
+            "mean_absolute_error": 2.0711561798947287e-06,
+            "actual_dtype": "float32",
+            "reference_dtype": "float32"
+          },
+          "uint8_python_vs_native": {
+            "different_voxels": 28,
+            "maximum_absolute_error": 1.0,
+            "p99_absolute_error": 0.0,
+            "mean_absolute_error": 1.6689300537109375e-06,
+            "actual_dtype": "uint8",
+            "reference_dtype": "uint8"
+          },
+          "native_repeated_float": {
+            "different_voxels": 0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "actual_dtype": "float32",
+            "reference_dtype": "float32"
+          },
+          "native_repeated_uint8": {
+            "different_voxels": 0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "actual_dtype": "uint8",
+            "reference_dtype": "uint8"
+          }
+        },
+        "native_0_seconds": 163.2296925485134,
+        "python_array_call_seconds_including_metadata": 181.94136800151318,
+        "python_detail": {
+          "backend": "SimpleITK Python complete fixed N4 recipe",
+          "used_native_programs": false,
+          "simpleitk_version": "2.5.6",
+          "itk_version": "5.4",
+          "library_sha256": "c25cd8cf7053c8224c246744e1f1bc9af12db0c95a8221b27e9546cc4511b62c",
+          "fitting_threads": 1,
+          "reconstruction_threads": 4,
+          "recipe": {
+            "shrink": [
+              4,
+              4,
+              4
+            ],
+            "iterations": [
+              50,
+              50,
+              50,
+              50
+            ],
+            "convergence_threshold": 0.0,
+            "spline_order": 3,
+            "initial_control_points": [
+              4,
+              4,
+              4
+            ],
+            "histogram_bins": 200,
+            "fwhm": 0.15,
+            "wiener_noise": 0.01,
+            "mask": "all ones",
+            "mask_label": 1
+          },
+          "internal_geometry": {
+            "origin_mm": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "direction": "identity",
+            "spacing_mm": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "current_level": 4,
+          "elapsed_last_level_iterations": 51,
+          "timing_parts_seconds": {
+            "array_prepare_and_shrink": 0.035267966799438,
+            "fitting": 180.69697773456573,
+            "full_bspline_reconstruction": 0.24920650385320187,
+            "exp_divide_and_array_download": 0.4108170662075281
+          },
+          "total_seconds": 181.3922692714259,
+          "restored_global_threads": 4,
+          "original_global_threads": 4
+        },
+        "python_float_sha256": "b11a48327b6a5e0a3497873e06964827118f46b108e7f9df2d38f72648b945e8",
+        "native_float_sha256": "c9323917afda537f3d7f4a37cf7c908b339ce61928d4af6a7817f366800c77dc",
+        "native_1_seconds": 163.80324406083673
+      },
+      "file": {
+        "status": "complete",
+        "scope": "full Python file N4 stage; not raw-T1 continuous reconstruction",
+        "code_version": "54f681dc:N4-SimpleITK-file-api-overlay",
+        "script_sha256": "5a4eed68af83bf2aa931c8b671bb16e53a79a51f8ad9b34594ac33332fdfc84f",
+        "module_sha256": "185c0864e777796c828a6edf4d230375a8dd5953fc23ea44edf6c8c820bdc02a",
+        "wrapper_sha256": "4756ac012390442d49d7a1b8537c21eaf0759793844a7be07c814ad04e83dbf4",
+        "input_chain_sha256": "cb3cff1cb7f7834365f77109bae71f970cc77cb88f4a354db86a98793eb1bea3",
+        "source_sha256": "713cec3c45edb17eec664dce2d939986a41481eae59c4575079c19f9e14e32e2",
+        "baseline_report_sha256": "54ae6f2873021144140645082ada411e0e03078e3d6326150fa65b5e5abc3e7e",
+        "output_sha256": "ded9a180eb41e9f25b7c5f237a0d422e8f43fde45f26c9e9a44281b721dce3a1",
+        "comparisons": {
+          "previous_python_quantized": {
+            "different_voxels": 0,
+            "maximum_absolute_error": 0,
+            "p99_absolute_error": 0.0,
+            "mean_absolute_error": 0.0
+          },
+          "native_quantized": {
+            "different_voxels": 28,
+            "maximum_absolute_error": 1,
+            "p99_absolute_error": 0.0,
+            "mean_absolute_error": 1.6689300537109375e-06
+          }
+        },
+        "geometry_exact": true,
+        "shape_exact": true,
+        "output_dtype": "uint8",
+        "detail": {
+          "backend": "simpleitk_python",
+          "used_native_programs": false,
+          "simpleitk_version": "2.5.6",
+          "itk_version": "5.4",
+          "library_sha256": "c25cd8cf7053c8224c246744e1f1bc9af12db0c95a8221b27e9546cc4511b62c",
+          "fitting_threads": 1,
+          "reconstruction_threads": 4,
+          "recipe": {
+            "shrink": [
+              4,
+              4,
+              4
+            ],
+            "iterations": [
+              50,
+              50,
+              50,
+              50
+            ],
+            "convergence_threshold": 0.0,
+            "spline_order": 3,
+            "initial_control_points": [
+              4,
+              4,
+              4
+            ],
+            "histogram_bins": 200,
+            "fwhm": 0.15,
+            "wiener_noise": 0.01,
+            "mask": "all ones",
+            "mask_label": 1
+          },
+          "internal_geometry": {
+            "origin_mm": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "direction": "identity",
+            "spacing_mm": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "current_level": 4,
+          "elapsed_last_level_iterations": 51,
+          "timing_parts_seconds": {
+            "array_prepare_and_shrink": 0.03618935402482748,
+            "fitting": 181.00951681565493,
+            "full_bspline_reconstruction": 0.29275704082101583,
+            "exp_divide_and_array_download": 0.24968024529516697
+          },
+          "total_seconds": 186.38168290816247,
+          "restored_global_threads": 4,
+          "original_global_threads": 4,
+          "array_stage_seconds": 181.58814345579594,
+          "file_io_included": true,
+          "output": "PRIVATE_FNIT/runs/recon_n4_python_file_api_20261010_v2/sub07/nu0.mgz",
+          "input_sha256": "713cec3c45edb17eec664dce2d939986a41481eae59c4575079c19f9e14e32e2",
+          "output_sha256": "ded9a180eb41e9f25b7c5f237a0d422e8f43fde45f26c9e9a44281b721dce3a1",
+          "implementation_sha256": "185c0864e777796c828a6edf4d230375a8dd5953fc23ea44edf6c8c820bdc02a",
+          "execution": "in-process",
+          "device": "cpu"
+        },
+        "threads": 4
+      }
+    },
+    "sub06": {
+      "array": {
+        "status": "complete",
+        "scope": "complete frozen same-input N4; not continuous recon-all",
+        "source_sha256": "04ce13b5b3a7a22ab94536e4fab89868e985ce435069f4517d5840aa202b95ea",
+        "code_version": "54f681dcab210a22c2e6862b2854a7033b5a208d:N4-SimpleITK2.5.6-overlay",
+        "driver_sha256": "72543753741efa9a24c7ffc5f97c100bc97af489e79f04ff7fb48bfa3947726b",
+        "module_sha256": "185c0864e777796c828a6edf4d230375a8dd5953fc23ea44edf6c8c820bdc02a",
+        "reference_program_sha256": "5c6156bd2e05806dee387abea24050a4bbb92b16ea4988747ca1ddd60d9c437b",
+        "reference_source_sha256": "c281204beb21ba756257449c564c23a3f0efc0a15387b7d3527cf858042fca8f",
+        "threads": 4,
+        "host": "A100_BENCHMARK_HOST",
+        "cpu_affinity": [
+          24,
+          25,
+          26,
+          27
+        ],
+        "input_shape": [
+          256,
+          256,
+          256
+        ],
+        "input_dtype": "uint8",
+        "input_affine_mm": [
+          [
+            -0.9999998807907104,
+            -3.725290298461914e-09,
+            -6.51925802230835e-09,
+            130.5413055419922
+          ],
+          [
+            5.005858838558197e-09,
+            -3.725290298461914e-09,
+            1.0,
+            -102.80550384521484
+          ],
+          [
+            -3.725290298461914e-09,
+            -0.9999999403953552,
+            -7.450580596923828e-09,
+            116.7668228149414
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "comparisons": {
+          "float_python_vs_native": {
+            "different_voxels": 8038768,
+            "maximum_absolute_error": 0.0001068115234375,
+            "p99_absolute_error": 4.57763671875e-05,
+            "mean_absolute_error": 5.373405022268685e-06,
+            "actual_dtype": "float32",
+            "reference_dtype": "float32"
+          },
+          "uint8_python_vs_native": {
+            "different_voxels": 99,
+            "maximum_absolute_error": 1.0,
+            "p99_absolute_error": 0.0,
+            "mean_absolute_error": 5.900859832763672e-06,
+            "actual_dtype": "uint8",
+            "reference_dtype": "uint8"
+          },
+          "native_repeated_float": {
+            "different_voxels": 0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "actual_dtype": "float32",
+            "reference_dtype": "float32"
+          },
+          "native_repeated_uint8": {
+            "different_voxels": 0,
+            "maximum_absolute_error": 0.0,
+            "p99_absolute_error": 0.0,
+            "mean_absolute_error": 0.0,
+            "actual_dtype": "uint8",
+            "reference_dtype": "uint8"
+          }
+        },
+        "native_0_seconds": 164.97464363556355,
+        "python_array_call_seconds_including_metadata": 181.1083045778796,
+        "python_detail": {
+          "backend": "SimpleITK Python complete fixed N4 recipe",
+          "used_native_programs": false,
+          "simpleitk_version": "2.5.6",
+          "itk_version": "5.4",
+          "library_sha256": "c25cd8cf7053c8224c246744e1f1bc9af12db0c95a8221b27e9546cc4511b62c",
+          "fitting_threads": 1,
+          "reconstruction_threads": 4,
+          "recipe": {
+            "shrink": [
+              4,
+              4,
+              4
+            ],
+            "iterations": [
+              50,
+              50,
+              50,
+              50
+            ],
+            "convergence_threshold": 0.0,
+            "spline_order": 3,
+            "initial_control_points": [
+              4,
+              4,
+              4
+            ],
+            "histogram_bins": 200,
+            "fwhm": 0.15,
+            "wiener_noise": 0.01,
+            "mask": "all ones",
+            "mask_label": 1
+          },
+          "internal_geometry": {
+            "origin_mm": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "direction": "identity",
+            "spacing_mm": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "current_level": 4,
+          "elapsed_last_level_iterations": 51,
+          "timing_parts_seconds": {
+            "array_prepare_and_shrink": 0.037648933939635754,
+            "fitting": 180.03074482269585,
+            "full_bspline_reconstruction": 0.3535117292776704,
+            "exp_divide_and_array_download": 0.206176970154047
+          },
+          "total_seconds": 180.6280824560672,
+          "restored_global_threads": 4,
+          "original_global_threads": 4
+        },
+        "python_float_sha256": "4fc5d7df2b7f32bbdb2472b6a8ef4bc87f107301c99bb38766f113094dc169c5",
+        "native_float_sha256": "4ab4b237b50fead268da0705bed6167ffbfc3a881bdc4c0a32461623a2344b43",
+        "native_1_seconds": 163.98216759134084
+      },
+      "file": {
+        "status": "complete",
+        "scope": "full Python file N4 stage; not raw-T1 continuous reconstruction",
+        "code_version": "54f681dc:N4-SimpleITK-file-api-overlay",
+        "script_sha256": "5a4eed68af83bf2aa931c8b671bb16e53a79a51f8ad9b34594ac33332fdfc84f",
+        "module_sha256": "185c0864e777796c828a6edf4d230375a8dd5953fc23ea44edf6c8c820bdc02a",
+        "wrapper_sha256": "4756ac012390442d49d7a1b8537c21eaf0759793844a7be07c814ad04e83dbf4",
+        "input_chain_sha256": "cb3cff1cb7f7834365f77109bae71f970cc77cb88f4a354db86a98793eb1bea3",
+        "source_sha256": "04ce13b5b3a7a22ab94536e4fab89868e985ce435069f4517d5840aa202b95ea",
+        "baseline_report_sha256": "fec246e6a224735cd1d603310e69b29899e324fee60e51c32e89bf43457a3cd2",
+        "output_sha256": "47eca291283f22b380285441ad8c6e8248a2bb6f3601d0dac83b5f317a5ec98f",
+        "comparisons": {
+          "previous_python_quantized": {
+            "different_voxels": 0,
+            "maximum_absolute_error": 0,
+            "p99_absolute_error": 0.0,
+            "mean_absolute_error": 0.0
+          },
+          "native_quantized": {
+            "different_voxels": 99,
+            "maximum_absolute_error": 1,
+            "p99_absolute_error": 0.0,
+            "mean_absolute_error": 5.900859832763672e-06
+          }
+        },
+        "geometry_exact": true,
+        "shape_exact": true,
+        "output_dtype": "uint8",
+        "detail": {
+          "backend": "simpleitk_python",
+          "used_native_programs": false,
+          "simpleitk_version": "2.5.6",
+          "itk_version": "5.4",
+          "library_sha256": "c25cd8cf7053c8224c246744e1f1bc9af12db0c95a8221b27e9546cc4511b62c",
+          "fitting_threads": 1,
+          "reconstruction_threads": 4,
+          "recipe": {
+            "shrink": [
+              4,
+              4,
+              4
+            ],
+            "iterations": [
+              50,
+              50,
+              50,
+              50
+            ],
+            "convergence_threshold": 0.0,
+            "spline_order": 3,
+            "initial_control_points": [
+              4,
+              4,
+              4
+            ],
+            "histogram_bins": 200,
+            "fwhm": 0.15,
+            "wiener_noise": 0.01,
+            "mask": "all ones",
+            "mask_label": 1
+          },
+          "internal_geometry": {
+            "origin_mm": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "direction": "identity",
+            "spacing_mm": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "current_level": 4,
+          "elapsed_last_level_iterations": 51,
+          "timing_parts_seconds": {
+            "array_prepare_and_shrink": 0.03593243006616831,
+            "fitting": 181.3224626602605,
+            "full_bspline_reconstruction": 0.24083533883094788,
+            "exp_divide_and_array_download": 0.22523948177695274
+          },
+          "total_seconds": 185.29012457095087,
+          "restored_global_threads": 4,
+          "original_global_threads": 4,
+          "array_stage_seconds": 181.82446991093457,
+          "file_io_included": true,
+          "output": "PRIVATE_FNIT/runs/recon_n4_python_file_api_20261010_v2/sub06/nu0.mgz",
+          "input_sha256": "04ce13b5b3a7a22ab94536e4fab89868e985ce435069f4517d5840aa202b95ea",
+          "output_sha256": "47eca291283f22b380285441ad8c6e8248a2bb6f3601d0dac83b5f317a5ec98f",
+          "implementation_sha256": "185c0864e777796c828a6edf4d230375a8dd5953fc23ea44edf6c8c820bdc02a",
+          "execution": "in-process",
+          "device": "cpu"
+        },
+        "threads": 4
+      }
+    }
+  },
+  "dependency": {
+    "files": [
+      {
+        "filename": "simpleitk-2.5.6-cp311-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+        "bytes": 52798369,
+        "sha256": "99242c333ed17138134e9749f3a484518f41baebab0fc0f0fe7c657ab8090c07"
+      }
+    ],
+    "package": "SimpleITK",
+    "version": "2.5.6",
+    "purpose": "declared generic Python-library dependency; no FS stage program"
+  }
+}

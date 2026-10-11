@@ -1,0 +1,1155 @@
+{
+  "scope": "four_completed_original_T1_to_filled_routes_only",
+  "producer_source_commit": "eab334f7",
+  "source_manifest_sha256": "96c2a5352f69e87d3fa432c1733e4cde2b903d40982decf677b6e1f4424631ca",
+  "overall_equivalence": "not_assessed",
+  "degradation": "not_assessed",
+  "own_simultaneous_GPU_20GB_gate": "not_assessed",
+  "nvml_attribution": "unmapped driver PIDs; own memory unknown, not zero",
+  "cases": {
+    "public_A": {
+      "simpleitk": {
+        "input_sha256": "7e33afb28f631fac31d81e2428a6144f61aba4102859c694eeb49ee584de04f7",
+        "n4_backend": "simpleitk",
+        "wall_seconds_including_spawn_import_load_IO": 671.384255672805,
+        "stages": [
+          {
+            "name": "input_talairach",
+            "seconds": 22.105924014933407
+          },
+          {
+            "name": "n4",
+            "seconds": 189.7259696153924
+          },
+          {
+            "name": "nu",
+            "seconds": 5.558034410700202
+          },
+          {
+            "name": "T1_normalize",
+            "seconds": 91.44379840511829
+          },
+          {
+            "name": "brainmask",
+            "seconds": 0.844441482797265
+          },
+          {
+            "name": "SynthSeg",
+            "seconds": 10.658201953396201
+          },
+          {
+            "name": "mri_em_register",
+            "seconds": 75.01647244393826
+          },
+          {
+            "name": "mri_ca_normalize",
+            "seconds": 34.56121853739023
+          },
+          {
+            "name": "mri_cc",
+            "seconds": 18.288506876677275
+          },
+          {
+            "name": "brain_second_normalize",
+            "seconds": 86.75482934433967
+          },
+          {
+            "name": "entowm",
+            "seconds": 1.4316010074689984
+          },
+          {
+            "name": "ants_denoise",
+            "seconds": 25.257843313738704
+          },
+          {
+            "name": "mri_segment",
+            "seconds": 43.432112325914204
+          },
+          {
+            "name": "mri_edit_wm_with_aseg",
+            "seconds": 22.70990110002458
+          },
+          {
+            "name": "wm_pretess",
+            "seconds": 8.599657270126045
+          },
+          {
+            "name": "wm_fix_ento",
+            "seconds": 1.445778476074338
+          },
+          {
+            "name": "wm_fix_acj",
+            "seconds": 1.6896086493507028
+          },
+          {
+            "name": "mri_fill",
+            "seconds": 19.83160605840385
+          },
+          {
+            "name": "filled_auto_checkpoint",
+            "seconds": 0.0014375923201441765
+          }
+        ],
+        "source_sha256": {
+          "volume_prefix_python.py": "ebbb8163c6641f4c1a92001dccebaf82c00d1c43430ded6089a6953c48ea6b42",
+          "n4_simpleitk.py": "06435c4277a0a64a535646d76d1240482ed768199188b072d4716f7cc0b681e0",
+          "n4_itk_torch_experimental.py": "fdc7731ecc7c98546d23fa90d970cf87664a39bc22fdfdbfae498ae5d0867a8b",
+          "mri_em_register_complete.py": "b615bd519325623c6ed67cef48ebb8a0cbbed91834f64534dd786a76b9c6e936",
+          "mri_em_register_python.py": "f6283e2d35e6d24ff0124999fe7ecc32ecc4bb18c1788219bc895029d4d4e3a7",
+          "mri_em_register_em_candidate.py": "82c0944824066a39f67c9319a1170a79106dd2599e0fee927c5dd973a311c264"
+        },
+        "benchmark_source_sha256": "cda85e372e201393854cddcc128ba0c3787b05e7797313d5f058081868280d04",
+        "cpu_affinity": [
+          96,
+          97,
+          98,
+          99
+        ],
+        "resources": {
+          "synthstrip.1.pt": {
+            "size": 30851709,
+            "sha256": "37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33"
+          },
+          "synthmorph.affine.2.h5": {
+            "size": 51455312,
+            "sha256": "1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6"
+          },
+          "synthseg_2.0.h5": {
+            "size": 53079152,
+            "sha256": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e"
+          },
+          "synthseg_segmentation_labels_2.0.npy": {
+            "size": 348,
+            "sha256": "5ef25ec33fe917ac99f30b8f2185b2d77121136ee411b9c4970c0b59be615ed8"
+          },
+          "synthseg_segmentation_names_2.0.npy": {
+            "size": 7168,
+            "sha256": "234eb6d514e10d6ebd748a8b30a1d12d9426fd874c607e37852406fae8f290fc"
+          },
+          "synthseg_topological_classes_2.0.npy": {
+            "size": 348,
+            "sha256": "650b4b96834485c1e6d7421de4af74da80d861e6b2a39ef1164389bde3a5e14a"
+          },
+          "entowm.fsm31.t1.nstd00-30.nstd21-108.h5": {
+            "size": 3296904,
+            "sha256": "9be55798498331f655acd75d4f0cd5036463e0f497bbb239be0167d6a9129a07"
+          },
+          "entowm.ctab": {
+            "size": 318,
+            "sha256": "fa46a74e7c5385b6e474553acbb34f536dac640c52586ec4193a0ea9739948f1"
+          },
+          "average/mni305.cor.stripped.mgz": {
+            "size": 1342430,
+            "sha256": "fff93f13255a8d393c0e787fbfcfaf5eb379e88e955bda7e04e31552568878a4"
+          },
+          "average/RB_all_2020-01-02.gca": {
+            "size": 71651552,
+            "sha256": "2fcd276a39800f01f93a4c8828ae6d0a8cea3d8b8b9fe1599d4ee54e806be93e"
+          },
+          "FreeSurferColorLUT.txt": {
+            "size": 116487,
+            "sha256": "da55c6a47d316ee16d2609afd5c93cb8078e08e7e3afec5bb6283027d7c33e7b"
+          },
+          "SubCorticalMassLUT.txt": {
+            "size": 281,
+            "sha256": "65957c41244153d6614aeaf08c16ee956c09e2c8b5e198aa64c81946f75e93b6"
+          }
+        },
+        "torch_peak_allocated_bytes": 13072251904,
+        "torch_peak_reserved_bytes": 17611882496,
+        "precision": {
+          "entry_matmul_tf32": true,
+          "entry_cudnn_tf32": true,
+          "autocast": false,
+          "SynthSeg": {
+            "requested_cudnn_tf32": false,
+            "forwards": [
+              {
+                "pass": "original",
+                "device": "cuda:0",
+                "matmul_tf32": true,
+                "cudnn_tf32": false,
+                "input_dtype": "torch.float32",
+                "model_dtypes": [
+                  "torch.float32"
+                ],
+                "autocast": {
+                  "cpu": {
+                    "enabled": false,
+                    "dtype": "torch.bfloat16"
+                  },
+                  "cuda": {
+                    "enabled": false,
+                    "dtype": "torch.float16"
+                  }
+                },
+                "output_dtype": "torch.float32"
+              },
+              {
+                "pass": "flipped",
+                "device": "cuda:0",
+                "matmul_tf32": true,
+                "cudnn_tf32": false,
+                "input_dtype": "torch.float32",
+                "model_dtypes": [
+                  "torch.float32"
+                ],
+                "autocast": {
+                  "cpu": {
+                    "enabled": false,
+                    "dtype": "torch.bfloat16"
+                  },
+                  "cuda": {
+                    "enabled": false,
+                    "dtype": "torch.float16"
+                  }
+                },
+                "output_dtype": "torch.float32"
+              }
+            ],
+            "posterior_buffer_reused": true,
+            "posterior_ensemble_dtype": "torch.float32"
+          },
+          "EntoWM": [
+            {
+              "model": "entowm.fsm31.t1.nstd00-30.nstd21-108.h5",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "model_devices": [
+                "cuda:0"
+              ],
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cudnn_enabled": true,
+              "cudnn_benchmark": false,
+              "cudnn_deterministic": false,
+              "autocast": {
+                "enabled": false,
+                "dtype": "torch.float16"
+              }
+            }
+          ]
+        },
+        "dependencies": {
+          "backend": "simpleitk",
+          "required": true,
+          "simpleitk_version": "2.5.6",
+          "itk_version": "5.4",
+          "library_sha256": "c25cd8cf7053c8224c246744e1f1bc9af12db0c95a8221b27e9546cc4511b62c"
+        },
+        "execution_complete": true,
+        "completed_stages": 19,
+        "completed_private_receipt_sha256": "e5da7bbc4f1f4ee1f41dc0ac4796d2d275184cfb87fad4928a472047dc0ba6e6",
+        "input_models_actual_forwards": [
+          {
+            "model": "SynthStrip",
+            "device": "cuda:0",
+            "input_dtype": "torch.float32",
+            "model_devices": [
+              "cuda:0"
+            ],
+            "model_dtypes": [
+              "torch.float32"
+            ],
+            "matmul_tf32": true,
+            "cudnn_tf32": false,
+            "cudnn_enabled": true,
+            "cudnn_benchmark": false,
+            "cudnn_deterministic": true,
+            "autocast": {
+              "enabled": false,
+              "dtype": "torch.float16"
+            }
+          }
+        ],
+        "talairach_child_gpu": {
+          "device": "cuda:0",
+          "actual_forwards": [
+            {
+              "model": "affine",
+              "compute_inverse": true,
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "model_devices": [
+                "cuda:0"
+              ],
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "matmul_tf32": false,
+              "cudnn_tf32": false,
+              "cudnn_enabled": true,
+              "cudnn_benchmark": true,
+              "cudnn_deterministic": true,
+              "autocast": {
+                "enabled": false,
+                "dtype": "torch.float16"
+              }
+            }
+          ],
+          "gpu_peak_allocated_bytes": 4690513920,
+          "gpu_peak_reserved_bytes": 7168065536
+        },
+        "audit_scope": "precision/allocator metadata recovered from completed immutable typed receipts; algorithms not rerun"
+      },
+      "torch": {
+        "input_sha256": "7e33afb28f631fac31d81e2428a6144f61aba4102859c694eeb49ee584de04f7",
+        "n4_backend": "torch",
+        "wall_seconds_including_spawn_import_load_IO": 469.66136014834046,
+        "stages": [
+          {
+            "name": "input_talairach",
+            "seconds": 20.11631539557129
+          },
+          {
+            "name": "n4",
+            "seconds": 2.815873828716576
+          },
+          {
+            "name": "nu",
+            "seconds": 5.677949242293835
+          },
+          {
+            "name": "T1_normalize",
+            "seconds": 78.69322173949331
+          },
+          {
+            "name": "brainmask",
+            "seconds": 0.8698415691033006
+          },
+          {
+            "name": "SynthSeg",
+            "seconds": 8.43538326304406
+          },
+          {
+            "name": "mri_em_register",
+            "seconds": 72.94859514199197
+          },
+          {
+            "name": "mri_ca_normalize",
+            "seconds": 35.79993119649589
+          },
+          {
+            "name": "mri_cc",
+            "seconds": 20.57743182312697
+          },
+          {
+            "name": "brain_second_normalize",
+            "seconds": 93.09820772800595
+          },
+          {
+            "name": "entowm",
+            "seconds": 1.283892828039825
+          },
+          {
+            "name": "ants_denoise",
+            "seconds": 24.467552345246077
+          },
+          {
+            "name": "mri_segment",
+            "seconds": 47.29770901519805
+          },
+          {
+            "name": "mri_edit_wm_with_aseg",
+            "seconds": 18.02967284154147
+          },
+          {
+            "name": "wm_pretess",
+            "seconds": 8.98993282392621
+          },
+          {
+            "name": "wm_fix_ento",
+            "seconds": 1.8627879209816456
+          },
+          {
+            "name": "wm_fix_acj",
+            "seconds": 2.0923336185514927
+          },
+          {
+            "name": "mri_fill",
+            "seconds": 14.544618514366448
+          },
+          {
+            "name": "filled_auto_checkpoint",
+            "seconds": 0.0020816614851355553
+          }
+        ],
+        "source_sha256": {
+          "volume_prefix_python.py": "ebbb8163c6641f4c1a92001dccebaf82c00d1c43430ded6089a6953c48ea6b42",
+          "n4_simpleitk.py": "06435c4277a0a64a535646d76d1240482ed768199188b072d4716f7cc0b681e0",
+          "n4_itk_torch_experimental.py": "fdc7731ecc7c98546d23fa90d970cf87664a39bc22fdfdbfae498ae5d0867a8b",
+          "mri_em_register_complete.py": "b615bd519325623c6ed67cef48ebb8a0cbbed91834f64534dd786a76b9c6e936",
+          "mri_em_register_python.py": "f6283e2d35e6d24ff0124999fe7ecc32ecc4bb18c1788219bc895029d4d4e3a7",
+          "mri_em_register_em_candidate.py": "82c0944824066a39f67c9319a1170a79106dd2599e0fee927c5dd973a311c264"
+        },
+        "benchmark_source_sha256": "cda85e372e201393854cddcc128ba0c3787b05e7797313d5f058081868280d04",
+        "cpu_affinity": [
+          96,
+          97,
+          98,
+          99
+        ],
+        "resources": {
+          "synthstrip.1.pt": {
+            "size": 30851709,
+            "sha256": "37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33"
+          },
+          "synthmorph.affine.2.h5": {
+            "size": 51455312,
+            "sha256": "1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6"
+          },
+          "synthseg_2.0.h5": {
+            "size": 53079152,
+            "sha256": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e"
+          },
+          "synthseg_segmentation_labels_2.0.npy": {
+            "size": 348,
+            "sha256": "5ef25ec33fe917ac99f30b8f2185b2d77121136ee411b9c4970c0b59be615ed8"
+          },
+          "synthseg_segmentation_names_2.0.npy": {
+            "size": 7168,
+            "sha256": "234eb6d514e10d6ebd748a8b30a1d12d9426fd874c607e37852406fae8f290fc"
+          },
+          "synthseg_topological_classes_2.0.npy": {
+            "size": 348,
+            "sha256": "650b4b96834485c1e6d7421de4af74da80d861e6b2a39ef1164389bde3a5e14a"
+          },
+          "entowm.fsm31.t1.nstd00-30.nstd21-108.h5": {
+            "size": 3296904,
+            "sha256": "9be55798498331f655acd75d4f0cd5036463e0f497bbb239be0167d6a9129a07"
+          },
+          "entowm.ctab": {
+            "size": 318,
+            "sha256": "fa46a74e7c5385b6e474553acbb34f536dac640c52586ec4193a0ea9739948f1"
+          },
+          "average/mni305.cor.stripped.mgz": {
+            "size": 1342430,
+            "sha256": "fff93f13255a8d393c0e787fbfcfaf5eb379e88e955bda7e04e31552568878a4"
+          },
+          "average/RB_all_2020-01-02.gca": {
+            "size": 71651552,
+            "sha256": "2fcd276a39800f01f93a4c8828ae6d0a8cea3d8b8b9fe1599d4ee54e806be93e"
+          },
+          "FreeSurferColorLUT.txt": {
+            "size": 116487,
+            "sha256": "da55c6a47d316ee16d2609afd5c93cb8078e08e7e3afec5bb6283027d7c33e7b"
+          },
+          "SubCorticalMassLUT.txt": {
+            "size": 281,
+            "sha256": "65957c41244153d6614aeaf08c16ee956c09e2c8b5e198aa64c81946f75e93b6"
+          }
+        },
+        "torch_peak_allocated_bytes": 13072251904,
+        "torch_peak_reserved_bytes": 17643339776,
+        "precision": {
+          "entry_matmul_tf32": true,
+          "entry_cudnn_tf32": true,
+          "autocast": false,
+          "SynthSeg": {
+            "requested_cudnn_tf32": false,
+            "forwards": [
+              {
+                "pass": "original",
+                "device": "cuda:0",
+                "matmul_tf32": true,
+                "cudnn_tf32": false,
+                "input_dtype": "torch.float32",
+                "model_dtypes": [
+                  "torch.float32"
+                ],
+                "autocast": {
+                  "cpu": {
+                    "enabled": false,
+                    "dtype": "torch.bfloat16"
+                  },
+                  "cuda": {
+                    "enabled": false,
+                    "dtype": "torch.float16"
+                  }
+                },
+                "output_dtype": "torch.float32"
+              },
+              {
+                "pass": "flipped",
+                "device": "cuda:0",
+                "matmul_tf32": true,
+                "cudnn_tf32": false,
+                "input_dtype": "torch.float32",
+                "model_dtypes": [
+                  "torch.float32"
+                ],
+                "autocast": {
+                  "cpu": {
+                    "enabled": false,
+                    "dtype": "torch.bfloat16"
+                  },
+                  "cuda": {
+                    "enabled": false,
+                    "dtype": "torch.float16"
+                  }
+                },
+                "output_dtype": "torch.float32"
+              }
+            ],
+            "posterior_buffer_reused": true,
+            "posterior_ensemble_dtype": "torch.float32"
+          },
+          "EntoWM": [
+            {
+              "model": "entowm.fsm31.t1.nstd00-30.nstd21-108.h5",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "model_devices": [
+                "cuda:0"
+              ],
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cudnn_enabled": true,
+              "cudnn_benchmark": false,
+              "cudnn_deterministic": false,
+              "autocast": {
+                "enabled": false,
+                "dtype": "torch.float16"
+              }
+            }
+          ]
+        },
+        "dependencies": {
+          "backend": "torch"
+        },
+        "execution_complete": true,
+        "completed_stages": 19,
+        "completed_private_receipt_sha256": "64696c92515bfe4e33cc433c14327021d259ca8e11c45261195da39a3748361b",
+        "input_models_actual_forwards": [
+          {
+            "model": "SynthStrip",
+            "device": "cuda:0",
+            "input_dtype": "torch.float32",
+            "model_devices": [
+              "cuda:0"
+            ],
+            "model_dtypes": [
+              "torch.float32"
+            ],
+            "matmul_tf32": true,
+            "cudnn_tf32": false,
+            "cudnn_enabled": true,
+            "cudnn_benchmark": false,
+            "cudnn_deterministic": true,
+            "autocast": {
+              "enabled": false,
+              "dtype": "torch.float16"
+            }
+          }
+        ],
+        "talairach_child_gpu": {
+          "device": "cuda:0",
+          "actual_forwards": [
+            {
+              "model": "affine",
+              "compute_inverse": true,
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "model_devices": [
+                "cuda:0"
+              ],
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "matmul_tf32": false,
+              "cudnn_tf32": false,
+              "cudnn_enabled": true,
+              "cudnn_benchmark": true,
+              "cudnn_deterministic": true,
+              "autocast": {
+                "enabled": false,
+                "dtype": "torch.float16"
+              }
+            }
+          ],
+          "gpu_peak_allocated_bytes": 4690513920,
+          "gpu_peak_reserved_bytes": 7168065536
+        },
+        "audit_scope": "precision/allocator metadata recovered from completed immutable typed receipts; algorithms not rerun"
+      }
+    },
+    "public_B": {
+      "simpleitk": {
+        "input_sha256": "59ef7bed60d4db64d56d947ebed2ef62a9257c26fe879848fe24d10a490f74fc",
+        "n4_backend": "simpleitk",
+        "wall_seconds_including_spawn_import_load_IO": 560.6340617677197,
+        "stages": [
+          {
+            "name": "input_talairach",
+            "seconds": 19.24893542006612
+          },
+          {
+            "name": "n4",
+            "seconds": 187.72334910742939
+          },
+          {
+            "name": "nu",
+            "seconds": 4.880161363631487
+          },
+          {
+            "name": "T1_normalize",
+            "seconds": 55.46387080196291
+          },
+          {
+            "name": "brainmask",
+            "seconds": 0.7197557995095849
+          },
+          {
+            "name": "SynthSeg",
+            "seconds": 5.570823594927788
+          },
+          {
+            "name": "mri_em_register",
+            "seconds": 71.86368903424591
+          },
+          {
+            "name": "mri_ca_normalize",
+            "seconds": 27.864624836482108
+          },
+          {
+            "name": "mri_cc",
+            "seconds": 10.519038066267967
+          },
+          {
+            "name": "brain_second_normalize",
+            "seconds": 74.42220107745379
+          },
+          {
+            "name": "entowm",
+            "seconds": 1.2565099885687232
+          },
+          {
+            "name": "ants_denoise",
+            "seconds": 18.779798639938235
+          },
+          {
+            "name": "mri_segment",
+            "seconds": 31.89596482180059
+          },
+          {
+            "name": "mri_edit_wm_with_aseg",
+            "seconds": 14.433602144010365
+          },
+          {
+            "name": "wm_pretess",
+            "seconds": 6.991251328960061
+          },
+          {
+            "name": "wm_fix_ento",
+            "seconds": 1.5561587186530232
+          },
+          {
+            "name": "wm_fix_acj",
+            "seconds": 1.7381627960130572
+          },
+          {
+            "name": "mri_fill",
+            "seconds": 12.278214088641107
+          },
+          {
+            "name": "filled_auto_checkpoint",
+            "seconds": 0.0011210152879357338
+          }
+        ],
+        "source_sha256": {
+          "volume_prefix_python.py": "ebbb8163c6641f4c1a92001dccebaf82c00d1c43430ded6089a6953c48ea6b42",
+          "n4_simpleitk.py": "06435c4277a0a64a535646d76d1240482ed768199188b072d4716f7cc0b681e0",
+          "n4_itk_torch_experimental.py": "fdc7731ecc7c98546d23fa90d970cf87664a39bc22fdfdbfae498ae5d0867a8b",
+          "mri_em_register_complete.py": "b615bd519325623c6ed67cef48ebb8a0cbbed91834f64534dd786a76b9c6e936",
+          "mri_em_register_python.py": "f6283e2d35e6d24ff0124999fe7ecc32ecc4bb18c1788219bc895029d4d4e3a7",
+          "mri_em_register_em_candidate.py": "82c0944824066a39f67c9319a1170a79106dd2599e0fee927c5dd973a311c264"
+        },
+        "benchmark_source_sha256": "cda85e372e201393854cddcc128ba0c3787b05e7797313d5f058081868280d04",
+        "cpu_affinity": [
+          96,
+          97,
+          98,
+          99
+        ],
+        "resources": {
+          "synthstrip.1.pt": {
+            "size": 30851709,
+            "sha256": "37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33"
+          },
+          "synthmorph.affine.2.h5": {
+            "size": 51455312,
+            "sha256": "1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6"
+          },
+          "synthseg_2.0.h5": {
+            "size": 53079152,
+            "sha256": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e"
+          },
+          "synthseg_segmentation_labels_2.0.npy": {
+            "size": 348,
+            "sha256": "5ef25ec33fe917ac99f30b8f2185b2d77121136ee411b9c4970c0b59be615ed8"
+          },
+          "synthseg_segmentation_names_2.0.npy": {
+            "size": 7168,
+            "sha256": "234eb6d514e10d6ebd748a8b30a1d12d9426fd874c607e37852406fae8f290fc"
+          },
+          "synthseg_topological_classes_2.0.npy": {
+            "size": 348,
+            "sha256": "650b4b96834485c1e6d7421de4af74da80d861e6b2a39ef1164389bde3a5e14a"
+          },
+          "entowm.fsm31.t1.nstd00-30.nstd21-108.h5": {
+            "size": 3296904,
+            "sha256": "9be55798498331f655acd75d4f0cd5036463e0f497bbb239be0167d6a9129a07"
+          },
+          "entowm.ctab": {
+            "size": 318,
+            "sha256": "fa46a74e7c5385b6e474553acbb34f536dac640c52586ec4193a0ea9739948f1"
+          },
+          "average/mni305.cor.stripped.mgz": {
+            "size": 1342430,
+            "sha256": "fff93f13255a8d393c0e787fbfcfaf5eb379e88e955bda7e04e31552568878a4"
+          },
+          "average/RB_all_2020-01-02.gca": {
+            "size": 71651552,
+            "sha256": "2fcd276a39800f01f93a4c8828ae6d0a8cea3d8b8b9fe1599d4ee54e806be93e"
+          },
+          "FreeSurferColorLUT.txt": {
+            "size": 116487,
+            "sha256": "da55c6a47d316ee16d2609afd5c93cb8078e08e7e3afec5bb6283027d7c33e7b"
+          },
+          "SubCorticalMassLUT.txt": {
+            "size": 281,
+            "sha256": "65957c41244153d6614aeaf08c16ee956c09e2c8b5e198aa64c81946f75e93b6"
+          }
+        },
+        "torch_peak_allocated_bytes": 13072251904,
+        "torch_peak_reserved_bytes": 18685624320,
+        "precision": {
+          "entry_matmul_tf32": true,
+          "entry_cudnn_tf32": true,
+          "autocast": false,
+          "SynthSeg": {
+            "requested_cudnn_tf32": false,
+            "forwards": [
+              {
+                "pass": "original",
+                "device": "cuda:0",
+                "matmul_tf32": true,
+                "cudnn_tf32": false,
+                "input_dtype": "torch.float32",
+                "model_dtypes": [
+                  "torch.float32"
+                ],
+                "autocast": {
+                  "cpu": {
+                    "enabled": false,
+                    "dtype": "torch.bfloat16"
+                  },
+                  "cuda": {
+                    "enabled": false,
+                    "dtype": "torch.float16"
+                  }
+                },
+                "output_dtype": "torch.float32"
+              },
+              {
+                "pass": "flipped",
+                "device": "cuda:0",
+                "matmul_tf32": true,
+                "cudnn_tf32": false,
+                "input_dtype": "torch.float32",
+                "model_dtypes": [
+                  "torch.float32"
+                ],
+                "autocast": {
+                  "cpu": {
+                    "enabled": false,
+                    "dtype": "torch.bfloat16"
+                  },
+                  "cuda": {
+                    "enabled": false,
+                    "dtype": "torch.float16"
+                  }
+                },
+                "output_dtype": "torch.float32"
+              }
+            ],
+            "posterior_buffer_reused": true,
+            "posterior_ensemble_dtype": "torch.float32"
+          },
+          "EntoWM": [
+            {
+              "model": "entowm.fsm31.t1.nstd00-30.nstd21-108.h5",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "model_devices": [
+                "cuda:0"
+              ],
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cudnn_enabled": true,
+              "cudnn_benchmark": false,
+              "cudnn_deterministic": false,
+              "autocast": {
+                "enabled": false,
+                "dtype": "torch.float16"
+              }
+            }
+          ]
+        },
+        "dependencies": {
+          "backend": "simpleitk",
+          "required": true,
+          "simpleitk_version": "2.5.6",
+          "itk_version": "5.4",
+          "library_sha256": "c25cd8cf7053c8224c246744e1f1bc9af12db0c95a8221b27e9546cc4511b62c"
+        },
+        "execution_complete": true,
+        "completed_stages": 19,
+        "completed_private_receipt_sha256": "e9e25099d1ad728f54febc2a1bbc3d8f7057cbdad2df5133f928c2e0219e9f01",
+        "input_models_actual_forwards": [
+          {
+            "model": "SynthStrip",
+            "device": "cuda:0",
+            "input_dtype": "torch.float32",
+            "model_devices": [
+              "cuda:0"
+            ],
+            "model_dtypes": [
+              "torch.float32"
+            ],
+            "matmul_tf32": true,
+            "cudnn_tf32": false,
+            "cudnn_enabled": true,
+            "cudnn_benchmark": false,
+            "cudnn_deterministic": true,
+            "autocast": {
+              "enabled": false,
+              "dtype": "torch.float16"
+            }
+          }
+        ],
+        "talairach_child_gpu": {
+          "device": "cuda:0",
+          "actual_forwards": [
+            {
+              "model": "affine",
+              "compute_inverse": true,
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "model_devices": [
+                "cuda:0"
+              ],
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "matmul_tf32": false,
+              "cudnn_tf32": false,
+              "cudnn_enabled": true,
+              "cudnn_benchmark": true,
+              "cudnn_deterministic": true,
+              "autocast": {
+                "enabled": false,
+                "dtype": "torch.float16"
+              }
+            }
+          ],
+          "gpu_peak_allocated_bytes": 4690513920,
+          "gpu_peak_reserved_bytes": 7168065536
+        },
+        "audit_scope": "precision/allocator metadata recovered from completed immutable typed receipts; algorithms not rerun"
+      },
+      "torch": {
+        "input_sha256": "59ef7bed60d4db64d56d947ebed2ef62a9257c26fe879848fe24d10a490f74fc",
+        "n4_backend": "torch",
+        "wall_seconds_including_spawn_import_load_IO": 365.82563494332135,
+        "stages": [
+          {
+            "name": "input_talairach",
+            "seconds": 18.84797076229006
+          },
+          {
+            "name": "n4",
+            "seconds": 2.222620066255331
+          },
+          {
+            "name": "nu",
+            "seconds": 4.973656139336526
+          },
+          {
+            "name": "T1_normalize",
+            "seconds": 55.56610823981464
+          },
+          {
+            "name": "brainmask",
+            "seconds": 0.7014640318229795
+          },
+          {
+            "name": "SynthSeg",
+            "seconds": 6.999411053955555
+          },
+          {
+            "name": "mri_em_register",
+            "seconds": 72.02932080160826
+          },
+          {
+            "name": "mri_ca_normalize",
+            "seconds": 29.21256021875888
+          },
+          {
+            "name": "mri_cc",
+            "seconds": 10.459212897345424
+          },
+          {
+            "name": "brain_second_normalize",
+            "seconds": 73.48949633911252
+          },
+          {
+            "name": "entowm",
+            "seconds": 1.1130218151956797
+          },
+          {
+            "name": "ants_denoise",
+            "seconds": 17.191123406402767
+          },
+          {
+            "name": "mri_segment",
+            "seconds": 29.753585008904338
+          },
+          {
+            "name": "mri_edit_wm_with_aseg",
+            "seconds": 11.594362201169133
+          },
+          {
+            "name": "wm_pretess",
+            "seconds": 6.58152068592608
+          },
+          {
+            "name": "wm_fix_ento",
+            "seconds": 1.2964376024901867
+          },
+          {
+            "name": "wm_fix_acj",
+            "seconds": 1.5015285843983293
+          },
+          {
+            "name": "mri_fill",
+            "seconds": 10.892404198646545
+          },
+          {
+            "name": "filled_auto_checkpoint",
+            "seconds": 0.0033033937215805054
+          }
+        ],
+        "source_sha256": {
+          "volume_prefix_python.py": "ebbb8163c6641f4c1a92001dccebaf82c00d1c43430ded6089a6953c48ea6b42",
+          "n4_simpleitk.py": "06435c4277a0a64a535646d76d1240482ed768199188b072d4716f7cc0b681e0",
+          "n4_itk_torch_experimental.py": "fdc7731ecc7c98546d23fa90d970cf87664a39bc22fdfdbfae498ae5d0867a8b",
+          "mri_em_register_complete.py": "b615bd519325623c6ed67cef48ebb8a0cbbed91834f64534dd786a76b9c6e936",
+          "mri_em_register_python.py": "f6283e2d35e6d24ff0124999fe7ecc32ecc4bb18c1788219bc895029d4d4e3a7",
+          "mri_em_register_em_candidate.py": "82c0944824066a39f67c9319a1170a79106dd2599e0fee927c5dd973a311c264"
+        },
+        "benchmark_source_sha256": "cda85e372e201393854cddcc128ba0c3787b05e7797313d5f058081868280d04",
+        "cpu_affinity": [
+          96,
+          97,
+          98,
+          99
+        ],
+        "resources": {
+          "synthstrip.1.pt": {
+            "size": 30851709,
+            "sha256": "37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33"
+          },
+          "synthmorph.affine.2.h5": {
+            "size": 51455312,
+            "sha256": "1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6"
+          },
+          "synthseg_2.0.h5": {
+            "size": 53079152,
+            "sha256": "f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e"
+          },
+          "synthseg_segmentation_labels_2.0.npy": {
+            "size": 348,
+            "sha256": "5ef25ec33fe917ac99f30b8f2185b2d77121136ee411b9c4970c0b59be615ed8"
+          },
+          "synthseg_segmentation_names_2.0.npy": {
+            "size": 7168,
+            "sha256": "234eb6d514e10d6ebd748a8b30a1d12d9426fd874c607e37852406fae8f290fc"
+          },
+          "synthseg_topological_classes_2.0.npy": {
+            "size": 348,
+            "sha256": "650b4b96834485c1e6d7421de4af74da80d861e6b2a39ef1164389bde3a5e14a"
+          },
+          "entowm.fsm31.t1.nstd00-30.nstd21-108.h5": {
+            "size": 3296904,
+            "sha256": "9be55798498331f655acd75d4f0cd5036463e0f497bbb239be0167d6a9129a07"
+          },
+          "entowm.ctab": {
+            "size": 318,
+            "sha256": "fa46a74e7c5385b6e474553acbb34f536dac640c52586ec4193a0ea9739948f1"
+          },
+          "average/mni305.cor.stripped.mgz": {
+            "size": 1342430,
+            "sha256": "fff93f13255a8d393c0e787fbfcfaf5eb379e88e955bda7e04e31552568878a4"
+          },
+          "average/RB_all_2020-01-02.gca": {
+            "size": 71651552,
+            "sha256": "2fcd276a39800f01f93a4c8828ae6d0a8cea3d8b8b9fe1599d4ee54e806be93e"
+          },
+          "FreeSurferColorLUT.txt": {
+            "size": 116487,
+            "sha256": "da55c6a47d316ee16d2609afd5c93cb8078e08e7e3afec5bb6283027d7c33e7b"
+          },
+          "SubCorticalMassLUT.txt": {
+            "size": 281,
+            "sha256": "65957c41244153d6614aeaf08c16ee956c09e2c8b5e198aa64c81946f75e93b6"
+          }
+        },
+        "torch_peak_allocated_bytes": 13072251904,
+        "torch_peak_reserved_bytes": 18717081600,
+        "precision": {
+          "entry_matmul_tf32": true,
+          "entry_cudnn_tf32": true,
+          "autocast": false,
+          "SynthSeg": {
+            "requested_cudnn_tf32": false,
+            "forwards": [
+              {
+                "pass": "original",
+                "device": "cuda:0",
+                "matmul_tf32": true,
+                "cudnn_tf32": false,
+                "input_dtype": "torch.float32",
+                "model_dtypes": [
+                  "torch.float32"
+                ],
+                "autocast": {
+                  "cpu": {
+                    "enabled": false,
+                    "dtype": "torch.bfloat16"
+                  },
+                  "cuda": {
+                    "enabled": false,
+                    "dtype": "torch.float16"
+                  }
+                },
+                "output_dtype": "torch.float32"
+              },
+              {
+                "pass": "flipped",
+                "device": "cuda:0",
+                "matmul_tf32": true,
+                "cudnn_tf32": false,
+                "input_dtype": "torch.float32",
+                "model_dtypes": [
+                  "torch.float32"
+                ],
+                "autocast": {
+                  "cpu": {
+                    "enabled": false,
+                    "dtype": "torch.bfloat16"
+                  },
+                  "cuda": {
+                    "enabled": false,
+                    "dtype": "torch.float16"
+                  }
+                },
+                "output_dtype": "torch.float32"
+              }
+            ],
+            "posterior_buffer_reused": true,
+            "posterior_ensemble_dtype": "torch.float32"
+          },
+          "EntoWM": [
+            {
+              "model": "entowm.fsm31.t1.nstd00-30.nstd21-108.h5",
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "model_devices": [
+                "cuda:0"
+              ],
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "matmul_tf32": true,
+              "cudnn_tf32": false,
+              "cudnn_enabled": true,
+              "cudnn_benchmark": false,
+              "cudnn_deterministic": false,
+              "autocast": {
+                "enabled": false,
+                "dtype": "torch.float16"
+              }
+            }
+          ]
+        },
+        "dependencies": {
+          "backend": "torch"
+        },
+        "execution_complete": true,
+        "completed_stages": 19,
+        "completed_private_receipt_sha256": "45a57ae4e46daca84932ed291726d76a6c2902fd9dd2a09c40ced7737c25c227",
+        "input_models_actual_forwards": [
+          {
+            "model": "SynthStrip",
+            "device": "cuda:0",
+            "input_dtype": "torch.float32",
+            "model_devices": [
+              "cuda:0"
+            ],
+            "model_dtypes": [
+              "torch.float32"
+            ],
+            "matmul_tf32": true,
+            "cudnn_tf32": false,
+            "cudnn_enabled": true,
+            "cudnn_benchmark": false,
+            "cudnn_deterministic": true,
+            "autocast": {
+              "enabled": false,
+              "dtype": "torch.float16"
+            }
+          }
+        ],
+        "talairach_child_gpu": {
+          "device": "cuda:0",
+          "actual_forwards": [
+            {
+              "model": "affine",
+              "compute_inverse": true,
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "model_devices": [
+                "cuda:0"
+              ],
+              "model_dtypes": [
+                "torch.float32"
+              ],
+              "matmul_tf32": false,
+              "cudnn_tf32": false,
+              "cudnn_enabled": true,
+              "cudnn_benchmark": true,
+              "cudnn_deterministic": true,
+              "autocast": {
+                "enabled": false,
+                "dtype": "torch.float16"
+              }
+            }
+          ],
+          "gpu_peak_allocated_bytes": 4690513920,
+          "gpu_peak_reserved_bytes": 7168065536
+        },
+        "audit_scope": "precision/allocator metadata recovered from completed immutable typed receipts; algorithms not rerun"
+      }
+    }
+  }
+}

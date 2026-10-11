@@ -21,11 +21,14 @@ def _to_uchar(values: np.ndarray) -> np.ndarray:
 
 
 def correct_volume(input_file: str | Path, output_file: str | Path,
-                   *, binary: str | Path, reconstruction_threads: int = 1,
-                   profile_path: str | Path | None = None) -> None:
+                   *, binary: str | Path | None = None, reconstruction_threads: int = 1,
+                   profile_path: str | Path | None = None,
+                   backend: str = "native") -> dict | None:
     """Conda ITK N4：3D MGH/MGZ→同网格uint8 nu0，RAS/mm不变。
 
-    binary为源码构建程序；拟合固定1线程，reconstruction_threads默认1，
+    backend默认native：binary为源码构建程序。显式simpleitk复用独立
+    Python完整N4 API，不使用binary、不调用FS程序，返回带版本与SHA的
+    报告。两路径拟合固定1线程，reconstruction_threads默认1，
     正整数只控制全分辨率空间重建。profile_path=None；指定时记录实际子段。
     旧二进制不支持新参数时仍使用原单线程，并如实记录；不改变拟合参数。
     输入/程序缺失、非法线程、维度或字节数错误抛异常；程序失败传播异常。
@@ -33,6 +36,14 @@ def correct_volume(input_file: str | Path, output_file: str | Path,
     """
     if isinstance(reconstruction_threads, bool) or not isinstance(reconstruction_threads, int) or reconstruction_threads < 1:
         raise ValueError("reconstruction_threads must be a positive integer")
+    if backend == "simpleitk":
+        from .n4_simpleitk import correct_volume as correct_python
+        return correct_python(input_file=input_file, output_file=output_file,
+            reconstruction_threads=reconstruction_threads, profile_path=profile_path)
+    if backend != "native":
+        raise ValueError("N4 backend must be native or simpleitk")
+    if binary is None:
+        raise ValueError("native N4 backend requires binary")
     executable = Path(binary).resolve()
     if not executable.is_file() or not os.access(executable, os.X_OK):
         raise FileNotFoundError(f"N4 executable not found: {executable}")
@@ -83,11 +94,12 @@ def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--i", required=True, dest="input_file")
     parser.add_argument("--o", required=True, dest="output_file")
-    parser.add_argument("--binary", required=True)
+    parser.add_argument("--binary")
+    parser.add_argument("--backend", choices=("native", "simpleitk"), default="native")
     parser.add_argument("--reconstruction-threads", type=int, default=1)
     parser.add_argument("--profile", dest="profile_path")
     args = parser.parse_args(argv)
-    correct_volume(args.input_file, args.output_file, binary=args.binary,
+    correct_volume(args.input_file, args.output_file, binary=args.binary, backend=args.backend,
                    reconstruction_threads=args.reconstruction_threads, profile_path=args.profile_path)
 
 

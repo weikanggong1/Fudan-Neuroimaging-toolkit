@@ -1,0 +1,344 @@
+{
+  "scope": "local focused contracts, not MRI benchmark",
+  "git_base": "66a9be092d78922bdb4eb1db992f57442aad1475",
+  "source_sha256": {
+    "src/fnit/recon_all/profiling.py": "17b12fdc4e72736f64dc2834ea34a282bc726513599e8045b63d0f9eeccc5c7e",
+    "src/fnit/recon_all/nvml_process_memory.py": "1879606b4af4c10e088cff3c665255511dee872da91d4a9c8b2b1cb07550b348",
+    "src/fnit/recon_all/hemisphere_parallel.py": "cdf9dce7a00dbaee1b991f99bfd754d07bfcd94918182f946f4bac6ac7efa1b3",
+    "tests/recon_all/test_nvml_process_memory.py": "1c22402e90869c49f1c4f422aec9e8e269652f7f66ea70ac99188ad153cd8c18",
+    "tests/recon_all/test_profiling.py": "d0f6a1ca2667c8e9a323cbf7d79558cdeff7052c2bf1dc55d1265030b6ab96a2",
+    "tests/recon_all/test_process_memory_namespace.py": "f1cf3b14b37a7e6b04147ec34a860b86129c55009b708ca4eafec168e2e899f8",
+    "tests/recon_all/test_hemisphere_parallel.py": "04a2a7f3b344951864fa952a43817148a794ce04e00565df4bbb39ada5bdfb8d"
+  },
+  "command": "PYTHONPATH=/tmp/fnit-python-libs-20261010:src OMP_NUM_THREADS=4 NUMBA_CACHE_DIR=/tmp/fnit-root-numba-20261010 python -m pytest tests/recon_all/test_nvml_process_memory.py tests/recon_all/test_profiling.py tests/recon_all/test_process_memory_namespace.py tests/recon_all/test_hemisphere_parallel.py",
+  "counts": {
+    "tests": 64,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "time": 46.899
+  },
+  "raw_junit_sha256": "203dab396951375020ce577d9275d51f7d02baf10ef27776d85e5c5036e36fe6",
+  "cases": [
+    {
+      "name": "test_byte_units_handle_cache_and_balanced_close",
+      "class": "tests.recon_all.test_nvml_process_memory",
+      "seconds": 0.002
+    },
+    {
+      "name": "test_unavailable_process_bytes_raise_instead_of_zero[None]",
+      "class": "tests.recon_all.test_nvml_process_memory",
+      "seconds": 0.006
+    },
+    {
+      "name": "test_unavailable_process_bytes_raise_instead_of_zero[-1]",
+      "class": "tests.recon_all.test_nvml_process_memory",
+      "seconds": 0.005
+    },
+    {
+      "name": "test_unavailable_process_bytes_raise_instead_of_zero[18446744073709551615]",
+      "class": "tests.recon_all.test_nvml_process_memory",
+      "seconds": 0.002
+    },
+    {
+      "name": "test_device_failure_keeps_valid_process_bytes_and_error",
+      "class": "tests.recon_all.test_nvml_process_memory",
+      "seconds": 0.004
+    },
+    {
+      "name": "test_failed_init_does_not_shutdown_another_instances_reference",
+      "class": "tests.recon_all.test_nvml_process_memory",
+      "seconds": 0.003
+    },
+    {
+      "name": "test_auto_nvml_selects_logical_gpu_and_keeps_exact_bytes",
+      "class": "tests.recon_all.test_nvml_process_memory",
+      "seconds": 0.004
+    },
+    {
+      "name": "test_auto_fallback_is_explicit_and_uses_same_uuid[init]",
+      "class": "tests.recon_all.test_nvml_process_memory",
+      "seconds": 0.002
+    },
+    {
+      "name": "test_auto_fallback_is_explicit_and_uses_same_uuid[devices]",
+      "class": "tests.recon_all.test_nvml_process_memory",
+      "seconds": 0.002
+    },
+    {
+      "name": "test_auto_fallback_is_explicit_and_uses_same_uuid[snapshot]",
+      "class": "tests.recon_all.test_nvml_process_memory",
+      "seconds": 0.002
+    },
+    {
+      "name": "test_forced_nvml_error_never_silently_switches_backend",
+      "class": "tests.recon_all.test_nvml_process_memory",
+      "seconds": 0.002
+    },
+    {
+      "name": "test_nvml_invisible_host_pid_remains_unknown",
+      "class": "tests.recon_all.test_nvml_process_memory",
+      "seconds": 0.002
+    },
+    {
+      "name": "test_cpu_sampler_is_lazy_and_does_not_load_nvml",
+      "class": "tests.recon_all.test_nvml_process_memory",
+      "seconds": 0.001
+    },
+    {
+      "name": "test_initialized_cuda_uuid_overrides_changed_environment",
+      "class": "tests.recon_all.test_nvml_process_memory",
+      "seconds": 0.002
+    },
+    {
+      "name": "test_production_does_not_synchronize_or_reset",
+      "class": "tests.recon_all.test_profiling",
+      "seconds": 0.002
+    },
+    {
+      "name": "test_profile_targets_requested_device_and_records_function_exception",
+      "class": "tests.recon_all.test_profiling",
+      "seconds": 0.001
+    },
+    {
+      "name": "test_initialized_allocator_is_preserved_and_not_inferred_from_late_environment",
+      "class": "tests.recon_all.test_profiling",
+      "seconds": 0.001
+    },
+    {
+      "name": "test_allocator_selection_before_context",
+      "class": "tests.recon_all.test_profiling",
+      "seconds": 0.001
+    },
+    {
+      "name": "test_existing_allocator_environment_is_presence_based[1]",
+      "class": "tests.recon_all.test_profiling",
+      "seconds": 0.001
+    },
+    {
+      "name": "test_existing_allocator_environment_is_presence_based[0]",
+      "class": "tests.recon_all.test_profiling",
+      "seconds": 0.001
+    },
+    {
+      "name": "test_existing_allocator_environment_is_presence_based[]",
+      "class": "tests.recon_all.test_profiling",
+      "seconds": 0.001
+    },
+    {
+      "name": "test_failed_presynchronization_records_current_stage_and_preserves_error",
+      "class": "tests.recon_all.test_profiling",
+      "seconds": 0.001
+    },
+    {
+      "name": "test_forward_records_actual_cudnn_backend_without_changing_policy[False-False-False]",
+      "class": "tests.recon_all.test_profiling",
+      "seconds": 0.003
+    },
+    {
+      "name": "test_forward_records_actual_cudnn_backend_without_changing_policy[True-False-True]",
+      "class": "tests.recon_all.test_profiling",
+      "seconds": 0.001
+    },
+    {
+      "name": "test_forward_records_actual_cudnn_backend_without_changing_policy[True-True-True]",
+      "class": "tests.recon_all.test_profiling",
+      "seconds": 0.001
+    },
+    {
+      "name": "test_invisible_host_pid_is_unknown_instead_of_zero",
+      "class": "tests.recon_all.test_process_memory_namespace",
+      "seconds": 0.002
+    },
+    {
+      "name": "test_declared_namespace_alias_matches_local_child",
+      "class": "tests.recon_all.test_process_memory_namespace",
+      "seconds": 0.002
+    },
+    {
+      "name": "test_known_external_load_is_separate",
+      "class": "tests.recon_all.test_process_memory_namespace",
+      "seconds": 0.005
+    },
+    {
+      "name": "test_device_busy_but_process_query_empty_is_unknown",
+      "class": "tests.recon_all.test_process_memory_namespace",
+      "seconds": 0.003
+    },
+    {
+      "name": "test_empty_device_and_empty_process_query_are_observed_zero",
+      "class": "tests.recon_all.test_process_memory_namespace",
+      "seconds": 0.003
+    },
+    {
+      "name": "test_visible_external_pid_does_not_prove_empty_parent_is_zero",
+      "class": "tests.recon_all.test_process_memory_namespace",
+      "seconds": 0.002
+    },
+    {
+      "name": "test_allocator_inherits_presence_semantics",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 3.105
+    },
+    {
+      "name": "test_bootstrap_failure_records_phase_without_cuda_queries",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 0.046
+    },
+    {
+      "name": "test_cancel_ended_leader_reaps_live_own_grandchild_only",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 3.45
+    },
+    {
+      "name": "test_cleanup_error_preserves_original_worker_failure",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 2.708
+    },
+    {
+      "name": "test_cleanup_failure_cannot_remain_complete",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 2.675
+    },
+    {
+      "name": "test_cli_opt_in",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 0.013
+    },
+    {
+      "name": "test_cpu_and_zero_wait_disable_resource_retry",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 0.088
+    },
+    {
+      "name": "test_cuda_current_device_is_fixed_without_unneeded_initialization",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 0.005
+    },
+    {
+      "name": "test_digital_topology_volumes_publish_per_hemisphere_without_shared_overwrite",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 2.567
+    },
+    {
+      "name": "test_explicit_worker_cache_never_changes_parent_environment",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 2.806
+    },
+    {
+      "name": "test_failure_cancels_sibling_and_does_not_publish",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 2.684
+    },
+    {
+      "name": "test_idle_cache_release_never_initializes_cpu_or_fresh_cuda",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 0.004
+    },
+    {
+      "name": "test_idle_cache_release_records_live_and_reserved_separately",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 0.012
+    },
+    {
+      "name": "test_interrupt_during_ready_wait_cancels_active_workers",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 0.043
+    },
+    {
+      "name": "test_intervals_do_not_sum_into_wall",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 0.005
+    },
+    {
+      "name": "test_invalid_resource_budget",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 0.008
+    },
+    {
+      "name": "test_invalid_startup_wait",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 0.008
+    },
+    {
+      "name": "test_invalid_worker_cache_is_rejected_before_private_outputs",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 0.006
+    },
+    {
+      "name": "test_metadata_publication_failure_marks_report_failed",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 2.75
+    },
+    {
+      "name": "test_missing_report_is_never_retried",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 0.066
+    },
+    {
+      "name": "test_missing_worker_report_retains_both_requests",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 0.054
+    },
+    {
+      "name": "test_non_bootstrap_phases_do_not_retry_even_if_oom",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 0.177
+    },
+    {
+      "name": "test_operation_or_post_sync_oom_is_never_retried",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 0.074
+    },
+    {
+      "name": "test_parallel_final_placement_defers_gpu_maps",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 0.029
+    },
+    {
+      "name": "test_pre_go_oom_restarts_only_failed_side_and_function_runs_once",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 2.136
+    },
+    {
+      "name": "test_ready_wait_exits_on_deadline_or_parent_death_even_with_go",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 0.011
+    },
+    {
+      "name": "test_real_exec_private_writes_and_right_overwrite",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 2.609
+    },
+    {
+      "name": "test_real_runtime_message_in_bootstrap_worker_report",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 0.012
+    },
+    {
+      "name": "test_real_runtime_oom_message_and_host_oom_classification",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 0.007
+    },
+    {
+      "name": "test_serial_exec_uses_four_threads_and_no_overlap",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 5.399
+    },
+    {
+      "name": "test_short_gpu_uuid_is_canonicalized_and_unknown_is_unavailable",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 0.014
+    },
+    {
+      "name": "test_startup_timeout_cancels_without_entering_function",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 0.093
+    },
+    {
+      "name": "test_undeclared_shared_mutation_is_rejected_before_publish",
+      "class": "tests.recon_all.test_hemisphere_parallel.HemisphereParallelTests",
+      "seconds": 2.655
+    }
+  ]
+}

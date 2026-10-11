@@ -1,0 +1,108 @@
+{
+  "scope": "two fresh independent fixed Conda source reference processes, first EDGE scoring only; intentional stop before GA",
+  "reference_program_sha256": "c3bb6b744f3d3ebcc0bbaf6a79b4266eb712ea51a113b06157456b560654fde6",
+  "reference_capture_source_sha256": "afdc475fd9e1e42d6bb570361cc7a19f0cec9baa79a39d92a6a7afdf3cc4239a",
+  "reference_capture_library_sha256": "3868dad9c7d2193b5c38d56b2cc482296c2acfbc392ddd2f6bfdbe96cb49cdcf",
+  "compiler_command": [
+    "[PRIVATE_FNIT]/envs/recon_main_20261009_v3/bin/x86_64-conda-linux-gnu-cc",
+    "-shared",
+    "-fPIC",
+    "-O2",
+    "[PRIVATE_FNIT]/workspaces/recon_topology_source_mri_edges_20261010_v2/validation/recon_all/python_gpu_port/topology_capture_edges.c",
+    "-o",
+    "[PRIVATE_FNIT]/workspaces/recon_topology_source_mri_edges_20261010_v2/edge_capture.so",
+    "-ldl"
+  ],
+  "compiler_identity": "x86_64-conda-linux-gnu-cc (conda-forge gcc 11.4.0-13) 11.4.0",
+  "preflight": {
+    "input": "[PRIVATE_FNIT]/workspaces/recon_topology_source_mri_edges_20261010_v2/input/subject/surf/lh.qsphere.nofix",
+    "output": "[PRIVATE_FNIT]/workspaces/recon_topology_source_mri_edges_20261010_v2/input/subject/surf/lh.topology-centered.sphere",
+    "vertices": 110534,
+    "faces": 221116,
+    "iterations": 10,
+    "seconds": 8.666192406788468
+  },
+  "centered_sha256": "72e0094518dd360feec3ccec4c4ce61e96c8ed30b41610c13d45a8438bac1969",
+  "references": [
+    {
+      "exit_code": 0,
+      "wall_seconds": 5.38008005078882,
+      "command": [
+        "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/native/bin/mris_fix_topology_fnit",
+        "-threads",
+        "4",
+        "-mgz",
+        "-sphere",
+        "qsphere.nofix",
+        "-inflated",
+        "inflated.nofix",
+        "-orig",
+        "orig.nofix",
+        "-out",
+        "diagnostic.orig.premesh",
+        "-ga",
+        "-seed",
+        "1234",
+        "-threads",
+        "4",
+        "subject",
+        "lh"
+      ],
+      "sha256": {
+        "edges.before.bin": "260f617fa79d310d709d75207108c638bbd6e4823db79920c752c425ac1a3b1e",
+        "edges.after.bin": "1f0f3dfd8912d8d2b2ff07e77008061eadf4404d92ab69a84e3686f2ea57310e"
+      },
+      "log_sha256": "5c2e2e18b51b79b145027b2008d69bf9997190333afa980ed349ec1f4d1d2005"
+    },
+    {
+      "exit_code": 0,
+      "wall_seconds": 4.9913485031574965,
+      "command": [
+        "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/native/bin/mris_fix_topology_fnit",
+        "-threads",
+        "4",
+        "-mgz",
+        "-sphere",
+        "qsphere.nofix",
+        "-inflated",
+        "inflated.nofix",
+        "-orig",
+        "orig.nofix",
+        "-out",
+        "diagnostic.orig.premesh",
+        "-ga",
+        "-seed",
+        "1234",
+        "-threads",
+        "4",
+        "subject",
+        "lh"
+      ],
+      "sha256": {
+        "edges.before.bin": "260f617fa79d310d709d75207108c638bbd6e4823db79920c752c425ac1a3b1e",
+        "edges.after.bin": "1f0f3dfd8912d8d2b2ff07e77008061eadf4404d92ab69a84e3686f2ea57310e"
+      },
+      "log_sha256": "5c2e2e18b51b79b145027b2008d69bf9997190333afa980ed349ec1f4d1d2005"
+    }
+  ],
+  "repeat_bytes_equal": true,
+  "host": "A100-8",
+  "cpu_affinity": [
+    8,
+    9,
+    10,
+    11
+  ],
+  "num_threads": 4,
+  "random_seed": 1234,
+  "input_sha256": {
+    "source_subject": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject",
+    "inputs": {
+      "surf/lh.orig.nofix": "cfa9c1d0f5681a87d4ae709d0b093e20fdc3466ea6525b7fc94ba61a4708b0f9",
+      "surf/lh.inflated.nofix": "176ceabdc00801876dbed069f0d6ec88ca9159b338415541308a8797a11d027b",
+      "surf/lh.qsphere.nofix": "cf3c1e339c9d36c5245cb7d75cc11a4bd174ee3267e2f41ce8867061e9eed952",
+      "mri/brain.mgz": "977f6fb298d38e10588cd636f4db38ca8c3456265b24d6d80d00d54e60e98eed",
+      "mri/wm.mgz": "859a3551807921395a516466c406d6816e79ba7813c016dc97e07b326ae8953c"
+    }
+  }
+}

@@ -45,3 +45,13 @@ def test_nonlinear_sse_uses_native_float32_distance_weight():
     expected = float(np.float32(0.1)) * (2 * arc * arc)
     assert result["weighted_distance"] == expected
     assert result["total"] == expected
+
+
+def test_nonlinear_distance_scale_uses_fixed_tu_float_sqrt():
+    vertices = np.asarray([[100, 0, 0], [0, 100, 0]], np.float32)
+    result = nonlinear_epoch_sse(
+        vertices, np.empty((0, 3), np.int32),
+        np.asarray([0, 1, 2], np.int64), np.asarray([1, 0], np.int32),
+        np.zeros(2, np.float32), np.float32(float.fromhex("0x1.140f74p+16")))
+    # Same expression independently compiled with fixed original TU headers.
+    assert result["distance_scale"] == float.fromhex("0x1.7ff6p-1")

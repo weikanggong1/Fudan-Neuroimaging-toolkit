@@ -1,0 +1,3364 @@
+{
+  "status": "complete",
+  "scope": "isolated full native GA; sole additional argument -verbose_low",
+  "full_workflow_complete": false,
+  "preflight": {
+    "status": "passed",
+    "scope": "isolated reference only; no original stage executed in preflight",
+    "case": "ds000114/sub07/ses-test/lh",
+    "source": {
+      "git_commit": "79a41cdda2397525a8952dd5af303372b352916c",
+      "source_archive_sha256": "e0a9a418669035f39f979e25cfb4b65e8cc93e200485eae7d93a2d22ddcfcaec",
+      "source_archive_bytes": 21473280,
+      "scope": "tracked actual commit only; no experimental final-white overlay; two raw public T1 empty outputs; native N4; GCSA numba and exact CPU remesh python storage"
+    },
+    "benchmark_sha256": "6de395039495083787474fd91f1b107701af74dd89fe1e489c484e3ca279060c",
+    "producer_runtime_sha256": "eabdf28d09f37ed2b85bd26082f76dd4161665169de916d4565f43f0a55d8c1e",
+    "frozen_source_sha256": {
+      "native_free.py": "0e3c09e3a88f746b858ac2d21167b4dffef308062731e024d6f3fb91236d05a2",
+      "topology_conda_ga.py": "285d781f1514c394b8ee9141ffad5775557b407e2753a1a8691ca8668e8463d0",
+      "topology_preflight_python.py": "7ae02e2c7e5133a9de544361c95b9e7def7f5d92e35f3bbc27e8ca03f8d5ec00"
+    },
+    "program_sha256": "c3bb6b744f3d3ebcc0bbaf6a79b4266eb712ea51a113b06157456b560654fde6",
+    "comparison_module_sha256": "ea8e7faf842c8f4039a50bc3097eb2bd77752b84355f1f76134a6bccdd3a31ba",
+    "inputs": {
+      "surf/lh.orig.nofix": {
+        "sha256": "cfa9c1d0f5681a87d4ae709d0b093e20fdc3466ea6525b7fc94ba61a4708b0f9",
+        "bytes": 3980575
+      },
+      "surf/lh.inflated.nofix": {
+        "sha256": "176ceabdc00801876dbed069f0d6ec88ca9159b338415541308a8797a11d027b",
+        "bytes": 3981496
+      },
+      "surf/lh.qsphere.nofix": {
+        "sha256": "cf3c1e339c9d36c5245cb7d75cc11a4bd174ee3267e2f41ce8867061e9eed952",
+        "bytes": 3981463
+      },
+      "mri/brain.mgz": {
+        "sha256": "977f6fb298d38e10588cd636f4db38ca8c3456265b24d6d80d00d54e60e98eed",
+        "bytes": 1130216
+      },
+      "mri/wm.mgz": {
+        "sha256": "859a3551807921395a516466c406d6816e79ba7813c016dc97e07b326ae8953c",
+        "bytes": 309175
+      }
+    },
+    "reference_premesh_sha256": "4f50b9f28e8774e28a22ce5ec4d83fa9eaca071ff093bdd6da530d0f644592c0",
+    "reference_search_behaviour": {
+      "log_sha256": "e2d677205a4cf136b1b17b239e24fd3edb7c46fb7af3a169b3ee5d9512b0d8f6",
+      "ordered_behaviour_lines": [
+        "setting seed for random number genererator to 1234",
+        "number of patches/generation : 10",
+        "number of generations :        10",
+        "before topology correction, eno=-24 (nv=110534, nf=221116, ne=331674, g=13)",
+        "9 defects found, arbitrating ambiguous regions...",
+        "9 defects to be corrected ",
+        "CORRECTING DEFECT 0 (vertices=67, convex hull=125, v0=170)",
+        "After retessellation of defect 0 (v0=170), euler #=-6 (108572,325432,216854) : difference with theory (-6) = 0 ",
+        "CORRECTING DEFECT 1 (vertices=116, convex hull=61, v0=2166)",
+        "After retessellation of defect 1 (v0=2166), euler #=-5 (108590,325509,216914) : difference with theory (-5) = 0 ",
+        "CORRECTING DEFECT 2 (vertices=57, convex hull=38, v0=76115)",
+        "After retessellation of defect 2 (v0=76115), euler #=-4 (108596,325541,216941) : difference with theory (-4) = 0 ",
+        "CORRECTING DEFECT 3 (vertices=1428, convex hull=162, v0=80530)",
+        "After retessellation of defect 3 (v0=80530), euler #=-3 (108609,325660,217048) : difference with theory (-3) = 0 ",
+        "CORRECTING DEFECT 4 (vertices=219, convex hull=179, v0=83370)",
+        "After retessellation of defect 4 (v0=83370), euler #=-2 (108674,325941,217265) : difference with theory (-2) = 0 ",
+        "CORRECTING DEFECT 5 (vertices=6, convex hull=22, v0=83456)",
+        "After retessellation of defect 5 (v0=83456), euler #=-1 (108675,325953,217277) : difference with theory (-1) = 0 ",
+        "CORRECTING DEFECT 6 (vertices=18, convex hull=52, v0=92138)",
+        "After retessellation of defect 6 (v0=92138), euler #=0 (108683,326001,217318) : difference with theory (0) = 0 ",
+        "CORRECTING DEFECT 7 (vertices=46, convex hull=46, v0=99360)",
+        "After retessellation of defect 7 (v0=99360), euler #=1 (108692,326046,217355) : difference with theory (1) = 0 ",
+        "CORRECTING DEFECT 8 (vertices=39, convex hull=67, v0=106379)",
+        "After retessellation of defect 8 (v0=106379), euler #=2 (108710,326124,217416) : difference with theory (2) = 0 ",
+        "41 mutations (34.2%), 79 crossovers (65.8%), 127 vertices were eliminated",
+        "after topology correction, eno=2 (nv=108710, nf=217416, ne=326124, g=0)"
+      ],
+      "defects": [
+        {
+          "number": 0,
+          "vertices": 67,
+          "convex_hull": 125,
+          "first_vertex": 170
+        },
+        {
+          "number": 1,
+          "vertices": 116,
+          "convex_hull": 61,
+          "first_vertex": 2166
+        },
+        {
+          "number": 2,
+          "vertices": 57,
+          "convex_hull": 38,
+          "first_vertex": 76115
+        },
+        {
+          "number": 3,
+          "vertices": 1428,
+          "convex_hull": 162,
+          "first_vertex": 80530
+        },
+        {
+          "number": 4,
+          "vertices": 219,
+          "convex_hull": 179,
+          "first_vertex": 83370
+        },
+        {
+          "number": 5,
+          "vertices": 6,
+          "convex_hull": 22,
+          "first_vertex": 83456
+        },
+        {
+          "number": 6,
+          "vertices": 18,
+          "convex_hull": 52,
+          "first_vertex": 92138
+        },
+        {
+          "number": 7,
+          "vertices": 46,
+          "convex_hull": 46,
+          "first_vertex": 99360
+        },
+        {
+          "number": 8,
+          "vertices": 39,
+          "convex_hull": 67,
+          "first_vertex": 106379
+        }
+      ],
+      "per_candidate_fitness_trace": "not_in_reference_log"
+    },
+    "private_license_readable": true,
+    "cpu_affinity": [
+      100,
+      101,
+      102,
+      103
+    ],
+    "total_cpu_budget": 4,
+    "actual_native_threads": 1,
+    "seed": 1234,
+    "cuda_visible_devices": "",
+    "new_GPU_execution": false,
+    "script_sha256": "9671ccbc03d1b40f359e41ebce6d9026e5bc1efdc939331e7c79dc1afae0b996",
+    "overall_metric_equivalence": "not_assessed"
+  },
+  "baseline_repeat_report_sha256": "f1b2ca2abc85bf5491216d91df73bb43c9d40e79fe52c367bf0c67ef1b7d3db9",
+  "baseline_repeat_complete_sha256": "7ff1c9bedbf74fdd52a887a9aa6011e64f2778737e667ff925c2dede980bd975",
+  "original_premesh_sha256": "4f50b9f28e8774e28a22ce5ec4d83fa9eaca071ff093bdd6da530d0f644592c0",
+  "script_sha256": "07094a62ebc10e0506c1f4e498652b7e67ab9715a8d138c2518070f509f130ee",
+  "shared_benchmark_tool_sha256": "9671ccbc03d1b40f359e41ebce6d9026e5bc1efdc939331e7c79dc1afae0b996",
+  "command_arguments": [
+    "-threads",
+    "1",
+    "-mgz",
+    "-sphere",
+    "qsphere.nofix",
+    "-inflated",
+    "inflated.nofix",
+    "-orig",
+    "orig.nofix",
+    "-out",
+    "orig.premesh",
+    "-ga",
+    "-seed",
+    "1234",
+    "-threads",
+    "1",
+    "-verbose_low",
+    "subject",
+    "lh"
+  ],
+  "native_seconds": 155.90543626621366,
+  "comparisons": {
+    "original_79": {
+      "surface": {
+        "pass": true,
+        "coordinates_mm": {
+          "pass": true,
+          "elements": 326130,
+          "exact": 326130,
+          "outliers": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "first_outlier": null
+        },
+        "ordered_faces": {
+          "pass": true,
+          "elements": 652248,
+          "exact": 652248,
+          "outliers": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "first_outlier": null
+        },
+        "volume_geometry_data_exact": true,
+        "volume_geometry_filename_equal": false,
+        "volume_geometry_exact": false
+      },
+      "classifications": {
+        "strict_coordinates": true,
+        "strict_ordered_faces": true,
+        "strict_geometric_fields": true,
+        "strict_header_filename": false,
+        "strict_file_bytes": false
+      },
+      "reference_sha256": "4f50b9f28e8774e28a22ce5ec4d83fa9eaca071ff093bdd6da530d0f644592c0",
+      "candidate_sha256": "a49ad02d59d8a31b4b1343c82ed58de5527551cc55100b5d14aa5c18005a436b"
+    },
+    "default_repeat": {
+      "surface": {
+        "pass": true,
+        "coordinates_mm": {
+          "pass": true,
+          "elements": 326130,
+          "exact": 326130,
+          "outliers": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "first_outlier": null
+        },
+        "ordered_faces": {
+          "pass": true,
+          "elements": 652248,
+          "exact": 652248,
+          "outliers": 0,
+          "max_abs": 0.0,
+          "p99_abs": 0.0,
+          "first_outlier": null
+        },
+        "volume_geometry_data_exact": true,
+        "volume_geometry_filename_equal": false,
+        "volume_geometry_exact": false
+      },
+      "classifications": {
+        "strict_coordinates": true,
+        "strict_ordered_faces": true,
+        "strict_geometric_fields": true,
+        "strict_header_filename": false,
+        "strict_file_bytes": false
+      },
+      "reference_sha256": "abe3af78a4a9f32180235a0dc955325f00f064c96f78a6e2baff1dcbc642cf1f",
+      "candidate_sha256": "a49ad02d59d8a31b4b1343c82ed58de5527551cc55100b5d14aa5c18005a436b"
+    }
+  },
+  "control": {
+    "defects": [
+      {
+        "defect_number": 0,
+        "initial_population_fitness_prints": [
+          {
+            "slot": 0,
+            "text": "-97.760778",
+            "value": -97.760778
+          },
+          {
+            "slot": 1,
+            "text": "-105.683649",
+            "value": -105.683649
+          },
+          {
+            "slot": 2,
+            "text": "-95.166757",
+            "value": -95.166757
+          },
+          {
+            "slot": 3,
+            "text": "-95.006091",
+            "value": -95.006091
+          },
+          {
+            "slot": 4,
+            "text": "-96.754022",
+            "value": -96.754022
+          },
+          {
+            "slot": 5,
+            "text": "-101.575651",
+            "value": -101.575651
+          },
+          {
+            "slot": 6,
+            "text": "-98.271660",
+            "value": -98.27166
+          },
+          {
+            "slot": 7,
+            "text": "-97.084613",
+            "value": -97.084613
+          },
+          {
+            "slot": 8,
+            "text": "-94.603453",
+            "value": -94.603453
+          },
+          {
+            "slot": 9,
+            "text": "-94.347164",
+            "value": -94.347164
+          }
+        ],
+        "generation_rows": [
+          {
+            "completed_generation_number": 1,
+            "best_fitness_print": "-9.4347e+01",
+            "printed_value": -94.347,
+            "rounding_interval_lower": -94.3475,
+            "rounding_interval_upper": -94.34649999999999
+          },
+          {
+            "completed_generation_number": 2,
+            "best_fitness_print": "-9.4254e+01",
+            "printed_value": -94.254,
+            "rounding_interval_lower": -94.25450000000001,
+            "rounding_interval_upper": -94.2535
+          },
+          {
+            "completed_generation_number": 3,
+            "best_fitness_print": "-9.4254e+01",
+            "printed_value": -94.254,
+            "rounding_interval_lower": -94.25450000000001,
+            "rounding_interval_upper": -94.2535
+          },
+          {
+            "completed_generation_number": 4,
+            "best_fitness_print": "-9.4254e+01",
+            "printed_value": -94.254,
+            "rounding_interval_lower": -94.25450000000001,
+            "rounding_interval_upper": -94.2535
+          },
+          {
+            "completed_generation_number": 5,
+            "best_fitness_print": "-9.4224e+01",
+            "printed_value": -94.224,
+            "rounding_interval_lower": -94.2245,
+            "rounding_interval_upper": -94.2235
+          },
+          {
+            "completed_generation_number": 6,
+            "best_fitness_print": "-9.3886e+01",
+            "printed_value": -93.886,
+            "rounding_interval_lower": -93.8865,
+            "rounding_interval_upper": -93.8855
+          },
+          {
+            "completed_generation_number": 7,
+            "best_fitness_print": "-9.3601e+01",
+            "printed_value": -93.601,
+            "rounding_interval_lower": -93.6015,
+            "rounding_interval_upper": -93.6005
+          },
+          {
+            "completed_generation_number": 8,
+            "best_fitness_print": "-9.3601e+01",
+            "printed_value": -93.601,
+            "rounding_interval_lower": -93.6015,
+            "rounding_interval_upper": -93.6005
+          },
+          {
+            "completed_generation_number": 9,
+            "best_fitness_print": "-9.3582e+01",
+            "printed_value": -93.582,
+            "rounding_interval_lower": -93.5825,
+            "rounding_interval_upper": -93.58149999999999
+          },
+          {
+            "completed_generation_number": 10,
+            "best_fitness_print": "-9.3582e+01",
+            "printed_value": -93.582,
+            "rounding_interval_lower": -93.5825,
+            "rounding_interval_upper": -93.58149999999999
+          },
+          {
+            "completed_generation_number": 11,
+            "best_fitness_print": "-9.3582e+01",
+            "printed_value": -93.582,
+            "rounding_interval_lower": -93.5825,
+            "rounding_interval_upper": -93.58149999999999
+          },
+          {
+            "completed_generation_number": 12,
+            "best_fitness_print": "-9.3582e+01",
+            "printed_value": -93.582,
+            "rounding_interval_lower": -93.5825,
+            "rounding_interval_upper": -93.58149999999999
+          },
+          {
+            "completed_generation_number": 13,
+            "best_fitness_print": "-9.3453e+01",
+            "printed_value": -93.453,
+            "rounding_interval_lower": -93.4535,
+            "rounding_interval_upper": -93.4525
+          },
+          {
+            "completed_generation_number": 14,
+            "best_fitness_print": "-9.3042e+01",
+            "printed_value": -93.042,
+            "rounding_interval_lower": -93.0425,
+            "rounding_interval_upper": -93.0415
+          },
+          {
+            "completed_generation_number": 15,
+            "best_fitness_print": "-9.3042e+01",
+            "printed_value": -93.042,
+            "rounding_interval_lower": -93.0425,
+            "rounding_interval_upper": -93.0415
+          },
+          {
+            "completed_generation_number": 16,
+            "best_fitness_print": "-9.3042e+01",
+            "printed_value": -93.042,
+            "rounding_interval_lower": -93.0425,
+            "rounding_interval_upper": -93.0415
+          },
+          {
+            "completed_generation_number": 17,
+            "best_fitness_print": "-9.3042e+01",
+            "printed_value": -93.042,
+            "rounding_interval_lower": -93.0425,
+            "rounding_interval_upper": -93.0415
+          },
+          {
+            "completed_generation_number": 18,
+            "best_fitness_print": "-9.3042e+01",
+            "printed_value": -93.042,
+            "rounding_interval_lower": -93.0425,
+            "rounding_interval_upper": -93.0415
+          },
+          {
+            "completed_generation_number": 19,
+            "best_fitness_print": "-9.3042e+01",
+            "printed_value": -93.042,
+            "rounding_interval_lower": -93.0425,
+            "rounding_interval_upper": -93.0415
+          },
+          {
+            "completed_generation_number": 20,
+            "best_fitness_print": "-9.3042e+01",
+            "printed_value": -93.042,
+            "rounding_interval_lower": -93.0425,
+            "rounding_interval_upper": -93.0415
+          },
+          {
+            "completed_generation_number": 21,
+            "best_fitness_print": "-9.3042e+01",
+            "printed_value": -93.042,
+            "rounding_interval_lower": -93.0425,
+            "rounding_interval_upper": -93.0415
+          },
+          {
+            "completed_generation_number": 22,
+            "best_fitness_print": "-9.3042e+01",
+            "printed_value": -93.042,
+            "rounding_interval_lower": -93.0425,
+            "rounding_interval_upper": -93.0415
+          },
+          {
+            "completed_generation_number": 23,
+            "best_fitness_print": "-9.3042e+01",
+            "printed_value": -93.042,
+            "rounding_interval_lower": -93.0425,
+            "rounding_interval_upper": -93.0415
+          },
+          {
+            "completed_generation_number": 24,
+            "best_fitness_print": "-9.3042e+01",
+            "printed_value": -93.042,
+            "rounding_interval_lower": -93.0425,
+            "rounding_interval_upper": -93.0415
+          },
+          {
+            "completed_generation_number": 25,
+            "best_fitness_print": "-9.3042e+01",
+            "printed_value": -93.042,
+            "rounding_interval_lower": -93.0425,
+            "rounding_interval_upper": -93.0415
+          },
+          {
+            "completed_generation_number": 26,
+            "best_fitness_print": "-9.3042e+01",
+            "printed_value": -93.042,
+            "rounding_interval_lower": -93.0425,
+            "rounding_interval_upper": -93.0415
+          },
+          {
+            "completed_generation_number": 27,
+            "best_fitness_print": "-9.3042e+01",
+            "printed_value": -93.042,
+            "rounding_interval_lower": -93.0425,
+            "rounding_interval_upper": -93.0415
+          },
+          {
+            "completed_generation_number": 28,
+            "best_fitness_print": "-9.3042e+01",
+            "printed_value": -93.042,
+            "rounding_interval_lower": -93.0425,
+            "rounding_interval_upper": -93.0415
+          },
+          {
+            "completed_generation_number": 29,
+            "best_fitness_print": "-9.3042e+01",
+            "printed_value": -93.042,
+            "rounding_interval_lower": -93.0425,
+            "rounding_interval_upper": -93.0415
+          }
+        ],
+        "improving_event_lines": [
+          "new optimal fitness found at 2: -95.1668",
+          "new optimal fitness found at 3: -95.0061",
+          "new optimal fitness found at 8: -94.6035",
+          "new optimal fitness found at 9: -94.3472",
+          "CROSSOVER (0 x 2): new optimal fitness found at 2: -9.4254e+01",
+          "CROSSOVER (3 x 1): new optimal fitness found at 8: -9.4224e+01",
+          "CROSSOVER (0 x 1): new optimal fitness found at 2: -9.3886e+01",
+          "replacement 0 MUTATION: new optimal fitness found at 1: -9.3601e+01",
+          "CROSSOVER (0 x 2): new optimal fitness found at 4: -9.3582e+01",
+          "CROSSOVER (0 x 1): new optimal fitness found at 2: -9.3474e+01",
+          "CROSSOVER (1 x 2): new optimal fitness found at 4: -9.3453e+01",
+          "CROSSOVER (0 x 3): new optimal fitness found at 3: -9.3076e+01",
+          "CROSSOVER (1 x 0): new optimal fitness found at 4: -9.3042e+01"
+        ],
+        "deletion_event_lines": [
+          "Worst 3 vertices have been deleted (corresponds to ~1%)",
+          "Worst 3 vertices have been deleted (corresponds to ~1%)",
+          "Worst 3 vertices have been deleted (corresponds to ~1%)",
+          "Worst 2 vertices have been deleted (corresponds to ~1%)",
+          "Deleting worst vertices : 5 vertices have been deleted",
+          "Worst 2 vertices have been deleted (corresponds to ~1%)",
+          "Worst 2 vertices have been deleted (corresponds to ~1%)"
+        ],
+        "completed_generations_printed": 29,
+        "generation_prints_contiguous": true,
+        "last_generation_best_fitness_print": {
+          "completed_generation_number": 29,
+          "best_fitness_print": "-9.3042e+01",
+          "printed_value": -93.042,
+          "rounding_interval_lower": -93.0425,
+          "rounding_interval_upper": -93.0415
+        },
+        "exact_candidate_evaluations": null,
+        "exact_final_double_fitness": null,
+        "exact_termination_code": null,
+        "scope": "actual low-verbosity prints; source branch audit separate"
+      },
+      {
+        "defect_number": 1,
+        "initial_population_fitness_prints": [
+          {
+            "slot": 0,
+            "text": "-131.812802",
+            "value": -131.812802
+          },
+          {
+            "slot": 1,
+            "text": "-144.060952",
+            "value": -144.060952
+          },
+          {
+            "slot": 2,
+            "text": "-121.197792",
+            "value": -121.197792
+          },
+          {
+            "slot": 3,
+            "text": "-117.668502",
+            "value": -117.668502
+          },
+          {
+            "slot": 4,
+            "text": "-147.867877",
+            "value": -147.867877
+          },
+          {
+            "slot": 5,
+            "text": "-145.276620",
+            "value": -145.27662
+          },
+          {
+            "slot": 6,
+            "text": "-134.980396",
+            "value": -134.980396
+          },
+          {
+            "slot": 7,
+            "text": "-142.209726",
+            "value": -142.209726
+          },
+          {
+            "slot": 8,
+            "text": "-131.534533",
+            "value": -131.534533
+          },
+          {
+            "slot": 9,
+            "text": "-146.685395",
+            "value": -146.685395
+          }
+        ],
+        "generation_rows": [
+          {
+            "completed_generation_number": 1,
+            "best_fitness_print": "-1.1103e+02",
+            "printed_value": -111.03,
+            "rounding_interval_lower": -111.035,
+            "rounding_interval_upper": -111.025
+          },
+          {
+            "completed_generation_number": 2,
+            "best_fitness_print": "-9.5489e+01",
+            "printed_value": -95.489,
+            "rounding_interval_lower": -95.4895,
+            "rounding_interval_upper": -95.4885
+          },
+          {
+            "completed_generation_number": 3,
+            "best_fitness_print": "-9.5489e+01",
+            "printed_value": -95.489,
+            "rounding_interval_lower": -95.4895,
+            "rounding_interval_upper": -95.4885
+          },
+          {
+            "completed_generation_number": 4,
+            "best_fitness_print": "-9.1754e+01",
+            "printed_value": -91.754,
+            "rounding_interval_lower": -91.75450000000001,
+            "rounding_interval_upper": -91.7535
+          },
+          {
+            "completed_generation_number": 5,
+            "best_fitness_print": "-9.1754e+01",
+            "printed_value": -91.754,
+            "rounding_interval_lower": -91.75450000000001,
+            "rounding_interval_upper": -91.7535
+          },
+          {
+            "completed_generation_number": 6,
+            "best_fitness_print": "-9.1754e+01",
+            "printed_value": -91.754,
+            "rounding_interval_lower": -91.75450000000001,
+            "rounding_interval_upper": -91.7535
+          },
+          {
+            "completed_generation_number": 7,
+            "best_fitness_print": "-9.1754e+01",
+            "printed_value": -91.754,
+            "rounding_interval_lower": -91.75450000000001,
+            "rounding_interval_upper": -91.7535
+          },
+          {
+            "completed_generation_number": 8,
+            "best_fitness_print": "-9.1754e+01",
+            "printed_value": -91.754,
+            "rounding_interval_lower": -91.75450000000001,
+            "rounding_interval_upper": -91.7535
+          },
+          {
+            "completed_generation_number": 9,
+            "best_fitness_print": "-9.1754e+01",
+            "printed_value": -91.754,
+            "rounding_interval_lower": -91.75450000000001,
+            "rounding_interval_upper": -91.7535
+          },
+          {
+            "completed_generation_number": 10,
+            "best_fitness_print": "-9.1754e+01",
+            "printed_value": -91.754,
+            "rounding_interval_lower": -91.75450000000001,
+            "rounding_interval_upper": -91.7535
+          },
+          {
+            "completed_generation_number": 11,
+            "best_fitness_print": "-9.1754e+01",
+            "printed_value": -91.754,
+            "rounding_interval_lower": -91.75450000000001,
+            "rounding_interval_upper": -91.7535
+          },
+          {
+            "completed_generation_number": 12,
+            "best_fitness_print": "-9.1754e+01",
+            "printed_value": -91.754,
+            "rounding_interval_lower": -91.75450000000001,
+            "rounding_interval_upper": -91.7535
+          },
+          {
+            "completed_generation_number": 13,
+            "best_fitness_print": "-9.1754e+01",
+            "printed_value": -91.754,
+            "rounding_interval_lower": -91.75450000000001,
+            "rounding_interval_upper": -91.7535
+          },
+          {
+            "completed_generation_number": 14,
+            "best_fitness_print": "-9.1754e+01",
+            "printed_value": -91.754,
+            "rounding_interval_lower": -91.75450000000001,
+            "rounding_interval_upper": -91.7535
+          },
+          {
+            "completed_generation_number": 15,
+            "best_fitness_print": "-9.1754e+01",
+            "printed_value": -91.754,
+            "rounding_interval_lower": -91.75450000000001,
+            "rounding_interval_upper": -91.7535
+          },
+          {
+            "completed_generation_number": 16,
+            "best_fitness_print": "-9.1754e+01",
+            "printed_value": -91.754,
+            "rounding_interval_lower": -91.75450000000001,
+            "rounding_interval_upper": -91.7535
+          },
+          {
+            "completed_generation_number": 17,
+            "best_fitness_print": "-9.1754e+01",
+            "printed_value": -91.754,
+            "rounding_interval_lower": -91.75450000000001,
+            "rounding_interval_upper": -91.7535
+          },
+          {
+            "completed_generation_number": 18,
+            "best_fitness_print": "-9.1754e+01",
+            "printed_value": -91.754,
+            "rounding_interval_lower": -91.75450000000001,
+            "rounding_interval_upper": -91.7535
+          },
+          {
+            "completed_generation_number": 19,
+            "best_fitness_print": "-9.1754e+01",
+            "printed_value": -91.754,
+            "rounding_interval_lower": -91.75450000000001,
+            "rounding_interval_upper": -91.7535
+          }
+        ],
+        "improving_event_lines": [
+          "new optimal fitness found at 2: -121.1978",
+          "new optimal fitness found at 3: -117.6685",
+          "CROSSOVER (0 x 2): new optimal fitness found at 2: -1.1103e+02",
+          "CROSSOVER (0 x 2) & MUTATION: new optimal fitness found at 3: -9.5489e+01",
+          "CROSSOVER (0 x 1): new optimal fitness found at 2: -9.1754e+01"
+        ],
+        "deletion_event_lines": [
+          "Worst vertex has been deleted",
+          "Deleting worst vertices : 3 vertices have been deleted",
+          "Worst vertex has been deleted"
+        ],
+        "completed_generations_printed": 19,
+        "generation_prints_contiguous": true,
+        "last_generation_best_fitness_print": {
+          "completed_generation_number": 19,
+          "best_fitness_print": "-9.1754e+01",
+          "printed_value": -91.754,
+          "rounding_interval_lower": -91.75450000000001,
+          "rounding_interval_upper": -91.7535
+        },
+        "exact_candidate_evaluations": null,
+        "exact_final_double_fitness": null,
+        "exact_termination_code": null,
+        "scope": "actual low-verbosity prints; source branch audit separate"
+      },
+      {
+        "defect_number": 2,
+        "initial_population_fitness_prints": [
+          {
+            "slot": 0,
+            "text": "-102.420975",
+            "value": -102.420975
+          },
+          {
+            "slot": 1,
+            "text": "-100.736780",
+            "value": -100.73678
+          },
+          {
+            "slot": 2,
+            "text": "-142.808830",
+            "value": -142.80883
+          },
+          {
+            "slot": 3,
+            "text": "-101.286956",
+            "value": -101.286956
+          },
+          {
+            "slot": 4,
+            "text": "-109.930076",
+            "value": -109.930076
+          },
+          {
+            "slot": 5,
+            "text": "-100.351108",
+            "value": -100.351108
+          },
+          {
+            "slot": 6,
+            "text": "-110.622450",
+            "value": -110.62245
+          },
+          {
+            "slot": 7,
+            "text": "-102.603011",
+            "value": -102.603011
+          },
+          {
+            "slot": 8,
+            "text": "-100.467487",
+            "value": -100.467487
+          },
+          {
+            "slot": 9,
+            "text": "-113.885724",
+            "value": -113.885724
+          }
+        ],
+        "generation_rows": [
+          {
+            "completed_generation_number": 1,
+            "best_fitness_print": "-1.0035e+02",
+            "printed_value": -100.35,
+            "rounding_interval_lower": -100.35499999999999,
+            "rounding_interval_upper": -100.345
+          },
+          {
+            "completed_generation_number": 2,
+            "best_fitness_print": "-1.0035e+02",
+            "printed_value": -100.35,
+            "rounding_interval_lower": -100.35499999999999,
+            "rounding_interval_upper": -100.345
+          },
+          {
+            "completed_generation_number": 3,
+            "best_fitness_print": "-1.0035e+02",
+            "printed_value": -100.35,
+            "rounding_interval_lower": -100.35499999999999,
+            "rounding_interval_upper": -100.345
+          },
+          {
+            "completed_generation_number": 4,
+            "best_fitness_print": "-1.0035e+02",
+            "printed_value": -100.35,
+            "rounding_interval_lower": -100.35499999999999,
+            "rounding_interval_upper": -100.345
+          },
+          {
+            "completed_generation_number": 5,
+            "best_fitness_print": "-1.0035e+02",
+            "printed_value": -100.35,
+            "rounding_interval_lower": -100.35499999999999,
+            "rounding_interval_upper": -100.345
+          },
+          {
+            "completed_generation_number": 6,
+            "best_fitness_print": "-1.0035e+02",
+            "printed_value": -100.35,
+            "rounding_interval_lower": -100.35499999999999,
+            "rounding_interval_upper": -100.345
+          },
+          {
+            "completed_generation_number": 7,
+            "best_fitness_print": "-1.0035e+02",
+            "printed_value": -100.35,
+            "rounding_interval_lower": -100.35499999999999,
+            "rounding_interval_upper": -100.345
+          },
+          {
+            "completed_generation_number": 8,
+            "best_fitness_print": "-1.0035e+02",
+            "printed_value": -100.35,
+            "rounding_interval_lower": -100.35499999999999,
+            "rounding_interval_upper": -100.345
+          },
+          {
+            "completed_generation_number": 9,
+            "best_fitness_print": "-1.0035e+02",
+            "printed_value": -100.35,
+            "rounding_interval_lower": -100.35499999999999,
+            "rounding_interval_upper": -100.345
+          },
+          {
+            "completed_generation_number": 10,
+            "best_fitness_print": "-1.0035e+02",
+            "printed_value": -100.35,
+            "rounding_interval_lower": -100.35499999999999,
+            "rounding_interval_upper": -100.345
+          },
+          {
+            "completed_generation_number": 11,
+            "best_fitness_print": "-1.0035e+02",
+            "printed_value": -100.35,
+            "rounding_interval_lower": -100.35499999999999,
+            "rounding_interval_upper": -100.345
+          },
+          {
+            "completed_generation_number": 12,
+            "best_fitness_print": "-1.0035e+02",
+            "printed_value": -100.35,
+            "rounding_interval_lower": -100.35499999999999,
+            "rounding_interval_upper": -100.345
+          },
+          {
+            "completed_generation_number": 13,
+            "best_fitness_print": "-1.0035e+02",
+            "printed_value": -100.35,
+            "rounding_interval_lower": -100.35499999999999,
+            "rounding_interval_upper": -100.345
+          },
+          {
+            "completed_generation_number": 14,
+            "best_fitness_print": "-1.0035e+02",
+            "printed_value": -100.35,
+            "rounding_interval_lower": -100.35499999999999,
+            "rounding_interval_upper": -100.345
+          },
+          {
+            "completed_generation_number": 15,
+            "best_fitness_print": "-1.0035e+02",
+            "printed_value": -100.35,
+            "rounding_interval_lower": -100.35499999999999,
+            "rounding_interval_upper": -100.345
+          },
+          {
+            "completed_generation_number": 16,
+            "best_fitness_print": "-9.9917e+01",
+            "printed_value": -99.917,
+            "rounding_interval_lower": -99.9175,
+            "rounding_interval_upper": -99.9165
+          },
+          {
+            "completed_generation_number": 17,
+            "best_fitness_print": "-9.9917e+01",
+            "printed_value": -99.917,
+            "rounding_interval_lower": -99.9175,
+            "rounding_interval_upper": -99.9165
+          },
+          {
+            "completed_generation_number": 18,
+            "best_fitness_print": "-9.9917e+01",
+            "printed_value": -99.917,
+            "rounding_interval_lower": -99.9175,
+            "rounding_interval_upper": -99.9165
+          },
+          {
+            "completed_generation_number": 19,
+            "best_fitness_print": "-9.9917e+01",
+            "printed_value": -99.917,
+            "rounding_interval_lower": -99.9175,
+            "rounding_interval_upper": -99.9165
+          },
+          {
+            "completed_generation_number": 20,
+            "best_fitness_print": "-9.9917e+01",
+            "printed_value": -99.917,
+            "rounding_interval_lower": -99.9175,
+            "rounding_interval_upper": -99.9165
+          },
+          {
+            "completed_generation_number": 21,
+            "best_fitness_print": "-9.9917e+01",
+            "printed_value": -99.917,
+            "rounding_interval_lower": -99.9175,
+            "rounding_interval_upper": -99.9165
+          },
+          {
+            "completed_generation_number": 22,
+            "best_fitness_print": "-9.9917e+01",
+            "printed_value": -99.917,
+            "rounding_interval_lower": -99.9175,
+            "rounding_interval_upper": -99.9165
+          },
+          {
+            "completed_generation_number": 23,
+            "best_fitness_print": "-9.9917e+01",
+            "printed_value": -99.917,
+            "rounding_interval_lower": -99.9175,
+            "rounding_interval_upper": -99.9165
+          },
+          {
+            "completed_generation_number": 24,
+            "best_fitness_print": "-9.9917e+01",
+            "printed_value": -99.917,
+            "rounding_interval_lower": -99.9175,
+            "rounding_interval_upper": -99.9165
+          },
+          {
+            "completed_generation_number": 25,
+            "best_fitness_print": "-9.9917e+01",
+            "printed_value": -99.917,
+            "rounding_interval_lower": -99.9175,
+            "rounding_interval_upper": -99.9165
+          },
+          {
+            "completed_generation_number": 26,
+            "best_fitness_print": "-9.9917e+01",
+            "printed_value": -99.917,
+            "rounding_interval_lower": -99.9175,
+            "rounding_interval_upper": -99.9165
+          }
+        ],
+        "improving_event_lines": [
+          "new optimal fitness found at 1: -100.7368",
+          "new optimal fitness found at 5: -100.3511",
+          "CROSSOVER (0 x 1): new optimal fitness found at 4: -1.0035e+02",
+          "CROSSOVER (1 x 0) & MUTATION: new optimal fitness found at 6: -9.9917e+01"
+        ],
+        "deletion_event_lines": [
+          "Deleting worst vertices : 0 vertices have been deleted"
+        ],
+        "completed_generations_printed": 26,
+        "generation_prints_contiguous": true,
+        "last_generation_best_fitness_print": {
+          "completed_generation_number": 26,
+          "best_fitness_print": "-9.9917e+01",
+          "printed_value": -99.917,
+          "rounding_interval_lower": -99.9175,
+          "rounding_interval_upper": -99.9165
+        },
+        "exact_candidate_evaluations": null,
+        "exact_final_double_fitness": null,
+        "exact_termination_code": null,
+        "scope": "actual low-verbosity prints; source branch audit separate"
+      },
+      {
+        "defect_number": 3,
+        "initial_population_fitness_prints": [
+          {
+            "slot": 0,
+            "text": "-119.262606",
+            "value": -119.262606
+          },
+          {
+            "slot": 1,
+            "text": "-123.546670",
+            "value": -123.54667
+          },
+          {
+            "slot": 2,
+            "text": "-124.223175",
+            "value": -124.223175
+          },
+          {
+            "slot": 3,
+            "text": "-122.773659",
+            "value": -122.773659
+          },
+          {
+            "slot": 4,
+            "text": "-124.467008",
+            "value": -124.467008
+          },
+          {
+            "slot": 5,
+            "text": "-121.912577",
+            "value": -121.912577
+          },
+          {
+            "slot": 6,
+            "text": "-118.714952",
+            "value": -118.714952
+          },
+          {
+            "slot": 7,
+            "text": "-121.472096",
+            "value": -121.472096
+          },
+          {
+            "slot": 8,
+            "text": "-129.876823",
+            "value": -129.876823
+          },
+          {
+            "slot": 9,
+            "text": "-123.373007",
+            "value": -123.373007
+          }
+        ],
+        "generation_rows": [
+          {
+            "completed_generation_number": 1,
+            "best_fitness_print": "-1.1871e+02",
+            "printed_value": -118.71,
+            "rounding_interval_lower": -118.71499999999999,
+            "rounding_interval_upper": -118.705
+          },
+          {
+            "completed_generation_number": 2,
+            "best_fitness_print": "-1.1792e+02",
+            "printed_value": -117.92,
+            "rounding_interval_lower": -117.925,
+            "rounding_interval_upper": -117.915
+          },
+          {
+            "completed_generation_number": 3,
+            "best_fitness_print": "-1.1792e+02",
+            "printed_value": -117.92,
+            "rounding_interval_lower": -117.925,
+            "rounding_interval_upper": -117.915
+          },
+          {
+            "completed_generation_number": 4,
+            "best_fitness_print": "-1.1792e+02",
+            "printed_value": -117.92,
+            "rounding_interval_lower": -117.925,
+            "rounding_interval_upper": -117.915
+          },
+          {
+            "completed_generation_number": 5,
+            "best_fitness_print": "-1.1789e+02",
+            "printed_value": -117.89,
+            "rounding_interval_lower": -117.895,
+            "rounding_interval_upper": -117.885
+          },
+          {
+            "completed_generation_number": 6,
+            "best_fitness_print": "-1.1742e+02",
+            "printed_value": -117.42,
+            "rounding_interval_lower": -117.425,
+            "rounding_interval_upper": -117.415
+          },
+          {
+            "completed_generation_number": 7,
+            "best_fitness_print": "-1.1742e+02",
+            "printed_value": -117.42,
+            "rounding_interval_lower": -117.425,
+            "rounding_interval_upper": -117.415
+          },
+          {
+            "completed_generation_number": 8,
+            "best_fitness_print": "-1.1742e+02",
+            "printed_value": -117.42,
+            "rounding_interval_lower": -117.425,
+            "rounding_interval_upper": -117.415
+          },
+          {
+            "completed_generation_number": 9,
+            "best_fitness_print": "-1.1742e+02",
+            "printed_value": -117.42,
+            "rounding_interval_lower": -117.425,
+            "rounding_interval_upper": -117.415
+          },
+          {
+            "completed_generation_number": 10,
+            "best_fitness_print": "-1.1742e+02",
+            "printed_value": -117.42,
+            "rounding_interval_lower": -117.425,
+            "rounding_interval_upper": -117.415
+          },
+          {
+            "completed_generation_number": 11,
+            "best_fitness_print": "-1.1738e+02",
+            "printed_value": -117.38,
+            "rounding_interval_lower": -117.38499999999999,
+            "rounding_interval_upper": -117.375
+          },
+          {
+            "completed_generation_number": 12,
+            "best_fitness_print": "-1.1738e+02",
+            "printed_value": -117.38,
+            "rounding_interval_lower": -117.38499999999999,
+            "rounding_interval_upper": -117.375
+          },
+          {
+            "completed_generation_number": 13,
+            "best_fitness_print": "-1.1738e+02",
+            "printed_value": -117.38,
+            "rounding_interval_lower": -117.38499999999999,
+            "rounding_interval_upper": -117.375
+          },
+          {
+            "completed_generation_number": 14,
+            "best_fitness_print": "-1.1701e+02",
+            "printed_value": -117.01,
+            "rounding_interval_lower": -117.015,
+            "rounding_interval_upper": -117.00500000000001
+          },
+          {
+            "completed_generation_number": 15,
+            "best_fitness_print": "-1.1693e+02",
+            "printed_value": -116.93,
+            "rounding_interval_lower": -116.935,
+            "rounding_interval_upper": -116.92500000000001
+          },
+          {
+            "completed_generation_number": 16,
+            "best_fitness_print": "-1.1693e+02",
+            "printed_value": -116.93,
+            "rounding_interval_lower": -116.935,
+            "rounding_interval_upper": -116.92500000000001
+          },
+          {
+            "completed_generation_number": 17,
+            "best_fitness_print": "-1.1693e+02",
+            "printed_value": -116.93,
+            "rounding_interval_lower": -116.935,
+            "rounding_interval_upper": -116.92500000000001
+          },
+          {
+            "completed_generation_number": 18,
+            "best_fitness_print": "-1.1676e+02",
+            "printed_value": -116.76,
+            "rounding_interval_lower": -116.765,
+            "rounding_interval_upper": -116.75500000000001
+          },
+          {
+            "completed_generation_number": 19,
+            "best_fitness_print": "-1.1676e+02",
+            "printed_value": -116.76,
+            "rounding_interval_lower": -116.765,
+            "rounding_interval_upper": -116.75500000000001
+          },
+          {
+            "completed_generation_number": 20,
+            "best_fitness_print": "-1.1676e+02",
+            "printed_value": -116.76,
+            "rounding_interval_lower": -116.765,
+            "rounding_interval_upper": -116.75500000000001
+          },
+          {
+            "completed_generation_number": 21,
+            "best_fitness_print": "-1.1676e+02",
+            "printed_value": -116.76,
+            "rounding_interval_lower": -116.765,
+            "rounding_interval_upper": -116.75500000000001
+          },
+          {
+            "completed_generation_number": 22,
+            "best_fitness_print": "-1.1676e+02",
+            "printed_value": -116.76,
+            "rounding_interval_lower": -116.765,
+            "rounding_interval_upper": -116.75500000000001
+          },
+          {
+            "completed_generation_number": 23,
+            "best_fitness_print": "-1.1676e+02",
+            "printed_value": -116.76,
+            "rounding_interval_lower": -116.765,
+            "rounding_interval_upper": -116.75500000000001
+          },
+          {
+            "completed_generation_number": 24,
+            "best_fitness_print": "-1.1676e+02",
+            "printed_value": -116.76,
+            "rounding_interval_lower": -116.765,
+            "rounding_interval_upper": -116.75500000000001
+          },
+          {
+            "completed_generation_number": 25,
+            "best_fitness_print": "-1.1676e+02",
+            "printed_value": -116.76,
+            "rounding_interval_lower": -116.765,
+            "rounding_interval_upper": -116.75500000000001
+          },
+          {
+            "completed_generation_number": 26,
+            "best_fitness_print": "-1.1676e+02",
+            "printed_value": -116.76,
+            "rounding_interval_lower": -116.765,
+            "rounding_interval_upper": -116.75500000000001
+          },
+          {
+            "completed_generation_number": 27,
+            "best_fitness_print": "-1.1676e+02",
+            "printed_value": -116.76,
+            "rounding_interval_lower": -116.765,
+            "rounding_interval_upper": -116.75500000000001
+          },
+          {
+            "completed_generation_number": 28,
+            "best_fitness_print": "-1.1601e+02",
+            "printed_value": -116.01,
+            "rounding_interval_lower": -116.015,
+            "rounding_interval_upper": -116.00500000000001
+          },
+          {
+            "completed_generation_number": 29,
+            "best_fitness_print": "-1.1601e+02",
+            "printed_value": -116.01,
+            "rounding_interval_lower": -116.015,
+            "rounding_interval_upper": -116.00500000000001
+          },
+          {
+            "completed_generation_number": 30,
+            "best_fitness_print": "-1.1601e+02",
+            "printed_value": -116.01,
+            "rounding_interval_lower": -116.015,
+            "rounding_interval_upper": -116.00500000000001
+          },
+          {
+            "completed_generation_number": 31,
+            "best_fitness_print": "-1.1601e+02",
+            "printed_value": -116.01,
+            "rounding_interval_lower": -116.015,
+            "rounding_interval_upper": -116.00500000000001
+          },
+          {
+            "completed_generation_number": 32,
+            "best_fitness_print": "-1.1601e+02",
+            "printed_value": -116.01,
+            "rounding_interval_lower": -116.015,
+            "rounding_interval_upper": -116.00500000000001
+          },
+          {
+            "completed_generation_number": 33,
+            "best_fitness_print": "-1.1601e+02",
+            "printed_value": -116.01,
+            "rounding_interval_lower": -116.015,
+            "rounding_interval_upper": -116.00500000000001
+          },
+          {
+            "completed_generation_number": 34,
+            "best_fitness_print": "-1.1598e+02",
+            "printed_value": -115.98,
+            "rounding_interval_lower": -115.985,
+            "rounding_interval_upper": -115.97500000000001
+          },
+          {
+            "completed_generation_number": 35,
+            "best_fitness_print": "-1.1598e+02",
+            "printed_value": -115.98,
+            "rounding_interval_lower": -115.985,
+            "rounding_interval_upper": -115.97500000000001
+          },
+          {
+            "completed_generation_number": 36,
+            "best_fitness_print": "-1.1598e+02",
+            "printed_value": -115.98,
+            "rounding_interval_lower": -115.985,
+            "rounding_interval_upper": -115.97500000000001
+          },
+          {
+            "completed_generation_number": 37,
+            "best_fitness_print": "-1.1598e+02",
+            "printed_value": -115.98,
+            "rounding_interval_lower": -115.985,
+            "rounding_interval_upper": -115.97500000000001
+          },
+          {
+            "completed_generation_number": 38,
+            "best_fitness_print": "-1.1529e+02",
+            "printed_value": -115.29,
+            "rounding_interval_lower": -115.295,
+            "rounding_interval_upper": -115.28500000000001
+          },
+          {
+            "completed_generation_number": 39,
+            "best_fitness_print": "-1.1509e+02",
+            "printed_value": -115.09,
+            "rounding_interval_lower": -115.095,
+            "rounding_interval_upper": -115.08500000000001
+          },
+          {
+            "completed_generation_number": 40,
+            "best_fitness_print": "-1.1509e+02",
+            "printed_value": -115.09,
+            "rounding_interval_lower": -115.095,
+            "rounding_interval_upper": -115.08500000000001
+          },
+          {
+            "completed_generation_number": 41,
+            "best_fitness_print": "-1.1503e+02",
+            "printed_value": -115.03,
+            "rounding_interval_lower": -115.035,
+            "rounding_interval_upper": -115.025
+          },
+          {
+            "completed_generation_number": 42,
+            "best_fitness_print": "-1.1503e+02",
+            "printed_value": -115.03,
+            "rounding_interval_lower": -115.035,
+            "rounding_interval_upper": -115.025
+          },
+          {
+            "completed_generation_number": 43,
+            "best_fitness_print": "-1.1503e+02",
+            "printed_value": -115.03,
+            "rounding_interval_lower": -115.035,
+            "rounding_interval_upper": -115.025
+          },
+          {
+            "completed_generation_number": 44,
+            "best_fitness_print": "-1.1503e+02",
+            "printed_value": -115.03,
+            "rounding_interval_lower": -115.035,
+            "rounding_interval_upper": -115.025
+          },
+          {
+            "completed_generation_number": 45,
+            "best_fitness_print": "-1.1503e+02",
+            "printed_value": -115.03,
+            "rounding_interval_lower": -115.035,
+            "rounding_interval_upper": -115.025
+          },
+          {
+            "completed_generation_number": 46,
+            "best_fitness_print": "-1.1498e+02",
+            "printed_value": -114.98,
+            "rounding_interval_lower": -114.985,
+            "rounding_interval_upper": -114.97500000000001
+          },
+          {
+            "completed_generation_number": 47,
+            "best_fitness_print": "-1.1475e+02",
+            "printed_value": -114.75,
+            "rounding_interval_lower": -114.755,
+            "rounding_interval_upper": -114.745
+          },
+          {
+            "completed_generation_number": 48,
+            "best_fitness_print": "-1.1475e+02",
+            "printed_value": -114.75,
+            "rounding_interval_lower": -114.755,
+            "rounding_interval_upper": -114.745
+          },
+          {
+            "completed_generation_number": 49,
+            "best_fitness_print": "-1.1434e+02",
+            "printed_value": -114.34,
+            "rounding_interval_lower": -114.345,
+            "rounding_interval_upper": -114.33500000000001
+          },
+          {
+            "completed_generation_number": 50,
+            "best_fitness_print": "-1.1434e+02",
+            "printed_value": -114.34,
+            "rounding_interval_lower": -114.345,
+            "rounding_interval_upper": -114.33500000000001
+          },
+          {
+            "completed_generation_number": 51,
+            "best_fitness_print": "-1.1434e+02",
+            "printed_value": -114.34,
+            "rounding_interval_lower": -114.345,
+            "rounding_interval_upper": -114.33500000000001
+          },
+          {
+            "completed_generation_number": 52,
+            "best_fitness_print": "-1.1434e+02",
+            "printed_value": -114.34,
+            "rounding_interval_lower": -114.345,
+            "rounding_interval_upper": -114.33500000000001
+          },
+          {
+            "completed_generation_number": 53,
+            "best_fitness_print": "-1.1434e+02",
+            "printed_value": -114.34,
+            "rounding_interval_lower": -114.345,
+            "rounding_interval_upper": -114.33500000000001
+          },
+          {
+            "completed_generation_number": 54,
+            "best_fitness_print": "-1.1430e+02",
+            "printed_value": -114.3,
+            "rounding_interval_lower": -114.30499999999999,
+            "rounding_interval_upper": -114.295
+          },
+          {
+            "completed_generation_number": 55,
+            "best_fitness_print": "-1.1430e+02",
+            "printed_value": -114.3,
+            "rounding_interval_lower": -114.30499999999999,
+            "rounding_interval_upper": -114.295
+          },
+          {
+            "completed_generation_number": 56,
+            "best_fitness_print": "-1.1423e+02",
+            "printed_value": -114.23,
+            "rounding_interval_lower": -114.235,
+            "rounding_interval_upper": -114.22500000000001
+          },
+          {
+            "completed_generation_number": 57,
+            "best_fitness_print": "-1.1423e+02",
+            "printed_value": -114.23,
+            "rounding_interval_lower": -114.235,
+            "rounding_interval_upper": -114.22500000000001
+          },
+          {
+            "completed_generation_number": 58,
+            "best_fitness_print": "-1.1423e+02",
+            "printed_value": -114.23,
+            "rounding_interval_lower": -114.235,
+            "rounding_interval_upper": -114.22500000000001
+          },
+          {
+            "completed_generation_number": 59,
+            "best_fitness_print": "-1.1423e+02",
+            "printed_value": -114.23,
+            "rounding_interval_lower": -114.235,
+            "rounding_interval_upper": -114.22500000000001
+          },
+          {
+            "completed_generation_number": 60,
+            "best_fitness_print": "-1.1416e+02",
+            "printed_value": -114.16,
+            "rounding_interval_lower": -114.16499999999999,
+            "rounding_interval_upper": -114.155
+          },
+          {
+            "completed_generation_number": 61,
+            "best_fitness_print": "-1.1416e+02",
+            "printed_value": -114.16,
+            "rounding_interval_lower": -114.16499999999999,
+            "rounding_interval_upper": -114.155
+          },
+          {
+            "completed_generation_number": 62,
+            "best_fitness_print": "-1.1416e+02",
+            "printed_value": -114.16,
+            "rounding_interval_lower": -114.16499999999999,
+            "rounding_interval_upper": -114.155
+          },
+          {
+            "completed_generation_number": 63,
+            "best_fitness_print": "-1.1416e+02",
+            "printed_value": -114.16,
+            "rounding_interval_lower": -114.16499999999999,
+            "rounding_interval_upper": -114.155
+          },
+          {
+            "completed_generation_number": 64,
+            "best_fitness_print": "-1.1416e+02",
+            "printed_value": -114.16,
+            "rounding_interval_lower": -114.16499999999999,
+            "rounding_interval_upper": -114.155
+          },
+          {
+            "completed_generation_number": 65,
+            "best_fitness_print": "-1.1416e+02",
+            "printed_value": -114.16,
+            "rounding_interval_lower": -114.16499999999999,
+            "rounding_interval_upper": -114.155
+          },
+          {
+            "completed_generation_number": 66,
+            "best_fitness_print": "-1.1416e+02",
+            "printed_value": -114.16,
+            "rounding_interval_lower": -114.16499999999999,
+            "rounding_interval_upper": -114.155
+          },
+          {
+            "completed_generation_number": 67,
+            "best_fitness_print": "-1.1409e+02",
+            "printed_value": -114.09,
+            "rounding_interval_lower": -114.095,
+            "rounding_interval_upper": -114.08500000000001
+          },
+          {
+            "completed_generation_number": 68,
+            "best_fitness_print": "-1.1409e+02",
+            "printed_value": -114.09,
+            "rounding_interval_lower": -114.095,
+            "rounding_interval_upper": -114.08500000000001
+          },
+          {
+            "completed_generation_number": 69,
+            "best_fitness_print": "-1.1409e+02",
+            "printed_value": -114.09,
+            "rounding_interval_lower": -114.095,
+            "rounding_interval_upper": -114.08500000000001
+          },
+          {
+            "completed_generation_number": 70,
+            "best_fitness_print": "-1.1409e+02",
+            "printed_value": -114.09,
+            "rounding_interval_lower": -114.095,
+            "rounding_interval_upper": -114.08500000000001
+          },
+          {
+            "completed_generation_number": 71,
+            "best_fitness_print": "-1.1386e+02",
+            "printed_value": -113.86,
+            "rounding_interval_lower": -113.865,
+            "rounding_interval_upper": -113.855
+          },
+          {
+            "completed_generation_number": 72,
+            "best_fitness_print": "-1.1380e+02",
+            "printed_value": -113.8,
+            "rounding_interval_lower": -113.80499999999999,
+            "rounding_interval_upper": -113.795
+          },
+          {
+            "completed_generation_number": 73,
+            "best_fitness_print": "-1.1360e+02",
+            "printed_value": -113.6,
+            "rounding_interval_lower": -113.60499999999999,
+            "rounding_interval_upper": -113.595
+          },
+          {
+            "completed_generation_number": 74,
+            "best_fitness_print": "-1.1352e+02",
+            "printed_value": -113.52,
+            "rounding_interval_lower": -113.52499999999999,
+            "rounding_interval_upper": -113.515
+          },
+          {
+            "completed_generation_number": 75,
+            "best_fitness_print": "-1.1352e+02",
+            "printed_value": -113.52,
+            "rounding_interval_lower": -113.52499999999999,
+            "rounding_interval_upper": -113.515
+          },
+          {
+            "completed_generation_number": 76,
+            "best_fitness_print": "-1.1352e+02",
+            "printed_value": -113.52,
+            "rounding_interval_lower": -113.52499999999999,
+            "rounding_interval_upper": -113.515
+          },
+          {
+            "completed_generation_number": 77,
+            "best_fitness_print": "-1.1336e+02",
+            "printed_value": -113.36,
+            "rounding_interval_lower": -113.365,
+            "rounding_interval_upper": -113.355
+          },
+          {
+            "completed_generation_number": 78,
+            "best_fitness_print": "-1.1336e+02",
+            "printed_value": -113.36,
+            "rounding_interval_lower": -113.365,
+            "rounding_interval_upper": -113.355
+          },
+          {
+            "completed_generation_number": 79,
+            "best_fitness_print": "-1.1336e+02",
+            "printed_value": -113.36,
+            "rounding_interval_lower": -113.365,
+            "rounding_interval_upper": -113.355
+          },
+          {
+            "completed_generation_number": 80,
+            "best_fitness_print": "-1.1329e+02",
+            "printed_value": -113.29,
+            "rounding_interval_lower": -113.295,
+            "rounding_interval_upper": -113.28500000000001
+          },
+          {
+            "completed_generation_number": 81,
+            "best_fitness_print": "-1.1329e+02",
+            "printed_value": -113.29,
+            "rounding_interval_lower": -113.295,
+            "rounding_interval_upper": -113.28500000000001
+          },
+          {
+            "completed_generation_number": 82,
+            "best_fitness_print": "-1.1329e+02",
+            "printed_value": -113.29,
+            "rounding_interval_lower": -113.295,
+            "rounding_interval_upper": -113.28500000000001
+          },
+          {
+            "completed_generation_number": 83,
+            "best_fitness_print": "-1.1329e+02",
+            "printed_value": -113.29,
+            "rounding_interval_lower": -113.295,
+            "rounding_interval_upper": -113.28500000000001
+          },
+          {
+            "completed_generation_number": 84,
+            "best_fitness_print": "-1.1329e+02",
+            "printed_value": -113.29,
+            "rounding_interval_lower": -113.295,
+            "rounding_interval_upper": -113.28500000000001
+          },
+          {
+            "completed_generation_number": 85,
+            "best_fitness_print": "-1.1329e+02",
+            "printed_value": -113.29,
+            "rounding_interval_lower": -113.295,
+            "rounding_interval_upper": -113.28500000000001
+          },
+          {
+            "completed_generation_number": 86,
+            "best_fitness_print": "-1.1292e+02",
+            "printed_value": -112.92,
+            "rounding_interval_lower": -112.925,
+            "rounding_interval_upper": -112.915
+          },
+          {
+            "completed_generation_number": 87,
+            "best_fitness_print": "-1.1292e+02",
+            "printed_value": -112.92,
+            "rounding_interval_lower": -112.925,
+            "rounding_interval_upper": -112.915
+          },
+          {
+            "completed_generation_number": 88,
+            "best_fitness_print": "-1.1292e+02",
+            "printed_value": -112.92,
+            "rounding_interval_lower": -112.925,
+            "rounding_interval_upper": -112.915
+          },
+          {
+            "completed_generation_number": 89,
+            "best_fitness_print": "-1.1292e+02",
+            "printed_value": -112.92,
+            "rounding_interval_lower": -112.925,
+            "rounding_interval_upper": -112.915
+          },
+          {
+            "completed_generation_number": 90,
+            "best_fitness_print": "-1.1292e+02",
+            "printed_value": -112.92,
+            "rounding_interval_lower": -112.925,
+            "rounding_interval_upper": -112.915
+          },
+          {
+            "completed_generation_number": 91,
+            "best_fitness_print": "-1.1292e+02",
+            "printed_value": -112.92,
+            "rounding_interval_lower": -112.925,
+            "rounding_interval_upper": -112.915
+          },
+          {
+            "completed_generation_number": 92,
+            "best_fitness_print": "-1.1292e+02",
+            "printed_value": -112.92,
+            "rounding_interval_lower": -112.925,
+            "rounding_interval_upper": -112.915
+          },
+          {
+            "completed_generation_number": 93,
+            "best_fitness_print": "-1.1292e+02",
+            "printed_value": -112.92,
+            "rounding_interval_lower": -112.925,
+            "rounding_interval_upper": -112.915
+          },
+          {
+            "completed_generation_number": 94,
+            "best_fitness_print": "-1.1292e+02",
+            "printed_value": -112.92,
+            "rounding_interval_lower": -112.925,
+            "rounding_interval_upper": -112.915
+          },
+          {
+            "completed_generation_number": 95,
+            "best_fitness_print": "-1.1292e+02",
+            "printed_value": -112.92,
+            "rounding_interval_lower": -112.925,
+            "rounding_interval_upper": -112.915
+          },
+          {
+            "completed_generation_number": 96,
+            "best_fitness_print": "-1.1292e+02",
+            "printed_value": -112.92,
+            "rounding_interval_lower": -112.925,
+            "rounding_interval_upper": -112.915
+          }
+        ],
+        "improving_event_lines": [
+          "new optimal fitness found at 6: -118.7150",
+          "CROSSOVER (1 x 4): new optimal fitness found at 5: -1.1792e+02",
+          "CROSSOVER (0 x 2): new optimal fitness found at 3: -1.1789e+02",
+          "CROSSOVER (0 x 1): new optimal fitness found at 2: -1.1759e+02",
+          "CROSSOVER (3 x 0) & MUTATION: new optimal fitness found at 7: -1.1742e+02",
+          "CROSSOVER (0 x 1): new optimal fitness found at 4: -1.1738e+02",
+          "CROSSOVER (0 x 1): new optimal fitness found at 3: -1.1701e+02",
+          "CROSSOVER (0 x 1): new optimal fitness found at 3: -1.1693e+02",
+          "CROSSOVER (0 x 2) & MUTATION: new optimal fitness found at 3: -1.1676e+02",
+          "CROSSOVER (0 x 2): new optimal fitness found at 2: -1.1621e+02",
+          "CROSSOVER (4 x 2) & MUTATION: new optimal fitness found at 9: -1.1601e+02",
+          "CROSSOVER (3 x 1) & MUTATION: new optimal fitness found at 8: -1.1598e+02",
+          "CROSSOVER (1 x 2) & MUTATION: new optimal fitness found at 4: -1.1595e+02",
+          "CROSSOVER (1 x 0) & MUTATION: new optimal fitness found at 5: -1.1585e+02",
+          "CROSSOVER (2 x 0) & MUTATION: new optimal fitness found at 6: -1.1529e+02",
+          "CROSSOVER (0 x 2) & MUTATION: new optimal fitness found at 3: -1.1509e+02",
+          "CROSSOVER (1 x 0) & MUTATION: new optimal fitness found at 6: -1.1503e+02",
+          "CROSSOVER (4 x 1) & MUTATION: new optimal fitness found at 9: -1.1498e+02",
+          "CROSSOVER (1 x 2) & MUTATION: new optimal fitness found at 5: -1.1475e+02",
+          "replacement 0 MUTATION: new optimal fitness found at 1: -1.1444e+02",
+          "CROSSOVER (1 x 3): new optimal fitness found at 4: -1.1434e+02",
+          "CROSSOVER (1 x 0) & MUTATION: new optimal fitness found at 5: -1.1430e+02",
+          "CROSSOVER (0 x 1): new optimal fitness found at 3: -1.1423e+02",
+          "CROSSOVER (3 x 1): new optimal fitness found at 8: -1.1416e+02",
+          "replacement 0 MUTATION: new optimal fitness found at 1: -1.1409e+02",
+          "CROSSOVER (0 x 2): new optimal fitness found at 2: -1.1386e+02",
+          "replacement 0 MUTATION: new optimal fitness found at 1: -1.1380e+02",
+          "CROSSOVER (0 x 2): new optimal fitness found at 2: -1.1360e+02",
+          "CROSSOVER (0 x 2): new optimal fitness found at 2: -1.1352e+02",
+          "CROSSOVER (0 x 1): new optimal fitness found at 3: -1.1336e+02",
+          "CROSSOVER (2 x 0): new optimal fitness found at 7: -1.1329e+02",
+          "replacement 0 MUTATION: new optimal fitness found at 1: -1.1327e+02",
+          "CROSSOVER (0 x 3): new optimal fitness found at 2: -1.1292e+02"
+        ],
+        "deletion_event_lines": [
+          "Worst 10 vertices have been deleted (corresponds to ~1%)",
+          "Worst 9 vertices have been deleted (corresponds to ~1%)",
+          "Worst 8 vertices have been deleted (corresponds to ~1%)",
+          "Worst 8 vertices have been deleted (corresponds to ~1%)",
+          "Worst 7 vertices have been deleted (corresponds to ~1%)",
+          "Worst 6 vertices have been deleted (corresponds to ~1%)",
+          "Worst 6 vertices have been deleted (corresponds to ~1%)",
+          "Worst 5 vertices have been deleted (corresponds to ~1%)",
+          "Worst 4 vertices have been deleted (corresponds to ~1%)",
+          "Worst 4 vertices have been deleted (corresponds to ~1%)",
+          "Worst 4 vertices have been deleted (corresponds to ~1%)",
+          "Worst 3 vertices have been deleted (corresponds to ~1%)",
+          "Worst 3 vertices have been deleted (corresponds to ~1%)",
+          "Worst 3 vertices have been deleted (corresponds to ~1%)",
+          "Worst 2 vertices have been deleted (corresponds to ~1%)",
+          "Worst 2 vertices have been deleted (corresponds to ~1%)",
+          "Worst 2 vertices have been deleted (corresponds to ~1%)",
+          "Worst 2 vertices have been deleted (corresponds to ~1%)",
+          "Worst 2 vertices have been deleted (corresponds to ~1%)",
+          "Worst vertex has been deleted",
+          "Worst vertex has been deleted",
+          "Worst vertex has been deleted",
+          "Worst vertex has been deleted",
+          "Worst vertex has been deleted",
+          "Worst vertex has been deleted",
+          "Worst vertex has been deleted",
+          "Worst vertex has been deleted",
+          "Worst vertex has been deleted",
+          "Deleting worst vertices : 0 vertices have been deleted"
+        ],
+        "completed_generations_printed": 96,
+        "generation_prints_contiguous": true,
+        "last_generation_best_fitness_print": {
+          "completed_generation_number": 96,
+          "best_fitness_print": "-1.1292e+02",
+          "printed_value": -112.92,
+          "rounding_interval_lower": -112.925,
+          "rounding_interval_upper": -112.915
+        },
+        "exact_candidate_evaluations": null,
+        "exact_final_double_fitness": null,
+        "exact_termination_code": null,
+        "scope": "actual low-verbosity prints; source branch audit separate"
+      },
+      {
+        "defect_number": 4,
+        "initial_population_fitness_prints": [
+          {
+            "slot": 0,
+            "text": "-88.343789",
+            "value": -88.343789
+          },
+          {
+            "slot": 1,
+            "text": "-87.792000",
+            "value": -87.792
+          },
+          {
+            "slot": 2,
+            "text": "-86.860788",
+            "value": -86.860788
+          },
+          {
+            "slot": 3,
+            "text": "-100.906137",
+            "value": -100.906137
+          },
+          {
+            "slot": 4,
+            "text": "-83.432117",
+            "value": -83.432117
+          },
+          {
+            "slot": 5,
+            "text": "-100.127344",
+            "value": -100.127344
+          },
+          {
+            "slot": 6,
+            "text": "-109.964434",
+            "value": -109.964434
+          },
+          {
+            "slot": 7,
+            "text": "-93.687202",
+            "value": -93.687202
+          },
+          {
+            "slot": 8,
+            "text": "-91.363971",
+            "value": -91.363971
+          },
+          {
+            "slot": 9,
+            "text": "-84.097455",
+            "value": -84.097455
+          }
+        ],
+        "generation_rows": [
+          {
+            "completed_generation_number": 1,
+            "best_fitness_print": "-8.2178e+01",
+            "printed_value": -82.178,
+            "rounding_interval_lower": -82.1785,
+            "rounding_interval_upper": -82.1775
+          },
+          {
+            "completed_generation_number": 2,
+            "best_fitness_print": "-8.0422e+01",
+            "printed_value": -80.422,
+            "rounding_interval_lower": -80.4225,
+            "rounding_interval_upper": -80.4215
+          },
+          {
+            "completed_generation_number": 3,
+            "best_fitness_print": "-8.0422e+01",
+            "printed_value": -80.422,
+            "rounding_interval_lower": -80.4225,
+            "rounding_interval_upper": -80.4215
+          },
+          {
+            "completed_generation_number": 4,
+            "best_fitness_print": "-8.0422e+01",
+            "printed_value": -80.422,
+            "rounding_interval_lower": -80.4225,
+            "rounding_interval_upper": -80.4215
+          },
+          {
+            "completed_generation_number": 5,
+            "best_fitness_print": "-8.0422e+01",
+            "printed_value": -80.422,
+            "rounding_interval_lower": -80.4225,
+            "rounding_interval_upper": -80.4215
+          },
+          {
+            "completed_generation_number": 6,
+            "best_fitness_print": "-7.7833e+01",
+            "printed_value": -77.833,
+            "rounding_interval_lower": -77.8335,
+            "rounding_interval_upper": -77.8325
+          },
+          {
+            "completed_generation_number": 7,
+            "best_fitness_print": "-7.7754e+01",
+            "printed_value": -77.754,
+            "rounding_interval_lower": -77.75450000000001,
+            "rounding_interval_upper": -77.7535
+          },
+          {
+            "completed_generation_number": 8,
+            "best_fitness_print": "-7.7754e+01",
+            "printed_value": -77.754,
+            "rounding_interval_lower": -77.75450000000001,
+            "rounding_interval_upper": -77.7535
+          },
+          {
+            "completed_generation_number": 9,
+            "best_fitness_print": "-7.7754e+01",
+            "printed_value": -77.754,
+            "rounding_interval_lower": -77.75450000000001,
+            "rounding_interval_upper": -77.7535
+          },
+          {
+            "completed_generation_number": 10,
+            "best_fitness_print": "-7.7754e+01",
+            "printed_value": -77.754,
+            "rounding_interval_lower": -77.75450000000001,
+            "rounding_interval_upper": -77.7535
+          },
+          {
+            "completed_generation_number": 11,
+            "best_fitness_print": "-7.7754e+01",
+            "printed_value": -77.754,
+            "rounding_interval_lower": -77.75450000000001,
+            "rounding_interval_upper": -77.7535
+          },
+          {
+            "completed_generation_number": 12,
+            "best_fitness_print": "-7.7754e+01",
+            "printed_value": -77.754,
+            "rounding_interval_lower": -77.75450000000001,
+            "rounding_interval_upper": -77.7535
+          },
+          {
+            "completed_generation_number": 13,
+            "best_fitness_print": "-7.7754e+01",
+            "printed_value": -77.754,
+            "rounding_interval_lower": -77.75450000000001,
+            "rounding_interval_upper": -77.7535
+          },
+          {
+            "completed_generation_number": 14,
+            "best_fitness_print": "-7.7128e+01",
+            "printed_value": -77.128,
+            "rounding_interval_lower": -77.1285,
+            "rounding_interval_upper": -77.1275
+          },
+          {
+            "completed_generation_number": 15,
+            "best_fitness_print": "-7.7089e+01",
+            "printed_value": -77.089,
+            "rounding_interval_lower": -77.0895,
+            "rounding_interval_upper": -77.0885
+          },
+          {
+            "completed_generation_number": 16,
+            "best_fitness_print": "-7.7089e+01",
+            "printed_value": -77.089,
+            "rounding_interval_lower": -77.0895,
+            "rounding_interval_upper": -77.0885
+          },
+          {
+            "completed_generation_number": 17,
+            "best_fitness_print": "-7.7089e+01",
+            "printed_value": -77.089,
+            "rounding_interval_lower": -77.0895,
+            "rounding_interval_upper": -77.0885
+          },
+          {
+            "completed_generation_number": 18,
+            "best_fitness_print": "-7.7089e+01",
+            "printed_value": -77.089,
+            "rounding_interval_lower": -77.0895,
+            "rounding_interval_upper": -77.0885
+          },
+          {
+            "completed_generation_number": 19,
+            "best_fitness_print": "-7.7020e+01",
+            "printed_value": -77.02,
+            "rounding_interval_lower": -77.0205,
+            "rounding_interval_upper": -77.0195
+          },
+          {
+            "completed_generation_number": 20,
+            "best_fitness_print": "-7.7020e+01",
+            "printed_value": -77.02,
+            "rounding_interval_lower": -77.0205,
+            "rounding_interval_upper": -77.0195
+          },
+          {
+            "completed_generation_number": 21,
+            "best_fitness_print": "-7.7020e+01",
+            "printed_value": -77.02,
+            "rounding_interval_lower": -77.0205,
+            "rounding_interval_upper": -77.0195
+          },
+          {
+            "completed_generation_number": 22,
+            "best_fitness_print": "-7.6768e+01",
+            "printed_value": -76.768,
+            "rounding_interval_lower": -76.7685,
+            "rounding_interval_upper": -76.7675
+          },
+          {
+            "completed_generation_number": 23,
+            "best_fitness_print": "-7.6768e+01",
+            "printed_value": -76.768,
+            "rounding_interval_lower": -76.7685,
+            "rounding_interval_upper": -76.7675
+          },
+          {
+            "completed_generation_number": 24,
+            "best_fitness_print": "-7.6768e+01",
+            "printed_value": -76.768,
+            "rounding_interval_lower": -76.7685,
+            "rounding_interval_upper": -76.7675
+          },
+          {
+            "completed_generation_number": 25,
+            "best_fitness_print": "-7.6768e+01",
+            "printed_value": -76.768,
+            "rounding_interval_lower": -76.7685,
+            "rounding_interval_upper": -76.7675
+          },
+          {
+            "completed_generation_number": 26,
+            "best_fitness_print": "-7.6768e+01",
+            "printed_value": -76.768,
+            "rounding_interval_lower": -76.7685,
+            "rounding_interval_upper": -76.7675
+          },
+          {
+            "completed_generation_number": 27,
+            "best_fitness_print": "-7.6768e+01",
+            "printed_value": -76.768,
+            "rounding_interval_lower": -76.7685,
+            "rounding_interval_upper": -76.7675
+          },
+          {
+            "completed_generation_number": 28,
+            "best_fitness_print": "-7.6768e+01",
+            "printed_value": -76.768,
+            "rounding_interval_lower": -76.7685,
+            "rounding_interval_upper": -76.7675
+          },
+          {
+            "completed_generation_number": 29,
+            "best_fitness_print": "-7.6768e+01",
+            "printed_value": -76.768,
+            "rounding_interval_lower": -76.7685,
+            "rounding_interval_upper": -76.7675
+          },
+          {
+            "completed_generation_number": 30,
+            "best_fitness_print": "-7.6768e+01",
+            "printed_value": -76.768,
+            "rounding_interval_lower": -76.7685,
+            "rounding_interval_upper": -76.7675
+          },
+          {
+            "completed_generation_number": 31,
+            "best_fitness_print": "-7.6768e+01",
+            "printed_value": -76.768,
+            "rounding_interval_lower": -76.7685,
+            "rounding_interval_upper": -76.7675
+          },
+          {
+            "completed_generation_number": 32,
+            "best_fitness_print": "-7.6768e+01",
+            "printed_value": -76.768,
+            "rounding_interval_lower": -76.7685,
+            "rounding_interval_upper": -76.7675
+          },
+          {
+            "completed_generation_number": 33,
+            "best_fitness_print": "-7.6768e+01",
+            "printed_value": -76.768,
+            "rounding_interval_lower": -76.7685,
+            "rounding_interval_upper": -76.7675
+          },
+          {
+            "completed_generation_number": 34,
+            "best_fitness_print": "-7.6768e+01",
+            "printed_value": -76.768,
+            "rounding_interval_lower": -76.7685,
+            "rounding_interval_upper": -76.7675
+          },
+          {
+            "completed_generation_number": 35,
+            "best_fitness_print": "-7.6768e+01",
+            "printed_value": -76.768,
+            "rounding_interval_lower": -76.7685,
+            "rounding_interval_upper": -76.7675
+          },
+          {
+            "completed_generation_number": 36,
+            "best_fitness_print": "-7.6768e+01",
+            "printed_value": -76.768,
+            "rounding_interval_lower": -76.7685,
+            "rounding_interval_upper": -76.7675
+          },
+          {
+            "completed_generation_number": 37,
+            "best_fitness_print": "-7.6768e+01",
+            "printed_value": -76.768,
+            "rounding_interval_lower": -76.7685,
+            "rounding_interval_upper": -76.7675
+          }
+        ],
+        "improving_event_lines": [
+          "new optimal fitness found at 1: -87.7920",
+          "new optimal fitness found at 2: -86.8608",
+          "new optimal fitness found at 4: -83.4321",
+          "CROSSOVER (0 x 4): new optimal fitness found at 2: -8.3174e+01",
+          "CROSSOVER (1 x 2) & MUTATION: new optimal fitness found at 6: -8.2178e+01",
+          "CROSSOVER (0 x 3): new optimal fitness found at 2: -8.2030e+01",
+          "CROSSOVER (2 x 0): new optimal fitness found at 6: -8.0767e+01",
+          "CROSSOVER (2 x 0): new optimal fitness found at 7: -8.0422e+01",
+          "CROSSOVER (0 x 2) & MUTATION: new optimal fitness found at 2: -7.7833e+01",
+          "CROSSOVER (0 x 2): new optimal fitness found at 3: -7.7754e+01",
+          "CROSSOVER (0 x 3): new optimal fitness found at 2: -7.7456e+01",
+          "CROSSOVER (3 x 0): new optimal fitness found at 8: -7.7128e+01",
+          "CROSSOVER (1 x 0): new optimal fitness found at 4: -7.7089e+01",
+          "CROSSOVER (0 x 1): new optimal fitness found at 2: -7.7020e+01",
+          "CROSSOVER (1 x 0): new optimal fitness found at 5: -7.6768e+01"
+        ],
+        "deletion_event_lines": [
+          "Worst 8 vertices have been deleted (corresponds to ~1%)",
+          "Worst 8 vertices have been deleted (corresponds to ~1%)",
+          "Worst 7 vertices have been deleted (corresponds to ~1%)",
+          "Worst 6 vertices have been deleted (corresponds to ~1%)",
+          "Worst 5 vertices have been deleted (corresponds to ~1%)",
+          "Worst 5 vertices have been deleted (corresponds to ~1%)",
+          "Worst 4 vertices have been deleted (corresponds to ~1%)",
+          "Deleting worst vertices : 9 vertices have been deleted",
+          "Worst 3 vertices have been deleted (corresponds to ~1%)"
+        ],
+        "completed_generations_printed": 37,
+        "generation_prints_contiguous": true,
+        "last_generation_best_fitness_print": {
+          "completed_generation_number": 37,
+          "best_fitness_print": "-7.6768e+01",
+          "printed_value": -76.768,
+          "rounding_interval_lower": -76.7685,
+          "rounding_interval_upper": -76.7675
+        },
+        "exact_candidate_evaluations": null,
+        "exact_final_double_fitness": null,
+        "exact_termination_code": null,
+        "scope": "actual low-verbosity prints; source branch audit separate"
+      },
+      {
+        "defect_number": 5,
+        "initial_population_fitness_prints": [
+          {
+            "slot": 0,
+            "text": "-119.253345",
+            "value": -119.253345
+          },
+          {
+            "slot": 1,
+            "text": "-118.130763",
+            "value": -118.130763
+          },
+          {
+            "slot": 2,
+            "text": "-119.934618",
+            "value": -119.934618
+          },
+          {
+            "slot": 3,
+            "text": "-117.926996",
+            "value": -117.926996
+          },
+          {
+            "slot": 4,
+            "text": "-119.315913",
+            "value": -119.315913
+          },
+          {
+            "slot": 5,
+            "text": "-119.843479",
+            "value": -119.843479
+          },
+          {
+            "slot": 6,
+            "text": "-119.652781",
+            "value": -119.652781
+          },
+          {
+            "slot": 7,
+            "text": "-119.253345",
+            "value": -119.253345
+          },
+          {
+            "slot": 8,
+            "text": "-118.829210",
+            "value": -118.82921
+          },
+          {
+            "slot": 9,
+            "text": "-119.280382",
+            "value": -119.280382
+          }
+        ],
+        "generation_rows": [
+          {
+            "completed_generation_number": 1,
+            "best_fitness_print": "-1.1793e+02",
+            "printed_value": -117.93,
+            "rounding_interval_lower": -117.935,
+            "rounding_interval_upper": -117.92500000000001
+          },
+          {
+            "completed_generation_number": 2,
+            "best_fitness_print": "-1.1740e+02",
+            "printed_value": -117.4,
+            "rounding_interval_lower": -117.405,
+            "rounding_interval_upper": -117.39500000000001
+          },
+          {
+            "completed_generation_number": 3,
+            "best_fitness_print": "-1.1740e+02",
+            "printed_value": -117.4,
+            "rounding_interval_lower": -117.405,
+            "rounding_interval_upper": -117.39500000000001
+          },
+          {
+            "completed_generation_number": 4,
+            "best_fitness_print": "-1.1740e+02",
+            "printed_value": -117.4,
+            "rounding_interval_lower": -117.405,
+            "rounding_interval_upper": -117.39500000000001
+          },
+          {
+            "completed_generation_number": 5,
+            "best_fitness_print": "-1.1732e+02",
+            "printed_value": -117.32,
+            "rounding_interval_lower": -117.32499999999999,
+            "rounding_interval_upper": -117.315
+          },
+          {
+            "completed_generation_number": 6,
+            "best_fitness_print": "-1.1731e+02",
+            "printed_value": -117.31,
+            "rounding_interval_lower": -117.315,
+            "rounding_interval_upper": -117.305
+          },
+          {
+            "completed_generation_number": 7,
+            "best_fitness_print": "-1.1731e+02",
+            "printed_value": -117.31,
+            "rounding_interval_lower": -117.315,
+            "rounding_interval_upper": -117.305
+          },
+          {
+            "completed_generation_number": 8,
+            "best_fitness_print": "-1.1710e+02",
+            "printed_value": -117.1,
+            "rounding_interval_lower": -117.10499999999999,
+            "rounding_interval_upper": -117.095
+          },
+          {
+            "completed_generation_number": 9,
+            "best_fitness_print": "-1.1710e+02",
+            "printed_value": -117.1,
+            "rounding_interval_lower": -117.10499999999999,
+            "rounding_interval_upper": -117.095
+          },
+          {
+            "completed_generation_number": 10,
+            "best_fitness_print": "-1.1710e+02",
+            "printed_value": -117.1,
+            "rounding_interval_lower": -117.10499999999999,
+            "rounding_interval_upper": -117.095
+          },
+          {
+            "completed_generation_number": 11,
+            "best_fitness_print": "-1.1710e+02",
+            "printed_value": -117.1,
+            "rounding_interval_lower": -117.10499999999999,
+            "rounding_interval_upper": -117.095
+          },
+          {
+            "completed_generation_number": 12,
+            "best_fitness_print": "-1.1710e+02",
+            "printed_value": -117.1,
+            "rounding_interval_lower": -117.10499999999999,
+            "rounding_interval_upper": -117.095
+          },
+          {
+            "completed_generation_number": 13,
+            "best_fitness_print": "-1.1710e+02",
+            "printed_value": -117.1,
+            "rounding_interval_lower": -117.10499999999999,
+            "rounding_interval_upper": -117.095
+          },
+          {
+            "completed_generation_number": 14,
+            "best_fitness_print": "-1.1690e+02",
+            "printed_value": -116.9,
+            "rounding_interval_lower": -116.905,
+            "rounding_interval_upper": -116.89500000000001
+          },
+          {
+            "completed_generation_number": 15,
+            "best_fitness_print": "-1.1690e+02",
+            "printed_value": -116.9,
+            "rounding_interval_lower": -116.905,
+            "rounding_interval_upper": -116.89500000000001
+          },
+          {
+            "completed_generation_number": 16,
+            "best_fitness_print": "-1.1690e+02",
+            "printed_value": -116.9,
+            "rounding_interval_lower": -116.905,
+            "rounding_interval_upper": -116.89500000000001
+          },
+          {
+            "completed_generation_number": 17,
+            "best_fitness_print": "-1.1690e+02",
+            "printed_value": -116.9,
+            "rounding_interval_lower": -116.905,
+            "rounding_interval_upper": -116.89500000000001
+          },
+          {
+            "completed_generation_number": 18,
+            "best_fitness_print": "-1.1690e+02",
+            "printed_value": -116.9,
+            "rounding_interval_lower": -116.905,
+            "rounding_interval_upper": -116.89500000000001
+          },
+          {
+            "completed_generation_number": 19,
+            "best_fitness_print": "-1.1690e+02",
+            "printed_value": -116.9,
+            "rounding_interval_lower": -116.905,
+            "rounding_interval_upper": -116.89500000000001
+          },
+          {
+            "completed_generation_number": 20,
+            "best_fitness_print": "-1.1690e+02",
+            "printed_value": -116.9,
+            "rounding_interval_lower": -116.905,
+            "rounding_interval_upper": -116.89500000000001
+          },
+          {
+            "completed_generation_number": 21,
+            "best_fitness_print": "-1.1690e+02",
+            "printed_value": -116.9,
+            "rounding_interval_lower": -116.905,
+            "rounding_interval_upper": -116.89500000000001
+          },
+          {
+            "completed_generation_number": 22,
+            "best_fitness_print": "-1.1690e+02",
+            "printed_value": -116.9,
+            "rounding_interval_lower": -116.905,
+            "rounding_interval_upper": -116.89500000000001
+          },
+          {
+            "completed_generation_number": 23,
+            "best_fitness_print": "-1.1690e+02",
+            "printed_value": -116.9,
+            "rounding_interval_lower": -116.905,
+            "rounding_interval_upper": -116.89500000000001
+          },
+          {
+            "completed_generation_number": 24,
+            "best_fitness_print": "-1.1690e+02",
+            "printed_value": -116.9,
+            "rounding_interval_lower": -116.905,
+            "rounding_interval_upper": -116.89500000000001
+          }
+        ],
+        "improving_event_lines": [
+          "new optimal fitness found at 1: -118.1308",
+          "new optimal fitness found at 3: -117.9270",
+          "replacement 0 MUTATION: new optimal fitness found at 1: -1.1740e+02",
+          "CROSSOVER (4 x 0) & MUTATION: new optimal fitness found at 9: -1.1732e+02",
+          "CROSSOVER (0 x 4) & MUTATION: new optimal fitness found at 2: -1.1731e+02",
+          "replacement 0 MUTATION: new optimal fitness found at 1: -1.1718e+02",
+          "CROSSOVER (1 x 0): new optimal fitness found at 4: -1.1710e+02",
+          "CROSSOVER (1 x 0) & MUTATION: new optimal fitness found at 4: -1.1710e+02",
+          "CROSSOVER (3 x 0) & MUTATION: new optimal fitness found at 9: -1.1690e+02"
+        ],
+        "deletion_event_lines": [
+          "Deleting worst vertices : 0 vertices have been deleted"
+        ],
+        "completed_generations_printed": 24,
+        "generation_prints_contiguous": true,
+        "last_generation_best_fitness_print": {
+          "completed_generation_number": 24,
+          "best_fitness_print": "-1.1690e+02",
+          "printed_value": -116.9,
+          "rounding_interval_lower": -116.905,
+          "rounding_interval_upper": -116.89500000000001
+        },
+        "exact_candidate_evaluations": null,
+        "exact_final_double_fitness": null,
+        "exact_termination_code": null,
+        "scope": "actual low-verbosity prints; source branch audit separate"
+      },
+      {
+        "defect_number": 6,
+        "initial_population_fitness_prints": [
+          {
+            "slot": 0,
+            "text": "-84.355867",
+            "value": -84.355867
+          },
+          {
+            "slot": 1,
+            "text": "-86.230613",
+            "value": -86.230613
+          },
+          {
+            "slot": 2,
+            "text": "-82.470510",
+            "value": -82.47051
+          },
+          {
+            "slot": 3,
+            "text": "-93.284686",
+            "value": -93.284686
+          },
+          {
+            "slot": 4,
+            "text": "-86.906342",
+            "value": -86.906342
+          },
+          {
+            "slot": 5,
+            "text": "-90.758865",
+            "value": -90.758865
+          },
+          {
+            "slot": 6,
+            "text": "-92.482634",
+            "value": -92.482634
+          },
+          {
+            "slot": 7,
+            "text": "-84.224178",
+            "value": -84.224178
+          },
+          {
+            "slot": 8,
+            "text": "-85.913786",
+            "value": -85.913786
+          },
+          {
+            "slot": 9,
+            "text": "-96.987533",
+            "value": -96.987533
+          }
+        ],
+        "generation_rows": [
+          {
+            "completed_generation_number": 1,
+            "best_fitness_print": "-8.2471e+01",
+            "printed_value": -82.471,
+            "rounding_interval_lower": -82.4715,
+            "rounding_interval_upper": -82.4705
+          },
+          {
+            "completed_generation_number": 2,
+            "best_fitness_print": "-8.2471e+01",
+            "printed_value": -82.471,
+            "rounding_interval_lower": -82.4715,
+            "rounding_interval_upper": -82.4705
+          },
+          {
+            "completed_generation_number": 3,
+            "best_fitness_print": "-8.2471e+01",
+            "printed_value": -82.471,
+            "rounding_interval_lower": -82.4715,
+            "rounding_interval_upper": -82.4705
+          },
+          {
+            "completed_generation_number": 4,
+            "best_fitness_print": "-8.2471e+01",
+            "printed_value": -82.471,
+            "rounding_interval_lower": -82.4715,
+            "rounding_interval_upper": -82.4705
+          },
+          {
+            "completed_generation_number": 5,
+            "best_fitness_print": "-8.2471e+01",
+            "printed_value": -82.471,
+            "rounding_interval_lower": -82.4715,
+            "rounding_interval_upper": -82.4705
+          },
+          {
+            "completed_generation_number": 6,
+            "best_fitness_print": "-8.2471e+01",
+            "printed_value": -82.471,
+            "rounding_interval_lower": -82.4715,
+            "rounding_interval_upper": -82.4705
+          },
+          {
+            "completed_generation_number": 7,
+            "best_fitness_print": "-8.2471e+01",
+            "printed_value": -82.471,
+            "rounding_interval_lower": -82.4715,
+            "rounding_interval_upper": -82.4705
+          },
+          {
+            "completed_generation_number": 8,
+            "best_fitness_print": "-8.2471e+01",
+            "printed_value": -82.471,
+            "rounding_interval_lower": -82.4715,
+            "rounding_interval_upper": -82.4705
+          },
+          {
+            "completed_generation_number": 9,
+            "best_fitness_print": "-8.2471e+01",
+            "printed_value": -82.471,
+            "rounding_interval_lower": -82.4715,
+            "rounding_interval_upper": -82.4705
+          },
+          {
+            "completed_generation_number": 10,
+            "best_fitness_print": "-8.2471e+01",
+            "printed_value": -82.471,
+            "rounding_interval_lower": -82.4715,
+            "rounding_interval_upper": -82.4705
+          },
+          {
+            "completed_generation_number": 11,
+            "best_fitness_print": "-8.2471e+01",
+            "printed_value": -82.471,
+            "rounding_interval_lower": -82.4715,
+            "rounding_interval_upper": -82.4705
+          },
+          {
+            "completed_generation_number": 12,
+            "best_fitness_print": "-8.2403e+01",
+            "printed_value": -82.403,
+            "rounding_interval_lower": -82.40350000000001,
+            "rounding_interval_upper": -82.4025
+          },
+          {
+            "completed_generation_number": 13,
+            "best_fitness_print": "-8.2403e+01",
+            "printed_value": -82.403,
+            "rounding_interval_lower": -82.40350000000001,
+            "rounding_interval_upper": -82.4025
+          },
+          {
+            "completed_generation_number": 14,
+            "best_fitness_print": "-8.2403e+01",
+            "printed_value": -82.403,
+            "rounding_interval_lower": -82.40350000000001,
+            "rounding_interval_upper": -82.4025
+          },
+          {
+            "completed_generation_number": 15,
+            "best_fitness_print": "-8.2403e+01",
+            "printed_value": -82.403,
+            "rounding_interval_lower": -82.40350000000001,
+            "rounding_interval_upper": -82.4025
+          },
+          {
+            "completed_generation_number": 16,
+            "best_fitness_print": "-8.2403e+01",
+            "printed_value": -82.403,
+            "rounding_interval_lower": -82.40350000000001,
+            "rounding_interval_upper": -82.4025
+          },
+          {
+            "completed_generation_number": 17,
+            "best_fitness_print": "-8.2403e+01",
+            "printed_value": -82.403,
+            "rounding_interval_lower": -82.40350000000001,
+            "rounding_interval_upper": -82.4025
+          },
+          {
+            "completed_generation_number": 18,
+            "best_fitness_print": "-8.2403e+01",
+            "printed_value": -82.403,
+            "rounding_interval_lower": -82.40350000000001,
+            "rounding_interval_upper": -82.4025
+          },
+          {
+            "completed_generation_number": 19,
+            "best_fitness_print": "-8.2403e+01",
+            "printed_value": -82.403,
+            "rounding_interval_lower": -82.40350000000001,
+            "rounding_interval_upper": -82.4025
+          },
+          {
+            "completed_generation_number": 20,
+            "best_fitness_print": "-8.2403e+01",
+            "printed_value": -82.403,
+            "rounding_interval_lower": -82.40350000000001,
+            "rounding_interval_upper": -82.4025
+          },
+          {
+            "completed_generation_number": 21,
+            "best_fitness_print": "-8.2403e+01",
+            "printed_value": -82.403,
+            "rounding_interval_lower": -82.40350000000001,
+            "rounding_interval_upper": -82.4025
+          },
+          {
+            "completed_generation_number": 22,
+            "best_fitness_print": "-8.2403e+01",
+            "printed_value": -82.403,
+            "rounding_interval_lower": -82.40350000000001,
+            "rounding_interval_upper": -82.4025
+          }
+        ],
+        "improving_event_lines": [
+          "new optimal fitness found at 2: -82.4705",
+          "CROSSOVER (0 x 1) & MUTATION: new optimal fitness found at 3: -8.2403e+01"
+        ],
+        "deletion_event_lines": [
+          "Deleting worst vertices : 2 vertices have been deleted",
+          "Deleting worst vertices : 0 vertices have been deleted"
+        ],
+        "completed_generations_printed": 22,
+        "generation_prints_contiguous": true,
+        "last_generation_best_fitness_print": {
+          "completed_generation_number": 22,
+          "best_fitness_print": "-8.2403e+01",
+          "printed_value": -82.403,
+          "rounding_interval_lower": -82.40350000000001,
+          "rounding_interval_upper": -82.4025
+        },
+        "exact_candidate_evaluations": null,
+        "exact_final_double_fitness": null,
+        "exact_termination_code": null,
+        "scope": "actual low-verbosity prints; source branch audit separate"
+      },
+      {
+        "defect_number": 7,
+        "initial_population_fitness_prints": [
+          {
+            "slot": 0,
+            "text": "-88.432072",
+            "value": -88.432072
+          },
+          {
+            "slot": 1,
+            "text": "-90.131657",
+            "value": -90.131657
+          },
+          {
+            "slot": 2,
+            "text": "-86.500309",
+            "value": -86.500309
+          },
+          {
+            "slot": 3,
+            "text": "-87.361862",
+            "value": -87.361862
+          },
+          {
+            "slot": 4,
+            "text": "-88.546653",
+            "value": -88.546653
+          },
+          {
+            "slot": 5,
+            "text": "-88.226527",
+            "value": -88.226527
+          },
+          {
+            "slot": 6,
+            "text": "-89.480974",
+            "value": -89.480974
+          },
+          {
+            "slot": 7,
+            "text": "-88.942541",
+            "value": -88.942541
+          },
+          {
+            "slot": 8,
+            "text": "-88.444669",
+            "value": -88.444669
+          },
+          {
+            "slot": 9,
+            "text": "-86.695753",
+            "value": -86.695753
+          }
+        ],
+        "generation_rows": [
+          {
+            "completed_generation_number": 1,
+            "best_fitness_print": "-8.5199e+01",
+            "printed_value": -85.199,
+            "rounding_interval_lower": -85.1995,
+            "rounding_interval_upper": -85.1985
+          },
+          {
+            "completed_generation_number": 2,
+            "best_fitness_print": "-8.5199e+01",
+            "printed_value": -85.199,
+            "rounding_interval_lower": -85.1995,
+            "rounding_interval_upper": -85.1985
+          },
+          {
+            "completed_generation_number": 3,
+            "best_fitness_print": "-8.5179e+01",
+            "printed_value": -85.179,
+            "rounding_interval_lower": -85.1795,
+            "rounding_interval_upper": -85.1785
+          },
+          {
+            "completed_generation_number": 4,
+            "best_fitness_print": "-8.5179e+01",
+            "printed_value": -85.179,
+            "rounding_interval_lower": -85.1795,
+            "rounding_interval_upper": -85.1785
+          },
+          {
+            "completed_generation_number": 5,
+            "best_fitness_print": "-8.4333e+01",
+            "printed_value": -84.333,
+            "rounding_interval_lower": -84.3335,
+            "rounding_interval_upper": -84.3325
+          },
+          {
+            "completed_generation_number": 6,
+            "best_fitness_print": "-8.4333e+01",
+            "printed_value": -84.333,
+            "rounding_interval_lower": -84.3335,
+            "rounding_interval_upper": -84.3325
+          },
+          {
+            "completed_generation_number": 7,
+            "best_fitness_print": "-8.4333e+01",
+            "printed_value": -84.333,
+            "rounding_interval_lower": -84.3335,
+            "rounding_interval_upper": -84.3325
+          },
+          {
+            "completed_generation_number": 8,
+            "best_fitness_print": "-8.4333e+01",
+            "printed_value": -84.333,
+            "rounding_interval_lower": -84.3335,
+            "rounding_interval_upper": -84.3325
+          },
+          {
+            "completed_generation_number": 9,
+            "best_fitness_print": "-8.4333e+01",
+            "printed_value": -84.333,
+            "rounding_interval_lower": -84.3335,
+            "rounding_interval_upper": -84.3325
+          },
+          {
+            "completed_generation_number": 10,
+            "best_fitness_print": "-8.4333e+01",
+            "printed_value": -84.333,
+            "rounding_interval_lower": -84.3335,
+            "rounding_interval_upper": -84.3325
+          },
+          {
+            "completed_generation_number": 11,
+            "best_fitness_print": "-8.4333e+01",
+            "printed_value": -84.333,
+            "rounding_interval_lower": -84.3335,
+            "rounding_interval_upper": -84.3325
+          },
+          {
+            "completed_generation_number": 12,
+            "best_fitness_print": "-8.4333e+01",
+            "printed_value": -84.333,
+            "rounding_interval_lower": -84.3335,
+            "rounding_interval_upper": -84.3325
+          },
+          {
+            "completed_generation_number": 13,
+            "best_fitness_print": "-8.4333e+01",
+            "printed_value": -84.333,
+            "rounding_interval_lower": -84.3335,
+            "rounding_interval_upper": -84.3325
+          },
+          {
+            "completed_generation_number": 14,
+            "best_fitness_print": "-8.4333e+01",
+            "printed_value": -84.333,
+            "rounding_interval_lower": -84.3335,
+            "rounding_interval_upper": -84.3325
+          },
+          {
+            "completed_generation_number": 15,
+            "best_fitness_print": "-8.4333e+01",
+            "printed_value": -84.333,
+            "rounding_interval_lower": -84.3335,
+            "rounding_interval_upper": -84.3325
+          },
+          {
+            "completed_generation_number": 16,
+            "best_fitness_print": "-8.4333e+01",
+            "printed_value": -84.333,
+            "rounding_interval_lower": -84.3335,
+            "rounding_interval_upper": -84.3325
+          },
+          {
+            "completed_generation_number": 17,
+            "best_fitness_print": "-8.3924e+01",
+            "printed_value": -83.924,
+            "rounding_interval_lower": -83.92450000000001,
+            "rounding_interval_upper": -83.9235
+          },
+          {
+            "completed_generation_number": 18,
+            "best_fitness_print": "-8.3902e+01",
+            "printed_value": -83.902,
+            "rounding_interval_lower": -83.9025,
+            "rounding_interval_upper": -83.9015
+          },
+          {
+            "completed_generation_number": 19,
+            "best_fitness_print": "-8.3173e+01",
+            "printed_value": -83.173,
+            "rounding_interval_lower": -83.1735,
+            "rounding_interval_upper": -83.1725
+          },
+          {
+            "completed_generation_number": 20,
+            "best_fitness_print": "-8.3173e+01",
+            "printed_value": -83.173,
+            "rounding_interval_lower": -83.1735,
+            "rounding_interval_upper": -83.1725
+          },
+          {
+            "completed_generation_number": 21,
+            "best_fitness_print": "-8.3171e+01",
+            "printed_value": -83.171,
+            "rounding_interval_lower": -83.17150000000001,
+            "rounding_interval_upper": -83.1705
+          },
+          {
+            "completed_generation_number": 22,
+            "best_fitness_print": "-8.3171e+01",
+            "printed_value": -83.171,
+            "rounding_interval_lower": -83.17150000000001,
+            "rounding_interval_upper": -83.1705
+          },
+          {
+            "completed_generation_number": 23,
+            "best_fitness_print": "-8.3171e+01",
+            "printed_value": -83.171,
+            "rounding_interval_lower": -83.17150000000001,
+            "rounding_interval_upper": -83.1705
+          },
+          {
+            "completed_generation_number": 24,
+            "best_fitness_print": "-8.3055e+01",
+            "printed_value": -83.055,
+            "rounding_interval_lower": -83.05550000000001,
+            "rounding_interval_upper": -83.0545
+          },
+          {
+            "completed_generation_number": 25,
+            "best_fitness_print": "-8.2958e+01",
+            "printed_value": -82.958,
+            "rounding_interval_lower": -82.9585,
+            "rounding_interval_upper": -82.9575
+          },
+          {
+            "completed_generation_number": 26,
+            "best_fitness_print": "-8.2606e+01",
+            "printed_value": -82.606,
+            "rounding_interval_lower": -82.6065,
+            "rounding_interval_upper": -82.60549999999999
+          },
+          {
+            "completed_generation_number": 27,
+            "best_fitness_print": "-8.2606e+01",
+            "printed_value": -82.606,
+            "rounding_interval_lower": -82.6065,
+            "rounding_interval_upper": -82.60549999999999
+          },
+          {
+            "completed_generation_number": 28,
+            "best_fitness_print": "-8.2606e+01",
+            "printed_value": -82.606,
+            "rounding_interval_lower": -82.6065,
+            "rounding_interval_upper": -82.60549999999999
+          },
+          {
+            "completed_generation_number": 29,
+            "best_fitness_print": "-8.2592e+01",
+            "printed_value": -82.592,
+            "rounding_interval_lower": -82.5925,
+            "rounding_interval_upper": -82.5915
+          },
+          {
+            "completed_generation_number": 30,
+            "best_fitness_print": "-8.2490e+01",
+            "printed_value": -82.49,
+            "rounding_interval_lower": -82.4905,
+            "rounding_interval_upper": -82.48949999999999
+          },
+          {
+            "completed_generation_number": 31,
+            "best_fitness_print": "-8.2387e+01",
+            "printed_value": -82.387,
+            "rounding_interval_lower": -82.3875,
+            "rounding_interval_upper": -82.3865
+          },
+          {
+            "completed_generation_number": 32,
+            "best_fitness_print": "-8.2387e+01",
+            "printed_value": -82.387,
+            "rounding_interval_lower": -82.3875,
+            "rounding_interval_upper": -82.3865
+          },
+          {
+            "completed_generation_number": 33,
+            "best_fitness_print": "-8.2387e+01",
+            "printed_value": -82.387,
+            "rounding_interval_lower": -82.3875,
+            "rounding_interval_upper": -82.3865
+          },
+          {
+            "completed_generation_number": 34,
+            "best_fitness_print": "-8.2387e+01",
+            "printed_value": -82.387,
+            "rounding_interval_lower": -82.3875,
+            "rounding_interval_upper": -82.3865
+          },
+          {
+            "completed_generation_number": 35,
+            "best_fitness_print": "-8.2387e+01",
+            "printed_value": -82.387,
+            "rounding_interval_lower": -82.3875,
+            "rounding_interval_upper": -82.3865
+          },
+          {
+            "completed_generation_number": 36,
+            "best_fitness_print": "-8.2387e+01",
+            "printed_value": -82.387,
+            "rounding_interval_lower": -82.3875,
+            "rounding_interval_upper": -82.3865
+          },
+          {
+            "completed_generation_number": 37,
+            "best_fitness_print": "-8.2387e+01",
+            "printed_value": -82.387,
+            "rounding_interval_lower": -82.3875,
+            "rounding_interval_upper": -82.3865
+          },
+          {
+            "completed_generation_number": 38,
+            "best_fitness_print": "-8.2387e+01",
+            "printed_value": -82.387,
+            "rounding_interval_lower": -82.3875,
+            "rounding_interval_upper": -82.3865
+          },
+          {
+            "completed_generation_number": 39,
+            "best_fitness_print": "-8.2387e+01",
+            "printed_value": -82.387,
+            "rounding_interval_lower": -82.3875,
+            "rounding_interval_upper": -82.3865
+          },
+          {
+            "completed_generation_number": 40,
+            "best_fitness_print": "-8.2387e+01",
+            "printed_value": -82.387,
+            "rounding_interval_lower": -82.3875,
+            "rounding_interval_upper": -82.3865
+          },
+          {
+            "completed_generation_number": 41,
+            "best_fitness_print": "-8.2387e+01",
+            "printed_value": -82.387,
+            "rounding_interval_lower": -82.3875,
+            "rounding_interval_upper": -82.3865
+          }
+        ],
+        "improving_event_lines": [
+          "new optimal fitness found at 2: -86.5003",
+          "CROSSOVER (1 x 4) & MUTATION: new optimal fitness found at 4: -8.5779e+01",
+          "CROSSOVER (2 x 1): new optimal fitness found at 7: -8.5199e+01",
+          "CROSSOVER (2 x 1) & MUTATION: new optimal fitness found at 6: -8.5179e+01",
+          "replacement 0 MUTATION: new optimal fitness found at 1: -8.4333e+01",
+          "replacement 0 MUTATION: new optimal fitness found at 1: -8.3924e+01",
+          "CROSSOVER (1 x 0) & MUTATION: new optimal fitness found at 4: -8.3902e+01",
+          "CROSSOVER (0 x 2): new optimal fitness found at 2: -8.3445e+01",
+          "CROSSOVER (2 x 1) & MUTATION: new optimal fitness found at 7: -8.3173e+01",
+          "CROSSOVER (1 x 0) & MUTATION: new optimal fitness found at 5: -8.3171e+01",
+          "CROSSOVER (4 x 1): new optimal fitness found at 9: -8.3055e+01",
+          "CROSSOVER (0 x 2): new optimal fitness found at 3: -8.2958e+01",
+          "CROSSOVER (2 x 0): new optimal fitness found at 7: -8.2606e+01",
+          "CROSSOVER (0 x 2): new optimal fitness found at 3: -8.2592e+01",
+          "CROSSOVER (1 x 0) & MUTATION: new optimal fitness found at 4: -8.2490e+01",
+          "CROSSOVER (0 x 1): new optimal fitness found at 3: -8.2387e+01"
+        ],
+        "deletion_event_lines": [
+          "Worst vertex has been deleted",
+          "Deleting worst vertices : 2 vertices have been deleted",
+          "Deleting worst vertices : 0 vertices have been deleted"
+        ],
+        "completed_generations_printed": 41,
+        "generation_prints_contiguous": true,
+        "last_generation_best_fitness_print": {
+          "completed_generation_number": 41,
+          "best_fitness_print": "-8.2387e+01",
+          "printed_value": -82.387,
+          "rounding_interval_lower": -82.3875,
+          "rounding_interval_upper": -82.3865
+        },
+        "exact_candidate_evaluations": null,
+        "exact_final_double_fitness": null,
+        "exact_termination_code": null,
+        "scope": "actual low-verbosity prints; source branch audit separate"
+      },
+      {
+        "defect_number": 8,
+        "initial_population_fitness_prints": [
+          {
+            "slot": 0,
+            "text": "-88.148246",
+            "value": -88.148246
+          },
+          {
+            "slot": 1,
+            "text": "-95.608189",
+            "value": -95.608189
+          },
+          {
+            "slot": 2,
+            "text": "-87.728801",
+            "value": -87.728801
+          },
+          {
+            "slot": 3,
+            "text": "-88.679449",
+            "value": -88.679449
+          },
+          {
+            "slot": 4,
+            "text": "-88.679047",
+            "value": -88.679047
+          },
+          {
+            "slot": 5,
+            "text": "-88.885187",
+            "value": -88.885187
+          },
+          {
+            "slot": 6,
+            "text": "-89.866559",
+            "value": -89.866559
+          },
+          {
+            "slot": 7,
+            "text": "-88.671762",
+            "value": -88.671762
+          },
+          {
+            "slot": 8,
+            "text": "-88.068372",
+            "value": -88.068372
+          },
+          {
+            "slot": 9,
+            "text": "-87.025126",
+            "value": -87.025126
+          }
+        ],
+        "generation_rows": [
+          {
+            "completed_generation_number": 1,
+            "best_fitness_print": "-8.7025e+01",
+            "printed_value": -87.025,
+            "rounding_interval_lower": -87.02550000000001,
+            "rounding_interval_upper": -87.0245
+          },
+          {
+            "completed_generation_number": 2,
+            "best_fitness_print": "-8.5263e+01",
+            "printed_value": -85.263,
+            "rounding_interval_lower": -85.26350000000001,
+            "rounding_interval_upper": -85.2625
+          },
+          {
+            "completed_generation_number": 3,
+            "best_fitness_print": "-8.2248e+01",
+            "printed_value": -82.248,
+            "rounding_interval_lower": -82.2485,
+            "rounding_interval_upper": -82.2475
+          },
+          {
+            "completed_generation_number": 4,
+            "best_fitness_print": "-8.1522e+01",
+            "printed_value": -81.522,
+            "rounding_interval_lower": -81.52250000000001,
+            "rounding_interval_upper": -81.5215
+          },
+          {
+            "completed_generation_number": 5,
+            "best_fitness_print": "-8.1522e+01",
+            "printed_value": -81.522,
+            "rounding_interval_lower": -81.52250000000001,
+            "rounding_interval_upper": -81.5215
+          },
+          {
+            "completed_generation_number": 6,
+            "best_fitness_print": "-8.1522e+01",
+            "printed_value": -81.522,
+            "rounding_interval_lower": -81.52250000000001,
+            "rounding_interval_upper": -81.5215
+          },
+          {
+            "completed_generation_number": 7,
+            "best_fitness_print": "-8.1522e+01",
+            "printed_value": -81.522,
+            "rounding_interval_lower": -81.52250000000001,
+            "rounding_interval_upper": -81.5215
+          },
+          {
+            "completed_generation_number": 8,
+            "best_fitness_print": "-8.1324e+01",
+            "printed_value": -81.324,
+            "rounding_interval_lower": -81.3245,
+            "rounding_interval_upper": -81.3235
+          },
+          {
+            "completed_generation_number": 9,
+            "best_fitness_print": "-8.1324e+01",
+            "printed_value": -81.324,
+            "rounding_interval_lower": -81.3245,
+            "rounding_interval_upper": -81.3235
+          },
+          {
+            "completed_generation_number": 10,
+            "best_fitness_print": "-8.1324e+01",
+            "printed_value": -81.324,
+            "rounding_interval_lower": -81.3245,
+            "rounding_interval_upper": -81.3235
+          },
+          {
+            "completed_generation_number": 11,
+            "best_fitness_print": "-8.1324e+01",
+            "printed_value": -81.324,
+            "rounding_interval_lower": -81.3245,
+            "rounding_interval_upper": -81.3235
+          },
+          {
+            "completed_generation_number": 12,
+            "best_fitness_print": "-8.1324e+01",
+            "printed_value": -81.324,
+            "rounding_interval_lower": -81.3245,
+            "rounding_interval_upper": -81.3235
+          },
+          {
+            "completed_generation_number": 13,
+            "best_fitness_print": "-8.0854e+01",
+            "printed_value": -80.854,
+            "rounding_interval_lower": -80.8545,
+            "rounding_interval_upper": -80.8535
+          },
+          {
+            "completed_generation_number": 14,
+            "best_fitness_print": "-8.0854e+01",
+            "printed_value": -80.854,
+            "rounding_interval_lower": -80.8545,
+            "rounding_interval_upper": -80.8535
+          },
+          {
+            "completed_generation_number": 15,
+            "best_fitness_print": "-8.0854e+01",
+            "printed_value": -80.854,
+            "rounding_interval_lower": -80.8545,
+            "rounding_interval_upper": -80.8535
+          },
+          {
+            "completed_generation_number": 16,
+            "best_fitness_print": "-8.0854e+01",
+            "printed_value": -80.854,
+            "rounding_interval_lower": -80.8545,
+            "rounding_interval_upper": -80.8535
+          },
+          {
+            "completed_generation_number": 17,
+            "best_fitness_print": "-8.0854e+01",
+            "printed_value": -80.854,
+            "rounding_interval_lower": -80.8545,
+            "rounding_interval_upper": -80.8535
+          },
+          {
+            "completed_generation_number": 18,
+            "best_fitness_print": "-8.0854e+01",
+            "printed_value": -80.854,
+            "rounding_interval_lower": -80.8545,
+            "rounding_interval_upper": -80.8535
+          },
+          {
+            "completed_generation_number": 19,
+            "best_fitness_print": "-8.0854e+01",
+            "printed_value": -80.854,
+            "rounding_interval_lower": -80.8545,
+            "rounding_interval_upper": -80.8535
+          },
+          {
+            "completed_generation_number": 20,
+            "best_fitness_print": "-8.0854e+01",
+            "printed_value": -80.854,
+            "rounding_interval_lower": -80.8545,
+            "rounding_interval_upper": -80.8535
+          },
+          {
+            "completed_generation_number": 21,
+            "best_fitness_print": "-8.0854e+01",
+            "printed_value": -80.854,
+            "rounding_interval_lower": -80.8545,
+            "rounding_interval_upper": -80.8535
+          },
+          {
+            "completed_generation_number": 22,
+            "best_fitness_print": "-8.0854e+01",
+            "printed_value": -80.854,
+            "rounding_interval_lower": -80.8545,
+            "rounding_interval_upper": -80.8535
+          },
+          {
+            "completed_generation_number": 23,
+            "best_fitness_print": "-8.0854e+01",
+            "printed_value": -80.854,
+            "rounding_interval_lower": -80.8545,
+            "rounding_interval_upper": -80.8535
+          },
+          {
+            "completed_generation_number": 24,
+            "best_fitness_print": "-8.0854e+01",
+            "printed_value": -80.854,
+            "rounding_interval_lower": -80.8545,
+            "rounding_interval_upper": -80.8535
+          },
+          {
+            "completed_generation_number": 25,
+            "best_fitness_print": "-8.0854e+01",
+            "printed_value": -80.854,
+            "rounding_interval_lower": -80.8545,
+            "rounding_interval_upper": -80.8535
+          },
+          {
+            "completed_generation_number": 26,
+            "best_fitness_print": "-8.0854e+01",
+            "printed_value": -80.854,
+            "rounding_interval_lower": -80.8545,
+            "rounding_interval_upper": -80.8535
+          },
+          {
+            "completed_generation_number": 27,
+            "best_fitness_print": "-8.0854e+01",
+            "printed_value": -80.854,
+            "rounding_interval_lower": -80.8545,
+            "rounding_interval_upper": -80.8535
+          },
+          {
+            "completed_generation_number": 28,
+            "best_fitness_print": "-8.0854e+01",
+            "printed_value": -80.854,
+            "rounding_interval_lower": -80.8545,
+            "rounding_interval_upper": -80.8535
+          }
+        ],
+        "improving_event_lines": [
+          "new optimal fitness found at 2: -87.7288",
+          "new optimal fitness found at 9: -87.0251",
+          "CROSSOVER (2 x 1) & MUTATION: new optimal fitness found at 7: -8.6915e+01",
+          "CROSSOVER (4 x 0) & MUTATION: new optimal fitness found at 9: -8.5263e+01",
+          "CROSSOVER (0 x 4): new optimal fitness found at 3: -8.4856e+01",
+          "CROSSOVER (0 x 4): new optimal fitness found at 4: -8.2248e+01",
+          "CROSSOVER (4 x 2) & MUTATION: new optimal fitness found at 8: -8.1522e+01",
+          "CROSSOVER (1 x 0) & MUTATION: new optimal fitness found at 5: -8.1324e+01",
+          "CROSSOVER (0 x 2) & MUTATION: new optimal fitness found at 2: -8.0854e+01"
+        ],
+        "deletion_event_lines": [
+          "Worst vertex has been deleted",
+          "Worst vertex has been deleted",
+          "Worst vertex has been deleted",
+          "Worst vertex has been deleted",
+          "Deleting worst vertices : 2 vertices have been deleted",
+          "Worst vertex has been deleted"
+        ],
+        "completed_generations_printed": 28,
+        "generation_prints_contiguous": true,
+        "last_generation_best_fitness_print": {
+          "completed_generation_number": 28,
+          "best_fitness_print": "-8.0854e+01",
+          "printed_value": -80.854,
+          "rounding_interval_lower": -80.8545,
+          "rounding_interval_upper": -80.8535
+        },
+        "exact_candidate_evaluations": null,
+        "exact_final_double_fitness": null,
+        "exact_termination_code": null,
+        "scope": "actual low-verbosity prints; source branch audit separate"
+      }
+    ],
+    "exact_total_evaluations": null,
+    "missing_fields_reason": "VERBOSE_MODE_LOW does not print number_of_patches, exact final double or explicit termination code",
+    "log_sha256": "8b76ef101d134ace851888f5ff4f96103709076994db5778328122c484f31c61"
+  },
+  "centering_sha256": "72e0094518dd360feec3ccec4c4ce61e96c8ed30b41610c13d45a8438bac1969",
+  "inputs_after_unchanged": true,
+  "cpu_affinity": [
+    100,
+    101,
+    102,
+    103
+  ],
+  "total_cpu_budget": 4,
+  "actual_native_threads": 1,
+  "process_exit_code": 0,
+  "child_max_rss_bytes": 721461248,
+  "cuda_memory_bytes": null,
+  "shared_load_average": [
+    49.83,
+    54.75,
+    61.32
+  ],
+  "shared_load_scope": "same host, different time; verbosity overhead; not a speed pair",
+  "overall_metric_equivalence": "not_assessed",
+  "full_diagnostic_wall_seconds": 168.2842080593109
+}

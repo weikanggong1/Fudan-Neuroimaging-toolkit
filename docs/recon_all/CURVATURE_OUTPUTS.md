@@ -2,7 +2,7 @@
 
 [返回阶段索引](CONDA_CPP_STAGES.md) · [单 T1 输出结构](README.md)
 
-标准流程先在每侧已配准球面上映射 folding atlas 的第 6 幅图，再对 `smoothwm` 计算曲率附图及统计。两个原生程序都从固定源码在 FNIT Conda 环境中编译；下面的官方命令只用于说明参数对应关系。
+标准流程先在每侧已配准球面上映射 folding atlas 的第 6 幅图，再对 `smoothwm` 计算曲率附图及统计。曲率统计已提供完整自有Python/Numba/PyTorch入口；原软件命令用于参数对应与独立benchmark。
 
 ## `avg_curv`：`_run_avg_curv(...)`
 
@@ -28,30 +28,40 @@ mrisp_paint -a 5 average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif#6 \
   surf/lh.sphere.reg surf/lh.avg_curv
 ```
 
-## 曲率附图：`_run_curvature_stats(...)`
+## 曲率附图与完整统计：`write_curvature_stats(...)`
 
-输入 `binary` 为 FNIT Conda 中的 `mris_curvature_stats`；`subject` 为被试目录；`hemi` 为 `lh` 或 `rh`；`assets` 为同一资产目录。函数无返回值；读取 `surf/H.smoothwm` 三角面及 `surf/H.curv`、`surf/H.sulc` 顶点图，生成 `stats/H.curv.stats` 文本和 `surf/H.smoothwm.{BE,C,FI,S}.crv` float32 顶点图。附图的顶点序号与 `smoothwm` 一致，曲率单位依各个指标定义；不能作为体素图读取。
+[完整七节说明与本版benchmark](FULL_CURVATURE_STATS_PYTHON_20261010.md)。
+输入为同侧自产 `surf/H.smoothwm` 三角网格及 `surf/H.curv`、`surf/H.sulc`
+FP32顶点图，全部沿原顶点顺序；网格坐标为surface RAS/mm。输出完整
+`stats/H.curv.stats` 和 `surf/H.smoothwm.{K,H,K1,K2,S,C,BE,FI}.crv`。
+函数不调用原版程序，不需要模板、权重或许可证。
 
 ```python
-from pathlib import Path
-from fnit.recon_all.native_free import _run_curvature_stats
+from fnit.recon_all.curvature_stats_python import write_curvature_stats
 
-_run_curvature_stats(
-    binary=Path("/opt/conda/envs/fnit/bin/mris_curvature_stats"),  # FNIT 自编译程序
-    subject=Path("/data/subjects/sub01"),  # 已有 smoothwm、curv、sulc 的目录
-    hemi="lh",  # 左半球；右侧使用 "rh"
-    assets=Path("/data/fnit-assets"),  # 已校验的 FNIT 资产目录
+curvature_report = write_curvature_stats(
+    subject_dir="/data/subjects/sub01",  # 自产smoothwm/curv/sulc被试目录
+    hemisphere="lh",                    # 左侧；右侧为rh
+    device="cuda:0",                    # 明确目标GPU；cpu也是完整自有路径
+    angle_backend="source_libm",        # 固定源acosf数学步骤及CPU sqrtf
+    averages=0,                         # 标准流程不额外平均原始纹理
+    overwrite=True,                     # 晚阶段按流程语义重写早期曲率输出
 )
 ```
 
-对应官方命令，在被试的 `scripts/` 目录执行：
+返回路径清单、网格规模、全部统计及含检查/传输/读写的总墙钟。
+两例四侧完整同输入回归中，八图与完整统计文件均逐字节一致。
+全参数、单位、限制与失败行为见完整说明；原版固定源码程序只保留
+独立参考用途，不以近似四图摘要代替完整curv.stats。
+
+### 固定参考命令
 
 ```bash
 mris_curvature_stats -m --writeCurvatureFiles -G \
   -o ../stats/lh.curv.stats -F smoothwm sub01 lh curv sulc
 ```
 
-## 真实 T1 的同输入核对
+## 历史同输入记录（2026-09-29）
 
 使用 2026-09-24 官方 `a_official` 的冻结左侧球面、`smoothwm` 和顶点图作输入，FNIT 使用 2026-09-29 新主页 Conda 环境编译的程序。对照的是已有官方结果文件；FNIT 标准运行路径不调用预装程序。
 

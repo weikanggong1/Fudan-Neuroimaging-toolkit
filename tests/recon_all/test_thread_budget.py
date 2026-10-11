@@ -52,6 +52,26 @@ class ThreadBudgetTests(unittest.TestCase):
         self.assertTrue(report["restoration_complete"])
         self.assertEqual(self.state, {"torch": 8, "numba": 12})
 
+    def test_initial_numba_openmp_changes_torch_even_if_caller_already_matches_budget(self):
+        self.state['torch'] = 4
+        initialized = False
+        original = self.module.numba.get_num_threads
+
+        def first_initialization():
+            nonlocal initialized
+            if not initialized:
+                self.state['torch'] = 12
+                initialized = True
+            return original()
+
+        self.module.numba.get_num_threads = first_initialization
+        with self.module.thread_budget(threads=4) as report:
+            self.assertEqual(self.state, {'torch': 4, 'numba': 4})
+            self.assertEqual(report['torch']['before'], 4)
+            self.assertEqual(report['torch']['after_numba_initialization'], 12)
+        self.assertEqual(self.state, {'torch': 4, 'numba': 12})
+        self.assertTrue(report['restoration_complete'])
+
     def test_rejects_above_capacity_before_mutation(self):
         with self.assertRaisesRegex(ValueError, "initial capacity 16"):
             with self.module.thread_budget(threads=17):

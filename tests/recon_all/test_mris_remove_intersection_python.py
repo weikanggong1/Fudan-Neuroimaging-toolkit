@@ -69,15 +69,26 @@ def test_positive_branch_rechecks_repaired_surface(tmp_path) -> None:
     binary = tmp_path / "mris_remove_intersection"
     binary.write_text("binary")
 
-    def repair(command, *, env, check):
-        assert command[:2] == [str(binary), str(source)]
-        assert check
-        assert env["FREESURFER_HOME"] == str(tmp_path)
-        corrected, corrected_faces = tetrahedra(3.0)
-        fs.write_geometry(command[2], corrected, corrected_faces)
-
-    with patch("fnit.recon_all.mris_remove_intersection_python.subprocess.run",
-               side_effect=repair):
+    corrected, corrected_faces = tetrahedra(3.0)
+    np.testing.assert_array_equal(corrected_faces, faces)
+    diagnostics = dict(intersecting_faces_before=4, marked_vertices=7)
+    # 文件调度契约：算法本身另有真实非零交回归。本测试不执行旧binary。
+    with patch("fnit.recon_all.place_surface_final_cleanup.repair_intersections",
+               return_value=(corrected, diagnostics)) as repair:
         assert remove_intersection_surface(source, output, binary=binary,
                                            assets_dir=tmp_path) == (4, 7)
+        assert repair.call_args.kwargs["marking_backend"] == "source_numba"
     assert mark_intersections(*fs.read_geometry(str(output)))[1] == 0
+
+
+def test_residual_repair_is_rejected_before_output(tmp_path) -> None:
+    vertices, faces = tetrahedra(0.3)
+    source, output = tmp_path / "input", tmp_path / "output"
+    fs.write_geometry(str(source), vertices, faces)
+    original = source.read_bytes()
+    with patch("fnit.recon_all.place_surface_final_cleanup.repair_intersections",
+               return_value=(vertices, dict(intersecting_faces_before=4, marked_vertices=7))):
+        with pytest.raises(RuntimeError, match="intersecting faces"):
+            remove_intersection_surface(source, output)
+    assert not output.exists()
+    assert source.read_bytes() == original

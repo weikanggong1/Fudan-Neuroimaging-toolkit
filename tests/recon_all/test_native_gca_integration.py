@@ -49,6 +49,7 @@ class NativeGcaIntegrationTest(unittest.TestCase):
                 _native_em_register_binary(directory)
 
     def test_single_subject_cli_forwards_native_directory(self):
+        # 保留独立原生参考的CLI兼容性。
         with tempfile.TemporaryDirectory() as directory:
             native_dir = Path(directory)
             with patch("fnit.recon_all.native_free.run_recon_all_python",
@@ -57,6 +58,19 @@ class NativeGcaIntegrationTest(unittest.TestCase):
                     main(["input.nii.gz", "subject", "--weights-dir", "weights",
                           "--assets-dir", "assets", "--native-bin-dir", str(native_dir)])
             self.assertEqual(run.call_args.kwargs["native_bin_dir"], native_dir)
+
+    def test_torch_registration_does_not_require_original_program(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "transforms").mkdir()
+            def register(*args, **kwargs):
+                (root / "transforms/talairach.lta").write_text("own LTA")
+                return {"implementation": "own"}
+            with patch("fnit.recon_all.mri_em_register_python.register_t1", side_effect=register), \
+                 patch("fnit.recon_all.native_free.subprocess.run", side_effect=AssertionError("native program called")):
+                value = _run_native_em_register(None, root, root / "atlas.gca", root,
+                    backend="torch", device="cuda:0", binary_sha256=None)
+            self.assertEqual(value["implementation"], "own")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,32 @@
+{
+  "scope": "diagnostic parser failure after completed raw-T1 prefixes; no production workflow failed or modified",
+  "status": "failed_metadata_diagnostic",
+  "exit_code": 1,
+  "original_script_sha256": "12a63bb6449d895262785521ec6bfa21320546e1d6490cd6f4b8e2d0dcba8d30",
+  "original_log_sha256": "1ab534a5627142f883b3d2fc5787c45b40edf631b73bca71466d29772b765537",
+  "original_log_preserved": true,
+  "safe_log_excerpt": [
+    "File <FNIT_TASK_WORKSPACE>/mgh_sections_diagnosis.py, line 40, in main",
+    "assert len(value) == length and code == 31 and value.endswith(b'\\0')",
+    "AssertionError"
+  ],
+  "cause": "The initial diagnostic assumed every trailing tag had a generic int64 length and tag31 payload. The existing filled writer starts with TAG_OLD_COLORTABLE=1, version=-2, followed by TAG_CMDLINE=3; that legacy table has its own variable-width layout.",
+  "subsequent_successful_version": {
+    "executed_v2_script_sha256": "03f742aaaaaa4ebbd73b6ae0810cc916580dc1cdbf51a2532472b2f0c405c6e4",
+    "exit_code": 0,
+    "report_sha256": "e2ea20388d2845b1b2a52e8e0dfa4a08dee35e4ddac06425d138951d75ed3ef4",
+    "published_filename": "mgh_sections_diagnosis.py",
+    "published_script_sha256": "03f742aaaaaa4ebbd73b6ae0810cc916580dc1cdbf51a2532472b2f0c405c6e4",
+    "published_relation_to_executed_v2": "byte-identical copy; filename changed only; the tested v2 already used named runs-root/comparisons/source-root/output arguments and contained no server path literals",
+    "changes_from_failed_v1": [
+      "Parse TAG_OLD_COLORTABLE version2 according to the existing FNIT writer layout before generic length-prefixed tags.",
+      "Validate TAG31 own transform pathname and TAG3 fill provenance separately.",
+      "Normalize only the respective full subject-directory literals and recompute their tag lengths for an explicitly separate metadata diagnostic.",
+      "Cast byte offsets to Python integers before JSON serialization; preserve full raw/header/data/footer/tag hashes."
+    ]
+  },
+  "primary_volume_comparison_exit_code": 0,
+  "production_volumes_modified": false,
+  "strict_file_differences_remain_reported": true,
+  "overall_metric_equivalence": "not_assessed"
+}

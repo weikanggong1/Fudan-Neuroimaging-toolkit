@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "scope": "two complete frozen same-input LH stages; not raw T1 recon-all",
+  "production_target_backend": "serial unchanged",
+  "overall_metric_equivalence": "not_assessed",
+  "precision": "TF32 enabled; no half precision",
+  "performance": "one shared-load serial/parallel pair per stage; includes first JIT, output writes and synchronization",
+  "references": "previous same-input references reused by input/program/output SHA; no new native repeat or native performance comparison",
+  "process_tree_GPU_memory": "not measured; Torch allocator peaks are not total GPU occupancy",
+  "stages": {
+    "preaparc": {
+      "status": "complete",
+      "regression_exact": true,
+      "serial_seconds": 254.9135315315798,
+      "parallel_seconds": 230.66324371285737,
+      "observed_wall_reduction_percent": 9.513142622528136,
+      "reference_program_sha256": "78b64b7395aa0db0592ab6912fc026128b221c56d9f802db225fa59c18ceda44",
+      "border_source_sha256": "e577a2e01f49d616f8ad45a1dc0d2573b7518c3e7c3ce9875e490563b27ef188",
+      "complete_steps": 37,
+      "pass_ends": [
+        17,
+        27,
+        34,
+        37
+      ],
+      "target_threads": 2,
+      "private_receipt_sha256": "f6c7edc7f92f5d93654f36327f34a97203010fc8631c3050a29346c390ff2477"
+    },
+    "pial": {
+      "status": "complete",
+      "regression_exact": true,
+      "serial_seconds": 326.63985312450677,
+      "parallel_seconds": 321.0029420796782,
+      "observed_wall_reduction_percent": 1.7257266652884407,
+      "reference_program_sha256": "78b64b7395aa0db0592ab6912fc026128b221c56d9f802db225fa59c18ceda44",
+      "border_source_sha256": "e577a2e01f49d616f8ad45a1dc0d2573b7518c3e7c3ce9875e490563b27ef188",
+      "complete_steps": 44,
+      "pass_ends": [
+        27,
+        33,
+        37,
+        44
+      ],
+      "target_threads": 2,
+      "private_receipt_sha256": "e76b4216dbf5ff49c8593ab1db8b54c1bf5e3b51f57dc2967a1f95c80c33eb35"
+    }
+  }
+}

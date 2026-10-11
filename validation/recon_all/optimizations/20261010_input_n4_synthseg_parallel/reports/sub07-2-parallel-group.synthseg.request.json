@@ -1,0 +1,25 @@
+{
+  "callable": "fnit.recon_all.input_stage_parallel:run_synthseg_task",
+  "operation": "synthseg",
+  "kwargs": {
+    "input_path": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject/mri/orig.mgz",
+    "threads": 3,
+    "segmentation_path": "[PRIVATE_FNIT]/runs/input_stage_parallel_20261010_v2/ABBA/sub07/2-parallel/synthseg.mgz",
+    "volumes_path": "[PRIVATE_FNIT]/runs/input_stage_parallel_20261010_v2/ABBA/sub07/2-parallel/synthseg.vol.csv",
+    "weights_dir": "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/weights",
+    "color_lut": "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/assets/FreeSurferColorLUT.txt",
+    "device": "cuda:5",
+    "cudnn_benchmark": false,
+    "cudnn_deterministic": true
+  },
+  "threads": 3,
+  "device": "cuda:5",
+  "precision": {
+    "matmul_tf32": true,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "cudnn_deterministic": true
+  },
+  "profile_stages": true,
+  "allocator_policy": "auto"
+}

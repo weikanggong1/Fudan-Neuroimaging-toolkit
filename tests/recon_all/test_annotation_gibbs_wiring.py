@@ -70,14 +70,14 @@ class TestAnnotationGibbsWiring(unittest.TestCase):
             with patch.object(native_free, "_run_recon_all_python", return_value={}) as run:
                 native_free.run_recon_all_python(
                     t1="raw", subject_dir=Path(directory), weights_dir="weights",
-                    assets_dir="assets", device="cpu", annotation_gibbs_backend="numba",
+                    assets_dir="assets", device="cuda:0", annotation_gibbs_backend="numba",
                     remesh_scalar_storage="python")
             self.assertEqual(run.call_args.kwargs["annotation_gibbs_backend"], "numba")
         self.assertEqual(run.call_args.kwargs["remesh_scalar_storage"], "python")
         with patch.object(native_free, "run_recon_all_python", return_value={}) as run, \
                 contextlib.redirect_stdout(io.StringIO()):
             native_free.main(["raw", "subject", "--weights-dir", "weights",
-                              "--assets-dir", "assets", "--device", "cpu",
+                              "--assets-dir", "assets", "--device", "cuda:0",
                               "--annotation-gibbs-backend", "numba", "--remesh-scalar-storage", "python"])
         self.assertEqual(run.call_args.kwargs["annotation_gibbs_backend"], "numba")
         self.assertEqual(run.call_args.kwargs["remesh_scalar_storage"], "python")
@@ -97,7 +97,7 @@ class TestAnnotationGibbsWiring(unittest.TestCase):
             with patch("fnit.recon_all.batch.subprocess", SimpleNamespace(run=launch)):
                 run_recon_all_python_batch(
                     jobs=[{"t1": raw, "subject_dir": subject}], weights_dir=root / "weights",
-                    assets_dir=root / "assets", devices=("cpu",), threads=4,
+                    assets_dir=root / "assets", devices=("cuda:0",), threads=4,
                     hemisphere_workers=2, annotation_gibbs_backend="numba",
                     remesh_scalar_storage="python")
             command = launch.call_args.args[0]
@@ -120,7 +120,7 @@ class TestAnnotationGibbsWiring(unittest.TestCase):
             args = [str(script), "--t1", str(raw), "--output-root", str(output),
                     "--weights-dir", str(root / "weights"), "--assets-dir", str(root / "assets"),
                     "--native-bin-dir", str(root / "native"), "--code-version", "entry-contract",
-                    "--device", "cpu", "--annotation-gibbs-backend", "numba",
+                    "--device", "cuda:0", "--annotation-gibbs-backend", "numba",
                     "--remesh-scalar-storage", "python"]
             class Sampler:
                 def __init__(self, **kwargs): pass

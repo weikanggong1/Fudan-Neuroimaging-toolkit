@@ -6,7 +6,7 @@ import unittest
 import numpy as np
 import torch
 
-from fnit.recon_all.discrete_curvature_torch import DiscreteCurvatureTopology
+from fnit.recon_all.discrete_curvature_torch import DiscreteCurvatureTopology, _principal_curvatures
 
 
 class DiscreteCurvatureTest(unittest.TestCase):
@@ -64,6 +64,19 @@ class DiscreteCurvatureTest(unittest.TestCase):
         invalid[0, 0] = torch.nan
         with self.assertRaises(ValueError):
             context.evaluate(vertices=invalid)
+
+    def test_float_sqrt_and_float_add_match_source_expression(self):
+        # 选择包含近退化量级的表达式输入；Double提升确实改变主曲率舍入。
+        mean = np.array([-.05144, -455.85657, .1, 1.234567], np.float32)
+        gaussian = np.array([.15261, 13269.50879, -.13219, .43111], np.float32)
+        root = np.sqrt(np.maximum(mean * mean - gaussian, np.float32(0)))
+        a, b = mean + root, mean - root
+        expected = (np.where(abs(a) >= abs(b), a, b), np.where(abs(a) <= abs(b), a, b))
+        result = _principal_curvatures(torch.from_numpy(mean), torch.from_numpy(gaussian), False)
+        for actual, wanted in zip(result, expected):
+            np.testing.assert_array_equal(actual.numpy(), wanted)
+        promoted = np.sqrt(np.maximum(mean * mean - gaussian, np.float32(0)).astype(np.float64))
+        self.assertTrue(np.any((mean + promoted).astype(np.float32) != a))
 
 
 if __name__ == "__main__":

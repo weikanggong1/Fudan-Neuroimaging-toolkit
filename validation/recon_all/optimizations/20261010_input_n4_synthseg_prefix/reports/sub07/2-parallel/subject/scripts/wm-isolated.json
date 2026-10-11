@@ -1,0 +1,84 @@
+{
+  "scope": "complete FNIT WM in isolated cached worker; not raw T1 whole recon",
+  "code_version": "FNIT-source-hashes",
+  "worker_pid": 1310,
+  "input_sha256": "d3151937c58a1ec2110e35cc12c524c21e314459fca1f23fb434847dd73c73aa",
+  "output_sha256": "6fe83d780af885c24434695cabc923510a85aa7ded9d87343a6489831ab01200",
+  "source_sha256": {
+    "worker": "2ee098c485c62cc9a848df27a3c8489dc5961897a1477a4ba58edd7de66dd42d",
+    "segmentation": "abee3136f2c88409746b817a845ad48afbf326005f242f4eabc123c6544613bb",
+    "histogram": "73e3b832da7f81ff944a75c69b056f63fc591aeb5877c26ec104c4d5b63a152e",
+    "planar": "40a1a10dd6421b6b11b7d3561f1cc1e28c4a3fc2219d23175fd68e93513fb587",
+    "profiling": "17b12fdc4e72736f64dc2834ea34a282bc726513599e8045b63d0f9eeccc5c7e"
+  },
+  "cuda_allocator": {
+    "requested": "enabled",
+    "cuda_initialized_at_entry": false,
+    "environment_at_entry": null,
+    "environment_after_selection": null,
+    "effective": "enabled",
+    "torch_stats_known_valid": true,
+    "torch_stats_known_unavailable": false
+  },
+  "logical_device": "cuda:0",
+  "cuda_visible_devices": "GPU-anonymized-device-009",
+  "threads": {
+    "torch": 4,
+    "requested": 4,
+    "cpu_affinity": [
+      96,
+      97,
+      98,
+      99
+    ],
+    "environment": {
+      "OMP_NUM_THREADS": "4",
+      "MKL_NUM_THREADS": "4",
+      "OPENBLAS_NUM_THREADS": "4",
+      "NUMBA_NUM_THREADS": "4"
+    }
+  },
+  "precision": {
+    "matmul_tf32": true,
+    "cudnn_tf32": true,
+    "autocast": {
+      "enabled": false,
+      "dtype": "torch.float16"
+    },
+    "half_requested": false
+  },
+  "torch_version": "2.5.1",
+  "gpu_name": "NVIDIA A100-SXM4-80GB",
+  "api": {
+    "implementation": "FNIT PyTorch hybrid",
+    "device": "cuda:0",
+    "histogram_backend": "torch",
+    "histogram_batch_size": 2048,
+    "planar_backend": "cached",
+    "planar_batch_size": 256,
+    "ordered_cpu_rules": true,
+    "output": "[PRIVATE_FNIT]/runs/recon_input_prefix_20261010_v1/sub07/2-parallel/subject/mri/wm.seg.mgz"
+  },
+  "stage_profile": {
+    "name": "complete_wm_cached",
+    "seconds": 27.385884921066463,
+    "function_seconds": 26.71177391242236,
+    "cuda_pre_sync_seconds": 0.673202259466052,
+    "cuda_post_sync_seconds": 6.0706399381160736e-05,
+    "cuda_synchronized": true,
+    "cuda_synchronization_requested": true,
+    "parent_cpu_seconds": 26.850788350000002,
+    "child_cpu_seconds": 0.0,
+    "torch_memory_stats_status": "available",
+    "gpu_peak_allocated_bytes": 211383296,
+    "gpu_peak_reserved_bytes": 257949696,
+    "gpu_peak_scope": "stage"
+  },
+  "allocated_peak_bytes": 211383296,
+  "reserved_peak_bytes": 257949696,
+  "process_tree_GPU_memory": "caller benchmark uses shared ProcessTreeDeviceSampler",
+  "worker_api_wall_seconds_including_validation_init_read_transfer_write": 29.024852093309164,
+  "overall_metric_equivalence": "not_assessed",
+  "isolated_cli_wall_seconds": 31.399482797831297,
+  "isolation": "fresh exec; worker cache enabled; parent policy preserved"
+}

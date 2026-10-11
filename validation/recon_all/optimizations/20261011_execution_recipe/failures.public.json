@@ -1,0 +1,37 @@
+{
+  "status": "preserved",
+  "scope": "setup and contract failures, no accepted real MRI run",
+  "records": [
+    {
+      "version": "v1",
+      "phase": "pytest unavailable before tests",
+      "accepted_tests": 0
+    },
+    {
+      "version": "v1",
+      "phase": "stdlib contracts",
+      "tests_run": 96,
+      "failures": 3,
+      "errors": 1,
+      "reason": "old 21-key contract and unconfigured SimpleITK target; resolved by committed test updates and declared dependency target",
+      "log_sha256": "b715e47b6f752881480d095aba8240ce21c0dc0bfff3768eb2836371bbd2ce46"
+    },
+    {
+      "version": "v2",
+      "phase": "annotation input preflight",
+      "reason": "selected surface fixture lacks sphere.reg; no annotation computed",
+      "log_sha256": "5e7e7e6d1850acf4563d15a50cb005356f08300f7007c0e29769b6ccfc5109bc"
+    },
+    {
+      "version": "v2_initial_setup",
+      "phase": "shell quoting SyntaxError before mutation",
+      "accepted_runs": 0
+    }
+  ],
+  "immutable_production_source_commit": "7636284e140ef7a7b6bb432df88e915481343eda",
+  "validated_candidate_commit": "46bf4a13fcaba1130b8d61339691b530cb6ad144",
+  "errata": {
+    "v3_command_scope": "command body timing excludes interpreter startup; the frozen harness scope string incorrectly said launcher measured it separately; no external launcher/startup measurement exists",
+    "v3_fixture_reports": "private fixture copied old scripts and full-run report; no inherited report counted as current proof; current worker reports require fresh process reaping and new outputs; future harness clears historical scripts/reports"
+  }
+}

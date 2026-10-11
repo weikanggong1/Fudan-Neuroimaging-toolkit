@@ -1,0 +1,46 @@
+{
+  "fixed_source_commit": "d932c45b7941662ea380a05efef580568b98d41a",
+  "source_checks": {
+    "utils/mrisurf_defect.cpp": {
+      "sha256": "55ace70ab09b1868a8cb152a9547879abdce790635b484bef1bf056986958187",
+      "lines": "188-393",
+      "rules": [
+        "default build MRIS_FIX_TOPOLOGY_ERROR_MODE=1: defect+chull; alternate compile uses border",
+        "negative mappings and previously ripped records skip restore",
+        "save/restore orig/normal, nsizeCur/Max/vtotal/vnum/v2num/v3num and incident num/f/n",
+        "nfaces truncated only; face contents and non-DVS fields never backed up",
+        "source malloc(vtotal) then memcpy(vsize) is unsafe if vsize>vtotal; FNIT explicitly stores vsize"
+      ]
+    },
+    "utils/mrisurf_topology.cpp": {
+      "sha256": "b3bad6af7aae45f29e1db345395e2ea8c20a0e02762e0d6f8db0464957b8bdfd",
+      "lines": "818-836;907-920",
+      "rules": [
+        "nsizeCur count index0/1/2/3 chooses0/vnum/v2num/v3num",
+        "vsize=max(count_at_nsizeMax,vtotal)",
+        "restoration requires saved vtotal match restored nsizeCur count"
+      ]
+    },
+    "utils/mrisurf_base.cpp": {
+      "sha256": "f21ce5a02b2d25537b48ec52e3012ed8120832cb018beeb6dca1ee1c66943dba",
+      "lines": "618-622",
+      "rules": [
+        "MRIStruncateNFaces changes logical nfaces and topology revision, no face payload restoration"
+      ]
+    },
+    "utils/mrisurf_metricProperties.cpp": {
+      "sha256": "458f896e7d2bdcbcdd7c9e73b2a396823d2015c723117d604bb06e3e8f27ba17",
+      "lines": "174-190",
+      "rules": [
+        "MRISsetOriginalXYZ sets orig floats and signals active RealmTrees; caller of own DVS must invalidate spatial caches for report original_coordinate_restored_vertices"
+      ]
+    },
+    "include/mrisurf_base.h": {
+      "sha256": "ddd2a74582be9252481edda50f04df0b48b0546d032b54fce2416167ad08ec79",
+      "lines": "286",
+      "rules": [
+        "MRIS_FIX_TOPOLOGY_ERROR_MODE=1"
+      ]
+    }
+  }
+}

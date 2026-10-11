@@ -113,7 +113,14 @@ def sphere_vertex_normals(positions: torch.Tensor,
                           faces: torch.Tensor, *,
                           incidence: tuple[torch.Tensor, torch.Tensor, torch.Tensor] | None = None
                           ) -> torch.Tensor:
-    """Default FreeSurfer metric-properties corner normals in face order."""
+    """按有序面生成同顶点序的 float32 球面法向，输入坐标为 RAS/mm。
+
+    positions 为 (N,3)，faces 为 (F,3) 整数；可选 incidence 是已缓存的
+    有序面/角索引与每顶点度数。返回 (N,3)，保留输入设备。属于
+    mris_register 的内部步骤，没有独立 CLI。零长边/叉积沿 mrisNormalize
+    的 d>0 分支保留零向量，不添加 epsilon 或改变非零向量的除法顺序。
+    全部 incident 法向抵消的顶点需要上游几何修复，本接口明确报错。
+    """
     corner0 = faces[:, [2, 0, 1]]
     corner1 = faces[:, [1, 2, 0]]
 
@@ -121,7 +128,9 @@ def sphere_vertex_normals(positions: torch.Tensor,
         squared = (vectors[..., 0] * vectors[..., 0]
                    + vectors[..., 1] * vectors[..., 1]
                    + vectors[..., 2] * vectors[..., 2])
-        return vectors / squared.double().sqrt().float()[..., None]
+        length = squared.double().sqrt().float()
+        denominator = torch.where(length > 0, length, torch.ones_like(length))
+        return vectors / denominator[..., None]
 
     first = unit(positions[faces] - positions[corner0])
     second = unit(positions[corner1] - positions[faces])
@@ -142,6 +151,8 @@ def sphere_vertex_normals(positions: torch.Tensor,
         normals = torch.where((degrees > index)[:, None],
                               normals + corner_normals[face_indices[:, index], corner_indices[:, index]],
                               normals)
+    if bool(torch.any(torch.all(normals == 0, dim=1))):
+        raise ValueError("Zero vertex-normal sums require source metric geometry repair")
     return unit(normals)
 
 
@@ -208,7 +219,14 @@ def first_distance_gradient(input_sphere: torch.Tensor,
 def face_area_normals(positions: torch.Tensor, faces: torch.Tensor,
                       *, signed_sphere: bool = False
                       ) -> tuple[torch.Tensor, torch.Tensor]:
-    """Triangle areas and unit normals; orient spherical faces outward."""
+    """返回 (F,) 面积/mm² 与 (F,3) 法向，保留设备与 float32 面顺序。
+
+    positions 是 (N,3) RAS/mm，faces 是 (F,3) 整数。signed_sphere 默认
+    False 返回绝对面积；True 按球面径向符号返回带符号面积和外向法向。
+    属于 mris_register 内部步骤，没有独立 CLI。法向沿 V3_NORMALIZE：
+    长度绝对值小于 float32 epsilon 时保留叉积，其余沿原除法顺序，
+    不修改坐标或面积；非有限输入仍传播到上层质量检查。
+    """
     first = positions[faces[:, 1]] - positions[faces[:, 0]]
     second = positions[faces[:, 2]] - positions[faces[:, 0]]
     cross = torch.stack((first[:, 1] * second[:, 2] - first[:, 2] * second[:, 1],
@@ -217,11 +235,13 @@ def face_area_normals(positions: torch.Tensor, faces: torch.Tensor,
     squared = (cross[:, 0] * cross[:, 0] + cross[:, 1] * cross[:, 1]
                + cross[:, 2] * cross[:, 2])
     length = squared.double().sqrt().float()
+    denominator = torch.where(length.abs() < torch.finfo(torch.float32).eps,
+                              torch.ones_like(length), length)
     if signed_sphere:
         centroid = positions[faces].sum(dim=1)
         orientation = torch.where((centroid * cross).sum(dim=1) < 0.0, -1.0, 1.0)
-        return length * 0.5 * orientation, cross * (orientation / length)[:, None]
-    return length * 0.5, cross * (1.0 / length)[:, None]
+        return length * 0.5 * orientation, cross * (orientation / denominator)[:, None]
+    return length * 0.5, cross * (1.0 / denominator)[:, None]
 
 
 @torch.no_grad()

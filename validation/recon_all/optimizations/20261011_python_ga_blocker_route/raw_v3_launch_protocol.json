@@ -1,0 +1,43 @@
+{
+  "package_git_base": "c2293890dad4bc3b697d06848aa1bad40f441137",
+  "package_source_manifest_sha256": "47090ab1419cafcab4f2d3c3fb0542e27aadadafd40ad43dc8536f81709ae21d",
+  "package_native_free_sha256": "8b6233aa21984dc3985da0f395c8484f05517b45e03409b22023b4ec3e2dad4a",
+  "wheel_sha256": "ef654b830c2e5b34afa0589cb8bf45287ba9a02a59f0c73a699516365bbf6a43",
+  "benchmark_source_commit": "5d1cdb5ef7e9c50932e63f2361c8640d66ed8384",
+  "source_files": {
+    "tools/benchmark_recon_torch_end_to_end.py": {
+      "bytes": 16604,
+      "sha256": "47f5743eb66ca69345a8798c881334e45466837e29307f2f75a57829ceae50ce"
+    },
+    "tools/recon_python_execution_audit/sitecustomize.py": {
+      "bytes": 1765,
+      "sha256": "d7a2b302bfc7e779e53876e86fcdb61572fdd42a9727fd5ff12389ec357f770c"
+    }
+  },
+  "parameters": {
+    "backend": "python",
+    "topology_backend": "python-ga",
+    "blocker_scan_backend_selected_in_production": "numba",
+    "device": "cuda:0",
+    "physical_gpu": 1,
+    "gpu_model_at_launch": "NVIDIA A100-SXM4-80GB",
+    "threads": 4,
+    "cpu_affinity": [
+      104,
+      105,
+      106,
+      107
+    ],
+    "expected_input_sha256": "7e33afb28f631fac31d81e2428a6144f61aba4102859c694eeb49ee584de04f7",
+    "precision": "default TF32 + existing verified FP32 exceptions; no automatic half"
+  },
+  "dependencies": {
+    "simpleitk_version": "2.5.6",
+    "library_sha256": "c25cd8cf7053c8224c246744e1f1bc9af12db0c95a8221b27e9546cc4511b62c",
+    "nvidia_ml_py_version": "13.580.82",
+    "pynvml_py_sha256": "4251429c25f1615a4166f395d3c09fe0732bfb023864c4b7f12813373e5696ea"
+  },
+  "scope": "raw public T1 + empty directory; installed independent Python GA; no official inputs",
+  "status": "frozen_launch_protocol_not_run_result",
+  "performance_comparison": "shared host and separate A100 device; no controlled whole speedup conclusion"
+}

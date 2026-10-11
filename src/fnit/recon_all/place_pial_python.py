@@ -13,12 +13,13 @@ from pathlib import Path
 import nibabel as nib
 import nibabel.freesurfer as fs
 import numpy as np
+from numba import get_num_threads
 
 from .place_surface_border import compute_border_values_first_pass
 from .place_surface_collision import asynchronous_first_step
 from .place_surface_curvature import quadratic_curvature, tangent_basis, two_ring_neighbors
 from .place_surface_decision import pial_step_decision
-from .place_surface_final_cleanup import pin_medial_wall, repair_intersections
+from .place_surface_final_cleanup import pin_medial_wall, repair_intersections, pial_cleanup_mask
 from .place_surface_geometry import surface_ras_to_voxel
 from .place_surface_gradient_average import average_signed_gradients
 from .place_surface_intensity import intensity_gradient
@@ -34,6 +35,55 @@ from .place_surface_smoothing import average_marked_values, _ordered_neighbors
 from .place_surface_spring import spring_gradient
 from .place_surface_step import unconstrained_step_with_offsets
 from .place_surface_volume import prepare_placement_volume
+
+
+def _validate_pial_volume_geometry(brain, wm, aseg, surface_metadata) -> np.ndarray:
+    """校验三张 MGZ 的同一三维网格，返回既有 surface RAS→voxel 变换。
+
+    brain/wm/aseg 是已加载的 nibabel MGHImage；只读取头信息，不复制影像。
+    三者须有完全相同的 shape、scanner RAS affine，单位 mm；
+    affine/vox2ras_tkr/间距须有限且间距为正。MRI各自的vox2ras_tkr未用于
+    共享体素索引，不要求其位相同；MGH方向与间距的等价分解可使它不同。
+    surface_metadata 是 white 的完整体积
+    几何，允许与 MRI 不同的有效几何，由既有变换处理；不要求重置其头。
+    缺失、非有限或退化几何抛 ValueError，失败发生在强度准备和优化前。
+    返回 float32 (4,4)，复用 surface_ras_to_voxel 的原顺序运算，无重采样。
+    """
+    for name, image in (("brain.finalsurfs", brain), ("wm", wm), ("aseg.presurf", aseg)):
+        if len(image.shape) != 3:
+            raise ValueError(f"pial MRI must be a 3D volume: {name}")
+        affine = np.asarray(image.affine)
+        spacing = np.asarray(image.header.get_zooms()[:3])
+        if affine.shape != (4, 4) or not np.isfinite(affine).all() \
+                or not np.isfinite(spacing).all() or np.any(spacing <= 0):
+            raise ValueError(f"pial MRI geometry must be finite with positive spacing: {name}")
+        try:
+            tkr = np.asarray(image.header.get_vox2ras_tkr())
+        except AttributeError as error:
+            raise ValueError(f"pial MRI requires MGH surface-RAS geometry: {name}") from error
+        if tkr.shape != (4, 4) or not np.isfinite(tkr).all():
+            raise ValueError(f"pial MRI surface-RAS geometry must be finite: {name}")
+        if image.shape != brain.shape or not np.array_equal(affine, brain.affine):
+            raise ValueError(f"pial MRI grids differ: {name}")
+    try:
+        # 原表面格式允许 ``valid = 1  # volume info valid``；整数标记
+        # 与行尾注释分开读取，不能把有效注释误当作无效几何。
+        if str(surface_metadata["valid"]).split("#", 1)[0].strip() != "1":
+            raise ValueError("white volume geometry is invalid")
+        for key in ("volume", "voxelsize", "xras", "yras", "zras", "cras"):
+            values = np.asarray(surface_metadata[key])
+            if values.shape != (3,) or not np.isfinite(values).all() \
+                    or (key in {"volume", "voxelsize"} and np.any(values <= 0)):
+                raise ValueError(f"white volume geometry is invalid: {key}")
+        directions = np.stack([surface_metadata[key] for key in ("xras", "yras", "zras")])
+        if np.linalg.det(directions) == 0:
+            raise ValueError("white volume geometry has singular directions")
+        affine = surface_ras_to_voxel(brain.header, surface_metadata)
+    except (KeyError, TypeError, np.linalg.LinAlgError) as error:
+        raise ValueError("white requires complete valid surface-RAS volume geometry") from error
+    if not np.isfinite(affine).all():
+        raise ValueError("pial surface RAS to voxel transform must be finite")
+    return affine
 
 
 def _write_vertices_like(source: Path, output: Path, vertices: np.ndarray) -> None:
@@ -63,9 +113,11 @@ def place_pial_t1(
     retained_mht_backend: str = "tree",
     cleanup_marking_backend: str = "legacy",
     cleanup_candidate_grid_cells_per_axis: int = 2,
+    cleanup_constraint_mode: str = "source_rip",
     device: str | None = None,
     trace_callback=None,
     profile: bool = False,
+    target_search_backend: str = "serial",
 ) -> dict:
     """Place and save one hemisphere's pial.T1 using the native four-pass order.
 
@@ -89,8 +141,17 @@ def place_pial_t1(
     cleanup_marking_backend默认legacy；source_numba/source_torch显式复用
     源有向标记，source_torch要求device，清理candidate_grid默认为2，
     显式3只允许source_torch。源清理最终残余非零会抛异常而不写表面。
+    target_search_backend默认serial；parallel仅按既定Numba线程预算并行
+    独立目标搜索，fastmath=False；有序目标平均与碰撞接受不变。
     七项输入、MRI网格、surface RAS/mm、有序输出和全部参数/真实验证见
     docs/recon_all/PYTHON_PIAL_PLACEMENT.md。函数不执行外部程序或启用半精度。
+    三张MRI的三维shape和scanner affine须完全相同；头几何须有限，
+    white体积几何须有效。错位输入在强度准备/优化前抛ValueError，不重采样。
+    cleanup_constraint_mode默认source_rip：原rip既限制移动又排除SOAP
+    邻居贡献，保留非rip但cortex外邻居的源贡献。显式cortex_pinned_union
+    把cortex外已pin顶点加入该mask，同时改变移动域和邻居贡献；它是
+    强化诊断策略，不声称源清理等价。四轮优化rip始终不变。模式规定的
+    固定坐标被移动或源相交残余非零时失败，不写表面。
     ``trace_callback(step, pass_index, coordinates_copy, diagnostics)`` is an
     optional read-only diagnostic sink called after every completed step.
     Its diagnostics include all trial decisions; a rejected terminal step
@@ -102,6 +163,10 @@ def place_pial_t1(
     CUDA target at section boundaries; default execution does not add barriers.
     """
     started = time.perf_counter()
+    if cleanup_constraint_mode not in ("source_rip", "cortex_pinned_union"):
+        raise ValueError("cleanup_constraint_mode must be source_rip or cortex_pinned_union")
+    if target_search_backend not in ("serial", "parallel"):
+        raise ValueError("target_search_backend must be serial or parallel")
     if candidate_backend not in ("tree", "snapshot", "torch_snapshot"):
         raise ValueError("candidate_backend must be tree, snapshot or torch_snapshot")
     if candidate_backend == "torch_snapshot" and device is None:
@@ -173,11 +238,16 @@ def place_pial_t1(
 
     xyz, faces, metadata = fs.read_geometry(str(white), read_metadata=True)
     xyz = xyz.astype(np.float32)
+    if not np.isfinite(xyz).all():
+        raise ValueError("pial white coordinates must be finite")
+    brain = nib.load(str(brain_path))
+    wm_image = nib.load(str(wm_path))
+    aseg_image = nib.load(str(aseg_path))
+    affine = _validate_pial_volume_geometry(brain, wm_image, aseg_image, metadata)
     ripped = np.asarray(rip_outside_label(
         len(xyz), fs.read_label(str(label))), dtype=np.bool_)
-    brain = nib.load(str(brain_path))
-    wm = np.asarray(nib.load(str(wm_path)).dataobj)
-    aseg = np.asarray(nib.load(str(aseg_path)).dataobj)
+    wm = np.asarray(wm_image.dataobj)
+    aseg = np.asarray(aseg_image.dataobj)
     stats = dict(line.split()[:2] for line in stats_path.read_text().splitlines()
                  if len(line.split()) >= 2)
     volume, bright = prepare_placement_volume(
@@ -186,7 +256,6 @@ def place_pial_t1(
     )
     placement = volume.copy()
     placement[bright == 130] = 0
-    affine = surface_ras_to_voxel(brain.header, metadata)
     sampler = None
     if sampling_backend != "cpu":
         from .place_surface_sampling import PlacementSampling
@@ -201,7 +270,7 @@ def place_pial_t1(
     border = compute_border_values_first_pass(
         volume, aseg, xyz, normals, xyz, ripped,
         np.full(len(xyz), -1.0, dtype=np.float32), affine, thresholds,
-        hemisphere=hemi, surface="pial",
+        hemisphere=hemi, surface="pial", target_search_backend=target_search_backend,
     )
     values = average_marked_values(border[0], border[4], ripped, faces, 5)
     neighbor_indices, neighbor_valid, _ = _ordered_neighbors(faces, len(xyz))
@@ -347,7 +416,7 @@ def place_pial_t1(
             border = compute_border_values_first_pass(
                 volume, aseg, current, current_normals, xyz, ripped,
                 values, affine, thresholds, hemisphere=hemi, surface="pial",
-                sigma=sigma,
+                sigma=sigma, target_search_backend=target_search_backend,
             )
             values = average_marked_values(border[0], border[4], ripped, faces, 5)
             original_area = surface_total_area(current, faces)
@@ -364,15 +433,26 @@ def place_pial_t1(
         raise RuntimeError(f"pial optimizer did not finish four passes in {max_steps} steps")
 
     cleanup_started = profile_boundary()
-    pinned = pin_medial_wall(current, xyz, fs.read_label(str(cortex)))
+    cortex_vertices = fs.read_label(str(cortex))
+    cleanup_fixed = pial_cleanup_mask(ripped=ripped, cortex_vertices=cortex_vertices,
+                                      constraint_mode=cleanup_constraint_mode)
+    pinned = pin_medial_wall(current, xyz, cortex_vertices)
     if cleanup_marking_backend == "legacy":
-        repaired, cleanup = repair_intersections(pinned, faces, ripped)
+        repaired, cleanup = repair_intersections(pinned, faces, cleanup_fixed)
     else:
         repaired, cleanup = repair_intersections(
-            pinned, faces, ripped, marking_backend=cleanup_marking_backend,
+            pinned, faces, cleanup_fixed, marking_backend=cleanup_marking_backend,
             device=device, candidate_grid_cells_per_axis=cleanup_candidate_grid_cells_per_axis)
-        if cleanup["intersecting_faces_after"]:
-            raise RuntimeError("source pial cleanup has residual intersections; output not written")
+    if not np.array_equal(repaired[cleanup_fixed], pinned[cleanup_fixed]):
+        raise RuntimeError("pial cleanup moved fixed vertices; output not written")
+    cleanup["fixed_vertices"] = int(np.count_nonzero(cleanup_fixed))
+    cleanup["additional_pinned_vertices"] = int(np.count_nonzero(cleanup_fixed & ~ripped))
+    cleanup["constraint_mode"] = cleanup_constraint_mode
+    cleanup["soap_neighbor_mask"] = "original_rip" if cleanup_constraint_mode == "source_rip" else "original_rip_union_outside_cortex"
+    if cleanup["intersecting_faces_after"]:
+        error = RuntimeError(f"pial cleanup ({cleanup_constraint_mode}) has residual intersections; output not written")
+        error.cleanup_diagnostics = cleanup
+        raise error
     record_section("cleanup", cleanup_started)
     write_started = profile_boundary()
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -381,13 +461,15 @@ def place_pial_t1(
     seconds = time.perf_counter() - started
     result = {"output": str(output), "hemisphere": hemi, "steps": step,
             "pass_ends": pass_ends, "cleanup": cleanup,
-            "sampling_backend": sampling_backend, "device": device,
+            "sampling_backend": sampling_backend, "target_search_backend": target_search_backend,
+            "target_search_threads": get_num_threads() if target_search_backend == "parallel" else 1, "device": device,
             "regularization_backend": regularization_backend,
             "candidate_backend": candidate_backend,
             "candidate_grid_cells_per_axis": candidate_grid_cells_per_axis,
             "retained_mht_backend": retained_mht_backend,
             "cleanup_marking_backend": cleanup_marking_backend,
             "cleanup_candidate_grid_cells_per_axis": cleanup_candidate_grid_cells_per_axis,
+            "cleanup_constraint_mode": cleanup_constraint_mode,
             "seconds": seconds, "profile": bool(profile)}
     if stage_seconds is not None:
         stage_seconds["control"] = seconds - sum(stage_seconds.values())

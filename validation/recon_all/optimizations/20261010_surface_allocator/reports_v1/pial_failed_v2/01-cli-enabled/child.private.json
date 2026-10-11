@@ -1,0 +1,109 @@
+{
+  "status": "failed",
+  "pid": 118364,
+  "source_root": "[PRIVATE_FNIT]/workspaces/recon_surface_allocator_v4_20261010_v1/src",
+  "import_seconds": 2.4254222195595503,
+  "request": {
+    "source_root": "[PRIVATE_FNIT]/workspaces/recon_surface_allocator_v4_20261010_v1/src",
+    "subject": "[PRIVATE_FNIT]/runs/recon_surface_allocator_pial_v4_20261010_v2/01-cli-enabled/subject",
+    "hemi": "lh",
+    "device": "cuda:0",
+    "threads": 4,
+    "policy": "enabled",
+    "stage": "pial",
+    "input_sha256": {
+      "surf/lh.white": "df9eaf2ed4e709bee489c93c24e5afbe5c7854f2d7baa04e8103091c3c29f767",
+      "surf/autodet.gw.stats.lh.dat": "16fad6d58028a08e374fae6a0fdabc804b3f816fd185179aac5a714a973df42c",
+      "mri/brain.finalsurfs.mgz": "14e5c3a99198df61ef6356c44db8ee0f54e5a9e4a44faa4c057044459272e1f5",
+      "mri/wm.mgz": "ac618d2b0143c4991e7bcad8f39264402be24a63de5b474e538fa7ca160add14",
+      "mri/aseg.presurf.mgz": "00289571f123b8c04e2e9a17e0c697cd6100899b7c1b49f20c1f5309cd9ffc7c",
+      "label/lh.cortex.label": "2b7962fccffc0fa94861c4d670bfab70df97a708f6fc67870c3830666def8864",
+      "label/lh.cortex+hipamyg.label": "f6e65f9cfe8753abdc76eec5e71a4cc9db9e6096fa9ef4bd7f57d0dcf8e4c2e1"
+    },
+    "report_path": "[PRIVATE_FNIT]/runs/recon_surface_allocator_pial_v4_20261010_v2/01-cli-enabled/child.private.json"
+  },
+  "input_sha256": {
+    "surf/lh.white": "df9eaf2ed4e709bee489c93c24e5afbe5c7854f2d7baa04e8103091c3c29f767",
+    "surf/autodet.gw.stats.lh.dat": "16fad6d58028a08e374fae6a0fdabc804b3f816fd185179aac5a714a973df42c",
+    "mri/brain.finalsurfs.mgz": "14e5c3a99198df61ef6356c44db8ee0f54e5a9e4a44faa4c057044459272e1f5",
+    "mri/wm.mgz": "ac618d2b0143c4991e7bcad8f39264402be24a63de5b474e538fa7ca160add14",
+    "mri/aseg.presurf.mgz": "00289571f123b8c04e2e9a17e0c697cd6100899b7c1b49f20c1f5309cd9ffc7c",
+    "label/lh.cortex.label": "2b7962fccffc0fa94861c4d670bfab70df97a708f6fc67870c3830666def8864",
+    "label/lh.cortex+hipamyg.label": "f6e65f9cfe8753abdc76eec5e71a4cc9db9e6096fa9ef4bd7f57d0dcf8e4c2e1"
+  },
+  "driver_sha256": "e15454ff1951a2f49ba8cfc398e61fcb0efedff4ea1fa017808f18ddbb64766a",
+  "allocator": {
+    "requested": "enabled",
+    "cuda_initialized_at_entry": false,
+    "environment_at_entry": null,
+    "environment_after_selection": null,
+    "effective": "enabled",
+    "torch_stats_known_valid": true,
+    "torch_stats_known_unavailable": false
+  },
+  "options": {
+    "regularization_backend": "cpu",
+    "sampling_backend": "cpu",
+    "candidate_backend": "torch_snapshot",
+    "candidate_grid_cells_per_axis": 3,
+    "retained_mht_backend": "compiled",
+    "cleanup_marking_backend": "source_torch",
+    "cleanup_candidate_grid_cells_per_axis": 3,
+    "device": "cuda:0"
+  },
+  "precision": {
+    "matmul_tf32": true,
+    "cudnn_tf32": true,
+    "autocast": {
+      "enabled": false,
+      "dtype": "torch.float16"
+    },
+    "algorithm_coordinate_dtype": "float32"
+  },
+  "cpu_affinity": [
+    108,
+    109,
+    110,
+    111
+  ],
+  "threads": 4,
+  "versions": {
+    "torch": "2.5.1",
+    "numpy": "1.26.4",
+    "scipy": "1.17.1",
+    "numba": "0.67.0",
+    "nibabel": "5.4.2"
+  },
+  "cuda_bootstrap_seconds": 5.359989772550762,
+  "gpu_name": "NVIDIA A100-SXM4-80GB",
+  "gpu_uuid": "e92ea062-9dbe-4d7f-54a9-deded0295fb5",
+  "error": "RuntimeError('source pial cleanup has residual intersections; output not written')",
+  "child_main_seconds": 254.50628547929227,
+  "io_before": {
+    "rchar": 36088001,
+    "wchar": 1778,
+    "syscr": 5410,
+    "syscw": 1,
+    "read_bytes": 0,
+    "write_bytes": 0,
+    "cancelled_write_bytes": 0
+  },
+  "io_after": {
+    "rchar": 73835025,
+    "wchar": 3238676,
+    "syscr": 9104,
+    "syscw": 140,
+    "read_bytes": 0,
+    "write_bytes": 0,
+    "cancelled_write_bytes": 0
+  },
+  "rusage": {
+    "ru_utime": 230.884967,
+    "ru_stime": 22.786404,
+    "ru_maxrss": 1320364,
+    "ru_minflt": 755274,
+    "ru_majflt": 0,
+    "ru_inblock": 0,
+    "ru_oublock": 0
+  }
+}

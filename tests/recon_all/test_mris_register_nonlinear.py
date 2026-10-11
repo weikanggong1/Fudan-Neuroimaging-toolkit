@@ -109,3 +109,38 @@ def test_zero_correlation_force_preserves_gradient():
     after = correlation_gradient_add(before, positions, torch.zeros(3), e1, e2,
                                      torch.zeros((8, 4)), torch.ones((8, 4)), 1.0)
     torch.testing.assert_close(after, before, rtol=0, atol=0)
+
+
+def test_collinear_corner_contributes_zero_without_poisoning_vertex_normals():
+    from fnit.recon_all.mris_register_nonlinear import sphere_vertex_normals
+
+    positions = torch.tensor([[0., 0., 0.], [1., 0., 0.], [2., 0., 0.],
+                              [0., 1., 0.], [0., 0., 1.]])
+    faces = torch.tensor([[0, 1, 2], [0, 2, 3], [1, 3, 4],
+                          [2, 4, 3], [0, 4, 2]])
+    normals = sphere_vertex_normals(positions, faces)
+    without_zero_corner = sphere_vertex_normals(positions, faces[1:])
+    assert bool(torch.isfinite(normals).all())
+    torch.testing.assert_close(normals, without_zero_corner, rtol=0, atol=0)
+
+
+def test_zero_incident_normal_sum_fails_before_atlas_sampling():
+    import pytest
+    from fnit.recon_all.mris_register_nonlinear import sphere_vertex_normals
+
+    with pytest.raises(ValueError, match="Zero vertex-normal sums"):
+        sphere_vertex_normals(torch.tensor([[0., 0., 0.], [1., 0., 0.], [2., 0., 0.]]),
+                              torch.tensor([[0, 1, 2]]))
+
+
+def test_zero_and_tiny_face_normals_follow_source_fzero_without_changing_area():
+    positions = torch.tensor([[0., 0., 0.], [1., 0., 0.],
+                              [2., 0., 0.], [0., 1e-8, 0.]])
+    faces = torch.tensor([[0, 1, 2], [0, 1, 3]])
+    expected_areas = torch.tensor([0., 0.5e-8])
+    expected_normals = torch.tensor([[0., 0., 0.], [0., 0., 1e-8]])
+    for signed_sphere in (False, True):
+        areas, normals = face_area_normals(positions, faces, signed_sphere=signed_sphere)
+        assert bool(torch.isfinite(normals).all())
+        torch.testing.assert_close(areas, expected_areas, rtol=0, atol=0)
+        torch.testing.assert_close(normals, expected_normals, rtol=0, atol=0)

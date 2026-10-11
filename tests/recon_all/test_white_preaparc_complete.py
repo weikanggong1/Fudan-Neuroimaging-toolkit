@@ -26,7 +26,7 @@ def white_inputs(tmp_path, monkeypatch):
     (tmp_path / "surf/autodet.gw.stats.lh.dat").write_text(
         "MID_GRAY 50\n" + "".join(f"white_{name} 50\n" for name in
         ("inside_hi", "border_hi", "border_low", "outside_low", "outside_hi")))
-    observed = {"rip": [], "border": [], "average": [], "cleanup": [], "context": [], "gpu_average": []}
+    observed = {"rip": [], "border": [], "average": [], "cleanup": [], "context": [], "gpu_average": [], "target_backend": []}
     monkeypatch.setattr(stage, "average_vertex_positions", lambda vertices, *a: vertices.copy())
     monkeypatch.setattr(stage, "prepare_placement_volume", lambda image, *a, **k: (image, None))
 
@@ -39,6 +39,7 @@ def white_inputs(tmp_path, monkeypatch):
         return flags, np.zeros(3, dtype=np.float32) if values is None else values.copy()
 
     def border(volume, seg, current, normals, original, ripped, values, *args, **kwargs):
+        observed["target_backend"].append(kwargs["target_search_backend"])
         observed["border"].append((kwargs["sigma"], kwargs["surface"], original.copy()))
         target = np.full(3, len(observed["border"]), dtype=np.float32)
         return target, None, None, None, np.ones(3, dtype=np.bool_), np.ones(3)
@@ -309,3 +310,15 @@ def test_nondefault_cleanup_grid_requires_source_torch(tmp_path):
     with pytest.raises(ValueError,match="cleanup candidate grid requires source_torch"):
         stage.place_white_preaparc(subject_dir=tmp_path,hemi="lh",output=tmp_path/"white",
                                   cleanup_candidate_grid_cells_per_axis=3)
+
+
+@pytest.mark.parametrize("target_backend", ["serial", "parallel"])
+def test_explicit_target_backend_reaches_all_four_searches(white_inputs, monkeypatch, target_backend):
+    subject, xyz, faces, observed = white_inputs
+    monkeypatch.setattr(stage, "pial_step_decision", lambda ls, lr, s, r, dt, red:
+                        (dt * .5, red + 1, True, True, red + 1 > 2))
+    result = stage.place_white_preaparc(subject_dir=subject, hemi="lh",
+        output=subject/"diagnostic/white", max_steps=4, target_search_backend=target_backend)
+    assert observed["target_backend"] == [target_backend] * 4
+    assert result["target_search_backend"] == target_backend
+    assert result["target_search_threads"] >= 1

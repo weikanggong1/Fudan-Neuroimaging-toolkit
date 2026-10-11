@@ -42,12 +42,26 @@ def project_radially(vertices: np.ndarray, radius: float = 100.0,
     return (wide - displacement).astype(np.float32)
 
 
-def initial_scale(vertices: np.ndarray) -> np.ndarray:
-    """Apply the fixed input size cap preceding spherical inflation."""
+def initial_scale(vertices: np.ndarray, *, bbox_mode: str = "legacy_integer") -> np.ndarray:
+    """在球面投影前按包围盒跨度限幅，返回float32(N,3)坐标。
+
+    vertices为非空、有限的(N,3) surface RAS/mm，转换为float32计算。
+    bbox_mode='legacy_integer'默认保留旧quick路径及归档已安装程序的
+    截断规则；'source_float'使用本轮固定Conda编译单元确认的浮点abs
+    规则，标准sphere显式选择后者。跨度大于75mm时绕包围盒中心等比
+    缩放，否则复制输入；不改变顶点顺序/面。非法模式、shape或非有限
+    输入抛ValueError，不写文件。这是mris_sphere内部步骤，无独立CLI。
+    两种模式的真实初始化/完整阶段差异见SPHERE_OVERLAP_FULL_STOP说明。
+    """
     xyz = np.asarray(vertices, dtype=np.float32)
-    # Pinned 8.2 C++ uses stdlib abs(int) on each float bbox dimension.  The
-    # implicit conversion truncates toward zero (215.832 mm becomes 215 mm).
-    dimension = np.float32(np.max(np.trunc(xyz.max(axis=0) - xyz.min(axis=0))))
+    if bbox_mode not in {"legacy_integer", "source_float"}:
+        raise ValueError("bbox_mode must be legacy_integer or source_float")
+    if xyz.ndim != 2 or xyz.shape[1] != 3 or len(xyz) == 0 or not np.isfinite(xyz).all():
+        raise ValueError("vertices must be a nonempty finite (N, 3) array")
+    span = xyz.max(axis=0) - xyz.min(axis=0)
+    if bbox_mode == "legacy_integer":
+        span = np.trunc(span)
+    dimension = np.float32(np.max(span))
     if dimension > np.float32(0.75) * RADIUS:
         scale = np.float32((np.float32(0.75) * RADIUS) / dimension)
         xyz = scale_about_bbox(xyz, scale)

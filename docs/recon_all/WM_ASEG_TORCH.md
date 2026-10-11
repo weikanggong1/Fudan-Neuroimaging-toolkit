@@ -5,13 +5,13 @@
 `edit_wm_aseg_torch.py` 把输入标签决定的 MTL 补白质及后编辑改为
 PyTorch CUDA。原有 Numba/NumPy 函数保留作回归参考。有序核心扫描仍由 Numba CPU 执行。新增完整同输入混合诊断接口，将
 `-fill-seg-wm` 放在原生首遍 WM 分支，GPU 预计算静态候选、执行固定
-filled 的邻域传播及后编辑。`remove_paths_to_cortex` 仍只接受几何证明
-其原生 byte-access 分支为 no-op 的输入；其余输入报错。默认生产后端
+filled 的邻域传播及后编辑。`remove_paths_to_cortex` 复用完整有序
+NumPy/Numba 实现；快速几何证明仅省去确证无作用的扫描。默认生产后端
 保持原样，混合接口不表示完整通用命令或整例 recon-all 已迁移。
 
 ```mermaid
 flowchart LR
-    A[WM brain aseg EntoWM 同网格] --> B[remove_paths 几何证明]
+    A[WM brain aseg EntoWM 同网格] --> B[remove_paths 证明或有序CPU搜索]
     B --> C[GPU 静态 fill 候选]
     C --> D[Numba 首遍有序 WM 分支消费候选]
     D --> E[GPU 固定 filled 邻域传播]
@@ -91,18 +91,20 @@ late_edit_report = write_late_wm_edits_torch(
 虚假的完成标记。
 
 完整诊断接口 `edit_wm_aseg_hybrid_diagnostic(wm, brain, aseg, entowm, *,
-device="cuda:0", fill_seg_wm=False)` 返回 `(新uint8数组, 报告字典)`。四个
+device="cuda:0", fill_seg_wm=False, aseg_storage_dtype="int32")` 返回 `(新uint8数组, 报告字典)`。四个
 NumPy输入为同网格，WM/brain必须uint8，aseg/entowm必须int32。有序
 Numba保留反馈依赖的有序扫描。GPU先计算aseg决定的fill候选，首遍
 WM分支逐点消费，随后GPU执行固定filled的传播；再回到Numba后续
 扫描，最后连接GPU海马下方、spackle和late编辑。后编辑不再次fill。
-`remove_paths_to_cortex` 的几何no-op证明不成立时抛 `NotImplementedError`；
-旧的固定被试公共入口及其SHA限制保留。完整混合接口没有按被试SHA
-绕过几何证明；本轮同输入原生命令回归单独报告，尚未替换生产默认。
+`aseg_storage_dtype` 指定原四字节 int32/float32 存储，默认 int32；
+文件入口在转换前校验并转发原 dtype。活跃路径按原顺序完整搜索，
+不使用被试 SHA 特例；完全不变的内层传播状态证明不终止后抛
+`RuntimeError`。详见 [MTL 路径阻断](WM_REMOVE_PATHS.md)。
+旧版本回归仍按原源码 SHA 保留，不改标为当前实现或新整例。
 
 文件版本 `write_wm_asegedit_hybrid_diagnostic` 包含加载、传输和写出。
 额外要求aseg原存储为4字节int32或float32精确整数；原生MRIclone保留
-该dtype，byte-access范围依赖itemsize，int16/uint8不能先转int32再证明。
+该dtype，byte-access范围依赖itemsize，int16/uint8不能先转int32代替原 byte-access 语义。
 EntoWM及late-only文件API不受此存储限制。
 
 
@@ -196,6 +198,8 @@ dtype guard，不改变这两例已接受输入的算子，guard的当前版本�
 由总任务另行验收，本页没有整例10分钟或整体等效结论。
 
 ## 6. 更新与验证记录
+
+- 2026-10-11：复用新完整 NumPy/Numba MTL 路径阻断；数组接口增加默认兼容的 `aseg_storage_dtype`，文件接口自动转发原四字节存储。GPU算子和前向精度未改，当前回归范围见 [路径阻断专页](WM_REMOVE_PATHS.md)。
 
 - 2026-10-09：新增确定性 Torch 子阶段和文件 API；CPU/reference 保留。
 - 2026-10-09：修正既有Numba核心遗漏的cerebellar exterior标签6/45与

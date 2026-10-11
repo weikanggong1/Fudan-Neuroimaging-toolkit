@@ -1,0 +1,37 @@
+{
+  "source_commit": "d932c45b7941662ea380a05efef580568b98d41a",
+  "source_files_sha256": {
+    "defect": "55ace70ab09b1868a8cb152a9547879abdce790635b484bef1bf056986958187",
+    "matrix": "14d64078a37252c0e1b8d3354140bab46e8c41601975e414d1fe78dea94fd52c",
+    "numerics": "a40443aad70cd37f1ccd6c75a7891d2bf8760a16dafe594ef03c50c0a0039009",
+    "vnl_symmetric_eigensystem_54": "9bd7968efdf317ea4e7ec7ef5e28347289ff5df6a14224b53808eb0f965ae7a4",
+    "tql2_54": "ff2fc858575a9380e7de0108ca1f3f089cbfaa354bc79e67c1c909d7ef81a0a8",
+    "tred2_54": "68d48153b6b8fdf73696bcbd01daa76c3e46b3c5e055e32b6d65a21ba787a05c",
+    "pythag_54": "abfc707c8a30a80ef2a20dc630b3ba003784f4b09675158e52d55353114dcf23",
+    "mrisurf_base": "ddd2a74582be9252481edda50f04df0b48b0546d032b54fce2416167ad08ec79"
+  },
+  "source_bodies_published": false,
+  "actual_reference_linked_vnl": "ITK 5.4, observed in independent build receipt",
+  "vnl_53_54_symmetric_helper_bytes_equal": true,
+  "rules": {
+    "tangent": "source float32 cross/sub/mul/sqrt; second cross consumes unnormalized first cross",
+    "ordered_neighborhood": "vt.v[0:vtotal], preserve order and all design rows including zero projected radius",
+    "projection": "float32 V3_DOT widening to double ui/vi, double polynomial then float32 design/rsq",
+    "gram_rhs_inverse": "ordered float32 MatrixMultiply, mature FNIT VNL3 SVD reuse",
+    "condition": "source MatrixIsZero maxabs<=1e-11\u21921e10, FZERO(wmin)<FLT_EPS\u21921e8, normal wmax/wmin float32",
+    "ill_conditioned_threshold": 500000,
+    "svd_inverse_cutoff": 0.0001,
+    "eigensystem": "2x2 float32 Hessian widening F64 EISPACK stable-norm QL, then F32 principal fields and abs ordering",
+    "zero_matrix_basis": "source m_eigen state retained across selected vertices; first allocated zero",
+    "source_caller": "computeDefectSecondFundamentalForm inside first complete mrisComputeDefectLogLikelihood; no standalone CLI"
+  },
+  "units": {
+    "coordinates": "tkregister/surface RAS mm",
+    "principal_curvature": "mm^-1",
+    "normals_and_basis": "dimensionless",
+    "gram": "mm^4",
+    "rhs": "mm^3"
+  },
+  "actual_real_case": "ds000114 sub-07 ses-test LH first complete candidate, 110534 vertices/99 selected",
+  "old_initial_fit_not_reused": "initial qsphere/rip/two-ring preprocessing differs from live candidate; only shared 3x3 SVD reused"
+}

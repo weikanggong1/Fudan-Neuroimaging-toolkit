@@ -15,12 +15,12 @@ from .n4_wrapper import make_nu
 def validate_n4_execution(*, n4_backend: str, n4_execution: str, device: str) -> None:
     """创建输出前检查N4路由，不加载影像、模型或初始化CUDA。
 
-    n4_backend为native/torch，n4_execution为in-process/isolated，device
+    n4_backend为native/torch/simpleitk，n4_execution为in-process/isolated，device
     沿用调用者逻辑设备。isolated只允许完整Torch及显式cuda:N；其余
     非法组合抛ValueError。无输出/坐标单位，属于调度内部参数检查。
     """
-    if n4_backend not in {"native", "torch"}:
-        raise ValueError("n4_backend must be 'native' or 'torch'")
+    if n4_backend not in {"native", "torch", "simpleitk"}:
+        raise ValueError("n4_backend must be native, torch or simpleitk")
     if n4_execution not in {"in-process", "isolated"}:
         raise ValueError("n4_execution must be in-process or isolated")
     if n4_execution == "isolated":
@@ -33,6 +33,23 @@ def validate_n4_execution(*, n4_backend: str, n4_execution: str, device: str) ->
             raise ValueError("isolated N4 requires n4_backend='torch' and explicit CUDA device cuda:N")
 
 
+def require_n4_runtime_dependencies(*, n4_backend: str) -> dict:
+    """所选N4后端的运行依赖预检，须在影像/模型/subject创建之前执行。
+
+    simpleitk惰性检查已声明2.5.6、必要API及可读库，返回实际版本/库SHA。
+    native/torch不导入SimpleITK，本函数不代替其既有程序/设备校验。
+    非法selector抛ValueError；库缺失/导入失败/版本不符抛ImportError，
+    不回退其他后端，不创建目录、不初始化CUDA或改线程/TF32。
+    """
+    if n4_backend not in {"native", "torch", "simpleitk"}:
+        raise ValueError("n4_backend must be native, torch or simpleitk")
+    if n4_backend == "simpleitk":
+        from .n4_simpleitk import require_simpleitk_runtime
+        return require_simpleitk_runtime()
+    return {"backend": n4_backend, "required": False,
+            "scope": "no SimpleITK dependency for this backend"}
+
+
 def run_n4_stage(*, input_path: str | Path, output_path: str | Path,
                  n4_backend: str = "native", n4_execution: str = "in-process",
                  native_binary: str | Path | None = None, device: str = "cpu",
@@ -42,6 +59,8 @@ def run_n4_stage(*, input_path: str | Path, output_path: str | Path,
 
     input_path/output_path为三维影像路径，输出uint8、同affine/mm。
     native默认独立Conda ITK，native_binary必填，拟合/重建各1线程。
+    simpleitk使用独立Python完整N4，无需native_binary、设备仍为CPU，
+    拟合1线程、重建threads线程；仅允许in-process并恢复ITK全局线程。
     torch默认in-process沿用父allocator；isolated复用新exec缓存worker，
     必须cuda:N及新report_path。threads默认4；profile默认False同步
     Torch细分，native在report_path非None时写原生profile。返回实际
@@ -49,6 +68,14 @@ def run_n4_stage(*, input_path: str | Path, output_path: str | Path,
     reserved及父策略完整保留。失败传播，不复制参考或静默回退。
     """
     validate_n4_execution(n4_backend=n4_backend, n4_execution=n4_execution, device=device)
+    require_n4_runtime_dependencies(n4_backend=n4_backend)
+    if n4_backend == "simpleitk":
+        if isinstance(threads, bool) or not isinstance(threads, int) or threads < 1:
+            raise ValueError("threads must be a positive integer")
+        details = correct_volume(input_file=input_path, output_file=output_path,
+            backend="simpleitk", reconstruction_threads=threads, profile_path=report_path)
+        return {**details, "backend": "simpleitk_python", "execution": n4_execution,
+                "device": "cpu", "used_native_programs": False}
     if n4_backend == "native":
         if native_binary is None:
             raise ValueError("native_binary is required for native N4")
@@ -84,6 +111,8 @@ def run_input_n4_chain(t1: str | Path, subject_dir: str | Path,
     为已校验SynthStrip/Talairach权重及MNI305模板；全部输出在subject_dir。
     device默认cpu，控制神经推理及显式Torch N4；threads默认4，为前段CPU
     预算。native默认复用Conda ITK，n4_binary必须提供，拟合/重建均1线程；
+    simpleitk显式使用Python库完整固定N4，拟合1线程、重建threads线程，
+    不调用原版程序、无需binary或CUDA；实际库版本/SHA与量化误差另报。
     torch显式实验复用完整固定ITK5.4.7配方，不使用旧blur残差近似，不读取
     参考。n4_execution默认in-process保留父allocator；isolated只允许
     Torch/cuda:N，在新exec中局部缓存并保留完整阶段收据/父CUDA状态。
@@ -99,6 +128,7 @@ def run_input_n4_chain(t1: str | Path, subject_dir: str | Path,
     validate_n4_execution(n4_backend=n4_backend, n4_execution=n4_execution, device=device)
     if n4_backend == "native" and n4_binary is None:
         raise ValueError("n4_binary is required when n4_backend='native'")
+    require_n4_runtime_dependencies(n4_backend=n4_backend)
     result = run_input_talairach_chain(
         t1, subject_dir, weights_dir, assets_dir,
         device=device, threads=threads)
@@ -109,7 +139,7 @@ def run_input_n4_chain(t1: str | Path, subject_dir: str | Path,
     nu = mri / "nu.mgz"
     started = time.perf_counter()
     report_path = (Path(subject_dir) / "scripts/n4-isolated.json" if n4_execution == "isolated"
-                   else Path(subject_dir) / "scripts/n4.profile.json" if profile and n4_backend == "native"
+                   else Path(subject_dir) / "scripts/n4.profile.json" if profile and n4_backend in {"native", "simpleitk"}
                    else None)
     n4_details = run_n4_stage(input_path=mri / "orig.mgz", output_path=nu0,
                              n4_backend=n4_backend, n4_execution=n4_execution,
@@ -138,7 +168,7 @@ def main() -> None:
     parser.add_argument("--weights-dir", type=Path, required=True)
     parser.add_argument("--assets-dir", type=Path, required=True)
     parser.add_argument("--n4-binary", type=Path)
-    parser.add_argument("--n4-backend", choices=("native", "torch"), default="native")
+    parser.add_argument("--n4-backend", choices=("native", "torch", "simpleitk"), default="native")
     parser.add_argument("--n4-execution", choices=("in-process", "isolated"), default="in-process")
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--threads", type=int, default=4)

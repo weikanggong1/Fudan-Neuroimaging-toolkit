@@ -1,0 +1,154 @@
+{
+  "schema_version": 1,
+  "scope": "Preparation only: current scientific source plus two raw public T1s into new empty output roots; no original-software stage or original-software-derived image/surface input",
+  "scientific_git": "9292a0a7be63f6bc96f2dfa358261cb1587e0f23",
+  "report_parent_git": "22851fe5f556a444ad38f015423ef4a0eda33a93",
+  "whole_started": false,
+  "launch_authorized": false,
+  "two_cases": [
+    {
+      "case": "ds000114_sub-06",
+      "bytes": 10429286,
+      "sha256": "7e33afb28f631fac31d81e2428a6144f61aba4102859c694eeb49ee584de04f7",
+      "expected_bytes": 10429286,
+      "expected_sha256": "7e33afb28f631fac31d81e2428a6144f61aba4102859c694eeb49ee584de04f7",
+      "passed": true
+    },
+    {
+      "case": "ds000114_sub-07",
+      "bytes": 8580756,
+      "sha256": "59ef7bed60d4db64d56d947ebed2ef62a9257c26fe879848fe24d10a490f74fc",
+      "expected_bytes": 8580756,
+      "expected_sha256": "59ef7bed60d4db64d56d947ebed2ef62a9257c26fe879848fe24d10a490f74fc",
+      "passed": true
+    }
+  ],
+  "source_binding_file": "frozen_source_binding.public.json",
+  "resources_binding_file": "readiness.public.json",
+  "profile": {
+    "input_execution": "serial",
+    "native_optimizations": "torch",
+    "n4_backend": "simpleitk",
+    "n4_execution": "in-process",
+    "wm_backend": "torch-optimized",
+    "gca_execution": "isolated",
+    "gca_inverse_backend": "torch",
+    "gca_candidate_chunk": 1024,
+    "normalization_controls_backend": "torch",
+    "normalization_initial_bias_backend": "torch",
+    "sphere_finish_backend": "torch",
+    "mni_execution": "parallel-late",
+    "wm_execution": "isolated",
+    "wm_edit_backend": "python",
+    "defects_backend": "torch",
+    "inflate_backend": "torch",
+    "surface_placement_backend": "python",
+    "topology_backend": "python-ga",
+    "annotation_gibbs_backend": "numba",
+    "remesh_scalar_storage": "python",
+    "fill_backend": "numba",
+    "hemisphere_workers": 2
+  },
+  "additional_parameters": {
+    "backend": "python",
+    "device": "cuda:0",
+    "threads": 4,
+    "sphere_normals_backend": "numba",
+    "precision": "existing TF32 default and validated FP32 exceptions; no half/autocast",
+    "gpu_memory_target_bytes": 20000000000
+  },
+  "complete_ga": {
+    "seed": 1234,
+    "population": 10,
+    "max_unchanged": 10,
+    "niters": -1,
+    "initial_selection": true,
+    "vertex_eliminate": true,
+    "use_overlap": false,
+    "normal_status": "surface",
+    "soap": 5,
+    "final_orig": true,
+    "face_cache": true,
+    "blocker_scan": "numba",
+    "remesh_scalar_storage": "python",
+    "experimental_gpu_distance_enabled": false
+  },
+  "resource_recommendation": {
+    "physical_gpu_index": 2,
+    "physical_gpu_uuid": null,
+    "cpu_affinity": [
+      80,
+      81,
+      82,
+      83
+    ],
+    "half_worker_threads": 2,
+    "reserved": false,
+    "snapshot_gpu_used_mib": 26413,
+    "snapshot_gpu_util_percent": 0,
+    "snapshot_observed_utc": "2026-10-11T03:37:54Z",
+    "shared_gpu": true,
+    "prelaunch_recheck_required": true,
+    "same_device_verification": "Before launch, compare the selected device UUID with the original private snapshot receipt; the public copy omits the hardware identifier. Device index alone is insufficient."
+  },
+  "gates": {
+    "raw_t1_hashes_passed": true,
+    "resource_hashes_passed": true,
+    "local_source_manifest_passed": true,
+    "local_install_passed": true,
+    "task2_final_pial_regression_received": false,
+    "final_scientific_freeze_confirmed": false,
+    "current_wheel_cfff_install_verified": false,
+    "resource_notice_and_file_license_mapping_verified": false,
+    "fresh_gpu_cpu_disk_recheck_passed": false,
+    "trusted_process_gpu_pid_mapping_verified": false,
+    "launch_authorized": false
+  },
+  "timing_protocol": {
+    "cases_execution": "sequential; each separate process and absent output root; preserve failures; no stage resume",
+    "outer_wall": "supervisor begins before interpreter startup and ends after child exit/reaping and final artifact writes; include imports, preflight hashing, all stage IO and report publication",
+    "cli_wall": "Popen to CLI exit includes interpreter initialization, model loading, transfers, computation, writeout and validation",
+    "stage_wall": "same monotonic clock; each named stage includes its own read/write and synchronization; preserve nested boundaries and do not sum overlaps",
+    "sampler_interval_seconds": 0.5,
+    "memory": "one contemporaneous sample of parent and all live descendants on selected GPU; sum same-sample owned bytes, never sum individual historical peaks",
+    "memory_mapping": "require verified host/container PID identity map; NVML if available; record backend, query errors, missing samples, maximum interval, namespace mapping; unresolved owned peak remains null",
+    "cold_warm": "record first-use JIT/model cache and loading separately without excluding them from full wall",
+    "precision_validation": "record actual TF32 switches and intentional FP32 operations; no undocumented low-precision changes"
+  },
+  "completion_gate": {
+    "exit_receipt": 0,
+    "benchmark_exit_code": 0,
+    "api_status": "complete",
+    "all_expected_outputs": 138,
+    "output_hash_manifest_required": true,
+    "mesh_quality": "all generated final surfaces finite, closed/manifold, valid indices, consistent orientation, nonzero face area and zero geometric intersections; preserve existing complete GA gate",
+    "reference_comparison": "separate post-run evaluation of geometry/images/labels/metrics against declared original-software reference; record versions, hashes and stage/whole timing. Original outputs may enter evaluator only, never candidate pipeline. No accuracy/equivalence claim before actual paired comparison",
+    "visualization": "write T1/segmentation overlays and white/pial/registered-sphere QC images only after outputs exist"
+  },
+  "known_harness_issue": {
+    "file": "tools/benchmark_recon_torch_end_to_end.py",
+    "lines": [
+      75,
+      81
+    ],
+    "issue": "Python profile call omits input_execution and overwrites parsed args; parallel request currently becomes serial",
+    "action": "prepare actual serial profile; any future wrapper fix requires new script binding and review before run"
+  },
+  "forbidden": [
+    "original-software executables or native-bin-dir in candidate stages",
+    "reference image/surface artifacts as candidate inputs",
+    "resume old failed runs",
+    "reduce GA iterations/population/quality checks to obtain a passing run",
+    "unverified asset redistribution",
+    "modify shared index/environment/production during preparation"
+  ],
+  "public_derivation": {
+    "scope": "Public privacy derivative only; no MRI rerun or scientific/report correction",
+    "redacted_field": "resource_recommendation.physical_gpu_uuid",
+    "redaction": "Set to null; original private receipt retains the actual identifier for same-device recheck",
+    "original_protocol_sha256": "27392cea1f6e98e6b39a72b788372d61584212b11b95a3558931dfde6161bcae",
+    "original_private_receipt": "run_discovery.private.json",
+    "original_private_receipt_sha256": "a951ebe57a8a226304782bd7ea68c9196eac3d4458ede89c6b4ca23b5fc17760",
+    "preserved": "Scientific source/wheel/input hashes, historical v2/v3 failures, resource observations, pending gates and whole_started=false are unchanged"
+  }
+}

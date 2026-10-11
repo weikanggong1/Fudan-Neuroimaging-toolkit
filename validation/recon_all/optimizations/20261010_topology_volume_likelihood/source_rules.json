@@ -1,0 +1,42 @@
+{
+  "fixed_original_commit": "d932c45b7941662ea380a05efef580568b98d41a",
+  "files": [
+    {
+      "name": "utils/mrisurf_defect.cpp",
+      "sha256": "55ace70ab09b1868a8cb152a9547879abdce790635b484bef1bf056986958187",
+      "function": "mrisComputeDefectMRILogUnlikelihood_wkr volume aggregation/curvbak feedback",
+      "lines": [
+        3021,
+        3122
+      ],
+      "range_sha256": "c695b0d29261ae40fbb2a59e5753e1f80fa772843f63cd6faeb4f28bad5032aa"
+    },
+    {
+      "name": "include/mrisurf_metricProperties.h",
+      "sha256": "6c345b8c127342bd4c6ff151797c1f00c9533a73f3d2b734e449521d4f9b7160",
+      "source_rules": [
+        "L54 NOT_PROCESSED_YET=1000 and NPY alias",
+        "L58-62 float subtraction/multiply then double .5 and C int toward zero: iVOL"
+      ]
+    },
+    {
+      "name": "utils/mrisurf_defect.h",
+      "sha256": "2463a2b9477ede08f29d4ae9c0678913136ca947ff49fccd0b852a82dcf3d19f",
+      "source_rules": [
+        "L29 KEEP_VERTEX=0",
+        "L30 DISCARD_VERTEX=1"
+      ]
+    }
+  ],
+  "rules": [
+    "distance generation 1838-3030 is a different operator and not implemented here",
+    "fixed margin3 and k/j/i traversal",
+    "initial tissue count1/FP32 initial means and ordered additions",
+    "strict signed distance thresholds +.5/-.5, exact NPY equality",
+    "maxabs excludes no-intensity and NPY; clamp 1..2",
+    "ordered original defect vertices only DISCARD skipped; duplicate translations not deduped",
+    "iVOL samples using source float index_scale, not generic MRI affine or division by physical spacing",
+    "source curvbak updated multiplicatively and sequentially; output copied input array preserves all other entries",
+    "native first defect before GA mutation; full dynamic patch and whole pipeline not yet tested"
+  ]
+}

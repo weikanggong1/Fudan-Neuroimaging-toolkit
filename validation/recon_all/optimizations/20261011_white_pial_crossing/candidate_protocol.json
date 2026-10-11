@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "algorithm": "independent_free_plane_pair_solver_v2_crossing_guard",
+  "parameters": {
+    "max_displacement_mm": 1.0,
+    "minimum_area_ratio": 0.2,
+    "clearance_mm": 0.002,
+    "max_sweeps": 4,
+    "optimizer_iterations": 100,
+    "diagnostic_pair_limit": null,
+    "projection_mode": "free_separating_plane",
+    "crossing_guard": true
+  },
+  "acceptance": {
+    "fixed_vertices": "rip union all outside cortex; preserve entry coordinates bitwise",
+    "ordered_faces": "unchanged",
+    "source_and_float64_self_pairs": "strict subset for each accepted trial; no new pairs; final complete sets equal",
+    "affected_faces": "all retain positive initial-normal dot and area ratio >=0.2",
+    "maximum_cumulative_displacement_mm": 1.0,
+    "white_pial_proper_crossings": "both exact/F64 internal straddles and positive intersection interval; no minimum length; no new pair",
+    "white_pial_nonmedial_exact_contacts": "no new exact edge/point/coplanar contact excluding unchanged allfixed exact ownwhite coincidence",
+    "source_tolerance_contact": "reported separately; cannot exempt positive internal crossing"
+  },
+  "scope": "complete independent residual-stage candidate on frozen own seven inputs; not raw T1 or overall equivalence",
+  "reference_coordinates_used_for_candidate": false,
+  "production_default_change": false,
+  "candidate_constraints_are_not_overall_equivalence_thresholds": true,
+  "initial_proper_crossings_are_separate_from_no_new_gate": true,
+  "crossing_backend": "F64_with_exact_IEEE_fraction_fallback",
+  "crossing_helper_sha256": "acf0a8037db63ea682bdbf7c8fda83b175b4d7946e7164b584056e88891e238d"
+}

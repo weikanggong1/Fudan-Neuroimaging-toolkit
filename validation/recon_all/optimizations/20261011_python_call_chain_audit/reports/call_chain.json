@@ -1,0 +1,1444 @@
+{
+  "schema_version": 1,
+  "reviewed_commit": "bee263f93d1842b44ede5ecf3c791af11613f8ce",
+  "git_head_at_capture": "f18c43e97409299cd0ef5ba03aa75c6aea393839",
+  "scope": "current conditional call-chain static audit; no current real MRI execution",
+  "template_reuse": {
+    "path": "validation/recon_all/optimizations/20261010_python_profile_static/static_audit.json",
+    "sha256": "21753e3e18debc86fe1303ea3754a976c78341990094b922ca610424de86f1b7",
+    "reuse": "structure only; all referenced functions recaptured, no historical runtime claims copied"
+  },
+  "profile": {
+    "native_optimizations": "torch",
+    "n4_backend": "simpleitk",
+    "n4_execution": "in-process",
+    "wm_backend": "torch-optimized",
+    "gca_execution": "isolated",
+    "gca_inverse_backend": "torch",
+    "gca_candidate_chunk": 1024,
+    "normalization_controls_backend": "torch",
+    "normalization_initial_bias_backend": "torch",
+    "sphere_finish_backend": "torch",
+    "mni_execution": "parallel-late",
+    "wm_execution": "isolated",
+    "wm_edit_backend": "python",
+    "defects_backend": "torch",
+    "inflate_backend": "torch",
+    "surface_placement_backend": "python",
+    "topology_backend": "python",
+    "annotation_gibbs_backend": "numba",
+    "remesh_scalar_storage": "python",
+    "fill_backend": "numba",
+    "hemisphere_workers": 2
+  },
+  "source": {
+    "schema_version": 1,
+    "git_head_at_capture": "f18c43e97409299cd0ef5ba03aa75c6aea393839",
+    "baseline_git_commit": "fc36d6c1c761302ed5b7425b730b17ab4951090b",
+    "before_batch_sha256": "f0df68a998668b625c2cf42db0d57b9250c0ed2aa3808ae63238ff25351e3715",
+    "source_files": {
+      "src/fnit/recon_all/native_free.py": {
+        "sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+        "size_bytes": 146752
+      },
+      "src/fnit/recon_all/batch.py": {
+        "sha256": "0023e24dd3e076b0ae632c8de2fbd57b7b39030e4cc6af92f86d342bc0c4b7d4",
+        "size_bytes": 19459
+      },
+      "src/fnit/recon_all/python_profile.py": {
+        "sha256": "127a8a3b869f1d8dc7afc4b3ac13fb46e22b34be2cbafd133ac64a9b47be78bf",
+        "size_bytes": 3663
+      },
+      "src/fnit/recon_all/native_runtime_selection.py": {
+        "sha256": "dccff7899fa919d486081d3ec351b858ea552da8ffa564a41e8111cc318f2f76",
+        "size_bytes": 4334
+      },
+      "src/fnit/recon_all/input_n4_chain.py": {
+        "sha256": "cb3cff1cb7f7834365f77109bae71f970cc77cb88f4a354db86a98793eb1bea3",
+        "size_bytes": 10446
+      },
+      "src/fnit/recon_all/n4_itk.py": {
+        "sha256": "4756ac012390442d49d7a1b8537c21eaf0759793844a7be07c814ad04e83dbf4",
+        "size_bytes": 5541
+      },
+      "src/fnit/recon_all/n4_simpleitk.py": {
+        "sha256": "c14e8eb46fb408926ddb9a7fe3d35d97bb5201382928e87226f71f8e01041b90",
+        "size_bytes": 9398
+      },
+      "src/fnit/recon_all/n4_itk_torch_experimental.py": {
+        "sha256": "fdc7731ecc7c98546d23fa90d970cf87664a39bc22fdfdbfae498ae5d0867a8b",
+        "size_bytes": 14986
+      },
+      "src/fnit/recon_all/mri_segment.py": {
+        "sha256": "abee3136f2c88409746b817a845ad48afbf326005f242f4eabc123c6544613bb",
+        "size_bytes": 48564
+      },
+      "src/fnit/recon_all/edit_wm_aseg_core_python.py": {
+        "sha256": "206511ff9b524eb10fb3219a81a85ae7b8a826d439df2b8d2ccb7f8d3b61a049",
+        "size_bytes": 31199
+      },
+      "src/fnit/recon_all/wm_aseg_io.py": {
+        "sha256": "62aca11054872004c50cf38a7af2e6e4ff2af8af5f467a391acff6de03a8927d",
+        "size_bytes": 1551
+      },
+      "src/fnit/recon_all/mris_register_average_numba.py": {
+        "sha256": "956616a920f751f49d201bf5a0a17867084a4b8e810336ab849d29fb60b0648b",
+        "size_bytes": 6671
+      },
+      "src/fnit/recon_all/mris_register_average_gpu.py": {
+        "sha256": "d0e2afb1e37fdfaff7ac80913ada47fed1805ae52ff296fa34050ac0cd7d7b42",
+        "size_bytes": 2087
+      },
+      "src/fnit/recon_all/discrete_curvature_torch.py": {
+        "sha256": "2f0642af718f9d1fa08032fc3c74cc5e8be34def7f77eb8735982a39b5c41493",
+        "size_bytes": 14742
+      },
+      "src/fnit/recon_all/mni_nonlinear_chain.py": {
+        "sha256": "d33d0b0fb31cc5605c926047c7d210bae3e72cfd2dfe02ebdbcf68ec14c70faa",
+        "size_bytes": 7430
+      },
+      "src/fnit/recon_all/python_gpu_profile.py": {
+        "sha256": "0f944c42bdf2e05e461e933bef183baefaf3075b5c7cf810581213ef08efdb6d",
+        "size_bytes": 7677
+      }
+    },
+    "local_interpreter_python": "3.11.16",
+    "local_package_versions": {
+      "torch": "2.5.1",
+      "numpy": "1.26.4",
+      "numba": "0.67.0",
+      "nibabel": "5.4.2",
+      "scipy": "1.17.1",
+      "SimpleITK": "2.5.6",
+      "triton": "3.1.0"
+    },
+    "runtime_version_scope": "local focused tests only; not the CFFF production environment",
+    "generic_libraries_permitted": [
+      "Python",
+      "NumPy",
+      "Numba",
+      "PyTorch",
+      "SimpleITK",
+      "SciPy"
+    ],
+    "declared_versions": {
+      "Conda_python": "3.11",
+      "Conda_pytorch": "2.5.1",
+      "Conda_triton": "3.1.0",
+      "SimpleITK": "2.5.6"
+    }
+  },
+  "stages": [
+    {
+      "name": "profile/程序发现",
+      "implementation": "固定21选项，不消费原版程序/能力探测",
+      "selected_guard": "backend=python；mode=torch；include_white=False",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/python_profile.py",
+          "file_sha256": "127a8a3b869f1d8dc7afc4b3ac13fb46e22b34be2cbafd133ac64a9b47be78bf",
+          "bytes": 3663,
+          "function": "python_profile_options",
+          "line": 7,
+          "end_line": 57,
+          "function_sha256": "a4c913b996e6a4bb82028edc843e085bd8a73a30de8b964a7a550e504a4f3f27"
+        },
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_run_recon_all_python",
+          "line": 1218,
+          "end_line": 2013,
+          "function_sha256": "93df2dbc92b148f6683e3dfdcab68cfb190970cf383887e52b2e32202af2ed8b"
+        },
+        {
+          "path": "src/fnit/recon_all/native_runtime_selection.py",
+          "file_sha256": "dccff7899fa919d486081d3ec351b858ea552da8ffa564a41e8111cc318f2f76",
+          "bytes": 4334,
+          "function": "select_native_optimizations",
+          "line": 10,
+          "end_line": 71,
+          "function_sha256": "6484cddb602c60afa02a268ecbe22ee45a5817463774b2fbf70e1209fb80ace3"
+        }
+      ]
+    },
+    {
+      "name": "conform/SynthStrip/Talairach",
+      "implementation": "自有Python/Numba与Torch GPU",
+      "selected_guard": "显式CUDA；Talairach子进程为sys.executable -m",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/input_talairach_chain.py",
+          "file_sha256": "ab0a02eca9a738cf9c43e0cbcf179165fe187529bbc34ad1929b619fd60bc8d3",
+          "bytes": 7648,
+          "function": "run_input_talairach_chain",
+          "line": 94,
+          "end_line": 147,
+          "function_sha256": "3931c7a3ff8a335cba4ecc62cbe06d68fec4bc5214989e5b6e61b78933b955a1"
+        },
+        {
+          "path": "src/fnit/recon_all/talairach_synthmorph.py",
+          "file_sha256": "4030e0b68f7dc496b4256e72bd8db542957c9d791b7a8c9f88a02e3d2cd920cc",
+          "bytes": 5127,
+          "function": "register_talairach",
+          "line": 52,
+          "end_line": 76,
+          "function_sha256": "6c8cdb773724487b28d760a55e56875d5714f7e61f98d1eb907e2cc83ebec78d"
+        }
+      ]
+    },
+    {
+      "name": "N4/nu",
+      "implementation": "SimpleITK Python API通用ITK CPU库；自有nu转换",
+      "selected_guard": "simpleitk首分支返回，不解析原版N4程序",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/input_n4_chain.py",
+          "file_sha256": "cb3cff1cb7f7834365f77109bae71f970cc77cb88f4a354db86a98793eb1bea3",
+          "bytes": 10446,
+          "function": "run_n4_stage",
+          "line": 36,
+          "end_line": 81,
+          "function_sha256": "635508088267b04622389f834196ff32653558f5687115962ea9321b879f6c3c"
+        },
+        {
+          "path": "src/fnit/recon_all/n4_itk.py",
+          "file_sha256": "4756ac012390442d49d7a1b8537c21eaf0759793844a7be07c814ad04e83dbf4",
+          "bytes": 5541,
+          "function": "correct_volume",
+          "line": 23,
+          "end_line": 90,
+          "function_sha256": "6ff8a303b30a8c4b86f00cd73015658d0b3b109b9be5fce9bef466c32850b95a"
+        },
+        {
+          "path": "src/fnit/recon_all/n4_simpleitk.py",
+          "file_sha256": "c14e8eb46fb408926ddb9a7fe3d35d97bb5201382928e87226f71f8e01041b90",
+          "bytes": 9398,
+          "function": "correct_volume",
+          "line": 113,
+          "end_line": 149,
+          "function_sha256": "fdade068e3165545470dec61f310fc08b69e9b3772900ff8066873da7829c98f"
+        },
+        {
+          "path": "src/fnit/recon_all/n4_wrapper.py",
+          "file_sha256": "8b8288a981ee69d9cc6bfe1af6b46463743e83ead2e542f32bc6fd50a810839e",
+          "bytes": 6394,
+          "function": "make_nu",
+          "line": 112,
+          "end_line": 127,
+          "function_sha256": "3e802c99b6c3645a0c9cee3d90d22c61b47072445da25df5d14f3e5868378b7c"
+        }
+      ]
+    },
+    {
+      "name": "两轮normalize/brainmask",
+      "implementation": "自有Torch GPU与有序Numba CPU混合",
+      "selected_guard": "both normalization calls explicitly pass device=device; controls=torch and second initial_bias=torch; ordered ridge and feedback stay CPU",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/normalization/pipeline.py",
+          "file_sha256": "605b68b844929c852d2978fb38050cc56dcd18ff997742cb852946dfe12860ef",
+          "bytes": 8273,
+          "function": "normalize_t1",
+          "line": 23,
+          "end_line": 138,
+          "function_sha256": "2551080a38681569dcd90ee08360337dd53e35ab84012b4aa3d8cb11c42463ba"
+        },
+        {
+          "path": "src/fnit/recon_all/normalization/aseg_pipeline.py",
+          "file_sha256": "bb4175e69e71ec14e06bad7895d85152632438192c642f9c7027438a3e11832c",
+          "bytes": 8652,
+          "function": "normalize_t1_aseg",
+          "line": 77,
+          "end_line": 132,
+          "function_sha256": "9821555e4d66befc0301177537dab2258f3162bd86bfb8cbf748ba02e8362841"
+        }
+      ]
+    },
+    {
+      "name": "SynthSeg/辅助网络",
+      "implementation": "自有Torch GPU",
+      "selected_guard": "SynthSeg CUDA不进入CPU columns；EntoWM/MCA-dura/vsinus显式CUDA及既有精度例外",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_run_white_mri_chain",
+          "line": 565,
+          "end_line": 598,
+          "function_sha256": "258cf1d6285cea430d85ec4448c100d3e30c55b4c8d2a58e70dba28ee0ed8c29"
+        },
+        {
+          "path": "src/fnit/synthseg_parc/cpu_conv.py",
+          "file_sha256": "234df7485ec44157c9e9d909d914dbb4d08f0d7f56d68f56400fd24891f786f4",
+          "bytes": 6660,
+          "function": "CPUInferenceConv3d.forward",
+          "line": 105,
+          "end_line": 130,
+          "function_sha256": "5fc7aa65f2b0d5093f475e25b9e7cd98255b289ee58f6a52ae8ef4dc6412ba2f"
+        }
+      ]
+    },
+    {
+      "name": "GCA registration",
+      "implementation": "完整自有Python/Numba EM与Torch GPU评分/求逆",
+      "selected_guard": "binary=None；isolated Python worker；inverse=torch；chunk1024",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_run_native_em_register",
+          "line": 164,
+          "end_line": 232,
+          "function_sha256": "e35c7a0544b81ee256f4e130934cee35c2e8567f32a6bd91543fcc0f82845598"
+        },
+        {
+          "path": "src/fnit/recon_all/gca_torch_worker.py",
+          "file_sha256": "823dc7be2ed9fe2b149ade62d7e32850511358b140916c045bf6d2e453dbdb87",
+          "bytes": 9970,
+          "function": "run_isolated_registration",
+          "line": 32,
+          "end_line": 73,
+          "function_sha256": "216a71315afc9f068ee4fe89d429486c7ffe8c8796c12a7712902643f8595c39"
+        },
+        {
+          "path": "src/fnit/recon_all/gca_torch_worker.py",
+          "file_sha256": "823dc7be2ed9fe2b149ade62d7e32850511358b140916c045bf6d2e453dbdb87",
+          "bytes": 9970,
+          "function": "run_worker",
+          "line": 76,
+          "end_line": 163,
+          "function_sha256": "04f5cd164bfad3a7707121f2e183150b70dc6115c77e0ac2bb73fc7d5f228660"
+        },
+        {
+          "path": "src/fnit/recon_all/mri_em_register_python.py",
+          "file_sha256": "0e3c39684314f84b47a158266550f35baaf1ef67e5c7bb36df8f145aed772aef",
+          "bytes": 5619,
+          "function": "register_t1",
+          "line": 22,
+          "end_line": 95,
+          "function_sha256": "1b4198b8ab7b2463b0dfe270dca2af13a4d353a17922b1b041baf4a1e73767d0"
+        }
+      ]
+    },
+    {
+      "name": "CA normalize/corpus callosum",
+      "implementation": "自有Python/Numba CPU",
+      "selected_guard": "run_ca_normalize未传device，保持CPU默认；run_mri_cc自有",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/ca_normalize_python.py",
+          "file_sha256": "167be9d72496b7279b98e52b8f0d6c0808d2c09d02df24af1fed0fd331100b9b",
+          "bytes": 25723,
+          "function": "run_ca_normalize",
+          "line": 508,
+          "end_line": 548,
+          "function_sha256": "056bff04cc2965566186bc989b02275f0f70536fc0a6a4f13cd48d66c2be5e8b"
+        },
+        {
+          "path": "src/fnit/recon_all/mri_cc_python.py",
+          "file_sha256": "19600fbb7de784ae5bc715a3347cee40fbfb539fa1fa37cac52a53d48c0c70e8",
+          "bytes": 7192,
+          "function": "run_mri_cc",
+          "line": 145,
+          "end_line": 153,
+          "function_sha256": "9e607072d987aaaab746c10124484f0fc8c70f16ea1eec98f4ad6fff4790d317"
+        }
+      ]
+    },
+    {
+      "name": "WM segmentation",
+      "implementation": "自有Python/Numba有序CPU与Torch GPU直方图/缓存平面",
+      "selected_guard": "wm_backend=torch-optimized；isolated Python worker",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_run_torch_wm_segment",
+          "line": 78,
+          "end_line": 109,
+          "function_sha256": "68e735f42fe5e287cc75c746e49125113ab4700b22a5ef91b798335d4ab6b6f1"
+        },
+        {
+          "path": "src/fnit/recon_all/wm_torch_worker.py",
+          "file_sha256": "2ee098c485c62cc9a848df27a3c8489dc5961897a1477a4ba58edd7de66dd42d",
+          "bytes": 9696,
+          "function": "run_isolated_segmentation",
+          "line": 43,
+          "end_line": 88,
+          "function_sha256": "55d278599b6fbd0e38c4d3a090925362a6cb7fb6ac298e20dcaa77bf15d2ca62"
+        },
+        {
+          "path": "src/fnit/recon_all/mri_segment.py",
+          "file_sha256": "abee3136f2c88409746b817a845ad48afbf326005f242f4eabc123c6544613bb",
+          "bytes": 48564,
+          "function": "segment_white_matter_mgz",
+          "line": 969,
+          "end_line": 1003,
+          "function_sha256": "c0a0b4d488c7873457402b676787d3c303b3e27d1d75f5e8a3d93b0b0d7696e1"
+        }
+      ]
+    },
+    {
+      "name": "WM aseg/pretess/Ento-ACJ",
+      "implementation": "完整自有Python/Numba CPU编辑与Torch GPU后编辑",
+      "selected_guard": "wm_edit_backend=python; full source-order typed/byte path search; no original program or subject whitelist",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_run_python_wm_edit",
+          "line": 138,
+          "end_line": 153,
+          "function_sha256": "761a8ac1c7e4c4ad63b2d6087f08bcc0ebf2261829f537b1f7029b1be186a774"
+        },
+        {
+          "path": "src/fnit/recon_all/edit_wm_aseg_core_python.py",
+          "file_sha256": "206511ff9b524eb10fb3219a81a85ae7b8a826d439df2b8d2ccb7f8d3b61a049",
+          "bytes": 31199,
+          "function": "write_wm_asegedit_profile",
+          "line": 591,
+          "end_line": 624,
+          "function_sha256": "34d7464e56b85e8608a85d883f6adac6e463db21f47dfaa50789ab8aafbe1dbd"
+        },
+        {
+          "path": "src/fnit/recon_all/edit_wm_aseg_core_python.py",
+          "file_sha256": "206511ff9b524eb10fb3219a81a85ae7b8a826d439df2b8d2ccb7f8d3b61a049",
+          "bytes": 31199,
+          "function": "remove_paths_to_cortex",
+          "line": 528,
+          "end_line": 544,
+          "function_sha256": "8ff321e5d08823726fa3f39b11b126d69eac059706fc011a1ff14311535008e8"
+        }
+      ]
+    },
+    {
+      "name": "filled",
+      "implementation": "完整自有Python与有序Numba CPU切割/堆/标签",
+      "selected_guard": "fill_backend=numba；初始边界CPU，不是纯GPU",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/fill_cutting_plane_python.py",
+          "file_sha256": "5bc61b2e68d6ed47dadc0dafdc488c61807435b9e28dc12c48d5e7dbf3981a04",
+          "bytes": 11207,
+          "function": "fill_mgz",
+          "line": 151,
+          "end_line": 195,
+          "function_sha256": "3cbfc98077110b6536ec31e3e74e1cdc029f42320e9797158c7a6ebea4263780"
+        }
+      ]
+    },
+    {
+      "name": "tessellation/topology",
+      "implementation": "自有Torch tessellation与Python/Numba数字拓扑",
+      "selected_guard": "topology_backend=python；数字拓扑不同于FS GA",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_surface_pair",
+          "line": 677,
+          "end_line": 757,
+          "function_sha256": "063f87ddffab294e8b6b304b2298356fa4b528882647ce10ec51835e8a8811ff"
+        },
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_prepare_native_topology",
+          "line": 259,
+          "end_line": 346,
+          "function_sha256": "f275f87a81a4e03c635c13ea2a2639ea39fdd71d36f56bd99dede856ee567d31"
+        },
+        {
+          "path": "src/fnit/recon_all/topology_volume_python.py",
+          "file_sha256": "b6ad8b5c54a51dc9a263da3df8eeb0a2f8588b56d4c1e964d57ee509a2a1d0a9",
+          "bytes": 24094,
+          "function": "run_volume_topology",
+          "line": 260,
+          "end_line": 341,
+          "function_sha256": "31b89db66663237d8cb79a0f505fca9c6b021191467ffb316dab1c91609c8945"
+        }
+      ]
+    },
+    {
+      "name": "remesh/intersection",
+      "implementation": "自有Python/Numba有序CPU",
+      "selected_guard": "remesh_scalar_storage=python；intersection binary=None；source_numba完整修复",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/mris_remesh_python.py",
+          "file_sha256": "17288a05177fd09fa3e757b9c84cc56466e3e2c9f6acaf6998aba1d32fa83706",
+          "bytes": 27093,
+          "function": "remesh_surface",
+          "line": 618,
+          "end_line": 634,
+          "function_sha256": "cc16b9e2c5bfaaa84fb6848e510756cc734b5382564379551d7395cf70f12151"
+        },
+        {
+          "path": "src/fnit/recon_all/mris_remove_intersection_python.py",
+          "file_sha256": "af53953c41a6bed1ecf7b25fb4cecaab1c8658b1786f15d096420514be965767",
+          "bytes": 14760,
+          "function": "remove_intersection_surface",
+          "line": 242,
+          "end_line": 262,
+          "function_sha256": "d7f091e2d49689ea88d9451cf0974f94ad84e07657036ca71ce71e967ffc50b3"
+        },
+        {
+          "path": "src/fnit/recon_all/mris_remove_intersection_python.py",
+          "file_sha256": "af53953c41a6bed1ecf7b25fb4cecaab1c8658b1786f15d096420514be965767",
+          "bytes": 14760,
+          "function": "run_remove_intersection",
+          "line": 151,
+          "end_line": 239,
+          "function_sha256": "b18651496f350792ad15eed83c8b822cc17f2179c00ea3ab88326a880206c08e"
+        }
+      ]
+    },
+    {
+      "name": "white.preaparc/white/pial",
+      "implementation": "完整四轮Python/Numba CPU与Torch GPU候选/清理",
+      "selected_guard": "surface_placement_backend=python；compiled retained MHT是@njit/objmode，不是CPP库",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/surface_placement_python.py",
+          "file_sha256": "8a34d3801b6ad2815599d8b16068420767c59085a2b3172e248eb4d8e95150dd",
+          "bytes": 6260,
+          "function": "placement_options",
+          "line": 13,
+          "end_line": 31,
+          "function_sha256": "90ca25a43d2ab82e34caabf28d08324a58690096eec3c607605b3156618d0842"
+        },
+        {
+          "path": "src/fnit/recon_all/surface_placement_python.py",
+          "file_sha256": "8a34d3801b6ad2815599d8b16068420767c59085a2b3172e248eb4d8e95150dd",
+          "bytes": 6260,
+          "function": "run_preaparc_python",
+          "line": 53,
+          "end_line": 81,
+          "function_sha256": "e10a94fbc37590efa8a2549914cadd6c16fb6c65e820eadcdf57d51d8045ae88"
+        },
+        {
+          "path": "src/fnit/recon_all/surface_placement_python.py",
+          "file_sha256": "8a34d3801b6ad2815599d8b16068420767c59085a2b3172e248eb4d8e95150dd",
+          "bytes": 6260,
+          "function": "run_final_white_python",
+          "line": 84,
+          "end_line": 100,
+          "function_sha256": "49df1ac4fd7a5f6d2994f2e8fb9767ede0def4a2cb75b60920b85fec46fd094b"
+        },
+        {
+          "path": "src/fnit/recon_all/surface_placement_python.py",
+          "file_sha256": "8a34d3801b6ad2815599d8b16068420767c59085a2b3172e248eb4d8e95150dd",
+          "bytes": 6260,
+          "function": "run_pial_python",
+          "line": 103,
+          "end_line": 119,
+          "function_sha256": "047333d6834ec14071d761115874bc8a830dabb94aa7f90aa68fa2d874da0055"
+        },
+        {
+          "path": "src/fnit/recon_all/place_surface_snapshot.py",
+          "file_sha256": "c2bac9c2f9065454d295981c38c85b58657b0a75f7278f8c124f4f6a979facbf",
+          "bytes": 11508,
+          "function": "_ordered_retained_snapshot_step",
+          "line": 73,
+          "end_line": 132,
+          "function_sha256": "88f3f42cb1f2836bd85de5463faa45e5eca337971ca324b52c85f754d759907c"
+        }
+      ]
+    },
+    {
+      "name": "inflate/sphere",
+      "implementation": "自有Torch inflation；sphere CPU目标/步长与GPU平均/收尾",
+      "selected_guard": "inflate=torch；sphere_finish=torch；averaging_device=CUDA；normals默认CPU",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_run_accurate_sphere_pair",
+          "line": 349,
+          "end_line": 398,
+          "function_sha256": "30083bb7fb7553c46d06bda03fc2af48c5757feec7a6c94b3f834312fd8df15f"
+        },
+        {
+          "path": "src/fnit/recon_all/inflate_torch.py",
+          "file_sha256": "a782b5ec493d4c390131e8882b0b07ebf3d5b5e9ad39da59328b964500550aab",
+          "bytes": 12173,
+          "function": "TorchInflationContext",
+          "line": 19,
+          "end_line": 217,
+          "function_sha256": "2d60455ac97e77323588ae2d10ceb677deaac468c44c02938d1e7ed3fea33965"
+        },
+        {
+          "path": "src/fnit/recon_all/sphere_standard_run.py",
+          "file_sha256": "96bca3f4f48daefdb9583c05b876a94511b155da36aae09f266e41691f8a6827",
+          "bytes": 11190,
+          "function": "run_standard_sphere",
+          "line": 31,
+          "end_line": 169,
+          "function_sha256": "f9cec985e9b64617b475168444d436dd1b127dfb91f8f4065a9af16b1e383041"
+        }
+      ]
+    },
+    {
+      "name": "sphere.reg",
+      "implementation": "自有Python/Numba CPU目标/步长与Torch/Triton GPU有序平均",
+      "selected_guard": "两pass传CUDA averaging_device；overlap_device=cpu；不走CPU CPP平均器",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_hemisphere_operation",
+          "line": 965,
+          "end_line": 1047,
+          "function_sha256": "de7117d8f5ac9f122398b6fa7b9351bab4a9642720374c18633766ba4e276000"
+        },
+        {
+          "path": "src/fnit/recon_all/mris_register_run.py",
+          "file_sha256": "fd0a10c2673393be88a239167b6295576ecdf889f2d80a4e5f71b214eba79b69",
+          "bytes": 4680,
+          "function": "run_register_sphere",
+          "line": 16,
+          "end_line": 64,
+          "function_sha256": "e7f6744b37c23bebaedd5ccc9e2d2e05d2b19e6eedf2689a355a3bf337db265d"
+        },
+        {
+          "path": "src/fnit/recon_all/mris_register_sulc_run.py",
+          "file_sha256": "b70b141a3ff6f73751ede98d0c7eab5fdc50890fff01f67ba28139773946c0c5",
+          "bytes": 8362,
+          "function": "run_register_sulc",
+          "line": 32,
+          "end_line": 141,
+          "function_sha256": "37de28311c7920763c762d87bdac1db7423e677e7633f07bfc90136a2139fce9"
+        },
+        {
+          "path": "src/fnit/recon_all/mris_register_smoothwm_run.py",
+          "file_sha256": "3060cc6da170d27796220633ea8222fd95f1b7131dff7335328c8b3620590ab2",
+          "bytes": 11968,
+          "function": "run_register_smoothwm",
+          "line": 35,
+          "end_line": 185,
+          "function_sha256": "b7c0ccdc8c55732f7c43709c50f46f51319eee26b5f751952b074f3697228de4"
+        },
+        {
+          "path": "src/fnit/recon_all/mris_register_average_numba.py",
+          "file_sha256": "956616a920f751f49d201bf5a0a17867084a4b8e810336ab849d29fb60b0648b",
+          "bytes": 6671,
+          "function": "RegistrationGradientAverager.__call__",
+          "line": 119,
+          "end_line": 135,
+          "function_sha256": "53107bdf1f7905bbbbf5b719d3a5277ae9efb93429aabea3ca6b7d4a81c193e3"
+        }
+      ]
+    },
+    {
+      "name": "avg_curv/extra annotation",
+      "implementation": "自有Python/Numba CPU采样与标签映射",
+      "selected_guard": "python_only=True；avg_curv平均复用average_marked_values，不走CPP平均器",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_run_avg_curv",
+          "line": 473,
+          "end_line": 498,
+          "function_sha256": "1fcd27454ac9b8e2a7deea32617cbb3e172a4838edaef97c232ad463b5ec485d"
+        },
+        {
+          "path": "src/fnit/recon_all/mrisp_paint_python.py",
+          "file_sha256": "3dd7515a8759371ccec1a4c6b4f280310a252708396debdfb822abac2cdae163",
+          "bytes": 9930,
+          "function": "paint_atlas_values",
+          "line": 74,
+          "end_line": 113,
+          "function_sha256": "b765c32bc21577717f23e242160125f4b084c731ab3b5e58f10d96300cd2ee1d"
+        },
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_project_exvivo_annotations",
+          "line": 854,
+          "end_line": 883,
+          "function_sha256": "4ac1f436e599bb20942241eb2cdf74ec3d9df481ff5161a082951676386bccac"
+        }
+      ]
+    },
+    {
+      "name": "GCSA annotation",
+      "implementation": "自有Torch GPU特征与有序Numba CPU Gibbs",
+      "selected_guard": "annotation_gibbs_backend=numba；按表面版本缓存",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/gcsa_label_python.py",
+          "file_sha256": "a3446d19f8f33d9fbb43ff3654d76932733d000ec0e563e4a8ed030dc4933ffa",
+          "bytes": 10873,
+          "function": "GCSAFeatureCache",
+          "line": 33,
+          "end_line": 101,
+          "function_sha256": "cc37dd682df495aa8a34e2794e1b37f64f2cc945f6fc2082647109e742f1ee0f"
+        },
+        {
+          "path": "src/fnit/recon_all/gcsa_label_python.py",
+          "file_sha256": "a3446d19f8f33d9fbb43ff3654d76932733d000ec0e563e4a8ed030dc4933ffa",
+          "bytes": 10873,
+          "function": "label_surface",
+          "line": 125,
+          "end_line": 196,
+          "function_sha256": "72feffd30b0a86ca02c76b12d6a00206f73aadcd6306710f68414f74d2188755"
+        }
+      ]
+    },
+    {
+      "name": "defects volume",
+      "implementation": "自有Torch GPU投射与Python格式写出",
+      "selected_guard": "defects_backend=torch；提前return；LH→RH共享输出顺序保留",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_run_defects_volume",
+          "line": 531,
+          "end_line": 562,
+          "function_sha256": "a3393a32d0a4e824b28df6ecf95a76ed21a2c0434f23a733cbf439c32d9df073"
+        },
+        {
+          "path": "src/fnit/recon_all/defects_label_volume_torch.py",
+          "file_sha256": "807b123d7e1ac47021864dfe5b486fa1ca3e9dd6eecbef792d469fe8552d12e5",
+          "bytes": 14150,
+          "function": "defects_to_volume",
+          "line": 166,
+          "end_line": 249,
+          "function_sha256": "dcb1183f1418e9908c64c1135d46c4a8fb48e3e499ddc0ae3567798cecda5e2c"
+        }
+      ]
+    },
+    {
+      "name": "thickness/area/curv",
+      "implementation": "自有Torch GPU几何与SciPy/Numba CPU空间查询",
+      "selected_guard": "Python/CUDA分支，没有原版指标程序",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_run_surface_metrics",
+          "line": 401,
+          "end_line": 441,
+          "function_sha256": "9873ae51f47d733d691c7ddc040eb94b84c5a448c3465b4a8361078ae06d0202"
+        },
+        {
+          "path": "src/fnit/recon_all/surface_thickness_gpu.py",
+          "file_sha256": "ab019eb7d413c7b08f01ad6b2e499c406ab513cb531d723142c2db2d6c12e961",
+          "bytes": 10070,
+          "function": "thickness_map",
+          "line": 129,
+          "end_line": 193,
+          "function_sha256": "459d125da7ace77caface818bdde07ee01a1f66c2ade5d65e59be6ff4692413a"
+        },
+        {
+          "path": "src/fnit/recon_all/surface_area_gpu.py",
+          "file_sha256": "ad60ee9c6b3e45464650ac15f2fce7bc2ea3a6cb519c15f371f4f653f45964a8",
+          "bytes": 2305,
+          "function": "area_map",
+          "line": 29,
+          "end_line": 32,
+          "function_sha256": "512fed1a7eda3c8d00eb5b466ac1c5c03f530440735fdcd4883471afb5fe7dd5"
+        },
+        {
+          "path": "src/fnit/recon_all/surface_curvature_gpu.py",
+          "file_sha256": "7af66e0b23dd19cabe8e20e7ea75686531eb87550e599d318f35dc24f7efc8e0",
+          "bytes": 5182,
+          "function": "curvature_map",
+          "line": 96,
+          "end_line": 105,
+          "function_sha256": "1dadf2e41d0e0c5eb3e095a6bd37510e04cd1b901e853fc9879847ec673f0b1b"
+        }
+      ]
+    },
+    {
+      "name": "curv.stats/八派生图",
+      "implementation": "自有Torch离散曲率与有序Numba统计/系统libm",
+      "selected_guard": "python_only=True；source_libm=Numba np.arccos，不是原FS库",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_run_curvature_stats",
+          "line": 501,
+          "end_line": 528,
+          "function_sha256": "990e6bf9030c03e90e2868eb3f45213ff69976be7048c0b55bfb1c4db7daf399"
+        },
+        {
+          "path": "src/fnit/recon_all/curvature_stats_python.py",
+          "file_sha256": "e4b715d2fa99330f426ecd47a1c2fc3622dbb3284151eb5ae3c5d9772784be10",
+          "bytes": 19846,
+          "function": "write_curvature_stats",
+          "line": 166,
+          "end_line": 319,
+          "function_sha256": "c1a3a47717249ca9c2fd99a6dd60c188cd9f540c90656340d10423e3751d78f2"
+        },
+        {
+          "path": "src/fnit/recon_all/discrete_curvature_torch.py",
+          "file_sha256": "2f0642af718f9d1fa08032fc3c74cc5e8be34def7f77eb8735982a39b5c41493",
+          "bytes": 14742,
+          "function": "_source_acosf",
+          "line": 23,
+          "end_line": 29,
+          "function_sha256": "316ac629a870c2aa826d0a6c6e3ada6221537e2e308cc545a6aacb578ba7ce9d"
+        }
+      ]
+    },
+    {
+      "name": "jacobian/contrast/ribbon/volume maps",
+      "implementation": "自有Python/Numba与Torch CPU",
+      "selected_guard": "jacobian与contrast明确CPU；标签/体积映射为自有函数",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_project_parcels",
+          "line": 842,
+          "end_line": 851,
+          "function_sha256": "f9d37630739d22fbbe9c6e394074f3b3e5422bd971d14470c827d0d5b15bcc26"
+        },
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_project_wmparc",
+          "line": 886,
+          "end_line": 891,
+          "function_sha256": "6ea96ff52c4412466040ad7298df028aad6ffc1940649f58d11634f28b9e910f"
+        },
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_run_recon_all_python",
+          "line": 1218,
+          "end_line": 2013,
+          "function_sha256": "93df2dbc92b148f6683e3dfdcab68cfb190970cf383887e52b2e32202af2ed8b"
+        }
+      ]
+    },
+    {
+      "name": "ROI/aseg/wmparc/brainvol stats",
+      "implementation": "自有GPU统计基量与Python/Numba CPU归约/写出",
+      "selected_guard": "SurfaceStatsCache CUDA；no-th3脑区定义保留",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_write_hemisphere_stats",
+          "line": 943,
+          "end_line": 961,
+          "function_sha256": "0acda8c56b3f0f9aca3f84268a6ae4b88c50e102c9d55c391e9acb60ef907a21"
+        },
+        {
+          "path": "src/fnit/recon_all/surface_stats_cache.py",
+          "file_sha256": "6f64b40773c61d46fd167c34a74530d9475dd7992b6607c99df14511826ab2a1",
+          "bytes": 17430,
+          "function": "SurfaceStatsCache",
+          "line": 42,
+          "end_line": 336,
+          "function_sha256": "7713b9bf5d810ba56a346118b0a86f5f9e4490954a9a02d60ddebf9682565749"
+        },
+        {
+          "path": "src/fnit/recon_all/anatomical_stats_file.py",
+          "file_sha256": "3aef07cbf0788276341125774717f1e0555a1197b2faeba5c9b75610a468df53",
+          "bytes": 3096,
+          "function": "write_anatomical_stats",
+          "line": 10,
+          "end_line": 58,
+          "function_sha256": "1ba697098a3a8327ee04b60cef4d5770efdc6af6c11198fc969a487635e28f9c"
+        }
+      ]
+    },
+    {
+      "name": "MNI affine/nonlinear/inverse/check",
+      "implementation": "自有SynthMorph Torch GPU与GPU采样/逆场",
+      "selected_guard": "parallel-late；postprocess=gpu；三个原版program None；Python fresh exec及CPU mesh2+2",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/mni_aux_chain.py",
+          "file_sha256": "60b5c9d1255208df19f9a1eb6ccda300562829d5476a012488784e8ae7f4a2be",
+          "bytes": 9306,
+          "function": "run_mni_aux_chain",
+          "line": 148,
+          "end_line": 180,
+          "function_sha256": "263c734743e99a816ba4f82b6320241f82c271ab75a9dab25c9571b063e0a6b6"
+        },
+        {
+          "path": "src/fnit/recon_all/mni_mesh_parallel.py",
+          "file_sha256": "5a79b715c48391dd50fdb8e40f999c4624092eeeebeaebd926ac7fed987b9b46",
+          "bytes": 12337,
+          "function": "run_mni_stage",
+          "line": 30,
+          "end_line": 64,
+          "function_sha256": "9a79e5516d3e0b628ce628ff10d9ae02cbda1f05e02cc6a5c07b72e21e5c6b3c"
+        },
+        {
+          "path": "src/fnit/recon_all/mni_mesh_parallel.py",
+          "file_sha256": "5a79b715c48391dd50fdb8e40f999c4624092eeeebeaebd926ac7fed987b9b46",
+          "bytes": 12337,
+          "function": "run_mni_and_validate",
+          "line": 67,
+          "end_line": 202,
+          "function_sha256": "530b5c6424bc192a372e7f3d5c92f748099e5ab8dbfb2d08dd819a67e365fab0"
+        },
+        {
+          "path": "src/fnit/recon_all/mni_nonlinear_chain.py",
+          "file_sha256": "d33d0b0fb31cc5605c926047c7d210bae3e72cfd2dfe02ebdbcf68ec14c70faa",
+          "bytes": 7430,
+          "function": "run_mni_nonlinear_chain",
+          "line": 20,
+          "end_line": 132,
+          "function_sha256": "ac54a1072d2513af72e25bae00a5bbb008d8ebe42216e61fa9678574946102e8"
+        }
+      ]
+    },
+    {
+      "name": "输出/网格校验",
+      "implementation": "自有Python/NumPy/Numba CPU",
+      "selected_guard": "join后完整检查，失败抛异常；整体等效未判定",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_complete_output_validation",
+          "line": 1190,
+          "end_line": 1215,
+          "function_sha256": "8f4b69cd211c8c0d79f42754539cc89992878e7907afa92f0eb2c608796f2281"
+        },
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_validate_meshes",
+          "line": 907,
+          "end_line": 940,
+          "function_sha256": "b82b7813fdf36d8a4aee6efb36745ecb83f33b84cc93b2bced66c144fd14f0a4"
+        }
+      ]
+    }
+  ],
+  "unselected_local_CPP_routes": [
+    {
+      "name": "CPU sphere/register CPP averager",
+      "selected": false,
+      "guard": "Averager CUDA分支不调用average_gradients_exact_cpu",
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/mris_register_average_numba.py",
+          "file_sha256": "956616a920f751f49d201bf5a0a17867084a4b8e810336ab849d29fb60b0648b",
+          "bytes": 6671,
+          "function": "average_gradients_exact_cpu",
+          "line": 57,
+          "end_line": 80,
+          "function_sha256": "f2abfb5db630b33ba7a425c3942ff6bc9adf2040289ebc4867e7f8418c1d5f9f"
+        },
+        {
+          "path": "src/fnit/recon_all/mris_register_average_numba.py",
+          "file_sha256": "956616a920f751f49d201bf5a0a17867084a4b8e810336ab849d29fb60b0648b",
+          "bytes": 6671,
+          "function": "RegistrationGradientAverager.__call__",
+          "line": 119,
+          "end_line": 135,
+          "function_sha256": "53107bdf1f7905bbbbf5b719d3a5277ae9efb93429aabea3ca6b7d4a81c193e3"
+        },
+        {
+          "path": "src/fnit/recon_all/_average_cpu_cpp.py",
+          "file_sha256": "03ba0229b6d8052d933a8e56d6558db35f030d5e3251c026e504486d3ca214bd",
+          "bytes": 11999,
+          "function": "_bind",
+          "line": 159,
+          "end_line": 171,
+          "function_sha256": "76212535a80ecc64040793b4cbc1608db08bb7d2f6506387687aa8a511b7c261"
+        }
+      ]
+    },
+    {
+      "name": "SynthSeg CPU columns CPP/ctypes",
+      "selected": false,
+      "guard": "CPUInferenceConv3d需要image.device=cpu；CUDA不惰性导入或构建",
+      "evidence": [
+        {
+          "path": "src/fnit/synthseg_parc/cpu_conv.py",
+          "file_sha256": "234df7485ec44157c9e9d909d914dbb4d08f0d7f56d68f56400fd24891f786f4",
+          "bytes": 6660,
+          "function": "CPUInferenceConv3d.forward",
+          "line": 105,
+          "end_line": 130,
+          "function_sha256": "5fc7aa65f2b0d5093f475e25b9e7cd98255b289ee58f6a52ae8ef4dc6412ba2f"
+        }
+      ]
+    },
+    {
+      "name": "SynthMorph CPU joint Eigen CPP/ctypes",
+      "selected": false,
+      "guard": "requires moving and fixed CPU；GPU不导入_cpu_eigen",
+      "evidence": [
+        {
+          "path": "src/fnit/synthmorph/models.py",
+          "file_sha256": "f0ceefbcfbb665ffd5295ffa9f2e967cef0e1d303d0e72d37fd1cd71df26c026",
+          "bytes": 22925,
+          "function": "_cpu_joint_inference_enabled",
+          "line": 113,
+          "end_line": 119,
+          "function_sha256": "0252ef9db62bb79a612a3bb72eaa5fd50b7b1e4866726b4dc32d40146ccac970"
+        },
+        {
+          "path": "src/fnit/synthmorph/models.py",
+          "file_sha256": "f0ceefbcfbb665ffd5295ffa9f2e967cef0e1d303d0e72d37fd1cd71df26c026",
+          "bytes": 22925,
+          "function": "AffineNetwork.forward",
+          "line": 322,
+          "end_line": 365,
+          "function_sha256": "fee06c46fe9afd6d86612087d18ccf47980e328a2acc4e2d7fbf9809638114f8"
+        },
+        {
+          "path": "src/fnit/synthmorph/models.py",
+          "file_sha256": "f0ceefbcfbb665ffd5295ffa9f2e967cef0e1d303d0e72d37fd1cd71df26c026",
+          "bytes": 22925,
+          "function": "_cpu_joint_matrix_sqrt",
+          "line": 286,
+          "end_line": 298,
+          "function_sha256": "931d1fa401d44989ff4e205ee4f832335ced4d39a51e9e6458d77ad4992dbe5f"
+        }
+      ]
+    }
+  ],
+  "extra_current_function_references": [
+    {
+      "path": "src/fnit/recon_all/wm_remove_paths.py",
+      "file_sha256": "5f77eae5cc3948079de6a0fa626c83d34c634751ea5ba7a505c1f8381a472385",
+      "bytes": 17489,
+      "function": "remove_mtl_paths",
+      "line": 310,
+      "end_line": 365,
+      "function_sha256": "bc8bce5046ed7d55db26a027b3dedd83a295c0f92c82f8e2893db168dfdb410d"
+    },
+    {
+      "path": "src/fnit/recon_all/expected_outputs.py",
+      "file_sha256": "0b0f4b26dc05895c891a47d33a83312c18e0161bff2c3bdf34aab9ecb948d43a",
+      "bytes": 2576,
+      "function": "paths",
+      "line": 34,
+      "end_line": 45,
+      "function_sha256": "7aadca4ae817b1d2719d6a1820cd141653f8125989fc95e1814ccdd5ba9ff0f9"
+    },
+    {
+      "path": "src/fnit/recon_all/anatomical_stats_rows.py",
+      "file_sha256": "0832f2f33006435c330305a9dee224c33441df8a1b7fb420561413a7668fe5f9",
+      "bytes": 2471,
+      "function": "anatomical_stats_rows",
+      "line": 9,
+      "end_line": 45,
+      "function_sha256": "314e8df93dc9cdddc43e6d1cea65995baf291fc08c95bf8f45e3ee4256270d82"
+    },
+    {
+      "path": "src/fnit/recon_all/anatomical_stats_global.py",
+      "file_sha256": "1f33e2e32bbaa3c2676d68a092497a22e3a824be382cc05abe54557300087235",
+      "bytes": 6329,
+      "function": "anatomical_stats_global_lines",
+      "line": 29,
+      "end_line": 114,
+      "function_sha256": "d1d936dff1b888167d48a630649fc3f001b2e29d74b39d5d656f900f1a72d62f"
+    },
+    {
+      "path": "src/fnit/recon_all/mni_warp_inverse.py",
+      "file_sha256": "5bd1ee57342ed59c692a88a6d1814e4787d767c407b3644bdc5fe1ef6578cdc4",
+      "bytes": 6513,
+      "function": "fill_inverse_fields",
+      "line": 14,
+      "end_line": 80,
+      "function_sha256": "3772ea14212f6537e48d3c25a9c102deb4b96ad3dabc29348be3194a0fa2197d"
+    }
+  ],
+  "docstring_only_changes": [
+    {
+      "path": "src/fnit/recon_all/native_free.py",
+      "reviewed_commit_sha256": "294742c090a3c873156c28efa3af9255322d691d3d7a016b999c5b458de82d17",
+      "captured_working_tree_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+      "runtime_AST_without_docstrings_equal": true
+    },
+    {
+      "path": "src/fnit/recon_all/batch.py",
+      "reviewed_commit_sha256": "1805d02acb0ae208de93a4abf45c036224c9daa5f3aafa1892d41a0fd01b0ce3",
+      "captured_working_tree_sha256": "0023e24dd3e076b0ae632c8de2fbd57b7b39030e4cc6af92f86d342bc0c4b7d4",
+      "runtime_AST_without_docstrings_equal": true
+    }
+  ],
+  "original_stage_selected_static": [],
+  "all_outputs": {
+    "expected_count": 138,
+    "unique_count": 138,
+    "relative_paths": [
+      "mri/T1.mgz",
+      "mri/antsdn.brain.mgz",
+      "mri/aparc+aseg.mgz",
+      "mri/aparc.DKTatlas+aseg.mgz",
+      "mri/aparc.a2009s+aseg.mgz",
+      "mri/aseg.auto.mgz",
+      "mri/aseg.mgz",
+      "mri/aseg.presurf.hypos.mgz",
+      "mri/aseg.presurf.mgz",
+      "mri/brain.finalsurfs.manedit.mgz",
+      "mri/brain.finalsurfs.mgz",
+      "mri/brain.mgz",
+      "mri/brainmask.mgz",
+      "mri/ctrl_pts.mgz",
+      "mri/entowm.mgz",
+      "mri/filled.auto.mgz",
+      "mri/filled.mgz",
+      "mri/lh.ribbon.mgz",
+      "mri/mca-dura.mgz",
+      "mri/mrisps.white.mgz",
+      "mri/mrisps.wpa.mgz",
+      "mri/norm.mgz",
+      "mri/nu.mgz",
+      "mri/orig.mgz",
+      "mri/orig/001.mgz",
+      "mri/rawavg.mgz",
+      "mri/rh.ribbon.mgz",
+      "mri/ribbon.mgz",
+      "mri/surface.defects.mgz",
+      "mri/synthseg.rca.mgz",
+      "mri/synthstrip.mgz",
+      "mri/transforms/synthmorph.1.0mm.1.0mm/test.nii.gz",
+      "mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.inv.nii.gz",
+      "mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz",
+      "mri/vsinus.mgz",
+      "mri/wm.asegedit.mgz",
+      "mri/wm.mgz",
+      "mri/wm.seg.mgz",
+      "mri/wmparc.mgz",
+      "surf/lh.w-g.pct.mgh",
+      "surf/rh.w-g.pct.mgh",
+      "surf/lh.orig",
+      "surf/lh.smoothwm",
+      "surf/lh.inflated",
+      "surf/lh.white",
+      "surf/lh.white.preaparc",
+      "surf/lh.pial",
+      "surf/lh.pial.T1",
+      "surf/lh.sphere",
+      "surf/lh.sphere.reg",
+      "surf/rh.orig",
+      "surf/rh.smoothwm",
+      "surf/rh.inflated",
+      "surf/rh.white",
+      "surf/rh.white.preaparc",
+      "surf/rh.pial",
+      "surf/rh.pial.T1",
+      "surf/rh.sphere",
+      "surf/rh.sphere.reg",
+      "surf/lh.thickness",
+      "surf/lh.area",
+      "surf/lh.area.pial",
+      "surf/lh.area.mid",
+      "surf/lh.volume",
+      "surf/lh.curv",
+      "surf/lh.curv.pial",
+      "surf/lh.avg_curv",
+      "surf/lh.sulc",
+      "surf/lh.jacobian_white",
+      "surf/lh.inflated.H",
+      "surf/lh.inflated.K",
+      "surf/lh.smoothwm.BE.crv",
+      "surf/lh.smoothwm.C.crv",
+      "surf/lh.smoothwm.FI.crv",
+      "surf/lh.smoothwm.H.crv",
+      "surf/lh.smoothwm.K.crv",
+      "surf/lh.smoothwm.K1.crv",
+      "surf/lh.smoothwm.K2.crv",
+      "surf/lh.smoothwm.S.crv",
+      "surf/lh.white.preaparc.H",
+      "surf/lh.white.preaparc.K",
+      "surf/rh.thickness",
+      "surf/rh.area",
+      "surf/rh.area.pial",
+      "surf/rh.area.mid",
+      "surf/rh.volume",
+      "surf/rh.curv",
+      "surf/rh.curv.pial",
+      "surf/rh.avg_curv",
+      "surf/rh.sulc",
+      "surf/rh.jacobian_white",
+      "surf/rh.inflated.H",
+      "surf/rh.inflated.K",
+      "surf/rh.smoothwm.BE.crv",
+      "surf/rh.smoothwm.C.crv",
+      "surf/rh.smoothwm.FI.crv",
+      "surf/rh.smoothwm.H.crv",
+      "surf/rh.smoothwm.K.crv",
+      "surf/rh.smoothwm.K1.crv",
+      "surf/rh.smoothwm.K2.crv",
+      "surf/rh.smoothwm.S.crv",
+      "surf/rh.white.preaparc.H",
+      "surf/rh.white.preaparc.K",
+      "label/lh.aparc.annot",
+      "label/lh.aparc.a2009s.annot",
+      "label/lh.aparc.DKTatlas.annot",
+      "label/lh.BA_exvivo.annot",
+      "label/lh.BA_exvivo.thresh.annot",
+      "label/lh.mpm.vpnl.annot",
+      "label/rh.aparc.annot",
+      "label/rh.aparc.a2009s.annot",
+      "label/rh.aparc.DKTatlas.annot",
+      "label/rh.BA_exvivo.annot",
+      "label/rh.BA_exvivo.thresh.annot",
+      "label/rh.mpm.vpnl.annot",
+      "stats/lh.aparc.stats",
+      "stats/lh.aparc.a2009s.stats",
+      "stats/lh.aparc.DKTatlas.stats",
+      "stats/lh.aparc.pial.stats",
+      "stats/lh.BA_exvivo.stats",
+      "stats/lh.BA_exvivo.thresh.stats",
+      "stats/lh.curv.stats",
+      "stats/lh.w-g.pct.stats",
+      "stats/rh.aparc.stats",
+      "stats/rh.aparc.a2009s.stats",
+      "stats/rh.aparc.DKTatlas.stats",
+      "stats/rh.aparc.pial.stats",
+      "stats/rh.BA_exvivo.stats",
+      "stats/rh.BA_exvivo.thresh.stats",
+      "stats/rh.curv.stats",
+      "stats/rh.w-g.pct.stats",
+      "stats/aseg.stats",
+      "stats/wmparc.stats",
+      "stats/brainvol.stats",
+      "stats/entowm.stats",
+      "stats/vsinus.stats",
+      "stats/synthseg.tiv.dat",
+      "stats/synthseg.vol.csv"
+    ],
+    "validation": "presence after mesh/MNI join; decoded/numeric equivalence is separate",
+    "current_execution_verified": false
+  },
+  "historical_execution_audit": {
+    "producer_code_version": "922f569806bfdfafb9ba16355ae9660efd261eba+manifest:21bfe987f5f2cfde992578208d8235b1ed90ad2c4608c95df1b0f4c6751b9d9a",
+    "summary_sha256": "0e9bfbf8df591f29060e2390fd0da89dff1b3d057d05ca064de78a8a94289b3a",
+    "cases": {
+      "sub06": {
+        "status": "failed",
+        "full_workflow_complete": false,
+        "failed_stage": "register_hemisphere_group",
+        "input_sha256": "7e33afb28f631fac31d81e2428a6144f61aba4102859c694eeb49ee584de04f7",
+        "native_free_source_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+        "events": {
+          "python_start": 8,
+          "subprocess.Popen": 831
+        },
+        "original_stage_attempts": [],
+        "files": [
+          {
+            "path": "validation/recon_all/optimizations/20261010_python_profile/reports/completed_v4/sub06-candidate/execution-audit/49493.events.json",
+            "published_sha256": "2ee7d8a943bd17c17e37f85ff0af47a7d9a3af19cbcd2decc5696d948faab774",
+            "original_export_sha256": "2058c8341d5f1ad61ca4979186abce56cc3e18fa0570a2c7da01f92c9ae7c4b2",
+            "original_jsonl_sha256": "b8d6d0c1d9d3d936ee5d47b0290cc07b5900bb31cdb62c03ad89ffbe503188bc",
+            "events": 812
+          },
+          {
+            "path": "validation/recon_all/optimizations/20261010_python_profile/reports/completed_v4/sub06-candidate/execution-audit/50084.events.json",
+            "published_sha256": "8c306a8c985790e8475f7cb2ff9e0f85e5c729f4ddc5688a29a192469f7c6dfd",
+            "original_export_sha256": "e7d61a430c6cb439245da7c7c80e7ae849d440ac4788d2ead5ce19d203f1c724",
+            "original_jsonl_sha256": "c80f049acc0a6d15feeff6808e7fc72cb94bbf2fc400c3ef3dcca0f7b9c1c50c",
+            "events": 3
+          },
+          {
+            "path": "validation/recon_all/optimizations/20261010_python_profile/reports/completed_v4/sub06-candidate/execution-audit/54038.events.json",
+            "published_sha256": "efba1d354332fefde6176d5bccd6686179f0dd77eb45540cf97910e14bf7b5a9",
+            "original_export_sha256": "83e2d0f1d4a56ad1b170a8ec94b4b412b58cf30b6b89aebcbfb0b4a8084c6b49",
+            "original_jsonl_sha256": "f04bec9f10e71b9d2a2dc3a02f2d9d575524d737f7574a8117cde56bd201e684",
+            "events": 2
+          },
+          {
+            "path": "validation/recon_all/optimizations/20261010_python_profile/reports/completed_v4/sub06-candidate/execution-audit/55556.events.json",
+            "published_sha256": "3cb6cf6e754c8301ba9725412fa3cb4163381a9e9869ef91badafcd6d4dbff54",
+            "original_export_sha256": "ced4f279abcbc0ff5771bed1439e68a4907a1dae2d91019788d41dacda2f6b6a",
+            "original_jsonl_sha256": "cc03b79d14415c98a2fafa107995a5fc52d948b47dac387dcf648b38f639ad61",
+            "events": 2
+          },
+          {
+            "path": "validation/recon_all/optimizations/20261010_python_profile/reports/completed_v4/sub06-candidate/execution-audit/56838.events.json",
+            "published_sha256": "5e0c3eb68bdb7ceb74217d8f77c4b34c2b9bc91e2452348182ab04d17878e967",
+            "original_export_sha256": "017c5e48651309a389fad87620197dac0ab3f9fa6ff55e145dfb4686ceba9f01",
+            "original_jsonl_sha256": "66590f095495d01d6d03c6a9559e1685b165355235c9b43f3a33fa494efa1e04",
+            "events": 6
+          },
+          {
+            "path": "validation/recon_all/optimizations/20261010_python_profile/reports/completed_v4/sub06-candidate/execution-audit/56839.events.json",
+            "published_sha256": "9383186bd33feb0c5d1a0fa8c1fea376b513f244d58ffc95baa4497952f95773",
+            "original_export_sha256": "47d66b56ef7935326aed92c8951e64e15ca4681f520794025daa8cdb6e3c2a30",
+            "original_jsonl_sha256": "4693f511e97ceb5313a50f608f3c6e22542172f7b27a56e7e9f8f6db1b6650e1",
+            "events": 6
+          },
+          {
+            "path": "validation/recon_all/optimizations/20261010_python_profile/reports/completed_v4/sub06-candidate/execution-audit/65216.events.json",
+            "published_sha256": "d9f24ddc00e10af9336d1d2d947bd96e344b80dffeee76fae37e0369412e08c8",
+            "original_export_sha256": "c42e5ffccbfc4558d9a6f15bc0ef0c6f1fb091425aae901e48c6dac69f0fc65f",
+            "original_jsonl_sha256": "d4d4ab370a9d127a01dd49038b8004a6810930d03fedec757af614b9a39abec4",
+            "events": 4
+          },
+          {
+            "path": "validation/recon_all/optimizations/20261010_python_profile/reports/completed_v4/sub06-candidate/execution-audit/65217.events.json",
+            "published_sha256": "8e6cd0408bee1f2e38f190c4d9f164e78b76dc73cef7db984be34bd127145b6c",
+            "original_export_sha256": "9c8c5d5900d4698e479ad2b8c41becde6b895346f504ee7f5bf7af3b7bb390ea",
+            "original_jsonl_sha256": "f7cf7dc2d5985f4a81e3f8062d219b74175ce94f60d5eea86c2f524f3e6d7911",
+            "events": 4
+          }
+        ]
+      },
+      "sub07": {
+        "status": "failed",
+        "full_workflow_complete": false,
+        "failed_stage": "finish_surface_hemisphere_group",
+        "input_sha256": "59ef7bed60d4db64d56d947ebed2ef62a9257c26fe879848fe24d10a490f74fc",
+        "native_free_source_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+        "events": {
+          "python_start": 12,
+          "subprocess.Popen": 10928
+        },
+        "original_stage_attempts": [],
+        "files": [
+          {
+            "path": "validation/recon_all/optimizations/20261010_python_profile/reports/completed_v4/sub07-candidate/execution-audit/49495.events.json",
+            "published_sha256": "46d7428b5905f7975319656614918fce1a06430091cbb8c5c0adca7d95440c94",
+            "original_export_sha256": "6d48c990013c49bd9ee85360663805acfd9fad4ccf14a8075d22378a871045cb",
+            "original_jsonl_sha256": "2c798b532e79a2b1f101aae3bda3bf650e52c9e9fa614c489de05ce332c10505",
+            "events": 10905
+          },
+          {
+            "path": "validation/recon_all/optimizations/20261010_python_profile/reports/completed_v4/sub07-candidate/execution-audit/50091.events.json",
+            "published_sha256": "b1fe8617d49892f6e211a27f3d5b940e3119cb5d5e7d1279487f72aa5c4df253",
+            "original_export_sha256": "c37ba8e61b7d8d7bb05e27e3c1ff0747a435553a370f77952f0bc1eb442fdb55",
+            "original_jsonl_sha256": "257ecf463482234aa28cc6c220cbcafdc1ec6d7c8d20720506e6ac0ed12beac6",
+            "events": 3
+          },
+          {
+            "path": "validation/recon_all/optimizations/20261010_python_profile/reports/completed_v4/sub07-candidate/execution-audit/54007.events.json",
+            "published_sha256": "f687a0f99b6c2378f0a2cb29b28d198cd4d4b53885daad34f269181ecc4a7674",
+            "original_export_sha256": "389bdb178d728ff084ffe7987fc64fa1904a1946415ec9801fcc6214728d2c29",
+            "original_jsonl_sha256": "4ed6d379bf6f7822932a9b805d288115d8ca7f1ce0d5592c6c180ebee376e2ae",
+            "events": 2
+          },
+          {
+            "path": "validation/recon_all/optimizations/20261010_python_profile/reports/completed_v4/sub07-candidate/execution-audit/55407.events.json",
+            "published_sha256": "b1366492e856c6ca784a612e81a374c12255a452bb518c236da9118b9eee9244",
+            "original_export_sha256": "e2dfea92679c1b5e1ba50c700d7e68831172c7b47516dedd9c189169e158588d",
+            "original_jsonl_sha256": "828b0bc621595d9317146f8443c9fa7cc635a6a971991d458bb26c01bcdc62b2",
+            "events": 2
+          },
+          {
+            "path": "validation/recon_all/optimizations/20261010_python_profile/reports/completed_v4/sub07-candidate/execution-audit/56620.events.json",
+            "published_sha256": "e3a9de786b9c6f35e3a6666093ef465b3787ae4301d95debafb79ecbe94b87d3",
+            "original_export_sha256": "4b19e6e8ffb1baa0c17bbc3a850f4e25baa8a6e3df6cdaaa1d9d14836a3d4b06",
+            "original_jsonl_sha256": "ec5872e92bfbc4d9559f01146aecaffd24f024412e9992903292dcda3c27dd44",
+            "events": 6
+          },
+          {
+            "path": "validation/recon_all/optimizations/20261010_python_profile/reports/completed_v4/sub07-candidate/execution-audit/56621.events.json",
+            "published_sha256": "98ff68c5b26fff5278ebcdbfe7515167b64329a80e6994d0c3e65c2cc7b9b7d5",
+            "original_export_sha256": "62d56030729bdb6efd0c6b8f766c9c93c39e485714b8fbe7ebcbd97183876b16",
+            "original_jsonl_sha256": "746d012ce3287111ca142ee1202e939a5515ece0e1fddf43dda7c5826248af5a",
+            "events": 6
+          },
+          {
+            "path": "validation/recon_all/optimizations/20261010_python_profile/reports/completed_v4/sub07-candidate/execution-audit/64371.events.json",
+            "published_sha256": "1776baa3353ca98b82fedba552897e7b14705455912cafb8443b2f78c5a81da0",
+            "original_export_sha256": "540c60f6ea487df28a7a6570cd0d1108042d38bc1bc0f6307309353510daca76",
+            "original_jsonl_sha256": "7f807fdc48e4d6436769f3212bc0a29eee6e74c26a223f1f4db8b6064f61c0f2",
+            "events": 4
+          },
+          {
+            "path": "validation/recon_all/optimizations/20261010_python_profile/reports/completed_v4/sub07-candidate/execution-audit/64372.events.json",
+            "published_sha256": "e426deb5bae8b21905528951eca81888036957a5f94f0ceba302bc0a66c2a119",
+            "original_export_sha256": "506833eb58f9e45c78b326a011bf9d004417aa428e1abe41ae5ac38adea17cb1",
+            "original_jsonl_sha256": "f830361adb33c8853761f9a4a66085f1fa3d352ec2d63690762a802251aa9c60",
+            "events": 4
+          },
+          {
+            "path": "validation/recon_all/optimizations/20261010_python_profile/reports/completed_v4/sub07-candidate/execution-audit/67474.events.json",
+            "published_sha256": "d21271ba630df7634827f69d983cfe92e4da21556462e1a42af5d4830724d112",
+            "original_export_sha256": "ac496a2f393516008f63bcaa58efe1471c88caaffca4477b451949f597b940b9",
+            "original_jsonl_sha256": "a7d53d14705ed41ae37ab4b35871487ca6570bdd8f4664b473b36b225cbbb7d5",
+            "events": 2
+          },
+          {
+            "path": "validation/recon_all/optimizations/20261010_python_profile/reports/completed_v4/sub07-candidate/execution-audit/67475.events.json",
+            "published_sha256": "231de0697c1216d68cd07828aa37bf5972def0ec504b9a9b12c9697942acb4f0",
+            "original_export_sha256": "a75acb95d0c5bbe87f02a957795bcb80c547e7ecca2747572a5bf7818226a048",
+            "original_jsonl_sha256": "a31dff69e387b0ec7538fe9065b5c97cafb6723e75d0ff31d63643240c71d68f",
+            "events": 2
+          },
+          {
+            "path": "validation/recon_all/optimizations/20261010_python_profile/reports/completed_v4/sub07-candidate/execution-audit/67962.events.json",
+            "published_sha256": "a61057d25e6325f721c11fc059f71bbda329af8869340266a6bd035c0e835ae0",
+            "original_export_sha256": "1feeea3161ad2053cb9006b2173781c5779b147ce4dd2baea616cedd40d15a7e",
+            "original_jsonl_sha256": "de8c94175f49ba002f50a5791fe428cba79cbc07cd2a7db1d6c9878961c3f731",
+            "events": 2
+          },
+          {
+            "path": "validation/recon_all/optimizations/20261010_python_profile/reports/completed_v4/sub07-candidate/execution-audit/67963.events.json",
+            "published_sha256": "93b18060080be78ad3b0a1f49575fbf93d555ff6cbe8f6982996616b5eea9d7d",
+            "original_export_sha256": "7ed37edd74a16e0de71a1f49a64e5c569142514c3ec9c00410b4251b3fee6c0f",
+            "original_jsonl_sha256": "55e062b6160d374f879a1de156c11af33dc5586dddd81c516e7d52023e24e4cb",
+            "events": 2
+          }
+        ]
+      }
+    },
+    "scope": "historical actual paths until failure; not current-code execution",
+    "shared_library_or_file_access_OS_audit": "not_recorded",
+    "clean_environment_isolation": "not_verified"
+  },
+  "boundaries": {
+    "current_runtime_audit": "not_run",
+    "shared_library_runtime_audit": "not_run",
+    "OS_isolation": "not_verified",
+    "precision_or_time_or_memory_benchmark": "not_run",
+    "whole_equivalence": "not_assessed",
+    "full_source_GA_in_production_python_profile": false
+  },
+  "priority": "wire and validate the existing own source-semantics complete GA; current Python profile still selects digital topology and whole quality failed"
+}

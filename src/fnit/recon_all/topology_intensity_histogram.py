@@ -45,7 +45,7 @@ def _raw_histogram(values: np.ndarray, selected: np.ndarray) -> np.ndarray:
 
 
 def _smooth_histogram(raw: np.ndarray) -> np.ndarray:
-    """Source HISTOsmooth with sigma 2 and per-bin edge normalization."""
+    """Source sigma2 有序平滑，支持输入实际bin数；256-bin原调用逐值兼容。"""
     kernel = np.empty(17, np.float32)
     norm = np.float32(0)
     for index in range(17):
@@ -58,12 +58,12 @@ def _smooth_histogram(raw: np.ndarray) -> np.ndarray:
         kernel[index] = value
         norm = np.float32(norm + value)
     kernel = kernel / norm
-    result = np.empty(256, np.float32)
-    for bin_index in range(256):
+    result = np.empty(len(raw), np.float32)
+    for bin_index in range(len(raw)):
         total = norm = np.float32(0)
         for index, weight in enumerate(kernel):
             source = bin_index + index - 8
-            if 0 <= source < 256:
+            if 0 <= source < len(raw):
                 norm = np.float32(norm + weight)
                 total = np.float32(total + np.float32(weight * raw[source]))
         result[bin_index] = np.float32(total / norm)

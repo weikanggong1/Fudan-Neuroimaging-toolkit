@@ -1,0 +1,235 @@
+{
+  "scope": "frozen_same_input_file_API_not_raw_T1_whole_case",
+  "code_commit": "54f681dc-plus-hashed-own-intersection-v1",
+  "candidate_source_sha256": {
+    "mrisp_paint_python": "2e53ba6cc557a80e97e2f1edd8c5dc8b93203406026cb673b50fc804a8735f4d",
+    "mris_register_atlas": "38170e443c7ed83d7c145cf4a9cef3daf34f4da1177363cd7841677b1177ca74",
+    "place_surface_smoothing": "5e413a3df69833020be34fdbf8e4b2b6b80e00ddc6b54ac09717527dbf718d07",
+    "mris_remove_intersection_python": "011e6482cc32bdb02156dd15f24e0b1d24f3a2318c148deb5def1366dcd6f210",
+    "place_surface_final_cleanup": "cee87f5e12e48d12a9aadd0198f2b06e68a9eca875cefa0d91b3b7f93ff2f8c0",
+    "place_surface_intersection_marking": "63ea29f2af2183abc2ded01a6cf0053aa659a753d158c4710f8212c5e4fe4e71",
+    "place_surface_collision": "f36213cfa1c8e65b2dfa69490ab4978e140d7852cbefb0834ed3f991ac84b166",
+    "place_surface_collision_torch": "adac1598f162d5c0fb27afeac6d8625c8da7d66ae781205c1153b00403ba799a",
+    "place_surface_candidates_torch": "502b5da1aaa2275d48b106885a603fe797c74fb24fadcca1a53e0a641db243b8"
+  },
+  "script_sha256": "188d867c0eb10a6f921aac635f7bc0434e442a7a4e7085f5d4415c00320fc98e",
+  "host": "A100-8-shared",
+  "platform": "Linux-3.10.0-1160.el7.x86_64-x86_64-with-glibc2.27",
+  "cpu_affinity": [
+    8,
+    9,
+    10,
+    11
+  ],
+  "threads": 4,
+  "device": "cuda:0",
+  "torch_version": "2.5.1",
+  "precision": {
+    "matmul_tf32": true,
+    "cudnn_tf32": true,
+    "autocast": false,
+    "image_coordinate_dtype": "float32",
+    "intersection_predicate_dtype": "float64"
+  },
+  "allocator_environment": {
+    "PYTORCH_NO_CUDA_MEMORY_CACHING": null,
+    "PYTORCH_ALLOC_CONF": null,
+    "PYTORCH_CUDA_ALLOC_CONF": null
+  },
+  "paint": [],
+  "intersection": [
+    {
+      "candidate": {
+        "scope": "complete_intersection_file_API_not_recon_all",
+        "input_path": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject/surf/lh.orig.premesh",
+        "output_path": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/intersection_gpu_v1/intersection_case0.candidate",
+        "input_sha256": "4f50b9f28e8774e28a22ce5ec4d83fa9eaca071ff093bdd6da530d0f644592c0",
+        "source_sha256": "011e6482cc32bdb02156dd15f24e0b1d24f3a2318c148deb5def1366dcd6f210",
+        "vertices": 108710,
+        "faces": 217416,
+        "coordinate_units": "surface_RAS_mm",
+        "marking_backend": "source_torch",
+        "device": "cuda:0",
+        "candidate_grid_cells_per_axis": 2,
+        "require_zero": false,
+        "cleanup": {
+          "intersecting_faces_before": 24,
+          "intersecting_faces_after": 0,
+          "intersecting_faces_trace": [
+            24,
+            0
+          ],
+          "marked_vertices": 43,
+          "smoothed_vertices": 43,
+          "smoothing_cycles": 1,
+          "smoothing_iterations": 100,
+          "marker_calls": 2,
+          "marker_evaluations": 2,
+          "marker_identical_geometry_cache_hits": 0
+        },
+        "source_intersecting_faces_after_independent_recheck": 0,
+        "geometric_intersecting_faces_after_independent_recheck": 0,
+        "read_seconds": 0.04580552037805319,
+        "compute_seconds": 380.5336590372026,
+        "recheck_seconds": 94.02521236147732,
+        "native_program_called": false,
+        "execution_status": "complete",
+        "output_written": true,
+        "output_sha256": "bbaaae1f89c041a2b2178bce3f56c5f9b2489586c456286d99b3df71eca67119",
+        "write_seconds": 0.013515228405594826,
+        "total_seconds_including_io": 474.61819681338966
+      },
+      "reference": {
+        "command": [
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/native/bin/mris_remove_intersection",
+          "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject/surf/lh.orig.premesh",
+          "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/intersection_gpu_v1/intersection_case0.reference"
+        ],
+        "returncode": 0,
+        "seconds_including_process_start_and_io": 3.8706750320270658
+      },
+      "reference_repeat": {
+        "command": [
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/native/bin/mris_remove_intersection",
+          "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject/surf/lh.orig.premesh",
+          "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/intersection_gpu_v1/intersection_case0.repeat"
+        ],
+        "returncode": 0,
+        "seconds_including_process_start_and_io": 3.8457183307036757
+      },
+      "reference_program_sha256": "f1ffce58956f9089e15f4709af0d3b64ddcced3c16943d6f522439351c3f2b47",
+      "ordered_faces_equal": true,
+      "candidate_reference_coordinate_error": {
+        "different_elements": 0,
+        "maximum": 0.0,
+        "p99": 0.0,
+        "mean": 0.0
+      },
+      "reference_repeat_coordinate_error": {
+        "different_elements": 0,
+        "maximum": 0.0,
+        "p99": 0.0,
+        "mean": 0.0
+      },
+      "reference_repeat_ordered_faces_equal": true,
+      "geometry_header_equal": true,
+      "raw_file_bytes_equal": false,
+      "same_index_distance_mm": {
+        "maximum": 0.0,
+        "p99": 0.0
+      }
+    },
+    {
+      "candidate": {
+        "scope": "complete_intersection_file_API_not_recon_all",
+        "input_path": "[PRIVATE_FNIT]/runs/recon_torch_surface_20261009/source_ordered_fileapi_v7_sub07_lh/smoothed-orig.diagnostic-surface",
+        "output_path": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/intersection_gpu_v1/intersection_case1.candidate",
+        "input_sha256": "2d55d8694ae92a63d1898c163c58ba3d4b8d38a4f7a5df972b432f004af78446",
+        "source_sha256": "011e6482cc32bdb02156dd15f24e0b1d24f3a2318c148deb5def1366dcd6f210",
+        "vertices": 114342,
+        "faces": 228680,
+        "coordinate_units": "surface_RAS_mm",
+        "marking_backend": "source_torch",
+        "device": "cuda:0",
+        "candidate_grid_cells_per_axis": 2,
+        "require_zero": false,
+        "cleanup": {
+          "intersecting_faces_before": 6,
+          "intersecting_faces_after": 1,
+          "intersecting_faces_trace": [
+            6,
+            9,
+            6,
+            9,
+            15,
+            7,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "marked_vertices": 13,
+          "smoothed_vertices": 121,
+          "smoothing_cycles": 22,
+          "smoothing_iterations": 2200,
+          "marker_calls": 23,
+          "marker_evaluations": 7,
+          "marker_identical_geometry_cache_hits": 16
+        },
+        "source_intersecting_faces_after_independent_recheck": 1,
+        "geometric_intersecting_faces_after_independent_recheck": 2,
+        "read_seconds": 0.04212917573750019,
+        "compute_seconds": 128.16537702735513,
+        "recheck_seconds": 12.755220064893365,
+        "native_program_called": false,
+        "execution_status": "complete",
+        "output_written": true,
+        "output_sha256": "c68340e107546d2d7716c012eef9b9670a93defd2abe093968cb5e73f03ca8ff",
+        "write_seconds": 0.014642616733908653,
+        "total_seconds_including_io": 140.97737405542284
+      },
+      "reference": {
+        "command": [
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/native/bin/mris_remove_intersection",
+          "[PRIVATE_FNIT]/runs/recon_torch_surface_20261009/source_ordered_fileapi_v7_sub07_lh/smoothed-orig.diagnostic-surface",
+          "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/intersection_gpu_v1/intersection_case1.reference"
+        ],
+        "returncode": 0,
+        "seconds_including_process_start_and_io": 29.517737494781613
+      },
+      "reference_repeat": {
+        "command": [
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/native/bin/mris_remove_intersection",
+          "[PRIVATE_FNIT]/runs/recon_torch_surface_20261009/source_ordered_fileapi_v7_sub07_lh/smoothed-orig.diagnostic-surface",
+          "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/intersection_gpu_v1/intersection_case1.repeat"
+        ],
+        "returncode": 0,
+        "seconds_including_process_start_and_io": 31.3115007346496
+      },
+      "reference_program_sha256": "f1ffce58956f9089e15f4709af0d3b64ddcced3c16943d6f522439351c3f2b47",
+      "ordered_faces_equal": true,
+      "candidate_reference_coordinate_error": {
+        "different_elements": 0,
+        "maximum": 0.0,
+        "p99": 0.0,
+        "mean": 0.0
+      },
+      "reference_repeat_coordinate_error": {
+        "different_elements": 0,
+        "maximum": 0.0,
+        "p99": 0.0,
+        "mean": 0.0
+      },
+      "reference_repeat_ordered_faces_equal": true,
+      "geometry_header_equal": true,
+      "raw_file_bytes_equal": false,
+      "same_index_distance_mm": {
+        "maximum": 0.0,
+        "p99": 0.0
+      }
+    }
+  ],
+  "overall_equivalence": "not_assessed",
+  "memory": {
+    "target_device": "cuda:0",
+    "torch_allocated_peak_bytes": 700563968,
+    "torch_reserved_peak_bytes": 1646264320,
+    "parent_child_simultaneous_process_tree_peak_bytes": null,
+    "process_tree_observation": "not_measured_in_this_stage_script"
+  },
+  "benchmark_total_seconds_including_loading_transfers_io_and_references": 685.4987149080262,
+  "execution_status": "complete"
+}

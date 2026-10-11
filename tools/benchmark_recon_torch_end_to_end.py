@@ -42,21 +42,25 @@ def main():
     parser.add_argument("--output-root", type=Path, required=True)
     parser.add_argument("--weights-dir", type=Path, required=True)
     parser.add_argument("--assets-dir", type=Path, required=True)
-    parser.add_argument("--native-bin-dir", type=Path, required=True)
+    parser.add_argument("--native-bin-dir", type=Path)
+    parser.add_argument("--backend", choices=("native", "python"), default="native")
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--threads", type=int, default=4)
-    parser.add_argument("--n4-backend", choices=("native", "torch"), default="native")
+    parser.add_argument("--n4-backend", choices=("native", "torch", "simpleitk"), default="native")
     parser.add_argument("--n4-execution", choices=("in-process", "isolated"), default="in-process")
+    parser.add_argument("--input-execution", choices=("serial", "parallel"), default="serial")
     parser.add_argument("--normalization-controls-backend", choices=("cpu", "torch"), default="cpu")
     parser.add_argument("--normalization-initial-bias-backend", choices=("cpu", "torch"), default="cpu")
     parser.add_argument("--inflate-backend", choices=("native", "torch"), default="native")
     parser.add_argument("--sphere-finish-backend", choices=("cpu", "torch"), default="cpu")
+    parser.add_argument("--surface-placement-backend", choices=("native", "python"), default="native")
+    parser.add_argument("--topology-backend", choices=("native", "python", "python-ga"), default="native")
     parser.add_argument("--annotation-gibbs-backend", choices=("python", "numba"), default="python")
     parser.add_argument("--remesh-scalar-storage", choices=("numpy", "python"), default="numpy")
     parser.add_argument("--mni-execution", choices=("in-process", "parallel-late"), default="in-process")
     parser.add_argument("--hemisphere-workers", type=int, choices=(1, 2), default=2)
     parser.add_argument("--defects-backend", choices=("native", "torch"), default="torch")
-    parser.add_argument("--wm-edit-backend", choices=("native", "torch-hybrid"), default="native")
+    parser.add_argument("--wm-edit-backend", choices=("native", "python", "torch-hybrid"), default="native")
     parser.add_argument("--wm-backend", choices=("native", "torch", "torch-optimized"), default="native")
     parser.add_argument("--wm-execution", choices=("in-process", "isolated"), default="in-process")
     parser.add_argument("--gca-inverse-backend", choices=("cpu", "torch"), default="cpu")
@@ -67,19 +71,34 @@ def main():
     parser.add_argument("--native-optimizations", choices=("auto", "original", "torch"), default="auto")
     parser.add_argument("--code-version", required=True)
     args = parser.parse_args()
+    if args.backend == "python":
+        from fnit.recon_all.python_profile import python_profile_options
+        for key, value in python_profile_options(device=args.device, threads=args.threads,
+                n4_backend="simpleitk" if args.n4_backend == "native" else args.n4_backend,
+                n4_execution=args.n4_execution,
+                input_execution=args.input_execution,
+                topology_backend="python" if args.topology_backend == "native" else args.topology_backend).items():
+            setattr(args, key, value)
+    elif args.native_bin_dir is None:
+        parser.error("--native-bin-dir is required for the mixed benchmark control")
     from fnit.recon_all.native_free import (_normalization_controls_options, _normalization_initial_bias_options,
                                           _validate_inflate_backend, _validate_mni_execution,
                                           _validate_sphere_finish_backend, _validate_annotation_gibbs_backend,
-                                          _validate_remesh_scalar_storage)
+                                          _validate_remesh_scalar_storage, _validate_surface_placement_backend)
     _validate_annotation_gibbs_backend(args.annotation_gibbs_backend)
     _validate_remesh_scalar_storage(args.remesh_scalar_storage)
+    _validate_surface_placement_backend(args.surface_placement_backend)
     _normalization_controls_options(args.normalization_controls_backend, args.device)
     _normalization_initial_bias_options(args.normalization_initial_bias_backend, args.device)
     _validate_inflate_backend(args.inflate_backend, args.device, args.hemisphere_workers)
     _validate_sphere_finish_backend(args.sphere_finish_backend, args.device, args.hemisphere_workers)
     _validate_mni_execution(args.mni_execution, args.device, args.threads)
-    from fnit.recon_all.input_n4_chain import validate_n4_execution
+    from fnit.recon_all.input_n4_chain import validate_n4_execution, require_n4_runtime_dependencies
     validate_n4_execution(n4_backend=args.n4_backend, n4_execution=args.n4_execution, device=args.device)
+    from fnit.recon_all.native_free import _validate_input_execution
+    _validate_input_execution(args.input_execution, n4_backend=args.n4_backend,
+                             n4_execution=args.n4_execution, device=args.device, threads=args.threads)
+    n4_dependencies = require_n4_runtime_dependencies(n4_backend=args.n4_backend)
     if args.output_root.exists():
         raise FileExistsError("output-root must not exist: " + str(args.output_root))
     if not args.t1.is_file():
@@ -100,20 +119,24 @@ def main():
             kind: {str(path.relative_to(root)): sha(path) for path in root.rglob("*")
                    if path.is_file() and "license" not in path.name.lower()}
             for kind, root in (("weights", args.weights_dir), ("assets", args.assets_dir))},
-        "native_program_sha256": {path.name: sha(path) for path in args.native_bin_dir.iterdir()
-                                  if path.is_file() and os.access(path, os.X_OK)},
+        "native_program_sha256": ({path.name: sha(path) for path in args.native_bin_dir.iterdir()
+                                  if path.is_file() and os.access(path, os.X_OK)} if args.backend != "python" else {}),
         "host": platform.node(), "cpu": next((row.split(":", 1)[1].strip()
             for row in Path("/proc/cpuinfo").read_text().splitlines() if row.startswith("model name")), None),
         "cpu_affinity": sorted(os.sched_getaffinity(0)), "threads": args.threads,
+        "backend": args.backend, "topology_backend": args.topology_backend,
         "device": args.device, "defects_backend": args.defects_backend,
         "sphere_normals_backend": args.sphere_normals_backend,
         "wm_edit_backend": args.wm_edit_backend,
         "wm_backend": args.wm_backend,
         "n4_backend": args.n4_backend, "n4_execution": args.n4_execution,
+        "n4_runtime_dependencies": n4_dependencies,
+        "input_execution": args.input_execution,
         "normalization_controls_backend": args.normalization_controls_backend,
         "normalization_initial_bias_backend": args.normalization_initial_bias_backend,
         "inflate_backend": args.inflate_backend,
         "sphere_finish_backend": args.sphere_finish_backend,
+        "surface_placement_backend": args.surface_placement_backend,
         "annotation_gibbs_backend": args.annotation_gibbs_backend,
         "remesh_scalar_storage": args.remesh_scalar_storage,
         "mni_execution": args.mni_execution,
@@ -136,28 +159,43 @@ def main():
     # 仅benchmark子进程启用故障栈与无缓冲日志，硬信号失败仍保留定位信息。
     command = [sys.executable, "-X", "faulthandler", "-u", "-m", "fnit.recon_all.native_free", str(args.t1), str(subject),
                "--weights-dir", str(args.weights_dir), "--assets-dir", str(args.assets_dir),
-               "--native-bin-dir", str(args.native_bin_dir), "--device", args.device,
+               "--backend", args.backend, "--device", args.device,
                "--threads", str(args.threads), "--hemisphere-workers", str(args.hemisphere_workers),
                "--native-optimizations", args.native_optimizations,
                "--defects-backend", args.defects_backend, "--profile-stages"]
+    if args.backend != "python":
+        command += ["--native-bin-dir", str(args.native_bin_dir)]
     command += ["--sphere-normals-backend", args.sphere_normals_backend]
     command += ["--wm-edit-backend", args.wm_edit_backend]
     command += ["--wm-backend", args.wm_backend, "--gca-inverse-backend", args.gca_inverse_backend,
                 "--gca-candidate-chunk", str(args.gca_candidate_chunk), "--gca-execution", args.gca_execution,
                 "--fill-backend", args.fill_backend]
     command += ["--n4-backend", args.n4_backend, "--n4-execution", args.n4_execution]
+    command += ["--input-execution", args.input_execution]
     command += ["--normalization-controls-backend", args.normalization_controls_backend]
     command += ["--normalization-initial-bias-backend", args.normalization_initial_bias_backend]
     command += ["--inflate-backend", args.inflate_backend]
     command += ["--sphere-finish-backend", args.sphere_finish_backend]
+    command += ["--surface-placement-backend", args.surface_placement_backend]
+    command += ["--topology-backend", args.topology_backend]
     command += ["--annotation-gibbs-backend", args.annotation_gibbs_backend]
     command += ["--remesh-scalar-storage", args.remesh_scalar_storage]
     command += ["--mni-execution", args.mni_execution]
     command += ["--wm-execution", args.wm_execution]
     report["cli_command"] = command
+    child_environment = os.environ.copy()
+    if args.backend == "python":
+        audit_directory = args.output_root / "execution-audit"
+        child_environment["FNIT_RECON_AUDIT_DIR"] = str(audit_directory)
+        audit_module = Path(__file__).parent / "recon_python_execution_audit"
+        child_environment["PYTHONPATH"] = os.pathsep.join(
+            [str(audit_module), child_environment.get("PYTHONPATH", "")])
+        report["execution_audit"] = {"directory": str(audit_directory),
+            "scope": "Python audited process-launch events in CLI and inherited child interpreters; not OS file/library isolation",
+            "source_sha256": sha(audit_module / "sitecustomize.py"), "status": "running"}
     tick = time.perf_counter()
     with (args.output_root / "run.log").open("w") as log:
-        process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT, env=child_environment)
         sampler = ProcessTreeDeviceSampler(device=args.device, parent_pid=process.pid, interval=.5)
         report.update(execution="running", cli_pid=process.pid, harness_pid=os.getpid(),
                       periodic_checkpoint_seconds=30)
@@ -208,6 +246,12 @@ def main():
         report["stages"] = [{key: value for key, value in row.items() if key != "gpu_memory"}
                             for row in runtime.get("stages", [])]
     report["execution"] = "complete" if process.returncode == 0 else "failed"
+    if args.backend == "python":
+        rows = [json.loads(line) for path in audit_directory.glob("*.jsonl")
+                for line in path.read_text().splitlines() if line.strip()]
+        report["execution_audit"].update(status="complete", processes=sorted({row["pid"] for row in rows}),
+            events=len(rows), original_program_attempts=[row for row in rows if row.get("blocked")],
+            passed=bool(rows) and not any(row.get("blocked") for row in rows))
     report["full_harness_seconds"] = time.perf_counter() - setup_tick
     save_report(report_path, report)
     return process.returncode

@@ -1,0 +1,99 @@
+{
+  "status": "complete_n4_prefix_comparison",
+  "full_workflow_complete": false,
+  "overall_metric_equivalence": "not_assessed",
+  "controlled_speedup_established": false,
+  "scope": "two real raw T1 empty-directory continuous volume prefixes; SimpleITK versus explicit Torch N4",
+  "script_sha256": "94f4f1e96bb0adf562c309b27103182564e1694d2e80f7f70ca5c76b3ed593cd",
+  "specification_sha256": "bbb66b8444df2c7249cb4537901626eb717ce41a17c4805370dd36852ea4f378",
+  "comparison_helpers_sha256": "3b51b63bb62ede5e163b773436739c44591df3b1a875aa59504a812c1644c151",
+  "comparison_modules_sha256": {
+    "src/fnit/recon_all/compare_native_free.py": "fc905615f526dcd0ba5c4503fbbc7fe14047d4c206d807c1c388cc17f0d64a51",
+    "src/fnit/recon_all/ca_normalize_python.py": "167be9d72496b7279b98e52b8f0d6c0808d2c09d02df24af1fed0fd331100b9b"
+  },
+  "cases": [
+    {
+      "case": "sub06",
+      "comparison_sha256": "4a87e6ecf1bce6bbdc24e4266cb82eba425bb733992c60aad36e2378f9e4e5c0",
+      "pre_n4_input_values_geometry_exact": true,
+      "all_geometry_dtype_exact": true,
+      "different_voxels": {
+        "rawavg.mgz": 0,
+        "orig.mgz": 0,
+        "tmp/nu0.mgz": 4115,
+        "nu.mgz": 3801,
+        "T1.mgz": 465058,
+        "brainmask.mgz": 200967,
+        "synthseg.rca.mgz": 0,
+        "norm.mgz": 551092,
+        "brain.mgz": 754675,
+        "aseg.presurf.mgz": 0,
+        "wm.seg.mgz": 203295,
+        "wm.asegedit.mgz": 144368,
+        "wm.mgz": 144810,
+        "filled.mgz": 4592
+      },
+      "filled_minimum_foreground_dice": 0.995470694807181,
+      "LTA_different_elements": 4,
+      "CSV_numeric_values_equal": true,
+      "timing_observations": {
+        "controlled_speedup_established": false,
+        "public_API_seconds_including_reads_writes_reference_candidate": [
+          464.2847222117707,
+          373.25553239975125
+        ],
+        "fresh_CLI_seconds_reference_candidate": [
+          475.02638612501323,
+          400.39461204968393
+        ],
+        "diagnostic_seconds_including_imports_hashing_reference_candidate": [
+          473.86653476487845,
+          396.53953308518976
+        ],
+        "scope": "actual synchronized stage wall includes writes; nested timers not added; different versions/time/load are diagnostic observations"
+      }
+    },
+    {
+      "case": "sub07",
+      "comparison_sha256": "59f505d3cc61d4c8d0fc8ed4b4b6dffbe3f7398e2c544284fecb105e42118555",
+      "pre_n4_input_values_geometry_exact": true,
+      "all_geometry_dtype_exact": true,
+      "different_voxels": {
+        "rawavg.mgz": 0,
+        "orig.mgz": 0,
+        "tmp/nu0.mgz": 3245,
+        "nu.mgz": 9216,
+        "T1.mgz": 24383,
+        "brainmask.mgz": 5801,
+        "synthseg.rca.mgz": 0,
+        "norm.mgz": 52520,
+        "brain.mgz": 184870,
+        "aseg.presurf.mgz": 0,
+        "wm.seg.mgz": 61703,
+        "wm.asegedit.mgz": 44208,
+        "wm.mgz": 44290,
+        "filled.mgz": 2289
+      },
+      "filled_minimum_foreground_dice": 0.9972274928737903,
+      "LTA_different_elements": 0,
+      "CSV_numeric_values_equal": true,
+      "timing_observations": {
+        "controlled_speedup_established": false,
+        "public_API_seconds_including_reads_writes_reference_candidate": [
+          486.8586847772822,
+          360.4578093364835
+        ],
+        "fresh_CLI_seconds_reference_candidate": [
+          510.2001294195652,
+          393.81693405658007
+        ],
+        "diagnostic_seconds_including_imports_hashing_reference_candidate": [
+          505.8902316922322,
+          383.739660278894
+        ],
+        "scope": "actual synchronized stage wall includes writes; nested timers not added; different versions/time/load are diagnostic observations"
+      }
+    }
+  ],
+  "diagnostic_seconds_including_hashes_reads_writes": 105.41553035192192
+}

@@ -1,0 +1,815 @@
+{
+  "operation": "register",
+  "workers_requested": 2,
+  "total_thread_budget": 4,
+  "worker_threads": 2,
+  "status": "failed",
+  "workers": {
+    "lh": {
+      "status": "failed",
+      "pid": 65216,
+      "started_monotonic": 4381467.338219863,
+      "logical_device": "cuda:0",
+      "precision": {
+        "matmul_tf32": true,
+        "cudnn_tf32": true
+      },
+      "operation_entered": true,
+      "cuda_allocator": {
+        "requested": "disabled",
+        "cuda_initialized_at_entry": false,
+        "environment_at_entry": "1",
+        "environment_after_selection": "1",
+        "effective": "disabled",
+        "torch_stats_known_valid": false,
+        "torch_stats_known_unavailable": true
+      },
+      "actual_cuda_device": {
+        "name": "NVIDIA A100-SXM4-80GB",
+        "uuid": "e92ea062-9dbe-4d7f-54a9-deded0295fb5"
+      },
+      "cuda_bootstrap_seconds": 4.1519306637346745,
+      "ready_monotonic": 4381472.982559465,
+      "go_monotonic": 4381477.413987885,
+      "operation_started_monotonic": 4381477.551889258,
+      "stage": {
+        "name": "register",
+        "seconds": 38.61096378881484,
+        "function_seconds": 38.61081492435187,
+        "cuda_pre_sync_seconds": 7.732119411230087e-05,
+        "cuda_post_sync_seconds": 0.0,
+        "cuda_synchronized": true,
+        "cuda_synchronization_requested": true,
+        "parent_cpu_seconds": 69.956857856,
+        "child_cpu_seconds": 0.053713000000000004,
+        "torch_memory_stats_status": "unavailable",
+        "error": "IndexError('index -9223372036854775808 is out of bounds for dimension 1 with size 256\\nException raised from get at /opt/conda/conda-bld/pytorch_1729647369228/work/aten/src/ATen/native/cpu/IndexKernelUtils.h:42 (most recent call first):\\nC++ CapturedTraceback:\\n#4 std::_Function_handler<std::shared_ptr<c10::LazyValue<std::string> const> (), c10::SetStackTraceFetcher(std::function<std::string ()>)::{lambda()#1}>::_M_invoke(std::_Any_data const&) from Logging.cpp:0\\n#5 c10::Error::Error(c10::SourceLocation, std::string) from ??:0\\n#6 void c10::function_ref<void (char**, long const*, long, long)>::callback_fn<at::TensorIteratorBase::loop_2d_from_1d<at::native::cpu_index_kernel<float, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1} const&, bool)::{lambda(char**, long const*, long)#1}>(at::native::cpu_index_kernel<float, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1} const&, bool)::{lambda(char**, long const*, long)#1} const&)::{lambda(char**, long const*, long, long)#1}>(long, char**, long const*, long, long) [clone .cold] from IndexKernel.cpp.AVX2.cpp:0\\n#7 at::TensorIteratorBase::serial_for_each(c10::function_ref<void (char**, long const*, long, long)>, at::Range) const from ??:0\\n#8 void at::internal::invoke_parallel<at::parallel_for<at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1}>(long, long, long, at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1} const&)::{lambda(long, long)#1}>(long, long, long, at::parallel_for<at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1}>(long, long, long, at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1} const&)::{lambda(long, long)#1} const) [clone ._omp_fn.0] from TensorIterator.cpp:0\\n#9 __kmp_api_GOMP_parallel from :0\\n#10 at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long) from ??:0\\n#11 at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>) from IndexKernel.cpp.AVX2.cpp:0\\n#12 at::(anonymous namespace)::wrapper_CPU_index_Tensor(at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from RegisterCPU.cpp:0\\n#13 c10::impl::wrap_kernel_functor_unboxed_<c10::impl::detail::WrapFunctionIntoFunctor_<c10::CompileTimeFunctionPointer<at::Tensor (at::Tensor const&, c10::List<std::optional<at::Tensor> > const&), &at::(anonymous namespace)::wrapper_CPU_index_Tensor>, at::Tensor, c10::guts::typelist::typelist<at::Tensor const&, c10::List<std::optional<at::Tensor> > const&> >, at::Tensor (at::Tensor const&, c10::List<std::optional<at::Tensor> > const&)>::call(c10::OperatorKernel*, c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from RegisterCPU.cpp:0\\n#14 at::_ops::index_Tensor::redispatch(c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from ??:0\\n#15 torch::autograd::VariableType::(anonymous namespace)::index_Tensor(c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from VariableType_1.cpp:0\\n#16 c10::impl::wrap_kernel_functor_unboxed_<c10::impl::detail::WrapFunctionIntoFunctor_<c10::CompileTimeFunctionPointer<at::Tensor (c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&), &torch::autograd::VariableType::(anonymous namespace)::index_Tensor>, at::Tensor, c10::guts::typelist::typelist<c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&> >, at::Tensor (c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&)>::call(c10::OperatorKernel*, c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from VariableType_1.cpp:0\\n#17 at::_ops::index_Tensor::call(at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from ??:0\\n#18 at::indexing::dispatch_index(at::Tensor const&, std::vector<at::Tensor, std::allocator<at::Tensor> >&&) from :0\\n#19 torch::autograd::THPVariable_getitem(_object*, _object*) from ??:0\\n#20 _PyEval_EvalFrameDefault from ??:0\\n#21 _PyFunction_Vectorcall from ??:0\\n#22 _PyEval_EvalFrameDefault from ??:0\\n#23 _PyFunction_Vectorcall from ??:0\\n#24 _PyEval_EvalFrameDefault from ??:0\\n#25 _PyFunction_Vectorcall from ??:0\\n#26 PyObject_Call from ??:0\\n#27 _PyEval_EvalFrameDefault from ??:0\\n#28 _PyFunction_Vectorcall from ??:0\\n#29 PyObject_Call from ??:0\\n#30 _PyEval_EvalFrameDefault from ??:0\\n#31 _PyObject_VectorcallTstate.lto_priv.4 from :0\\n#32 method_vectorcall from :0\\n#33 PyObject_Call from ??:0\\n#34 _PyEval_EvalFrameDefault from ??:0\\n#35 _PyFunction_Vectorcall from ??:0\\n#36 PyObject_Call from ??:0\\n#37 _PyEval_EvalFrameDefault from ??:0\\n#38 _PyObject_VectorcallTstate.lto_priv.4 from :0\\n#39 method_vectorcall from :0\\n#40 PyObject_Call from ??:0\\n#41 _PyEval_EvalFrameDefault from ??:0\\n#42 _PyEval_Vector from :0\\n#43 PyEval_EvalCode from ??:0\\n#44 builtin_exec from :0\\n#45 cfunction_vectorcall_FASTCALL_KEYWORDS from :0\\n#46 PyObject_Vectorcall from ??:0\\n#47 _PyEval_EvalFrameDefault from ??:0\\n#48 _PyFunction_Vectorcall from ??:0\\n#49 pymain_run_module from :0\\n#50 Py_RunMain.localalias from :0\\n#51 Py_BytesMain from ??:0\\n#52 __libc_start_main from ??:0\\n#53 _start from ??:0\\n')"
+      },
+      "thread_budget": {
+        "requested_threads": 2,
+        "scope": "Torch process intraop and current caller Numba thread mask",
+        "torch": {
+          "before": 2,
+          "effective": 2,
+          "interop_unchanged": 1,
+          "restored": 2
+        },
+        "numba": {
+          "before": 2,
+          "effective": 2,
+          "initial_capacity": 2,
+          "mask_only": true,
+          "threading_layer": "tbb",
+          "restored": 2
+        },
+        "environment_modified": false,
+        "restoration_complete": true
+      },
+      "failure_phase": "operation",
+      "cuda_oom": false,
+      "error": "IndexError('index -9223372036854775808 is out of bounds for dimension 1 with size 256\\nException raised from get at /opt/conda/conda-bld/pytorch_1729647369228/work/aten/src/ATen/native/cpu/IndexKernelUtils.h:42 (most recent call first):\\nC++ CapturedTraceback:\\n#4 std::_Function_handler<std::shared_ptr<c10::LazyValue<std::string> const> (), c10::SetStackTraceFetcher(std::function<std::string ()>)::{lambda()#1}>::_M_invoke(std::_Any_data const&) from Logging.cpp:0\\n#5 c10::Error::Error(c10::SourceLocation, std::string) from ??:0\\n#6 void c10::function_ref<void (char**, long const*, long, long)>::callback_fn<at::TensorIteratorBase::loop_2d_from_1d<at::native::cpu_index_kernel<float, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1} const&, bool)::{lambda(char**, long const*, long)#1}>(at::native::cpu_index_kernel<float, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1} const&, bool)::{lambda(char**, long const*, long)#1} const&)::{lambda(char**, long const*, long, long)#1}>(long, char**, long const*, long, long) [clone .cold] from IndexKernel.cpp.AVX2.cpp:0\\n#7 at::TensorIteratorBase::serial_for_each(c10::function_ref<void (char**, long const*, long, long)>, at::Range) const from ??:0\\n#8 void at::internal::invoke_parallel<at::parallel_for<at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1}>(long, long, long, at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1} const&)::{lambda(long, long)#1}>(long, long, long, at::parallel_for<at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1}>(long, long, long, at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1} const&)::{lambda(long, long)#1} const) [clone ._omp_fn.0] from TensorIterator.cpp:0\\n#9 __kmp_api_GOMP_parallel from :0\\n#10 at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long) from ??:0\\n#11 at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>) from IndexKernel.cpp.AVX2.cpp:0\\n#12 at::(anonymous namespace)::wrapper_CPU_index_Tensor(at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from RegisterCPU.cpp:0\\n#13 c10::impl::wrap_kernel_functor_unboxed_<c10::impl::detail::WrapFunctionIntoFunctor_<c10::CompileTimeFunctionPointer<at::Tensor (at::Tensor const&, c10::List<std::optional<at::Tensor> > const&), &at::(anonymous namespace)::wrapper_CPU_index_Tensor>, at::Tensor, c10::guts::typelist::typelist<at::Tensor const&, c10::List<std::optional<at::Tensor> > const&> >, at::Tensor (at::Tensor const&, c10::List<std::optional<at::Tensor> > const&)>::call(c10::OperatorKernel*, c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from RegisterCPU.cpp:0\\n#14 at::_ops::index_Tensor::redispatch(c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from ??:0\\n#15 torch::autograd::VariableType::(anonymous namespace)::index_Tensor(c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from VariableType_1.cpp:0\\n#16 c10::impl::wrap_kernel_functor_unboxed_<c10::impl::detail::WrapFunctionIntoFunctor_<c10::CompileTimeFunctionPointer<at::Tensor (c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&), &torch::autograd::VariableType::(anonymous namespace)::index_Tensor>, at::Tensor, c10::guts::typelist::typelist<c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&> >, at::Tensor (c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&)>::call(c10::OperatorKernel*, c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from VariableType_1.cpp:0\\n#17 at::_ops::index_Tensor::call(at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from ??:0\\n#18 at::indexing::dispatch_index(at::Tensor const&, std::vector<at::Tensor, std::allocator<at::Tensor> >&&) from :0\\n#19 torch::autograd::THPVariable_getitem(_object*, _object*) from ??:0\\n#20 _PyEval_EvalFrameDefault from ??:0\\n#21 _PyFunction_Vectorcall from ??:0\\n#22 _PyEval_EvalFrameDefault from ??:0\\n#23 _PyFunction_Vectorcall from ??:0\\n#24 _PyEval_EvalFrameDefault from ??:0\\n#25 _PyFunction_Vectorcall from ??:0\\n#26 PyObject_Call from ??:0\\n#27 _PyEval_EvalFrameDefault from ??:0\\n#28 _PyFunction_Vectorcall from ??:0\\n#29 PyObject_Call from ??:0\\n#30 _PyEval_EvalFrameDefault from ??:0\\n#31 _PyObject_VectorcallTstate.lto_priv.4 from :0\\n#32 method_vectorcall from :0\\n#33 PyObject_Call from ??:0\\n#34 _PyEval_EvalFrameDefault from ??:0\\n#35 _PyFunction_Vectorcall from ??:0\\n#36 PyObject_Call from ??:0\\n#37 _PyEval_EvalFrameDefault from ??:0\\n#38 _PyObject_VectorcallTstate.lto_priv.4 from :0\\n#39 method_vectorcall from :0\\n#40 PyObject_Call from ??:0\\n#41 _PyEval_EvalFrameDefault from ??:0\\n#42 _PyEval_Vector from :0\\n#43 PyEval_EvalCode from ??:0\\n#44 builtin_exec from :0\\n#45 cfunction_vectorcall_FASTCALL_KEYWORDS from :0\\n#46 PyObject_Vectorcall from ??:0\\n#47 _PyEval_EvalFrameDefault from ??:0\\n#48 _PyFunction_Vectorcall from ??:0\\n#49 pymain_run_module from :0\\n#50 Py_RunMain.localalias from :0\\n#51 Py_BytesMain from ??:0\\n#52 __libc_start_main from ??:0\\n#53 _start from ??:0\\n')",
+      "traceback": "Traceback (most recent call last):\n  File \"[PRIVATE_FNIT]/workspaces/recon_python_profile_20261010_v4/src/fnit/recon_all/hemisphere_worker.py\", line 89, in main\n    report['value'] = profiler.run(request['operation'], function,\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/workspaces/recon_python_profile_20261010_v4/src/fnit/recon_all/profiling.py\", line 134, in run\n    value = function(*args, **kwargs)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/workspaces/recon_python_profile_20261010_v4/src/fnit/recon_all/native_free.py\", line 972, in _hemisphere_operation\n    value = step(f'register_{hemi}', run_register_sphere,\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/workspaces/recon_python_profile_20261010_v4/src/fnit/recon_all/native_free.py\", line 954, in step\n    return profiler.run(name, function, *args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/workspaces/recon_python_profile_20261010_v4/src/fnit/recon_all/profiling.py\", line 134, in run\n    value = function(*args, **kwargs)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/workspaces/recon_python_profile_20261010_v4/src/fnit/recon_all/mris_register_run.py\", line 37, in run_register_sphere\n    sulc_report = run_register_sulc(sphere, smoothwm, sulc, atlas, seed,\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/envs/recon_main_20261009_v3/lib/python3.11/site-packages/torch/utils/_contextlib.py\", line 116, in decorate_context\n    return func(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/workspaces/recon_python_profile_20261010_v4/src/fnit/recon_all/mris_register_sulc_run.py\", line 106, in run_register_sulc\n    force = correlation_gradient_add(force, projected, curvature, e1, e2,\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/envs/recon_main_20261009_v3/lib/python3.11/site-packages/torch/utils/_contextlib.py\", line 116, in decorate_context\n    return func(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/workspaces/recon_python_profile_20261010_v4/src/fnit/recon_all/mris_register_nonlinear.py\", line 489, in correlation_gradient_add\n    up = sample_correlation_atlas(target_mean, positions + u)\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/envs/recon_main_20261009_v3/lib/python3.11/site-packages/torch/utils/_contextlib.py\", line 116, in decorate_context\n    return func(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/workspaces/recon_python_profile_20261010_v4/src/fnit/recon_all/mris_register_nonlinear.py\", line 468, in sample_correlation_atlas\n    return (du * dv * frame[(v1 + offset1) % v_dim, u1]\n                      ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nIndexError: index -9223372036854775808 is out of bounds for dimension 1 with size 256\nException raised from get at /opt/conda/conda-bld/pytorch_1729647369228/work/aten/src/ATen/native/cpu/IndexKernelUtils.h:42 (most recent call first):\nC++ CapturedTraceback:\n#4 std::_Function_handler<std::shared_ptr<c10::LazyValue<std::string> const> (), c10::SetStackTraceFetcher(std::function<std::string ()>)::{lambda()#1}>::_M_invoke(std::_Any_data const&) from Logging.cpp:0\n#5 c10::Error::Error(c10::SourceLocation, std::string) from ??:0\n#6 void c10::function_ref<void (char**, long const*, long, long)>::callback_fn<at::TensorIteratorBase::loop_2d_from_1d<at::native::cpu_index_kernel<float, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1} const&, bool)::{lambda(char**, long const*, long)#1}>(at::native::cpu_index_kernel<float, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1} const&, bool)::{lambda(char**, long const*, long)#1} const&)::{lambda(char**, long const*, long, long)#1}>(long, char**, long const*, long, long) [clone .cold] from IndexKernel.cpp.AVX2.cpp:0\n#7 at::TensorIteratorBase::serial_for_each(c10::function_ref<void (char**, long const*, long, long)>, at::Range) const from ??:0\n#8 void at::internal::invoke_parallel<at::parallel_for<at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1}>(long, long, long, at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1} const&)::{lambda(long, long)#1}>(long, long, long, at::parallel_for<at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1}>(long, long, long, at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1} const&)::{lambda(long, long)#1} const) [clone ._omp_fn.0] from TensorIterator.cpp:0\n#9 __kmp_api_GOMP_parallel from :0\n#10 at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long) from ??:0\n#11 at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>) from IndexKernel.cpp.AVX2.cpp:0\n#12 at::(anonymous namespace)::wrapper_CPU_index_Tensor(at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from RegisterCPU.cpp:0\n#13 c10::impl::wrap_kernel_functor_unboxed_<c10::impl::detail::WrapFunctionIntoFunctor_<c10::CompileTimeFunctionPointer<at::Tensor (at::Tensor const&, c10::List<std::optional<at::Tensor> > const&), &at::(anonymous namespace)::wrapper_CPU_index_Tensor>, at::Tensor, c10::guts::typelist::typelist<at::Tensor const&, c10::List<std::optional<at::Tensor> > const&> >, at::Tensor (at::Tensor const&, c10::List<std::optional<at::Tensor> > const&)>::call(c10::OperatorKernel*, c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from RegisterCPU.cpp:0\n#14 at::_ops::index_Tensor::redispatch(c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from ??:0\n#15 torch::autograd::VariableType::(anonymous namespace)::index_Tensor(c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from VariableType_1.cpp:0\n#16 c10::impl::wrap_kernel_functor_unboxed_<c10::impl::detail::WrapFunctionIntoFunctor_<c10::CompileTimeFunctionPointer<at::Tensor (c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&), &torch::autograd::VariableType::(anonymous namespace)::index_Tensor>, at::Tensor, c10::guts::typelist::typelist<c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&> >, at::Tensor (c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&)>::call(c10::OperatorKernel*, c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from VariableType_1.cpp:0\n#17 at::_ops::index_Tensor::call(at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from ??:0\n#18 at::indexing::dispatch_index(at::Tensor const&, std::vector<at::Tensor, std::allocator<at::Tensor> >&&) from :0\n#19 torch::autograd::THPVariable_getitem(_object*, _object*) from ??:0\n#20 _PyEval_EvalFrameDefault from ??:0\n#21 _PyFunction_Vectorcall from ??:0\n#22 _PyEval_EvalFrameDefault from ??:0\n#23 _PyFunction_Vectorcall from ??:0\n#24 _PyEval_EvalFrameDefault from ??:0\n#25 _PyFunction_Vectorcall from ??:0\n#26 PyObject_Call from ??:0\n#27 _PyEval_EvalFrameDefault from ??:0\n#28 _PyFunction_Vectorcall from ??:0\n#29 PyObject_Call from ??:0\n#30 _PyEval_EvalFrameDefault from ??:0\n#31 _PyObject_VectorcallTstate.lto_priv.4 from :0\n#32 method_vectorcall from :0\n#33 PyObject_Call from ??:0\n#34 _PyEval_EvalFrameDefault from ??:0\n#35 _PyFunction_Vectorcall from ??:0\n#36 PyObject_Call from ??:0\n#37 _PyEval_EvalFrameDefault from ??:0\n#38 _PyObject_VectorcallTstate.lto_priv.4 from :0\n#39 method_vectorcall from :0\n#40 PyObject_Call from ??:0\n#41 _PyEval_EvalFrameDefault from ??:0\n#42 _PyEval_Vector from :0\n#43 PyEval_EvalCode from ??:0\n#44 builtin_exec from :0\n#45 cfunction_vectorcall_FASTCALL_KEYWORDS from :0\n#46 PyObject_Vectorcall from ??:0\n#47 _PyEval_EvalFrameDefault from ??:0\n#48 _PyFunction_Vectorcall from ??:0\n#49 pymain_run_module from :0\n#50 Py_RunMain.localalias from :0\n#51 Py_BytesMain from ??:0\n#52 __libc_start_main from ??:0\n#53 _start from ??:0\n\n",
+      "cuda_initialized_after_failure": true,
+      "finished_monotonic": 4381516.184895334,
+      "total_seconds": 48.84667547047138,
+      "environment": {
+        "requested_threads": 2,
+        "scope": "fresh subprocess initialization only",
+        "environment_before": {
+          "OMP_NUM_THREADS": "4",
+          "OPENBLAS_NUM_THREADS": "4",
+          "MKL_NUM_THREADS": "4",
+          "NUMEXPR_NUM_THREADS": "4",
+          "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS": "4",
+          "NUMBA_NUM_THREADS": "4"
+        },
+        "environment_after": {
+          "OMP_NUM_THREADS": "2",
+          "OPENBLAS_NUM_THREADS": "2",
+          "MKL_NUM_THREADS": "2",
+          "NUMEXPR_NUM_THREADS": "2",
+          "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS": "2",
+          "NUMBA_NUM_THREADS": "2"
+        },
+        "parent_environment_modified": false,
+        "active_worker_counts_verified": false,
+        "cuda_allocator_cache": {
+          "requested": "inherit",
+          "selected_policy": "disabled",
+          "environment_at_entry": "1",
+          "environment_at_fresh_exec": "1",
+          "parent_environment_unchanged": true
+        },
+        "TORCH_SHOW_CPP_STACKTRACES": "1"
+      }
+    },
+    "rh": {
+      "status": "report_unavailable",
+      "pid": 65217,
+      "exit_code": -15,
+      "reason": "worker report missing after process reaping",
+      "environment": {
+        "requested_threads": 2,
+        "scope": "fresh subprocess initialization only",
+        "environment_before": {
+          "OMP_NUM_THREADS": "4",
+          "OPENBLAS_NUM_THREADS": "4",
+          "MKL_NUM_THREADS": "4",
+          "NUMEXPR_NUM_THREADS": "4",
+          "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS": "4",
+          "NUMBA_NUM_THREADS": "4"
+        },
+        "environment_after": {
+          "OMP_NUM_THREADS": "2",
+          "OPENBLAS_NUM_THREADS": "2",
+          "MKL_NUM_THREADS": "2",
+          "NUMEXPR_NUM_THREADS": "2",
+          "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS": "2",
+          "NUMBA_NUM_THREADS": "2"
+        },
+        "parent_environment_modified": false,
+        "active_worker_counts_verified": false,
+        "cuda_allocator_cache": {
+          "requested": "inherit",
+          "selected_policy": "disabled",
+          "environment_at_entry": "1",
+          "environment_at_fresh_exec": "1",
+          "parent_environment_unchanged": true
+        },
+        "TORCH_SHOW_CPP_STACKTRACES": "1"
+      }
+    }
+  },
+  "values": {},
+  "published": [],
+  "startup_attempts": {
+    "lh": [
+      {
+        "attempt": 1,
+        "pid": 65216,
+        "request_path": "[PRIVATE_FNIT]/runs/recon_python_profile_20261010_v4/sub06-candidate/subject/scripts/register.lh.startup-01.request.json",
+        "report_path": "[PRIVATE_FNIT]/runs/recon_python_profile_20261010_v4/sub06-candidate/subject/scripts/register.lh.startup-01.report.json",
+        "log_path": "[PRIVATE_FNIT]/runs/recon_python_profile_20261010_v4/sub06-candidate/subject/scripts/register.lh.startup-01.worker.log",
+        "started_monotonic": 4381467.293158446,
+        "operation_entered": true,
+        "ready_monotonic": 4381472.982559465,
+        "go_monotonic": 4381477.401724303,
+        "worker_report": {
+          "status": "failed",
+          "pid": 65216,
+          "started_monotonic": 4381467.338219863,
+          "logical_device": "cuda:0",
+          "precision": {
+            "matmul_tf32": true,
+            "cudnn_tf32": true
+          },
+          "operation_entered": true,
+          "cuda_allocator": {
+            "requested": "disabled",
+            "cuda_initialized_at_entry": false,
+            "environment_at_entry": "1",
+            "environment_after_selection": "1",
+            "effective": "disabled",
+            "torch_stats_known_valid": false,
+            "torch_stats_known_unavailable": true
+          },
+          "actual_cuda_device": {
+            "name": "NVIDIA A100-SXM4-80GB",
+            "uuid": "e92ea062-9dbe-4d7f-54a9-deded0295fb5"
+          },
+          "cuda_bootstrap_seconds": 4.1519306637346745,
+          "ready_monotonic": 4381472.982559465,
+          "go_monotonic": 4381477.413987885,
+          "operation_started_monotonic": 4381477.551889258,
+          "stage": {
+            "name": "register",
+            "seconds": 38.61096378881484,
+            "function_seconds": 38.61081492435187,
+            "cuda_pre_sync_seconds": 7.732119411230087e-05,
+            "cuda_post_sync_seconds": 0.0,
+            "cuda_synchronized": true,
+            "cuda_synchronization_requested": true,
+            "parent_cpu_seconds": 69.956857856,
+            "child_cpu_seconds": 0.053713000000000004,
+            "torch_memory_stats_status": "unavailable",
+            "error": "IndexError('index -9223372036854775808 is out of bounds for dimension 1 with size 256\\nException raised from get at /opt/conda/conda-bld/pytorch_1729647369228/work/aten/src/ATen/native/cpu/IndexKernelUtils.h:42 (most recent call first):\\nC++ CapturedTraceback:\\n#4 std::_Function_handler<std::shared_ptr<c10::LazyValue<std::string> const> (), c10::SetStackTraceFetcher(std::function<std::string ()>)::{lambda()#1}>::_M_invoke(std::_Any_data const&) from Logging.cpp:0\\n#5 c10::Error::Error(c10::SourceLocation, std::string) from ??:0\\n#6 void c10::function_ref<void (char**, long const*, long, long)>::callback_fn<at::TensorIteratorBase::loop_2d_from_1d<at::native::cpu_index_kernel<float, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1} const&, bool)::{lambda(char**, long const*, long)#1}>(at::native::cpu_index_kernel<float, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1} const&, bool)::{lambda(char**, long const*, long)#1} const&)::{lambda(char**, long const*, long, long)#1}>(long, char**, long const*, long, long) [clone .cold] from IndexKernel.cpp.AVX2.cpp:0\\n#7 at::TensorIteratorBase::serial_for_each(c10::function_ref<void (char**, long const*, long, long)>, at::Range) const from ??:0\\n#8 void at::internal::invoke_parallel<at::parallel_for<at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1}>(long, long, long, at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1} const&)::{lambda(long, long)#1}>(long, long, long, at::parallel_for<at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1}>(long, long, long, at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1} const&)::{lambda(long, long)#1} const) [clone ._omp_fn.0] from TensorIterator.cpp:0\\n#9 __kmp_api_GOMP_parallel from :0\\n#10 at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long) from ??:0\\n#11 at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>) from IndexKernel.cpp.AVX2.cpp:0\\n#12 at::(anonymous namespace)::wrapper_CPU_index_Tensor(at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from RegisterCPU.cpp:0\\n#13 c10::impl::wrap_kernel_functor_unboxed_<c10::impl::detail::WrapFunctionIntoFunctor_<c10::CompileTimeFunctionPointer<at::Tensor (at::Tensor const&, c10::List<std::optional<at::Tensor> > const&), &at::(anonymous namespace)::wrapper_CPU_index_Tensor>, at::Tensor, c10::guts::typelist::typelist<at::Tensor const&, c10::List<std::optional<at::Tensor> > const&> >, at::Tensor (at::Tensor const&, c10::List<std::optional<at::Tensor> > const&)>::call(c10::OperatorKernel*, c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from RegisterCPU.cpp:0\\n#14 at::_ops::index_Tensor::redispatch(c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from ??:0\\n#15 torch::autograd::VariableType::(anonymous namespace)::index_Tensor(c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from VariableType_1.cpp:0\\n#16 c10::impl::wrap_kernel_functor_unboxed_<c10::impl::detail::WrapFunctionIntoFunctor_<c10::CompileTimeFunctionPointer<at::Tensor (c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&), &torch::autograd::VariableType::(anonymous namespace)::index_Tensor>, at::Tensor, c10::guts::typelist::typelist<c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&> >, at::Tensor (c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&)>::call(c10::OperatorKernel*, c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from VariableType_1.cpp:0\\n#17 at::_ops::index_Tensor::call(at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from ??:0\\n#18 at::indexing::dispatch_index(at::Tensor const&, std::vector<at::Tensor, std::allocator<at::Tensor> >&&) from :0\\n#19 torch::autograd::THPVariable_getitem(_object*, _object*) from ??:0\\n#20 _PyEval_EvalFrameDefault from ??:0\\n#21 _PyFunction_Vectorcall from ??:0\\n#22 _PyEval_EvalFrameDefault from ??:0\\n#23 _PyFunction_Vectorcall from ??:0\\n#24 _PyEval_EvalFrameDefault from ??:0\\n#25 _PyFunction_Vectorcall from ??:0\\n#26 PyObject_Call from ??:0\\n#27 _PyEval_EvalFrameDefault from ??:0\\n#28 _PyFunction_Vectorcall from ??:0\\n#29 PyObject_Call from ??:0\\n#30 _PyEval_EvalFrameDefault from ??:0\\n#31 _PyObject_VectorcallTstate.lto_priv.4 from :0\\n#32 method_vectorcall from :0\\n#33 PyObject_Call from ??:0\\n#34 _PyEval_EvalFrameDefault from ??:0\\n#35 _PyFunction_Vectorcall from ??:0\\n#36 PyObject_Call from ??:0\\n#37 _PyEval_EvalFrameDefault from ??:0\\n#38 _PyObject_VectorcallTstate.lto_priv.4 from :0\\n#39 method_vectorcall from :0\\n#40 PyObject_Call from ??:0\\n#41 _PyEval_EvalFrameDefault from ??:0\\n#42 _PyEval_Vector from :0\\n#43 PyEval_EvalCode from ??:0\\n#44 builtin_exec from :0\\n#45 cfunction_vectorcall_FASTCALL_KEYWORDS from :0\\n#46 PyObject_Vectorcall from ??:0\\n#47 _PyEval_EvalFrameDefault from ??:0\\n#48 _PyFunction_Vectorcall from ??:0\\n#49 pymain_run_module from :0\\n#50 Py_RunMain.localalias from :0\\n#51 Py_BytesMain from ??:0\\n#52 __libc_start_main from ??:0\\n#53 _start from ??:0\\n')"
+          },
+          "thread_budget": {
+            "requested_threads": 2,
+            "scope": "Torch process intraop and current caller Numba thread mask",
+            "torch": {
+              "before": 2,
+              "effective": 2,
+              "interop_unchanged": 1,
+              "restored": 2
+            },
+            "numba": {
+              "before": 2,
+              "effective": 2,
+              "initial_capacity": 2,
+              "mask_only": true,
+              "threading_layer": "tbb",
+              "restored": 2
+            },
+            "environment_modified": false,
+            "restoration_complete": true
+          },
+          "failure_phase": "operation",
+          "cuda_oom": false,
+          "error": "IndexError('index -9223372036854775808 is out of bounds for dimension 1 with size 256\\nException raised from get at /opt/conda/conda-bld/pytorch_1729647369228/work/aten/src/ATen/native/cpu/IndexKernelUtils.h:42 (most recent call first):\\nC++ CapturedTraceback:\\n#4 std::_Function_handler<std::shared_ptr<c10::LazyValue<std::string> const> (), c10::SetStackTraceFetcher(std::function<std::string ()>)::{lambda()#1}>::_M_invoke(std::_Any_data const&) from Logging.cpp:0\\n#5 c10::Error::Error(c10::SourceLocation, std::string) from ??:0\\n#6 void c10::function_ref<void (char**, long const*, long, long)>::callback_fn<at::TensorIteratorBase::loop_2d_from_1d<at::native::cpu_index_kernel<float, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1} const&, bool)::{lambda(char**, long const*, long)#1}>(at::native::cpu_index_kernel<float, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1} const&, bool)::{lambda(char**, long const*, long)#1} const&)::{lambda(char**, long const*, long, long)#1}>(long, char**, long const*, long, long) [clone .cold] from IndexKernel.cpp.AVX2.cpp:0\\n#7 at::TensorIteratorBase::serial_for_each(c10::function_ref<void (char**, long const*, long, long)>, at::Range) const from ??:0\\n#8 void at::internal::invoke_parallel<at::parallel_for<at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1}>(long, long, long, at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1} const&)::{lambda(long, long)#1}>(long, long, long, at::parallel_for<at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1}>(long, long, long, at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1} const&)::{lambda(long, long)#1} const) [clone ._omp_fn.0] from TensorIterator.cpp:0\\n#9 __kmp_api_GOMP_parallel from :0\\n#10 at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long) from ??:0\\n#11 at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>) from IndexKernel.cpp.AVX2.cpp:0\\n#12 at::(anonymous namespace)::wrapper_CPU_index_Tensor(at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from RegisterCPU.cpp:0\\n#13 c10::impl::wrap_kernel_functor_unboxed_<c10::impl::detail::WrapFunctionIntoFunctor_<c10::CompileTimeFunctionPointer<at::Tensor (at::Tensor const&, c10::List<std::optional<at::Tensor> > const&), &at::(anonymous namespace)::wrapper_CPU_index_Tensor>, at::Tensor, c10::guts::typelist::typelist<at::Tensor const&, c10::List<std::optional<at::Tensor> > const&> >, at::Tensor (at::Tensor const&, c10::List<std::optional<at::Tensor> > const&)>::call(c10::OperatorKernel*, c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from RegisterCPU.cpp:0\\n#14 at::_ops::index_Tensor::redispatch(c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from ??:0\\n#15 torch::autograd::VariableType::(anonymous namespace)::index_Tensor(c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from VariableType_1.cpp:0\\n#16 c10::impl::wrap_kernel_functor_unboxed_<c10::impl::detail::WrapFunctionIntoFunctor_<c10::CompileTimeFunctionPointer<at::Tensor (c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&), &torch::autograd::VariableType::(anonymous namespace)::index_Tensor>, at::Tensor, c10::guts::typelist::typelist<c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&> >, at::Tensor (c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&)>::call(c10::OperatorKernel*, c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from VariableType_1.cpp:0\\n#17 at::_ops::index_Tensor::call(at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from ??:0\\n#18 at::indexing::dispatch_index(at::Tensor const&, std::vector<at::Tensor, std::allocator<at::Tensor> >&&) from :0\\n#19 torch::autograd::THPVariable_getitem(_object*, _object*) from ??:0\\n#20 _PyEval_EvalFrameDefault from ??:0\\n#21 _PyFunction_Vectorcall from ??:0\\n#22 _PyEval_EvalFrameDefault from ??:0\\n#23 _PyFunction_Vectorcall from ??:0\\n#24 _PyEval_EvalFrameDefault from ??:0\\n#25 _PyFunction_Vectorcall from ??:0\\n#26 PyObject_Call from ??:0\\n#27 _PyEval_EvalFrameDefault from ??:0\\n#28 _PyFunction_Vectorcall from ??:0\\n#29 PyObject_Call from ??:0\\n#30 _PyEval_EvalFrameDefault from ??:0\\n#31 _PyObject_VectorcallTstate.lto_priv.4 from :0\\n#32 method_vectorcall from :0\\n#33 PyObject_Call from ??:0\\n#34 _PyEval_EvalFrameDefault from ??:0\\n#35 _PyFunction_Vectorcall from ??:0\\n#36 PyObject_Call from ??:0\\n#37 _PyEval_EvalFrameDefault from ??:0\\n#38 _PyObject_VectorcallTstate.lto_priv.4 from :0\\n#39 method_vectorcall from :0\\n#40 PyObject_Call from ??:0\\n#41 _PyEval_EvalFrameDefault from ??:0\\n#42 _PyEval_Vector from :0\\n#43 PyEval_EvalCode from ??:0\\n#44 builtin_exec from :0\\n#45 cfunction_vectorcall_FASTCALL_KEYWORDS from :0\\n#46 PyObject_Vectorcall from ??:0\\n#47 _PyEval_EvalFrameDefault from ??:0\\n#48 _PyFunction_Vectorcall from ??:0\\n#49 pymain_run_module from :0\\n#50 Py_RunMain.localalias from :0\\n#51 Py_BytesMain from ??:0\\n#52 __libc_start_main from ??:0\\n#53 _start from ??:0\\n')",
+          "traceback": "Traceback (most recent call last):\n  File \"[PRIVATE_FNIT]/workspaces/recon_python_profile_20261010_v4/src/fnit/recon_all/hemisphere_worker.py\", line 89, in main\n    report['value'] = profiler.run(request['operation'], function,\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/workspaces/recon_python_profile_20261010_v4/src/fnit/recon_all/profiling.py\", line 134, in run\n    value = function(*args, **kwargs)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/workspaces/recon_python_profile_20261010_v4/src/fnit/recon_all/native_free.py\", line 972, in _hemisphere_operation\n    value = step(f'register_{hemi}', run_register_sphere,\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/workspaces/recon_python_profile_20261010_v4/src/fnit/recon_all/native_free.py\", line 954, in step\n    return profiler.run(name, function, *args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/workspaces/recon_python_profile_20261010_v4/src/fnit/recon_all/profiling.py\", line 134, in run\n    value = function(*args, **kwargs)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/workspaces/recon_python_profile_20261010_v4/src/fnit/recon_all/mris_register_run.py\", line 37, in run_register_sphere\n    sulc_report = run_register_sulc(sphere, smoothwm, sulc, atlas, seed,\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/envs/recon_main_20261009_v3/lib/python3.11/site-packages/torch/utils/_contextlib.py\", line 116, in decorate_context\n    return func(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/workspaces/recon_python_profile_20261010_v4/src/fnit/recon_all/mris_register_sulc_run.py\", line 106, in run_register_sulc\n    force = correlation_gradient_add(force, projected, curvature, e1, e2,\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/envs/recon_main_20261009_v3/lib/python3.11/site-packages/torch/utils/_contextlib.py\", line 116, in decorate_context\n    return func(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/workspaces/recon_python_profile_20261010_v4/src/fnit/recon_all/mris_register_nonlinear.py\", line 489, in correlation_gradient_add\n    up = sample_correlation_atlas(target_mean, positions + u)\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/envs/recon_main_20261009_v3/lib/python3.11/site-packages/torch/utils/_contextlib.py\", line 116, in decorate_context\n    return func(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/workspaces/recon_python_profile_20261010_v4/src/fnit/recon_all/mris_register_nonlinear.py\", line 468, in sample_correlation_atlas\n    return (du * dv * frame[(v1 + offset1) % v_dim, u1]\n                      ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nIndexError: index -9223372036854775808 is out of bounds for dimension 1 with size 256\nException raised from get at /opt/conda/conda-bld/pytorch_1729647369228/work/aten/src/ATen/native/cpu/IndexKernelUtils.h:42 (most recent call first):\nC++ CapturedTraceback:\n#4 std::_Function_handler<std::shared_ptr<c10::LazyValue<std::string> const> (), c10::SetStackTraceFetcher(std::function<std::string ()>)::{lambda()#1}>::_M_invoke(std::_Any_data const&) from Logging.cpp:0\n#5 c10::Error::Error(c10::SourceLocation, std::string) from ??:0\n#6 void c10::function_ref<void (char**, long const*, long, long)>::callback_fn<at::TensorIteratorBase::loop_2d_from_1d<at::native::cpu_index_kernel<float, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1} const&, bool)::{lambda(char**, long const*, long)#1}>(at::native::cpu_index_kernel<float, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1} const&, bool)::{lambda(char**, long const*, long)#1} const&)::{lambda(char**, long const*, long, long)#1}>(long, char**, long const*, long, long) [clone .cold] from IndexKernel.cpp.AVX2.cpp:0\n#7 at::TensorIteratorBase::serial_for_each(c10::function_ref<void (char**, long const*, long, long)>, at::Range) const from ??:0\n#8 void at::internal::invoke_parallel<at::parallel_for<at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1}>(long, long, long, at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1} const&)::{lambda(long, long)#1}>(long, long, long, at::parallel_for<at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1}>(long, long, long, at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1} const&)::{lambda(long, long)#1} const) [clone ._omp_fn.0] from TensorIterator.cpp:0\n#9 __kmp_api_GOMP_parallel from :0\n#10 at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long) from ??:0\n#11 at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>) from IndexKernel.cpp.AVX2.cpp:0\n#12 at::(anonymous namespace)::wrapper_CPU_index_Tensor(at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from RegisterCPU.cpp:0\n#13 c10::impl::wrap_kernel_functor_unboxed_<c10::impl::detail::WrapFunctionIntoFunctor_<c10::CompileTimeFunctionPointer<at::Tensor (at::Tensor const&, c10::List<std::optional<at::Tensor> > const&), &at::(anonymous namespace)::wrapper_CPU_index_Tensor>, at::Tensor, c10::guts::typelist::typelist<at::Tensor const&, c10::List<std::optional<at::Tensor> > const&> >, at::Tensor (at::Tensor const&, c10::List<std::optional<at::Tensor> > const&)>::call(c10::OperatorKernel*, c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from RegisterCPU.cpp:0\n#14 at::_ops::index_Tensor::redispatch(c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from ??:0\n#15 torch::autograd::VariableType::(anonymous namespace)::index_Tensor(c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from VariableType_1.cpp:0\n#16 c10::impl::wrap_kernel_functor_unboxed_<c10::impl::detail::WrapFunctionIntoFunctor_<c10::CompileTimeFunctionPointer<at::Tensor (c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&), &torch::autograd::VariableType::(anonymous namespace)::index_Tensor>, at::Tensor, c10::guts::typelist::typelist<c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&> >, at::Tensor (c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&)>::call(c10::OperatorKernel*, c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from VariableType_1.cpp:0\n#17 at::_ops::index_Tensor::call(at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from ??:0\n#18 at::indexing::dispatch_index(at::Tensor const&, std::vector<at::Tensor, std::allocator<at::Tensor> >&&) from :0\n#19 torch::autograd::THPVariable_getitem(_object*, _object*) from ??:0\n#20 _PyEval_EvalFrameDefault from ??:0\n#21 _PyFunction_Vectorcall from ??:0\n#22 _PyEval_EvalFrameDefault from ??:0\n#23 _PyFunction_Vectorcall from ??:0\n#24 _PyEval_EvalFrameDefault from ??:0\n#25 _PyFunction_Vectorcall from ??:0\n#26 PyObject_Call from ??:0\n#27 _PyEval_EvalFrameDefault from ??:0\n#28 _PyFunction_Vectorcall from ??:0\n#29 PyObject_Call from ??:0\n#30 _PyEval_EvalFrameDefault from ??:0\n#31 _PyObject_VectorcallTstate.lto_priv.4 from :0\n#32 method_vectorcall from :0\n#33 PyObject_Call from ??:0\n#34 _PyEval_EvalFrameDefault from ??:0\n#35 _PyFunction_Vectorcall from ??:0\n#36 PyObject_Call from ??:0\n#37 _PyEval_EvalFrameDefault from ??:0\n#38 _PyObject_VectorcallTstate.lto_priv.4 from :0\n#39 method_vectorcall from :0\n#40 PyObject_Call from ??:0\n#41 _PyEval_EvalFrameDefault from ??:0\n#42 _PyEval_Vector from :0\n#43 PyEval_EvalCode from ??:0\n#44 builtin_exec from :0\n#45 cfunction_vectorcall_FASTCALL_KEYWORDS from :0\n#46 PyObject_Vectorcall from ??:0\n#47 _PyEval_EvalFrameDefault from ??:0\n#48 _PyFunction_Vectorcall from ??:0\n#49 pymain_run_module from :0\n#50 Py_RunMain.localalias from :0\n#51 Py_BytesMain from ??:0\n#52 __libc_start_main from ??:0\n#53 _start from ??:0\n\n",
+          "cuda_initialized_after_failure": true,
+          "finished_monotonic": 4381516.184895334,
+          "total_seconds": 48.84667547047138,
+          "environment": {
+            "requested_threads": 2,
+            "scope": "fresh subprocess initialization only",
+            "environment_before": {
+              "OMP_NUM_THREADS": "4",
+              "OPENBLAS_NUM_THREADS": "4",
+              "MKL_NUM_THREADS": "4",
+              "NUMEXPR_NUM_THREADS": "4",
+              "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS": "4",
+              "NUMBA_NUM_THREADS": "4"
+            },
+            "environment_after": {
+              "OMP_NUM_THREADS": "2",
+              "OPENBLAS_NUM_THREADS": "2",
+              "MKL_NUM_THREADS": "2",
+              "NUMEXPR_NUM_THREADS": "2",
+              "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS": "2",
+              "NUMBA_NUM_THREADS": "2"
+            },
+            "parent_environment_modified": false,
+            "active_worker_counts_verified": false,
+            "cuda_allocator_cache": {
+              "requested": "inherit",
+              "selected_policy": "disabled",
+              "environment_at_entry": "1",
+              "environment_at_fresh_exec": "1",
+              "parent_environment_unchanged": true
+            },
+            "TORCH_SHOW_CPP_STACKTRACES": "1"
+          }
+        },
+        "exit_code": 1
+      }
+    ],
+    "rh": [
+      {
+        "attempt": 1,
+        "pid": 65217,
+        "request_path": "[PRIVATE_FNIT]/runs/recon_python_profile_20261010_v4/sub06-candidate/subject/scripts/register.rh.startup-01.request.json",
+        "report_path": "[PRIVATE_FNIT]/runs/recon_python_profile_20261010_v4/sub06-candidate/subject/scripts/register.rh.startup-01.report.json",
+        "log_path": "[PRIVATE_FNIT]/runs/recon_python_profile_20261010_v4/sub06-candidate/subject/scripts/register.rh.startup-01.worker.log",
+        "started_monotonic": 4381467.294927994,
+        "operation_entered": null,
+        "ready_monotonic": 4381472.900736024,
+        "go_monotonic": 4381477.402414776,
+        "worker_report": {
+          "status": "report_unavailable",
+          "pid": 65217,
+          "exit_code": -15,
+          "reason": "worker report missing after process reaping",
+          "environment": {
+            "requested_threads": 2,
+            "scope": "fresh subprocess initialization only",
+            "environment_before": {
+              "OMP_NUM_THREADS": "4",
+              "OPENBLAS_NUM_THREADS": "4",
+              "MKL_NUM_THREADS": "4",
+              "NUMEXPR_NUM_THREADS": "4",
+              "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS": "4",
+              "NUMBA_NUM_THREADS": "4"
+            },
+            "environment_after": {
+              "OMP_NUM_THREADS": "2",
+              "OPENBLAS_NUM_THREADS": "2",
+              "MKL_NUM_THREADS": "2",
+              "NUMEXPR_NUM_THREADS": "2",
+              "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS": "2",
+              "NUMBA_NUM_THREADS": "2"
+            },
+            "parent_environment_modified": false,
+            "active_worker_counts_verified": false,
+            "cuda_allocator_cache": {
+              "requested": "inherit",
+              "selected_policy": "disabled",
+              "environment_at_entry": "1",
+              "environment_at_fresh_exec": "1",
+              "parent_environment_unchanged": true
+            },
+            "TORCH_SHOW_CPP_STACKTRACES": "1"
+          }
+        },
+        "exit_code": -15
+      }
+    ]
+  },
+  "startup_wait_seconds": 30,
+  "mitigation_scope": "pre-callable startup resource admission; not a driver root-cause fix",
+  "requests": {
+    "lh": {
+      "path": "[PRIVATE_FNIT]/runs/recon_python_profile_20261010_v4/sub06-candidate/subject/scripts/register.lh.request.json",
+      "private_subject": "[PRIVATE_FNIT]/runs/recon_python_profile_20261010_v4/sub06-candidate/subject/scripts/hemi-register-n4aa8wug/lh/subject",
+      "private_path_scope": "historical path; cleaned after group"
+    },
+    "rh": {
+      "path": "[PRIVATE_FNIT]/runs/recon_python_profile_20261010_v4/sub06-candidate/subject/scripts/register.rh.request.json",
+      "private_subject": "[PRIVATE_FNIT]/runs/recon_python_profile_20261010_v4/sub06-candidate/subject/scripts/hemi-register-n4aa8wug/rh/subject",
+      "private_path_scope": "historical path; cleaned after group"
+    }
+  },
+  "request_path_scope": "historical parameters; private subject paths are cleaned after this group",
+  "caller_device": "cuda:0",
+  "worker_device": "cuda:0",
+  "worker_allocator_selection": {
+    "basis": "environment at fresh exec",
+    "requested": "inherit",
+    "selected_policy": "disabled",
+    "environment_at_entry": "1",
+    "environment_at_fresh_exec": "1",
+    "parent_environment_unchanged": true,
+    "parent_preinitialized_actual_state": "not_inferred_from_environment"
+  },
+  "private_copy_seconds": 0.5543851656839252,
+  "parent_idle_cuda_cache": {
+    "status": "complete",
+    "device": "cuda:0",
+    "seconds": 0.0004150066524744034,
+    "before": {
+      "allocated_bytes": 0,
+      "reserved_bytes": 0
+    },
+    "after": {
+      "allocated_bytes": 0,
+      "reserved_bytes": 0
+    },
+    "cuda_context_created": null,
+    "cuda_context_measurement": "not measured; global initialization does not prove target-device context exists",
+    "scope": "parent PyTorch allocator counters; CUDA contexts, workers and external allocators excluded",
+    "method": "synchronize selected device then empty_cache on parent allocator; live tensors and allocator policy unchanged"
+  },
+  "startup_batches": [
+    {
+      "hemispheres": [
+        "lh",
+        "rh"
+      ],
+      "seconds": 10.111600543372333,
+      "deadline_seconds": 30
+    }
+  ],
+  "startup_wait_seconds_actual": 10.111600543372333,
+  "error": "RuntimeError('hemisphere worker failed; sibling cancelled')",
+  "operation_entered": {
+    "lh": true,
+    "rh": null
+  },
+  "device_process_tree": {
+    "status": "ownership_unresolved",
+    "target_gpu_uuid": "GPU-anonymized-device-008",
+    "sampling_interval_seconds": 0.5,
+    "max_observed_interval_seconds": 4.822753997519612,
+    "failed_samples": [],
+    "samples": [
+      {
+        "monotonic": 4381467.294997335,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 4344,
+            "bytes": 39329988608
+          },
+          {
+            "pid": 78642,
+            "bytes": 576716800
+          }
+        ],
+        "target_compute_process_sum_bytes": 39906705408,
+        "target_device_used_bytes": 39921385472,
+        "device_query_error": null,
+        "sample_query_seconds": 1.8502826364710927
+      },
+      {
+        "monotonic": 4381469.165418678,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 4344,
+            "bytes": 39329988608
+          },
+          {
+            "pid": 78642,
+            "bytes": 576716800
+          }
+        ],
+        "target_compute_process_sum_bytes": 39906705408,
+        "target_device_used_bytes": 39921385472,
+        "device_query_error": null,
+        "sample_query_seconds": 2.029303003102541
+      },
+      {
+        "monotonic": 4381471.214875623,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 4344,
+            "bytes": 39329988608
+          },
+          {
+            "pid": 78642,
+            "bytes": 576716800
+          },
+          {
+            "pid": 70165,
+            "bytes": 79691776
+          },
+          {
+            "pid": 70164,
+            "bytes": 16777216
+          }
+        ],
+        "target_compute_process_sum_bytes": 40003174400,
+        "target_device_used_bytes": 40801140736,
+        "device_query_error": null,
+        "sample_query_seconds": 2.4781200196594
+      },
+      {
+        "monotonic": 4381473.713428916,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 4344,
+            "bytes": 39329988608
+          },
+          {
+            "pid": 78642,
+            "bytes": 576716800
+          },
+          {
+            "pid": 70165,
+            "bytes": 434110464
+          },
+          {
+            "pid": 70164,
+            "bytes": 434110464
+          }
+        ],
+        "target_compute_process_sum_bytes": 40774926336,
+        "target_device_used_bytes": 40801140736,
+        "device_query_error": null,
+        "sample_query_seconds": 3.6682043047621846
+      },
+      {
+        "monotonic": 4381477.403120855,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 4344,
+            "bytes": 39329988608
+          },
+          {
+            "pid": 78642,
+            "bytes": 576716800
+          },
+          {
+            "pid": 70165,
+            "bytes": 434110464
+          },
+          {
+            "pid": 70164,
+            "bytes": 434110464
+          }
+        ],
+        "target_compute_process_sum_bytes": 40774926336,
+        "target_device_used_bytes": 40801140736,
+        "device_query_error": null,
+        "sample_query_seconds": 4.772527036257088
+      },
+      {
+        "monotonic": 4381482.225874852,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 4344,
+            "bytes": 39329988608
+          },
+          {
+            "pid": 78642,
+            "bytes": 576716800
+          },
+          {
+            "pid": 70165,
+            "bytes": 434110464
+          },
+          {
+            "pid": 70164,
+            "bytes": 434110464
+          }
+        ],
+        "target_compute_process_sum_bytes": 40774926336,
+        "target_device_used_bytes": 40801140736,
+        "device_query_error": null,
+        "sample_query_seconds": 3.979284266009927
+      },
+      {
+        "monotonic": 4381486.255742215,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 4344,
+            "bytes": 39329988608
+          },
+          {
+            "pid": 78642,
+            "bytes": 576716800
+          },
+          {
+            "pid": 70165,
+            "bytes": 434110464
+          },
+          {
+            "pid": 70164,
+            "bytes": 434110464
+          }
+        ],
+        "target_compute_process_sum_bytes": 40774926336,
+        "target_device_used_bytes": 40801140736,
+        "device_query_error": null,
+        "sample_query_seconds": 3.8236331958323717
+      },
+      {
+        "monotonic": 4381490.129698988,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 4344,
+            "bytes": 39329988608
+          },
+          {
+            "pid": 78642,
+            "bytes": 576716800
+          },
+          {
+            "pid": 70165,
+            "bytes": 434110464
+          },
+          {
+            "pid": 70164,
+            "bytes": 434110464
+          }
+        ],
+        "target_compute_process_sum_bytes": 40774926336,
+        "target_device_used_bytes": 40801140736,
+        "device_query_error": null,
+        "sample_query_seconds": 3.8404836393892765
+      },
+      {
+        "monotonic": 4381494.020401776,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 4344,
+            "bytes": 39329988608
+          },
+          {
+            "pid": 78642,
+            "bytes": 576716800
+          },
+          {
+            "pid": 70165,
+            "bytes": 434110464
+          },
+          {
+            "pid": 70164,
+            "bytes": 434110464
+          }
+        ],
+        "target_compute_process_sum_bytes": 40774926336,
+        "target_device_used_bytes": 40801140736,
+        "device_query_error": null,
+        "sample_query_seconds": 4.214929333887994
+      },
+      {
+        "monotonic": 4381498.285521139,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 4344,
+            "bytes": 39329988608
+          },
+          {
+            "pid": 78642,
+            "bytes": 576716800
+          },
+          {
+            "pid": 70165,
+            "bytes": 434110464
+          },
+          {
+            "pid": 70164,
+            "bytes": 434110464
+          }
+        ],
+        "target_compute_process_sum_bytes": 40774926336,
+        "target_device_used_bytes": 40801140736,
+        "device_query_error": null,
+        "sample_query_seconds": 3.7831851644441485
+      },
+      {
+        "monotonic": 4381502.11894194,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 4344,
+            "bytes": 39329988608
+          },
+          {
+            "pid": 78642,
+            "bytes": 576716800
+          },
+          {
+            "pid": 70165,
+            "bytes": 434110464
+          },
+          {
+            "pid": 70164,
+            "bytes": 434110464
+          }
+        ],
+        "target_compute_process_sum_bytes": 40774926336,
+        "target_device_used_bytes": 40801140736,
+        "device_query_error": null,
+        "sample_query_seconds": 4.019801625050604
+      },
+      {
+        "monotonic": 4381506.188854148,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 4344,
+            "bytes": 39329988608
+          },
+          {
+            "pid": 78642,
+            "bytes": 576716800
+          },
+          {
+            "pid": 70165,
+            "bytes": 434110464
+          },
+          {
+            "pid": 70164,
+            "bytes": 434110464
+          }
+        ],
+        "target_compute_process_sum_bytes": 40774926336,
+        "target_device_used_bytes": 40815820800,
+        "device_query_error": null,
+        "sample_query_seconds": 3.5861954856663942
+      },
+      {
+        "monotonic": 4381509.825164772,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 4344,
+            "bytes": 39329988608
+          },
+          {
+            "pid": 78642,
+            "bytes": 576716800
+          },
+          {
+            "pid": 70165,
+            "bytes": 448790528
+          },
+          {
+            "pid": 70164,
+            "bytes": 448790528
+          }
+        ],
+        "target_compute_process_sum_bytes": 40804286464,
+        "target_device_used_bytes": 40830500864,
+        "device_query_error": null,
+        "sample_query_seconds": 4.420048227533698
+      },
+      {
+        "monotonic": 4381514.295433768,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 4344,
+            "bytes": 39329988608
+          },
+          {
+            "pid": 78642,
+            "bytes": 576716800
+          },
+          {
+            "pid": 70165,
+            "bytes": 448790528
+          },
+          {
+            "pid": 70164,
+            "bytes": 434110464
+          }
+        ],
+        "target_compute_process_sum_bytes": 40789606400,
+        "target_device_used_bytes": 40376467456,
+        "device_query_error": null,
+        "sample_query_seconds": 3.8343351846560836
+      },
+      {
+        "monotonic": 4381518.394850915,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 4344,
+            "bytes": 39329988608
+          },
+          {
+            "pid": 78642,
+            "bytes": 576716800
+          }
+        ],
+        "target_compute_process_sum_bytes": 39906705408,
+        "target_device_used_bytes": 39921385472,
+        "device_query_error": null,
+        "sample_query_seconds": 3.399649196304381
+      }
+    ],
+    "peak_tree_total_bytes": null,
+    "observed_resolved_tree_peak_bytes": null,
+    "peak_target_compute_process_sum_bytes": 40804286464,
+    "peak_target_device_used_bytes": 40830500864,
+    "scope": "simultaneous process snapshot on target GPU; unresolved host/container PID ownership is null; device total is separate and includes other users; consecutive queries are not exactly simultaneous",
+    "worker_pids": [
+      65216,
+      65217
+    ]
+  },
+  "cleanup_seconds": 0.025029441341757774,
+  "group_wall_seconds": 55.08450067508966
+}

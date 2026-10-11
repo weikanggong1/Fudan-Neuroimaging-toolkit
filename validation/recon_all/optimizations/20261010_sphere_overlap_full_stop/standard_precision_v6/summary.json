@@ -1,0 +1,491 @@
+{
+  "scope": "complete frozen same-input standard-sphere stage, not raw-T1 recon-all",
+  "reference_commit": "d932c45b7941662ea380a05efef580568b98d41a",
+  "reference_program_sha256": "5d487630dbb5b5dac25a50ddf9ca3c1a3a3661c7c7ca86d8f437ca4c4d9c3cc6",
+  "native_reference_reproducibility": "two complete unobserved runs per case; decoded coordinates and ordered faces exact",
+  "candidate_backend": "self-written NumPy/Numba, with existing Torch ordered averaging and overlap cleanup",
+  "runtime": {
+    "CPU": "Intel Xeon Platinum 8369B 2.90GHz",
+    "GPU": "NVIDIA A100 80GB",
+    "physical_target_gpu_uuid": "GPU-anonymized-device-004",
+    "GPU_process_total_memory": "not sampled for these full-stage runs; allocated/reserved are not total usage",
+    "torch": "2.5.1",
+    "numpy": "1.26.4",
+    "python": "3.11",
+    "threads": 4,
+    "affinity": [
+      116,
+      117,
+      118,
+      119
+    ],
+    "tf32": true,
+    "half_precision_requested": false,
+    "shared_load": true,
+    "allocator_cache": "PYTORCH_NO_CUDA_MEMORY_CACHING absent, verified actual launchers; reused NUMBA_CACHE_DIR"
+  },
+  "cases": [
+    {
+      "case": "sub07",
+      "bbox_mode": "source_float",
+      "report": "sub07-sse-float-full-v6/comparison_v1.json",
+      "full_trace": "sub07-sse-float-full-v6/trace.json",
+      "complete_api_seconds": 168.4619032293558,
+      "complete_observer_wall_seconds": 169.78399058245122,
+      "updates": 446,
+      "full_after_update_exact": true,
+      "final_geometry": {
+        "different_coordinate_elements": 0,
+        "max_abs_coordinate_mm": 0.0,
+        "mean_distance_mm": 0.0,
+        "p99_distance_mm": 0.0,
+        "max_distance_mm": 0.0
+      },
+      "ordered_faces_equal": true,
+      "quality": {
+        "source_niterations": 1000,
+        "source_limit_comparison": "iteration-start_iteration > niterations",
+        "start_iteration": 446,
+        "final_iteration": 1447,
+        "updates": 1001,
+        "stop_reason": "source_niterations_limit",
+        "initial_negative_float32": 4329,
+        "last_pre_step_negative_float32": 2941,
+        "final_negative_float32": 2932,
+        "final_negative_double": 2932,
+        "negative_area_mm2_sum": 37.82141495754067,
+        "negative_area_mm2_max": 0.44336208300070207,
+        "negative_area_mm2_p99": 0.1796475292027871,
+        "zero_area_double": 0,
+        "finite": true,
+        "minimum_negative_float32": 2911,
+        "minimum_iteration": 1395,
+        "final_dt": 0.07236674924774866,
+        "marked_expansion_rings": 1,
+        "quality_status": "failed_quality"
+      },
+      "torch_memory": {
+        "device": "cuda:0",
+        "allocated_peak_bytes": 58234368,
+        "reserved_peak_bytes": 83886080
+      }
+    },
+    {
+      "case": "sub07",
+      "bbox_mode": "legacy_integer",
+      "report": "sub07-sse-legacy-full-v7/comparison_v1.json",
+      "full_trace": "sub07-sse-legacy-full-v7/trace.json",
+      "complete_api_seconds": 158.86784010287374,
+      "complete_observer_wall_seconds": 160.24519020412117,
+      "updates": 427,
+      "full_after_update_exact": false,
+      "final_geometry": {
+        "different_coordinate_elements": 285135,
+        "max_abs_coordinate_mm": 44.05959701538086,
+        "mean_distance_mm": 7.9839933396630585,
+        "p99_distance_mm": 33.86682619129135,
+        "max_distance_mm": 49.24438061089858
+      },
+      "ordered_faces_equal": true,
+      "quality": {
+        "source_niterations": 1000,
+        "source_limit_comparison": "iteration-start_iteration > niterations",
+        "start_iteration": 427,
+        "final_iteration": 1428,
+        "updates": 1001,
+        "stop_reason": "source_niterations_limit",
+        "initial_negative_float32": 5393,
+        "last_pre_step_negative_float32": 4240,
+        "final_negative_float32": 4229,
+        "final_negative_double": 4229,
+        "negative_area_mm2_sum": 46.76759490106953,
+        "negative_area_mm2_max": 0.2760631843820087,
+        "negative_area_mm2_p99": 0.1316478216385081,
+        "zero_area_double": 0,
+        "finite": true,
+        "minimum_negative_float32": 4212,
+        "minimum_iteration": 1357,
+        "final_dt": 0.050536399996767206,
+        "marked_expansion_rings": 1,
+        "quality_status": "failed_quality"
+      },
+      "torch_memory": {
+        "device": "cuda:0",
+        "allocated_peak_bytes": 58234368,
+        "reserved_peak_bytes": 83886080
+      }
+    },
+    {
+      "case": "normal",
+      "bbox_mode": "source_float",
+      "report": "normal-sse-float-full-v6/comparison_v1.json",
+      "full_trace": "normal-sse-float-full-v6/trace.json",
+      "complete_api_seconds": 108.05650544632226,
+      "complete_observer_wall_seconds": 109.70545546058565,
+      "updates": 232,
+      "full_after_update_exact": true,
+      "final_geometry": {
+        "different_coordinate_elements": 0,
+        "max_abs_coordinate_mm": 0.0,
+        "mean_distance_mm": 0.0,
+        "p99_distance_mm": 0.0,
+        "max_distance_mm": 0.0
+      },
+      "ordered_faces_equal": true,
+      "quality": {
+        "source_niterations": 1000,
+        "source_limit_comparison": "iteration-start_iteration > niterations",
+        "start_iteration": 232,
+        "final_iteration": 250,
+        "updates": 18,
+        "stop_reason": "no_negative_faces",
+        "initial_negative_float32": 44,
+        "last_pre_step_negative_float32": 1,
+        "final_negative_float32": 0,
+        "final_negative_double": 0,
+        "negative_area_mm2_sum": 0.0,
+        "negative_area_mm2_max": 0.0,
+        "negative_area_mm2_p99": 0.0,
+        "zero_area_double": 0,
+        "finite": true,
+        "minimum_negative_float32": 0,
+        "minimum_iteration": 250,
+        "final_dt": 0.99,
+        "marked_expansion_rings": 0,
+        "quality_status": "passed"
+      },
+      "torch_memory": {
+        "device": "cuda:0",
+        "allocated_peak_bytes": 56478208,
+        "reserved_peak_bytes": 71303168
+      }
+    },
+    {
+      "case": "normal",
+      "bbox_mode": "legacy_integer",
+      "report": "normal-sse-legacy-full-v7/comparison_v1.json",
+      "full_trace": "normal-sse-legacy-full-v7/trace.json",
+      "complete_api_seconds": 120.11309665068984,
+      "complete_observer_wall_seconds": 129.58922430872917,
+      "updates": 274,
+      "full_after_update_exact": false,
+      "final_geometry": {
+        "different_coordinate_elements": 319866,
+        "max_abs_coordinate_mm": 6.951449394226074,
+        "mean_distance_mm": 3.1429952139578106,
+        "p99_distance_mm": 4.600878376127831,
+        "max_distance_mm": 6.991029514625323
+      },
+      "ordered_faces_equal": true,
+      "quality": {
+        "source_niterations": 1000,
+        "source_limit_comparison": "iteration-start_iteration > niterations",
+        "start_iteration": 274,
+        "final_iteration": 294,
+        "updates": 20,
+        "stop_reason": "no_negative_faces",
+        "initial_negative_float32": 28,
+        "last_pre_step_negative_float32": 2,
+        "final_negative_float32": 0,
+        "final_negative_double": 0,
+        "negative_area_mm2_sum": 0.0,
+        "negative_area_mm2_max": 0.0,
+        "negative_area_mm2_p99": 0.0,
+        "zero_area_double": 0,
+        "finite": true,
+        "minimum_negative_float32": 0,
+        "minimum_iteration": 294,
+        "final_dt": 0.99,
+        "marked_expansion_rings": 0,
+        "quality_status": "passed"
+      },
+      "torch_memory": {
+        "device": "cuda:0",
+        "allocated_peak_bytes": 56478208,
+        "reserved_peak_bytes": 71303168
+      }
+    }
+  ],
+  "linear_only_fix_failed_controls": [
+    {
+      "case": "sub07",
+      "source_linear_sqrt_only": true,
+      "full_trace": "sub07-sse-float-full-v5/trace.json",
+      "updates": 461,
+      "quality": {
+        "source_niterations": 1000,
+        "source_limit_comparison": "iteration-start_iteration > niterations",
+        "start_iteration": 461,
+        "final_iteration": 1462,
+        "updates": 1001,
+        "stop_reason": "source_niterations_limit",
+        "initial_negative_float32": 4233,
+        "last_pre_step_negative_float32": 2919,
+        "final_negative_float32": 2922,
+        "final_negative_double": 2922,
+        "negative_area_mm2_sum": 38.779991469293925,
+        "negative_area_mm2_max": 0.4453224562851544,
+        "negative_area_mm2_p99": 0.1816272972400618,
+        "zero_area_double": 0,
+        "finite": true,
+        "minimum_negative_float32": 2914,
+        "minimum_iteration": 1459,
+        "final_dt": 0.04800957999692884,
+        "marked_expansion_rings": 1,
+        "quality_status": "failed_quality"
+      },
+      "first_divergent_record": {
+        "index": 420,
+        "kind": "nonlinear-area-distance",
+        "coordinates_before_sha256": "d28b24bc2adbaaef440fd27270ae47825c7aee6aa2a6466d1688cada4a409e03",
+        "gradient_after_average_sha256": "1f1f79f8a8d6eda634ddaec62dc62a4165389deba73b8312babb6f4e756b0ab9",
+        "search": {
+          "mean_delta": 0.0012075119099160699,
+          "max_delta": 0.24647537795391022,
+          "min_dt": 0.8281491816254688,
+          "max_dt": 10103.420015830718,
+          "starting_sse": {
+            "total": 2285.8619475314126,
+            "weighted_distance": 152.80907598678127,
+            "weighted_nonlinear_area": 2133.052871544631,
+            "negative_faces": 4519,
+            "distance_scale": 0.7505285466945154,
+            "area_scale": 0.5623855590820312
+          },
+          "initial_candidates": [
+            {
+              "dt": 0.8281491816254688,
+              "sse": 2285.486455168068
+            },
+            {
+              "dt": 8.281491816254688,
+              "sse": 2292.4511329921997
+            },
+            {
+              "dt": 82.81491816254687,
+              "sse": 2692.932111566607
+            },
+            {
+              "dt": 828.1491816254687,
+              "sse": 21162.987506860143
+            },
+            {
+              "dt": 8281.491816254687,
+              "sse": 449047.1295779907
+            }
+          ],
+          "quadratic": {
+            "a": 0.25,
+            "b": -0.375,
+            "c": 2286.046875,
+            "predicted_dt": 1.5
+          },
+          "candidates": [
+            {
+              "dt": 0.4140745908127344,
+              "sse": 2285.6950063708227
+            },
+            {
+              "dt": 0.8281491816254688,
+              "sse": 2285.486455168068
+            },
+            {
+              "dt": 1.2422237724382033,
+              "sse": 2285.299658548367
+            },
+            {
+              "dt": 0.0,
+              "sse": 2285.8619475314126
+            },
+            {
+              "dt": 1.5,
+              "sse": 2285.1436659741885
+            }
+          ],
+          "selected_index": 4,
+          "selected_dt": 1.5
+        },
+        "integration_state": {
+          "stage": "nonlinear_repair",
+          "weight": 0.001,
+          "averages": 2,
+          "steps_at_scale": 5
+        },
+        "diagnostic_native_before": {
+          "status": "compared",
+          "index": 420,
+          "reference_sha256": "02595ce2b6dd10b00d3f542609f936cab43d6c4efb282e209d1d3c58b5a82454",
+          "different_coordinates": 0,
+          "max_abs_coordinate_mm": 0.0,
+          "max_distance_mm": 0.0,
+          "p99_distance_mm": 0.0,
+          "mean_distance_mm": 0.0
+        },
+        "coordinates_after_sha256": "694441ef02bb1e578821154b36549805d54d6f22ae89ae280d84f536284d715e",
+        "diagnostic_native_after": {
+          "status": "compared",
+          "index": 421,
+          "reference_sha256": "191b82e0632c49dff3cba1587344998f46d2aaeeaf252e05d7bbf31b54afbb7f",
+          "different_coordinates": 258402,
+          "max_abs_coordinate_mm": 0.00727081298828125,
+          "max_distance_mm": 0.008003606005809658,
+          "p99_distance_mm": 0.0005479845521895846,
+          "mean_distance_mm": 6.886700051605058e-05
+        },
+        "api_schedule": {
+          "index": 420,
+          "stage": "nonlinear_repair",
+          "weight": 0.001,
+          "averages": 2,
+          "dt": 1.5
+        }
+      }
+    },
+    {
+      "case": "normal",
+      "source_linear_sqrt_only": true,
+      "full_trace": "normal-sse-float-full-v5/trace.json",
+      "updates": 229,
+      "quality": {
+        "source_niterations": 1000,
+        "source_limit_comparison": "iteration-start_iteration > niterations",
+        "start_iteration": 229,
+        "final_iteration": 247,
+        "updates": 18,
+        "stop_reason": "no_negative_faces",
+        "initial_negative_float32": 43,
+        "last_pre_step_negative_float32": 1,
+        "final_negative_float32": 0,
+        "final_negative_double": 0,
+        "negative_area_mm2_sum": 0.0,
+        "negative_area_mm2_max": 0.0,
+        "negative_area_mm2_p99": 0.0,
+        "zero_area_double": 0,
+        "finite": true,
+        "minimum_negative_float32": 0,
+        "minimum_iteration": 247,
+        "final_dt": 0.99,
+        "marked_expansion_rings": 0,
+        "quality_status": "passed"
+      },
+      "first_divergent_record": {
+        "index": 214,
+        "kind": "nonlinear-area-distance",
+        "coordinates_before_sha256": "39c84b41668adb5d049d7217f24675501f6e7d3b7b7785336d6fb663ed440d55",
+        "gradient_after_average_sha256": "0b0bd0986839fa6ba2d684afeaaf8539f4475caa4273af298b12447dafc6eff6",
+        "search": {
+          "mean_delta": 0.00011460722815198699,
+          "max_delta": 0.0005720260212343132,
+          "min_dt": 8.725453150946507,
+          "max_dt": 106450.52844154737,
+          "starting_sse": {
+            "total": 5617.534777427849,
+            "weighted_distance": 4203.129123643266,
+            "weighted_nonlinear_area": 1414.4056537845827,
+            "negative_faces": 21,
+            "distance_scale": 0.730651343060818,
+            "area_scale": 0.5338506698608398
+          },
+          "initial_candidates": [
+            {
+              "dt": 8.725453150946507,
+              "sse": 5616.918940649379
+            },
+            {
+              "dt": 87.25453150946507,
+              "sse": 5611.245774686473
+            },
+            {
+              "dt": 872.5453150946507,
+              "sse": 5556.771983896275
+            },
+            {
+              "dt": 8725.453150946507,
+              "sse": 5238.357082127621
+            },
+            {
+              "dt": 87254.53150946507,
+              "sse": 24489.89809702498
+            }
+          ],
+          "quadratic": {
+            "a": 3.3387914299964905e-06,
+            "b": -0.036304473876953125,
+            "c": 5617.40625,
+            "predicted_dt": 10873.537109375
+          },
+          "candidates": [
+            {
+              "dt": 4362.726575473253,
+              "sse": 5364.20636098431
+            },
+            {
+              "dt": 8725.453150946507,
+              "sse": 5238.357082127621
+            },
+            {
+              "dt": 13088.17972641976,
+              "sse": 5239.652162101353
+            },
+            {
+              "dt": 0.0,
+              "sse": 5617.534777427849
+            },
+            {
+              "dt": 10873.537109375,
+              "sse": 5223.296023172486
+            }
+          ],
+          "selected_index": 4,
+          "selected_dt": 10873.537109375
+        },
+        "integration_state": {
+          "stage": "nonlinear_repair",
+          "weight": 0.1,
+          "averages": 32,
+          "steps_at_scale": 0
+        },
+        "diagnostic_native_before": {
+          "status": "compared",
+          "index": 214,
+          "reference_sha256": "0f844c2fec81b64a729fbf4ef9699454bd6409eacbca004a5302d4fe8210c744",
+          "different_coordinates": 1099,
+          "max_abs_coordinate_mm": 9.5367431640625e-07,
+          "max_distance_mm": 9.5367431640625e-07,
+          "p99_distance_mm": 1.4901161193847656e-08,
+          "mean_distance_mm": 3.6916121848991356e-09
+        },
+        "coordinates_after_sha256": "5c3bbba54c3538bdf96853c6afd6fe068e0a19934ee979f20d72297613b1c762",
+        "diagnostic_native_after": {
+          "status": "compared",
+          "index": 215,
+          "reference_sha256": "29e3e351e8949eef1290afe30a98652447e8b47c587ca10c05fd3ffb62226ab1",
+          "different_coordinates": 307858,
+          "max_abs_coordinate_mm": 0.0006036758422851562,
+          "max_distance_mm": 0.0006483409143078806,
+          "p99_distance_mm": 0.0002485501404004083,
+          "mean_distance_mm": 0.00010091590325276497
+        },
+        "api_schedule": {
+          "index": 214,
+          "stage": "nonlinear_repair",
+          "weight": 0.1,
+          "averages": 32,
+          "dt": 10873.537109375
+        }
+      }
+    }
+  ],
+  "production_default": {
+    "standard": "source_float",
+    "quick": "legacy_integer",
+    "reference_feedback": false,
+    "strict_fold_gate_unchanged": true
+  },
+  "strict_decoded_geometry_reproduction": "source_float both complete cases passed; native comments/timestamps are not full-file byte equivalence",
+  "mesh_quality": "normal passed; sub07 source and candidate both retain 2932 double radial folds and fail quality",
+  "whole_recon_all_speedup": "not measured by this stage experiment",
+  "overall_metric_equivalence": "not_assessed",
+  "precision_failures": "integer bbox truncation and double sqrt of float ratio change fit and downstream geometry; neither attributed to random GPU behavior",
+  "known_cross_environment_difference": "current fixed-source normal reference vs installed archived official normal: mean3.415484/P995.863464/max7.483534mm; cause not fully determined"
+}

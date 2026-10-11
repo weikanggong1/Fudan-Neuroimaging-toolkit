@@ -1,13 +1,12 @@
 """Source-order CPU port of the fixed ``mri_edit_wm_with_aseg`` call."""
 
 import argparse
-import hashlib
 from pathlib import Path
+import time
 
 import nibabel as nib
 import numpy as np
 from numba import njit
-from scipy.ndimage import binary_dilation
 
 
 @njit(cache=True)
@@ -527,47 +526,111 @@ def edit_segmentation_profile(wm: np.ndarray, brain: np.ndarray,
 
 
 def remove_paths_to_cortex(wm: np.ndarray, brain: np.ndarray,
-                           aseg: np.ndarray) -> tuple[np.ndarray, int]:
-    """Prove the pinned int32-aseg path branch is a no-op, or reject the case.
+                           aseg: np.ndarray, *,
+                           aseg_storage_dtype: str | np.dtype = "int32") -> tuple[np.ndarray, int]:
+    """完整有序 MTL 路径阻断，复用 FNIT NumBa 双视图实现。
 
-    The native code clones the int32 aseg and later indexes its ROI and seed
-    volumes through `MRIvox`, a uint8 macro. With width=256, byte access at
-    any x coordinate addresses an int32 voxel at x//4 (at most 63). If both
-    dilated MTL ROIs begin past that x range, the path scans cannot encounter
-    their own seeds/ROI. This is true for the frozen fs_sub01 input. Other
-    geometries require an exact byte-level path port.
+    输入同3D XYZ网格：wm/brain uint8、aseg int32语义标签，各轴至少3。
+    aseg_storage_dtype默认int32，可显式float32表示原四字节MGH存储；
+    不能先改原存储类型再模拟MRIvox。返回新WM和实际填充次数，
+    无重采样或输入修改，坐标及半径单位为体素。保留通用不可达证明
+    快速路径，其他输入执行源顺序搜索，不按被试或哈希选择算法。
+    非法输入抛ValueError，确定不终止的byte固定状态抛RuntimeError；
+    其他计算异常传播。对应固定mri_edit_wm_with_aseg的首次子步骤。
     """
-    if not (wm.ndim == brain.ndim == aseg.ndim == 3 and
-            wm.shape == brain.shape == aseg.shape and wm.dtype == np.uint8 and
-            aseg.dtype.newbyteorder("=") == np.dtype("int32")):
-        raise ValueError("Expected matching 3D volumes, uint8 WM, and int32 aseg")
-    inaccessible_x = (wm.shape[0] - 1) // np.dtype("int32").itemsize
-    labels = aseg.astype(np.int32, copy=False)
-    for mtl_labels in ((17, 18, 5), (53, 54, 44)):
-        seed = np.isin(labels, mtl_labels)
-        if not seed.any():
-            continue
-        roi = binary_dilation(seed, structure=np.ones((3, 3, 3), bool), iterations=5)
-        if np.any(roi[:inaccessible_x + 1]):
-            raise NotImplementedError("MTL ROI reaches byte-addressable x range; exact native path search is needed")
-    return wm.copy(), 0
+    from .wm_remove_paths import remove_mtl_paths
+    output, report = remove_mtl_paths(wm=wm, brain=brain, aseg=aseg,
+                                     aseg_storage_dtype=aseg_storage_dtype)
+    return output, int(report["filled"])
+
+
+def edit_wm_aseg_profile(wm: np.ndarray, brain: np.ndarray,
+                         aseg: np.ndarray, entowm: np.ndarray, *,
+                         fill_seg_wm: bool = True,
+                         aseg_storage_dtype: str | np.dtype = "int32") -> tuple[np.ndarray, dict]:
+    """完整标准WM编辑：已有有序Numba核心与Python后编辑，无原生程序。
+
+    输入同3D XYZ网格：WM/brain为uint8强度，aseg/entowm为int32标签。
+    fill_seg_wm默认True，在首次WM分支内消费，不能在核心完成后补填。
+    返回新uint8 WM与实际子段秒数、路径证明及参数字典，输入不修改。
+    包含SCM-HA半径1、keep-in、EntoWM level3和ACJ；无其他命令选项。
+    aseg_storage_dtype默认int32，file API按原aseg存储传入float32或int32。
+    remove_paths使用完整双视图有序搜索与通用不可达证明；非法输入
+    抛ValueError，源搜索确定不终止时抛RuntimeError，不返回近似WM。
+    对应mri_edit_wm_with_aseg标准单T1 recipe，空间单位为体素。
+    """
+    from .edit_wm_aseg_late_python import apply_late_wm_edits
+    if (not isinstance(fill_seg_wm, bool) or wm.ndim != 3
+            or wm.shape != brain.shape or wm.shape != aseg.shape
+            or wm.shape != entowm.shape or wm.dtype != np.uint8
+            or brain.dtype != np.uint8 or aseg.dtype.newbyteorder("=") != np.dtype(np.int32)
+            or entowm.dtype.newbyteorder("=") != np.dtype(np.int32)):
+        raise ValueError("expected matching 3D uint8 WM/brain, int32 labels and boolean fill_seg_wm")
+    started = time.perf_counter()
+    after_paths, changed = remove_paths_to_cortex(wm, brain, aseg,
+                                                  aseg_storage_dtype=aseg_storage_dtype)
+    after_paths_time = time.perf_counter()
+    core = edit_segmentation_profile(after_paths, brain, aseg, fill_seg_wm=fill_seg_wm)
+    after_core_time = time.perf_counter()
+    core = spackle_wm_superior_to_mtl(core, aseg)
+    after_mtl_time = time.perf_counter()
+    output = apply_late_wm_edits(core, aseg, entowm, wm, fill_seg_wm=False)
+    finished = time.perf_counter()
+    return output, {"implementation": "FNIT ordered Numba and Python standard WM profile",
+        "device": "cpu", "used_native_programs": False, "fill_seg_wm": fill_seg_wm,
+        "fill_insertion": "first ordered WM-case scan; late fill disabled",
+        "path_proof_changed": int(changed), "paths_filled": int(changed),
+        "aseg_storage_dtype": np.dtype(aseg_storage_dtype).newbyteorder("=").name,
+        "total_seconds": finished-started,
+        "timing_parts_seconds": {"remove_paths_proof": after_paths_time-started,
+            "ordered_core": after_core_time-after_paths_time,
+            "superior_mtl": after_mtl_time-after_core_time,
+            "late_edits": finished-after_mtl_time}}
+
+
+def write_wm_asegedit_profile(wm_file: str | Path, brain_file: str | Path,
+                              aseg_file: str | Path, entowm_file: str | Path,
+                              output_file: str | Path, *,
+                              fill_seg_wm: bool = True) -> dict:
+    """完整CPU标准WM文件API，保留原MGH头/尾及毫米affine，不调用FS。
+
+    前四输入为同网格3D MGH/MGZ；WM/brain原存储uint8，aseg原存储
+    int32或float32精确整数，EntoWM为精确整数。输出为新uint8 MGZ；
+    fill_seg_wm默认True，规则/限制同edit_wm_aseg_profile。返回实际
+    分步、数组耗时及含校验、加载、写出的total_seconds和output路径。
+    保留aseg原存储类型用于临时字节访问；输入读写失败传播，非法
+    几何/标签抛ValueError，源搜索固定不终止抛RuntimeError；不读参考。
+    """
+    from .mgh_compat import save_same_dtype_mgh
+    from .wm_aseg_io import integer_label_array, validate_aseg_storage
+    started = time.perf_counter()
+    images = [nib.load(str(path)) for path in (wm_file, brain_file, aseg_file, entowm_file)]
+    first = images[0]
+    if any(not isinstance(image, nib.MGHImage) or len(image.shape) != 3
+           or image.shape != first.shape
+           or not np.allclose(image.affine, first.affine, rtol=0, atol=1e-4)
+           for image in images):
+        raise ValueError("all inputs must share a 3D MGH grid and affine")
+    if any(image.get_data_dtype() != np.dtype(np.uint8) for image in images[:2]):
+        raise ValueError("WM and brain input storage must be uint8")
+    validate_aseg_storage(images[2])
+    wm, brain = [np.array(image.dataobj, dtype=np.uint8, order="C", copy=True) for image in images[:2]]
+    aseg, entowm = [integer_label_array(image) for image in images[2:]]
+    output, report = edit_wm_aseg_profile(wm, brain, aseg, entowm,
+        fill_seg_wm=fill_seg_wm, aseg_storage_dtype=images[2].get_data_dtype())
+    save_same_dtype_mgh(wm_file, output_file, output)
+    report.update(array_stage_seconds=report["total_seconds"],
+                  total_seconds=time.perf_counter()-started, output=str(output_file), file_io_included=True)
+    return report
 
 
 def edit_wm_aseg_core_no_fill(wm: np.ndarray, brain: np.ndarray,
                               aseg: np.ndarray) -> np.ndarray:
-    """Run all three unconditional functions for the validated fs_sub01 input."""
-    expected = (
-        "591b231eca77bad3c3d1a4cedddb910a0db5f5f572732e30b54b8f6ad6d9fae6",
-        "c23d712bc6ae05b41023976ef2b707ff588562212534d8b32f1315a85beb5cd4",
-        "bd2fc1bd5a36a6bc88edf26817c02d66ac87afb85f45b298957182144504f971",
-    )
-    actual = (
-        hashlib.sha256(wm.tobytes(order="F")).hexdigest(),
-        hashlib.sha256(brain.tobytes(order="F")).hexdigest(),
-        hashlib.sha256(np.asarray(aseg, dtype=">i4").tobytes(order="F")).hexdigest(),
-    )
-    if actual != expected:
-        raise NotImplementedError("Full WM aseg core is validated only for fs_sub01")
+    """无fill的兼容核心API，复用一般输入几何证明和原有序三函数。
+
+    wm/brain/aseg为同3D网格数组，返回新uint8 WM；不含标准后编辑。
+    完整byte-access路径按int32存储执行，不按被试或输入哈希选算法。
+    """
     after_paths, _ = remove_paths_to_cortex(wm, brain, aseg)
     return spackle_wm_superior_to_mtl(
         edit_segmentation_no_fill(after_paths, brain, aseg), aseg)
@@ -575,28 +638,20 @@ def edit_wm_aseg_core_no_fill(wm: np.ndarray, brain: np.ndarray,
 
 def apply_wm_asegedit_fixed(wm: np.ndarray, brain: np.ndarray,
                              aseg: np.ndarray, entowm: np.ndarray) -> np.ndarray:
-    """Run the frozen recon-all options after the core; reject unproved paths."""
-    from .edit_wm_aseg_late_python import apply_late_wm_edits
+    """标准固定recipe兼容名称，复用一般输入完整API，不再晚置fill。
 
-    ento_sha = hashlib.sha256(np.asarray(entowm, dtype=">i4").tobytes(order="F")).hexdigest()
-    if ento_sha != "772c7440a0a576add5850f81c1acdde5359a61ce1d61895d16c105b25e6660c3":
-        raise NotImplementedError("Full WM aseg options are validated only for fs_sub01")
-    core = edit_wm_aseg_core_no_fill(wm, brain, aseg)
-    return apply_late_wm_edits(core, aseg, entowm, wm, fill_seg_wm=True)
+    输入/失败条件同edit_wm_aseg_profile；返回新uint8数组，内部fill
+    开启。旧冻结被试哈希与晚置fill实现已被新完整标准函数替代。
+    """
+    return edit_wm_aseg_profile(wm, brain, aseg, entowm, fill_seg_wm=True)[0]
 
 
 def write_wm_asegedit_fixed(wm_file: str | Path, brain_file: str | Path,
                              aseg_file: str | Path, entowm_file: str | Path,
                              output_file: str | Path) -> Path:
     """Write the fixed call without a FreeSurfer runtime, preserving MGH tags."""
-    from .mgh_compat import save_same_dtype_mgh
-
-    wm = np.asarray(nib.load(str(wm_file)).dataobj).astype(np.uint8)
-    brain = np.asarray(nib.load(str(brain_file)).dataobj).astype(np.uint8)
-    aseg = np.asarray(nib.load(str(aseg_file)).dataobj).astype(np.int32)
-    entowm = np.asarray(nib.load(str(entowm_file)).dataobj)
-    result = apply_wm_asegedit_fixed(wm, brain, aseg, entowm)
-    save_same_dtype_mgh(wm_file, output_file, result)
+    write_wm_asegedit_profile(wm_file=wm_file, brain_file=brain_file,
+        aseg_file=aseg_file, entowm_file=entowm_file, output_file=output_file, fill_seg_wm=True)
     return Path(output_file)
 
 

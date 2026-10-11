@@ -1,0 +1,95 @@
+{
+  "status": "complete",
+  "case": "sub07",
+  "backend": "cpu",
+  "scope": "frozen same-input complete WM file stage, not raw-T1 whole pipeline",
+  "input_producer": "79a41cdd",
+  "code_version": "2474392bf7aa76a1ea1778dae389a31537724621:wm-path-v1-SHA-overlay",
+  "producer_receipt_sha256": "6de395039495083787474fd91f1b107701af74dd89fe1e489c484e3ca279060c",
+  "hostname_private": "<private-host>",
+  "cpu_architecture": "x86_64",
+  "input_sha256": {
+    "wm.seg": "9f5ac060a911b30faf490b61c8255874e4c9be63c3b8c82631f9d0c69c20a8c1",
+    "brain": "977f6fb298d38e10588cd636f4db38ca8c3456265b24d6d80d00d54e60e98eed",
+    "aseg.presurf": "00289571f123b8c04e2e9a17e0c697cd6100899b7c1b49f20c1f5309cd9ffc7c",
+    "entowm": "2473b55ef9674c0b145845b54db227a5b7fbf10255ef6026536a60ce3dbd3d9a"
+  },
+  "script_sha256": "b49900f4588644c6163ffd9f3486ed4768c483f52f444332b2c78815b56f19b8",
+  "module_sha256": {
+    "edit_wm_aseg_core_python.py": "206511ff9b524eb10fb3219a81a85ae7b8a826d439df2b8d2ccb7f8d3b61a049",
+    "edit_wm_aseg_torch.py": "a889223263acbcec255f91bcf3c1df64174d6c88e4e9646f226feb46ad38dc9f"
+  },
+  "path_module_sha256": "5f77eae5cc3948079de6a0fa626c83d34c634751ea5ba7a505c1f8381a472385",
+  "source_manifest_sha256": "9e1d110192575fc10c9c799d8dc7a594c64ead9263e3ddbfb0212ab7959cac98",
+  "cpu_affinity": [
+    100,
+    101,
+    102,
+    103
+  ],
+  "computation_threads": 3,
+  "import_seconds": 15.261791170574725,
+  "device": "cuda:0",
+  "cuda_visible_devices": "0",
+  "cuda_allocator_environment": null,
+  "original_storage_dtype": ">f4",
+  "overall_metric_equivalence": "not_assessed",
+  "used_reference_inputs_in_production": false,
+  "file_api_wall_seconds": 15.829189198091626,
+  "api": {
+    "implementation": "FNIT ordered Numba and Python standard WM profile",
+    "device": "cpu",
+    "used_native_programs": false,
+    "fill_seg_wm": true,
+    "fill_insertion": "first ordered WM-case scan; late fill disabled",
+    "path_proof_changed": 0,
+    "paths_filled": 0,
+    "aseg_storage_dtype": "float32",
+    "total_seconds": 15.827710513956845,
+    "timing_parts_seconds": {
+      "remove_paths_proof": 0.9299405980855227,
+      "ordered_core": 7.978152866475284,
+      "superior_mtl": 0.024031024426221848,
+      "late_edits": 1.406110909767449
+    },
+    "array_stage_seconds": 10.338235398754478,
+    "output": "<FNIT_ROOT>/runs/wm_remove_paths_20261010_v1/sub07-cpu/4-cpu/output.mgz",
+    "file_io_included": true
+  },
+  "paths_diagnostic": {
+    "implementation": "FNIT source-order NumPy/Numba MTL path search",
+    "used_native_programs": false,
+    "aseg_storage_dtype": "float32",
+    "host_byteorder": "little",
+    "byte_access_max_numerical_x": 63,
+    "filled": 0,
+    "hemispheres": [
+      {
+        "hemisphere": "lh",
+        "proof_unreachable": true,
+        "filled": 0,
+        "outer_iterations": 0,
+        "source_iteration_cap_reached": false
+      },
+      {
+        "hemisphere": "rh",
+        "proof_unreachable": true,
+        "filled": 0,
+        "outer_iterations": 0,
+        "source_iteration_cap_reached": false
+      }
+    ],
+    "lh_reads": "typed ROI/filled",
+    "rh_reads": "byte ROI/filled",
+    "iteration_cap_condition": "path && niter++ < 100000",
+    "total_seconds": 1.5782126374542713
+  },
+  "output_sha256": "edaa6605c07d9835f6457cb36bd333873ab4951f38475fff9a33712338cd611c",
+  "input_sha256_after": {
+    "wm.seg": "9f5ac060a911b30faf490b61c8255874e4c9be63c3b8c82631f9d0c69c20a8c1",
+    "brain": "977f6fb298d38e10588cd636f4db38ca8c3456265b24d6d80d00d54e60e98eed",
+    "aseg.presurf": "00289571f123b8c04e2e9a17e0c697cd6100899b7c1b49f20c1f5309cd9ffc7c",
+    "entowm": "2473b55ef9674c0b145845b54db227a5b7fbf10255ef6026536a60ce3dbd3d9a"
+  },
+  "one_process_seconds": 34.59052975103259
+}

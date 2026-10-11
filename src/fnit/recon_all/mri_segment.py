@@ -1,7 +1,8 @@
-"""Isolated Python port of the fixed FreeSurfer 8.2 ``mri_segment`` call.
+"""固定标准WM分割的自有Python/Numba/PyTorch实现，无原生程序调用。
 
-The full ``wm.seg.mgz`` voxels match the frozen 1 mm MP-RAGE subject; the
-stage remains outside the native-free recon-all entry point.
+保留有序CPU更新，可选已有Torch直方图与静态平面缓存。2026-10-10
+真实两例首次差异定位到亮非白质整数阈值14→13，修复后完整分割
+同输入0体素差异；完整原始T1精度由pipeline独立验收。
 """
 
 from __future__ import annotations
@@ -535,13 +536,25 @@ def remove_1d_structures(masked: torch.Tensor) -> torch.Tensor:
 
 
 def remove_bright_nonwhite(image: torch.Tensor, masked: torch.Tensor) -> torch.Tensor:
-    """Apply the fixed ``MRIfindBrightNonWM`` mask to the thickened WM volume."""
+    """按 MRIfindBrightNonWM 清理三维同网格 uint8 WM，返回新张量。
+
+    image 是强度图，masked 是加厚后的 WM 标签；均为 XYZ 体素网格，
+    输出保留 masked 的设备、形状和 uint8 标签，无坐标变换。3³邻域
+    使用 nearest 边界，源实现整数表达式 (27-1)/2 的阈值为13，
+    不是上游旧注释写的14。无参数、无原生程序调用；维度或shape错误
+    抛 ValueError。属于 mri_segment -wsizemm 13 -mprage 的内部步骤。
+    """
+    if image.ndim != 3 or masked.ndim != 3 or image.shape != masked.shape:
+        raise ValueError("bright-nonwhite inputs must be matching 3D volumes")
+    if image.dtype != torch.uint8 or masked.dtype != torch.uint8:
+        raise ValueError("bright-nonwhite inputs must be uint8")
     source = image.cpu().numpy()
     result = masked.cpu().numpy().copy()
     white = result >= 5
     white_neighbors = convolve(white.astype(np.uint8),
                                np.ones((3, 3, 3), dtype=np.uint8), mode="nearest")
-    bright = (~white) & (source > 125) & (white_neighbors < 14)
+    minimum_white_neighbors = (3 * 3 * 3 - 1) // 2
+    bright = (~white) & (source > 125) & (white_neighbors < minimum_white_neighbors)
     bright = minimum_filter(maximum_filter(bright, size=3, mode="nearest"),
                             size=3, mode="nearest")
     expanded = bright | (maximum_filter(bright, size=3, mode="nearest")

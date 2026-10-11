@@ -1,0 +1,177 @@
+{
+  "schema": "fnit.process_memory_namespace_readonly_audit.v1",
+  "status": "read_only_review_complete",
+  "source_git_head_observed": "5d1cdb5ef7e9c50932e63f2361c8640d66ed8384",
+  "source_files": {
+    "src/fnit/recon_all/profiling.py": {
+      "sha256": "17b12fdc4e72736f64dc2834ea34a282bc726513599e8045b63d0f9eeccc5c7e",
+      "bytes": 21564,
+      "pid_alias_lines": [
+        228,
+        240
+      ],
+      "ownership_lines": [
+        359,
+        374
+      ],
+      "peak_lines": [
+        391,
+        410
+      ]
+    },
+    "src/fnit/recon_all/nvml_process_memory.py": {
+      "sha256": "1879606b4af4c10e088cff3c665255511dee872da91d4a9c8b2b1cb07550b348",
+      "bytes": 3058,
+      "driver_pid_lines": [
+        46,
+        53
+      ]
+    },
+    "tests/recon_all/test_process_memory_namespace.py": {
+      "sha256": "f1cf3b14b37a7e6b04147ec34a860b86129c55009b708ca4eafec168e2e899f8",
+      "bytes": 2561,
+      "test_scope": "mocked PID aliases and visibility; no actual CFFF host-to-container mapping test"
+    },
+    "tests/recon_all/test_nvml_process_memory.py": {
+      "sha256": "1c22402e90869c49f1c4f422aec9e8e269652f7f66ea70ac99188ad153cd8c18",
+      "bytes": 7943,
+      "test_scope": "mocked driver data, device selection, fallback and unavailable memory"
+    }
+  },
+  "historical_raw_ga_v1": {
+    "public_report_relative_path": "validation/recon_all/optimizations/20261011_python_n4_dependency_route/raw_t1_failure_v1.json",
+    "public_report_sha256": "afabeb96c90c87fd9e305155af1661bf4bad51b4845f5269ca153f26ff0b592f",
+    "query_backend": "nvidia-smi",
+    "peak_tree_total_bytes": null,
+    "observed_resolved_tree_peak_bytes": null,
+    "peak_target_compute_process_sum_bytes": 8212447232,
+    "peak_target_device_used_bytes": 8227127296,
+    "max_observed_interval_seconds": 1.2808552719652653,
+    "parent_plus_child_peak_ownership_resolved": false,
+    "historical_exited_process_mapping_recovered": false,
+    "limits": [
+      "The public summary has no resolved tree peak; current observations do not retroactively identify historical GPU processes.",
+      "The target compute-process sum and whole-device peak have different scopes and need not occur at the same time; they must not be added or substituted for the FNIT process-tree peak."
+    ]
+  },
+  "current_environment_observation": {
+    "kernel_release": "3.10.0-1160.el7.x86_64",
+    "self_status_has_nspid": false,
+    "self_status_namespace_fields": {},
+    "container_init_status_has_nspid": false,
+    "complete_host_proc_mount_found": false,
+    "host_proc_probe": {
+      "/host/proc": false,
+      "/hostfs/proc": false
+    },
+    "permission_failure_preserved": {
+      "path": "/proc/1/root/proc",
+      "error_type": "PermissionError"
+    },
+    "base_conda_environment_pynvml_available_without_extra_pythonpath": false,
+    "package_scope_limit": "The base environment check does not determine availability in independently installed FNIT targets. Switching between NVML and nvidia-smi does not itself provide a PID namespace mapping."
+  },
+  "current_raw_ga_v2_observation": {
+    "query_utc": "2026-10-10T20:30:11Z",
+    "run_name": "recon_python_ga_whole_20261011_v2",
+    "allowed_benchmark_fields_read": [
+      "harness_pid",
+      "cli_pid",
+      "execution"
+    ],
+    "harness_pid": 114201,
+    "cli_pid": 114348,
+    "execution_type": "str",
+    "execution_string_not_exported": true,
+    "owned_tree": [
+      {
+        "local_pid": 114201,
+        "parent_pid": 114199,
+        "starttime_ticks": 444771391,
+        "nspid_present": false
+      },
+      {
+        "local_pid": 114348,
+        "parent_pid": 114201,
+        "starttime_ticks": 444773410,
+        "nspid_present": false
+      },
+      {
+        "local_pid": 114748,
+        "parent_pid": 114348,
+        "starttime_ticks": 444777870,
+        "nspid_present": false
+      },
+      {
+        "local_pid": 114788,
+        "parent_pid": 114201,
+        "starttime_ticks": 444778265,
+        "nspid_present": false
+      }
+    ],
+    "owned_tree_same_pid_namespace": true,
+    "target_physical_gpu_index": 0,
+    "driver_compute_rows": [
+      {
+        "driver_pid": 39464,
+        "used_mib": 494,
+        "driver_pid_in_owned_local_aliases": false,
+        "ownership": "not_proven"
+      }
+    ],
+    "target_device_used_mib": 503,
+    "fnit_tree_memory_bytes": null,
+    "queries_exactly_simultaneous": false,
+    "scope": "A single live process identity and target-GPU numeric observation; not a peak measurement or a new reconstruction run."
+  },
+  "findings": [
+    {
+      "kind": "confirmed_mapping_gap",
+      "summary": "Current CFFF proc metadata has no NSpid or readable complete host proc view. Existing code therefore has only local numeric PID aliases while GPU queries expose an unmatched driver PID.",
+      "existing_reliable_host_to_container_mapping_found": false,
+      "fnit_peak_should_remain_null": true
+    },
+    {
+      "kind": "code_risk_not_observed_failure",
+      "summary": "The unconditional local-PID identity aliases and /proc/<driver_pid> existence test do not prove equal driver and container PID namespaces. A numeric collision could classify an unrelated driver process as own or external.",
+      "source_lines": [
+        231,
+        363,
+        366
+      ],
+      "actual_pid_collision_observed": false
+    },
+    {
+      "kind": "separate_lifecycle_limit",
+      "summary": "add_worker currently records metadata only; the sampled tree is rebuilt from the parent's live children. Reparented descendants and PID reuse need separate lifetime identity handling if that scope is required.",
+      "source_lines": [
+        207,
+        211,
+        350
+      ],
+      "actual_reparenting_as_cause_proven": false
+    }
+  ],
+  "minimum_proposed_changes_not_implemented": [
+    "Record kernel, PID namespace evidence, NSpid availability and mapping-unavailable reason without altering historical results.",
+    "Treat numeric PID identity as unverified when driver/proc namespace equality is not established; do not use local /proc visibility alone as host PID ownership proof.",
+    "If future infrastructure supplies a trusted host PID map or authorized host proc view, bind host/local PID, namespace, same UID and starttime to prevent PID reuse; otherwise retain null ownership.",
+    "Add meaningful namespace-collision, missing-NSpid and PID-reuse contracts if implementing the mapping change; existing mock alias tests alone do not establish a real CFFF mapping."
+  ],
+  "read_cmdline": false,
+  "read_private_logs": false,
+  "read_credentials": false,
+  "created_cuda_context": false,
+  "new_mri_computation": false,
+  "production_source_modified": false,
+  "git_index_modified": false,
+  "tests_rerun": false,
+  "public_export": {
+    "original_private_audit_sha256": "0e268b04891937df89b5080d155e9eec9399f28a0c3352c8cb886f00a7d7bc0a",
+    "removed_field_paths": [
+      "current_raw_ga_v2_observation.target_gpu_uuid"
+    ],
+    "all_retained_numeric_boolean_null_values_preserved": true,
+    "source_scope": "old unmodified profiling module and live allowed identity observations; not new repaired-source runtime"
+  }
+}

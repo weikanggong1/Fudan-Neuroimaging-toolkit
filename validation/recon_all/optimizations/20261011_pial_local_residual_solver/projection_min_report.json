@@ -1,0 +1,430 @@
+{
+  "schema_version": 1,
+  "execution_status": "complete_diagnosis",
+  "scope": "frozen same-input local residual cleanup; not raw-T1 workflow",
+  "input_sha256": {
+    "surf/lh.white": "df9eaf2ed4e709bee489c93c24e5afbe5c7854f2d7baa04e8103091c3c29f767",
+    "surf/autodet.gw.stats.lh.dat": "16fad6d58028a08e374fae6a0fdabc804b3f816fd185179aac5a714a973df42c",
+    "mri/brain.finalsurfs.mgz": "14e5c3a99198df61ef6356c44db8ee0f54e5a9e4a44faa4c057044459272e1f5",
+    "mri/wm.mgz": "ac618d2b0143c4991e7bcad8f39264402be24a63de5b474e538fa7ca160add14",
+    "mri/aseg.presurf.mgz": "00289571f123b8c04e2e9a17e0c697cd6100899b7c1b49f20c1f5309cd9ffc7c",
+    "label/lh.cortex.label": "2b7962fccffc0fa94861c4d670bfab70df97a708f6fc67870c3830666def8864",
+    "label/lh.cortex+hipamyg.label": "f6e65f9cfe8753abdc76eec5e71a4cc9db9e6096fa9ef4bd7f57d0dcf8e4c2e1"
+  },
+  "terminal_sha256": "e6440bc08203f01c3fdbb9845a8f5b86b28402c4913edcb45f2b3bc2cae0906f",
+  "protocol_sha256": "b5186bf9e6b5858c5f6b4428b6d38922be33bee3be81da6a91b2a70f8680a424",
+  "protocol": {
+    "schema_version": 1,
+    "algorithm": "independent_projected_pair_solver_v1",
+    "parameters": {
+      "max_displacement_mm": 1.0,
+      "minimum_area_ratio": 0.2,
+      "clearance_mm": 0.002,
+      "max_sweeps": 4,
+      "optimizer_iterations": 100,
+      "diagnostic_pair_limit": 1
+    },
+    "acceptance": {
+      "fixed_vertices": "rip union all outside cortex; preserve exact entry coordinates",
+      "ordered_faces": "unchanged",
+      "source_and_float64_pairs": "both strict subset for each accepted trial; no new pairs; full final validation",
+      "affected_faces": "all positive initial-normal dot and area ratio >=0.2",
+      "maximum_cumulative_displacement_mm": 1.0
+    },
+    "scope": "one canonical real face pair; not complete cleanup or overall equivalence",
+    "reference_coordinates_used_for_candidate": false
+  },
+  "script_sha256": "bb949db4e59736b63750b0a988c628f5c3c11b018983252d32b1edce20d528a7",
+  "threads": 4,
+  "cpu_affinity": [
+    104,
+    105,
+    106,
+    107
+  ],
+  "cuda_visible_devices": "",
+  "gpu_memory_bytes": null,
+  "gpu_computation": false,
+  "whole_pipeline_speedup": null,
+  "strict_reproduction": "independent_algorithm_not_source_reproduction",
+  "overall_metric_equivalence": "not_assessed",
+  "versions": {
+    "python": "3.11.16",
+    "numpy": "1.26.4",
+    "numba": "0.67.0",
+    "nibabel": "5.4.2",
+    "scipy": "1.17.1"
+  },
+  "coordinate_space": "surface_RAS",
+  "coordinate_unit": "mm",
+  "original_stage_program_called": false,
+  "source_sha256": {
+    "fnit.recon_all.batch": "217709c94d3b640572c99eba2fe32ca40f87ef9f3921c3b4fa747dad42b913b9",
+    "fnit.recon_all.compare_subject": "7381d28a46b5c07efbb4630cdcd26245c02aa24ea613fbac25e3b69dab2e7921",
+    "fnit.recon_all.extract_main_component_python": "5079510475ff74aca6f0823f49ed4514826b2d4080e8bfc37ab523a2eee2f2ea",
+    "fnit.recon_all.inflate_center_python": "bbb720cd05f9979da8c6da2f4f6ce797094bb3c01740bd71ea15445b2ddd7428",
+    "fnit.recon_all.mris_remove_intersection_python": "011e6482cc32bdb02156dd15f24e0b1d24f3a2318c148deb5def1366dcd6f210",
+    "fnit.recon_all.place_surface_collision": "f36213cfa1c8e65b2dfa69490ab4978e140d7852cbefb0834ed3f991ac84b166",
+    "fnit.recon_all.place_surface_collision_torch": "adac1598f162d5c0fb27afeac6d8625c8da7d66ae781205c1153b00403ba799a",
+    "fnit.recon_all.place_surface_intersection_marking": "752210294df00382a72e38157daced69a04893de0d305e6a8d3ceb4434384d1f",
+    "fnit.recon_all.place_surface_residual_cleanup": "d2d92cef03db4b6b3c9e05ad2c63b5b729dd921317034d4a89b754ee1e485631",
+    "fnit.recon_all.place_surface_residual_projection": "5785f33f4ffe769c28eff75308caade554c47f9fa74b51c49280c638ed3d01e7",
+    "fnit.recon_all.place_surface_smoothing": "5e413a3df69833020be34fdbf8e4b2b6b80e00ddc6b54ac09717527dbf718d07",
+    "fnit.recon_all.smooth_surface_python": "7ae11634300dfb8957dc80357642fc6bfe31be7b04f7694bdc5bb51383f447b9",
+    "fnit.recon_all.tessellate_gpu": "1c87b10862bf7ab4d3e648339489762d5798e92a97a6c1ca7195b18368877faf",
+    "fnit.recon_all.topology_preflight_python": "7ae02e2c7e5133a9de544361c95b9e7def7f5d92e35f3bbc27e8ca03f8d5ec00",
+    "fnit.recon_all.topology_volume_python": "b6ad8b5c54a51dc9a263da3df8eeb0a2f8588b56d4c1e964d57ee509a2a1d0a9"
+  },
+  "mesh": {
+    "vertices": 95045,
+    "faces": 190086,
+    "fixed_vertices": 7890,
+    "ripped_vertices": 5486,
+    "outside_cortex_elements_different_from_white_at_entry": 954,
+    "ripped_elements_different_from_white_at_entry": 0
+  },
+  "qc": [
+    {
+      "state": "initial_terminal",
+      "source_faces": 32,
+      "source_vertices": 35,
+      "float64_faces": 32,
+      "float64_vertices": 35,
+      "source_seconds": 35.12109172903001,
+      "float64_and_area_seconds": 27.130552092567086,
+      "finite": true,
+      "zero_area_faces": 0,
+      "minimum_area_mm2": 0.00011359905576961775,
+      "marked_vertex_sets_equal": true
+    },
+    {
+      "state": "candidate",
+      "source_faces": 32,
+      "source_vertices": 35,
+      "float64_faces": 32,
+      "float64_vertices": 35,
+      "source_seconds": 33.97697492316365,
+      "float64_and_area_seconds": 28.421443882398307,
+      "finite": true,
+      "zero_area_faces": 0,
+      "minimum_area_mm2": 0.00011359905576961775,
+      "marked_vertex_sets_equal": true
+    }
+  ],
+  "fixed_point_diagnosis": {
+    "marked_nonrip_vertices": 15,
+    "vertices_with_nonzero_source_soap_update": 0,
+    "source_soap_skips_ripped_neighbors": true
+  },
+  "topology": {
+    "vertices": 95045,
+    "faces": 190086,
+    "edges": 285129,
+    "euler": 2,
+    "components": 1,
+    "boundary_edges": 0,
+    "nonmanifold_edges": 0,
+    "degenerate_index_faces": 0,
+    "duplicate_faces": 0,
+    "valid": true
+  },
+  "nonmanifold_vertex_links": 0,
+  "edge_orientation_conflicts": 0,
+  "resolver": {
+    "schema_version": 1,
+    "algorithm": "independent_projected_pair_solver_v1",
+    "parameters": {
+      "max_displacement_mm": 1.0,
+      "minimum_area_ratio": 0.2,
+      "clearance_mm": 0.002,
+      "max_sweeps": 4,
+      "optimizer_iterations": 100,
+      "rings": [
+        0,
+        1,
+        2
+      ],
+      "optimizer_ftol": 1e-09,
+      "optimizer_feasibility_tolerance": 1e-09,
+      "diagnostic_pair_limit": 1
+    },
+    "source_directed_pairs_before": 80,
+    "float64_pairs_before": 40,
+    "fixed_vertices": 7890,
+    "candidate_trace": [
+      {
+        "sweep": 0,
+        "pair": [
+          25917,
+          132048
+        ],
+        "moving_face": 132048,
+        "ring": 0,
+        "plane": "normal_positive",
+        "moving_vertices": 1,
+        "affected_faces": 7,
+        "optimizer_success": false,
+        "optimizer_status": 8,
+        "optimizer_iterations": 29,
+        "minimum_optimizer_constraint": -1.4937925109387802,
+        "optimizer_seconds": 1.141114752739668,
+        "decision": "optimizer_infeasible"
+      },
+      {
+        "sweep": 0,
+        "pair": [
+          25917,
+          132048
+        ],
+        "moving_face": 132048,
+        "ring": 0,
+        "plane": "normal_negative",
+        "moving_vertices": 1,
+        "affected_faces": 7,
+        "decision": "fixed_corner_infeasible"
+      },
+      {
+        "sweep": 0,
+        "pair": [
+          25917,
+          132048
+        ],
+        "moving_face": 132048,
+        "ring": 0,
+        "plane": "edge_outside_0",
+        "moving_vertices": 1,
+        "affected_faces": 7,
+        "decision": "fixed_corner_infeasible"
+      },
+      {
+        "sweep": 0,
+        "pair": [
+          25917,
+          132048
+        ],
+        "moving_face": 132048,
+        "ring": 0,
+        "plane": "edge_outside_1",
+        "moving_vertices": 1,
+        "affected_faces": 7,
+        "decision": "fixed_corner_infeasible"
+      },
+      {
+        "sweep": 0,
+        "pair": [
+          25917,
+          132048
+        ],
+        "moving_face": 132048,
+        "ring": 0,
+        "plane": "edge_outside_2",
+        "moving_vertices": 1,
+        "affected_faces": 7,
+        "decision": "fixed_corner_infeasible"
+      },
+      {
+        "sweep": 0,
+        "pair": [
+          25917,
+          132048
+        ],
+        "moving_face": 132048,
+        "ring": 1,
+        "plane": "normal_positive",
+        "moving_vertices": 4,
+        "affected_faces": 19,
+        "optimizer_success": false,
+        "optimizer_status": 8,
+        "optimizer_iterations": 50,
+        "minimum_optimizer_constraint": -1.5815341499556368,
+        "optimizer_seconds": 0.04879297316074371,
+        "decision": "optimizer_infeasible"
+      },
+      {
+        "sweep": 0,
+        "pair": [
+          25917,
+          132048
+        ],
+        "moving_face": 132048,
+        "ring": 1,
+        "plane": "normal_negative",
+        "moving_vertices": 4,
+        "affected_faces": 19,
+        "decision": "fixed_corner_infeasible"
+      },
+      {
+        "sweep": 0,
+        "pair": [
+          25917,
+          132048
+        ],
+        "moving_face": 132048,
+        "ring": 1,
+        "plane": "edge_outside_0",
+        "moving_vertices": 4,
+        "affected_faces": 19,
+        "decision": "fixed_corner_infeasible"
+      },
+      {
+        "sweep": 0,
+        "pair": [
+          25917,
+          132048
+        ],
+        "moving_face": 132048,
+        "ring": 1,
+        "plane": "edge_outside_1",
+        "moving_vertices": 4,
+        "affected_faces": 19,
+        "decision": "fixed_corner_infeasible"
+      },
+      {
+        "sweep": 0,
+        "pair": [
+          25917,
+          132048
+        ],
+        "moving_face": 132048,
+        "ring": 1,
+        "plane": "edge_outside_2",
+        "moving_vertices": 4,
+        "affected_faces": 19,
+        "decision": "fixed_corner_infeasible"
+      },
+      {
+        "sweep": 0,
+        "pair": [
+          25917,
+          132048
+        ],
+        "moving_face": 132048,
+        "ring": 2,
+        "plane": "normal_positive",
+        "moving_vertices": 12,
+        "affected_faces": 41,
+        "optimizer_success": false,
+        "optimizer_status": 3,
+        "optimizer_iterations": 19,
+        "minimum_optimizer_constraint": -1.5832747075326554,
+        "optimizer_seconds": 0.05616456735879183,
+        "decision": "optimizer_infeasible"
+      },
+      {
+        "sweep": 0,
+        "pair": [
+          25917,
+          132048
+        ],
+        "moving_face": 132048,
+        "ring": 2,
+        "plane": "normal_negative",
+        "moving_vertices": 12,
+        "affected_faces": 41,
+        "decision": "fixed_corner_infeasible"
+      },
+      {
+        "sweep": 0,
+        "pair": [
+          25917,
+          132048
+        ],
+        "moving_face": 132048,
+        "ring": 2,
+        "plane": "edge_outside_0",
+        "moving_vertices": 12,
+        "affected_faces": 41,
+        "decision": "fixed_corner_infeasible"
+      },
+      {
+        "sweep": 0,
+        "pair": [
+          25917,
+          132048
+        ],
+        "moving_face": 132048,
+        "ring": 2,
+        "plane": "edge_outside_1",
+        "moving_vertices": 12,
+        "affected_faces": 41,
+        "decision": "fixed_corner_infeasible"
+      },
+      {
+        "sweep": 0,
+        "pair": [
+          25917,
+          132048
+        ],
+        "moving_face": 132048,
+        "ring": 2,
+        "plane": "edge_outside_2",
+        "moving_vertices": 12,
+        "affected_faces": 41,
+        "decision": "fixed_corner_infeasible"
+      }
+    ],
+    "accepted": [],
+    "strict_reproduction": "independent_algorithm_not_source_reproduction",
+    "overall_metric_equivalence": "not_assessed",
+    "status": "failed_residual",
+    "scope": "limited_diagnosis",
+    "source_directed_pairs_after": 80,
+    "float64_pairs_after": 40,
+    "source_intersecting_faces_after": 32,
+    "float64_intersecting_faces_after": 32,
+    "fixed_different_elements": 0,
+    "changed_vertices": 0,
+    "mean_displacement_mm": 0.0,
+    "p99_displacement_mm": 0.0,
+    "max_displacement_mm": 0.0,
+    "global_checks": [
+      {
+        "full_source_pair_set_matches_local_update": true,
+        "full_float64_pair_set_matches_local_update": true,
+        "no_new_source_directed_pairs": true,
+        "no_new_float64_pairs": true
+      }
+    ],
+    "full_resolver_seconds": 112.32440342288464
+  },
+  "output_sha256": {
+    "candidate.private.npy": "e6440bc08203f01c3fdbb9845a8f5b86b28402c4913edcb45f2b3bc2cae0906f",
+    "candidate.pial": "35a0d5cb613e357a4c70f3be46fdcd1e08dd7893c82bbea6f851dc0b720df035"
+  },
+  "geometry_guards": {
+    "fixed_different_elements": 0,
+    "ordered_faces_equal": true,
+    "nonpositive_initial_normal_dot_faces": 0,
+    "minimum_area_ratio": 1.0,
+    "white_pial_crossing": "not_assessed"
+  },
+  "ordered_displacement_mm": {
+    "different_elements": 0,
+    "changed_vertices": 0,
+    "mean": 0.0,
+    "p99": 0.0,
+    "max": 0.0,
+    "changed_vertex_p99": 0.0
+  },
+  "bidirectional_vertex_to_triangle": {
+    "candidate_to_entry": {
+      "mean_mm": 1.2026154378394038e-20,
+      "p99_mm": 0.0,
+      "max_mm": 5.16696640684342e-17
+    },
+    "entry_to_candidate": {
+      "mean_mm": 1.2026154378394038e-20,
+      "p99_mm": 0.0,
+      "max_mm": 5.16696640684342e-17
+    }
+  },
+  "surface_distance_seconds": 48.6176781617105,
+  "surface_distance_module_sha256": "fc29bbdb8f236c9c0b5bfcc7dfcb04359047d31e9317cdb63f186795c7e96a16",
+  "residual_self_intersection_quality": "failed",
+  "quality_scope": "self-intersection and unchanged mesh structure only; whole/white-pial crossing not assessed",
+  "peak_process_cpu_memory_bytes": 5998170112,
+  "complete_wall_seconds_before_report": 300.7982986997813,
+  "raw_server_report_sha256": "31b7a07c92f7a6293311a5ab1d11dd1ce1ff0c39037071d4fd65608b898b154f",
+  "complete_receipt_sha256": "cfb50ea6140a3393168598aac1fea86ef3f9f45673b76dbfeb4fa938f878b05b",
+  "cold_cli_wall_seconds": 301.68236146867275
+}

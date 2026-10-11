@@ -7,6 +7,12 @@ FNIT 已有 FP64 三角面对谓词和 1 mm MHT 桶采样。PyTorch 后端复用
 完整空间候选索引，不截断候选；soap-bubble 坐标更新仍使用源顺序 CPU
 实现。它是表面放置内部算子，不是完整 white 或 pial 的 GPU 替代。
 
+CPU路径现将原完整KD树候选列表打包为CSR，以Numba编译原半径/整数桶/
+共享顶点过滤；仍复用相同有向谓词和实际MHT桶。真实非零文件API ABBA
+中位125.797→73.936秒（1.701倍），全部460万有向三角对输入/输出顺序SHA、
+坐标/轨迹/文件与双复检零残余通过。首次JIT与读写/观察包含在API中，
+这不是整例recon-all提速；见[完整候选过滤说明](SOURCE_INTERSECTION_CANDIDATE_FILTER.md)。
+
 本轮定位了成熟清理子函数的一个检测规则问题：旧实现对无序面对只判断
 一次，并把阳性同时赋给两个面；源命令分别查询两个方向，只标当前查询
 面。源平面阈值和共面分支存在方向差异。新实现还保留共享顶点排除、面
@@ -82,6 +88,11 @@ cleaned_vertices, cleanup_report = repair_intersections(
 是否允许残余由调用阶段决定。完整 white 最终写出仍要求零相交。
 清理器的 `candidate_grid_cells_per_axis` 也默认2；显式3只接受
 `marking_backend="source_torch"`。不改变soap更新或停滞规则。
+
+最终拓扑压缩可额外给出 `ordered_neighbor_offsets` 整数 `(N+1,)` 与
+`ordered_neighbors` 整数 `(E,)`，两者默认均None。显式时沿用源一环顺序，
+保留未被当前面支撑的边；非法CSR在标记前拒绝。现有pial默认不变。
+完整参数、真实阶段范围与复现见 [有序邻接接口](TOPOLOGY_FINAL_INTERSECTION_CSR.md)。
 
 ## 3. 命令行与复现
 
@@ -259,6 +270,7 @@ allocated706,536,960字节、reserved2,908,749,824字节，进程树占用因PID
 - v11：显式3桶完整空间索引，真实完整清理ABBA中位减少25.62%；保留默认2桶。
 - v12：完整white四轮接线回归34步及表面/MRI SHA与v10相同、最终0相交。
 - v14：完整pial只替换source标记，39步及输出0差异；真实清理ABBA中位11.31倍，pial单配对1.572倍，默认保持。
+- 2026-10-11 CPU候选过滤：真实compact ORIGINAL非零输入，四线程完整文件API ABBA缩短41.226%；源有向谓词与全部候选顺序保持，原停止/SOAP/质量门不变。未改PyTorch路径或legacy默认。
 - 本地32项控制测试覆盖方向、桶、共享顶点/rip、GPU接口、缓存失效及white四轮状态；模拟测试不替代上表真实数据。
 
 旧v1/v2失败或慢版报告保留为排错证据，不替换其SHA或改写为当前成功。

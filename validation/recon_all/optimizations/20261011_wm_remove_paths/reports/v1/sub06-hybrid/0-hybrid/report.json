@@ -1,0 +1,81 @@
+{
+  "status": "complete",
+  "case": "sub06",
+  "backend": "hybrid",
+  "scope": "frozen same-input complete WM file stage, not raw-T1 whole pipeline",
+  "input_producer": "79a41cdd",
+  "code_version": "2474392bf7aa76a1ea1778dae389a31537724621:wm-path-v1-SHA-overlay",
+  "producer_receipt_sha256": "dae119ae4ae31768395141b406d708afe78937c5ae42b13a228746a42fa6b434",
+  "hostname_private": "<private-host>",
+  "cpu_architecture": "x86_64",
+  "input_sha256": {
+    "wm.seg": "907929d4cb684e9556e7ee9322f485d0341199860dcf2060e8d36eb4555a375c",
+    "brain": "de6896e108e8979f12909e58f239c534b26b9a3eb12dea951ee96177fbf177c5",
+    "aseg.presurf": "0e2efe5625d11bb33f4cc17f94af6a5c231eb1d522bff6deb6f4fb51c658f003",
+    "entowm": "02dd985d16b69011eea683089fdcebf9e769a5e5e3d95f70121dbb32bb719ab9"
+  },
+  "script_sha256": "b49900f4588644c6163ffd9f3486ed4768c483f52f444332b2c78815b56f19b8",
+  "module_sha256": {
+    "edit_wm_aseg_core_python.py": "206511ff9b524eb10fb3219a81a85ae7b8a826d439df2b8d2ccb7f8d3b61a049",
+    "edit_wm_aseg_torch.py": "a889223263acbcec255f91bcf3c1df64174d6c88e4e9646f226feb46ad38dc9f"
+  },
+  "path_module_sha256": "5f77eae5cc3948079de6a0fa626c83d34c634751ea5ba7a505c1f8381a472385",
+  "source_manifest_sha256": "9e1d110192575fc10c9c799d8dc7a594c64ead9263e3ddbfb0212ab7959cac98",
+  "cpu_affinity": [
+    100,
+    101,
+    102,
+    103
+  ],
+  "computation_threads": 3,
+  "import_seconds": 2.828109190799296,
+  "device": "cuda:0",
+  "cuda_visible_devices": "0",
+  "cuda_allocator_environment": null,
+  "original_storage_dtype": ">f4",
+  "overall_metric_equivalence": "not_assessed",
+  "used_reference_inputs_in_production": false,
+  "file_api_wall_seconds": 14.870201508514583,
+  "api": {
+    "implementation": "FNIT ordered Numba + PyTorch CUDA diagnostic",
+    "device": "cuda:0",
+    "used_native_programs": false,
+    "ordered_cpu_seconds": 10.055735767818987,
+    "torch_seconds_including_transfers": 0.5897711757570505,
+    "timing_parts_seconds": {
+      "remove_paths_cpu": 1.0472303228452802,
+      "label_upload_and_fill_seed": 0.17385593615472317,
+      "first_ordered_scans_cpu": 5.187548373825848,
+      "fixed_filled_propagation_and_transfers": 0.0692808348685503,
+      "post_ordered_scans_cpu": 3.820957071147859,
+      "mtl_late_and_transfers": 0.34663440473377705
+    },
+    "total_seconds": 14.866628754884005,
+    "path_proof_changed": 0,
+    "fill_seg_wm": true,
+    "paths_filled": 0,
+    "aseg_storage_dtype": "float32",
+    "fill_insertion": "native first ordered WM-case scan; fixed filled flags GPU propagation",
+    "production_default": false,
+    "array_stage_seconds": 10.645569612272084,
+    "output": "<FNIT_ROOT>/runs/wm_remove_paths_20261010_v1/sub06-hybrid/0-hybrid/output.mgz",
+    "file_io_included": true
+  },
+  "cuda": {
+    "name": "NVIDIA A100-SXM4-80GB",
+    "matmul_tf32": true,
+    "cudnn_tf32": true,
+    "autocast_enabled": false,
+    "peak_allocated_bytes": 553648128,
+    "peak_reserved_bytes": 641728512,
+    "allocator_stats_zero_is_zero_memory_claim": false
+  },
+  "output_sha256": "fbf7294273273e959edd7376619f4878dfaf7839b0bc10ce92852c5bbf3d9651",
+  "input_sha256_after": {
+    "wm.seg": "907929d4cb684e9556e7ee9322f485d0341199860dcf2060e8d36eb4555a375c",
+    "brain": "de6896e108e8979f12909e58f239c534b26b9a3eb12dea951ee96177fbf177c5",
+    "aseg.presurf": "0e2efe5625d11bb33f4cc17f94af6a5c231eb1d522bff6deb6f4fb51c658f003",
+    "entowm": "02dd985d16b69011eea683089fdcebf9e769a5e5e3d95f70121dbb32bb719ab9"
+  },
+  "one_process_seconds": 21.332864520139992
+}

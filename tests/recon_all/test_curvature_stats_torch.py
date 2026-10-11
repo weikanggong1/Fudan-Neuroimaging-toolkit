@@ -14,7 +14,7 @@ def _native_formula(k1, k2):
     delta = np.float32(a - b)
     return {"BE": bending, "C": np.float32(math.sqrt(0.5 * float(bending))),
             "S": np.float32(delta * delta),
-            "FI": np.float32(abs(float(a)) * (abs(float(a)) - abs(float(b))))}
+            "FI": np.float32(np.abs(a) * np.float32(np.abs(a) - np.abs(b)))}
 
 
 @pytest.mark.parametrize("device", ["cpu", "cuda"])
@@ -27,10 +27,10 @@ def test_native_float_double_expression_tree(device):
     for name in result:
         expected = np.array([_native_formula(x, y)[name] for x, y in zip(a, b)], np.float32)
         np.testing.assert_array_equal(result[name].cpu().numpy().view(np.uint32), expected.view(np.uint32))
-    # The native FI function promotes fabs operands to double; retain that
-    # result instead of using a superficially equivalent FP32 subtraction.
-    naive = np.abs(a) * (np.abs(a) - np.abs(b))
-    assert not np.array_equal(naive, result["FI"].cpu().numpy())
+    # 固定Conda头/编译器的fabs(float)重载为float。旧double fixture与其不同。
+    promoted = np.array([np.float32(abs(float(x)) * (abs(float(x)) - abs(float(y))))
+                         for x,y in zip(a,b)], np.float32)
+    assert not np.array_equal(promoted, result["FI"].cpu().numpy())
 
 
 def test_summary_rip_zero_ties_and_surface_integrals():

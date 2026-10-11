@@ -1,0 +1,66 @@
+{
+  "backend": "SimpleITK Python complete fixed N4 recipe",
+  "used_native_programs": false,
+  "simpleitk_version": "2.5.6",
+  "itk_version": "5.4",
+  "library_sha256": "c25cd8cf7053c8224c246744e1f1bc9af12db0c95a8221b27e9546cc4511b62c",
+  "fitting_threads": 1,
+  "reconstruction_threads": 4,
+  "actual_fitting_work_units": 1,
+  "actual_fitting_filter_threads": 1,
+  "recipe": {
+    "shrink": [
+      4,
+      4,
+      4
+    ],
+    "iterations": [
+      50,
+      50,
+      50,
+      50
+    ],
+    "convergence_threshold": 0.0,
+    "spline_order": 3,
+    "initial_control_points": [
+      4,
+      4,
+      4
+    ],
+    "histogram_bins": 200,
+    "fwhm": 0.15,
+    "wiener_noise": 0.01,
+    "mask": "all ones",
+    "mask_label": 1
+  },
+  "internal_geometry": {
+    "origin_mm": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "direction": "identity",
+    "spacing_mm": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "current_level": 4,
+  "elapsed_last_level_iterations": 51,
+  "timing_parts_seconds": {
+    "array_prepare_and_shrink": 0.03536159172654152,
+    "fitting": 180.06888774130493,
+    "full_bspline_reconstruction": 0.2624689256772399,
+    "exp_divide_and_array_download": 0.1997664589434862
+  },
+  "total_seconds": 185.31435198429972,
+  "restored_global_threads": 4,
+  "original_global_threads": 4,
+  "array_stage_seconds": 180.5664847176522,
+  "file_io_included": true,
+  "output": "$FNIT_ROOT/runs/n4_fitting_prefix_20261010_v2/prefixes/sub07-fit1/subject/mri/tmp/nu0.mgz",
+  "input_sha256": "3ead516a7a54c9fb952d7f7159fc96ef6a586822cac0e778b10b7e5fe7c22d86",
+  "output_sha256": "f6f5631b45c485eb9a671fc2e1255fff5caacd146fdb2649373f55c6dbae78e6",
+  "implementation_sha256": "c14e8eb46fb408926ddb9a7fe3d35d97bb5201382928e87226f71f8e01041b90"
+}

@@ -15,7 +15,7 @@ python -c "import fnit, torch; print(fnit.__version__, torch.cuda.is_available()
 fnit --help
 ```
 
-环境定义见 [environment.yml](environment.yml)，安装验证见 [Conda 环境报告](validation/environment/README.md)。需要独立编译程序的功能，按对应功能页完成安装。
+环境定义见 [environment.yml](environment.yml)，安装验证见 [Conda 环境报告](validation/environment/README.md)。需要独立编译程序的其他功能，按对应功能页完成安装。recon-all 的 Python 配方使用上述 Python/Numba/SimpleITK/TIFF 依赖，无需配置原版 FreeSurfer 阶段程序；运行前可用 `fnit-verify-recon-all-python --assets-dir /data/fnit_assets --require-nvml` 核验依赖与固定资产，输入与安装验证范围见[独立 Python 安装说明](docs/recon_all/PYTHON_RUNTIME_INSTALL.md)。
 
 `UKBConnectome_pipeline` 的 iFOD2/ACT 追踪使用 FNIT 自己从固定 MRtrix 源码构建的程序。首次追踪会自动构建，也可以提前安装；无需系统 MRtrix 或 Qt：
 

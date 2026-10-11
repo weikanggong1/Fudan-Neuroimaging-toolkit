@@ -1,0 +1,3421 @@
+{
+  "schema": "fnit-static-python-profile-audit-v1",
+  "date": "2026-10-11",
+  "git_commit": "0fdf8da6211afe06f3331153ef36690a392452b1",
+  "source_selection": "Git blobs at frozen commit; working edits excluded",
+  "static_only": true,
+  "whole_completed": false,
+  "os_isolation_verified": false,
+  "runtime_imports_tested": false,
+  "new_benchmark_executed": false,
+  "repository_modified": false,
+  "index_modified": false,
+  "scope": {
+    "backend": "python",
+    "topology_backend": "python-ga",
+    "n4_default": "simpleitk",
+    "device": "explicit cuda:N",
+    "generic_python_compiled_libraries_allowed": true
+  },
+  "finding": "Inspected selected call graph has no reachable original FS/FSL stage executable or prohibited indirect neuroimaging wrapper. Static audit only.",
+  "actual_bugs_found": [],
+  "sources": [
+    {
+      "category": "profile",
+      "path": "src/fnit/recon_all/python_profile.py",
+      "source_sha256": "b1e66c7378e564f01a9053207af98c037534cf43956dd5492f9ba33dcc0f9390",
+      "source_bytes": 4199,
+      "module_line_range": [
+        1,
+        63
+      ],
+      "function_ranges": [
+        {
+          "function": "python_profile_options",
+          "start_line": 7,
+          "end_line": 63
+        }
+      ],
+      "selected_implementation": "固定21项、显式cuda:N/threads>=2",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "orchestrator",
+      "path": "src/fnit/recon_all/native_free.py",
+      "source_sha256": "8b6233aa21984dc3985da0f395c8484f05517b45e03409b22023b4ec3e2dad4a",
+      "source_bytes": 155756,
+      "module_line_range": [
+        1,
+        2493
+      ],
+      "function_ranges": [
+        {
+          "function": "_native_binary",
+          "start_line": 22,
+          "end_line": 30
+        },
+        {
+          "function": "_native_bin_directory",
+          "start_line": 33,
+          "end_line": 39
+        },
+        {
+          "function": "_native_em_register_binary",
+          "start_line": 42,
+          "end_line": 43
+        },
+        {
+          "function": "_native_topology_binary",
+          "start_line": 46,
+          "end_line": 47
+        },
+        {
+          "function": "_native_surface_metrics_binary",
+          "start_line": 50,
+          "end_line": 51
+        },
+        {
+          "function": "_native_inflate_binary",
+          "start_line": 54,
+          "end_line": 55
+        },
+        {
+          "function": "_validate_standard_python_dependencies",
+          "start_line": 58,
+          "end_line": 68
+        },
+        {
+          "function": "_run_native_wm_segment",
+          "start_line": 71,
+          "end_line": 75
+        },
+        {
+          "function": "_run_torch_wm_segment",
+          "start_line": 78,
+          "end_line": 109
+        },
+        {
+          "function": "_run_native_wm_edit",
+          "start_line": 112,
+          "end_line": 118
+        },
+        {
+          "function": "_run_torch_wm_edit",
+          "start_line": 121,
+          "end_line": 135
+        },
+        {
+          "function": "_run_python_wm_edit",
+          "start_line": 138,
+          "end_line": 153
+        },
+        {
+          "function": "_folding_atlas",
+          "start_line": 156,
+          "end_line": 161
+        },
+        {
+          "function": "_run_native_em_register",
+          "start_line": 164,
+          "end_line": 232
+        },
+        {
+          "function": "_run_native_topology",
+          "start_line": 235,
+          "end_line": 242
+        },
+        {
+          "function": "_run_native_sphere_step",
+          "start_line": 245,
+          "end_line": 256
+        },
+        {
+          "function": "_run_and_publish_genetic_topology",
+          "start_line": 259,
+          "end_line": 353
+        },
+        {
+          "function": "_prepare_native_topology",
+          "start_line": 356,
+          "end_line": 459
+        },
+        {
+          "function": "_run_accurate_sphere_pair",
+          "start_line": 462,
+          "end_line": 511
+        },
+        {
+          "function": "_run_surface_metrics",
+          "start_line": 514,
+          "end_line": 554
+        },
+        {
+          "function": "_run_native_surface_metrics",
+          "start_line": 557,
+          "end_line": 583
+        },
+        {
+          "function": "_run_avg_curv",
+          "start_line": 586,
+          "end_line": 611
+        },
+        {
+          "function": "_run_curvature_stats",
+          "start_line": 614,
+          "end_line": 641
+        },
+        {
+          "function": "_run_defects_volume",
+          "start_line": 644,
+          "end_line": 675
+        },
+        {
+          "function": "_run_white_mri_chain",
+          "start_line": 678,
+          "end_line": 711
+        },
+        {
+          "function": "_place_preaparc_and_smooth",
+          "start_line": 714,
+          "end_line": 730
+        },
+        {
+          "function": "_run_native_pial",
+          "start_line": 733,
+          "end_line": 767
+        },
+        {
+          "function": "_write_principal_curvature_maps",
+          "start_line": 770,
+          "end_line": 787
+        },
+        {
+          "function": "_surface_pair",
+          "start_line": 790,
+          "end_line": 876
+        },
+        {
+          "function": "_finish_python_final_white",
+          "start_line": 879,
+          "end_line": 891
+        },
+        {
+          "function": "_finish_python_pial",
+          "start_line": 894,
+          "end_line": 907
+        },
+        {
+          "function": "_finish_cortical_surface",
+          "start_line": 910,
+          "end_line": 941
+        },
+        {
+          "function": "_finish_cortical_metrics",
+          "start_line": 944,
+          "end_line": 958
+        },
+        {
+          "function": "_project_parcels",
+          "start_line": 961,
+          "end_line": 970
+        },
+        {
+          "function": "_project_exvivo_annotations",
+          "start_line": 973,
+          "end_line": 1002
+        },
+        {
+          "function": "_project_wmparc",
+          "start_line": 1005,
+          "end_line": 1010
+        },
+        {
+          "function": "_segment_callosum",
+          "start_line": 1013,
+          "end_line": 1023
+        },
+        {
+          "function": "_validate_meshes",
+          "start_line": 1026,
+          "end_line": 1059
+        },
+        {
+          "function": "_write_hemisphere_stats",
+          "start_line": 1062,
+          "end_line": 1080
+        },
+        {
+          "function": "_hemisphere_operation",
+          "start_line": 1084,
+          "end_line": 1166
+        },
+        {
+          "function": "_validate_surface_placement_backend",
+          "start_line": 1169,
+          "end_line": 1172
+        },
+        {
+          "function": "_validate_remesh_scalar_storage",
+          "start_line": 1175,
+          "end_line": 1183
+        },
+        {
+          "function": "_validate_annotation_gibbs_backend",
+          "start_line": 1186,
+          "end_line": 1195
+        },
+        {
+          "function": "_normalization_controls_options",
+          "start_line": 1198,
+          "end_line": 1213
+        },
+        {
+          "function": "_normalization_initial_bias_options",
+          "start_line": 1216,
+          "end_line": 1230
+        },
+        {
+          "function": "_validate_inflate_backend",
+          "start_line": 1233,
+          "end_line": 1247
+        },
+        {
+          "function": "_validate_mni_execution",
+          "start_line": 1250,
+          "end_line": 1267
+        },
+        {
+          "function": "_validate_sphere_finish_backend",
+          "start_line": 1270,
+          "end_line": 1283
+        },
+        {
+          "function": "_validate_input_execution",
+          "start_line": 1286,
+          "end_line": 1306
+        },
+        {
+          "function": "_complete_output_validation",
+          "start_line": 1309,
+          "end_line": 1334
+        },
+        {
+          "function": "_run_recon_all_python",
+          "start_line": 1337,
+          "end_line": 2145
+        },
+        {
+          "function": "run_recon_all_python",
+          "start_line": 2148,
+          "end_line": 2396
+        },
+        {
+          "function": "main",
+          "start_line": 2399,
+          "end_line": 2489
+        }
+      ],
+      "selected_implementation": "解析和复核配方、完整调度及受guard的原生参考分支",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "selection",
+      "path": "src/fnit/recon_all/native_runtime_selection.py",
+      "source_sha256": "dccff7899fa919d486081d3ec351b858ea552da8ffa564a41e8111cc318f2f76",
+      "source_bytes": 4334,
+      "module_line_range": [
+        1,
+        71
+      ],
+      "function_ranges": [
+        {
+          "function": "select_native_optimizations",
+          "start_line": 10,
+          "end_line": 71
+        }
+      ],
+      "selected_implementation": "mode=torch/include_white=False关闭原版能力查询",
+      "device": "none",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "input",
+      "path": "src/fnit/recon_all/input_talairach_chain.py",
+      "source_sha256": "ab0a02eca9a738cf9c43e0cbcf179165fe187529bbc34ad1929b619fd60bc8d3",
+      "source_bytes": 7648,
+      "module_line_range": [
+        1,
+        165
+      ],
+      "function_ranges": [
+        {
+          "function": "write_voxel_lta_from_ras",
+          "start_line": 23,
+          "end_line": 64
+        },
+        {
+          "function": "save_synthstrip_mgh",
+          "start_line": 67,
+          "end_line": 91
+        },
+        {
+          "function": "run_input_talairach_chain",
+          "start_line": 94,
+          "end_line": 147
+        },
+        {
+          "function": "main",
+          "start_line": 150,
+          "end_line": 161
+        }
+      ],
+      "selected_implementation": "conform+SynthStrip+Talairach",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "conform",
+      "path": "src/fnit/recon_all/conform_gpu.py",
+      "source_sha256": "2f57ea6a64692dbb483e6cb9ca9820a6f71d01fcfd60ebc06f488adcdc7a875d",
+      "source_bytes": 10151,
+      "module_line_range": [
+        1,
+        216
+      ],
+      "function_ranges": [
+        {
+          "function": "_uchar_from_float",
+          "start_line": 21,
+          "end_line": 40
+        },
+        {
+          "function": "_coronal_affine",
+          "start_line": 43,
+          "end_line": 49
+        },
+        {
+          "function": "_source_affine",
+          "start_line": 52,
+          "end_line": 63
+        },
+        {
+          "function": "_multiply32",
+          "start_line": 66,
+          "end_line": 72
+        },
+        {
+          "function": "_det3",
+          "start_line": 75,
+          "end_line": 80
+        },
+        {
+          "function": "_inverse32",
+          "start_line": 83,
+          "end_line": 93
+        },
+        {
+          "function": "_resampled_header",
+          "start_line": 96,
+          "end_line": 115
+        },
+        {
+          "function": "_sample_trilinear",
+          "start_line": 118,
+          "end_line": 142
+        },
+        {
+          "function": "conform_volume",
+          "start_line": 145,
+          "end_line": 181
+        },
+        {
+          "function": "add_xform_to_header",
+          "start_line": 184,
+          "end_line": 199
+        },
+        {
+          "function": "main",
+          "start_line": 202,
+          "end_line": 212
+        }
+      ],
+      "selected_implementation": "自有缩放/采样/量化",
+      "device": "cuda:N",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "N4",
+      "path": "src/fnit/recon_all/input_n4_chain.py",
+      "source_sha256": "a5a27caca93eb7b186827f43429f07a1c404f1170054f5dfb039e232fa6d67d8",
+      "source_bytes": 11475,
+      "module_line_range": [
+        1,
+        203
+      ],
+      "function_ranges": [
+        {
+          "function": "validate_n4_execution",
+          "start_line": 15,
+          "end_line": 33
+        },
+        {
+          "function": "require_n4_runtime_dependencies",
+          "start_line": 36,
+          "end_line": 50
+        },
+        {
+          "function": "run_n4_stage",
+          "start_line": 53,
+          "end_line": 99
+        },
+        {
+          "function": "run_input_n4_chain",
+          "start_line": 102,
+          "end_line": 160
+        },
+        {
+          "function": "main",
+          "start_line": 163,
+          "end_line": 199
+        }
+      ],
+      "selected_implementation": "simpleitk默认，显式torch可exec",
+      "device": "CPU(default)/cuda:N(torch)",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "N4",
+      "path": "src/fnit/recon_all/n4_itk.py",
+      "source_sha256": "4756ac012390442d49d7a1b8537c21eaf0759793844a7be07c814ad04e83dbf4",
+      "source_bytes": 5541,
+      "module_line_range": [
+        1,
+        107
+      ],
+      "function_ranges": [
+        {
+          "function": "_to_uchar",
+          "start_line": 18,
+          "end_line": 20
+        },
+        {
+          "function": "correct_volume",
+          "start_line": 23,
+          "end_line": 90
+        },
+        {
+          "function": "main",
+          "start_line": 93,
+          "end_line": 103
+        }
+      ],
+      "selected_implementation": "simpleitk分支不执行native程序",
+      "device": "CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "N4",
+      "path": "src/fnit/recon_all/n4_simpleitk.py",
+      "source_sha256": "06435c4277a0a64a535646d76d1240482ed768199188b072d4716f7cc0b681e0",
+      "source_bytes": 11858,
+      "module_line_range": [
+        1,
+        213
+      ],
+      "function_ranges": [
+        {
+          "function": "_load_simpleitk",
+          "start_line": 23,
+          "end_line": 47
+        },
+        {
+          "function": "require_simpleitk_runtime",
+          "start_line": 50,
+          "end_line": 66
+        },
+        {
+          "function": "correct_array",
+          "start_line": 69,
+          "end_line": 158
+        },
+        {
+          "function": "correct_volume",
+          "start_line": 161,
+          "end_line": 198
+        },
+        {
+          "function": "main",
+          "start_line": 201,
+          "end_line": 209
+        }
+      ],
+      "selected_implementation": "通用SimpleITK完整N4，恢复ITK线程",
+      "device": "CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "N4-optional",
+      "path": "src/fnit/recon_all/n4_torch_worker.py",
+      "source_sha256": "b58342d9e08f06aa19c29222d94ef655b6fbdb38871b1c10539dbdfdf42f77f1",
+      "source_bytes": 7921,
+      "module_line_range": [
+        1,
+        135
+      ],
+      "function_ranges": [
+        {
+          "function": "_sha",
+          "start_line": 20,
+          "end_line": 24
+        },
+        {
+          "function": "_validate",
+          "start_line": 27,
+          "end_line": 37
+        },
+        {
+          "function": "run_isolated_n4",
+          "start_line": 40,
+          "end_line": 79
+        },
+        {
+          "function": "run_worker",
+          "start_line": 82,
+          "end_line": 118
+        },
+        {
+          "function": "main",
+          "start_line": 121,
+          "end_line": 132
+        }
+      ],
+      "selected_implementation": "sys.executable自有Torch N4 worker",
+      "device": "cuda:N",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "GCA",
+      "path": "src/fnit/recon_all/gca_torch_worker.py",
+      "source_sha256": "823dc7be2ed9fe2b149ade62d7e32850511358b140916c045bf6d2e453dbdb87",
+      "source_bytes": 9970,
+      "module_line_range": [
+        1,
+        183
+      ],
+      "function_ranges": [
+        {
+          "function": "_sha256",
+          "start_line": 24,
+          "end_line": 29
+        },
+        {
+          "function": "run_isolated_registration",
+          "start_line": 32,
+          "end_line": 73
+        },
+        {
+          "function": "run_worker",
+          "start_line": 76,
+          "end_line": 163
+        },
+        {
+          "function": "main",
+          "start_line": 166,
+          "end_line": 179
+        }
+      ],
+      "selected_implementation": "sys.executable、Torch评分+自有EM",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "GCA",
+      "path": "src/fnit/recon_all/mri_em_register_python.py",
+      "source_sha256": "0e3c39684314f84b47a158266550f35baaf1ef67e5c7bb36df8f145aed772aef",
+      "source_bytes": 5619,
+      "module_line_range": [
+        1,
+        119
+      ],
+      "function_ranges": [
+        {
+          "function": "register_t1",
+          "start_line": 22,
+          "end_line": 95
+        },
+        {
+          "function": "main",
+          "start_line": 98,
+          "end_line": 115
+        }
+      ],
+      "selected_implementation": "完整自有注册/写LTA",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "GCA",
+      "path": "src/fnit/recon_all/mri_em_register_score_gpu.py",
+      "source_sha256": "d6c9092cbad86c147ecd8e1c2443132eeb7904b5de5b5fab23e284dba14de719",
+      "source_bytes": 10737,
+      "module_line_range": [
+        1,
+        188
+      ],
+      "function_ranges": [
+        {
+          "function": "vnl_affine_inverse_tensor",
+          "start_line": 20,
+          "end_line": 47
+        },
+        {
+          "function": "_density_log_terms",
+          "start_line": 51,
+          "end_line": 58
+        },
+        {
+          "function": "GCASearchScorer.__init__",
+          "start_line": 78,
+          "end_line": 118
+        },
+        {
+          "function": "GCASearchScorer.score_many",
+          "start_line": 121,
+          "end_line": 182
+        },
+        {
+          "function": "GCASearchScorer.__call__",
+          "start_line": 184,
+          "end_line": 188
+        }
+      ],
+      "selected_implementation": "自有Torch评分",
+      "device": "cuda:N",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "normalization",
+      "path": "src/fnit/recon_all/ca_normalize_python.py",
+      "source_sha256": "167be9d72496b7279b98e52b8f0d6c0808d2c09d02df24af1fed0fd331100b9b",
+      "source_bytes": 25723,
+      "module_line_range": [
+        1,
+        548
+      ],
+      "function_ranges": [
+        {
+          "function": "read_voxel_lta",
+          "start_line": 31,
+          "end_line": 40
+        },
+        {
+          "function": "masked_input",
+          "start_line": 43,
+          "end_line": 58
+        },
+        {
+          "function": "atlas_samples",
+          "start_line": 61,
+          "end_line": 83
+        },
+        {
+          "function": "prior_to_source_coordinates",
+          "start_line": 86,
+          "end_line": 137
+        },
+        {
+          "function": "scale_masked_input",
+          "start_line": 140,
+          "end_line": 144
+        },
+        {
+          "function": "_atlas_label_fields",
+          "start_line": 147,
+          "end_line": 158
+        },
+        {
+          "function": "_node_label_means",
+          "start_line": 161,
+          "end_line": 167
+        },
+        {
+          "function": "_source_node_variance",
+          "start_line": 170,
+          "end_line": 177
+        },
+        {
+          "function": "_prefilter_controls",
+          "start_line": 180,
+          "end_line": 192
+        },
+        {
+          "function": "_uniform_controls",
+          "start_line": 195,
+          "end_line": 219
+        },
+        {
+          "function": "_propagate_short_bias",
+          "start_line": 223,
+          "end_line": 280
+        },
+        {
+          "function": "_gaussian_kernel",
+          "start_line": 283,
+          "end_line": 302
+        },
+        {
+          "function": "_convolve_short",
+          "start_line": 306,
+          "end_line": 333
+        },
+        {
+          "function": "_smooth_short",
+          "start_line": 336,
+          "end_line": 340
+        },
+        {
+          "function": "_smooth_histogram",
+          "start_line": 343,
+          "end_line": 356
+        },
+        {
+          "function": "_control_intensity_limits",
+          "start_line": 359,
+          "end_line": 390
+        },
+        {
+          "function": "control_frame",
+          "start_line": 393,
+          "end_line": 459
+        },
+        {
+          "function": "bias_from_control_frame",
+          "start_line": 462,
+          "end_line": 493
+        },
+        {
+          "function": "normalize_from_control_frame",
+          "start_line": 496,
+          "end_line": 505
+        },
+        {
+          "function": "run_ca_normalize",
+          "start_line": 508,
+          "end_line": 548
+        }
+      ],
+      "selected_implementation": "自产GCA归一化",
+      "device": "CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "normalization",
+      "path": "src/fnit/recon_all/normalization/__init__.py",
+      "source_sha256": "a3dbc39eb024387c4a73b687fe59784893b59222c678d82a74576be6fc120ff1",
+      "source_bytes": 203,
+      "module_line_range": [
+        1,
+        6
+      ],
+      "function_ranges": [],
+      "selected_implementation": "公开接口导出",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "normalization",
+      "path": "src/fnit/recon_all/normalization/pipeline.py",
+      "source_sha256": "605b68b844929c852d2978fb38050cc56dcd18ff997742cb852946dfe12860ef",
+      "source_bytes": 8273,
+      "module_line_range": [
+        1,
+        157
+      ],
+      "function_ranges": [
+        {
+          "function": "normalize_t1",
+          "start_line": 23,
+          "end_line": 138
+        },
+        {
+          "function": "main",
+          "start_line": 141,
+          "end_line": 153
+        }
+      ],
+      "selected_implementation": "自有第一轮归一化，Torch controls",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "normalization",
+      "path": "src/fnit/recon_all/normalization/aseg_pipeline.py",
+      "source_sha256": "bb4175e69e71ec14e06bad7895d85152632438192c642f9c7027438a3e11832c",
+      "source_bytes": 8652,
+      "module_line_range": [
+        1,
+        153
+      ],
+      "function_ranges": [
+        {
+          "function": "_complete_from_initial",
+          "start_line": 25,
+          "end_line": 74
+        },
+        {
+          "function": "normalize_t1_aseg",
+          "start_line": 77,
+          "end_line": 132
+        },
+        {
+          "function": "main",
+          "start_line": 135,
+          "end_line": 149
+        }
+      ],
+      "selected_implementation": "自有第二轮归一化，Torch controls/initial bias",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "WM",
+      "path": "src/fnit/recon_all/wm_torch_worker.py",
+      "source_sha256": "2ee098c485c62cc9a848df27a3c8489dc5961897a1477a4ba58edd7de66dd42d",
+      "source_bytes": 9696,
+      "module_line_range": [
+        1,
+        174
+      ],
+      "function_ranges": [
+        {
+          "function": "_sha256",
+          "start_line": 20,
+          "end_line": 25
+        },
+        {
+          "function": "_validate",
+          "start_line": 28,
+          "end_line": 40
+        },
+        {
+          "function": "run_isolated_segmentation",
+          "start_line": 43,
+          "end_line": 88
+        },
+        {
+          "function": "run_worker",
+          "start_line": 91,
+          "end_line": 153
+        },
+        {
+          "function": "main",
+          "start_line": 156,
+          "end_line": 170
+        }
+      ],
+      "selected_implementation": "sys.executable完整自有WM exec",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "WM",
+      "path": "src/fnit/recon_all/mri_segment.py",
+      "source_sha256": "abee3136f2c88409746b817a845ad48afbf326005f242f4eabc123c6544613bb",
+      "source_bytes": 48564,
+      "module_line_range": [
+        1,
+        1003
+      ],
+      "function_ranges": [
+        {
+          "function": "intensity_segmentation",
+          "start_line": 30,
+          "end_line": 41
+        },
+        {
+          "function": "_histogram_kernel",
+          "start_line": 44,
+          "end_line": 59
+        },
+        {
+          "function": "_smooth_histogram",
+          "start_line": 62,
+          "end_line": 66
+        },
+        {
+          "function": "_last_peak",
+          "start_line": 69,
+          "end_line": 83
+        },
+        {
+          "function": "_first_valley",
+          "start_line": 86,
+          "end_line": 97
+        },
+        {
+          "function": "histogram_segmentation",
+          "start_line": 100,
+          "end_line": 139
+        },
+        {
+          "function": "detect_intensity_thresholds",
+          "start_line": 142,
+          "end_line": 163
+        },
+        {
+          "function": "_scale_to_voxel",
+          "start_line": 180,
+          "end_line": 183
+        },
+        {
+          "function": "_plane_bases",
+          "start_line": 186,
+          "end_line": 199
+        },
+        {
+          "function": "_plane_positions",
+          "start_line": 202,
+          "end_line": 206
+        },
+        {
+          "function": "_select_normals",
+          "start_line": 209,
+          "end_line": 226
+        },
+        {
+          "function": "_sample_trilinear",
+          "start_line": 229,
+          "end_line": 248
+        },
+        {
+          "function": "median_curve_center",
+          "start_line": 251,
+          "end_line": 277
+        },
+        {
+          "function": "median_curve_segmentation",
+          "start_line": 280,
+          "end_line": 349
+        },
+        {
+          "function": "_border_labels",
+          "start_line": 352,
+          "end_line": 358
+        },
+        {
+          "function": "_summed_volume",
+          "start_line": 361,
+          "end_line": 363
+        },
+        {
+          "function": "_box_sum",
+          "start_line": 366,
+          "end_line": 374
+        },
+        {
+          "function": "_border_probabilities",
+          "start_line": 377,
+          "end_line": 403
+        },
+        {
+          "function": "reclassify_border",
+          "start_line": 406,
+          "end_line": 438
+        },
+        {
+          "function": "mask_white_labels",
+          "start_line": 441,
+          "end_line": 446
+        },
+        {
+          "function": "recover_bright_white",
+          "start_line": 449,
+          "end_line": 462
+        },
+        {
+          "function": "remove_wrong_direction",
+          "start_line": 465,
+          "end_line": 497
+        },
+        {
+          "function": "remove_1d_structures",
+          "start_line": 500,
+          "end_line": 535
+        },
+        {
+          "function": "remove_bright_nonwhite",
+          "start_line": 538,
+          "end_line": 567
+        },
+        {
+          "function": "_diagonal_present",
+          "start_line": 571,
+          "end_line": 588
+        },
+        {
+          "function": "_filter_diagonal_scan",
+          "start_line": 592,
+          "end_line": 630
+        },
+        {
+          "function": "filter_diagonal_morphology",
+          "start_line": 633,
+          "end_line": 639
+        },
+        {
+          "function": "_closed_strand_volume",
+          "start_line": 642,
+          "end_line": 649
+        },
+        {
+          "function": "thin_strand_candidates",
+          "start_line": 652,
+          "end_line": 668
+        },
+        {
+          "function": "_strand_segments",
+          "start_line": 671,
+          "end_line": 702
+        },
+        {
+          "function": "_dilate_strand_segments",
+          "start_line": 705,
+          "end_line": 723
+        },
+        {
+          "function": "_thicken_strands_core",
+          "start_line": 726,
+          "end_line": 804
+        },
+        {
+          "function": "_fill_strand_neighborhood",
+          "start_line": 807,
+          "end_line": 861
+        },
+        {
+          "function": "_fill_planar_holes",
+          "start_line": 864,
+          "end_line": 902
+        },
+        {
+          "function": "segment_white_matter",
+          "start_line": 905,
+          "end_line": 966
+        },
+        {
+          "function": "segment_white_matter_mgz",
+          "start_line": 969,
+          "end_line": 1003
+        }
+      ],
+      "selected_implementation": "Torch直方图/缓存planar+Numba有序反馈",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "WM-edit",
+      "path": "src/fnit/recon_all/edit_wm_aseg_core_python.py",
+      "source_sha256": "206511ff9b524eb10fb3219a81a85ae7b8a826d439df2b8d2ccb7f8d3b61a049",
+      "source_bytes": 31199,
+      "module_line_range": [
+        1,
+        668
+      ],
+      "function_ranges": [
+        {
+          "function": "_clamp",
+          "start_line": 13,
+          "end_line": 14
+        },
+        {
+          "function": "_distance_to_label",
+          "start_line": 18,
+          "end_line": 26
+        },
+        {
+          "function": "_superior_edge",
+          "start_line": 30,
+          "end_line": 35
+        },
+        {
+          "function": "_anterior_edge",
+          "start_line": 39,
+          "end_line": 44
+        },
+        {
+          "function": "_spackle",
+          "start_line": 48,
+          "end_line": 77
+        },
+        {
+          "function": "spackle_wm_superior_to_mtl",
+          "start_line": 80,
+          "end_line": 86
+        },
+        {
+          "function": "_neighbor",
+          "start_line": 90,
+          "end_line": 96
+        },
+        {
+          "function": "_unknown_nbhd",
+          "start_line": 100,
+          "end_line": 110
+        },
+        {
+          "function": "_distance_to_wm",
+          "start_line": 114,
+          "end_line": 122
+        },
+        {
+          "function": "_medial_hippo",
+          "start_line": 126,
+          "end_line": 136
+        },
+        {
+          "function": "_set_filled",
+          "start_line": 140,
+          "end_line": 142
+        },
+        {
+          "function": "_edit_until_propagation",
+          "start_line": 146,
+          "end_line": 258
+        },
+        {
+          "function": "_propagate_from_filled",
+          "start_line": 262,
+          "end_line": 284
+        },
+        {
+          "function": "edit_until_propagation",
+          "start_line": 287,
+          "end_line": 293
+        },
+        {
+          "function": "_add_aseg_wm_below_hippocampus",
+          "start_line": 297,
+          "end_line": 317
+        },
+        {
+          "function": "_nonfilled_neighbors",
+          "start_line": 321,
+          "end_line": 329
+        },
+        {
+          "function": "_anterior_edge_amygdala",
+          "start_line": 333,
+          "end_line": 335
+        },
+        {
+          "function": "_post_spackle_early",
+          "start_line": 339,
+          "end_line": 425
+        },
+        {
+          "function": "_post_spackle_late",
+          "start_line": 429,
+          "end_line": 493
+        },
+        {
+          "function": "edit_segmentation_no_fill",
+          "start_line": 496,
+          "end_line": 503
+        },
+        {
+          "function": "edit_segmentation_profile",
+          "start_line": 506,
+          "end_line": 524
+        },
+        {
+          "function": "remove_paths_to_cortex",
+          "start_line": 528,
+          "end_line": 544
+        },
+        {
+          "function": "edit_wm_aseg_profile",
+          "start_line": 547,
+          "end_line": 588
+        },
+        {
+          "function": "write_wm_asegedit_profile",
+          "start_line": 591,
+          "end_line": 624
+        },
+        {
+          "function": "edit_wm_aseg_core_no_fill",
+          "start_line": 627,
+          "end_line": 636
+        },
+        {
+          "function": "apply_wm_asegedit_fixed",
+          "start_line": 639,
+          "end_line": 646
+        },
+        {
+          "function": "write_wm_asegedit_fixed",
+          "start_line": 649,
+          "end_line": 655
+        },
+        {
+          "function": "main",
+          "start_line": 658,
+          "end_line": 664
+        }
+      ],
+      "selected_implementation": "完整Python/Numba editing",
+      "device": "CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "fill",
+      "path": "src/fnit/recon_all/fill_cutting_plane_python.py",
+      "source_sha256": "5bc61b2e68d6ed47dadc0dafdc488c61807435b9e28dc12c48d5e7dbf3981a04",
+      "source_bytes": 11207,
+      "module_line_range": [
+        1,
+        217
+      ],
+      "function_ranges": [
+        {
+          "function": "read_vox_to_tal_lta",
+          "start_line": 21,
+          "end_line": 35
+        },
+        {
+          "function": "compute_cc_cut_mask",
+          "start_line": 38,
+          "end_line": 82
+        },
+        {
+          "function": "_colortable_tag",
+          "start_line": 85,
+          "end_line": 104
+        },
+        {
+          "function": "save_filled_mgz",
+          "start_line": 107,
+          "end_line": 148
+        },
+        {
+          "function": "fill_mgz",
+          "start_line": 151,
+          "end_line": 195
+        },
+        {
+          "function": "main",
+          "start_line": 198,
+          "end_line": 213
+        }
+      ],
+      "selected_implementation": "自有切割/标签/Numba marching",
+      "device": "CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "GA",
+      "path": "src/fnit/recon_all/topology_genetic_files.py",
+      "source_sha256": "8c0d3ad057f142bd46a0fe89f9fd87bb780680a5b63bb85ab7833b06ab65fb6b",
+      "source_bytes": 28438,
+      "module_line_range": [
+        1,
+        442
+      ],
+      "function_ranges": [
+        {
+          "function": "_sha256",
+          "start_line": 24,
+          "end_line": 29
+        },
+        {
+          "function": "_json_value",
+          "start_line": 32,
+          "end_line": 46
+        },
+        {
+          "function": "_write_json",
+          "start_line": 49,
+          "end_line": 51
+        },
+        {
+          "function": "_loaded_module_hashes",
+          "start_line": 54,
+          "end_line": 59
+        },
+        {
+          "function": "_geometry_valid",
+          "start_line": 62,
+          "end_line": 82
+        },
+        {
+          "function": "_wm_geometry",
+          "start_line": 85,
+          "end_line": 100
+        },
+        {
+          "function": "_same_geometry",
+          "start_line": 103,
+          "end_line": 111
+        },
+        {
+          "function": "_read_surface",
+          "start_line": 114,
+          "end_line": 122
+        },
+        {
+          "function": "_checked_core_result",
+          "start_line": 125,
+          "end_line": 162
+        },
+        {
+          "function": "_final_quality",
+          "start_line": 165,
+          "end_line": 200
+        },
+        {
+          "function": "_footer_sha256",
+          "start_line": 203,
+          "end_line": 206
+        },
+        {
+          "function": "run_genetic_topology_files",
+          "start_line": 209,
+          "end_line": 414
+        },
+        {
+          "function": "main",
+          "start_line": 417,
+          "end_line": 438
+        }
+      ],
+      "selected_implementation": "完整自产GA文件接口/发布门",
+      "device": "CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "GA",
+      "path": "src/fnit/recon_all/topology_genetic_repair.py",
+      "source_sha256": "62c1fe30775bad0a31f045fff6bb4f6b12ed285aed095a8b29d8e201b420177d",
+      "source_bytes": 16466,
+      "module_line_range": [
+        1,
+        224
+      ],
+      "function_ranges": [
+        {
+          "function": "_next_inputs",
+          "start_line": 20,
+          "end_line": 23
+        },
+        {
+          "function": "_ordered_csr",
+          "start_line": 26,
+          "end_line": 43
+        },
+        {
+          "function": "_quality",
+          "start_line": 46,
+          "end_line": 79
+        },
+        {
+          "function": "repair_genetic_topology",
+          "start_line": 82,
+          "end_line": 224
+        }
+      ],
+      "selected_implementation": "完整自有有序GA",
+      "device": "CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "GA",
+      "path": "src/fnit/recon_all/topology_genetic_search.py",
+      "source_sha256": "a67e097912e1830503e90d44f985aea080b46d56c1af915a5a575f6be461c529",
+      "source_bytes": 14499,
+      "module_line_range": [
+        1,
+        230
+      ],
+      "function_ranges": [
+        {
+          "function": "TopologyRandomStream.__init__",
+          "start_line": 27,
+          "end_line": 34
+        },
+        {
+          "function": "TopologyRandomStream.__call__",
+          "start_line": 36,
+          "end_line": 48
+        },
+        {
+          "function": "source_population_limits",
+          "start_line": 51,
+          "end_line": 72
+        },
+        {
+          "function": "_selection_groups",
+          "start_line": 75,
+          "end_line": 91
+        },
+        {
+          "function": "prepare_genetic_defect_evaluator",
+          "start_line": 94,
+          "end_line": 165
+        },
+        {
+          "function": "search_and_finalize_defect",
+          "start_line": 168,
+          "end_line": 230
+        }
+      ],
+      "selected_implementation": "种群/随机流/候选反馈",
+      "device": "CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "GA",
+      "path": "src/fnit/recon_all/topology_candidate_cycle.py",
+      "source_sha256": "044ae6d1a80da6e8961701c65218874fffef90e0646f266a61320e0fa014abd4",
+      "source_bytes": 15393,
+      "module_line_range": [
+        1,
+        247
+      ],
+      "function_ranges": [
+        {
+          "function": "_one_ring_state",
+          "start_line": 17,
+          "end_line": 43
+        },
+        {
+          "function": "_candidate_state",
+          "start_line": 46,
+          "end_line": 49
+        },
+        {
+          "function": "_candidate_state_validated",
+          "start_line": 52,
+          "end_line": 97
+        },
+        {
+          "function": "_publish_candidate_attributes",
+          "start_line": 100,
+          "end_line": 128
+        },
+        {
+          "function": "materialize_candidate_state",
+          "start_line": 131,
+          "end_line": 146
+        },
+        {
+          "function": "evaluate_candidate_cycle",
+          "start_line": 149,
+          "end_line": 209
+        },
+        {
+          "function": "CandidateCycleEvaluator.__init__",
+          "start_line": 222,
+          "end_line": 226
+        },
+        {
+          "function": "CandidateCycleEvaluator.__call__",
+          "start_line": 228,
+          "end_line": 247
+        }
+      ],
+      "selected_implementation": "自有完整候选闭环",
+      "device": "CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "GA",
+      "path": "src/fnit/recon_all/topology_candidate_pipeline.py",
+      "source_sha256": "027f9d729c586a52dda8fb024e3fd50ef90f609b5de781e236e8b816b31c9f03",
+      "source_bytes": 13367,
+      "module_line_range": [
+        1,
+        183
+      ],
+      "function_ranges": [
+        {
+          "function": "_indices",
+          "start_line": 18,
+          "end_line": 22
+        },
+        {
+          "function": "candidate_face_check",
+          "start_line": 25,
+          "end_line": 63
+        },
+        {
+          "function": "_state",
+          "start_line": 66,
+          "end_line": 86
+        },
+        {
+          "function": "evaluate_candidate",
+          "start_line": 89,
+          "end_line": 183
+        }
+      ],
+      "selected_implementation": "完整候选评分链",
+      "device": "CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "remesh",
+      "path": "src/fnit/recon_all/mris_remesh_python.py",
+      "source_sha256": "17288a05177fd09fa3e757b9c84cc56466e3e2c9f6acaf6998aba1d32fa83706",
+      "source_bytes": 27093,
+      "module_line_range": [
+        1,
+        634
+      ],
+      "function_ranges": [
+        {
+          "function": "edge_key",
+          "start_line": 18,
+          "end_line": 19
+        },
+        {
+          "function": "edge_length",
+          "start_line": 22,
+          "end_line": 27
+        },
+        {
+          "function": "_topology_arrays",
+          "start_line": 31,
+          "end_line": 63
+        },
+        {
+          "function": "initial_topology",
+          "start_line": 66,
+          "end_line": 74
+        },
+        {
+          "function": "_python_topology",
+          "start_line": 77,
+          "end_line": 83
+        },
+        {
+          "function": "_vertex_topology_arrays",
+          "start_line": 87,
+          "end_line": 135
+        },
+        {
+          "function": "_remesh_face_normals",
+          "start_line": 139,
+          "end_line": 152
+        },
+        {
+          "function": "split_edge",
+          "start_line": 155,
+          "end_line": 201
+        },
+        {
+          "function": "split_pass",
+          "start_line": 204,
+          "end_line": 230
+        },
+        {
+          "function": "cross",
+          "start_line": 233,
+          "end_line": 236
+        },
+        {
+          "function": "norm",
+          "start_line": 239,
+          "end_line": 240
+        },
+        {
+          "function": "subtract",
+          "start_line": 243,
+          "end_line": 244
+        },
+        {
+          "function": "Mesh.__init__",
+          "start_line": 248,
+          "end_line": 263
+        },
+        {
+          "function": "Mesh.rebuild",
+          "start_line": 265,
+          "end_line": 278
+        },
+        {
+          "function": "Mesh.face_normals",
+          "start_line": 280,
+          "end_line": 282
+        },
+        {
+          "function": "Mesh.remove_edge",
+          "start_line": 284,
+          "end_line": 289
+        },
+        {
+          "function": "Mesh.contract_in_face",
+          "start_line": 291,
+          "end_line": 311
+        },
+        {
+          "function": "Mesh.remove_face_from_vertex",
+          "start_line": 313,
+          "end_line": 323
+        },
+        {
+          "function": "Mesh.can_contract",
+          "start_line": 325,
+          "end_line": 360
+        },
+        {
+          "function": "Mesh.contract",
+          "start_line": 362,
+          "end_line": 396
+        },
+        {
+          "function": "Mesh.compact",
+          "start_line": 398,
+          "end_line": 420
+        },
+        {
+          "function": "Mesh.collapse_pass",
+          "start_line": 422,
+          "end_line": 453
+        },
+        {
+          "function": "_smooth_ordered",
+          "start_line": 457,
+          "end_line": 531
+        },
+        {
+          "function": "smooth",
+          "start_line": 534,
+          "end_line": 558
+        },
+        {
+          "function": "remesh_geometry",
+          "start_line": 562,
+          "end_line": 595
+        },
+        {
+          "function": "_footer_offset",
+          "start_line": 598,
+          "end_line": 605
+        },
+        {
+          "function": "_copy_footer",
+          "start_line": 608,
+          "end_line": 615
+        },
+        {
+          "function": "remesh_surface",
+          "start_line": 618,
+          "end_line": 634
+        }
+      ],
+      "selected_implementation": "完整自有remesh",
+      "device": "CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "inflate",
+      "path": "src/fnit/recon_all/inflate_standard_run.py",
+      "source_sha256": "7eb0100a9b2e2fc8dd1a6e1da66ee37da0c29c71ec2cd2b207ef74687535dfb4",
+      "source_bytes": 9412,
+      "module_line_range": [
+        1,
+        155
+      ],
+      "function_ranges": [
+        {
+          "function": "run_standard_inflate",
+          "start_line": 21,
+          "end_line": 107
+        },
+        {
+          "function": "main",
+          "start_line": 110,
+          "end_line": 151
+        }
+      ],
+      "selected_implementation": "backend=torch完整inflate/sulc",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "inflate",
+      "path": "src/fnit/recon_all/inflate_torch.py",
+      "source_sha256": "a782b5ec493d4c390131e8882b0b07ebf3d5b5e9ad39da59328b964500550aab",
+      "source_bytes": 12173,
+      "module_line_range": [
+        1,
+        217
+      ],
+      "function_ranges": [
+        {
+          "function": "TorchInflationContext.__init__",
+          "start_line": 26,
+          "end_line": 50
+        },
+        {
+          "function": "TorchInflationContext._length",
+          "start_line": 53,
+          "end_line": 56
+        },
+        {
+          "function": "TorchInflationContext.face_area",
+          "start_line": 58,
+          "end_line": 64
+        },
+        {
+          "function": "TorchInflationContext.distances",
+          "start_line": 66,
+          "end_line": 68
+        },
+        {
+          "function": "TorchInflationContext.distance_gradient",
+          "start_line": 70,
+          "end_line": 90
+        },
+        {
+          "function": "TorchInflationContext.add_spring",
+          "start_line": 92,
+          "end_line": 103
+        },
+        {
+          "function": "TorchInflationContext.rms_height",
+          "start_line": 105,
+          "end_line": 117
+        },
+        {
+          "function": "TorchInflationContext.finalize",
+          "start_line": 120,
+          "end_line": 143
+        },
+        {
+          "function": "TorchInflationContext.integrate",
+          "start_line": 146,
+          "end_line": 217
+        }
+      ],
+      "selected_implementation": "自有Torch更新",
+      "device": "cuda:N",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "intersection",
+      "path": "src/fnit/recon_all/mris_remove_intersection_python.py",
+      "source_sha256": "af53953c41a6bed1ecf7b25fb4cecaab1c8658b1786f15d096420514be965767",
+      "source_bytes": 14760,
+      "module_line_range": [
+        1,
+        284
+      ],
+      "function_ranges": [
+        {
+          "function": "_interval",
+          "start_line": 19,
+          "end_line": 36
+        },
+        {
+          "function": "_coplanar_overlap",
+          "start_line": 39,
+          "end_line": 64
+        },
+        {
+          "function": "_triangles_intersect",
+          "start_line": 67,
+          "end_line": 92
+        },
+        {
+          "function": "mark_intersections",
+          "start_line": 95,
+          "end_line": 127
+        },
+        {
+          "function": "_write_preserving_surface",
+          "start_line": 130,
+          "end_line": 148
+        },
+        {
+          "function": "run_remove_intersection",
+          "start_line": 151,
+          "end_line": 239
+        },
+        {
+          "function": "remove_intersection_surface",
+          "start_line": 242,
+          "end_line": 262
+        },
+        {
+          "function": "main",
+          "start_line": 265,
+          "end_line": 280
+        }
+      ],
+      "selected_implementation": "完整SOAP，compat binary不执行",
+      "device": "CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "placement",
+      "path": "src/fnit/recon_all/surface_placement_python.py",
+      "source_sha256": "8a34d3801b6ad2815599d8b16068420767c59085a2b3172e248eb4d8e95150dd",
+      "source_bytes": 6260,
+      "module_line_range": [
+        1,
+        119
+      ],
+      "function_ranges": [
+        {
+          "function": "placement_options",
+          "start_line": 13,
+          "end_line": 31
+        },
+        {
+          "function": "_publish_report",
+          "start_line": 34,
+          "end_line": 42
+        },
+        {
+          "function": "_check_ordered_mesh",
+          "start_line": 45,
+          "end_line": 50
+        },
+        {
+          "function": "run_preaparc_python",
+          "start_line": 53,
+          "end_line": 81
+        },
+        {
+          "function": "run_final_white_python",
+          "start_line": 84,
+          "end_line": 100
+        },
+        {
+          "function": "run_pial_python",
+          "start_line": 103,
+          "end_line": 119
+        }
+      ],
+      "selected_implementation": "四轮white/pial；CPU有序采样/正则化，GPU候选/清理",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "placement",
+      "path": "src/fnit/recon_all/place_white_preaparc_python.py",
+      "source_sha256": "93da98e7d4c48888cbeaac64e5d031fcbf82acd3df958932e4da1f3aa810c225",
+      "source_bytes": 34851,
+      "module_line_range": [
+        1,
+        621
+      ],
+      "function_ranges": [
+        {
+          "function": "_place_white_preaparc",
+          "start_line": 40,
+          "end_line": 474
+        },
+        {
+          "function": "place_white_preaparc_prefix",
+          "start_line": 478,
+          "end_line": 490
+        },
+        {
+          "function": "place_white_preaparc",
+          "start_line": 493,
+          "end_line": 553
+        },
+        {
+          "function": "first_white_preaparc_step",
+          "start_line": 556,
+          "end_line": 566
+        },
+        {
+          "function": "main",
+          "start_line": 568,
+          "end_line": 617
+        }
+      ],
+      "selected_implementation": "完整white优化器",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "placement",
+      "path": "src/fnit/recon_all/place_final_white_python.py",
+      "source_sha256": "fbaf26998313e8cd4d6d1e82259b72b8bca9da263d299903ed70c54267e1bdf0",
+      "source_bytes": 3538,
+      "module_line_range": [
+        1,
+        56
+      ],
+      "function_ranges": [
+        {
+          "function": "place_final_white",
+          "start_line": 9,
+          "end_line": 56
+        }
+      ],
+      "selected_implementation": "复用完整white优化器",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "placement",
+      "path": "src/fnit/recon_all/place_pial_python.py",
+      "source_sha256": "223b538b33ad976545a2561b3fe8ee0584f1695bc8d12d676afa9d049e05e002",
+      "source_bytes": 25411,
+      "module_line_range": [
+        1,
+        458
+      ],
+      "function_ranges": [
+        {
+          "function": "_validate_pial_volume_geometry",
+          "start_line": 40,
+          "end_line": 86
+        },
+        {
+          "function": "_write_vertices_like",
+          "start_line": 89,
+          "end_line": 100
+        },
+        {
+          "function": "place_pial_t1",
+          "start_line": 103,
+          "end_line": 458
+        }
+      ],
+      "selected_implementation": "完整pial优化器",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "placement",
+      "path": "src/fnit/recon_all/place_surface_final_cleanup.py",
+      "source_sha256": "86536276c2b3cb535fcd6b18a41356cbebad77708adafb723890aef603999e09",
+      "source_bytes": 8655,
+      "module_line_range": [
+        1,
+        163
+      ],
+      "function_ranges": [
+        {
+          "function": "pin_medial_wall",
+          "start_line": 11,
+          "end_line": 17
+        },
+        {
+          "function": "repair_intersections",
+          "start_line": 20,
+          "end_line": 163
+        }
+      ],
+      "selected_implementation": "完整自有相交修复",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "sphere",
+      "path": "src/fnit/recon_all/sphere_standard_run.py",
+      "source_sha256": "96bca3f4f48daefdb9583c05b876a94511b155da36aae09f266e41691f8a6827",
+      "source_bytes": 11190,
+      "module_line_range": [
+        1,
+        201
+      ],
+      "function_ranges": [
+        {
+          "function": "run_standard_sphere",
+          "start_line": 31,
+          "end_line": 169
+        },
+        {
+          "function": "main",
+          "start_line": 172,
+          "end_line": 197
+        }
+      ],
+      "selected_implementation": "Numba优化与Torch finish",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "sphere-reg",
+      "path": "src/fnit/recon_all/mris_register_run.py",
+      "source_sha256": "fd0a10c2673393be88a239167b6295576ecdf889f2d80a4e5f71b214eba79b69",
+      "source_bytes": 4680,
+      "module_line_range": [
+        1,
+        91
+      ],
+      "function_ranges": [
+        {
+          "function": "run_register_sphere",
+          "start_line": 16,
+          "end_line": 64
+        },
+        {
+          "function": "main",
+          "start_line": 67,
+          "end_line": 87
+        }
+      ],
+      "selected_implementation": "自有sulc+smoothwm配准",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "sphere-reg",
+      "path": "src/fnit/recon_all/mris_register_average_gpu.py",
+      "source_sha256": "d0e2afb1e37fdfaff7ac80913ada47fed1805ae52ff296fa34050ac0cd7d7b42",
+      "source_bytes": 2087,
+      "module_line_range": [
+        1,
+        43
+      ],
+      "function_ranges": [
+        {
+          "function": "_average_gradient_kernel",
+          "start_line": 9,
+          "end_line": 23
+        },
+        {
+          "function": "average_on_cuda",
+          "start_line": 26,
+          "end_line": 43
+        }
+      ],
+      "selected_implementation": "自有Triton平均，显式cuda.device",
+      "device": "cuda:N",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "defects",
+      "path": "src/fnit/recon_all/defects_label_volume_torch.py",
+      "source_sha256": "807b123d7e1ac47021864dfe5b486fa1ca3e9dd6eecbef792d469fe8552d12e5",
+      "source_bytes": 14150,
+      "module_line_range": [
+        1,
+        270
+      ],
+      "function_ranges": [
+        {
+          "function": "_unit",
+          "start_line": 17,
+          "end_line": 21
+        },
+        {
+          "function": "project_defects",
+          "start_line": 24,
+          "end_line": 95
+        },
+        {
+          "function": "_ctab",
+          "start_line": 98,
+          "end_line": 123
+        },
+        {
+          "function": "_footer_and_colors",
+          "start_line": 126,
+          "end_line": 150
+        },
+        {
+          "function": "_color_tag",
+          "start_line": 153,
+          "end_line": 163
+        },
+        {
+          "function": "defects_to_volume",
+          "start_line": 166,
+          "end_line": 249
+        },
+        {
+          "function": "main",
+          "start_line": 252,
+          "end_line": 266
+        }
+      ],
+      "selected_implementation": "共享输出按LH再RH累计",
+      "device": "cuda:N",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "metrics",
+      "path": "src/fnit/recon_all/surface_thickness_gpu.py",
+      "source_sha256": "ab019eb7d413c7b08f01ad6b2e499c406ab513cb531d723142c2db2d6c12e961",
+      "source_bytes": 10070,
+      "module_line_range": [
+        1,
+        211
+      ],
+      "function_ranges": [
+        {
+          "function": "_normals",
+          "start_line": 17,
+          "end_line": 27
+        },
+        {
+          "function": "_adjacency_csr",
+          "start_line": 30,
+          "end_line": 36
+        },
+        {
+          "function": "_reachable_distances",
+          "start_line": 40,
+          "end_line": 88
+        },
+        {
+          "function": "_clip_mean",
+          "start_line": 92,
+          "end_line": 101
+        },
+        {
+          "function": "_radius_candidates",
+          "start_line": 104,
+          "end_line": 126
+        },
+        {
+          "function": "thickness_map",
+          "start_line": 130,
+          "end_line": 193
+        },
+        {
+          "function": "main",
+          "start_line": 200,
+          "end_line": 207
+        }
+      ],
+      "selected_implementation": "自有完整厚度",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "metrics",
+      "path": "src/fnit/recon_all/surface_area_gpu.py",
+      "source_sha256": "ad60ee9c6b3e45464650ac15f2fce7bc2ea3a6cb519c15f371f4f653f45964a8",
+      "source_bytes": 2305,
+      "module_line_range": [
+        1,
+        58
+      ],
+      "function_ranges": [
+        {
+          "function": "vertex_area",
+          "start_line": 14,
+          "end_line": 26
+        },
+        {
+          "function": "area_map",
+          "start_line": 29,
+          "end_line": 32
+        },
+        {
+          "function": "mid_area_map",
+          "start_line": 36,
+          "end_line": 45
+        },
+        {
+          "function": "main",
+          "start_line": 48,
+          "end_line": 54
+        }
+      ],
+      "selected_implementation": "自有面积",
+      "device": "cuda:N",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "metrics",
+      "path": "src/fnit/recon_all/surface_curvature_gpu.py",
+      "source_sha256": "7af66e0b23dd19cabe8e20e7ea75686531eb87550e599d318f35dc24f7efc8e0",
+      "source_bytes": 5182,
+      "module_line_range": [
+        1,
+        118
+      ],
+      "function_ranges": [
+        {
+          "function": "_neighbours",
+          "start_line": 17,
+          "end_line": 40
+        },
+        {
+          "function": "curvature_values",
+          "start_line": 44,
+          "end_line": 93
+        },
+        {
+          "function": "curvature_map",
+          "start_line": 96,
+          "end_line": 105
+        },
+        {
+          "function": "main",
+          "start_line": 108,
+          "end_line": 114
+        }
+      ],
+      "selected_implementation": "自有曲率",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "metrics",
+      "path": "src/fnit/recon_all/surface_roi_gpu.py",
+      "source_sha256": "5842a1a57ab0983b5735d3631826e9b89bd7123c271d18a4e4ad1161fb0ee758",
+      "source_bytes": 4134,
+      "module_line_range": [
+        1,
+        88
+      ],
+      "function_ranges": [
+        {
+          "function": "vertex_th3_volume",
+          "start_line": 15,
+          "end_line": 38
+        },
+        {
+          "function": "vertex_volume_map",
+          "start_line": 41,
+          "end_line": 46
+        },
+        {
+          "function": "roi_area_thickness",
+          "start_line": 50,
+          "end_line": 67
+        },
+        {
+          "function": "roi_gray_volume",
+          "start_line": 71,
+          "end_line": 88
+        }
+      ],
+      "selected_implementation": "自有TH3顶点图",
+      "device": "cuda:N",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "stats",
+      "path": "src/fnit/recon_all/surface_stats_cache.py",
+      "source_sha256": "6f64b40773c61d46fd167c34a74530d9475dd7992b6607c99df14511826ab2a1",
+      "source_bytes": 17430,
+      "module_line_range": [
+        1,
+        336
+      ],
+      "function_ranges": [
+        {
+          "function": "_file_version",
+          "start_line": 17,
+          "end_line": 21
+        },
+        {
+          "function": "_device",
+          "start_line": 24,
+          "end_line": 29
+        },
+        {
+          "function": "SurfaceStatsCache.__init__",
+          "start_line": 55,
+          "end_line": 65
+        },
+        {
+          "function": "SurfaceStatsCache.__enter__",
+          "start_line": 67,
+          "end_line": 68
+        },
+        {
+          "function": "SurfaceStatsCache.__exit__",
+          "start_line": 70,
+          "end_line": 71
+        },
+        {
+          "function": "SurfaceStatsCache.clear",
+          "start_line": 73,
+          "end_line": 78
+        },
+        {
+          "function": "SurfaceStatsCache.check_device",
+          "start_line": 80,
+          "end_line": 83
+        },
+        {
+          "function": "SurfaceStatsCache.geometry",
+          "start_line": 85,
+          "end_line": 98
+        },
+        {
+          "function": "SurfaceStatsCache.morph",
+          "start_line": 100,
+          "end_line": 106
+        },
+        {
+          "function": "SurfaceStatsCache.morph_tensor",
+          "start_line": 108,
+          "end_line": 116
+        },
+        {
+          "function": "SurfaceStatsCache.annotation",
+          "start_line": 118,
+          "end_line": 124
+        },
+        {
+          "function": "SurfaceStatsCache.cortex",
+          "start_line": 126,
+          "end_line": 138
+        },
+        {
+          "function": "SurfaceStatsCache.face_area",
+          "start_line": 141,
+          "end_line": 148
+        },
+        {
+          "function": "SurfaceStatsCache.vertex_area",
+          "start_line": 151,
+          "end_line": 163
+        },
+        {
+          "function": "SurfaceStatsCache.roi_vertex_area",
+          "start_line": 166,
+          "end_line": 179
+        },
+        {
+          "function": "SurfaceStatsCache.principal",
+          "start_line": 182,
+          "end_line": 203
+        },
+        {
+          "function": "SurfaceStatsCache.no_th3_volume",
+          "start_line": 206,
+          "end_line": 229
+        },
+        {
+          "function": "SurfaceStatsCache._groups",
+          "start_line": 231,
+          "end_line": 250
+        },
+        {
+          "function": "SurfaceStatsCache.roi_base",
+          "start_line": 253,
+          "end_line": 290
+        },
+        {
+          "function": "SurfaceStatsCache.curvature_columns",
+          "start_line": 292,
+          "end_line": 322
+        },
+        {
+          "function": "SurfaceStatsCache.roi_volumes",
+          "start_line": 325,
+          "end_line": 336
+        }
+      ],
+      "selected_implementation": "按表面版本缓存，脑区volume=no-th3",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "stats",
+      "path": "src/fnit/recon_all/curvature_stats_python.py",
+      "source_sha256": "e4b715d2fa99330f426ecd47a1c2fc3622dbb3284151eb5ae3c5d9772784be10",
+      "source_bytes": 19846,
+      "module_line_range": [
+        1,
+        349
+      ],
+      "function_ranges": [
+        {
+          "function": "_ordered_vertex_area",
+          "start_line": 30,
+          "end_line": 37
+        },
+        {
+          "function": "_geometry_summary",
+          "start_line": 41,
+          "end_line": 59
+        },
+        {
+          "function": "_ordered_statistics",
+          "start_line": 63,
+          "end_line": 100
+        },
+        {
+          "function": "_average_texture",
+          "start_line": 104,
+          "end_line": 120
+        },
+        {
+          "function": "_statistics",
+          "start_line": 123,
+          "end_line": 127
+        },
+        {
+          "function": "_f32_percentage",
+          "start_line": 130,
+          "end_line": 131
+        },
+        {
+          "function": "_format_section",
+          "start_line": 134,
+          "end_line": 163
+        },
+        {
+          "function": "write_curvature_stats",
+          "start_line": 166,
+          "end_line": 319
+        },
+        {
+          "function": "main",
+          "start_line": 322,
+          "end_line": 345
+        }
+      ],
+      "selected_implementation": "自有Torch/Numba/source_libm统计",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "stats",
+      "path": "src/fnit/recon_all/anatomical_stats_file.py",
+      "source_sha256": "3aef07cbf0788276341125774717f1e0555a1197b2faeba5c9b75610a468df53",
+      "source_bytes": 3096,
+      "module_line_range": [
+        1,
+        58
+      ],
+      "function_ranges": [
+        {
+          "function": "write_anatomical_stats",
+          "start_line": 10,
+          "end_line": 58
+        }
+      ],
+      "selected_implementation": "自有六图谱统计",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "worker",
+      "path": "src/fnit/recon_all/hemisphere_parallel.py",
+      "source_sha256": "d058f8486c5ebfd7b2543a3ffe0f724e236a91b451326761410235bb5949bbcc",
+      "source_bytes": 28183,
+      "module_line_range": [
+        1,
+        506
+      ],
+      "function_ranges": [
+        {
+          "function": "HemisphereGroupError.__init__",
+          "start_line": 29,
+          "end_line": 31
+        },
+        {
+          "function": "HemisphereGroupError.diagnostics",
+          "start_line": 34,
+          "end_line": 42
+        },
+        {
+          "function": "validate_hemisphere_workers",
+          "start_line": 45,
+          "end_line": 49
+        },
+        {
+          "function": "_snapshot",
+          "start_line": 52,
+          "end_line": 54
+        },
+        {
+          "function": "_owned",
+          "start_line": 57,
+          "end_line": 72
+        },
+        {
+          "function": "_normalize_paths",
+          "start_line": 75,
+          "end_line": 84
+        },
+        {
+          "function": "resolve_worker_device",
+          "start_line": 87,
+          "end_line": 93
+        },
+        {
+          "function": "inherited_allocator_policy",
+          "start_line": 96,
+          "end_line": 98
+        },
+        {
+          "function": "worker_cuda_cache_environment",
+          "start_line": 101,
+          "end_line": 122
+        },
+        {
+          "function": "release_idle_parent_cuda_cache",
+          "start_line": 125,
+          "end_line": 148
+        },
+        {
+          "function": "_live_group",
+          "start_line": 151,
+          "end_line": 166
+        },
+        {
+          "function": "_cancel",
+          "start_line": 169,
+          "end_line": 188
+        },
+        {
+          "function": "run_hemisphere_group",
+          "start_line": 191,
+          "end_line": 506
+        }
+      ],
+      "selected_implementation": "sys.executable，私有输出/线程分配/发布屏障",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "worker",
+      "path": "src/fnit/recon_all/hemisphere_worker.py",
+      "source_sha256": "df4b1fbf60d9bdbeac6bcb971d32ee990e905032414824b0466dff77d4f13c5e",
+      "source_bytes": 6109,
+      "module_line_range": [
+        1,
+        127
+      ],
+      "function_ranges": [
+        {
+          "function": "_is_cuda_oom",
+          "start_line": 13,
+          "end_line": 20
+        },
+        {
+          "function": "_wait_for_go",
+          "start_line": 23,
+          "end_line": 32
+        },
+        {
+          "function": "main",
+          "start_line": 35,
+          "end_line": 123
+        }
+      ],
+      "selected_implementation": "继承precision/device/thread budget；失败不回退",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "worker",
+      "path": "src/fnit/recon_all/input_stage_parallel.py",
+      "source_sha256": "1a2ea9bf2cd445c9dcf27ae49627f1b28981f18eaba7799006b6ff5b39960ac9",
+      "source_bytes": 15645,
+      "module_line_range": [
+        1,
+        276
+      ],
+      "function_ranges": [
+        {
+          "function": "_sha",
+          "start_line": 16,
+          "end_line": 21
+        },
+        {
+          "function": "_write",
+          "start_line": 24,
+          "end_line": 27
+        },
+        {
+          "function": "_precision",
+          "start_line": 30,
+          "end_line": 35
+        },
+        {
+          "function": "_sources",
+          "start_line": 38,
+          "end_line": 39
+        },
+        {
+          "function": "run_n4_task",
+          "start_line": 42,
+          "end_line": 62
+        },
+        {
+          "function": "run_synthseg_task",
+          "start_line": 65,
+          "end_line": 117
+        },
+        {
+          "function": "run_input_stage_group",
+          "start_line": 120,
+          "end_line": 276
+        }
+      ],
+      "selected_implementation": "可选SimpleITK CPU+SynthSeg GPU并行",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "Synth",
+      "path": "src/fnit/synthstrip/pipeline.py",
+      "source_sha256": "af4978d445f3438a82c06de2548918b0dcc049e746eba8190fc50b889f0a5a48",
+      "source_bytes": 14107,
+      "module_line_range": [
+        1,
+        275
+      ],
+      "function_ranges": [
+        {
+          "function": "_geometry_image",
+          "start_line": 29,
+          "end_line": 33
+        },
+        {
+          "function": "extend_sdt",
+          "start_line": 36,
+          "end_line": 55
+        },
+        {
+          "function": "_crop_nonzero",
+          "start_line": 58,
+          "end_line": 69
+        },
+        {
+          "function": "_reshape_center",
+          "start_line": 72,
+          "end_line": 88
+        },
+        {
+          "function": "_resample_affine",
+          "start_line": 91,
+          "end_line": 144
+        },
+        {
+          "function": "_conform_lia_1mm",
+          "start_line": 147,
+          "end_line": 173
+        },
+        {
+          "function": "_largest_filled_component",
+          "start_line": 176,
+          "end_line": 183
+        },
+        {
+          "function": "SynthStrip.__init__",
+          "start_line": 202,
+          "end_line": 229
+        },
+        {
+          "function": "SynthStrip.__call__",
+          "start_line": 232,
+          "end_line": 275
+        }
+      ],
+      "selected_implementation": "自有Torch SynthStrip，configure_precision=False",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "Synth",
+      "path": "src/fnit/synthseg_parc/synthseg.py",
+      "source_sha256": "3f0e91ff0bfa83ab8b3742a27ccecabcad83ddb650110d7347e5e4fea42ab62f",
+      "source_bytes": 9742,
+      "module_line_range": [
+        1,
+        184
+      ],
+      "function_ranges": [
+        {
+          "function": "_synthseg_index_with_numerical_ties",
+          "start_line": 29,
+          "end_line": 31
+        },
+        {
+          "function": "_restore_posterior_orientation",
+          "start_line": 34,
+          "end_line": 52
+        },
+        {
+          "function": "_official_soft_volumes",
+          "start_line": 55,
+          "end_line": 65
+        },
+        {
+          "function": "_segmentation_image",
+          "start_line": 68,
+          "end_line": 76
+        },
+        {
+          "function": "SynthSegResult.write_volumes_csv",
+          "start_line": 89,
+          "end_line": 99
+        },
+        {
+          "function": "SynthSeg.__init__",
+          "start_line": 105,
+          "end_line": 135
+        },
+        {
+          "function": "SynthSeg.__call__",
+          "start_line": 138,
+          "end_line": 184
+        }
+      ],
+      "selected_implementation": "自有SynthSeg，cudnn_tf32=False",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "Synth",
+      "path": "src/fnit/synthseg_parc/segment.py",
+      "source_sha256": "e2c1b3e2ad4f90037054395385f2fb2d93925d236f11ec06dbb9613d52482484",
+      "source_bytes": 18052,
+      "module_line_range": [
+        1,
+        354
+      ],
+      "function_ranges": [
+        {
+          "function": "SegmentUNet.__init__",
+          "start_line": 28,
+          "end_line": 38
+        },
+        {
+          "function": "SegmentUNet.forward",
+          "start_line": 40,
+          "end_line": 59
+        },
+        {
+          "function": "SegmentUNet.load_h5",
+          "start_line": 61,
+          "end_line": 92
+        },
+        {
+          "function": "_blur",
+          "start_line": 95,
+          "end_line": 104
+        },
+        {
+          "function": "SynthSegSegmenter.__init__",
+          "start_line": 110,
+          "end_line": 138
+        },
+        {
+          "function": "SynthSegSegmenter._forward",
+          "start_line": 140,
+          "end_line": 170
+        },
+        {
+          "function": "SynthSegSegmenter.posterior",
+          "start_line": 173,
+          "end_line": 227
+        },
+        {
+          "function": "SynthSegSegmenter.__call__",
+          "start_line": 230,
+          "end_line": 231
+        },
+        {
+          "function": "run_synthseg_parc_t1",
+          "start_line": 251,
+          "end_line": 290
+        },
+        {
+          "function": "_run_synthseg_parc_t1",
+          "start_line": 293,
+          "end_line": 354
+        }
+      ],
+      "selected_implementation": "构造不改精度，实际forward记录/恢复策略",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "Synth",
+      "path": "src/fnit/synthmorph/pipeline.py",
+      "source_sha256": "633ee2f94ebc6136c4219ea945a2c489a42fe6f1f154da80691fbb0c3794d37b",
+      "source_bytes": 27278,
+      "module_line_range": [
+        1,
+        651
+      ],
+      "function_ranges": [
+        {
+          "function": "network_space",
+          "start_line": 39,
+          "end_line": 61
+        },
+        {
+          "function": "_load",
+          "start_line": 64,
+          "end_line": 72
+        },
+        {
+          "function": "_image_data",
+          "start_line": 75,
+          "end_line": 85
+        },
+        {
+          "function": "_tensor",
+          "start_line": 88,
+          "end_line": 90
+        },
+        {
+          "function": "_tensor_frames",
+          "start_line": 93,
+          "end_line": 98
+        },
+        {
+          "function": "_numpy",
+          "start_line": 101,
+          "end_line": 104
+        },
+        {
+          "function": "_tensor_data",
+          "start_line": 107,
+          "end_line": 111
+        },
+        {
+          "function": "_affine_input",
+          "start_line": 114,
+          "end_line": 129
+        },
+        {
+          "function": "_header_transform",
+          "start_line": 132,
+          "end_line": 137
+        },
+        {
+          "function": "_network_input_images",
+          "start_line": 140,
+          "end_line": 152
+        },
+        {
+          "function": "_resampled_image",
+          "start_line": 155,
+          "end_line": 191
+        },
+        {
+          "function": "_resampled_frames",
+          "start_line": 194,
+          "end_line": 280
+        },
+        {
+          "function": "SynthMorph.__init__",
+          "start_line": 290,
+          "end_line": 332
+        },
+        {
+          "function": "SynthMorph.__call__",
+          "start_line": 335,
+          "end_line": 499
+        },
+        {
+          "function": "apply_transform",
+          "start_line": 503,
+          "end_line": 651
+        }
+      ],
+      "selected_implementation": "自有Torch SynthMorph",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "Synth",
+      "path": "src/fnit/recon_all/talairach_synthmorph.py",
+      "source_sha256": "4030e0b68f7dc496b4256e72bd8db542957c9d791b7a8c9f88a02e3d2cd920cc",
+      "source_bytes": 5127,
+      "module_line_range": [
+        1,
+        110
+      ],
+      "function_ranges": [
+        {
+          "function": "_matmul_float32",
+          "start_line": 13,
+          "end_line": 23
+        },
+        {
+          "function": "talairach_matrix",
+          "start_line": 26,
+          "end_line": 34
+        },
+        {
+          "function": "write_talairach_xfm",
+          "start_line": 37,
+          "end_line": 49
+        },
+        {
+          "function": "register_talairach",
+          "start_line": 52,
+          "end_line": 76
+        },
+        {
+          "function": "main",
+          "start_line": 79,
+          "end_line": 106
+        }
+      ],
+      "selected_implementation": "自有affine exec，scoped FP32",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "Synth",
+      "path": "src/fnit/recon_all/sclimbic.py",
+      "source_sha256": "d85363a2833863ddf26b4a24c8fb8f1fa5641a0c0ef87e62ed509a69f3540675",
+      "source_bytes": 16382,
+      "module_line_range": [
+        1,
+        350
+      ],
+      "function_ranges": [
+        {
+          "function": "LimbicUNet.__init__",
+          "start_line": 27,
+          "end_line": 50
+        },
+        {
+          "function": "LimbicUNet.forward",
+          "start_line": 52,
+          "end_line": 68
+        },
+        {
+          "function": "LimbicUNet.from_h5",
+          "start_line": 71,
+          "end_line": 100
+        },
+        {
+          "function": "_orient",
+          "start_line": 103,
+          "end_line": 105
+        },
+        {
+          "function": "_fit_shape",
+          "start_line": 108,
+          "end_line": 120
+        },
+        {
+          "function": "_ctab_rows",
+          "start_line": 123,
+          "end_line": 129
+        },
+        {
+          "function": "_etiv_from_lta",
+          "start_line": 132,
+          "end_line": 137
+        },
+        {
+          "function": "_write_stats",
+          "start_line": 140,
+          "end_line": 156
+        },
+        {
+          "function": "_cleanup",
+          "start_line": 159,
+          "end_line": 185
+        },
+        {
+          "function": "segment_sclimbic_image",
+          "start_line": 189,
+          "end_line": 256
+        },
+        {
+          "function": "mri_sclimbic_seg",
+          "start_line": 260,
+          "end_line": 274
+        },
+        {
+          "function": "mri_entowm_seg",
+          "start_line": 280,
+          "end_line": 294
+        },
+        {
+          "function": "main",
+          "start_line": 297,
+          "end_line": 346
+        }
+      ],
+      "selected_implementation": "自有辅助UNet，cuDNN scoped FP32",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "Synth",
+      "path": "src/fnit/recon_all/aux_seg.py",
+      "source_sha256": "a0ca73311328ae12a3f9a4d609c1cfb1c72ebb0737df6e47df9c57bbb91098fd",
+      "source_bytes": 14524,
+      "module_line_range": [
+        1,
+        320
+      ],
+      "function_ranges": [
+        {
+          "function": "_assets_root",
+          "start_line": 34,
+          "end_line": 36
+        },
+        {
+          "function": "_models_root",
+          "start_line": 39,
+          "end_line": 40
+        },
+        {
+          "function": "_lta_matrix",
+          "start_line": 43,
+          "end_line": 53
+        },
+        {
+          "function": "_resample_prior",
+          "start_line": 56,
+          "end_line": 76
+        },
+        {
+          "function": "_round",
+          "start_line": 79,
+          "end_line": 81
+        },
+        {
+          "function": "_crop_start",
+          "start_line": 84,
+          "end_line": 96
+        },
+        {
+          "function": "_extract",
+          "start_line": 99,
+          "end_line": 108
+        },
+        {
+          "function": "_paste",
+          "start_line": 111,
+          "end_line": 118
+        },
+        {
+          "function": "_infer_crop",
+          "start_line": 121,
+          "end_line": 145
+        },
+        {
+          "function": "_save_labels",
+          "start_line": 148,
+          "end_line": 156
+        },
+        {
+          "function": "mri_mcadura_seg",
+          "start_line": 159,
+          "end_line": 185
+        },
+        {
+          "function": "_write_vsinus_stats",
+          "start_line": 188,
+          "end_line": 209
+        },
+        {
+          "function": "mri_vsinus_seg",
+          "start_line": 212,
+          "end_line": 242
+        },
+        {
+          "function": "_parser",
+          "start_line": 245,
+          "end_line": 259
+        },
+        {
+          "function": "_args",
+          "start_line": 262,
+          "end_line": 286
+        },
+        {
+          "function": "main_mcadura",
+          "start_line": 289,
+          "end_line": 293
+        },
+        {
+          "function": "main_vsinus",
+          "start_line": 296,
+          "end_line": 309
+        },
+        {
+          "function": "main",
+          "start_line": 312,
+          "end_line": 316
+        }
+      ],
+      "selected_implementation": "自有辅助UNet与prior，cuDNN scoped FP32",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "MNI",
+      "path": "src/fnit/recon_all/mni_aux_chain.py",
+      "source_sha256": "60b5c9d1255208df19f9a1eb6ccda300562829d5476a012488784e8ae7f4a2be",
+      "source_bytes": 9306,
+      "module_line_range": [
+        1,
+        196
+      ],
+      "function_ranges": [
+        {
+          "function": "write_mni_voxel_lta",
+          "start_line": 20,
+          "end_line": 54
+        },
+        {
+          "function": "validate_mni_aux_assets",
+          "start_line": 57,
+          "end_line": 73
+        },
+        {
+          "function": "_crop_nonzero",
+          "start_line": 76,
+          "end_line": 98
+        },
+        {
+          "function": "register_mni152_affine",
+          "start_line": 101,
+          "end_line": 145
+        },
+        {
+          "function": "run_mni_aux_chain",
+          "start_line": 148,
+          "end_line": 180
+        },
+        {
+          "function": "main",
+          "start_line": 183,
+          "end_line": 192
+        }
+      ],
+      "selected_implementation": "所有网络显式device，affine matmul FP32",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "MNI",
+      "path": "src/fnit/recon_all/mni_mesh_parallel.py",
+      "source_sha256": "5a79b715c48391dd50fdb8e40f999c4624092eeeebeaebd926ac7fed987b9b46",
+      "source_bytes": 12337,
+      "module_line_range": [
+        1,
+        202
+      ],
+      "function_ranges": [
+        {
+          "function": "_sha",
+          "start_line": 16,
+          "end_line": 21
+        },
+        {
+          "function": "_write",
+          "start_line": 24,
+          "end_line": 27
+        },
+        {
+          "function": "run_mni_stage",
+          "start_line": 30,
+          "end_line": 64
+        },
+        {
+          "function": "run_mni_and_validate",
+          "start_line": 67,
+          "end_line": 202
+        }
+      ],
+      "selected_implementation": "晚期并行，显式cuda.device，gpu后处理",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "MNI",
+      "path": "src/fnit/recon_all/mni_nonlinear_chain.py",
+      "source_sha256": "d33d0b0fb31cc5605c926047c7d210bae3e72cfd2dfe02ebdbcf68ec14c70faa",
+      "source_bytes": 7430,
+      "module_line_range": [
+        1,
+        132
+      ],
+      "function_ranges": [
+        {
+          "function": "run_mni_nonlinear_chain",
+          "start_line": 20,
+          "end_line": 132
+        }
+      ],
+      "selected_implementation": "自有deform scoped FP32，gpu后处理",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "MNI",
+      "path": "src/fnit/recon_all/mni_warp_inverse.py",
+      "source_sha256": "5bd1ee57342ed59c692a88a6d1814e4787d767c407b3644bdc5fe1ef6578cdc4",
+      "source_bytes": 6513,
+      "module_line_range": [
+        1,
+        118
+      ],
+      "function_ranges": [
+        {
+          "function": "fill_inverse_fields",
+          "start_line": 15,
+          "end_line": 80
+        },
+        {
+          "function": "invert_mni_warp",
+          "start_line": 83,
+          "end_line": 118
+        }
+      ],
+      "selected_implementation": "自有Numba/Triton完整求逆",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    },
+    {
+      "category": "MNI",
+      "path": "src/fnit/recon_all/mni_warp_sampling.py",
+      "source_sha256": "84dd8fae47346dbb69ba74ce753c3286ea534828dededf30756d43738787da3d",
+      "source_bytes": 9511,
+      "module_line_range": [
+        1,
+        167
+      ],
+      "function_ranges": [
+        {
+          "function": "_device",
+          "start_line": 16,
+          "end_line": 20
+        },
+        {
+          "function": "_affine",
+          "start_line": 23,
+          "end_line": 29
+        },
+        {
+          "function": "_matmul",
+          "start_line": 32,
+          "end_line": 36
+        },
+        {
+          "function": "_grid",
+          "start_line": 39,
+          "end_line": 42
+        },
+        {
+          "function": "_linear_absolute",
+          "start_line": 45,
+          "end_line": 62
+        },
+        {
+          "function": "convert_mni_warp",
+          "start_line": 66,
+          "end_line": 115
+        },
+        {
+          "function": "_native_nearest_plan",
+          "start_line": 118,
+          "end_line": 126
+        },
+        {
+          "function": "resample_mni_check",
+          "start_line": 130,
+          "end_line": 167
+        }
+      ],
+      "selected_implementation": "自有warp转换/采样",
+      "device": "cuda:N+CPU",
+      "evidence_type": "static Git-blob branch/import/call inspection; no module execution"
+    }
+  ],
+  "original_guards": [
+    {
+      "path": "src/fnit/recon_all/native_free.py",
+      "line_range": [
+        1547,
+        1582
+      ],
+      "selected_values": {
+        "native_optimizations": "torch",
+        "n4_backend": "simpleitk",
+        "wm_backend": "torch-optimized",
+        "wm_edit_backend": "python",
+        "defects_backend": "torch",
+        "inflate_backend": "torch",
+        "surface_placement_backend": "python",
+        "topology_backend": "python-ga"
+      },
+      "description": "native program discovery guards false; CUDA disables MNI program discovery. Python skips caller original binary-directory validation. intersection tuple is None."
+    },
+    {
+      "path": "src/fnit/recon_all/native_runtime_selection.py",
+      "selected_values": {
+        "mode": "torch",
+        "include_white": false
+      },
+      "description": "Original GCA/white capability subprocesses unreachable."
+    },
+    {
+      "path": "src/fnit/recon_all/mni_nonlinear_chain.py",
+      "line_range": [
+        94,
+        123
+      ],
+      "selected_values": {
+        "postprocess_backend": "gpu"
+      },
+      "description": "Own complete GPU postprocess branch; conda subprocess else never used in this profile, exceptions propagate."
+    }
+  ],
+  "profile_validation": {
+    "public": "native_free.py:2262-2281 resolves 21 options",
+    "private": "native_free.py:1442-1467 verifies full dictionary equality",
+    "device": "python_profile_options rejects cpu/unindexed cuda",
+    "threads": "integer>=2; each hemisphere gets threads//2; odd remainder unused",
+    "default_thread_budget": 4,
+    "hemisphere_workers": 2,
+    "input_parallel_optional": "requires thread budget>=4; N4 SimpleITK CPU, SynthSeg explicit cuda:N",
+    "all_selected_gpu_device_arguments_forwarded": true
+  },
+  "worker_behavior": {
+    "command": "sys.executable FNIT modules, not original brain-imaging stage binaries",
+    "device": "Explicit kwargs/requests. Dedicated GCA/WM/N4 set_device; MNI and Triton launchers use cuda.device guards; hemisphere bootstrap/sync/properties explicit target.",
+    "precision": "Snapshot TF32 passed to hemisphere/MNI workers; no autocast enabled by FNIT. Dedicated GCA/WM use declared TF32 default.",
+    "failure": "phase-specific failed report and exception; no native algorithm fallback. Same callable pre-GO startup retry only for explicit CUDA OOM before operation entered.",
+    "shared_outputs": "Private hemisphere publication; parent defects writes LH then RH; MNI/mesh join before completeness."
+  },
+  "precision": {
+    "tf32_default": true,
+    "fnit_enables_fp16_bf16": false,
+    "parallel_python_profile_rejects_autocast": true,
+    "existing_fp32_exceptions": [
+      "SynthStrip cuDNN",
+      "SynthSeg cuDNN",
+      "Talairach affine matmul/cuDNN",
+      "MNI nonlinear matmul/cuDNN",
+      "MNI152 affine matmul",
+      "EntoWM/MCA-dura/vsinus cuDNN"
+    ],
+    "synthseg": "configure_device(...configure_precision=False) in both constructors; posterior applies requested cudnn_tf32=False; actual forwards recorded and previous flags restored",
+    "reported_forwards": "static evidence of recording device/dtype/TF32/autocast, not new measurement"
+  },
+  "default_boundaries": [
+    "Default backend=native remains mixed; unchanged by audit.",
+    "backend=python alone maps legacy topology=native to own digital topology=python, not GA; explicit python-ga required for this audit.",
+    "Historical backend=python-gpu fails capability gate if incomplete; distinct from CPU-allowed current Python recipe.",
+    "SynthSR is not called by this recon-all graph.",
+    "Generic SimpleITK/Numba/PyTorch/Triton compiled libraries are permitted; no assertion that all machine code is absent.",
+    "nvidia-smi monitoring and Python subprocesses are system/diagnostic execution, not original neuroimaging stage programs."
+  ],
+  "limits": [
+    "No module import/inference or true end-to-end run performed",
+    "No OS process/library/file-access isolation trace",
+    "No whole-completion, strict reproduction, speed or metric-equivalence claim",
+    "Uncommitted mesh distance routing/placement residual changes excluded"
+  ],
+  "manual_review_origin_sha256": "78e2183f30909b094ec3cce1d92def52df0d5e8a4c55077af53c0ad56980a564",
+  "repository": "Fudan-Neuroimaging-toolkit",
+  "source_binding_verified": true
+}

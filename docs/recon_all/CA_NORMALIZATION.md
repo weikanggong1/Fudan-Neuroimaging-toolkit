@@ -83,3 +83,42 @@ mri_ca_normalize -c ctrl_pts.mgz -mask brainmask.mgz \
 - [固定矩阵源码](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/utils/matrix.cpp)：`MatrixMultiply` 的 FP32 累计。
 - [固定 nint 源码](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/utils/utils.cpp)；[mri_ca_normalize](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/mri_ca_normalize/mri_ca_normalize.cpp)。
 - Fischl et al. Whole brain segmentation: automated labeling of neuroanatomical structures in the human brain. Neuron 33, 341–355 (2002).
+
+
+## 2026-10-11 共享 GCA 预处理修复与回归
+
+现场同输入独立原版 GCA 检查发现，真实输入的强度直方图过宽时，源实现禁用峰值缩放；共享 `estimate_image_white_matter_peak` 缺少这条分支。已补齐有序 FP32 直方图平滑和稳健 Gaussian 宽度检查，CA normalization 沿用同一个子函数。固定宽度阈值来自源算法，不是本次数据拟定的精度门槛；控制点选择、三轮归一化、偏置场和写出保持原实现。
+
+此前两个旧输入的零差异仍是历史证据，不代表本次新输入已通过。两例完整 GCA 同输入矩阵检查已通过；两例原始 T1→filled 回归按冻结源码运行。固定资源 `native/bin` 缺少 CA 参考程序，随后现场找到现有 Conda 环境内的固定 `d932c45` 完整源码和链接库。在独立新 benchmark 目录保留编译/链接 flags 与库顺序增编参考，构建 EXIT 0，共享 source/build/prefix 的输入哈希前后一致；生产链不读取该程序或其输出。不能把旧原版结果与不同阶段输入直接当成同输入比较。已有公开原版整例参考只用于生产完成后的只读比较，并先核对阶段输入和来源。独立 callable benchmark 可显式传入原版程序，但不会获取它或传参考输出给生产者：
+
+```bash
+python tools/benchmark_recon_ca_normalize_python.py \
+  --nu subject/mri/nu.mgz --mask subject/mri/brainmask.mgz \
+  --atlas resources/average/RB_all_2020-01-02.gca \
+  --lta subject/mri/transforms/talairach.lta \
+  --binary reference-environment/bin/mri_ca_normalize \
+  --output validation/new-ca-normalization-comparison
+```
+
+所有参数为必填路径：前四项为同一自产链的 nu、brainmask、GCA 和 type0 LTA；`binary` 为隔离原版参考；`output` 为不存在的新目录。分别输出 Python/原版的 norm（uint8同网格）和三轮 label/mean control frames（六帧float32），报告不同元素、最大/P99差、geometry/dtype和完整文件 API 时间。公开 JSON 只含哈希和 typed 指标；私有日志不进入仓库。该参考未实际执行时必须标记未验证。
+
+重复性检查使用两份已完成的同输入回执，逐数组比较 Python 与原版各自两次输出；输入、候选源码与参考程序 SHA 必须一致：
+
+```bash
+python tools/compare_recon_ca_repeats_python.py \
+  --first validation/ca-run1 --second validation/ca-run2 \
+  --output validation/ca-repeatability.public.json
+```
+
+`first`、`second` 是包含 `metrics.public.json`、`python/`、`native-reference/` 的两次隔离 benchmark 目录；`output` 为新的 JSON 路径。影像只读，输出报告数组差异、几何、dtype、有限值状态和文件 SHA，不以 MGZ 压缩文件字节相等替代数组复现。
+
+共享禁用分支的新保护直接返回 atlas 峰值，即 scale=1；即使局部 uint8 区域最大值低于 atlas 峰值，也不再把 atlas 值当局部 bin 索引。合同检查覆盖 GCA/CA 共用函数与恒等缩放，不把该合成合同称为原版 benchmark。两例原有成功回执仍绑定冻结源码；新保护未触发其已通过的索引范围。
+
+2026-10-11 最新本机同输入真实回归：两例各运行两次，四次 Python/原版 norm 与六帧 ctrl_pts 均零差异，shape/affine/dtype相同；Python及原版各自重复数组也全部零差。
+
+| 输入 | Python两次文件API/s | 原版两次含spawn/IO/s | norm/ctrl不同元素 | 两后端重复差异 |
+|---|---|---|---|---|
+| 公共例A | 34.946 / 32.353 | 50.406 / 48.442 | 0 / 0 | 0 |
+| 公共例B | 32.281 / 31.814 | 48.491 / 49.085 | 0 / 0 | 0 |
+
+候选冻结源码24bd8dd1，原版固定d932c45，CPU四核；Python计时排除解释器和顶部导入，原版包括spawn，不作为严格同边界内核加速比。[完整同输入与重复回执](../../benchmark/recon_volume_python_20261011/complete_ca_and_repeats.public.json)和[隔离构建指纹](../../benchmark/recon_volume_python_20261011/ca_reference_build.public.json)保留source/program/compiler/链接库SHA。该证据范围为两例同输入CA，不替代完整整例等效。

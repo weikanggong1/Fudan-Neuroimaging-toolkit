@@ -8,6 +8,7 @@ import numpy as np
 import torch
 
 from fnit.synthmorph import SynthMorph
+from .worker_program_guard import inherit_original_stage_guard
 
 
 def _matmul_float32(left: np.ndarray, right: np.ndarray) -> np.ndarray:
@@ -49,12 +50,20 @@ def write_talairach_xfm(matrix: np.ndarray, output: str | Path) -> None:
     path.write_text("\n".join(lines) + "\n")
 
 
+@inherit_original_stage_guard
 def register_talairach(moving: str | Path, template: str | Path,
                        weights: str | Path, output_xfm: str | Path,
                        output_lta: str | Path | None = None,
                        device: str = "cpu", threads: int = 4,
                        precision_report: list | None = None) -> np.ndarray:
-    """Run affine registration with local FP32 inference and restore TF32 flags."""
+    """运行已有FP32 affine；继承生产禁令时先安装守卫，退出恢复守卫/TF32。
+
+    moving为去颅骨自产MRI，template为声明MNI305模板，weights为本地
+    affine权重；output_xfm为scanner RAS/mm线性XFM，output_lta为可选LTA。
+    device默认cpu，生产显式传cuda:N；threads默认4，precision_report为
+    可选可写前向记录列表。返回有限4×4 FP32 RAS矩阵。守卫不改动数值、
+    既有线程选择或FP32例外；模型/输出失败和禁止原程序异常直接传播。
+    """
     torch.set_num_threads(threads)
     previous_matmul_tf32 = torch.backends.cuda.matmul.allow_tf32
     previous_cudnn_tf32 = torch.backends.cudnn.allow_tf32
@@ -76,6 +85,7 @@ def register_talairach(moving: str | Path, template: str | Path,
     return matrix
 
 
+@inherit_original_stage_guard
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("moving", type=Path, help="brain-extracted synthstrip.mgz")

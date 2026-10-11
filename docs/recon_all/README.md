@@ -2,41 +2,60 @@
 
 **2026-10-07现存GPU验证**：冻结3a的原始T1执行和生产网格通过9/10，完整官方比较9/10，十例输出各138项齐全。九例FNIT入口中位数2669.520秒、原官方5839.091秒；本次只收集已有结果，不宣称新的受控提速。68区厚度MAE0.0134–0.0397mm，自身同期采样峰6.143–13.571GB；sub-10206左侧自相交仍失败，严格复现与整体指标等效分别未通过/未判定。见[九例完整指标、耗时和局部问题](../../validation/recon_all/accuracy_20261003/runtime/server_refresh_20261007/README.md)及[版本绑定](PRECISION_CANDIDATE_BENCHMARK_20261004.md)。以下CPU与历史GPU记录继续保留原版本。
 
+当前独立Python候选的[2026-10-11合并、真实阶段回归、失败项和最终安装结果](INTEGRATION_RESULTS_20261011.md)单独记录；旧版本证据继续绑定其原源码。[公开源码与实测版本的对应关系](PUBLICATION_SNAPSHOT_20261011.md)说明报告派生哈希和安装源码核对范围。
+
 [返回首页](../../README.md) · [完整旧文档与更早证据](../../validation/recon_all/readme_archive_20261005.md)
 
 | 项目 | 内容 |
 |---|---|
-| 输入 | 原始单幅3D T1w、校验权重/图谱、用户许可证 |
+| 输入 | 原始单幅3D T1w、校验权重/图谱；native对照另需个人许可证 |
 | 输出 | 138项体积/表面/顶点图/标注/统计及JSON |
 | 对应原软件 | FreeSurfer8.2 recon-all单T1默认路径 |
 | Python / CLI | fnit.recon_all.native_free.run_recon_all_python；fnit-recon-all |
-| CPU / GPU | 默认是混合CPU/PyTorch CUDA/Numba/固定源码Conda native程序；严格 `python-gpu` profile 只在全部替代阶段完成后开放 |
+| CPU / GPU | `backend="python"`为完整独立候选，结合PyTorch GPU、Python/Numba CPU及SimpleITK；默认`native`保留混合对照，严格`python-gpu`尚未开放 |
 
 <a id="流程策略"></a>
 
 
 当前十分钟目标的热点和五个优化任务见 [2026-10-07 性能热点与任务](HOTSPOT_ACCELERATION_20261007.md)。
 当前纯 Python GPU 迁移矩阵和阻断项见 [2026-10-08 迁移状态](PYTHON_GPU_STATUS_20261008.md)。
+2026-10-10起以脱离原版阶段程序为目标，允许Python/Numba等CPU计算；`backend="python"`完整独立候选、阶段误差和原始整例结果见[自有Python流程](PYTHON_SURFACE_PIPELINE.md)。数字拓扑与原GA不同，整体指标等效未判定。新增显式 `topology_backend="python-ga"` 复用[安装包内的完整自有 GA](PYTHON_GENETIC_PROFILE.md)，原始整例验收仍待完成。
+原始T1的独立Python v4两例已退出并失败，球面配准和pial相交质量仍待修复；[最终整例收据](../../validation/recon_all/optimizations/20261010_python_profile/README.md)与后续阶段优化分开。
+2026-10-11的完整GA有序扫描已接入自有Numba并通过同输入回归，本地与服务器的[实际新wheel安装](../../validation/recon_all/optimizations/20261011_python_ga_blocker_route/README.md)核对十二模块及依赖；[当前原始T1实际前段](../../validation/recon_all/optimizations/20261011_python_ga_volume_prefix/README.md)对旧Python前段无新增数组或几何误差。新安装产物的整例、最终质量与整体等效仍待验证。
+
+新版有序扫描配方已完成[原始 T1 自产前段回归](../../validation/recon_all/optimizations/20261011_python_ga_raw_v3_prefix/README.md)：新旧 14 张 MRI 的数组、几何、dtype 和 LTA 全同，MRI 文件 SHA 为 8/14 相同；对应旧v2/v3整例已退出并失败，各28/138输出，详见[现场退出核查](../../validation/recon_all/optimizations/20261011_current_whole_preparation/README.md)；尚无本轮最终安装包的完整提速、表面质量或整体等效结论。
+后续[查询边向量复用](TOPOLOGY_BLOCKER_QUERY_REUSE.md)通过完整首缺陷、第四候选及直接库入口回归；首缺陷冷CLI观察为1357.057→1217.854秒，短阶段冷启动变慢的结果也保留。该核尚未用于上述冻结整例，不能把阶段观察当作整例提速。
+原拓扑算法的独立迁移已完成[候选几何](TOPOLOGY_CANDIDATE_GEOMETRY.md)、[校准先验](TOPOLOGY_DEFECT_CALIBRATION.md)、[候选评分](TOPOLOGY_PATCH_FITNESS.md)、[反馈统计](TOPOLOGY_CANDIDATE_STATISTICS.md)及[状态恢复](TOPOLOGY_CANDIDATE_STATE.md)的真实冻结阶段回归；[自产初始基底](TOPOLOGY_GENETIC_BASE_PREPARE.md)的完整坐标、有序面与K1/K2已通过同输入对照。各报告保留实际版本和比较范围。
+[连续候选状态](TOPOLOGY_CANDIDATE_CYCLE.md)、[全局先验](TOPOLOGY_GLOBAL_PRIORS.md)和[最终缺陷写回](TOPOLOGY_GA_FINALIZE.md)保留各自冻结阶段回归；[自产首缺陷完整搜索](TOPOLOGY_GENETIC_SEARCH.md)已完成29轮（轨迹索引0–28）/495次搜索评分及1次最终评分，首候选9组逐位一致，冷子CLI2502.916秒。全部9缺陷的[自有premesh控制器](TOPOLOGY_GENETIC_REPAIR.md)继续运行，成功后自动进入[标准remesh与最终orig验证](TOPOLOGY_GENETIC_ORIG.md)；两者与原始T1整例分别记录。完整源赢家及整体指标等效尚未判定，不改生产默认。
+2026-10-11的同输入阶段改进见[相交候选过滤](SOURCE_INTERSECTION_CANDIDATE_FILTER.md)与[同候选邻接复用](TOPOLOGY_CANDIDATE_INCIDENT_REUSE.md)：完整清理API缩短41.23%，候选/写回阶段CLI缩短10.58%，输出保持；不能相加或视为整例收益。WM完整路径搜索已接入[CPU及Torch混合入口](WM_REMOVE_PATHS.md)，两例解码体素与固定源参考一致，活跃路径的真实数据覆盖仍有限。最终orig的完成检查也已补修，详见上述功能页。
+完整自产 GA/orig 与原生参考的[全网格比较](GENETIC_MESH_COMPARISON.md)已排队，等待自产完成门；不同网格只报告双向点到三角面距离。[pial 终态诊断](PIAL_RESIDUAL_CLEANUP_DIAGNOSTIC.md)确认同输入两次原生参考与自有结果坐标一致，但均保留32个相交面，网格质量仍失败。
+面发现的[不可变保留面索引复用](TOPOLOGY_FACE_DETECTION_CACHE.md)通过同输入完整阶段ABBA，162项状态与控制不变，CLI中位数76.883→72.862秒（本组缩短5.23%）。后续[完整默认首缺陷搜索](TOPOLOGY_GENETIC_FACE_CACHE.md)的全部496评分、29轮、随机流、80字段和三份检查点相同；CLI2263.423→1329.629秒是跨时段观察，不是受控整例提速，全部九缺陷仍待验证。状态缓存的短阶段冷CLI曾变慢，[默认保持关闭](TOPOLOGY_CANDIDATE_STATE_CACHE.md)；后续[完整首缺陷状态缓存](TOPOLOGY_GENETIC_STATE_CACHE.md)保留输出一致及暖评分略慢的结果，跨时段总耗时另报。原生参考的[同输入重复与控制诊断](../../validation/recon_all/optimizations/20261011_topology_native_repeat/README.md)保留一处六位打印差异。
+输入并行接线后的两例原始T1→filled已完成，14图及LTA无新增数值差，完整前段耗时方向不一致；保留串行默认，见[前段回归、耗时、显存与脑图](../../validation/recon_all/optimizations/20261010_input_n4_synthseg_prefix/README.md)。
+完整SimpleITK Python N4、参数和两例同输入误差见 [N4独立Python库实现](N4_SIMPLEITK.md)；
 完整固定N4 PyTorch实验及真实误差见 [本轮N4](N4_COMPLETE_TORCH_20261009.md)；
 显式N4缓存隔离与原始输入链见 [N4输入链](INPUT_N4_CHAIN.md) 和 [阶段worker](N4_CACHED_WORKER.md)；
 GCA局部缓存与CLI/API验证见 [GCA阶段隔离](GCA_ISOLATED_TORCH_20261009.md)；
 GCA候选评分及新批量求逆见 [GCA说明](MRI_EM_TORCH_BACKEND.md)。
-N4默认仍为ITK，GCA新批量求逆尚未替换已存在的CUDA评分路径。
+单独逐阶段接口的N4默认仍为native对照；`backend="python"`固定选择SimpleITK，不执行该原版程序。各版本的GCA与N4实测分别记录。
 
 2026-10-09的阶段迁移见 [有序GPU法向](SURFACE_NORMALS_TORCH_20261009.md)、
 [white/pial正则项](PYTORCH_PLACEMENT_REGULARIZATION.md)、
 [WM/aseg编辑](WM_ASEG_TORCH.md)、[WM直方图](WM_HISTOGRAM_TORCH.md)及[完整缺陷投射](DEFECTS_TORCH.md)。
 [固定主曲率的GPU衍生图](CURVATURE_DERIVATIVES_TORCH_20261009.md)单列算子精度，
-不替代离散主曲率计算；新的[离散八图实验](DISCRETE_CURVATURE_TORCH_20261009.md)
-已完成两例双侧同输入回归，尚未满足全部探索门，不替代完整curv.stats。
+不替代离散主曲率计算；新的[完整曲率统计](FULL_CURVATURE_STATS_PYTHON_20261010.md)
+已完成两例双侧同输入八图及文本逐字节回归；整例接入另测。
+[完整配准的当前几何复用](REGISTRATION_CURRENT_STATE_REUSE.md)保留相同算法与GPU平均器，
+按完整同输入ABBA检验重复法向和弧距计算的移除；阶段收益与整例结果分开。
 原始T1空目录配对采用[整例复现脚本](TORCH_INTEGRATION_20261009.md)。
 容器 PID 与 GPU 显存归属的记录规则见[进程显存说明](GPU_PROCESS_MEMORY.md)。
-局部内核收益与完整阶段、整例收益分别记录，纯GPU全流程仍未完成。
+局部内核收益与完整阶段、整例收益分别记录，独立Python候选的完整生产验收仍未通过。
 ## 1. 功能简介
 
 `fnit-recon-all`从一幅原始T1w生成体积分割、双侧white/pial表面、顶点指标、脑区标注与统计。标准单T1入口目前不支持多T1、T2/FLAIR或纵向重建。
 
-当前是Python调度、PyTorch/NumPy/Numba计算与固定FreeSurfer源码在Conda内构建的原生辅助程序组成的流程；运行不启动系统安装的FreeSurfer，但仍会调用这些源码构建程序，并需要个人许可证。它不是全PyTorch或全GPU实现。所需native程序、资源和license缺失会提前报错。
+`backend="python"`选择完整独立候选：SimpleITK N4、自有WM分割与CPU有序编辑、数字拓扑或显式自有GA、完整white/pial及后续球面、指标和统计。它允许Python/Numba CPU核，当前仍要求显式`cuda:N`和总线程至少2；不读取`native_bin_dir`或执行原版阶段程序。数字拓扑采用不同于FreeSurfer GA的算法；`topology_backend="python-ga"` 将完整有序GA文件接口接入相同配方，并在最终orig质量和SHA检查后发布。两条路径的严格复现和整体指标等效分别验收，整例验证见[自有Python流程](PYTHON_SURFACE_PIPELINE.md)，新接线见[完整GA配方](PYTHON_GENETIC_PROFILE.md)。
+
+函数签名默认`backend="native"`保留既有混合对照，其中部分阶段使用固定FreeSurfer源码在Conda内构建的程序，需要核验程序和个人许可证。它不使用系统预装FreeSurfer。`python-gpu`是历史严格纯Python/CUDA配方，缺少必要替代时提前失败；与允许CPU计算的`python`配方不同。所有配方都检查必要步骤、真实输出和网格质量，缺依赖或阶段失败会报错。
 
 CUDA默认TF32，SynthStrip/SynthSeg/辅助网络及Talairach/MNI相关阶段保留同输入验证的FP32例外，不启用FP16/BF16。CPU入口不改调用方CUDA策略。执行完成、输出完整性、网格质量和数值等价是分别记录的状态。
 
@@ -63,38 +82,61 @@ reconstruction_report = run_recon_all_python(
     threads=4,  # 当前被试计算预算；双半球并行时各2线程，报告线程设置与恢复
     hemisphere_workers=2,  # 显式启用左右侧独立进程；默认1，共享缺陷体积仍顺序累计
     native_optimizations="auto",  # auto在CUDA上启用FNIT CUDA候选评分；original为Conda GCA；torch强制启用候选评分
-    n4_backend="native",  # torch显式使用完整200轮N4，已知强度偏移单列
+    n4_backend="native",  # 原生N4对照；simpleitk为完整Python库N4，torch实验误差单列
     n4_execution="in-process",  # isolated仅配torch/cuda:N，缓存子exec保持父策略
+    input_execution="serial",  # parallel只在总4线程下并行完整N4/SynthSeg；默认串行
     normalization_controls_backend="cpu",  # torch复用两轮同规则GPU邻域；仅显式cuda:N
     normalization_initial_bias_backend="cpu",  # torch复用第二轮初始偏置GPU传播/平滑，保持原除乘精度
     inflate_backend="native",  # torch复用完整标准inflated/sulc；须cuda:N和两个半球worker
     sphere_finish_backend="cpu",  # torch复用完整dense GPU球面收尾；须cuda:N和两个隔离worker
+    surface_placement_backend="native",  # 原放置对照；python复用完整preaparc/white/pial
+    topology_backend="native",  # 原GA对照；python为完整数字拓扑候选，算法不同
     annotation_gibbs_backend="python",  # numba复用完整有序重分类；GPU几何/随机序列不变
     remesh_scalar_storage="numpy",  # python优化已有CPU remesh双精度存储；拆缩/平滑顺序不变
     mni_execution="in-process",  # parallel-late在末尾将完整MNI与CPU网格检查并行；总线程至少2
     wm_backend="native",  # torch启用FNIT PyTorch/CPU有序混合WM分割
     wm_execution="in-process",  # isolated仅配torch-optimized，子exec局部缓存、父策略保持
     defects_backend="native",  # torch启用完整PyTorch缺陷投射；标签相同，颜色表不同
-    wm_edit_backend="native",  # torch-hybrid启用静态CUDA编辑，有序核心仍用Numba CPU
+    wm_edit_backend="native",  # python为完整Numba CPU编辑；torch-hybrid另用静态CUDA编辑
     sphere_normals_backend="numba",  # torch只迁移标准sphere法向；其余算法和finish保留
     gca_inverse_backend="cpu",  # torch显式复用相同公式的批量求逆；完整注册仍需回归
     gca_candidate_chunk=64,  # 完整候选的分块大小；较大块增加显存
     gca_execution="in-process",  # isolated以独立exec复用缓存，不改变父allocator/精度
     fill_backend="python",  # numba为有序CPU堆；torch-numba另把初始边界放到GPU
-    backend="native",  # native为当前可验收混合流程；python-gpu缺少完整替代时在创建输出前明确失败
-    native_bin_dir=None,  # None 表示使用当前 Conda 环境的 bin/
+    backend="native",  # 历史混合对照；执行/网格通过不代表整体指标等效
+    native_bin_dir=None,  # native对照使用当前Conda bin；Python配方不读取此项
     profile_stages=False,  # 生产默认不增加阶段 CUDA 同步；True 记录同步等待
     cuda_allocator_cache="auto",  # 首次 CUDA 默认关闭缓存；已初始化 API 保留实际策略
 )
 # reconstruction_report 是运行报告字典；仅在全部阶段与文件完整性检查通过后返回。
 ```
 
+完整独立候选的具名调用如下。`backend="python"`固定选择下面列出的后端及双侧worker；不以逐阶段混合默认回退到原版程序。
+
+```python
+python_reconstruction_report = run_recon_all_python(
+    t1="/data/sub01_T1w.nii.gz",  # 同一幅原始3D T1w
+    subject_dir="/data/subjects/sub01-python",  # 新的空输出目录
+    weights_dir="/data/fnit-weights",  # 已校验模型权重，遵守资源许可
+    assets_dir="/data/fnit-assets",  # 已校验模板/图谱，遵守资源许可
+    device="cuda:0",  # 当前独立配方要求明确CUDA编号；有序CPU核仍保留
+    threads=4,  # 总CPU预算，至少2；固定双侧worker平分
+    backend="python",  # 完整独立候选；严格复现和整体指标等效另行评估
+    n4_backend="simpleitk",  # 固定完整N4 Python库，实际CPU计算
+    n4_execution="in-process",  # SimpleITK不使用Torch缓存worker
+    wm_edit_backend="python",  # 固定完整Numba CPU WM/aseg编辑
+    surface_placement_backend="python",  # 固定完整preaparc/white/pial与自有指标
+    topology_backend="python",  # 固定数字拓扑算法，不是原GA
+    native_bin_dir=None,  # 此配方不读取该参数或发现原版阶段程序
+)
+```
+
 ### 输入数据格式
 
 - `t1`：原始3D `(X,Y,Z)` T1w NIfTI路径，有限值、有效4×4 affine和体素间距，不要求输入orientation固定。无外部脑mask前提；入口生成1mm、256³conform网格。强度无固定物理单位。
 - `subject_dir`：不存在或为空的单被试目录；不得与其他并行job目录嵌套或重叠。批量jobs每项只含t1与subject_dir。
-- `weights_dir`及`assets_dir`：逐文件大小/SHA通过的外置目录；模型权重与图谱是不同资源，不可混用。个人许可证通过FS_LICENSE提供，不复制到仓库或报告。
-- `native_bin_dir`：当前激活Conda bin或已核验的固定源码构建目录；构建、安装和许可说明见[安装页](CONDA_CPP_BUILD.md)。
+- `weights_dir`及`assets_dir`：逐文件大小/SHA通过的外置目录；模型权重与图谱是不同资源，不可混用，均须遵守其许可。native对照的个人许可证通过FS_LICENSE提供，不复制到仓库或报告；SimpleITK N4本身不需要FreeSurfer许可证。
+- `native_bin_dir`：native对照使用当前激活Conda bin或已核验的固定源码构建目录；`backend="python"`不读取该参数，也不查找这些程序。原生对照的构建、安装和许可说明见[安装页](CONDA_CPP_BUILD.md)。
 
 ### 单被试公开入口
 
@@ -104,32 +146,35 @@ reconstruction_report = run_recon_all_python(
 | `subject_dir` | 是 | `str 或 Path` | `—` | 不存在或为空的单被试重建输出目录 |
 | `weights_dir` | 是 | `str 或 Path` | `—` | 已通过大小与 SHA-256 校验的模型权重目录 |
 | `assets_dir` | 是 | `str 或 Path` | `—` | 已校验的模板和图谱目录 |
-| `device` | 否 | `str` | `'cuda:0'` | 计算设备，cpu 或 cuda:N；编号遵循 CUDA_VISIBLE_DEVICES |
+| `device` | 否 | `str` | `'cuda:0'` | native对照可用cpu/cuda:N；python配方要求显式cuda:N，编号遵循CUDA_VISIBLE_DEVICES |
 | `threads` | 否 | `int 或 None` | `4` | 正整数CPU线程预算；具体每阶段并行度及恢复见输入说明 |
-| `native_bin_dir` | 否 | `str 或 Path 或 None` | `None` | None 使用当前 Conda bin；也可指定核验过的源码构建目录 |
+| `native_bin_dir` | 否 | `str 或 Path 或 None` | `None` | native对照默认当前Conda bin，可指定核验目录；backend=python不读取 |
 | `profile_stages` | 否 | `bool` | `False` | 记录阶段 CUDA 同步等待；生产默认不增加同步 |
 | `cuda_allocator_cache` | 否 | `str` | `'auto'` | auto、enabled 或 disabled；首次 CUDA 前选择，auto 保留已初始化 API 策略 |
-| `hemisphere_workers` | 否 | `int` | `1` | 1串行；2以独立进程运行左右半球，总线程预算平分 |
+| `hemisphere_workers` | 否 | `int` | `1` | native对照1串行或2独立进程；python配方固定2，总threads至少2并平分 |
 | `native_optimizations` | 否 | `str` | `'auto'` | auto在CUDA上使用FNIT CUDA候选评分；original为Conda GCA；torch强制启用候选评分，EM仍为Python FP32 |
-| `n4_backend` | 否 | `str` | 'native' | torch显式复用完整N4；已知系统强度差异单列，不改变默认 |
-| `n4_execution` | 否 | `str` | 'in-process' | isolated仅Torch/cuda:N，在新exec局部缓存；非法组合输出前报错，子完整报告保留 |
-| `normalization_controls_backend` | 否 | `str` | `'cpu'` | torch复用两轮的GPU邻域计数/求和与缓冲；显式cuda:N，有序选择/其余偏置步骤不变 |
-| `normalization_initial_bias_backend` | 否 | `str` | `'cpu'` | torch只迁移第二轮初始偏置传播/平滑；距离/排序仍CPU，原float64除后乘/float32输出保持，显式cuda:N |
+| `n4_backend` | 否 | `str` | 'native' | native为原程序对照；simpleitk为完整CPU Python库N4；torch为完整Torch实验。python配方固定simpleitk，误差分别记录 |
+| `n4_execution` | 否 | `str` | 'in-process' | isolated仅Torch/cuda:N的缓存子exec；SimpleITK及python配方使用in-process，非法组合提前报错 |
+| `input_execution` | 否 | `str` | `'serial'` | parallel以N4 CPU1/SynthSeg GPU+CPU3的独立exec并行；总threads须4、SimpleITK/in-process和显式cuda:N，join后继续自产nu→filled，不重复分割；详见[完整并行组](INPUT_N4_SYNTHSEG_PARALLEL.md) |
+| `normalization_controls_backend` | 否 | `str` | `'cpu'` | torch复用两轮的GPU邻域计数/求和与缓冲；显式cuda:N，有序选择/其余偏置步骤不变；python配方固定torch。 |
+| `normalization_initial_bias_backend` | 否 | `str` | `'cpu'` | torch只迁移第二轮初始偏置传播/平滑；距离/排序仍CPU，原float64除后乘/float32输出保持，显式cuda:N；python配方固定torch。 |
 | `inflate_backend` | 否 | `str` | `'native'` | torch复用完整标准inflated/sulc；须cuda:N与hemisphere_workers=2，仅surface子exec局部启用缓存；nofix和后续球面算法保持 |
-| `sphere_finish_backend` | 否 | `str` | `'cpu'` | torch复用完整dense GPU标准sphere收尾，全部设备须cuda:N与hemisphere_workers=2，surface子exec局部缓存；原负面标记/SOAP/全投影/停止保持，不选择实验marked |
+| `surface_placement_backend` | 否 | `str` | `'native'` | native为原放置对照；python复用完整四轮preaparc/white/pial及自有指标，允许有序CPU核。python配方固定python |
+| `topology_backend` | 否 | `str` | `'native'` | native为原GA对照；python为完整数字拓扑；python-ga为完整自有有序GA。python配方默认数字python并保留显式python-ga；真实缺陷标签编号域分别检查，整体等效未判定 |
+| `sphere_finish_backend` | 否 | `str` | `'cpu'` | torch复用完整dense GPU标准sphere收尾，全部设备须cuda:N与hemisphere_workers=2，surface子exec局部缓存；原负面标记/SOAP/全投影/停止保持，不选择实验marked；python配方固定torch。 |
 | `remesh_scalar_storage` | 否 | `str` | 'numpy' | python复用已有CPU完整remesh的双精度标量存储；拆缩/堆/平滑保持同序，首次JIT与I/O计入 |
 | `annotation_gibbs_backend` | 否 | `str` | `'python'` | numba复用完整有序Gibbs重分类；共用GPU几何缓存，保持随机序列、标签/坐标及总线程，首次JIT/打包计入阶段 |
-| `mni_execution` | 否 | `str` | `'in-process'` | parallel-late须cuda:N及整数threads≥2，caller autocast关闭；全部半球写出后，完整MNI与CPU网格检查分配同一线程预算并行，join后检查输出；返回完整mni_mesh_parallel报告 |
+| `mni_execution` | 否 | `str` | `'in-process'` | parallel-late须cuda:N及整数threads≥2，caller autocast关闭；全部半球写出后，完整MNI与CPU网格检查分配同一线程预算并行，join后检查输出；返回完整mni_mesh_parallel报告；python配方固定parallel-late。 |
 | `wm_backend` | 否 | `str` | `'native'` | native调用Conda mri_segment；torch为已有混合分割，torch-optimized另复用Torch直方图和缓存平面几何 |
 | `wm_execution` | 否 | `str` | `'in-process'` | isolated只允许torch-optimized，在新exec启用缓存，返回完整阶段报告；父CUDA/TF32保持 |
 | `defects_backend` | 否 | `str` | `'native'` | torch使用完整缺陷投射；保持双侧顺序/标签，采用确定性颜色 |
-| `wm_edit_backend` | 否 | `str` | `'native'` | torch-hybrid用CUDA静态编辑及Numba有序核心；要求CUDA，证明失败报错 |
+| `wm_edit_backend` | 否 | `str` | `'native'` | native为原编辑对照；python为完整Numba CPU编辑；torch-hybrid为CUDA静态编辑加有序CPU核心。python配方固定python，输入证明失败报错 |
 | `sphere_normals_backend` | 否 | `str` | `'numba'` | torch迁移标准sphere法向；要求CUDA，完整优化与CPU finish保持 |
-| `gca_inverse_backend` | 否 | `str` | `'cpu'` | torch批量求逆；非默认设置仅允许CUDA的Torch GCA |
-| `gca_candidate_chunk` | 否 | `int` | `64` | 正整数完整候选分块，不删候选；非默认仅用于CUDA Torch GCA |
-| `gca_execution` | 否 | `str` | `'in-process'` | isolated为新exec中的局部CUDA缓存，父策略保持；仅Torch GCA |
+| `gca_inverse_backend` | 否 | `str` | `'cpu'` | torch批量求逆；非默认设置仅允许CUDA的Torch GCA；python配方固定torch。 |
+| `gca_candidate_chunk` | 否 | `int` | `64` | 正整数完整候选分块，不删候选；非默认仅用于CUDA Torch GCA；python配方固定1024。 |
+| `gca_execution` | 否 | `str` | `'in-process'` | isolated为新exec中的局部CUDA缓存，父策略保持；仅Torch GCA；python配方固定isolated。 |
 | `fill_backend` | 否 | `str` | `'python'` | numba为有序CPU堆；torch-numba另用CUDA初始边界，要求CUDA |
-| `backend` | 否 | `str` | `'native'` | `native` 为当前混合流程；`python-gpu` 为严格纯 Python/CUDA profile，未完成阶段会在输出前抛出结构化错误 |
+| `backend` | 否 | `str` | `'native'` | native保留混合对照；python为完整独立固定配方，允许CPU核/数字拓扑，要求cuda:N与threads至少2，整体等效未判定；python-gpu缺阶段提前失败 |
 
 ### 批量公开入口
 
@@ -138,30 +183,37 @@ reconstruction_report = run_recon_all_python(
 | `jobs` | 是 | `list[dict]` | `—` | 顺序job列表，每项仅含t1路径和subject_dir空目录；目录不得重叠 |
 | `weights_dir` | 是 | `str 或 Path` | `—` | 已通过大小与 SHA-256 校验的模型权重目录 |
 | `assets_dir` | 是 | `str 或 Path` | `—` | 已校验的模板和图谱目录 |
-| `devices` | 否 | `tuple[str, ...]` | `('cuda:0',)` | 互不重复的cpu/cuda:N设备tuple，每个设备一次一例，启动独立子进程 |
+| `devices` | 否 | `tuple[str, ...]` | `('cuda:0',)` | 互不重复的设备tuple，每设备一次一例；native对照可cpu/cuda:N，python配方全部须显式cuda:N |
 | `threads` | 否 | `int 或 None` | `4` | 正整数CPU线程预算；具体每阶段并行度及恢复见输入说明 |
-| `native_bin_dir` | 否 | `str 或 Path 或 None` | `None` | None 使用当前 Conda bin；也可指定核验过的源码构建目录 |
+| `native_bin_dir` | 否 | `str 或 Path 或 None` | `None` | native对照默认当前Conda bin，可指定核验目录；backend=python不读取 |
 | `profile_stages` | 否 | `bool` | `False` | 记录阶段 CUDA 同步等待；生产默认不增加同步 |
 | `cuda_allocator_cache` | 否 | `str` | `'auto'` | auto、enabled 或 disabled；首次 CUDA 前选择，auto 保留已初始化 API 策略 |
-| `hemisphere_workers` | 否 | `int` | `1` | 1串行；2以独立进程运行左右半球，总线程预算平分 |
+| `hemisphere_workers` | 否 | `int` | `1` | native对照1串行或2独立进程；python配方固定2，总threads至少2并平分 |
 | `native_optimizations` | 否 | `str` | `'auto'` | auto在CUDA上使用FNIT CUDA候选评分；original为Conda GCA；torch强制启用候选评分，EM仍为Python FP32 |
-| `n4_backend` | 否 | `str` | 'native' | torch显式复用完整N4；已知系统强度差异单列，不改变默认 |
-| `n4_execution` | 否 | `str` | 'in-process' | isolated仅Torch/cuda:N，在新exec局部缓存；非法组合输出前报错，子完整报告保留 |
-| `normalization_controls_backend` | 否 | `str` | `'cpu'` | torch复用两轮同规则GPU邻域；所有目标设备须为cuda:N，非法组合调度前拒绝 |
-| `normalization_initial_bias_backend` | 否 | `str` | `'cpu'` | torch复用第二轮初始偏置GPU算子，所有目标设备须为cuda:N，非法组合调度前拒绝 |
+| `n4_backend` | 否 | `str` | 'native' | native为原程序对照；simpleitk为完整CPU Python库N4；torch为完整Torch实验。python配方固定simpleitk，误差分别记录 |
+| `n4_execution` | 否 | `str` | 'in-process' | isolated仅Torch/cuda:N的缓存子exec；SimpleITK及python配方使用in-process，非法组合提前报错 |
+| `input_execution` | 否 | `str` | `'serial'` | parallel以N4 CPU1/SynthSeg GPU+CPU3的独立exec并行；总threads须4、SimpleITK/in-process和显式cuda:N，join后继续自产nu→filled，不重复分割；详见[完整并行组](INPUT_N4_SYNTHSEG_PARALLEL.md) |
+| `normalization_controls_backend` | 否 | `str` | `'cpu'` | torch复用两轮同规则GPU邻域；所有目标设备须为cuda:N，非法组合调度前拒绝；python配方固定torch。 |
+| `normalization_initial_bias_backend` | 否 | `str` | `'cpu'` | torch复用第二轮初始偏置GPU算子，所有目标设备须为cuda:N，非法组合调度前拒绝；python配方固定torch。 |
 | `inflate_backend` | 否 | `str` | `'native'` | torch使用完整标准inflated/sulc GPU算法；所有设备须cuda:N且hemisphere_workers=2，非法组合调度前拒绝 |
-| `sphere_finish_backend` | 否 | `str` | `'cpu'` | torch复用完整dense GPU标准sphere收尾，全部设备须cuda:N与hemisphere_workers=2，surface子exec局部缓存；原负面标记/SOAP/全投影/停止保持，不选择实验marked |
-| `mni_execution` | 否 | `str` | `'in-process'` | parallel-late须cuda:N及整数threads≥2，caller autocast关闭；全部半球写出后，完整MNI与CPU网格检查分配同一线程预算并行，join后检查输出；返回完整mni_mesh_parallel报告 |
+| `surface_placement_backend` | 否 | `str` | `'native'` | native为原放置对照；python复用完整四轮preaparc/white/pial及自有指标，允许有序CPU核。python配方固定python |
+| `topology_backend` | 否 | `str` | `'native'` | native为原GA对照；python为完整数字拓扑；python-ga为完整自有有序GA。python配方默认数字python并保留显式python-ga；真实缺陷标签编号域分别检查，整体等效未判定 |
+| `sphere_finish_backend` | 否 | `str` | `'cpu'` | torch复用完整dense GPU标准sphere收尾，全部设备须cuda:N与hemisphere_workers=2，surface子exec局部缓存；原负面标记/SOAP/全投影/停止保持，不选择实验marked；python配方固定torch。 |
+| `remesh_scalar_storage` | 否 | `str` | 'numpy' | python使用既有完整CPU remesh双精度标量存储，保持有序拆缩；python配方固定python |
+| `annotation_gibbs_backend` | 否 | `str` | `'python'` | numba为完整有序Gibbs核，GPU特征/随机序列保持；python配方固定numba |
+| `mni_execution` | 否 | `str` | `'in-process'` | parallel-late须cuda:N及整数threads≥2，caller autocast关闭；全部半球写出后，完整MNI与CPU网格检查分配同一线程预算并行，join后检查输出；返回完整mni_mesh_parallel报告；python配方固定parallel-late。 |
 | `wm_backend` | 否 | `str` | `'native'` | native调用Conda mri_segment；torch为已有混合分割，torch-optimized另复用Torch直方图和缓存平面几何 |
 | `wm_execution` | 否 | `str` | `'in-process'` | isolated只允许torch-optimized，在新exec启用缓存，返回完整阶段报告；父CUDA/TF32保持 |
-| `wm_edit_backend` | 否 | `str` | `'native'` | torch-hybrid复用CUDA静态编辑与Numba有序核心，要求CUDA |
+| `wm_edit_backend` | 否 | `str` | `'native'` | native为原编辑对照；python为完整Numba CPU编辑；torch-hybrid为CUDA静态编辑加有序CPU核心。python配方固定python，输入证明失败报错 |
 | `defects_backend` | 否 | `str` | `'native'` | torch完整缺陷投射；半球共享输出仍按左、右顺序 |
 | `sphere_normals_backend` | 否 | `str` | `'numba'` | torch仅迁移标准球面法向，要求CUDA |
-| `gca_inverse_backend` | 否 | `str` | `'cpu'` | torch批量求逆；非默认设置仅允许CUDA的Torch GCA |
-| `gca_candidate_chunk` | 否 | `int` | `64` | 正整数完整候选分块，不删候选；非默认仅用于CUDA Torch GCA |
-| `gca_execution` | 否 | `str` | `'in-process'` | isolated为新exec中的局部CUDA缓存，父策略保持；仅Torch GCA |
+| `gca_inverse_backend` | 否 | `str` | `'cpu'` | torch批量求逆；非默认设置仅允许CUDA的Torch GCA；python配方固定torch。 |
+| `gca_candidate_chunk` | 否 | `int` | `64` | 正整数完整候选分块，不删候选；非默认仅用于CUDA Torch GCA；python配方固定1024。 |
+| `gca_execution` | 否 | `str` | `'in-process'` | isolated为新exec中的局部CUDA缓存，父策略保持；仅Torch GCA；python配方固定isolated。 |
 | `fill_backend` | 否 | `str` | `'python'` | numba为有序CPU堆；torch-numba另用CUDA初始边界，要求CUDA |
-| `backend` | 否 | `str` | `'native'` | native为混合流程；python-gpu未完成时提前失败 |
+| `backend` | 否 | `str` | `'native'` | native保留混合对照；python为完整独立固定配方，允许CPU核/数字拓扑，要求cuda:N与threads至少2，整体等效未判定；python-gpu缺阶段提前失败 |
+
+`backend="python"`会覆盖配方内的逐阶段选项：`native_optimizations="torch"`、`n4_backend="simpleitk"`、`n4_execution="in-process"`、`wm_backend="torch-optimized"`、`gca_execution="isolated"`、`gca_inverse_backend="torch"`、`gca_candidate_chunk=1024`、`normalization_controls_backend="torch"`、`normalization_initial_bias_backend="torch"`、`sphere_finish_backend="torch"`、`mni_execution="parallel-late"`、`wm_execution="isolated"`、`wm_edit_backend="python"`、`defects_backend="torch"`、`inflate_backend="torch"`、`surface_placement_backend="python"`、`topology_backend="python"`、`annotation_gibbs_backend="numba"`、`remesh_scalar_storage="python"`、`fill_backend="numba"`、`hemisphere_workers=2`。两张表的默认列描述接口签名；其余选项按调用值保留并校验，实际后端写入运行报告。当前配方与已冻结整例结果分别按实际版本记录。
 
 ### 输出
 
@@ -253,21 +305,42 @@ reconstruction_reports = run_recon_all_python_batch(
     threads=4,  # 每被试总CPU预算
     hemisphere_workers=2,  # 每侧分得2线程，需要总预算至少2
     native_optimizations="auto",  # CUDA上用FNIT GCA候选评分；CPU按已验证能力选择
-    backend="native",  # 严格 python-gpu 尚未完成，不能静默回退
+    backend="native",  # 既有混合对照；完整独立候选改为python，配方固定后端
     normalization_controls_backend="cpu",  # torch仅显式cuda:N；保留原控制点选择与偏置规则
     normalization_initial_bias_backend="cpu",  # torch复用第二轮初始偏置；保留原float64除乘与float32输出
+    n4_backend="native",  # 原生N4对照；独立Python配方固定SimpleITK
+    n4_execution="in-process",  # SimpleITK保持in-process，isolated仅用于Torch N4
     inflate_backend="native",  # torch仅支持显式CUDA和两个半球worker，标准表面输出同序
+    surface_placement_backend="native",  # 原放置对照；python复用完整四轮white/pial
+    topology_backend="native",  # 原GA对照；python使用完整数字拓扑，非GA复现
     sphere_finish_backend="cpu",  # torch在表面子exec复用完整GPU收尾；父精度和缓存保持
     annotation_gibbs_backend="python",  # numba原样传给每例CLI，有序反馈不改标签
     remesh_scalar_storage="numpy",  # python原样传入，每侧完整remesh保持原有堆顺序
     mni_execution="in-process",  # parallel-late要求全部cuda:N；完整MNI与末尾网格检查并行
-    wm_edit_backend="native",  # torch-hybrid为同输入已验证的WM/aseg混合候选
+    wm_edit_backend="native",  # python为完整CPU有序编辑；torch-hybrid另迁移静态GPU规则
     defects_backend="native",  # torch保持完整缺陷标签投射；不等于拓扑GA
     sphere_normals_backend="numba",  # torch仅替换标准sphere法向
 )
 ```
 
-批量调用使用独立子进程；`devices=("cpu",)`可顺序CPU执行。设备数增多会增加同时运行被试数和总内存/CPU需求。输出目录不得相同、互相嵌套，或与已有运行重叠。
+完整独立候选可复用上面的job结构，但必须指定新的空输出目录：
+
+```python
+python_reconstruction_reports = run_recon_all_python_batch(
+    jobs=[  # 两例独立的新输出目录，不能复用已运行的目录
+        {"t1": "/data/sub01_T1w.nii.gz", "subject_dir": "/data/subjects/sub01-python"},
+        {"t1": "/data/sub02_T1w.nii.gz", "subject_dir": "/data/subjects/sub02-python"},
+    ],
+    weights_dir="/data/fnit-weights",  # 全部已校验权重
+    assets_dir="/data/fnit-assets",  # 全部已校验模板/图谱
+    devices=("cuda:0",),  # 每GPU一次一例；当前两例顺序运行
+    threads=4,  # 每被试总预算，固定双侧worker各2线程
+    backend="python",  # 每例使用上述完整独立固定配方
+    native_bin_dir=None,  # 此配方不读取原版程序目录
+)
+```
+
+批量调用使用独立子进程；完整重建的MNI后处理要求CUDA，设备建议使用显式`cuda:N`，独立Python配方必须如此。CPU设备在启动被试前报错，通用CPU子函数和独立参考验证仍可使用。设备数增多会增加同时运行被试数和总内存/CPU需求。输出目录不得相同、互相嵌套，或与已有运行重叠。
 
 批量入口按jobs顺序返回报告列表；每设备一个独立子进程，每job threads预算，失败汇总抛RuntimeError。示例默认单例；批量的设备数增加时总CPU预算也增加。
 
@@ -277,7 +350,15 @@ reconstruction_reports = run_recon_all_python_batch(
 export FS_LICENSE=/private/license.txt
 fnit-recon-all subject_T1w.nii.gz subjects/sub01 \
   --weights-dir /data/fnit-weights --assets-dir /data/fnit-assets \
-  --device cuda:0 --threads 4 --hemisphere-workers 2
+  --device cuda:0 --threads 4 --hemisphere-workers 2 --backend native
+```
+
+完整独立候选使用同一入口；固定配方自动选择SimpleITK、CPU WM编辑、完整自有放置和数字拓扑，不传原版程序目录：
+
+```bash
+fnit-recon-all subject_T1w.nii.gz subjects/sub01-python \
+  --weights-dir /data/fnit-weights --assets-dir /data/fnit-assets \
+  --device cuda:0 --threads 4 --backend python
 ```
 
 ### fnit-recon-all
@@ -288,34 +369,37 @@ fnit-recon-all subject_T1w.nii.gz subjects/sub01 \
 | `subject_dir` | `subject_dir` | 不存在或为空的单被试重建输出目录 |
 | `--weights-dir` | `weights_dir` | 已通过大小与 SHA-256 校验的模型权重目录 |
 | `--assets-dir` | `assets_dir` | 已校验的模板和图谱目录 |
-| `--device` | `device` | 计算设备，cpu 或 cuda:N；编号遵循 CUDA_VISIBLE_DEVICES |
+| `--device` | `device` | 完整重建使用CUDA，建议显式cuda:N；独立Python配方必须显式指定；编号遵循CUDA_VISIBLE_DEVICES |
 | `--threads` | `threads` | 正整数CPU线程预算，默认4；双侧并行平分此预算 |
-| `--native-bin-dir` | `native_bin_dir` | None 使用当前 Conda bin；也可指定核验过的源码构建目录 |
+| `--native-bin-dir` | `native_bin_dir` | native对照使用当前Conda bin或核验目录；backend=python不读取 |
 | `--hemisphere-workers` | `hemisphere_workers` | 1串行；2以独立进程运行左右半球，总线程预算平分 |
 | `--native-optimizations` | `native_optimizations` | auto在CUDA上使用FNIT CUDA候选评分；original为Conda GCA；torch强制启用候选评分 |
-| `--n4-backend` | `n4_backend` | native为Conda ITK；torch为完整200轮N4，系统强度差异单列 |
-| `--n4-execution` | `n4_execution` | in-process保留父策略；isolated仅Torch/cuda:N，完整缓存子exec |
-| `--normalization-controls-backend` | `normalization_controls_backend` | cpu保留原邻域；torch复用两轮GPU缓冲，显式cuda:N，其余算法不变 |
-| `--normalization-initial-bias-backend` | `normalization_initial_bias_backend` | cpu保留第二轮初始偏置；torch复用GPU传播/平滑，保持算术顺序和精度，显式cuda:N |
+| `--n4-backend` | `n4_backend` | native为混合入口的原程序对照；backend=python仅将该历史缺省映射为simpleitk，显式torch保留；两种Python N4均完整执行，误差另报 |
+| `--n4-execution` | `n4_execution` | 默认in-process；isolated仅Torch/cuda:N，独立Python配方保留显式选择；SimpleITK/isolated提前报错，见[N4后端选择](PYTHON_PROFILE_N4_SELECTION.md) |
+| `--input-execution` | `input_execution` | serial默认；parallel并行完整N4/SynthSeg，总4线程与明确cuda:N；仅支持SimpleITK/in-process，不改变拟合精度 |
+| `--normalization-controls-backend` | `normalization_controls_backend` | cpu保留原邻域；torch复用两轮GPU缓冲，显式cuda:N，其余算法不变；python配方固定torch。 |
+| `--normalization-initial-bias-backend` | `normalization_initial_bias_backend` | cpu保留第二轮初始偏置；torch复用GPU传播/平滑，保持算术顺序和精度，显式cuda:N；python配方固定torch。 |
 | `--inflate-backend` | `inflate_backend` | 默认native；torch仅替换标准inflated/sulc，须cuda:N和两个半球worker，surface子exec局部启用缓存 |
-| `--sphere-finish-backend` | `sphere_finish_backend` | 默认cpu；torch仅迁移既有完整dense标准sphere收尾，须cuda:N和两个缓存surface worker；注册收尾保持 |
+| `--surface-placement-backend` | `surface_placement_backend` | native为原放置对照；python为完整自有四轮preaparc/white/pial及指标；python配方固定python |
+| `--topology-backend` | `topology_backend` | native为原GA对照；python为完整数字拓扑；python-ga为完整自有有序GA，Python配方保留显式选择；整体等效未判定 |
+| `--sphere-finish-backend` | `sphere_finish_backend` | 默认cpu；torch仅迁移既有完整dense标准sphere收尾，须cuda:N和两个缓存surface worker；注册收尾保持；python配方固定torch。 |
 | `--remesh-scalar-storage` | `remesh_scalar_storage` | 默认numpy；python仅优化CPU完整remesh双精度存储，算法及三轮平滑不变 |
 | `--annotation-gibbs-backend` | `annotation_gibbs_backend` | 默认python；numba复用完整有序重分类，三图谱共享原特征，首次JIT/打包/读写计入墙钟 |
-| `--mni-execution` | `mni_execution` | 默认in-process；parallel-late在末尾并行完整MNI/CPU网格检查，明确cuda:N与至少2个总线程，join后检查138输出 |
+| `--mni-execution` | `mni_execution` | 默认in-process；parallel-late在末尾并行完整MNI/CPU网格检查，明确cuda:N与至少2个总线程，join后检查138输出；python配方固定parallel-late。 |
 | `--wm-backend` | `wm_backend` | native调用Conda mri_segment；torch为已有混合分割，torch-optimized另复用Torch直方图和缓存平面几何 |
 | `--wm-execution` | `wm_execution` | in-process保留父缓存；isolated为完整WM缓存worker，须配torch-optimized |
 | `--defects-backend` | `defects_backend` | native调用Conda mri_label2vol；torch使用完整PyTorch投射，不要求该原生程序 |
-| `--wm-edit-backend` | `wm_edit_backend` | native调用Conda编辑程序；torch-hybrid用CUDA静态编辑及Numba有序核心 |
+| `--wm-edit-backend` | `wm_edit_backend` | native为原编辑对照；python为完整Numba CPU编辑；torch-hybrid为CUDA静态编辑加有序CPU核心；python配方固定python |
 | `--sphere-normals-backend` | `sphere_normals_backend` | numba保留已有标准sphere法向；torch用同设备有序Torch法向 |
-| `--gca-inverse-backend` | `gca_inverse_backend` | cpu为原求逆，torch为同公式批量求逆；仅CUDA Torch GCA |
-| `--gca-candidate-chunk` | `gca_candidate_chunk` | 完整候选的正整数分块；默认64 |
-| `--gca-execution` | `gca_execution` | in-process保留父缓存；isolated使用新exec局部缓存 |
+| `--gca-inverse-backend` | `gca_inverse_backend` | cpu为原求逆，torch为同公式批量求逆；仅CUDA Torch GCA；python配方固定torch。 |
+| `--gca-candidate-chunk` | `gca_candidate_chunk` | 完整候选的正整数分块；默认64；python配方固定1024。 |
+| `--gca-execution` | `gca_execution` | in-process保留父缓存；isolated使用新exec局部缓存；python配方固定isolated。 |
 | `--fill-backend` | `fill_backend` | python、numba、torch-numba；保留有序距离场和标签规则 |
-| `--backend` | `backend` | `native` 为当前混合流程；`python-gpu` 要求所有阶段都有完整 Python/CUDA 实现，否则提前失败 |
+| `--backend` | `backend` | native为混合对照；python为完整独立候选，允许CPU核/数字拓扑，整体等效未判定；python-gpu缺阶段提前失败 |
 | `--profile-stages` | `profile_stages` | 记录阶段 CUDA 同步等待；生产默认不增加同步 |
 | `--cuda-allocator-cache` | `cuda_allocator_cache` | auto、enabled 或 disabled；首次 CUDA 前选择，auto 保留已初始化 API 策略 |
 
-CLI与Python默认差异：同为device=cuda:0、threads=4、hemisphere_workers=1；示例显式2。
+CLI与Python接口默认均为backend=native、device=cuda:0、threads=4、hemisphere_workers=1；独立Python配方固定两个半球worker，最低总线程为2。
 
 ## 4. 原软件调用
 
@@ -342,7 +426,11 @@ recon-all -i subject_T1w.nii.gz -s sub01 -sd reference/subjects -all -openmp 4
 
 最新完整自产配对及实际官方评分冻结为 **79a41cdd**：复用完整有序Numba Gibbs与CPU remesh双精度标量存储后，两例从原始T1/空目录连续完成，CLI **2718.390/2653.001秒**，完整harness **2737.822/2672.439秒**。相对同机同线程e34，本组慢28.0508%/29.0136%，没有整例提速；注释组缩短17.675/13.171秒，多个未改算法阶段也变慢，因果原因尚未隔离。138输出、生产网格、16张同序表面、七分割及68区统计保持，20/44顶点图有零容差尾差。实际官方严格复现仍6/138、7/138，厚度MAE **0.044824/0.050676mm**，整体等效未判定。完整阶段、544条逐区误差、实际官方距离/脑图、显存归属未知和安装范围见[本版两例完整报告](../../validation/recon_all/optimizations/20261010_whole_gcsa_remesh_a100_79a41cdd/README.md)，[变慢分解](../../validation/recon_all/optimizations/20261010_gcsa_remesh_runtime_diagnostics/README.md)保留全部观察。默认仍为旧Gibbs/remesh后端，十分钟与纯PyTorch目标尚未达到。
 
-后续完整Torch N4的原始连续链已检查到filled：少量N4量化差异在注册/归一化与WM链放大，默认仍为ITK；完整结果见[本次前段诊断](../../validation/recon_all/optimizations/20261010_n4_continuous_prefix/README.md)。 新增[两例四输入交叉归因](../../validation/recon_all/optimizations/20261010_n4_gca_cross_inputs/README.md)及[完整下游/失败形状诊断](N4_WHOLE_DIAGNOSTICS_20261010.md)：sub07仍因RH white自相交10面失败，诊断恢复不改变生产失败状态。[最终white实验接口](PYTHON_FINAL_WHITE.md)四侧匹配当前生产程序，但原始整例替换尚未测。
+后续完整Torch N4的原始连续链已检查到filled：少量N4量化差异在注册/归一化与WM链放大，该实验未改变native对照的N4默认；完整结果见[本次前段诊断](../../validation/recon_all/optimizations/20261010_n4_continuous_prefix/README.md)。 新增[两例四输入交叉归因](../../validation/recon_all/optimizations/20261010_n4_gca_cross_inputs/README.md)及[完整下游/失败形状诊断](N4_WHOLE_DIAGNOSTICS_20261010.md)：sub07仍因RH white自相交10面失败，诊断恢复不改变生产失败状态。[最终white实验接口](PYTHON_FINAL_WHITE.md)四侧匹配当前生产程序，但原始整例替换尚未测。
+
+新的[完整SimpleITK N4同输入验证](N4_SIMPLEITK.md)中，sub07/sub06量化输出分别有28/99个体素相差1，P99为0；原生重复运行相同。完整文件API为186.382/185.290秒，这些是阶段结果，不能代替独立Python配方的原始T1整例、网格和最终指标验收。
+
+独立Python配方现已保留显式Torch N4与isolated选择，默认SimpleITK保持。[两例新原始T1→filled对照](../../validation/recon_all/optimizations/20261010_torch_n4_prefix_compare/README.md)记录完整19步、14图误差、WM/filled Dice、LTA、显存与脑图；两例前段完成，但下游已有数值差异，整体等效未判定。跨时段墙钟观察不当作受控整例提速。
 
 2026-10-09 A100 整例冻结 `803aec50`：两例原始T1空目录控制/候选均完成，CLI **6137.234→2255.064秒、6040.677→2281.571秒**，同硬件/四线程配对提速 **2.72×、2.65×**。四次138输出与生产网格完整；新旧138项容差比较通过，有序面、表面坐标、分割及68区统计相同，零容差顶点图尾差仍完整保留。与官方严格复现为6/138、7/138，整体指标等效未判定。全部阶段、官方误差、局部质量、显存限制和脑图见[两例完整配对结果](../../validation/recon_all/optimizations/20261009_whole_pair_a100_803aec50/README.md)。该整例未包含后续N4、WM和GPU归一化实验；新接线的整例另行验证，十分钟目标尚未达到。
 
@@ -434,12 +522,19 @@ fnit-setup-weights --model recon-all --dest /data/fnit-weights --verify-only
 
 本页列出的模型/数组共11个，3,653,913,443 B。原始文件许可及归属见[统一资源规则](../WEIGHTS.md#权重许可与归属)。模型推理从本地加载已准备资源。
 
-重建还需98项标准资产和本机源码构建程序。逐文件大小/SHA及原作者来源见[assets.py](../../src/fnit/recon_all/assets.py)；安装器对已发布并收录[发布目录](../../src/fnit/_release_asset_catalog.json)的资源优先使用固定Release，保留固定来源回退。17项VPNL资源也已补充Release，来源与适用条款见[统一安装说明](../ASSETS.md)。固定源码与图谱保留各自许可及归属，个人FreeSurfer运行许可证由用户提供，不上传Release。
+重建还需98项标准资产。逐文件大小/SHA及原作者来源见[assets.py](../../src/fnit/recon_all/assets.py)；安装器对已发布并收录[发布目录](../../src/fnit/_release_asset_catalog.json)的资源优先使用固定Release，保留固定来源回退。17项VPNL资源也已补充Release，来源与适用条款见[统一安装说明](../ASSETS.md)。图谱和权重保留各自许可及归属。
+
+`backend="python"`使用主页Conda环境中的Python依赖及这些资源，不需要构建原版阶段程序或提供其运行许可证。该候选的当前网格质量限制和整例结果见[自有Python流程](PYTHON_SURFACE_PIPELINE.md)；安装完成不代表重建验收通过。
 
 ```bash
-bash tools/setup_recon_all_native_conda.sh
 fnit-setup-recon-all-assets --dest /data/fnit-assets
 fnit-setup-recon-all-assets --dest /data/fnit-assets --verify-only
 ```
 
-源码固定d932c45b7941662ea380a05efef580568b98d41a；构建安装器优先使用核验过的Release源码归档，未命中或下载失败时回退固定上游源码。[构建说明](CONDA_CPP_BUILD.md)列程序、源码归档校验和安装哈希；所需C/C++/Fortran工具链与tifffile按主页Conda环境安装。
+当前默认的`backend="native"`对照配方还需要独立源码构建程序和用户提供的个人FreeSurfer运行许可证，许可证不上传Release。其安装命令如下；选择Python候选时不执行此构建步骤。
+
+```bash
+bash tools/setup_recon_all_native_conda.sh
+```
+
+对照源码固定d932c45b7941662ea380a05efef580568b98d41a；构建安装器优先使用核验过的Release源码归档，未命中或下载失败时回退固定上游源码。[构建说明](CONDA_CPP_BUILD.md)列程序、源码归档校验和安装哈希；所需C/C++/Fortran工具链与tifffile按主页Conda环境安装。

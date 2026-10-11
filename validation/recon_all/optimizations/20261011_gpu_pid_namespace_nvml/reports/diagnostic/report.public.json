@@ -1,0 +1,161 @@
+{
+  "schema": "fnit.gpu_pid_namespace.live_nvml.v1",
+  "status": "passed",
+  "source_manifest_sha256": "d74fe151c62f2b7cf596ab0c2ed5c86c03d105d3bbcb5a853795eb75dfa9d89f",
+  "git_head_at_bundle": "b1e53cd88b0117e137cdc2c7480d6349db3bdd2c",
+  "module_source_commit": "89e0da3e469295047d31636b9bba918f284af1cb",
+  "installed_modules": {
+    "profiling.py": {
+      "sha256": "43fd54dd7217d789ff4eac0b6b9be702112444e9caf545f7f2f1c3f81acf09f8",
+      "bytes": 28023
+    },
+    "nvml_process_memory.py": {
+      "sha256": "1879606b4af4c10e088cff3c665255511dee872da91d4a9c8b2b1cb07550b348",
+      "bytes": 3058
+    }
+  },
+  "dependency_wheel": {
+    "sha256": "4361db337b0c551e2d101936dae2e9a60f957af26818e8c0c3a1f32b8db8d0a7",
+    "bytes": 49008
+  },
+  "installed_dependency": {
+    "version": "13.580.82",
+    "pynvml_py_sha256": "4251429c25f1615a4166f395d3c09fe0732bfb023864c4b7f12813373e5696ea",
+    "pynvml_py_bytes": 264920
+  },
+  "versions": {
+    "python": "3.11.16",
+    "torch": "2.5.1",
+    "kernel": "3.10.0-1160.el7.x86_64"
+  },
+  "process_identity_availability": {
+    "nspid_available": false,
+    "nspid_chain_length": 0,
+    "namespace_available": true,
+    "starttime_available": true,
+    "identity_error_category": null
+  },
+  "pid_mapping": {
+    "status": "unavailable",
+    "source": "local_proc_metadata_only",
+    "unavailable_reasons": [
+      "nspid_unavailable",
+      "trusted_driver_to_local_pid_mapping_not_supplied"
+    ]
+  },
+  "controls_before": {
+    "cuda_initialized": false,
+    "default_dtype": "torch.float32",
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cuda_autocast": {
+      "enabled": false,
+      "dtype": "torch.float16"
+    },
+    "cpu_autocast": {
+      "enabled": false,
+      "dtype": "torch.bfloat16"
+    },
+    "torch_intraop_threads": 4,
+    "torch_interop_threads": 64
+  },
+  "controls_after": {
+    "cuda_initialized": false,
+    "default_dtype": "torch.float32",
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cuda_autocast": {
+      "enabled": false,
+      "dtype": "torch.float16"
+    },
+    "cpu_autocast": {
+      "enabled": false,
+      "dtype": "torch.bfloat16"
+    },
+    "torch_intraop_threads": 4,
+    "torch_interop_threads": 64
+  },
+  "changed_environment_keys": [],
+  "cpu_sampler": {
+    "status": "not_applicable",
+    "query_backend": null,
+    "peak_tree_total_bytes": null,
+    "peak_target_device_used_bytes": null
+  },
+  "nvml_gpu_query": {
+    "status": "ownership_unresolved",
+    "query_backend_requested": "nvml",
+    "query_backend": "nvml",
+    "peak_tree_total_bytes": null,
+    "observed_resolved_tree_peak_bytes": null,
+    "peak_target_compute_process_sum_bytes": 3193962496,
+    "peak_target_device_used_bytes": 4140171264,
+    "scope": "one process snapshot on target GPU; unverified driver/local PID ownership is null; compute-process sum and sampled device-wide upper bound are separate observations, not exact FNIT peaks or continuous memory guarantees; consecutive queries are not exactly simultaneous",
+    "physical_device": 0,
+    "logical_device": "cuda:0",
+    "physical_device_confirmed": true,
+    "sample_count": 1,
+    "failed_sample_count": 0,
+    "backend_error_count": 0,
+    "failed_sample_categories": [],
+    "samples": [
+      {
+        "ownership": "unresolved",
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "target_compute_process_sum_bytes": 3193962496,
+        "target_device_used_bytes": 4140171264,
+        "sample_query_seconds": 0.7626082142814994,
+        "compute_process_count": 3,
+        "resolved_process_count": 0,
+        "unresolved_process_count": 3,
+        "device_query_succeeded": true,
+        "mapping_status": "unavailable",
+        "mapping_aliases_count": 0,
+        "mapping_unavailable_reasons": [
+          "nspid_unavailable",
+          "trusted_driver_to_local_pid_mapping_not_supplied"
+        ]
+      }
+    ]
+  },
+  "near_time_nvidia_smi_query": {
+    "status": "passed",
+    "physical_device": 0,
+    "device_used_bytes": 3214934016,
+    "raw_memory_mib": 3066,
+    "error_category": null
+  },
+  "query_timing_seconds": {
+    "nvml_started_after_probe_start": 3.757664419710636,
+    "nvml_query_wall": 0.7626148145645857,
+    "smi_started_after_probe_start": 4.567137759178877,
+    "smi_query_wall": 0.17798115871846676,
+    "smi_start_minus_nvml_finish": 0.04685852490365505
+  },
+  "checks": {
+    "installed_source_bytes_equal": true,
+    "declared_nvml_version": true,
+    "no_cuda_initialization": true,
+    "controls_unchanged": true,
+    "environment_unchanged": true,
+    "cpu_lazy_without_nvml": true,
+    "no_unproven_pid_aliases": true,
+    "live_nvml_query_succeeded": true,
+    "near_time_smi_query_succeeded": true
+  },
+  "seconds": {
+    "offline_wheel_installation": 0.9135771114379168,
+    "torch_and_actual_module_import": 2.8366274535655975,
+    "complete_probe": 4.747145262546837
+  },
+  "new_cuda_workload": false,
+  "new_mri_computation": false,
+  "old_environment_prefix_modified": false,
+  "frozen_raw_sources_modified": false,
+  "gpu_uuid_exported": false,
+  "cmdline_read": false,
+  "private_logs_read": false,
+  "trusted_host_pid_mapping_supplied": false,
+  "scope": "isolated declared wheel plus two installed modules; actual live NVML and near-time SMI observations; sequential queries differ in time, no exact FNIT memory ownership, no MRI/whole/OS-isolation validation"
+}

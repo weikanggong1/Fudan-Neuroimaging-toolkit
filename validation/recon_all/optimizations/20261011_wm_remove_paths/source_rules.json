@@ -1,0 +1,68 @@
+{
+  "fixed_source_commit": "d932c45b7941662ea380a05efef580568b98d41a",
+  "fixed_source_sha256": {
+    "mri_edit_wm_with_aseg/mri_edit_wm_with_aseg.cpp": "6cddf001f37981e7f96d5f4658bd16eb0b06d51cf8d235cac46ff8d8f9da6f21",
+    "utils/mriset.cpp": "90bf1b20ba0e4aad4a3827cba1976d87a63ec0eef07b8693ea18c319b3f6e96a",
+    "utils/mri.cpp": "2d2d71d4e15d339f92c1eab4072761bb82dfe97d2adde76cef587bc983645c59",
+    "include/mri.h": "1965dae1d366c788a10439b8ac1dca58c3da9f4056d7e1cd6a1b0f61ef7b83ce"
+  },
+  "anchors": {
+    "main_read_and_path_before_edit": [
+      125,
+      174
+    ],
+    "remove_paths": [
+      2305,
+      2768
+    ],
+    "MRIvox_byte_accessor": [
+      1480
+    ],
+    "WM_MIN_VAL": [
+      1684,
+      1685
+    ],
+    "MRIclone": [
+      5724
+    ],
+    "MRIdilate": [
+      1723
+    ],
+    "MRIboundingBox": [
+      3014
+    ]
+  },
+  "semantics": {
+    "aseg_original_storage": "MRIclone same type int32/float32; internally native little-endian x-row contiguous",
+    "ROI": "typed seed128 for LH17/18/5 and RH53/54/44; five clamped 27-neighbor dilations; ordered byte cleanup",
+    "ROI_cleaning_order": [
+      "amygdala anterior/superior",
+      "hippocampus lateral/anterior",
+      "medial",
+      "unknown",
+      "cortex"
+    ],
+    "bounding_box": "typed ROI>1; clamp interior 1..axis-2",
+    "seed": "scan x/y/z, WM>5 skip, MTL with inferior y+1 WM>5; byte128 seed writes",
+    "growth": "ordered x/y/z, neighbor xk -1..1/yk0..1/zk-1..1, immediate byte writes",
+    "LH_reads": "typed ROI/filled",
+    "RH_reads": "byte ROI/filled",
+    "brightest": "typed filled!=0, WM<=5, six-neighbor >=5, xk-3..3/yk-3..0/zk-3..3, strict> stable first ties",
+    "outer_stop": "path && niter++ <100000; max100001 actual fills",
+    "inner_stop": "source nfilled==0 or cortex path; no source inner iteration cap",
+    "fixed_state_failure": "if nfilled>0,no cortex,no filled-byte mutation in whole sweep, all mutable/read/control inputs identical -> deterministic nontermination -> explicit RuntimeError; no approximate output",
+    "reference_consumed_by_production": false
+  },
+  "mature_reuse": [
+    "core _clamp/_distance_to_label/_distance_to_wm/_superior_edge/_anterior_edge",
+    "SciPy binary_dilation exact initial binary0/128 mask"
+  ],
+  "limitations": {
+    "real_active_path_benchmark": "not_available; all20 hemispheres of10 public checkpoints satisfy unreachable proof",
+    "source_cap_actual_trigger": "not_tested",
+    "small_storage": "int16/uint8 unsupported and rejected before label conversion",
+    "whole": "not_tested_this_subtask",
+    "overall_metric_equivalence": "not_assessed",
+    "OS_isolation": "not_verified"
+  }
+}

@@ -1,0 +1,148 @@
+{
+  "scope": "first actual Torch/Numba context; no MRI or CUDA work",
+  "module_sha256": "bf0b40e5c6c7232d0de23dee3c491a3c27850d79922d81df71689933a9692fca",
+  "before": {
+    "torch_intraop": 4,
+    "torch_interop": 18,
+    "numba_mask": "not_read_before_first_context",
+    "numba_initial_capacity": 36,
+    "numba_threading_layer": "not_initialized",
+    "cuda_initialized": false,
+    "matmul_tf32": false,
+    "cudnn_tf32": true
+  },
+  "events": [
+    {
+      "operation": "torch.get_num_threads",
+      "value": 4
+    },
+    {
+      "operation": "numba.get_num_threads",
+      "value": 36,
+      "torch_before": 4,
+      "torch_after": 36,
+      "numba_threading_layer_before": "not_initialized",
+      "numba_threading_layer_after": "omp"
+    },
+    {
+      "operation": "numba.set_num_threads",
+      "requested": 4,
+      "torch_before": 36,
+      "torch_after": 36
+    },
+    {
+      "operation": "torch.get_num_threads",
+      "value": 36
+    },
+    {
+      "operation": "numba.get_num_threads",
+      "value": 4,
+      "torch_before": 36,
+      "torch_after": 36,
+      "numba_threading_layer_before": "omp",
+      "numba_threading_layer_after": "omp"
+    },
+    {
+      "operation": "numba.set_num_threads",
+      "requested": 36,
+      "torch_before": 36,
+      "torch_after": 36
+    },
+    {
+      "operation": "numba.get_num_threads",
+      "value": 36,
+      "torch_before": 36,
+      "torch_after": 36,
+      "numba_threading_layer_before": "omp",
+      "numba_threading_layer_after": "omp"
+    },
+    {
+      "operation": "torch.get_num_threads",
+      "value": 36
+    }
+  ],
+  "runtime": {
+    "python": "3.11.16",
+    "torch": "2.5.1",
+    "numba": "0.67.0",
+    "numpy": "1.26.4",
+    "system": "Linux",
+    "release": "6.18.40.1-microsoft-standard-WSL2",
+    "machine": "x86_64",
+    "logical_cpus": 36,
+    "affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35
+    ]
+  },
+  "requested_threads": 4,
+  "environment_before": {
+    "OMP_NUM_THREADS": "4",
+    "NUMBA_NUM_THREADS": null,
+    "OPENBLAS_NUM_THREADS": "4",
+    "MKL_NUM_THREADS": "4",
+    "NUMEXPR_NUM_THREADS": "4",
+    "OMP_DYNAMIC": null
+  },
+  "inside": null,
+  "context_report": null,
+  "exception": {
+    "type": "RuntimeError",
+    "message": "Torch or Numba did not apply the requested thread count"
+  },
+  "status": "context_failed",
+  "context_seconds": 0.0018877440015785396,
+  "after": {
+    "torch_intraop": 36,
+    "numba_mask": 36,
+    "torch_interop": 18,
+    "numba_threading_layer": "omp",
+    "cuda_initialized": false,
+    "matmul_tf32": false,
+    "cudnn_tf32": true
+  },
+  "environment_after": {
+    "OMP_NUM_THREADS": "4",
+    "NUMBA_NUM_THREADS": null,
+    "OPENBLAS_NUM_THREADS": "4",
+    "MKL_NUM_THREADS": "4",
+    "NUMEXPR_NUM_THREADS": "4",
+    "OMP_DYNAMIC": null
+  },
+  "environment_unchanged": true,
+  "child_seconds_including_imports": 2.19385608198354
+}

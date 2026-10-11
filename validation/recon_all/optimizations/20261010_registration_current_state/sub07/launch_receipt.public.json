@@ -1,0 +1,44 @@
+{
+  "started_epoch": 1791606953.3903456,
+  "host": "A100-8",
+  "driver_sha256": "ba6eb8a3cc1c26d82c78e83ea9b0fe67d83a5a50e27ecfb2301b9b33be69d9ab",
+  "baseline_binding_sha256": "6d7384b4a07146803a37a1ca3ab5610fef3e18097ed06cce15832c458a62f20a",
+  "candidate_binding_sha256": "d5e8d48808a36d8310c1a831517ef8d7d405b3f75bcd07991b1b56b4720e08e4",
+  "input_sha256": {
+    "sphere": "242e06261ad8b5a579b711b4d2dbfe4edfbc65cce14307dc8fb1d27b4b1317af",
+    "smoothwm": "1e4028a94a214e07d5b8397fba0891d5736397725cf59a003b29f0aefaf10ba6",
+    "sulc": "1db585f2290e35f7e467a41a445979b0e38b3c6361f13dc92cd640a507d4eed4"
+  },
+  "atlas_sha256": "92f1dc820d778a67c143d4ea82597fd71a89ddc738dfa555b7ca32ed21e95c97",
+  "affinity": [
+    96,
+    97,
+    98,
+    99
+  ],
+  "physical_gpu": 6,
+  "logical_gpu": "cuda:0",
+  "threads": 4,
+  "command": [
+    "[PRIVATE_FNIT]/envs/recon_main_20261009_v3/bin/python",
+    "[PRIVATE_FNIT]/workspaces/recon_registration_current_state_20261010_v2/benchmark_recon_registration_geometry.py",
+    "--baseline-source",
+    "[PRIVATE_FNIT]/workspaces/recon_registration_current_state_20261010_v1/bundle/baseline",
+    "--candidate-source",
+    "[PRIVATE_FNIT]/workspaces/recon_registration_current_state_20261010_v1/bundle/candidate",
+    "--subject",
+    "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject",
+    "--atlas",
+    "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+    "--stage-driver",
+    "[PRIVATE_FNIT]/workspaces/recon_registration_current_state_20261010_v1/bundle/validation/recon_all/optimizations/20261010_registration_zero_corner/benchmark_registration_v2.py",
+    "--output-dir",
+    "[PRIVATE_FNIT]/runs/recon_registration_current_state_20261010_v2_sub07/ABBA",
+    "--threads",
+    "4",
+    "--device",
+    "cuda:0",
+    "--hemi",
+    "lh"
+  ]
+}

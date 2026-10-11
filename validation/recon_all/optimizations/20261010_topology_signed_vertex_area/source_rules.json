@@ -1,0 +1,46 @@
+{
+  "fixed_original_commit": "d932c45b7941662ea380a05efef580568b98d41a",
+  "implementation_scope": "normal/curvature source signed vertex weights; separate from final mesh QC",
+  "files": [
+    {
+      "name": "utils/mrisurf_metricProperties_slow.h",
+      "sha256": "92c4017c0402b9e1bf502bfe032b04306f0956bb41532e980fad9288dd8171e1",
+      "ranges": [
+        {
+          "lines": [
+            624,
+            684
+          ],
+          "sha256": "5458210fb7a66e2ef758b96fa2deaaba2f5d162f90c6728acdc4066bdb51c464"
+        },
+        {
+          "lines": [
+            694,
+            727
+          ],
+          "sha256": "34108fad33f2abfcb189943ecb461af31ae0c923d65b9e92d7c66969e861528d"
+        }
+      ]
+    },
+    {
+      "name": "utils/mrisurf_metricProperties_fast.h",
+      "sha256": "169530749aafbe1454b5de6202afc66af899cc32f1d95b22b20a01354e5c4a6a",
+      "ranges": [
+        {
+          "lines": [
+            1062,
+            1131
+          ],
+          "sha256": "be3d2ca55e98d8f809cbf4aef5f61ebbbd9d8c025febb38e9a3667048f7ac482"
+        }
+      ]
+    }
+  ],
+  "rules": [
+    "mrisOrientPlane recomputes ordered vertex area from signed incident face areas, divided by 3 or 2",
+    "ellipsoid branch need not overwrite the positive first normal-stage vertex area",
+    "normal-dot and joint-curvature functions use raw vertex areas without abs/drop/positivity gate",
+    "empty patch stays zero; nonempty exact ordered double denominator zero raises explicit ValueError",
+    "initial snapshot regression at 3ebc601d remains old bfb module evidence, not rewritten as new code"
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "status": "complete",
+  "scope": "same-input 1001-step fresh GPU replay; shared diagnostic window, not causal performance comparison",
+  "script_sha256": "858a3e3c6161882a6a51fb1ad59ca0bb9aea154c5be0fac09ab7197eac0c94cb",
+  "source_sha256": "02ddf20f4c7924f0b579740a7f57e8e1eb35eda6ba5949ae71bdfe19ccf09d13",
+  "input_sha256": "22ba72454be1713f8b78a87e68e4209faa449b392b87afb34ce4bdcd7729783f",
+  "threads": 4,
+  "affinity": [
+    88,
+    89,
+    90,
+    91
+  ],
+  "allocator": {
+    "requested": "enabled",
+    "cuda_initialized_at_entry": false,
+    "environment_at_entry": null,
+    "environment_after_selection": null,
+    "effective": "enabled",
+    "torch_stats_known_valid": true,
+    "torch_stats_known_unavailable": false
+  },
+  "torch_version": "2.5.1",
+  "tf32_matmul": true,
+  "tf32_cudnn": true,
+  "autocast": false,
+  "allocator_env": null,
+  "full_cleanup_seconds_with_diagnostics": 2.986349917948246,
+  "history_exact": true,
+  "coordinate_elements_differing": 0,
+  "coordinate_max_mm": 0.0,
+  "coords_sha256": "26ce99d23045c635b3295f126d78f6e1b7ee6e784533b9d756094bacfb7c95f8",
+  "diagnostics": {
+    "source_niterations": 1000,
+    "source_limit_comparison": "iteration-start_iteration > niterations",
+    "start_iteration": 219,
+    "final_iteration": 1220,
+    "updates": 1001,
+    "stop_reason": "source_niterations_limit",
+    "initial_negative_float32": 9220,
+    "last_pre_step_negative_float32": 7501,
+    "final_negative_float32": 7507,
+    "final_negative_double": 7507,
+    "negative_area_mm2_sum": 51.517544754238855,
+    "negative_area_mm2_max": 0.41342257958014533,
+    "negative_area_mm2_p99": 0.11691778796984749,
+    "zero_area_double": 0,
+    "finite": true,
+    "minimum_negative_float32": 7496,
+    "minimum_iteration": 1117,
+    "final_dt": 0.04116221364986686,
+    "marked_expansion_rings": 1,
+    "quality_status": "failed_quality"
+  },
+  "strict_gate": "failed_quality",
+  "gpu_process_sampler": {
+    "status": "ownership_unresolved",
+    "target_gpu_uuid": "GPU-anonymized-device-004",
+    "sampling_interval_seconds": 0.2,
+    "max_observed_interval_seconds": 2.3671638444066048,
+    "failed_samples": [],
+    "samples": [
+      {
+        "monotonic": 4387473.744940513,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 88335,
+            "bytes": 562036736
+          }
+        ],
+        "target_compute_process_sum_bytes": 562036736,
+        "target_device_used_bytes": 594542592,
+        "device_query_error": null,
+        "sample_query_seconds": 2.167055451311171
+      },
+      {
+        "monotonic": 4387476.112104357,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 88335,
+            "bytes": 585105408
+          }
+        ],
+        "target_compute_process_sum_bytes": 585105408,
+        "target_device_used_bytes": 594542592,
+        "device_query_error": null,
+        "sample_query_seconds": 1.8340005381032825
+      },
+      {
+        "monotonic": 4387477.946172073,
+        "processes": [],
+        "tree_total_bytes": null,
+        "known_tree_bytes": 0,
+        "ownership": "unresolved",
+        "external_processes": [],
+        "unresolved_processes": [
+          {
+            "pid": 88335,
+            "bytes": 585105408
+          }
+        ],
+        "target_compute_process_sum_bytes": 585105408,
+        "target_device_used_bytes": 594542592,
+        "device_query_error": null,
+        "sample_query_seconds": 2.244439834728837
+      }
+    ],
+    "peak_tree_total_bytes": null,
+    "observed_resolved_tree_peak_bytes": null,
+    "peak_target_compute_process_sum_bytes": 585105408,
+    "peak_target_device_used_bytes": 594542592,
+    "scope": "simultaneous process snapshot on target GPU; unresolved host/container PID ownership is null; device total is separate and includes other users; consecutive queries are not exactly simultaneous",
+    "worker_pids": []
+  },
+  "allocated_peak_bytes": 50888192,
+  "reserved_peak_bytes": 71303168,
+  "harness_wall_seconds_including_import_load_transfer_compute_IO": 13.067449299618602
+}

@@ -1,0 +1,53 @@
+{
+  "scope": "two_selected_actual_GPU_regressions_only_not_MRI_benchmark",
+  "source_commit": "60d4a1c7",
+  "source_archive_sha256": "02aa66bbeace6b6f0666d6b744b7536abd68f14f42bbbb72de8b6581b212775f",
+  "test_sha256": "a8e6d8a74f050cfe90e0e8423b662ec24fc0806bf6d0e8df4e5a44ba025c90e5",
+  "module_sha256": {
+    "mri_em_register.py": "ad22be830ea400c22c4f4e903b193ef9f63d6da0f3e057538c062a648234f02f",
+    "mri_em_register_score_gpu.py": "d6c9092cbad86c147ecd8e1c2443132eeb7904b5de5b5fab23e284dba14de719",
+    "mri_em_register_search_source.py": "3e4558861e511a46f3888bdad7de7ca3270dbd27af113a57745deb3b4a2c74af",
+    "mri_em_register_search_jit.py": "d1fd5cff698a5b0104da87af0be9e11e0d6f50d06eb4b1cde9d0b2a8983664d1",
+    "mri_em_register_optimizer.py": "f541af34b01547b87ab9369786c532ce46f4e08cf5230f10b43689506b5be6da",
+    "mri_em_register_complete.py": "b615bd519325623c6ed67cef48ebb8a0cbbed91834f64534dd786a76b9c6e936"
+  },
+  "device_name": "NVIDIA A100-SXM4-80GB",
+  "device_uuid": "GPU-anonymized-device-001",
+  "torch_version": "2.5.1",
+  "precision_before": {
+    "default_dtype": "torch.float32",
+    "matmul_precision": "highest",
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_enabled": true,
+    "cudnn_benchmark": false,
+    "cudnn_deterministic": false,
+    "cuda_device": 0
+  },
+  "precision_after": {
+    "default_dtype": "torch.float32",
+    "matmul_precision": "highest",
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "cudnn_enabled": true,
+    "cudnn_benchmark": false,
+    "cudnn_deterministic": false,
+    "cuda_device": 0
+  },
+  "caller_state_restored": true,
+  "cases": [
+    {
+      "test": "test_gpu_coordinates_ignore_default_dtype",
+      "passed": true,
+      "seconds": 1.5204064464196563,
+      "error": null
+    },
+    {
+      "test": "test_device_reduction_retains_score_order_and_ties",
+      "passed": true,
+      "seconds": 0.02627619355916977,
+      "error": null
+    }
+  ],
+  "execution_complete": true
+}

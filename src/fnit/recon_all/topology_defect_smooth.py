@@ -9,6 +9,31 @@ from __future__ import annotations
 
 import numpy as np
 from numba import njit
+from .place_surface_normals import FaceNormalTopology
+
+
+def _incident_arrays(*, faces, vertex_count, topology=None):
+    """复用当前面版本的显式CSR；None保留原完整有序构造。
+
+    topology必须是FaceNormalTopology，绑定同N及完全相同的有序整数面。
+    返回原Numba内核使用的int32 offsets/face_ids；不缓存坐标或法向。
+    不兼容上下文或int32容量溢出抛ValueError，不截断索引。
+    """
+    if topology is not None:
+        if not isinstance(topology, FaceNormalTopology):
+            raise ValueError('topology must be FaceNormalTopology or None')
+        topology.validate(faces, vertex_count)
+        if len(topology.face_ids) > np.iinfo(np.int32).max:
+            raise ValueError('incident entries exceed int32 capacity')
+        return topology.offsets.astype(np.int32), topology.face_ids.astype(np.int32)
+    slots = [[] for _ in range(vertex_count)]
+    for fi, face in enumerate(faces):
+        for vertex in face:
+            slots[int(vertex)].append(fi)
+    offsets = np.zeros(vertex_count + 1, np.int32)
+    for vertex, row in enumerate(slots):
+        offsets[vertex + 1] = offsets[vertex] + len(row)
+    return offsets, np.asarray([fi for row in slots for fi in row], np.int32)
 
 @njit
 def _smooth_core(xyz, faces, inside, neighbors, degree, offsets, face_ids,
@@ -87,11 +112,23 @@ def _smooth_core(xyz, faces, inside, neighbors, degree, offsets, face_ids,
 
 def defect_smooth_type2(xyz: np.ndarray, faces: np.ndarray, inside_vertices: np.ndarray,
                         runtime_neighbors: list[list[int]],
-                        k1_mean: float, k2_mean: float) -> np.ndarray:
-    """Run the source's 25 iterations on retained interior patch vertices."""
+                        k1_mean: float, k2_mean: float, *, topology=None) -> np.ndarray:
+    """保留内点25轮源有序平滑，输出独立float32(N,3)坐标。
+
+    xyz为surface RAS/mm坐标，faces为同顶点顺序整数(F,3)，inside_vertices
+    为保留内点(K,)，runtime_neighbors为各内点原顺序邻接；曲率均值
+    k1_mean/k2_mean单位mm⁻¹，来自全局SFF1直方图。topology默认None，
+    沿用完整有序入射构造；可显式传同一面版本FaceNormalTopology复用CSR，
+    换面/顶点数必须重建，坐标/法向仍逐轮重算。上下文不匹配抛ValueError。
+    空内点返回独立坐标副本；原25轮、双自增邻域规则及求和顺序不变。
+    这是mris_fix_topology内部defectSmooth步骤，没有独立CLI或文件读写。
+    """
     points = np.ascontiguousarray(xyz, np.float32)
     triangles = np.ascontiguousarray(faces, np.int32)
     inside = np.ascontiguousarray(inside_vertices, np.int32)
+    if topology is not None:
+        # 验证原faces，不接受先截断浮点索引再匹配上下文。
+        offsets, face_ids = _incident_arrays(faces=faces, vertex_count=len(points), topology=topology)
     if len(inside) == 0:
         return points.copy()
     degree = np.zeros(len(points), np.int32)
@@ -100,13 +137,7 @@ def defect_smooth_type2(xyz: np.ndarray, faces: np.ndarray, inside_vertices: np.
     for vertex, row in zip(inside, runtime_neighbors):
         degree[vertex] = len(row)
         neighbors[vertex, :len(row)] = row
-    slots = [[] for _ in range(len(points))]
-    for fi, face in enumerate(triangles):
-        for vertex in face:
-            slots[int(vertex)].append(fi)
-    offsets = np.zeros(len(points) + 1, np.int32)
-    for vertex, row in enumerate(slots):
-        offsets[vertex + 1] = offsets[vertex] + len(row)
-    face_ids = np.asarray([fi for row in slots for fi in row], np.int32)
+    if topology is None:
+        offsets, face_ids = _incident_arrays(faces=triangles, vertex_count=len(points))
     return _smooth_core(points, triangles, inside, neighbors, degree,
                         offsets, face_ids, np.float32(k1_mean), np.float32(k2_mean))

@@ -1,0 +1,132 @@
+{
+  "status": "complete",
+  "pid": 110723,
+  "started_monotonic": 4394932.75354524,
+  "logical_device": "cuda:5",
+  "precision": {
+    "matmul_tf32": true,
+    "cudnn_tf32": true,
+    "cudnn_benchmark": false,
+    "cudnn_deterministic": true
+  },
+  "operation_entered": true,
+  "cuda_allocator": {
+    "requested": "auto",
+    "cuda_initialized_at_entry": false,
+    "environment_at_entry": "1",
+    "environment_after_selection": "1",
+    "effective": "disabled",
+    "torch_stats_known_valid": false,
+    "torch_stats_known_unavailable": true
+  },
+  "actual_cuda_device": {
+    "name": "NVIDIA A100-SXM4-80GB",
+    "uuid": "e92ea062-9dbe-4d7f-54a9-deded0295fb5"
+  },
+  "cuda_bootstrap_seconds": 3.04879251960665,
+  "operation_started_monotonic": 4394937.182591129,
+  "value": {
+    "segmentation": "[PRIVATE_FNIT]/runs/input_stage_parallel_20261010_v2/ABBA/sub06/2-parallel/synthseg.mgz",
+    "volumes_csv": "[PRIVATE_FNIT]/runs/input_stage_parallel_20261010_v2/ABBA/sub06/2-parallel/synthseg.vol.csv",
+    "total_intracranial_mm3": 1629142.875,
+    "precision": {
+      "requested_cudnn_tf32": false,
+      "forwards": [
+        {
+          "pass": "original",
+          "device": "cuda:5",
+          "matmul_tf32": true,
+          "cudnn_tf32": false,
+          "input_dtype": "torch.float32",
+          "model_dtypes": [
+            "torch.float32"
+          ],
+          "autocast": {
+            "cpu": {
+              "enabled": false,
+              "dtype": "torch.bfloat16"
+            },
+            "cuda": {
+              "enabled": false,
+              "dtype": "torch.float16"
+            }
+          },
+          "output_dtype": "torch.float32"
+        },
+        {
+          "pass": "flipped",
+          "device": "cuda:5",
+          "matmul_tf32": true,
+          "cudnn_tf32": false,
+          "input_dtype": "torch.float32",
+          "model_dtypes": [
+            "torch.float32"
+          ],
+          "autocast": {
+            "cpu": {
+              "enabled": false,
+              "dtype": "torch.bfloat16"
+            },
+            "cuda": {
+              "enabled": false,
+              "dtype": "torch.float16"
+            }
+          },
+          "output_dtype": "torch.float32"
+        }
+      ],
+      "posterior_buffer_reused": true,
+      "posterior_ensemble_dtype": "torch.float32"
+    },
+    "input_sha256": "04ce13b5b3a7a22ab94536e4fab89868e985ce435069f4517d5840aa202b95ea",
+    "outputs_sha256": {
+      "segmentation": "37c261104efd1302ee5188292941082f51babf37e5826a6c0936807276775697",
+      "volumes_csv": "28d7997225bd5810ea4c71755501e847f838bacdce9d428e52c2338099ef5065"
+    },
+    "actual_model_device": "cuda:5",
+    "actual_model_dtype": "torch.float32",
+    "source_sha256": {
+      "fnit.recon_all.input_stage_parallel": "8af12262635fd545288f34225a45f5693b9874e0dc38e603b4210bb96443be22",
+      "fnit.synthseg_parc.synthseg": "3f0e91ff0bfa83ab8b3742a27ccecabcad83ddb650110d7347e5e4fea42ab62f",
+      "fnit.synthseg_parc.segment": "e2c1b3e2ad4f90037054395385f2fb2d93925d236f11ec06dbb9613d52482484",
+      "fnit.synthseg_parc.preprocess": "6f21d7111db453364c891093efd83a524d96ef43799ef3459640b2597553379e",
+      "fnit.synthseg_parc.postprocess": "5ac0a53745e972563302ebcde2f078d5fb3e6eb7607ec92e59f67d85adae8936",
+      "fnit.synthseg_parc.precision": "3790b1b661f6934287ca7b90c9c445470f81b97e99ea3a10c3656b7d0e688147"
+    }
+  },
+  "operation_finished_monotonic": 4394952.562367292,
+  "stage": {
+    "name": "synthseg",
+    "seconds": 15.379745312966406,
+    "function_seconds": 15.379591325297952,
+    "cuda_pre_sync_seconds": 4.0121376514434814e-05,
+    "cuda_post_sync_seconds": 3.4747645258903503e-05,
+    "cuda_synchronized": true,
+    "cuda_synchronization_requested": true,
+    "parent_cpu_seconds": 9.259025899000001,
+    "child_cpu_seconds": 0.021137999999999997,
+    "torch_memory_stats_status": "unavailable"
+  },
+  "thread_budget": {
+    "requested_threads": 3,
+    "scope": "Torch process intraop and current caller Numba thread mask",
+    "torch": {
+      "before": 3,
+      "effective": 3,
+      "interop_unchanged": 1,
+      "restored": 3
+    },
+    "numba": {
+      "before": 3,
+      "effective": 3,
+      "initial_capacity": 3,
+      "mask_only": true,
+      "threading_layer": "tbb",
+      "restored": 3
+    },
+    "environment_modified": false,
+    "restoration_complete": true
+  },
+  "finished_monotonic": 4394952.562442521,
+  "total_seconds": 19.808897281065583
+}

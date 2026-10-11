@@ -1,5 +1,10 @@
 # `mris_fix_topology`: first-defect fitness and GA selection boundary
 
+> 历史冻结阶段记录。2026-10-10 源核对发现早期排名 helper 的 `1e-5`
+> 同分阈值与实际翻译单元 `FLT_EPSILON` 不符；现版字段写回、权重及
+> 同分规则见 [中文说明](../../../../docs/recon_all/TOPOLOGY_PATCH_FITNESS.md)。
+> 下列四位小数日志及历史数值保留原验证范围，不改标为当前完整 fitness 回归。
+
 The pinned FreeSurfer 8.2 source is
 `d932c45b7941662ea380a05efef580568b98d41a`. This report follows the
 fixed `fs_sub01` first defect on each hemisphere after the independently
@@ -12,8 +17,9 @@ replacement for `mris_fix_topology` or an end-to-end recon-all validation.
 then `mrisDefectPatchFitness` retessellates, discovers/orients patch faces,
 computes patch Euler, smooths and matches original coordinates, evaluates MRI
 and curvature likelihoods, applies the face-validity penalty, and restores
-the prior surface state. The initial 10 fitness values are ranked by
-`defectPatchRank` with a `1e-5` tie rule; later generations mutate, cross over,
+the prior surface state. The early helper ranked the initial 10 fitness values
+with a `1e-5` tie assumption; the current source translation-unit audit corrected
+this to `FLT_EPSILON`. Later generations mutate, cross over,
 select elites, and can delete vertices. After search, the saved best ordering
 and vertex status are replayed and matched again before cleanup.
 

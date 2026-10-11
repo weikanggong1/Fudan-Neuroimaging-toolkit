@@ -36,6 +36,8 @@ report = run_isolated_n4(
 
 `run_worker()` 是新进程CLI内部入口，默认cuda:0、4线程、不开剖析，matmul/cudnn TF32默认True；父API传入父进程实际策略。CUDA已初始化时拒绝更改分配器。无FP16/BF16，算法既有FP64拟合/归约与FFT例外保留。非法资源/路径、CUDA、完整N4、exec失败或哈希错误抛异常，可能留部分输出；不改默认、不复制参考、不调用原生命令。
 
+生产父进程的 `FNIT_RECON_FORBID_ORIGINAL_STAGES=1` 由exec继承。CLI与worker入口现在复用[程序守卫](WORKER_PROGRAM_GUARD.md)，在解析参数、校验或CUDA初始化之前安装；正常和异常退出恢复作用域。禁用或缺失标志时保留独立benchmark行为；活动父守卫不会被嵌套入口解除。尝试直接执行原软件阶段程序时抛 `RuntimeError`，不改变200轮N4、缓存策略、线程或TF32。
+
 ## 3．命令行与复现
 
 ```bash
@@ -94,7 +96,26 @@ A100-SXM4-80GB，同一CPU0–3/4线程，TF32开启，无半精度。输入来�
 
 完整原始T1连续链到filled的后续验证已发现下游放大：nu0仅4016/3259个量化差异，但filled差4671/2291体素，sub-06注册与归一化出现更大局部差异。见[两例逐阶段实际报告](../../validation/recon_all/optimizations/20261010_n4_continuous_prefix/README.md)。这不改变上述同输入worker精度/性能证据；生产默认仍ITK，不能以阶段提速或P99为零直接接管整例。
 
+### 2026-10-11 guarded wheel两例同输入新回归
+
+固定源码9292a0a7、wheel SHA 3e5e2eb0332d328cd92a968a17ae8cc2c6d872a961d103bca4a9d0d65df39e51；独立target安装623个Python文件与wheel一致，29关键模块与源码一致。旧worker所用FNIT自产orig现场核对SHA；本轮不使用官方上游影像，完整N4与B-spline模块SHA保持旧执行版本。
+
+| 病例 / 方式 | 完整外部墙钟 s | 子N4文件API s | 轮次 | 对旧完整Torch及两种旧worker |
+|---|---:|---:|---:|---|
+| sub-06 冷CLI | 7.522 | 3.525 | 200 | 全体素/affine/dtype/文件SHA一致 |
+| sub-07 冷CLI | 7.820 | 3.574 | 200 | 全体素/affine/dtype/文件SHA一致 |
+| sub-06 已初始化父API | 8.428 | 3.411 | 200 | 全体素/affine/dtype/文件SHA一致 |
+| sub-07 已初始化父API | 8.660 | 3.542 | 200 | 全体素/affine/dtype/文件SHA一致 |
+
+四组退出0，旧4016/3259体素+1差异保留。GPU6、CPU88–91及4线程；两项TF32开启，无autocast/半精度。旧空卡门WAIT保留；用户授权后先写共享资源协议，排除GPU4，同UUID两次间隔1.007秒满足利用率≤10%、free≥32GB，再取得锁并启动前复查。当前为非独占，各一次共享墙钟观测不用于整例提速结论。
+
+父API在已初始化CUDA下保留64MiB真实orig FP32张量，取得14/13个同快照父子行，已验证两行合计观测最大2,401,239,040字节。实际最长间隔0.730秒，查询无失败；驻留外部进程仍unresolved，全序列tree峰保持null。子Torch峰为1,295,297,024/1,384,120,320字节，父cache-off的allocated/reserved零值无效。只报告已验证窗口，未验证完整重建20GB/10min。
+
+四个实际子Python启动均有审计，未观察原阶段命令；六项已安装worker/CLI守卫CPU负向合同通过。协议先于四子启动，所有本轮父子driver行在正常退出后消失，其他共享进程保留。详细输入、边界、脑图SHA和[完整本轮报告](../../validation/recon_all/optimizations/20261011_guarded_n4/README.md)列出全部证据；旧回执及测量版本不改。
+
 ## 6．更新和验证记录
+
+2026-10-11：补齐可选Torch N4 exec的继承守卫，与GCA/WM/Talairach使用同一接口。新合同逐一验证标志缺失、0、1时CLI解析和第一处CUDA检查的程序拦截、状态恢复及输出未创建；它们与既有worker和完整EM接线合同共36项通过，14.10秒。没有在本次守卫修复后重跑真实N4；上面的四次MRI计时继续绑定其历史冻结源码，不能改标为本版GPU结果。
 
 2026-10-09复用完整N4新增exec策略；不改原核心数学或全局allocator。六项worker契约检查参数/父策略/exec/输出哈希/初始化状态，与四条原始输入链契约合计十项2.91s通过。两例两种父CUDA状态同输入回归完成，已有严格N4差异独立记录。新增`n4_backend="torch", n4_execution="isolated"`已显式接入输入链、单例/批次recon-all API、fnit-recon-all CLI和整例测评脚本。native/in-process默认不变，纯python-gpu全流程仍由完整能力门控制。原始T1到nu的两例回归另见[输入链](INPUT_N4_CHAIN.md)，不是完整recon-all测评。
 

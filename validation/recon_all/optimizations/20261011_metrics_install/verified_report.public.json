@@ -1,0 +1,3388 @@
+{
+  "code_commit": "22d4e0aa98a08b7463006981d7733c56ef60b82e",
+  "script_sha256": "fca4676b6cf1c049b8779e37e76d249e0883cbb39afe7bd26347bd09aea6f5e5",
+  "benchmark_commit": "d941dbc7714fe82af4daab35834eaae1c748ddd6",
+  "baseline_commit": "aeabc5aba9341f0358772eb00b1f07eb2cbaf643",
+  "source_sha256": {
+    "mni_nonlinear_chain.py": "52ae0e52d1359c8a5822701acc26efc91701da92dd25079404c5097e4ccedcb1",
+    "surface_stats_cache.py": "9b52ee7c886decba5e085c3abbf45872aaf4b1110e5037c156446fa2f31a3924",
+    "surface_thickness_gpu.py": "ab019eb7d413c7b08f01ad6b2e499c406ab513cb531d723142c2db2d6c12e961",
+    "python_runtime.py": "ded02e453981497ef9f29d47944055497e6234bec0a6fd6542c80425514cd7ae",
+    "anatomical_stats_file.py": "3aef07cbf0788276341125774717f1e0555a1197b2faeba5c9b75610a468df53",
+    "anatomical_stats_rows.py": "0832f2f33006435c330305a9dee224c33441df8a1b7fb420561413a7668fe5f9"
+  },
+  "baseline_cache_sha256": "6f64b40773c61d46fd167c34a74530d9475dd7992b6607c99df14511826ab2a1",
+  "reference_mni_caller_sha256": "d33d0b0fb31cc5605c926047c7d210bae3e72cfd2dfe02ebdbcf68ec14c70faa",
+  "device": {
+    "physical_index": 6,
+    "uuid": "GPU-anonymized-device-009",
+    "logical": "cuda:0",
+    "name": "NVIDIA A100-SXM4-80GB"
+  },
+  "threads": 4,
+  "cpu_affinity": [
+    88,
+    89,
+    90,
+    91
+  ],
+  "packages": {
+    "torch": "2.5.1",
+    "numpy": "1.26.4"
+  },
+  "whole_isolation": "not_assessed",
+  "overall_equivalence": "not_assessed",
+  "strict_138": "unchanged; not executed in this stage",
+  "cases": {
+    "case_A": {
+      "inputs": {
+        "surf/lh.inflated.nofix": {
+          "bytes": 4572830,
+          "sha256": "0de3206786ddfcb95ee52ad54d080096679b85837a7f782bcdfa1e3ee2d22a61"
+        },
+        "surf/lh.curv": {
+          "bytes": 522731,
+          "sha256": "1ec0d04f372f05d55a8545cbe780506a1c97f0bf6f74ff672f31303e68c43f44"
+        },
+        "surf/lh.smoothwm.BE.crv": {
+          "bytes": 522731,
+          "sha256": "8519c4a9e5934224e657375e832f94d5c01d3b1a7d67de8469a47fccb47c07c6"
+        },
+        "surf/lh.smoothwm.nofix": {
+          "bytes": 4571915,
+          "sha256": "cf67b83a9863476fd9e8b40d2e59c802f5f5690010470f5705180586dccea582"
+        },
+        "surf/lh.white": {
+          "bytes": 4705362,
+          "sha256": "ed373a68adcc8cc95d7a160a38f9baff620b768fddd0c6c54107da76c1d568a1"
+        },
+        "surf/lh.white.preaparc.H": {
+          "bytes": 522731,
+          "sha256": "fce07844518705db874ea8f3bc7ee77405215dc325468196901c898116a5627a"
+        },
+        "surf/lh.white.preaparc.K": {
+          "bytes": 522731,
+          "sha256": "0a65e4f3d904a567381ce5a433f244e457744d4dbd27e4f1aee3b1232a10c947"
+        },
+        "surf/lh.avg_curv": {
+          "bytes": 522731,
+          "sha256": "9a20076d3966d03759d2b6a2cc3e5fc50dea2686298b6c1bed83776b98a059d5"
+        },
+        "surf/lh.smoothwm.FI.crv": {
+          "bytes": 522731,
+          "sha256": "ec34e7175aade61ec5a0e4d3397cb33873f351c50b9b1ceb272a8de7322d3135"
+        },
+        "surf/lh.orig.raw.quad": {
+          "bytes": 3048072,
+          "sha256": "a8efa8f4cda8e1d176a054d495c49d73e5928d731115aff55567f522e2ef45e8"
+        },
+        "surf/lh.smoothwm.K2.crv": {
+          "bytes": 522731,
+          "sha256": "591674aff5fcb705878288e82306a15f8531bb613835d2badff2ebe6d38fce1e"
+        },
+        "surf/lh.area": {
+          "bytes": 522731,
+          "sha256": "5afaef59049f74ed3155b5f73593e37d2c88d0aaf3dd6d0c4b05a2c69e4c770c"
+        },
+        "surf/lh.pial.T1": {
+          "bytes": 4705362,
+          "sha256": "c780585b219891fc0f51a36bdc3e499f3f890d1cb2d4e74b1a9568b106326e10"
+        },
+        "surf/lh.smoothwm.H.crv": {
+          "bytes": 522731,
+          "sha256": "bd16373a8ef68bd1dd0126075acf151c052726029239d6ed20cef3236d4b5103"
+        },
+        "surf/lh.sphere": {
+          "bytes": 4705090,
+          "sha256": "0fd420d4e3ff00efc36fd6cd4c6a7dd3b306f9b5cb275879dea7db88940fa7d3"
+        },
+        "surf/lh.curv.pial": {
+          "bytes": 522731,
+          "sha256": "c2c8ef3dda2e8e1bd742aea0982dd73fe19d112193c707b255489d5ccf589b5f"
+        },
+        "surf/lh.orig.premesh": {
+          "bytes": 4493826,
+          "sha256": "5dadeb4221ae61c70fdc647399c413773c1207d0524903b52e5b6582fe46d448"
+        },
+        "surf/lh.white.preaparc": {
+          "bytes": 4705362,
+          "sha256": "53466615eaf078e90e202807eb4e2d49c351f944131bbe2a94b72f76a61cde79"
+        },
+        "surf/lh.volume": {
+          "bytes": 522731,
+          "sha256": "f6a5277cef1d8054e2e60ed62ccda0cb9834bc033cfc8de4fb0ce36d4dd672c8"
+        },
+        "surf/lh.w-g.pct.mgh": {
+          "bytes": 523020,
+          "sha256": "d5faa70fe37d705e322fe28b9cde0d2b0ba77538e89f82a583c54dee54a0212a"
+        },
+        "surf/lh.thickness": {
+          "bytes": 522731,
+          "sha256": "1b3bbf55357a24b6542a46ef907eaa3b24000f005a4e0fe08828009eb99dcb4b"
+        },
+        "surf/lh.smoothwm.C.crv": {
+          "bytes": 522731,
+          "sha256": "56392322966aaf84e6ff16e3c6248b5c61e6d67c763c68a8bae193d79c467e76"
+        },
+        "surf/lh.defect_chull": {
+          "bytes": 507823,
+          "sha256": "34a5e85b257b8bb735669ef807b7ea56ff87012f2a606ba49436d020e54a017a"
+        },
+        "surf/lh.area.mid": {
+          "bytes": 522731,
+          "sha256": "35205474f0fab18261676500951efe9a0b8f397fb211889aa9a5767558b5176c"
+        },
+        "surf/lh.sphere.reg": {
+          "bytes": 4705090,
+          "sha256": "510cc59fa6a4ac69c5f464be46277b97df3167c59e4408cb9504ec9dde55131c"
+        },
+        "surf/lh.inflated": {
+          "bytes": 4705087,
+          "sha256": "8b3d90d255b359a70d8195e100fbb1d02a2bbbb0c6809c32d0a76d39ff52a410"
+        },
+        "surf/lh.qsphere.nofix": {
+          "bytes": 4572797,
+          "sha256": "32d2b7192517e8336d880daee58a2d8332602759dcc722df1c9080c03f74f65a"
+        },
+        "surf/lh.orig": {
+          "bytes": 4705362,
+          "sha256": "059d7ba231c723a838528c7bbcf122f61edb9cfe33a828ed8c845802f9cdcae5"
+        },
+        "surf/lh.smoothwm": {
+          "bytes": 4705329,
+          "sha256": "acb9e0e512420d5d4d1b7bcdd4de9b0de5f93a8c8c2966a045aa70725ea1a9c5"
+        },
+        "surf/lh.jacobian_white": {
+          "bytes": 522731,
+          "sha256": "bea1eb9eb8bf72ee83be4d3a5a6f190c6f22bc40d3c9db9640babe2d6c1d9c65"
+        },
+        "surf/lh.area.pial": {
+          "bytes": 522731,
+          "sha256": "2131f9738861d2f7b180db29107e326fc9e001e6955f21fd247e18a25f26d26d"
+        },
+        "surf/lh.topology-centered.sphere": {
+          "bytes": 4572797,
+          "sha256": "697457bd8a4ffa93235d4763fbc8d24f4db2217fa0703dac16aba950012661a8"
+        },
+        "surf/lh.sulc": {
+          "bytes": 522731,
+          "sha256": "b2e1dc5c1349ad82f85239edea3ada5353900bbd0249dbffb79ba43cbc8ad1c5"
+        },
+        "surf/lh.smoothwm.K.crv": {
+          "bytes": 522731,
+          "sha256": "f2c496d649617076057375fc7c9063d27d42be585c1d60c0784529a7dd9d1a6e"
+        },
+        "surf/lh.smoothwm.S.crv": {
+          "bytes": 522731,
+          "sha256": "394fc3baa221410075a1831e4fd11347cf63ae6b7c58d7fb1beb086a3b70fa21"
+        },
+        "surf/lh.defect_borders": {
+          "bytes": 507823,
+          "sha256": "be1bd8e1e54e8bb7d8d45443bc172c78f4c33c996178315fbee4bb3bf490720b"
+        },
+        "surf/lh.inflated.K": {
+          "bytes": 522731,
+          "sha256": "95cf4954e909a9bee38917f9e708e65092c9e7c5c017f901b68746d3bceac235"
+        },
+        "surf/lh.defect_labels": {
+          "bytes": 507823,
+          "sha256": "50921b1a35902065b29b73a800a7fd7a92f272f40fa1ec0af3e6d76f4c0f4dee"
+        },
+        "surf/lh.inflated.H": {
+          "bytes": 522731,
+          "sha256": "f6c38e3a5e0ab80f57980cd722932e8299a0c70ef23677d2028e4e85ca483458"
+        },
+        "surf/lh.smoothwm.K1.crv": {
+          "bytes": 522731,
+          "sha256": "54dec32291f600674a27220f8935157ee6b90e54b44d9065f6188e1ae6765d42"
+        },
+        "surf/lh.pial": {
+          "bytes": 4705362,
+          "sha256": "c780585b219891fc0f51a36bdc3e499f3f890d1cb2d4e74b1a9568b106326e10"
+        },
+        "surf/lh.orig.nofix": {
+          "bytes": 4571915,
+          "sha256": "1c0ba7c3b5e75b16a2fb7f314c391e170cd7bc00a0a0f8333d16f5fa9f5273bb"
+        },
+        "label/lh.BA_exvivo.thresh.annot": {
+          "bytes": 1046230,
+          "sha256": "f2e0e760640bd72466c1e873777183079a2f8d7f81012587261198eab573f224"
+        },
+        "label/lh.hOc1.mpm.vpnl.label": {
+          "bytes": 204332,
+          "sha256": "6fed3f7215471ad2b4bad557d3c05eb59043def2198649c4762d168f25fad509"
+        },
+        "label/lh.aparc.a2009s.annot": {
+          "bytes": 1048688,
+          "sha256": "03dd9bbcfc44234d3de479dc873d323853acd47dac026743ee446a296fedcc11"
+        },
+        "label/lh.BA2_exvivo.label": {
+          "bytes": 227982,
+          "sha256": "001280a7d4c0f42a7869d55d016657b9f7d9b1367fdd8623f215d822d348aec6"
+        },
+        "label/lh.BA45_exvivo.label": {
+          "bytes": 161547,
+          "sha256": "ebfe827eb2381bd333d9e38bc9152efd15f4be422ecbeae60391512cbb747950"
+        },
+        "label/lh.aparc.annot": {
+          "bytes": 1046945,
+          "sha256": "e1ff40b741599ab03d9a006696846fbc6ac51d490ae35f91cc01f3f58125358d"
+        },
+        "label/lh.V2_exvivo.thresh.label": {
+          "bytes": 190373,
+          "sha256": "9b48f8a9d94410525de54dab3fd59d03592569ba0eafeeb567b912575d878cb6"
+        },
+        "label/lh.BA6_exvivo.label": {
+          "bytes": 365256,
+          "sha256": "55d1e34a1a58b411ad749333d92e21a2cc72f788cbbafe3dc9dd8fe1858059de"
+        },
+        "label/lh.BA4a_exvivo.thresh.label": {
+          "bytes": 68866,
+          "sha256": "bc9d8840c727ce9a82c358e3e691ddc9a8b3df6d047637d56e46c45c38493b4a"
+        },
+        "label/lh.BA44_exvivo.thresh.label": {
+          "bytes": 91003,
+          "sha256": "f664e6d3a3b4aa21cd76c0e795734c11c658d7c104b5f5b3d88fd8d79ff6a38c"
+        },
+        "label/lh.BA3b_exvivo.thresh.label": {
+          "bytes": 59926,
+          "sha256": "905670ce5fbe29c8afda53f1e10c3f8f0a8f33221667c69b8ce8a51c261aaae7"
+        },
+        "label/lh.hOc4v.mpm.vpnl.label": {
+          "bytes": 57799,
+          "sha256": "38481f17e411be086ff66ed511e6cded168a26632baf738ec5b81e55baeb7d22"
+        },
+        "label/lh.V1_exvivo.thresh.label": {
+          "bytes": 179589,
+          "sha256": "4ee4a7882593544aadd14a46d1305fb44ca5496aebe4b793ab46a55b5cc6b208"
+        },
+        "label/lh.BA4p_exvivo.label": {
+          "bytes": 112553,
+          "sha256": "daa82ff5d5709d6a5e9d9006b60fc140122e9a109a30c3c1d10a2ce8405845bc"
+        },
+        "label/lh.BA45_exvivo.thresh.label": {
+          "bytes": 57103,
+          "sha256": "51a69cc991a4146466aae46da845662accaca501e9560ca1d14ad8546c9ef936"
+        },
+        "label/lh.entorhinal_exvivo.thresh.label": {
+          "bytes": 16704,
+          "sha256": "c88799b4a4bc2b9b91801a8e443401d681ffc31a1b63b9966e5255a222041c71"
+        },
+        "label/lh.MT_exvivo.label": {
+          "bytes": 92422,
+          "sha256": "8563a96b2925d42fd6c9d4b330d9fe08121949d1766f5a6b4c4e3aa7d332ce41"
+        },
+        "label/lh.V2_exvivo.label": {
+          "bytes": 432957,
+          "sha256": "f986acc73de11605f90de1cb6ed2e15fb3740b82357af5d666536920206ce665"
+        },
+        "label/lh.hOc2.mpm.vpnl.label": {
+          "bytes": 165229,
+          "sha256": "413f8c7548ddf8ec90aa7ce8c57be22a0f51aee56295bff074d34134a28f019e"
+        },
+        "label/lh.BA4a_exvivo.label": {
+          "bytes": 159021,
+          "sha256": "05fccd103bcb95420f84b67b8af49a790a029e91af0ca0af815891a25d7e7f73"
+        },
+        "label/lh.FG1.mpm.vpnl.label": {
+          "bytes": 22087,
+          "sha256": "5876d725abf599766b74b9281ba9a4e47126fb893c1f5939fbc80b05b7aa9db5"
+        },
+        "label/lh.BA6_exvivo.thresh.label": {
+          "bytes": 173748,
+          "sha256": "77b03493174aeee2cf9f2e8a5296b186f8431962bd6b0a30daf8129c2e28ee19"
+        },
+        "label/lh.FG4.mpm.vpnl.label": {
+          "bytes": 110297,
+          "sha256": "3e939a805dbb91426913d9414d18acc1693584ae7098836038c0fdf7b7c2b7e2"
+        },
+        "label/lh.perirhinal_exvivo.thresh.label": {
+          "bytes": 16208,
+          "sha256": "7e7147797842c2ba67124d16d0e02574de31d8f5eae601a3f1ca23acb9d14aee"
+        },
+        "label/lh.BA44_exvivo.label": {
+          "bytes": 172945,
+          "sha256": "549f6c8810881c87923b978a5b02f32fbac2a2e4e2139b94ea1f7e30e7449b37"
+        },
+        "label/lh.BA3a_exvivo.label": {
+          "bytes": 109885,
+          "sha256": "d68068d6300ed7496f9bf4f3cea1ebb55d735a910f2af261524868adfea49c49"
+        },
+        "label/lh.cortex+hipamyg.label": {
+          "bytes": 5509213,
+          "sha256": "732bb22fd533ec87bdc7d191d3f8fdbb2d4c84431ada834cfb420af2dde464d9"
+        },
+        "label/lh.MT_exvivo.thresh.label": {
+          "bytes": 24822,
+          "sha256": "4abb2a4589773bf0da1a04771a99a024102d8786329f112f28852fc66490ab41"
+        },
+        "label/lh.hOc3v.mpm.vpnl.label": {
+          "bytes": 74395,
+          "sha256": "54ab1d99a0c0525cf079fcfb9a1a415a8e5c0570c0658c42750a04496a4b9110"
+        },
+        "label/lh.perirhinal_exvivo.label": {
+          "bytes": 42004,
+          "sha256": "dd9fdc7bf4c9749d238fcf17dd390c56efd9b1bf7579d239a4032b8a838ea313"
+        },
+        "label/lh.BA1_exvivo.thresh.label": {
+          "bytes": 29454,
+          "sha256": "52afb1026e4dfddb130bde43ce7ad119b7e40266c39b9ada6b4c1ef2200f950f"
+        },
+        "label/lh.FG2.mpm.vpnl.label": {
+          "bytes": 40014,
+          "sha256": "1c45c1bdf18bc85d8c5833d1de2b6362e6ff2f43a1886c44b5f7fcce6570570f"
+        },
+        "label/lh.V1_exvivo.label": {
+          "bytes": 247830,
+          "sha256": "0185269c875a3b879dd8bffea20f46c9c49dc19ad3e00de540deab51a7371103"
+        },
+        "label/lh.nofix.cortex.label": {
+          "bytes": 5271377,
+          "sha256": "de1e5f10e5d01075e70589f8e34d2227f1638aea78b75f2b2ced35cd29c8d432"
+        },
+        "label/lh.FG3.mpm.vpnl.label": {
+          "bytes": 73223,
+          "sha256": "f941e2b48d29d992d248c13f0711e3a65ef4f94d5098dcbe7c68882fef42664c"
+        },
+        "label/lh.cortex.label": {
+          "bytes": 5420828,
+          "sha256": "df19a6f1e0274c6e03cde1fc4597a055d61d0fd6ab0adef0670ba5215dc16a46"
+        },
+        "label/lh.entorhinal_exvivo.label": {
+          "bytes": 44785,
+          "sha256": "6889880c52df6cb871334a3f0f8f7471f32864bb1f78d7625ba4c1cbc16db3b4"
+        },
+        "label/lh.BA_exvivo.annot": {
+          "bytes": 1046125,
+          "sha256": "3e68f0df9b3c13ae985212b35e38f346360e16b8dd97907b4c9e0414e97f23b4"
+        },
+        "label/lh.BA4p_exvivo.thresh.label": {
+          "bytes": 43920,
+          "sha256": "b38df8422d183c940dae4f3765a844b7c83dc4d1f8a15085bb86af567992338c"
+        },
+        "label/lh.aparc.DKTatlas.annot": {
+          "bytes": 1046945,
+          "sha256": "b50405ae25147ae74c8b05b26e2064f7399910c2d976373d9a415878e1e62523"
+        },
+        "label/lh.BA3b_exvivo.label": {
+          "bytes": 172355,
+          "sha256": "981ecebcfbe9817f451ae9c43ce1a0609b1b64173708dc2da548e0f0ffb25b3b"
+        },
+        "label/lh.mpm.vpnl.annot": {
+          "bytes": 1045890,
+          "sha256": "9dce16e0b97e4e9aea7cdef5379fff76291fe6229248e8d2a15373500fef50a8"
+        },
+        "label/lh.BA3a_exvivo.thresh.label": {
+          "bytes": 42782,
+          "sha256": "edf69a5ebecf0a37f95f3e11afb312004d1c0175e31b8bf887056b02662e1b5d"
+        },
+        "label/lh.BA1_exvivo.label": {
+          "bytes": 124426,
+          "sha256": "c94a31ed701354a03f6c5fd9ee11534dfa74a0c4734390490d23dc07ba75624a"
+        },
+        "label/lh.BA2_exvivo.thresh.label": {
+          "bytes": 66124,
+          "sha256": "37675a8094ec78c88b7f99ac9ce2f5ed23e615a33d851d76e30a52521a3283e8"
+        }
+      },
+      "statistics": {
+        "baseline": {
+          "full_seconds": 3.675686535425484,
+          "cache_counters": {
+            "morph_reads": 3,
+            "annotation_reads": 5,
+            "cortex_reads": 1,
+            "global_total_computations": 3,
+            "etiv_computations": 1,
+            "geometry_reads": 3,
+            "face_area_computations": 2,
+            "roi_vertex_area_computations": 2,
+            "no_th3_volume_computations": 1,
+            "roi_summary_transfers": 6,
+            "principal_curvature_computations": 3
+          },
+          "matmul_tf32_after": true,
+          "matmul_tf32_before": false
+        },
+        "candidate": {
+          "full_seconds": 2.1977830678224564,
+          "cache_counters": {
+            "morph_reads": 3,
+            "annotation_reads": 5,
+            "cortex_reads": 1,
+            "global_total_computations": 3,
+            "etiv_computations": 1,
+            "geometry_reads": 3,
+            "face_area_computations": 2,
+            "roi_vertex_area_computations": 2,
+            "no_th3_volume_computations": 1,
+            "roi_summary_transfers": 6,
+            "principal_curvature_computations": 3
+          },
+          "matmul_tf32_after": false,
+          "matmul_tf32_before": false
+        },
+        "comparison": {
+          "aparc": {
+            "elements": 306,
+            "different_elements": 0,
+            "maximum": 0.0,
+            "p99": 0.0,
+            "mean": 0.0,
+            "byte_equal": true,
+            "regions": 34,
+            "columns": {
+              "NumVert": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "SurfArea": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "GrayVol_no_th3": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "ThickAvg": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "ThickStd": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "MeanCurv": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "GausCurv": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "FoldInd": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "CurvInd": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              }
+            }
+          },
+          "aparc.a2009s": {
+            "elements": 666,
+            "different_elements": 0,
+            "maximum": 0.0,
+            "p99": 0.0,
+            "mean": 0.0,
+            "byte_equal": true,
+            "regions": 74,
+            "columns": {
+              "NumVert": {
+                "elements": 74,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "SurfArea": {
+                "elements": 74,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "GrayVol_no_th3": {
+                "elements": 74,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "ThickAvg": {
+                "elements": 74,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "ThickStd": {
+                "elements": 74,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "MeanCurv": {
+                "elements": 74,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "GausCurv": {
+                "elements": 74,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "FoldInd": {
+                "elements": 74,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "CurvInd": {
+                "elements": 74,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              }
+            }
+          },
+          "aparc.DKTatlas": {
+            "elements": 279,
+            "different_elements": 0,
+            "maximum": 0.0,
+            "p99": 0.0,
+            "mean": 0.0,
+            "byte_equal": true,
+            "regions": 31,
+            "columns": {
+              "NumVert": {
+                "elements": 31,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "SurfArea": {
+                "elements": 31,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "GrayVol_no_th3": {
+                "elements": 31,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "ThickAvg": {
+                "elements": 31,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "ThickStd": {
+                "elements": 31,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "MeanCurv": {
+                "elements": 31,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "GausCurv": {
+                "elements": 31,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "FoldInd": {
+                "elements": 31,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "CurvInd": {
+                "elements": 31,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              }
+            }
+          },
+          "aparc.pial": {
+            "elements": 306,
+            "different_elements": 0,
+            "maximum": 0.0,
+            "p99": 0.0,
+            "mean": 0.0,
+            "byte_equal": true,
+            "regions": 34,
+            "columns": {
+              "NumVert": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "SurfArea": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "GrayVol_no_th3": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "ThickAvg": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "ThickStd": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "MeanCurv": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "GausCurv": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "FoldInd": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "CurvInd": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              }
+            }
+          },
+          "BA_exvivo": {
+            "elements": 126,
+            "different_elements": 0,
+            "maximum": 0.0,
+            "p99": 0.0,
+            "mean": 0.0,
+            "byte_equal": true,
+            "regions": 14,
+            "columns": {
+              "NumVert": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "SurfArea": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "GrayVol_no_th3": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "ThickAvg": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "ThickStd": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "MeanCurv": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "GausCurv": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "FoldInd": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "CurvInd": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              }
+            }
+          },
+          "BA_exvivo.thresh": {
+            "elements": 126,
+            "different_elements": 0,
+            "maximum": 0.0,
+            "p99": 0.0,
+            "mean": 0.0,
+            "byte_equal": true,
+            "regions": 14,
+            "columns": {
+              "NumVert": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "SurfArea": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "GrayVol_no_th3": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "ThickAvg": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "ThickStd": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "MeanCurv": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "GausCurv": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "FoldInd": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "CurvInd": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              }
+            }
+          }
+        },
+        "native_anatomical_stats_comparator": "not_in_declared_reference_bundle; no new original same-input claim"
+      },
+      "mni": {
+        "input_sha256": {
+          "mri/orig.mgz": "02b5a47c7e49300a4e45d216368e4ed97c04a39fccb82f7f1bd7146a5489cc43",
+          "mri/transforms/synthmorph.1.0mm.1.0mm/invol.crop.nii.gz": "c8c75145c21a903f8df3b001b5adbdde26fe1070a914b75c0b61a33bbfcf7562",
+          "mri/transforms/synthmorph.1.0mm.1.0mm/aff.lta": "4a67eaa4c16f52698e2ba2065b6d46d9d29d24962698fcbd992329f53e3d82de"
+        },
+        "baseline": {
+          "seconds": 65.66196046769619,
+          "timings": {
+            "deform_model_and_save": 35.05964932125062,
+            "warp_convert": 4.43001891952008,
+            "warp_inverse": 23.717419939115644,
+            "resample_check": 1.722699685022235
+          },
+          "observed_internal_forwards": [
+            {
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "parameter_dtypes": [
+                "torch.float32"
+              ],
+              "matmul_tf32": false,
+              "cudnn_tf32": false,
+              "autocast": false
+            },
+            {
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "parameter_dtypes": [
+                "torch.float32"
+              ],
+              "matmul_tf32": false,
+              "cudnn_tf32": false,
+              "autocast": false
+            }
+          ]
+        },
+        "candidate": {
+          "seconds": 52.21757640596479,
+          "timings": {
+            "deform_model_and_save": 24.766317313537,
+            "warp_convert": 4.064278028905392,
+            "warp_inverse": 21.000622891820967,
+            "resample_check": 1.6258750511333346
+          },
+          "observed_internal_forwards": [
+            {
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "parameter_dtypes": [
+                "torch.float32"
+              ],
+              "matmul_tf32": false,
+              "cudnn_tf32": false,
+              "autocast": false
+            },
+            {
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "parameter_dtypes": [
+                "torch.float32"
+              ],
+              "matmul_tf32": false,
+              "cudnn_tf32": false,
+              "autocast": false
+            }
+          ]
+        },
+        "native_reference": {
+          "seconds": 160.2765544783324,
+          "timings": {
+            "deform_model_and_save": 21.264898790977895,
+            "warp_convert": 32.03373377304524,
+            "warp_inverse": 95.13571859151125,
+            "resample_check": 11.185070441104472
+          },
+          "observed_internal_forwards": [
+            {
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "parameter_dtypes": [
+                "torch.float32"
+              ],
+              "matmul_tf32": false,
+              "cudnn_tf32": false,
+              "autocast": false
+            },
+            {
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "parameter_dtypes": [
+                "torch.float32"
+              ],
+              "matmul_tf32": false,
+              "cudnn_tf32": false,
+              "autocast": false
+            }
+          ]
+        },
+        "comparison": {
+          "forward": {
+            "elements": 25590063,
+            "different_elements": 0,
+            "maximum": 0.0,
+            "p99": 0.0,
+            "mean": 0.0,
+            "affine_maximum": 0.0,
+            "dtype_equal": true,
+            "shape": [
+              193,
+              229,
+              193,
+              1,
+              3
+            ],
+            "intent_equal": true,
+            "units_equal": true
+          },
+          "inverse": {
+            "elements": 50331648,
+            "different_elements": 0,
+            "maximum": 0.0,
+            "p99": 0.0,
+            "mean": 0.0,
+            "affine_maximum": 0.0,
+            "dtype_equal": true,
+            "shape": [
+              256,
+              256,
+              256,
+              1,
+              3
+            ],
+            "intent_equal": true,
+            "units_equal": true
+          },
+          "check": {
+            "elements": 8530021,
+            "different_elements": 0,
+            "maximum": 0.0,
+            "p99": 0.0,
+            "mean": 0.0,
+            "affine_maximum": 0.0,
+            "dtype_equal": true,
+            "shape": [
+              193,
+              229,
+              193
+            ],
+            "intent_equal": true,
+            "units_equal": true
+          },
+          "deform": {
+            "elements": 13961808,
+            "different_elements": 0,
+            "maximum": 0.0,
+            "p99": 0.0,
+            "mean": 0.0,
+            "affine_maximum": 0.0,
+            "dtype_equal": true,
+            "shape": [
+              152,
+              189,
+              162,
+              3
+            ]
+          }
+        },
+        "native_postprocess_comparison": {
+          "forward": {
+            "elements": 25590063,
+            "different_elements": 0,
+            "maximum": 0.0,
+            "p99": 0.0,
+            "mean": 0.0,
+            "affine_maximum": 0.0,
+            "dtype_equal": true,
+            "shape": [
+              193,
+              229,
+              193,
+              1,
+              3
+            ],
+            "intent_equal": true,
+            "units_equal": true
+          },
+          "inverse": {
+            "elements": 50331648,
+            "different_elements": 0,
+            "maximum": 0.0,
+            "p99": 0.0,
+            "mean": 0.0,
+            "affine_maximum": 0.0,
+            "dtype_equal": true,
+            "shape": [
+              256,
+              256,
+              256,
+              1,
+              3
+            ],
+            "intent_equal": true,
+            "units_equal": true
+          },
+          "check": {
+            "elements": 8530021,
+            "different_elements": 0,
+            "maximum": 0.0,
+            "p99": 0.0,
+            "mean": 0.0,
+            "affine_maximum": 0.0,
+            "dtype_equal": true,
+            "shape": [
+              193,
+              229,
+              193
+            ],
+            "intent_equal": true,
+            "units_equal": true
+          }
+        },
+        "native_reference_scope": "same FNIT FP32 model; original conversion/inversion/check only; not original SynthMorph or whole recon-all",
+        "native_program_sha256": {
+          "mri_warp_convert": "a6834f3b941a8267eccac15658dc1a7a35a67c2e67ba48a32eef7ad1909627a9",
+          "mri_ca_register": "69dc4f7c8f6a80617308d1a34dbf61f36526ed2aa6916e050aa49091ffd4e0dc",
+          "mri_convert": "82ff94e4b5a788027853dbaede4e8f318d076d69d51e3c786cae3b5866431b55"
+        }
+      },
+      "native_program_sha256": {
+        "mris_place_surface": "78b64b7395aa0db0592ab6912fc026128b221c56d9f802db225fa59c18ceda44"
+      },
+      "thickness_native_seconds": 34.58942473772913,
+      "thickness_python": {
+        "vertices": 130679,
+        "device": "cuda:0",
+        "setup_seconds": 0.346412843093276,
+        "compute_seconds": 2.3998883040621877,
+        "total_seconds": 2.7493539173156023,
+        "candidate_pairs": 3161980,
+        "peak_candidate_pairs": 34944,
+        "kdtree_workers": 4,
+        "candidate_search": "complete-radius",
+        "radius_guard_mm": 0.0001,
+        "maximum_hops": 20,
+        "maximum_direction_thickness_mm": 5.0,
+        "outer_seconds": 2.74979236908257
+      },
+      "thickness_vs_native": {
+        "elements": 130679,
+        "different_elements": 12839,
+        "maximum": 9.5367431640625e-07,
+        "p99": 2.384185791015625e-07,
+        "mean": 1.9705990043357973e-08
+      }
+    },
+    "case_B": {
+      "inputs": {
+        "surf/rh.orig": {
+          "bytes": 4139150,
+          "sha256": "62cc84385b4ba89d85152d25ab5ab98ac208a5acbedc37336400a188e834db0b"
+        },
+        "surf/rh.white.preaparc.K": {
+          "bytes": 459819,
+          "sha256": "1b7d751423824982f13b21ebfd80efe3a60cf85bf5191ddd6752fee2b91d5fe4"
+        },
+        "surf/rh.inflated.nofix": {
+          "bytes": 4017874,
+          "sha256": "d481ba313ac2d4032fd5722d0c064df4171c12d95d3247f1de884392a70864bf"
+        },
+        "surf/rh.area.pial": {
+          "bytes": 459819,
+          "sha256": "8b584ab98b187f5cdd0fe9df38cfc9b6eb50ddfabb6fcd2e1350085d1b223047"
+        },
+        "surf/rh.curv.pial": {
+          "bytes": 459819,
+          "sha256": "75ad9da82e5e7cc20421490c4034220fc08ca25ecac09ded5ad71f6e1ed71c42"
+        },
+        "surf/rh.area": {
+          "bytes": 459819,
+          "sha256": "a2c719eb06516bd18f6ce52badd241d0696d88489e8255bb6bc31b246c1d5dcf"
+        },
+        "surf/rh.smoothwm.BE.crv": {
+          "bytes": 459819,
+          "sha256": "a9dff93019ee6a340eadc9b68bcadac81435938bf48b329c00841063af08125d"
+        },
+        "surf/rh.defect_chull": {
+          "bytes": 446199,
+          "sha256": "e4de24e74a0f12d16e03e9673848e9a5c8fcb1f4b70fd74fef5e56be419f4434"
+        },
+        "surf/rh.smoothwm.nofix": {
+          "bytes": 4016959,
+          "sha256": "ee352b500f0608d3a262bcbfd278fbb32fca60688d97e10d27e510d670069931"
+        },
+        "surf/rh.curv": {
+          "bytes": 459819,
+          "sha256": "6c2e2b561afedc95c927edc67cde5b0a0adac9e3231adcc6696851d71846fadf"
+        },
+        "surf/rh.thickness": {
+          "bytes": 459819,
+          "sha256": "9ea1046d1c8ed1289879f92db919c30ebad1a128564eaec01b4dc75b4597ab37"
+        },
+        "surf/rh.orig.raw.quad": {
+          "bytes": 2678156,
+          "sha256": "6db02d59960f405fa6f6ed8a1c70e1c0e9f1022d6dff8bebce41fcd5104a6416"
+        },
+        "surf/rh.w-g.pct.mgh": {
+          "bytes": 460108,
+          "sha256": "b3dca25f61b8cb35c4765f8817b181833c276c45e104996fdfa8bb7509ed7371"
+        },
+        "surf/rh.pial.T1": {
+          "bytes": 4139150,
+          "sha256": "4a91f19b44f21ccb1d063c820a98d430fa8cb57b47d42b58736c25783a925202"
+        },
+        "surf/rh.smoothwm.C.crv": {
+          "bytes": 459819,
+          "sha256": "5b96388ac7466db95c677c42b0dce86e133f008066ade384ec1c3229cbee34ed"
+        },
+        "surf/rh.smoothwm.K.crv": {
+          "bytes": 459819,
+          "sha256": "11da76e8a33cdcc22b89491e890afda481f41c5285025b26641ce759080d1013"
+        },
+        "surf/rh.smoothwm.H.crv": {
+          "bytes": 459819,
+          "sha256": "8e8f4240e29039d42b3bea404e4ded4c0b9736fdf35897d2765841358d2b14fa"
+        },
+        "surf/rh.smoothwm": {
+          "bytes": 4139117,
+          "sha256": "e8ed98819bc510a2ed0f436b9886b6af5096dd9771db59389de48729186fe3cd"
+        },
+        "surf/rh.white.preaparc": {
+          "bytes": 4139150,
+          "sha256": "2a37edd3b0e1423640df83225ab0ed7a4fd5876ae39bf3b399b25d9aa6b2ec65"
+        },
+        "surf/rh.white.preaparc.H": {
+          "bytes": 459819,
+          "sha256": "8bf201e5df9f04cdafc18ae09b7f430906b494c378952eda68aefe6284faf40f"
+        },
+        "surf/rh.pial": {
+          "bytes": 4139150,
+          "sha256": "4a91f19b44f21ccb1d063c820a98d430fa8cb57b47d42b58736c25783a925202"
+        },
+        "surf/rh.inflated.K": {
+          "bytes": 459819,
+          "sha256": "d358b6335d6aa1a4b63186bb246e00f93843d8d000e9aa83b89035e69942ad65"
+        },
+        "surf/rh.topology-centered.sphere": {
+          "bytes": 4017841,
+          "sha256": "29ae3ccdcb431702f43775fe8bb6971a0ab68709143d774a9eae4356f8ae7b8e"
+        },
+        "surf/rh.smoothwm.K1.crv": {
+          "bytes": 459819,
+          "sha256": "508ffa5a5a3e2e40a8861c2baf36301e37e04c6d3f3e5ec1488579e28703e345"
+        },
+        "surf/rh.smoothwm.S.crv": {
+          "bytes": 459819,
+          "sha256": "9c32effc9a67b1307eb868cb21267f014b4c89a72f5f41412e9dddf876921e9a"
+        },
+        "surf/rh.inflated": {
+          "bytes": 4138875,
+          "sha256": "f546fc3ce076aed55a477f64a47c67999eb0fea840112ba398706b92af7d70ac"
+        },
+        "surf/rh.volume": {
+          "bytes": 459819,
+          "sha256": "263ddbee72e3044fe443b46389308009579873932477774279215ff31a7e43e9"
+        },
+        "surf/rh.defect_borders": {
+          "bytes": 446199,
+          "sha256": "30016c7c6ef97d9fe57dd768e671f6936d180eed89a6a7d55943e1bf441ba80c"
+        },
+        "surf/rh.sulc": {
+          "bytes": 459819,
+          "sha256": "7bd3f0266081ae3e495fcb2f8270ef46ef17b031084a91963f73bf57a8ba1c64"
+        },
+        "surf/rh.white": {
+          "bytes": 4139150,
+          "sha256": "adb0ce5b1175c0450ba91d1fcd481a27575750540b4e5abdfa986649c772ac9e"
+        },
+        "surf/rh.smoothwm.K2.crv": {
+          "bytes": 459819,
+          "sha256": "30d44e319b5871cf28d1ba03fb949784b4e07472f2f54e9a869e544c93a21e1b"
+        },
+        "surf/rh.jacobian_white": {
+          "bytes": 459819,
+          "sha256": "225bb6de814fcbf7cd6accf5ceb30557a4135a5653f493e260032f8ea0ced228"
+        },
+        "surf/rh.area.mid": {
+          "bytes": 459819,
+          "sha256": "285e0059eadda0aeb2ccc40dd0eb79978fc80201b8d4700250140f2b2e8d8fe5"
+        },
+        "surf/rh.avg_curv": {
+          "bytes": 459819,
+          "sha256": "ce3c112158a47fbb4fbf890430af12f6d90954d5f165d6b916eeccbbfe36da7d"
+        },
+        "surf/rh.smoothwm.FI.crv": {
+          "bytes": 459819,
+          "sha256": "1e16745076a51a6192ffcb1ec8b1d0c72fd137ded98f7f6e856a4ef6a965d6fa"
+        },
+        "surf/rh.defect_labels": {
+          "bytes": 446199,
+          "sha256": "1830357e24e3be034f56011f11472aba6cad64857147f36969007010b6d60495"
+        },
+        "surf/rh.sphere": {
+          "bytes": 4138878,
+          "sha256": "5944c099c5bc72407e3a5ffa44612fdc8b57f0564bfc0b2e7059ce0639ddb074"
+        },
+        "surf/rh.inflated.H": {
+          "bytes": 459819,
+          "sha256": "4b0ad7cc7813d864547822c04182edb1523dba86578f1d600478a8c744a36a07"
+        },
+        "surf/rh.orig.nofix": {
+          "bytes": 4016959,
+          "sha256": "f32d5795c85664cf3546b86107c0cb7a5ce1324790b90cb6c13e6c6bf8891932"
+        },
+        "surf/rh.qsphere.nofix": {
+          "bytes": 4017841,
+          "sha256": "968d6b8e74730a427b72f8a46b57024ce55e980401b2d89252e5af4b5b7eba9f"
+        },
+        "surf/rh.sphere.reg": {
+          "bytes": 4138878,
+          "sha256": "ebd248ab65c22cc374026eb01bed83846c1cf80d2b69422db5b8913aa5c2bd85"
+        },
+        "surf/rh.orig.premesh": {
+          "bytes": 3943526,
+          "sha256": "bb83909c7c745940f53de4bf201388bd0ca20ed8b4dba74e084873442e81d361"
+        },
+        "label/rh.V1_exvivo.label": {
+          "bytes": 222091,
+          "sha256": "449f98e9df2dba1cb560d13c037b9adf686b6b61f347775ce2c6f32e436c3163"
+        },
+        "label/rh.BA3b_exvivo.label": {
+          "bytes": 109225,
+          "sha256": "9a267793ec3d330080f28e9cf9d0aa86549e52a6c0f970bf3e994ccaded5f848"
+        },
+        "label/rh.hOc1.mpm.vpnl.label": {
+          "bytes": 173356,
+          "sha256": "83b87cc79cee1a7adef6843df77896fb0bed21ac1774f49eeb812d4158dd58db"
+        },
+        "label/rh.BA2_exvivo.thresh.label": {
+          "bytes": 64980,
+          "sha256": "e69253b712c4d7833879a6b78fc227b30cb2f836c620a720d655c4b68fa0fd04"
+        },
+        "label/rh.BA44_exvivo.thresh.label": {
+          "bytes": 38314,
+          "sha256": "f2d64a401a47bf2cca60d12aa6e97c2d8933ab69e6008277aef01654eeb24ed1"
+        },
+        "label/rh.BA_exvivo.thresh.annot": {
+          "bytes": 920406,
+          "sha256": "5a032312a9e9c7ddad33390f714d115f808b4548ee47c6a5fdccf0b3e2f6c6c0"
+        },
+        "label/rh.aparc.annot": {
+          "bytes": 921121,
+          "sha256": "df8dc11e7ef57c1da6fa299f39e52e27628aad9327d616469cf047d9e534494e"
+        },
+        "label/rh.cortex.label": {
+          "bytes": 4616546,
+          "sha256": "6d55c37fce4a8c290fff6a419403bb2e0fede9a287be9050c12ab9db8f3cce5e"
+        },
+        "label/rh.nofix.cortex.label": {
+          "bytes": 4494089,
+          "sha256": "a6c3d60b60c508f5c7663c8777942b7d53cf1285dc25d185a8ff063be0838a4d"
+        },
+        "label/rh.FG2.mpm.vpnl.label": {
+          "bytes": 29215,
+          "sha256": "b3d3f0c96cd1b7afeb81a38963f077a9972680e37800767c8067af2567870512"
+        },
+        "label/rh.BA3a_exvivo.label": {
+          "bytes": 91046,
+          "sha256": "5a9d5ead4ba0f60882f558a009b7c4a1bd3b90b5486b21c321a5da0be326ac19"
+        },
+        "label/rh.BA2_exvivo.label": {
+          "bytes": 167377,
+          "sha256": "ed3207b511db9b612c54d79d0b4f6aff8809a84fd9c6e3377a99343afed35cc8"
+        },
+        "label/rh.BA3b_exvivo.thresh.label": {
+          "bytes": 52815,
+          "sha256": "b77c379880bcb72be1ece4be5ec9f9bd083b20da7f938b258331f8a17bde28db"
+        },
+        "label/rh.BA4p_exvivo.thresh.label": {
+          "bytes": 36192,
+          "sha256": "df3a6ed7949458bbf02025814f0d536ad41cd8116ae80702b6d7d0c1d1d1d125"
+        },
+        "label/rh.entorhinal_exvivo.label": {
+          "bytes": 38673,
+          "sha256": "d38d4a9ad708cd067d7f20d15ddf1b08331b006bc56a5a8a5253609755cf69d7"
+        },
+        "label/rh.aparc.a2009s.annot": {
+          "bytes": 922864,
+          "sha256": "dddd0d730450704c666876af2e9eeb6c8b6f57723518ca1ccc34979cde5f957f"
+        },
+        "label/rh.cortex+hipamyg.label": {
+          "bytes": 4730789,
+          "sha256": "dcc0f1ae161643351c11e443636714036f56cb382cddf17c15fd14fa05292ea1"
+        },
+        "label/rh.perirhinal_exvivo.label": {
+          "bytes": 28470,
+          "sha256": "f5426ecff3d19a786ba31806059f0a3f9683479f6152e03a9753082c86bae7e1"
+        },
+        "label/rh.BA45_exvivo.label": {
+          "bytes": 196090,
+          "sha256": "5daf87aeeec25593d1cec9eacbb14d770fa9cb58dc5df31af4415d57ebaba146"
+        },
+        "label/rh.mpm.vpnl.annot": {
+          "bytes": 920066,
+          "sha256": "3fada7890e359bb0a441845442d4f4cb338a6a7efe4c4a49f28ca01d646b0493"
+        },
+        "label/rh.BA1_exvivo.label": {
+          "bytes": 100273,
+          "sha256": "675bc236f782f0062430fbffbf6b0e50b237821c06d66f682074023d780ef942"
+        },
+        "label/rh.BA6_exvivo.thresh.label": {
+          "bytes": 179269,
+          "sha256": "13e1920230e94c955b24743cd26ca489b5e98d050fdc4485eff2e6c8ce44528a"
+        },
+        "label/rh.entorhinal_exvivo.thresh.label": {
+          "bytes": 26049,
+          "sha256": "0a8d034b2fd8dca7fd8d07ab5fef94f6a8c66e5cd19a47b41b0048f018b1aaa7"
+        },
+        "label/rh.BA44_exvivo.label": {
+          "bytes": 216154,
+          "sha256": "bf94c52d7bf3d3941bdc140a155f7d2011604606d1c49954ff34ce65a075f1ab"
+        },
+        "label/rh.hOc3v.mpm.vpnl.label": {
+          "bytes": 63310,
+          "sha256": "9fea561555e6281f4c1ad4008179a60bb433e03cbacffd92723e5f8038d2b19c"
+        },
+        "label/rh.V1_exvivo.thresh.label": {
+          "bytes": 153573,
+          "sha256": "6885a86081e15d37618b5733d32c1cfc93571cb2ea3d54a63d7c90db6a6b506b"
+        },
+        "label/rh.FG4.mpm.vpnl.label": {
+          "bytes": 62051,
+          "sha256": "5d02782a97a20e7de2dbc6cb3c57978fa081a6f47d8375b67b14fe3a77cbc329"
+        },
+        "label/rh.FG3.mpm.vpnl.label": {
+          "bytes": 49335,
+          "sha256": "95fe143e6b734eba8abeb52a5823ff11ecb218782bd48bc9a42226625e0d9de5"
+        },
+        "label/rh.V2_exvivo.label": {
+          "bytes": 377891,
+          "sha256": "4e358ab93f4b9925f3cb5a1c0d690e4304dbbc6af53c5c2d7680ef592e430f3d"
+        },
+        "label/rh.BA6_exvivo.label": {
+          "bytes": 318513,
+          "sha256": "5fd5edc2e7d0f0d2c8ddbc0f67866b11de4fc668f84a8c9ca779159be08f3e74"
+        },
+        "label/rh.aparc.DKTatlas.annot": {
+          "bytes": 921121,
+          "sha256": "bb0804e73a3cfadcf14d04507f1b38e077dd64e99c42e028884a29539d34fd2e"
+        },
+        "label/rh.hOc4v.mpm.vpnl.label": {
+          "bytes": 53259,
+          "sha256": "ea919984208fe4f12a4074bb1fae11db80c87aba7124d1557d479edaf6140025"
+        },
+        "label/rh.BA_exvivo.annot": {
+          "bytes": 920301,
+          "sha256": "1a16ba8079c6a5394cc74ae205741b550589cbe7ca0c234c1e00d75ea71b6bf0"
+        },
+        "label/rh.FG1.mpm.vpnl.label": {
+          "bytes": 24170,
+          "sha256": "f1718ba2b04d948ddc60900b3a768c283bcd18e344dfdbaddebfe7afe0a21701"
+        },
+        "label/rh.BA4a_exvivo.thresh.label": {
+          "bytes": 37622,
+          "sha256": "4c3b64f54303febaac82e48c5d1baf94ead286f0c0da2282e4cdf5ec2c1a85d5"
+        },
+        "label/rh.BA45_exvivo.thresh.label": {
+          "bytes": 42207,
+          "sha256": "7df697f8529fd476674451adfef2c5ec1ea258703bd0a6baff0ae7acdc1a5e97"
+        },
+        "label/rh.MT_exvivo.label": {
+          "bytes": 77989,
+          "sha256": "51daed2f3ab8f94ef24e5c3e508318226ecebf97c267a29fd1210b523f9333a7"
+        },
+        "label/rh.V2_exvivo.thresh.label": {
+          "bytes": 169289,
+          "sha256": "039534a3d86c2f638373bf527e46d8f8d9ae57f191e6552daef61e6e66014adc"
+        },
+        "label/rh.hOc2.mpm.vpnl.label": {
+          "bytes": 134846,
+          "sha256": "290916f660f81f40b3d2740eedec87109da448a79d57fffa324d609560f4e841"
+        },
+        "label/rh.BA3a_exvivo.thresh.label": {
+          "bytes": 39116,
+          "sha256": "b548bf8bbae51d91ddd43d30471948d495a4e024fdecc1a31444af99b9871f28"
+        },
+        "label/rh.BA1_exvivo.thresh.label": {
+          "bytes": 22854,
+          "sha256": "3244a31224cee87dfdf3010531ff91946d9a878d15fe35004ce5d0b472e3717e"
+        },
+        "label/rh.perirhinal_exvivo.thresh.label": {
+          "bytes": 12358,
+          "sha256": "ea5199c35ef5be56057ccf754c4e312875403dbe87cddbd6138e14c3203ca9db"
+        },
+        "label/rh.BA4p_exvivo.label": {
+          "bytes": 106647,
+          "sha256": "15854f77c70ca385ffebb35ab376941c8746cb38c2ebc9ac4a2f308e00ec5ebf"
+        },
+        "label/rh.BA4a_exvivo.label": {
+          "bytes": 146820,
+          "sha256": "6e0a4885c85ad0a1cb8fd9256889a358ba0a408629479890676f80905c015e30"
+        },
+        "label/rh.MT_exvivo.thresh.label": {
+          "bytes": 9355,
+          "sha256": "664e0b7eb61f242535c3da20d7e742aa95e68e35aa59a34c942a9ce0195fa13e"
+        }
+      },
+      "statistics": {
+        "candidate": {
+          "full_seconds": 2.83475698903203,
+          "cache_counters": {
+            "morph_reads": 3,
+            "annotation_reads": 5,
+            "cortex_reads": 1,
+            "global_total_computations": 3,
+            "etiv_computations": 1,
+            "geometry_reads": 3,
+            "face_area_computations": 2,
+            "roi_vertex_area_computations": 2,
+            "no_th3_volume_computations": 1,
+            "roi_summary_transfers": 6,
+            "principal_curvature_computations": 3
+          },
+          "matmul_tf32_after": false,
+          "matmul_tf32_before": false
+        },
+        "baseline": {
+          "full_seconds": 1.938444229774177,
+          "cache_counters": {
+            "morph_reads": 3,
+            "annotation_reads": 5,
+            "cortex_reads": 1,
+            "global_total_computations": 3,
+            "etiv_computations": 1,
+            "geometry_reads": 3,
+            "face_area_computations": 2,
+            "roi_vertex_area_computations": 2,
+            "no_th3_volume_computations": 1,
+            "roi_summary_transfers": 6,
+            "principal_curvature_computations": 3
+          },
+          "matmul_tf32_after": true,
+          "matmul_tf32_before": false
+        },
+        "comparison": {
+          "aparc": {
+            "elements": 306,
+            "different_elements": 0,
+            "maximum": 0.0,
+            "p99": 0.0,
+            "mean": 0.0,
+            "byte_equal": true,
+            "regions": 34,
+            "columns": {
+              "NumVert": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "SurfArea": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "GrayVol_no_th3": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "ThickAvg": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "ThickStd": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "MeanCurv": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "GausCurv": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "FoldInd": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "CurvInd": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              }
+            }
+          },
+          "aparc.a2009s": {
+            "elements": 666,
+            "different_elements": 0,
+            "maximum": 0.0,
+            "p99": 0.0,
+            "mean": 0.0,
+            "byte_equal": true,
+            "regions": 74,
+            "columns": {
+              "NumVert": {
+                "elements": 74,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "SurfArea": {
+                "elements": 74,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "GrayVol_no_th3": {
+                "elements": 74,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "ThickAvg": {
+                "elements": 74,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "ThickStd": {
+                "elements": 74,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "MeanCurv": {
+                "elements": 74,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "GausCurv": {
+                "elements": 74,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "FoldInd": {
+                "elements": 74,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "CurvInd": {
+                "elements": 74,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              }
+            }
+          },
+          "aparc.DKTatlas": {
+            "elements": 279,
+            "different_elements": 0,
+            "maximum": 0.0,
+            "p99": 0.0,
+            "mean": 0.0,
+            "byte_equal": true,
+            "regions": 31,
+            "columns": {
+              "NumVert": {
+                "elements": 31,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "SurfArea": {
+                "elements": 31,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "GrayVol_no_th3": {
+                "elements": 31,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "ThickAvg": {
+                "elements": 31,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "ThickStd": {
+                "elements": 31,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "MeanCurv": {
+                "elements": 31,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "GausCurv": {
+                "elements": 31,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "FoldInd": {
+                "elements": 31,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "CurvInd": {
+                "elements": 31,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              }
+            }
+          },
+          "aparc.pial": {
+            "elements": 306,
+            "different_elements": 0,
+            "maximum": 0.0,
+            "p99": 0.0,
+            "mean": 0.0,
+            "byte_equal": true,
+            "regions": 34,
+            "columns": {
+              "NumVert": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "SurfArea": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "GrayVol_no_th3": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "ThickAvg": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "ThickStd": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "MeanCurv": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "GausCurv": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "FoldInd": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "CurvInd": {
+                "elements": 34,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              }
+            }
+          },
+          "BA_exvivo": {
+            "elements": 126,
+            "different_elements": 0,
+            "maximum": 0.0,
+            "p99": 0.0,
+            "mean": 0.0,
+            "byte_equal": true,
+            "regions": 14,
+            "columns": {
+              "NumVert": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "SurfArea": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "GrayVol_no_th3": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "ThickAvg": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "ThickStd": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "MeanCurv": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "GausCurv": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "FoldInd": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "CurvInd": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              }
+            }
+          },
+          "BA_exvivo.thresh": {
+            "elements": 126,
+            "different_elements": 0,
+            "maximum": 0.0,
+            "p99": 0.0,
+            "mean": 0.0,
+            "byte_equal": true,
+            "regions": 14,
+            "columns": {
+              "NumVert": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "SurfArea": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "GrayVol_no_th3": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "ThickAvg": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "ThickStd": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "MeanCurv": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "GausCurv": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "FoldInd": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              },
+              "CurvInd": {
+                "elements": 14,
+                "different_elements": 0,
+                "maximum": 0.0,
+                "p99": 0.0,
+                "mean": 0.0
+              }
+            }
+          }
+        },
+        "native_anatomical_stats_comparator": "not_in_declared_reference_bundle; no new original same-input claim"
+      },
+      "mni": {
+        "input_sha256": {
+          "mri/orig.mgz": "4e64d381db96d497b62d944c294dae2d3321f4ca6a2eac759eb2258ec8a0ca82",
+          "mri/transforms/synthmorph.1.0mm.1.0mm/invol.crop.nii.gz": "3d6a44356524cefe7040e5d8468314c2d9e5aee06bd1d00816f872cba2989a69",
+          "mri/transforms/synthmorph.1.0mm.1.0mm/aff.lta": "a97460e46695114206bb7219cb3eb404aa77261c8e784f4051fe63b093b18a45"
+        },
+        "candidate": {
+          "seconds": 61.58679370209575,
+          "timings": {
+            "deform_model_and_save": 27.09580957517028,
+            "warp_convert": 5.086783810518682,
+            "warp_inverse": 26.8170434134081,
+            "resample_check": 1.7353639351204038
+          },
+          "observed_internal_forwards": [
+            {
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "parameter_dtypes": [
+                "torch.float32"
+              ],
+              "matmul_tf32": false,
+              "cudnn_tf32": false,
+              "autocast": false
+            },
+            {
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "parameter_dtypes": [
+                "torch.float32"
+              ],
+              "matmul_tf32": false,
+              "cudnn_tf32": false,
+              "autocast": false
+            }
+          ]
+        },
+        "baseline": {
+          "seconds": 54.643566781654954,
+          "timings": {
+            "deform_model_and_save": 22.36266659758985,
+            "warp_convert": 4.866399880498648,
+            "warp_inverse": 24.89229452610016,
+            "resample_check": 1.703766101039946
+          },
+          "observed_internal_forwards": [
+            {
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "parameter_dtypes": [
+                "torch.float32"
+              ],
+              "matmul_tf32": false,
+              "cudnn_tf32": false,
+              "autocast": false
+            },
+            {
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "parameter_dtypes": [
+                "torch.float32"
+              ],
+              "matmul_tf32": false,
+              "cudnn_tf32": false,
+              "autocast": false
+            }
+          ]
+        },
+        "native_reference": {
+          "seconds": 200.89278676640242,
+          "timings": {
+            "deform_model_and_save": 23.026095297187567,
+            "warp_convert": 35.39062835369259,
+            "warp_inverse": 128.9314005970955,
+            "resample_check": 12.62782820314169
+          },
+          "observed_internal_forwards": [
+            {
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "parameter_dtypes": [
+                "torch.float32"
+              ],
+              "matmul_tf32": false,
+              "cudnn_tf32": false,
+              "autocast": false
+            },
+            {
+              "device": "cuda:0",
+              "input_dtype": "torch.float32",
+              "parameter_dtypes": [
+                "torch.float32"
+              ],
+              "matmul_tf32": false,
+              "cudnn_tf32": false,
+              "autocast": false
+            }
+          ]
+        },
+        "comparison": {
+          "forward": {
+            "elements": 25590063,
+            "different_elements": 0,
+            "maximum": 0.0,
+            "p99": 0.0,
+            "mean": 0.0,
+            "affine_maximum": 0.0,
+            "dtype_equal": true,
+            "shape": [
+              193,
+              229,
+              193,
+              1,
+              3
+            ],
+            "intent_equal": true,
+            "units_equal": true
+          },
+          "inverse": {
+            "elements": 50331648,
+            "different_elements": 0,
+            "maximum": 0.0,
+            "p99": 0.0,
+            "mean": 0.0,
+            "affine_maximum": 0.0,
+            "dtype_equal": true,
+            "shape": [
+              256,
+              256,
+              256,
+              1,
+              3
+            ],
+            "intent_equal": true,
+            "units_equal": true
+          },
+          "check": {
+            "elements": 8530021,
+            "different_elements": 0,
+            "maximum": 0.0,
+            "p99": 0.0,
+            "mean": 0.0,
+            "affine_maximum": 0.0,
+            "dtype_equal": true,
+            "shape": [
+              193,
+              229,
+              193
+            ],
+            "intent_equal": true,
+            "units_equal": true
+          },
+          "deform": {
+            "elements": 13961808,
+            "different_elements": 0,
+            "maximum": 0.0,
+            "p99": 0.0,
+            "mean": 0.0,
+            "affine_maximum": 0.0,
+            "dtype_equal": true,
+            "shape": [
+              152,
+              189,
+              162,
+              3
+            ]
+          }
+        },
+        "native_postprocess_comparison": {
+          "forward": {
+            "elements": 25590063,
+            "different_elements": 0,
+            "maximum": 0.0,
+            "p99": 0.0,
+            "mean": 0.0,
+            "affine_maximum": 0.0,
+            "dtype_equal": true,
+            "shape": [
+              193,
+              229,
+              193,
+              1,
+              3
+            ],
+            "intent_equal": true,
+            "units_equal": true
+          },
+          "inverse": {
+            "elements": 50331648,
+            "different_elements": 0,
+            "maximum": 0.0,
+            "p99": 0.0,
+            "mean": 0.0,
+            "affine_maximum": 0.0,
+            "dtype_equal": true,
+            "shape": [
+              256,
+              256,
+              256,
+              1,
+              3
+            ],
+            "intent_equal": true,
+            "units_equal": true
+          },
+          "check": {
+            "elements": 8530021,
+            "different_elements": 0,
+            "maximum": 0.0,
+            "p99": 0.0,
+            "mean": 0.0,
+            "affine_maximum": 0.0,
+            "dtype_equal": true,
+            "shape": [
+              193,
+              229,
+              193
+            ],
+            "intent_equal": true,
+            "units_equal": true
+          }
+        },
+        "native_reference_scope": "same FNIT FP32 model; only conversion/inversion/check are original programs; not original SynthMorph or whole recon-all",
+        "native_program_sha256": {
+          "mri_warp_convert": "a6834f3b941a8267eccac15658dc1a7a35a67c2e67ba48a32eef7ad1909627a9",
+          "mri_ca_register": "69dc4f7c8f6a80617308d1a34dbf61f36526ed2aa6916e050aa49091ffd4e0dc",
+          "mri_convert": "82ff94e4b5a788027853dbaede4e8f318d076d69d51e3c786cae3b5866431b55"
+        }
+      },
+      "native_program_sha256": {
+        "mris_place_surface": "78b64b7395aa0db0592ab6912fc026128b221c56d9f802db225fa59c18ceda44"
+      },
+      "thickness_native_seconds": 30.62773819733411,
+      "thickness_python": {
+        "vertices": 114951,
+        "device": "cuda:0",
+        "setup_seconds": 0.30624622758477926,
+        "compute_seconds": 1.798155096359551,
+        "total_seconds": 2.1069349125027657,
+        "candidate_pairs": 2693011,
+        "peak_candidate_pairs": 38508,
+        "kdtree_workers": 4,
+        "candidate_search": "complete-radius",
+        "radius_guard_mm": 0.0001,
+        "maximum_hops": 20,
+        "maximum_direction_thickness_mm": 5.0,
+        "outer_seconds": 2.107275146059692
+      },
+      "thickness_vs_native": {
+        "elements": 114951,
+        "different_elements": 11261,
+        "maximum": 9.5367431640625e-07,
+        "p99": 2.384185791015625e-07,
+        "mean": 1.9882992807672323e-08
+      }
+    }
+  },
+  "runtime": {
+    "status": "passed",
+    "dependencies": {
+      "torch": {
+        "required": true,
+        "module": "torch",
+        "status": "loadable",
+        "version": "2.5.1",
+        "module_sha256": "e1b5bf4151bd246a21e3ac5318f6edfcf2e6ef0fd4f233bfb77a264698ec1319"
+      },
+      "numpy": {
+        "required": true,
+        "module": "numpy",
+        "status": "loadable",
+        "version": "1.26.4",
+        "module_sha256": "22cd1535fa14d74ef6f457cca149ffdc80875f460be313b8f895273f78bc402e"
+      },
+      "scipy": {
+        "required": true,
+        "module": "scipy",
+        "status": "loadable",
+        "version": "1.17.1",
+        "module_sha256": "335bc6e0a9909dc7534f9569a3685a92dc8001cb8c63a6da4c239849ff02d4d0"
+      },
+      "numba": {
+        "required": true,
+        "module": "numba",
+        "status": "loadable",
+        "version": "0.67.0",
+        "module_sha256": "ad86000e18ba728805be54c5a249d212ef2631d8bcbc086bed8959076ea25656"
+      },
+      "nibabel": {
+        "required": true,
+        "module": "nibabel",
+        "status": "loadable",
+        "version": "5.4.2",
+        "module_sha256": "30f7a4b98584d3a733aef0708b19819f9342c5f3f0288ddc07680b63bca2db73"
+      },
+      "h5py": {
+        "required": true,
+        "module": "h5py",
+        "status": "loadable",
+        "version": "3.16.0",
+        "module_sha256": "21f855ed8c945f3264e1375f0146c8095b703c6334a5fdda4af908f63c175a13"
+      },
+      "SimpleITK": {
+        "required": true,
+        "module": "SimpleITK",
+        "status": "loadable",
+        "version": "2.5.6",
+        "module_sha256": "adca9fc000dea6fee1b1d9547409efaba42f0dd6e1e5a984f6f7791a95068aaa"
+      },
+      "tifffile": {
+        "required": true,
+        "module": "tifffile",
+        "status": "loadable",
+        "version": "2026.3.3",
+        "module_sha256": "39cf9ef20362357abbde3e6311ac41c1d291465f33f61979d3b80c94e7dc6d83"
+      },
+      "imagecodecs": {
+        "required": true,
+        "module": "imagecodecs",
+        "status": "loadable",
+        "version": "2026.3.6",
+        "module_sha256": "8d10bda56f37f21f09bf6285a2ca754eaf3bfa84e647685250f7a76fdb8a03ea"
+      },
+      "triton": {
+        "required": true,
+        "module": "triton",
+        "status": "loadable",
+        "version": "3.1.0",
+        "module_sha256": "493ce2bb6b1be86810b0d72e20df188f7634fd4a0843d08c31f2095709f04d0f"
+      },
+      "nvidia-ml-py": {
+        "required": true,
+        "module": "pynvml",
+        "status": "loadable",
+        "version": "13.580.82",
+        "module_sha256": "4251429c25f1615a4166f395d3c09fe0732bfb023864c4b7f12813373e5696ea"
+      }
+    },
+    "missing": [],
+    "incompatible": [],
+    "assets": {
+      "status": "verified",
+      "files": {
+        "ASegStatsLUT.txt": {
+          "bytes": 3240,
+          "sha256": "36eb822e91174a7a4f99f22f17f19e6692225476b815aa0fdaf0622fd32e2511"
+        },
+        "FreeSurferColorLUT.txt": {
+          "bytes": 116487,
+          "sha256": "da55c6a47d316ee16d2609afd5c93cb8078e08e7e3afec5bb6283027d7c33e7b"
+        },
+        "SubCorticalMassLUT.txt": {
+          "bytes": 281,
+          "sha256": "65957c41244153d6614aeaf08c16ee956c09e2c8b5e198aa64c81946f75e93b6"
+        },
+        "WMParcStatsLUT.txt": {
+          "bytes": 25476,
+          "sha256": "1eb362b9d929797179106ba37eecaa8eff2830f1509be8e7b56238e6ac7c6dbf"
+        },
+        "average/RB_all_2020-01-02.gca": {
+          "bytes": 71651552,
+          "sha256": "2fcd276a39800f01f93a4c8828ae6d0a8cea3d8b8b9fe1599d4ee54e806be93e"
+        },
+        "average/mni305.cor.stripped.mgz": {
+          "bytes": 1342430,
+          "sha256": "fff93f13255a8d393c0e787fbfcfaf5eb379e88e955bda7e04e31552568878a4"
+        },
+        "average/lh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs": {
+          "bytes": 18842086,
+          "sha256": "721d6f53e8e3edae2c3798d52c5878026f1cdbe6cb286659ae48b920651a4cb6"
+        },
+        "average/lh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs": {
+          "bytes": 21724500,
+          "sha256": "f726bca3747676e465aaad4572e525dc5370d0a073c435fd41c1beaff2ad6add"
+        },
+        "average/lh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs": {
+          "bytes": 22003357,
+          "sha256": "6db52238d4c6c5867edd645daf23a7ce1bf753caffa792c9972db40af8229214"
+        },
+        "average/rh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs": {
+          "bytes": 18610793,
+          "sha256": "64e98c907af4242cb79b645a384c97ed37854b7b127a18ad406084b29dc486cf"
+        },
+        "average/rh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs": {
+          "bytes": 21898679,
+          "sha256": "878f4caae1f7d439ebeae5499537b9b5c1146bf7c369f5fb4cfc1df67e6d0b29"
+        },
+        "average/rh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs": {
+          "bytes": 21987412,
+          "sha256": "3f6e2ec1f24081f5a3ad2cafcdc1aaa156a2a635b78c30808dbeb8aaf9421498"
+        },
+        "average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif": {
+          "bytes": 2857642,
+          "sha256": "92f1dc820d778a67c143d4ea82597fd71a89ddc738dfa555b7ca32ed21e95c97"
+        },
+        "average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif": {
+          "bytes": 2858470,
+          "sha256": "1064e4c0ae0440f5071b4369f29a09860f1abf6eddc90a271d10cd0ff7e60043"
+        },
+        "lib/bem/ic4.tri": {
+          "bytes": 207432,
+          "sha256": "95cc8e50f48df9b2a7a8558c9837becfa486f7562f2d9ae6fee4cc7aad341d13"
+        },
+        "lib/bem/ic7.tri": {
+          "bytes": 13368214,
+          "sha256": "cdd2761f0921a05d4959eb5b200fc3c65c0344a575809b0b09458299d90a1e6d"
+        },
+        "average/mca-dura.prior.warp.mni152.1.0mm.lh.nii.gz": {
+          "bytes": 41792,
+          "sha256": "0ea9f9ffdcbc38b139e5ca374dc322cb60773c355ffbccf21efd812d8c0ee458"
+        },
+        "average/mca-dura.prior.warp.mni152.1.0mm.rh.nii.gz": {
+          "bytes": 41927,
+          "sha256": "5772a838e2fdd2ecf0c83de27bc572532cd8b9b8a1b00d919a385aab34e5710e"
+        },
+        "average/vsinus.no-sp.prior.mni152.1.0mm.mgz": {
+          "bytes": 269881,
+          "sha256": "b46661dda5cdde2a9c43cd2bad7ca096bd96bf2ba6c60f784d54cd8a75485126"
+        },
+        "average/mni_icbm152_nlin_asym_09c/reg-targets/mni152.1.0mm.cropped.nii.gz": {
+          "bytes": 7745204,
+          "sha256": "ef89b7aa615dcb4a68a1cad725a9b99314227f9777ed86f42aae61e4e89da19a"
+        },
+        "average/mni_icbm152_nlin_asym_09c/reg-targets/mni152.1.0mm.nii.gz": {
+          "bytes": 17977963,
+          "sha256": "e4e1a25b66fef6b2cde8e4916d4a03d4369de6f24b0d3d4736baffc3d4a8c575"
+        },
+        "average/colortable_BA.txt": {
+          "bytes": 810,
+          "sha256": "83aaf7a79ce4fdb98c9f6175b318dfaceed276ebf7422cdfaa195f1f71a2512f"
+        },
+        "average/colortable_BA_thresh.txt": {
+          "bytes": 915,
+          "sha256": "025b467483825cba420d67c475a7f0af8f7eb092ae53010e7adddfe4a853443b"
+        },
+        "average/colortable_vpnl.txt": {
+          "bytes": 793,
+          "sha256": "bf73534d4fe5b46e120611b8886061cf546d871f3620c225604649f6fc0f195d"
+        },
+        "subjects/fsaverage/surf/lh.sphere.reg": {
+          "bytes": 5898546,
+          "sha256": "fddcf0eeecc6e0f62142164f7c0ac24fda1f0be8cb653d3f037970184c5ba98f"
+        },
+        "subjects/fsaverage/surf/rh.sphere.reg": {
+          "bytes": 5898546,
+          "sha256": "fddcf0eeecc6e0f62142164f7c0ac24fda1f0be8cb653d3f037970184c5ba98f"
+        },
+        "subjects/fsaverage/label/lh.BA1_exvivo.label": {
+          "bytes": 166374,
+          "sha256": "8884afe5b712013b7faf517d9c30950fb0d934737611cb39ee66ed4168935863"
+        },
+        "subjects/fsaverage/label/lh.BA1_exvivo.thresh.label": {
+          "bytes": 46008,
+          "sha256": "a52bfb2ca169f96b2e611f5b6d0ffe6e822178c774b93c62daee700aa553f02f"
+        },
+        "subjects/fsaverage/label/lh.BA2_exvivo.label": {
+          "bytes": 320897,
+          "sha256": "b4fc82af5491263068c0c12d04d5298c6fdc1f996cc832154905c1d4354145fd"
+        },
+        "subjects/fsaverage/label/lh.BA2_exvivo.thresh.label": {
+          "bytes": 94863,
+          "sha256": "1fb1811a8a29ebcb5060e23f988aad62b8a764b085f3e183075d2358ce92276d"
+        },
+        "subjects/fsaverage/label/lh.BA3a_exvivo.label": {
+          "bytes": 163588,
+          "sha256": "addeb991e3c083d5e27c8d14956654456fe3949f60122ce2b1ca635e75c3d52f"
+        },
+        "subjects/fsaverage/label/lh.BA3a_exvivo.thresh.label": {
+          "bytes": 68084,
+          "sha256": "963d4eb18f9f3362966d998cd7b440372889481ba440b2e2894f266a2e2b6889"
+        },
+        "subjects/fsaverage/label/lh.BA3b_exvivo.label": {
+          "bytes": 239495,
+          "sha256": "476ad4b6a72b4979b8a53545b1c4b1c6b82b1732dacfd51df3bcab05efe5410e"
+        },
+        "subjects/fsaverage/label/lh.BA3b_exvivo.thresh.label": {
+          "bytes": 90376,
+          "sha256": "86aac6cb4b65109f71afd11bcac8b1c2369c4e5d57f3bdd74184d78fc553dc61"
+        },
+        "subjects/fsaverage/label/lh.BA44_exvivo.label": {
+          "bytes": 167585,
+          "sha256": "62631737d99bf4c20c6586a9c13b17e43d4b53ea6d43b6f194c8697e0211d9f2"
+        },
+        "subjects/fsaverage/label/lh.BA44_exvivo.thresh.label": {
+          "bytes": 83185,
+          "sha256": "8d7a087c409a08869aacd06a74be36b7d95bce3ef9ceedab6aaa6625f31323b0"
+        },
+        "subjects/fsaverage/label/lh.BA45_exvivo.label": {
+          "bytes": 137141,
+          "sha256": "7c7a92b25ba2b7d1e21318d7b315039d9fa10d20527ad3740f83557745a2bfaa"
+        },
+        "subjects/fsaverage/label/lh.BA45_exvivo.thresh.label": {
+          "bytes": 50422,
+          "sha256": "d68196b0aaaf83c964c8333e2c4198a3e490379a3002bc9d913dc08a89122020"
+        },
+        "subjects/fsaverage/label/lh.BA4a_exvivo.label": {
+          "bytes": 231744,
+          "sha256": "59fa939431954f5fb85f9b9344cfece29f6ab60293f79b6331e7abb242370317"
+        },
+        "subjects/fsaverage/label/lh.BA4a_exvivo.thresh.label": {
+          "bytes": 103857,
+          "sha256": "0d36c09329bd36395643c66d07f0bbf34e30e699ee6567c2770d00df3058e7f2"
+        },
+        "subjects/fsaverage/label/lh.BA4p_exvivo.label": {
+          "bytes": 163313,
+          "sha256": "9dcf4ce34422bf6024cd70e31a8494fac428a1a14855c67c5812a0b1aa843632"
+        },
+        "subjects/fsaverage/label/lh.BA4p_exvivo.thresh.label": {
+          "bytes": 69838,
+          "sha256": "1b1451f5e52847d3285783a68f3088ece65dee0bfd88695a7d35c6e2f5e31e94"
+        },
+        "subjects/fsaverage/label/lh.BA6_exvivo.label": {
+          "bytes": 538881,
+          "sha256": "3432dfa143bfa910a251585c2359603e1972fa3e6acd7d7f8dd79c60b525d759"
+        },
+        "subjects/fsaverage/label/lh.BA6_exvivo.thresh.label": {
+          "bytes": 311318,
+          "sha256": "673c58990444ab7924b9c6ea8a6e26bac548079c96740732df066d44e6b220ed"
+        },
+        "subjects/fsaverage/label/lh.MT_exvivo.label": {
+          "bytes": 85306,
+          "sha256": "9149feef1c571b16bc0ac14795f3a4d3ca3367a4f2cd371706d831696e49a1b1"
+        },
+        "subjects/fsaverage/label/lh.MT_exvivo.thresh.label": {
+          "bytes": 23084,
+          "sha256": "79699fad47bcbb6b8935a567bb8b1928ffa19b295c8b4330681e0839e6df2e2c"
+        },
+        "subjects/fsaverage/label/lh.V1_exvivo.label": {
+          "bytes": 192278,
+          "sha256": "cd138deccaa711411a89f183d7d18b0f38c612c3ff454044dc26b2f21194c325"
+        },
+        "subjects/fsaverage/label/lh.V1_exvivo.thresh.label": {
+          "bytes": 151679,
+          "sha256": "cfd0cb7f4f8a1b55681609b64f414d1030ba2f30dd499228e8d91eae96f9ba9c"
+        },
+        "subjects/fsaverage/label/lh.V2_exvivo.label": {
+          "bytes": 337758,
+          "sha256": "123cf0910e014b7f830626e1475725c87a2315308f00c856420c4b6de8ed2d93"
+        },
+        "subjects/fsaverage/label/lh.V2_exvivo.thresh.label": {
+          "bytes": 149833,
+          "sha256": "ade1be8c79444d764e804d13bdb8d4be0479b966c4226a9a785409c55069caf3"
+        },
+        "subjects/fsaverage/label/lh.entorhinal_exvivo.label": {
+          "bytes": 57500,
+          "sha256": "4f34b9e31377d15ef78f786bfc0a9d553cb7ec4702450139a437acf266f4091b"
+        },
+        "subjects/fsaverage/label/lh.entorhinal_exvivo.thresh.label": {
+          "bytes": 21693,
+          "sha256": "a0c864c87a9a6636c799c28b0df0a3166624632702bec8c34a9c6661cd820749"
+        },
+        "subjects/fsaverage/label/lh.perirhinal_exvivo.label": {
+          "bytes": 55014,
+          "sha256": "b242367b90204b8d441264c0a07abd2e21f4884d9f214a3d936c37190111317a"
+        },
+        "subjects/fsaverage/label/lh.perirhinal_exvivo.thresh.label": {
+          "bytes": 20742,
+          "sha256": "6ddc7237cfe35854eb30704ed5deb8d22e194ddc058b5386753617322027d1e0"
+        },
+        "subjects/fsaverage/label/rh.BA1_exvivo.label": {
+          "bytes": 155760,
+          "sha256": "e13ca0b5263354a70fab89a90f9d662366ac718c27604f99a31a3ed487c1ff4d"
+        },
+        "subjects/fsaverage/label/rh.BA1_exvivo.thresh.label": {
+          "bytes": 38863,
+          "sha256": "a8588c380b9981e6ff51f789d679a5297b94c091ef9cac35187ea838f0e58699"
+        },
+        "subjects/fsaverage/label/rh.BA2_exvivo.label": {
+          "bytes": 265610,
+          "sha256": "5aec9b5dbcb35cdb44b384ac9e8ee194ca0a27cb93aa16a5d1a480ea6bf9c9a9"
+        },
+        "subjects/fsaverage/label/rh.BA2_exvivo.thresh.label": {
+          "bytes": 119206,
+          "sha256": "c33ead1dcebd8c91aed9c9ebb03e5ef485edc8d69c5efececee6e29e3e60abda"
+        },
+        "subjects/fsaverage/label/rh.BA3a_exvivo.label": {
+          "bytes": 156488,
+          "sha256": "472a099485fe350b6c84c6a5c63d391c28e12b2596ce1e9d467a5150619292d3"
+        },
+        "subjects/fsaverage/label/rh.BA3a_exvivo.thresh.label": {
+          "bytes": 74978,
+          "sha256": "cd96191d63460a2e11ee6a0006389eadbb8a9f4f5a55fbe97b97ff675ea4880f"
+        },
+        "subjects/fsaverage/label/rh.BA3b_exvivo.label": {
+          "bytes": 177307,
+          "sha256": "63c174c0f7d69b1a5e42f0db8b2232accaef4580ea1a2e1a9d1c235db8d654af"
+        },
+        "subjects/fsaverage/label/rh.BA3b_exvivo.thresh.label": {
+          "bytes": 96608,
+          "sha256": "7d0c61837aa898154351842ecd032f8b9c63bbf5311461b7cfe06abbec7cd99c"
+        },
+        "subjects/fsaverage/label/rh.BA44_exvivo.label": {
+          "bytes": 269815,
+          "sha256": "f13f41bc0b42fec614552701d4a728dd4358003a29fe7f29da1ff4d35c0113d6"
+        },
+        "subjects/fsaverage/label/rh.BA44_exvivo.thresh.label": {
+          "bytes": 43100,
+          "sha256": "0e59b5513e7e388e53cbe79a7ff947b8b41e116d2a324d01850f08d17d8eaa4c"
+        },
+        "subjects/fsaverage/label/rh.BA45_exvivo.label": {
+          "bytes": 211071,
+          "sha256": "788be813f4a949a15ba988698811dc861980b0a11386ef2c0c74f5398eadc819"
+        },
+        "subjects/fsaverage/label/rh.BA45_exvivo.thresh.label": {
+          "bytes": 50322,
+          "sha256": "1cc883c2c40c6c492935e1b6bcd5f65375c2555e7bae1ce2cf74b36fae130806"
+        },
+        "subjects/fsaverage/label/rh.BA4a_exvivo.label": {
+          "bytes": 224244,
+          "sha256": "bf88639551db4ea0455b487bbf7a427b2f1a0d1ba96fb41108079dd0728e39c0"
+        },
+        "subjects/fsaverage/label/rh.BA4a_exvivo.thresh.label": {
+          "bytes": 60471,
+          "sha256": "4789c770f40af484816afbfb78a851a194f32c8d9be52b113064b13f5ba84d28"
+        },
+        "subjects/fsaverage/label/rh.BA4p_exvivo.label": {
+          "bytes": 175244,
+          "sha256": "ca5e5d64c62dafda926ef1b631c99abf784dd0e725702b85b12d705e460a899d"
+        },
+        "subjects/fsaverage/label/rh.BA4p_exvivo.thresh.label": {
+          "bytes": 65740,
+          "sha256": "69f1ad431d2ea5f0ab2d247203b3825b29fc3c810821089bcec39ce3bf5d27f9"
+        },
+        "subjects/fsaverage/label/rh.BA6_exvivo.label": {
+          "bytes": 475963,
+          "sha256": "9730d02af8fa2de766d7445d154cbbea10db515cd9f2bc0a0c24faf3c8b38af6"
+        },
+        "subjects/fsaverage/label/rh.BA6_exvivo.thresh.label": {
+          "bytes": 300267,
+          "sha256": "e439228197eab77e9d5cba83dda7864768d8c80b94d33438fb41bcc7c91e11d5"
+        },
+        "subjects/fsaverage/label/rh.MT_exvivo.label": {
+          "bytes": 78819,
+          "sha256": "09ee210fff0ed9d913a28b3984a4d1a7682416fc44c111f02b50064bb894671a"
+        },
+        "subjects/fsaverage/label/rh.MT_exvivo.thresh.label": {
+          "bytes": 11674,
+          "sha256": "18d2a133d66c65ecfcc9e96de6e1a3324e9c0845a37d63805f1d0dfaa2a680d3"
+        },
+        "subjects/fsaverage/label/rh.V1_exvivo.label": {
+          "bytes": 189237,
+          "sha256": "0906451073e85f131ad809a0c68477546e7040a3882a4789bfeb2d7be71e72c2"
+        },
+        "subjects/fsaverage/label/rh.V1_exvivo.thresh.label": {
+          "bytes": 140751,
+          "sha256": "d0be64272e50bc6014daa61dba149eddf97d606443da85dbd85a96ee50efd188"
+        },
+        "subjects/fsaverage/label/rh.V2_exvivo.label": {
+          "bytes": 324193,
+          "sha256": "c5a77d07674240814bcab88d08a531e3a10ea26089afcad85f712e40219b2bbe"
+        },
+        "subjects/fsaverage/label/rh.V2_exvivo.thresh.label": {
+          "bytes": 151056,
+          "sha256": "007df4237059f4bf3a6053535a6dd20fdb2bb1989185bd758e9620474c8fbb46"
+        },
+        "subjects/fsaverage/label/rh.entorhinal_exvivo.label": {
+          "bytes": 46475,
+          "sha256": "2d4e7bb6ffed893edccc2c8ed37bc7a65703e59eec639b20ebb1e20ec02370e2"
+        },
+        "subjects/fsaverage/label/rh.entorhinal_exvivo.thresh.label": {
+          "bytes": 31152,
+          "sha256": "870334737b498638501c1e9ec3c20e1ca2c73c03f1de17a7d26244d7b96459ee"
+        },
+        "subjects/fsaverage/label/lh.FG1.mpm.vpnl.label": {
+          "bytes": 19982,
+          "sha256": "3e807da35c8272b44b52ff4732c4ecda49b712a95f611ffb1ba99337ec6b7d5f"
+        },
+        "subjects/fsaverage/label/lh.FG2.mpm.vpnl.label": {
+          "bytes": 34086,
+          "sha256": "e66ae1795cd0b59f4268180c0d9990a898a4b5808f5f249b56ce09150bf729a9"
+        },
+        "subjects/fsaverage/label/lh.FG3.mpm.vpnl.label": {
+          "bytes": 89996,
+          "sha256": "001d7eb1733fbd9d44df48ead11f32b5751365fe8a1d6d21c84d199a0f769c4c"
+        },
+        "subjects/fsaverage/label/lh.FG4.mpm.vpnl.label": {
+          "bytes": 101583,
+          "sha256": "7593ff98336e328dc574c73e2c77962a51d73a568c79fad12f9bce98cfc127d9"
+        },
+        "subjects/fsaverage/label/lh.hOc1.mpm.vpnl.label": {
+          "bytes": 180234,
+          "sha256": "ac2b3b33512cb9aab20aa5cf4dad70de2c8dd94000bc4d6bcc4160e1ee2f9183"
+        },
+        "subjects/fsaverage/label/lh.hOc2.mpm.vpnl.label": {
+          "bytes": 137176,
+          "sha256": "b94415047e6ce9756ef852d0acbd8f6068c617ce185d81ab55dae7df0d59d038"
+        },
+        "subjects/fsaverage/label/lh.hOc3v.mpm.vpnl.label": {
+          "bytes": 61482,
+          "sha256": "501ed11cb9764799df355049593932fad8becd4d130c239e8fa8381c4acacaeb"
+        },
+        "subjects/fsaverage/label/lh.hOc4v.mpm.vpnl.label": {
+          "bytes": 48322,
+          "sha256": "69e8d4b6a1a6db6d81f282ca7ec8b2de3f6d295f6177f32dfc3f8412e23addfb"
+        },
+        "subjects/fsaverage/label/rh.FG1.mpm.vpnl.label": {
+          "bytes": 25517,
+          "sha256": "284ad692e80ee1b9a88a938c37198b06e983b554846f148cd2dfeed935ae63b4"
+        },
+        "subjects/fsaverage/label/rh.FG2.mpm.vpnl.label": {
+          "bytes": 34157,
+          "sha256": "e6fcb5563d7ecc9efc976174375e802b44cdb05271f5cbefa97cf48bc608b65b"
+        },
+        "subjects/fsaverage/label/rh.FG3.mpm.vpnl.label": {
+          "bytes": 71590,
+          "sha256": "9b0b284d53c5ab827713ebe34ba9162539f6661ffced5e959c8f6721633dc0d1"
+        },
+        "subjects/fsaverage/label/rh.FG4.mpm.vpnl.label": {
+          "bytes": 75176,
+          "sha256": "0bb4c93b1ba774d83d0018669fce3299901f2d64723a14392d83e0037623dbb5"
+        },
+        "subjects/fsaverage/label/rh.hOc1.mpm.vpnl.label": {
+          "bytes": 166863,
+          "sha256": "077dd20fcb605fd9f68fa54ed196c2d51698f9d437293f7174de2c231fd03810"
+        },
+        "subjects/fsaverage/label/rh.hOc2.mpm.vpnl.label": {
+          "bytes": 124947,
+          "sha256": "c54b111f4b59ba6ed3b11edf104a35d8da93e6e52185b82144f176d118518523"
+        },
+        "subjects/fsaverage/label/rh.hOc3v.mpm.vpnl.label": {
+          "bytes": 57189,
+          "sha256": "2a1996ea90ada1ceb43d1f58d1136d35b544abe91989ac5dad75bcdf47ef05c4"
+        },
+        "subjects/fsaverage/label/rh.hOc4v.mpm.vpnl.label": {
+          "bytes": 48095,
+          "sha256": "f698568b8d1264ae17b7228bd685153bf6fc6d2fa67fd79414cbe568b23066a8"
+        },
+        "subjects/fsaverage/label/rh.perirhinal_exvivo.label": {
+          "bytes": 33698,
+          "sha256": "5f7debb15d42d60ebc0fc4e4a02d383704a6f20995f58a5d59bb8220620fc9da"
+        },
+        "subjects/fsaverage/label/rh.perirhinal_exvivo.thresh.label": {
+          "bytes": 13128,
+          "sha256": "e8eaa170f7d1aa232a4d4879e00354171a901c6c67a5b159b4724df12e694034"
+        }
+      }
+    },
+    "whole_isolation": "not_assessed",
+    "native_program_discovery": false
+  },
+  "torch_peak_allocated_bytes": 11712627712,
+  "torch_peak_reserved_bytes": 18014535680,
+  "torch_peak_scope": "case_B process cumulative peak; case_A process peaks recorded separately in provenance",
+  "production_audit": {
+    "forbidden_stage_execs": 0,
+    "observed_other_exec_basenames": [
+      "ptxas"
+    ],
+    "file_events": 3044,
+    "scope": "actual stats/MNI API calls only; not whole isolation"
+  },
+  "nvml": {
+    "status": "ownership_unresolved",
+    "target_gpu_uuid": "GPU-anonymized-device-009",
+    "sampling_interval_seconds": 0.5,
+    "max_observed_interval_seconds": 3.343543720431626,
+    "query_backend": "nvml",
+    "peak_tree_total_bytes": null,
+    "peak_target_device_used_bytes": 41501392896,
+    "scope": "one process snapshot on target GPU; unverified driver/local PID ownership is null; compute-process sum and sampled device-wide upper bound are separate observations, not exact FNIT peaks or continuous memory guarantees; consecutive queries are not exactly simultaneous; sampler report available for case_B process only; case_A final telemetry export unavailable after report serialization failure",
+    "sample_count": 717,
+    "failed_sample_count": 0
+  },
+  "status": "verified_two_real_cases",
+  "case_A_execution_provenance": {
+    "script_sha256": "f09766a2bcfb7e6d99a195b15ef21e89295079604bd0e6671493272c29cbf342",
+    "benchmark_commit": "b6ba58dd98921e9e452718d62228cb3cb9228bc9",
+    "production_audit": {
+      "forbidden_stage_execs": 0,
+      "observed_other_exec_basenames": [
+        "ptxas"
+      ],
+      "file_events": 3195,
+      "scope": "actual stats/MNI API calls only; not whole isolation"
+    },
+    "torch_peak_allocated_bytes": 11729373184,
+    "torch_peak_reserved_bytes": 18022924288,
+    "torch_peak_scope": "cumulative since initialized benchmark process",
+    "report_recovery": "numpy MGH shape converted to Python int; retained all previously completed output arrays and original stage timings; no recomputation"
+  },
+  "benchmark_attempts": {
+    "v2": "reference output lacked hemisphere prefix; failed before MNI",
+    "v3": "first case computed; numpy MGH shape JSON failure at comparison save",
+    "v4": "report-only first case recovery, second case reversed execution complete"
+  },
+  "reference_elf_audit": {
+    "mri_ca_register": {
+      "original_bytes": 3437768,
+      "original_sha256": "a0f3902b38963cd4b322b94342dde513903cb6455779f2282174c618b4ff0987",
+      "current_bytes": 3454449,
+      "current_sha256": "69dc4f7c8f6a80617308d1a34dbf61f36526ed2aa6916e050aa49091ffd4e0dc",
+      "original_matches_pinned_archive_and_manifest": true,
+      "changed_sections": [
+        ".dynamic",
+        ".dynstr",
+        ".dynsym",
+        ".symtab"
+      ],
+      "executable_sections_identical": true,
+      "constant_data_sections_identical": true,
+      "executable_section_sha256": {
+        ".init": "6b39442a984fbee609f46a2ae5d1c6009295dda96165872d1d293267faf78cdb",
+        ".plt": "5492ee921a9c16df6529fec3ae5308e0813f3c537fbe90f9406330b35be789c6",
+        ".plt.got": "bb5f4cb5fd9293299e0ffa9dec8279df7577559b5fe555880a75fef0db65443b",
+        ".text": "22ab475b1670d58edcbc6546a03e34770f16aa87f59881255e8dc9a7903d8987",
+        ".fini": "66e6f54550612182b4ad78f30b140dd08318b968db3878de2db65fef87dc04d7"
+      },
+      "needed_library_names": [
+        "libz.so.1",
+        "libitkvnl_algo-5.4.so.1",
+        "libitkvnl-5.4.so.1",
+        "libitkv3p_netlib-5.4.so.1",
+        "libgomp.so.1",
+        "libpthread.so.0",
+        "libcrypt.so.2",
+        "librt.so.1",
+        "libtiff.so.6",
+        "libstdc++.so.6",
+        "libm.so.6",
+        "libgcc_s.so.1",
+        "libc.so.6"
+      ],
+      "needed_library_names_identical": true,
+      "rpath_changed": true,
+      "full_file_manifest_match": false,
+      "status": "relocated_ELF_code_and_constants_verified_original_archive_whole_file_mismatch"
+    },
+    "mri_convert": {
+      "original_bytes": 3018368,
+      "original_sha256": "cca67a9b3ae61632377406724e09cb6c16409d40b8972c6836b9d36a5ced2ebe",
+      "current_bytes": 3031697,
+      "current_sha256": "82ff94e4b5a788027853dbaede4e8f318d076d69d51e3c786cae3b5866431b55",
+      "original_matches_pinned_archive_and_manifest": true,
+      "changed_sections": [
+        ".dynamic",
+        ".dynstr",
+        ".dynsym",
+        ".symtab"
+      ],
+      "executable_sections_identical": true,
+      "constant_data_sections_identical": true,
+      "executable_section_sha256": {
+        ".init": "674d9396ea4c975638326b30c0311a3deb8d5f6763b93809a2b935fd4e44cb52",
+        ".plt": "04e90523c05408958e5061eb9711e998bbe68fbdb4e7ad751a716594ac6bf614",
+        ".plt.got": "5c51cfa5736870f45614119f296b403d9a3b01ef4bc37a627f52f934ec1040f9",
+        ".text": "969d557f5b358e1d9f528fbebacde760da9dfdcebfc7f3004f4436b6f63dfd50",
+        ".fini": "66e6f54550612182b4ad78f30b140dd08318b968db3878de2db65fef87dc04d7"
+      },
+      "needed_library_names": [
+        "libz.so.1",
+        "libitkvnl_algo-5.4.so.1",
+        "libitkvnl-5.4.so.1",
+        "libitkv3p_netlib-5.4.so.1",
+        "libgomp.so.1",
+        "libpthread.so.0",
+        "libcrypt.so.2",
+        "librt.so.1",
+        "libtiff.so.6",
+        "libstdc++.so.6",
+        "libm.so.6",
+        "libgcc_s.so.1",
+        "libc.so.6"
+      ],
+      "needed_library_names_identical": true,
+      "rpath_changed": true,
+      "full_file_manifest_match": false,
+      "status": "relocated_ELF_code_and_constants_verified_original_archive_whole_file_mismatch"
+    },
+    "mri_warp_convert": {
+      "original_bytes": 2858504,
+      "original_sha256": "527255204f1cb6b71d47ac3f9032af388eae873bd46b7d69d8293b433e001059",
+      "current_bytes": 2871633,
+      "current_sha256": "a6834f3b941a8267eccac15658dc1a7a35a67c2e67ba48a32eef7ad1909627a9",
+      "original_matches_pinned_archive_and_manifest": true,
+      "changed_sections": [
+        ".dynamic",
+        ".dynstr",
+        ".dynsym",
+        ".symtab"
+      ],
+      "executable_sections_identical": true,
+      "constant_data_sections_identical": true,
+      "executable_section_sha256": {
+        ".init": "345c032199573b499fa7997d9d01abf510767d5b361c53b45c858e7593eb2221",
+        ".plt": "ce5daedc4d071631a30edccabf4b8c48e6aad8f6440037c08ce8e790a1b728a3",
+        ".plt.got": "6ace0ca171c14c9fb0624e7a48421d29979e2588e25dc205f4de0e77909244e8",
+        ".text": "047e3dd57cdfd61568d354ac420f2b23a08b009e2815554f7c405558b3697ac7",
+        ".fini": "66e6f54550612182b4ad78f30b140dd08318b968db3878de2db65fef87dc04d7"
+      },
+      "needed_library_names": [
+        "libz.so.1",
+        "libitkvnl_algo-5.4.so.1",
+        "libitkvnl-5.4.so.1",
+        "libitkv3p_netlib-5.4.so.1",
+        "libgomp.so.1",
+        "libpthread.so.0",
+        "libcrypt.so.2",
+        "librt.so.1",
+        "libtiff.so.6",
+        "libstdc++.so.6",
+        "libm.so.6",
+        "libgcc_s.so.1",
+        "libc.so.6"
+      ],
+      "needed_library_names_identical": true,
+      "rpath_changed": true,
+      "full_file_manifest_match": false,
+      "status": "relocated_ELF_code_and_constants_verified_original_archive_whole_file_mismatch"
+    },
+    "mris_place_surface": {
+      "original_bytes": 3783560,
+      "original_sha256": "44ad3994f8b86809b447919094273d3aa591b49be935ac4e09139e66bdddfe65",
+      "current_bytes": 3799377,
+      "current_sha256": "78b64b7395aa0db0592ab6912fc026128b221c56d9f802db225fa59c18ceda44",
+      "original_matches_pinned_archive_and_manifest": true,
+      "changed_sections": [
+        ".dynamic",
+        ".dynstr",
+        ".dynsym",
+        ".symtab"
+      ],
+      "executable_sections_identical": true,
+      "constant_data_sections_identical": true,
+      "executable_section_sha256": {
+        ".init": "291ba40eaf0cf64a798cd186e16e7fb7025ea0f5236f5792b21460f26f3e85da",
+        ".plt": "27c8b173ce4605243ff892b93c321ee95a83bb5e5a2babea01099144ae0cacfe",
+        ".plt.got": "14c768fb14633aca7f538d9e2b69b09660ae3acf817c5ecbea618f65b33b8390",
+        ".text": "e547dc0ddf6157286320d78ee990cc840a12392fbb28e015c67248752f0301f0",
+        ".fini": "66e6f54550612182b4ad78f30b140dd08318b968db3878de2db65fef87dc04d7"
+      },
+      "needed_library_names": [
+        "libz.so.1",
+        "libitkvnl_algo-5.4.so.1",
+        "libitkvnl-5.4.so.1",
+        "libitkv3p_netlib-5.4.so.1",
+        "libgomp.so.1",
+        "libpthread.so.0",
+        "libcrypt.so.2",
+        "librt.so.1",
+        "libtiff.so.6",
+        "libstdc++.so.6",
+        "libm.so.6",
+        "libgcc_s.so.1",
+        "libc.so.6"
+      ],
+      "needed_library_names_identical": true,
+      "rpath_changed": true,
+      "full_file_manifest_match": false,
+      "status": "relocated_ELF_code_and_constants_verified_original_archive_whole_file_mismatch"
+    }
+  },
+  "original_reference_binding": "relocated source-built reference ELF: same original executable/code and constant data sections and needed library names; RPATH/symbol/dynamic metadata changed; original whole-file manifest mismatch retained",
+  "reference_manifest_after": {
+    "mris_place_surface": {
+      "expected_original_bytes": 3783560,
+      "expected_original_sha256": "44ad3994f8b86809b447919094273d3aa591b49be935ac4e09139e66bdddfe65",
+      "current_bytes": 3799377,
+      "current_sha256": "78b64b7395aa0db0592ab6912fc026128b221c56d9f802db225fa59c18ceda44",
+      "full_file_manifest_match": false,
+      "status": "relocated_ELF_code_and_constants_verified_original_archive_whole_file_mismatch"
+    },
+    "mri_warp_convert": {
+      "expected_original_bytes": 2858504,
+      "expected_original_sha256": "527255204f1cb6b71d47ac3f9032af388eae873bd46b7d69d8293b433e001059",
+      "current_bytes": 2871633,
+      "current_sha256": "a6834f3b941a8267eccac15658dc1a7a35a67c2e67ba48a32eef7ad1909627a9",
+      "full_file_manifest_match": false,
+      "status": "relocated_ELF_code_and_constants_verified_original_archive_whole_file_mismatch"
+    },
+    "mri_ca_register": {
+      "expected_original_bytes": 3437768,
+      "expected_original_sha256": "a0f3902b38963cd4b322b94342dde513903cb6455779f2282174c618b4ff0987",
+      "current_bytes": 3454449,
+      "current_sha256": "69dc4f7c8f6a80617308d1a34dbf61f36526ed2aa6916e050aa49091ffd4e0dc",
+      "full_file_manifest_match": false,
+      "status": "relocated_ELF_code_and_constants_verified_original_archive_whole_file_mismatch"
+    },
+    "mri_convert": {
+      "expected_original_bytes": 3018368,
+      "expected_original_sha256": "cca67a9b3ae61632377406724e09cb6c16409d40b8972c6836b9d36a5ced2ebe",
+      "current_bytes": 3031697,
+      "current_sha256": "82ff94e4b5a788027853dbaede4e8f318d076d69d51e3c786cae3b5866431b55",
+      "full_file_manifest_match": false,
+      "status": "relocated_ELF_code_and_constants_verified_original_archive_whole_file_mismatch"
+    }
+  },
+  "frozen_input_integrity_after": "passed",
+  "weight_verification": {
+    "file": "synthmorph.deform.3.h5",
+    "bytes": 3508630424,
+    "sha256": "95b367cd30788cc647e4704b650642fc1d70d7e419c20c04f1ba1b2902bc6536",
+    "expected_bytes": 3508630424,
+    "expected_sha256": "95b367cd30788cc647e4704b650642fc1d70d7e419c20c04f1ba1b2902bc6536",
+    "status": "passed",
+    "integrity_after": "passed"
+  },
+  "runtime_assets_after": {
+    "status": "verified",
+    "files": {
+      "ASegStatsLUT.txt": {
+        "bytes": 3240,
+        "sha256": "36eb822e91174a7a4f99f22f17f19e6692225476b815aa0fdaf0622fd32e2511"
+      },
+      "FreeSurferColorLUT.txt": {
+        "bytes": 116487,
+        "sha256": "da55c6a47d316ee16d2609afd5c93cb8078e08e7e3afec5bb6283027d7c33e7b"
+      },
+      "SubCorticalMassLUT.txt": {
+        "bytes": 281,
+        "sha256": "65957c41244153d6614aeaf08c16ee956c09e2c8b5e198aa64c81946f75e93b6"
+      },
+      "WMParcStatsLUT.txt": {
+        "bytes": 25476,
+        "sha256": "1eb362b9d929797179106ba37eecaa8eff2830f1509be8e7b56238e6ac7c6dbf"
+      },
+      "average/RB_all_2020-01-02.gca": {
+        "bytes": 71651552,
+        "sha256": "2fcd276a39800f01f93a4c8828ae6d0a8cea3d8b8b9fe1599d4ee54e806be93e"
+      },
+      "average/mni305.cor.stripped.mgz": {
+        "bytes": 1342430,
+        "sha256": "fff93f13255a8d393c0e787fbfcfaf5eb379e88e955bda7e04e31552568878a4"
+      },
+      "average/lh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs": {
+        "bytes": 18842086,
+        "sha256": "721d6f53e8e3edae2c3798d52c5878026f1cdbe6cb286659ae48b920651a4cb6"
+      },
+      "average/lh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs": {
+        "bytes": 21724500,
+        "sha256": "f726bca3747676e465aaad4572e525dc5370d0a073c435fd41c1beaff2ad6add"
+      },
+      "average/lh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs": {
+        "bytes": 22003357,
+        "sha256": "6db52238d4c6c5867edd645daf23a7ce1bf753caffa792c9972db40af8229214"
+      },
+      "average/rh.DKaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs": {
+        "bytes": 18610793,
+        "sha256": "64e98c907af4242cb79b645a384c97ed37854b7b127a18ad406084b29dc486cf"
+      },
+      "average/rh.CDaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs": {
+        "bytes": 21898679,
+        "sha256": "878f4caae1f7d439ebeae5499537b9b5c1146bf7c369f5fb4cfc1df67e6d0b29"
+      },
+      "average/rh.DKTaparc.atlas.acfb40.noaparc.i12.2016-08-02.gcs": {
+        "bytes": 21987412,
+        "sha256": "3f6e2ec1f24081f5a3ad2cafcdc1aaa156a2a635b78c30808dbeb8aaf9421498"
+      },
+      "average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif": {
+        "bytes": 2857642,
+        "sha256": "92f1dc820d778a67c143d4ea82597fd71a89ddc738dfa555b7ca32ed21e95c97"
+      },
+      "average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif": {
+        "bytes": 2858470,
+        "sha256": "1064e4c0ae0440f5071b4369f29a09860f1abf6eddc90a271d10cd0ff7e60043"
+      },
+      "lib/bem/ic4.tri": {
+        "bytes": 207432,
+        "sha256": "95cc8e50f48df9b2a7a8558c9837becfa486f7562f2d9ae6fee4cc7aad341d13"
+      },
+      "lib/bem/ic7.tri": {
+        "bytes": 13368214,
+        "sha256": "cdd2761f0921a05d4959eb5b200fc3c65c0344a575809b0b09458299d90a1e6d"
+      },
+      "average/mca-dura.prior.warp.mni152.1.0mm.lh.nii.gz": {
+        "bytes": 41792,
+        "sha256": "0ea9f9ffdcbc38b139e5ca374dc322cb60773c355ffbccf21efd812d8c0ee458"
+      },
+      "average/mca-dura.prior.warp.mni152.1.0mm.rh.nii.gz": {
+        "bytes": 41927,
+        "sha256": "5772a838e2fdd2ecf0c83de27bc572532cd8b9b8a1b00d919a385aab34e5710e"
+      },
+      "average/vsinus.no-sp.prior.mni152.1.0mm.mgz": {
+        "bytes": 269881,
+        "sha256": "b46661dda5cdde2a9c43cd2bad7ca096bd96bf2ba6c60f784d54cd8a75485126"
+      },
+      "average/mni_icbm152_nlin_asym_09c/reg-targets/mni152.1.0mm.cropped.nii.gz": {
+        "bytes": 7745204,
+        "sha256": "ef89b7aa615dcb4a68a1cad725a9b99314227f9777ed86f42aae61e4e89da19a"
+      },
+      "average/mni_icbm152_nlin_asym_09c/reg-targets/mni152.1.0mm.nii.gz": {
+        "bytes": 17977963,
+        "sha256": "e4e1a25b66fef6b2cde8e4916d4a03d4369de6f24b0d3d4736baffc3d4a8c575"
+      },
+      "average/colortable_BA.txt": {
+        "bytes": 810,
+        "sha256": "83aaf7a79ce4fdb98c9f6175b318dfaceed276ebf7422cdfaa195f1f71a2512f"
+      },
+      "average/colortable_BA_thresh.txt": {
+        "bytes": 915,
+        "sha256": "025b467483825cba420d67c475a7f0af8f7eb092ae53010e7adddfe4a853443b"
+      },
+      "average/colortable_vpnl.txt": {
+        "bytes": 793,
+        "sha256": "bf73534d4fe5b46e120611b8886061cf546d871f3620c225604649f6fc0f195d"
+      },
+      "subjects/fsaverage/surf/lh.sphere.reg": {
+        "bytes": 5898546,
+        "sha256": "fddcf0eeecc6e0f62142164f7c0ac24fda1f0be8cb653d3f037970184c5ba98f"
+      },
+      "subjects/fsaverage/surf/rh.sphere.reg": {
+        "bytes": 5898546,
+        "sha256": "fddcf0eeecc6e0f62142164f7c0ac24fda1f0be8cb653d3f037970184c5ba98f"
+      },
+      "subjects/fsaverage/label/lh.BA1_exvivo.label": {
+        "bytes": 166374,
+        "sha256": "8884afe5b712013b7faf517d9c30950fb0d934737611cb39ee66ed4168935863"
+      },
+      "subjects/fsaverage/label/lh.BA1_exvivo.thresh.label": {
+        "bytes": 46008,
+        "sha256": "a52bfb2ca169f96b2e611f5b6d0ffe6e822178c774b93c62daee700aa553f02f"
+      },
+      "subjects/fsaverage/label/lh.BA2_exvivo.label": {
+        "bytes": 320897,
+        "sha256": "b4fc82af5491263068c0c12d04d5298c6fdc1f996cc832154905c1d4354145fd"
+      },
+      "subjects/fsaverage/label/lh.BA2_exvivo.thresh.label": {
+        "bytes": 94863,
+        "sha256": "1fb1811a8a29ebcb5060e23f988aad62b8a764b085f3e183075d2358ce92276d"
+      },
+      "subjects/fsaverage/label/lh.BA3a_exvivo.label": {
+        "bytes": 163588,
+        "sha256": "addeb991e3c083d5e27c8d14956654456fe3949f60122ce2b1ca635e75c3d52f"
+      },
+      "subjects/fsaverage/label/lh.BA3a_exvivo.thresh.label": {
+        "bytes": 68084,
+        "sha256": "963d4eb18f9f3362966d998cd7b440372889481ba440b2e2894f266a2e2b6889"
+      },
+      "subjects/fsaverage/label/lh.BA3b_exvivo.label": {
+        "bytes": 239495,
+        "sha256": "476ad4b6a72b4979b8a53545b1c4b1c6b82b1732dacfd51df3bcab05efe5410e"
+      },
+      "subjects/fsaverage/label/lh.BA3b_exvivo.thresh.label": {
+        "bytes": 90376,
+        "sha256": "86aac6cb4b65109f71afd11bcac8b1c2369c4e5d57f3bdd74184d78fc553dc61"
+      },
+      "subjects/fsaverage/label/lh.BA44_exvivo.label": {
+        "bytes": 167585,
+        "sha256": "62631737d99bf4c20c6586a9c13b17e43d4b53ea6d43b6f194c8697e0211d9f2"
+      },
+      "subjects/fsaverage/label/lh.BA44_exvivo.thresh.label": {
+        "bytes": 83185,
+        "sha256": "8d7a087c409a08869aacd06a74be36b7d95bce3ef9ceedab6aaa6625f31323b0"
+      },
+      "subjects/fsaverage/label/lh.BA45_exvivo.label": {
+        "bytes": 137141,
+        "sha256": "7c7a92b25ba2b7d1e21318d7b315039d9fa10d20527ad3740f83557745a2bfaa"
+      },
+      "subjects/fsaverage/label/lh.BA45_exvivo.thresh.label": {
+        "bytes": 50422,
+        "sha256": "d68196b0aaaf83c964c8333e2c4198a3e490379a3002bc9d913dc08a89122020"
+      },
+      "subjects/fsaverage/label/lh.BA4a_exvivo.label": {
+        "bytes": 231744,
+        "sha256": "59fa939431954f5fb85f9b9344cfece29f6ab60293f79b6331e7abb242370317"
+      },
+      "subjects/fsaverage/label/lh.BA4a_exvivo.thresh.label": {
+        "bytes": 103857,
+        "sha256": "0d36c09329bd36395643c66d07f0bbf34e30e699ee6567c2770d00df3058e7f2"
+      },
+      "subjects/fsaverage/label/lh.BA4p_exvivo.label": {
+        "bytes": 163313,
+        "sha256": "9dcf4ce34422bf6024cd70e31a8494fac428a1a14855c67c5812a0b1aa843632"
+      },
+      "subjects/fsaverage/label/lh.BA4p_exvivo.thresh.label": {
+        "bytes": 69838,
+        "sha256": "1b1451f5e52847d3285783a68f3088ece65dee0bfd88695a7d35c6e2f5e31e94"
+      },
+      "subjects/fsaverage/label/lh.BA6_exvivo.label": {
+        "bytes": 538881,
+        "sha256": "3432dfa143bfa910a251585c2359603e1972fa3e6acd7d7f8dd79c60b525d759"
+      },
+      "subjects/fsaverage/label/lh.BA6_exvivo.thresh.label": {
+        "bytes": 311318,
+        "sha256": "673c58990444ab7924b9c6ea8a6e26bac548079c96740732df066d44e6b220ed"
+      },
+      "subjects/fsaverage/label/lh.MT_exvivo.label": {
+        "bytes": 85306,
+        "sha256": "9149feef1c571b16bc0ac14795f3a4d3ca3367a4f2cd371706d831696e49a1b1"
+      },
+      "subjects/fsaverage/label/lh.MT_exvivo.thresh.label": {
+        "bytes": 23084,
+        "sha256": "79699fad47bcbb6b8935a567bb8b1928ffa19b295c8b4330681e0839e6df2e2c"
+      },
+      "subjects/fsaverage/label/lh.V1_exvivo.label": {
+        "bytes": 192278,
+        "sha256": "cd138deccaa711411a89f183d7d18b0f38c612c3ff454044dc26b2f21194c325"
+      },
+      "subjects/fsaverage/label/lh.V1_exvivo.thresh.label": {
+        "bytes": 151679,
+        "sha256": "cfd0cb7f4f8a1b55681609b64f414d1030ba2f30dd499228e8d91eae96f9ba9c"
+      },
+      "subjects/fsaverage/label/lh.V2_exvivo.label": {
+        "bytes": 337758,
+        "sha256": "123cf0910e014b7f830626e1475725c87a2315308f00c856420c4b6de8ed2d93"
+      },
+      "subjects/fsaverage/label/lh.V2_exvivo.thresh.label": {
+        "bytes": 149833,
+        "sha256": "ade1be8c79444d764e804d13bdb8d4be0479b966c4226a9a785409c55069caf3"
+      },
+      "subjects/fsaverage/label/lh.entorhinal_exvivo.label": {
+        "bytes": 57500,
+        "sha256": "4f34b9e31377d15ef78f786bfc0a9d553cb7ec4702450139a437acf266f4091b"
+      },
+      "subjects/fsaverage/label/lh.entorhinal_exvivo.thresh.label": {
+        "bytes": 21693,
+        "sha256": "a0c864c87a9a6636c799c28b0df0a3166624632702bec8c34a9c6661cd820749"
+      },
+      "subjects/fsaverage/label/lh.perirhinal_exvivo.label": {
+        "bytes": 55014,
+        "sha256": "b242367b90204b8d441264c0a07abd2e21f4884d9f214a3d936c37190111317a"
+      },
+      "subjects/fsaverage/label/lh.perirhinal_exvivo.thresh.label": {
+        "bytes": 20742,
+        "sha256": "6ddc7237cfe35854eb30704ed5deb8d22e194ddc058b5386753617322027d1e0"
+      },
+      "subjects/fsaverage/label/rh.BA1_exvivo.label": {
+        "bytes": 155760,
+        "sha256": "e13ca0b5263354a70fab89a90f9d662366ac718c27604f99a31a3ed487c1ff4d"
+      },
+      "subjects/fsaverage/label/rh.BA1_exvivo.thresh.label": {
+        "bytes": 38863,
+        "sha256": "a8588c380b9981e6ff51f789d679a5297b94c091ef9cac35187ea838f0e58699"
+      },
+      "subjects/fsaverage/label/rh.BA2_exvivo.label": {
+        "bytes": 265610,
+        "sha256": "5aec9b5dbcb35cdb44b384ac9e8ee194ca0a27cb93aa16a5d1a480ea6bf9c9a9"
+      },
+      "subjects/fsaverage/label/rh.BA2_exvivo.thresh.label": {
+        "bytes": 119206,
+        "sha256": "c33ead1dcebd8c91aed9c9ebb03e5ef485edc8d69c5efececee6e29e3e60abda"
+      },
+      "subjects/fsaverage/label/rh.BA3a_exvivo.label": {
+        "bytes": 156488,
+        "sha256": "472a099485fe350b6c84c6a5c63d391c28e12b2596ce1e9d467a5150619292d3"
+      },
+      "subjects/fsaverage/label/rh.BA3a_exvivo.thresh.label": {
+        "bytes": 74978,
+        "sha256": "cd96191d63460a2e11ee6a0006389eadbb8a9f4f5a55fbe97b97ff675ea4880f"
+      },
+      "subjects/fsaverage/label/rh.BA3b_exvivo.label": {
+        "bytes": 177307,
+        "sha256": "63c174c0f7d69b1a5e42f0db8b2232accaef4580ea1a2e1a9d1c235db8d654af"
+      },
+      "subjects/fsaverage/label/rh.BA3b_exvivo.thresh.label": {
+        "bytes": 96608,
+        "sha256": "7d0c61837aa898154351842ecd032f8b9c63bbf5311461b7cfe06abbec7cd99c"
+      },
+      "subjects/fsaverage/label/rh.BA44_exvivo.label": {
+        "bytes": 269815,
+        "sha256": "f13f41bc0b42fec614552701d4a728dd4358003a29fe7f29da1ff4d35c0113d6"
+      },
+      "subjects/fsaverage/label/rh.BA44_exvivo.thresh.label": {
+        "bytes": 43100,
+        "sha256": "0e59b5513e7e388e53cbe79a7ff947b8b41e116d2a324d01850f08d17d8eaa4c"
+      },
+      "subjects/fsaverage/label/rh.BA45_exvivo.label": {
+        "bytes": 211071,
+        "sha256": "788be813f4a949a15ba988698811dc861980b0a11386ef2c0c74f5398eadc819"
+      },
+      "subjects/fsaverage/label/rh.BA45_exvivo.thresh.label": {
+        "bytes": 50322,
+        "sha256": "1cc883c2c40c6c492935e1b6bcd5f65375c2555e7bae1ce2cf74b36fae130806"
+      },
+      "subjects/fsaverage/label/rh.BA4a_exvivo.label": {
+        "bytes": 224244,
+        "sha256": "bf88639551db4ea0455b487bbf7a427b2f1a0d1ba96fb41108079dd0728e39c0"
+      },
+      "subjects/fsaverage/label/rh.BA4a_exvivo.thresh.label": {
+        "bytes": 60471,
+        "sha256": "4789c770f40af484816afbfb78a851a194f32c8d9be52b113064b13f5ba84d28"
+      },
+      "subjects/fsaverage/label/rh.BA4p_exvivo.label": {
+        "bytes": 175244,
+        "sha256": "ca5e5d64c62dafda926ef1b631c99abf784dd0e725702b85b12d705e460a899d"
+      },
+      "subjects/fsaverage/label/rh.BA4p_exvivo.thresh.label": {
+        "bytes": 65740,
+        "sha256": "69f1ad431d2ea5f0ab2d247203b3825b29fc3c810821089bcec39ce3bf5d27f9"
+      },
+      "subjects/fsaverage/label/rh.BA6_exvivo.label": {
+        "bytes": 475963,
+        "sha256": "9730d02af8fa2de766d7445d154cbbea10db515cd9f2bc0a0c24faf3c8b38af6"
+      },
+      "subjects/fsaverage/label/rh.BA6_exvivo.thresh.label": {
+        "bytes": 300267,
+        "sha256": "e439228197eab77e9d5cba83dda7864768d8c80b94d33438fb41bcc7c91e11d5"
+      },
+      "subjects/fsaverage/label/rh.MT_exvivo.label": {
+        "bytes": 78819,
+        "sha256": "09ee210fff0ed9d913a28b3984a4d1a7682416fc44c111f02b50064bb894671a"
+      },
+      "subjects/fsaverage/label/rh.MT_exvivo.thresh.label": {
+        "bytes": 11674,
+        "sha256": "18d2a133d66c65ecfcc9e96de6e1a3324e9c0845a37d63805f1d0dfaa2a680d3"
+      },
+      "subjects/fsaverage/label/rh.V1_exvivo.label": {
+        "bytes": 189237,
+        "sha256": "0906451073e85f131ad809a0c68477546e7040a3882a4789bfeb2d7be71e72c2"
+      },
+      "subjects/fsaverage/label/rh.V1_exvivo.thresh.label": {
+        "bytes": 140751,
+        "sha256": "d0be64272e50bc6014daa61dba149eddf97d606443da85dbd85a96ee50efd188"
+      },
+      "subjects/fsaverage/label/rh.V2_exvivo.label": {
+        "bytes": 324193,
+        "sha256": "c5a77d07674240814bcab88d08a531e3a10ea26089afcad85f712e40219b2bbe"
+      },
+      "subjects/fsaverage/label/rh.V2_exvivo.thresh.label": {
+        "bytes": 151056,
+        "sha256": "007df4237059f4bf3a6053535a6dd20fdb2bb1989185bd758e9620474c8fbb46"
+      },
+      "subjects/fsaverage/label/rh.entorhinal_exvivo.label": {
+        "bytes": 46475,
+        "sha256": "2d4e7bb6ffed893edccc2c8ed37bc7a65703e59eec639b20ebb1e20ec02370e2"
+      },
+      "subjects/fsaverage/label/rh.entorhinal_exvivo.thresh.label": {
+        "bytes": 31152,
+        "sha256": "870334737b498638501c1e9ec3c20e1ca2c73c03f1de17a7d26244d7b96459ee"
+      },
+      "subjects/fsaverage/label/lh.FG1.mpm.vpnl.label": {
+        "bytes": 19982,
+        "sha256": "3e807da35c8272b44b52ff4732c4ecda49b712a95f611ffb1ba99337ec6b7d5f"
+      },
+      "subjects/fsaverage/label/lh.FG2.mpm.vpnl.label": {
+        "bytes": 34086,
+        "sha256": "e66ae1795cd0b59f4268180c0d9990a898a4b5808f5f249b56ce09150bf729a9"
+      },
+      "subjects/fsaverage/label/lh.FG3.mpm.vpnl.label": {
+        "bytes": 89996,
+        "sha256": "001d7eb1733fbd9d44df48ead11f32b5751365fe8a1d6d21c84d199a0f769c4c"
+      },
+      "subjects/fsaverage/label/lh.FG4.mpm.vpnl.label": {
+        "bytes": 101583,
+        "sha256": "7593ff98336e328dc574c73e2c77962a51d73a568c79fad12f9bce98cfc127d9"
+      },
+      "subjects/fsaverage/label/lh.hOc1.mpm.vpnl.label": {
+        "bytes": 180234,
+        "sha256": "ac2b3b33512cb9aab20aa5cf4dad70de2c8dd94000bc4d6bcc4160e1ee2f9183"
+      },
+      "subjects/fsaverage/label/lh.hOc2.mpm.vpnl.label": {
+        "bytes": 137176,
+        "sha256": "b94415047e6ce9756ef852d0acbd8f6068c617ce185d81ab55dae7df0d59d038"
+      },
+      "subjects/fsaverage/label/lh.hOc3v.mpm.vpnl.label": {
+        "bytes": 61482,
+        "sha256": "501ed11cb9764799df355049593932fad8becd4d130c239e8fa8381c4acacaeb"
+      },
+      "subjects/fsaverage/label/lh.hOc4v.mpm.vpnl.label": {
+        "bytes": 48322,
+        "sha256": "69e8d4b6a1a6db6d81f282ca7ec8b2de3f6d295f6177f32dfc3f8412e23addfb"
+      },
+      "subjects/fsaverage/label/rh.FG1.mpm.vpnl.label": {
+        "bytes": 25517,
+        "sha256": "284ad692e80ee1b9a88a938c37198b06e983b554846f148cd2dfeed935ae63b4"
+      },
+      "subjects/fsaverage/label/rh.FG2.mpm.vpnl.label": {
+        "bytes": 34157,
+        "sha256": "e6fcb5563d7ecc9efc976174375e802b44cdb05271f5cbefa97cf48bc608b65b"
+      },
+      "subjects/fsaverage/label/rh.FG3.mpm.vpnl.label": {
+        "bytes": 71590,
+        "sha256": "9b0b284d53c5ab827713ebe34ba9162539f6661ffced5e959c8f6721633dc0d1"
+      },
+      "subjects/fsaverage/label/rh.FG4.mpm.vpnl.label": {
+        "bytes": 75176,
+        "sha256": "0bb4c93b1ba774d83d0018669fce3299901f2d64723a14392d83e0037623dbb5"
+      },
+      "subjects/fsaverage/label/rh.hOc1.mpm.vpnl.label": {
+        "bytes": 166863,
+        "sha256": "077dd20fcb605fd9f68fa54ed196c2d51698f9d437293f7174de2c231fd03810"
+      },
+      "subjects/fsaverage/label/rh.hOc2.mpm.vpnl.label": {
+        "bytes": 124947,
+        "sha256": "c54b111f4b59ba6ed3b11edf104a35d8da93e6e52185b82144f176d118518523"
+      },
+      "subjects/fsaverage/label/rh.hOc3v.mpm.vpnl.label": {
+        "bytes": 57189,
+        "sha256": "2a1996ea90ada1ceb43d1f58d1136d35b544abe91989ac5dad75bcdf47ef05c4"
+      },
+      "subjects/fsaverage/label/rh.hOc4v.mpm.vpnl.label": {
+        "bytes": 48095,
+        "sha256": "f698568b8d1264ae17b7228bd685153bf6fc6d2fa67fd79414cbe568b23066a8"
+      },
+      "subjects/fsaverage/label/rh.perirhinal_exvivo.label": {
+        "bytes": 33698,
+        "sha256": "5f7debb15d42d60ebc0fc4e4a02d383704a6f20995f58a5d59bb8220620fc9da"
+      },
+      "subjects/fsaverage/label/rh.perirhinal_exvivo.thresh.label": {
+        "bytes": 13128,
+        "sha256": "e8eaa170f7d1aa232a4d4879e00354171a901c6c67a5b159b4724df12e694034"
+      }
+    }
+  },
+  "validation_exit": 0,
+  "boundary_tests": {
+    "passed": 9,
+    "seconds": 3.77
+  },
+  "installation": {
+    "status": "passed",
+    "scope": "offline wheel/import/CLI; existing dependencies",
+    "wheel": {
+      "name": "fudan_neuroimaging_toolkit-0.16.0-py3-none-any.whl",
+      "bytes": 5255694,
+      "sha256": "4298760e9dc79af29ec96f5e7b26b10914c195e7012537e1930a156a038a42e4"
+    },
+    "build": {
+      "exit_code": 0,
+      "seconds_including_io": 7.848590076901019
+    },
+    "install": {
+      "exit_code": 0,
+      "seconds_including_io": 1.9645693097263575
+    },
+    "entry": {
+      "exit_code": 0,
+      "seconds_including_io": 14.572026481851935
+    },
+    "dependency_installation": "existing environment; --no-deps --no-index",
+    "whole_recon_all": "not_assessed",
+    "clean_conda_full_reconstruction": "not_assessed",
+    "runtime_source_sha_checked": true
+  }
+}

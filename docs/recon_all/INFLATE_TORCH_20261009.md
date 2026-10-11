@@ -32,6 +32,7 @@ report = run_standard_inflate(
     backend="torch",  # 显式使用Torch；默认numpy用于既有CPU回归
     device="cuda:0",  # 显式GPU；默认cpu，不自动回退设备
     profile=True,  # 默认False；测量时逐子段同步目标GPU，生产不需过度同步
+    save_sulc=True,  # 默认True；完整计算并写sulc；nofix可显式False且路径None
 )
 ```
 
@@ -39,18 +40,33 @@ report = run_standard_inflate(
 |---|---|
 | `input_surface` | 必填 str/Path；FreeSurfer 三角表面格式，坐标 `(N,3)`、面 `(F,3)`，surface RAS/mm，有体积几何头时保留 |
 | `inflated_output` | 必填 str/Path；写 `(N,3)` FP32 坐标和原有序面、体积几何文本，中心平移及面积缩放后的表面 |
-| `sulc_output` | 必填 str/Path；写 `(N,)` FP32 morph 格式，和输入顶点一一对应，单位 mm |
+| `sulc_output` | str/Path或None，默认None；`save_sulc=True`须提供路径，写 `(N,)` FP32 morph，同顶点序、单位mm；False须为None |
 | `backend` | str，默认 `numpy`；`numpy` 复用 CPU NumPy/Numba，`torch` 选择新增张量实现 |
 | `device` | str，默认 `cpu`；Torch 可用 CPU 做诊断或显式 `cuda:N`；NumPy 必须为 CPU |
 | `profile` | bool，默认 False；True 对 Torch 子段前后同步，用于定位，返回时间包括该开销 |
+| `save_sulc` | bool，默认True；False只取消最终sulc写入，保持原积分、投影、停止与面积缩放 |
 
-三个路径必须不同。输入须有限、有合法索引、正总面积、无孤立顶点，体积 x 体素尺寸须为正有限数。数据没有重采样；体积 header 只用于声明几何和高分辨率步数。缓存仅属于本次有序面拓扑，不跨网格阶段或坐标版本复用法向。
+实际提供的路径必须不同。输入须有限、有合法索引、正总面积、无孤立顶点，体积 x 体素尺寸须为正有限数。数据没有重采样；体积 header 只用于声明几何和高分辨率步数。缓存仅属于本次有序面拓扑，不跨网格阶段或坐标版本复用法向。
 
 返回字典包含路径、后端、设备、顶点/面数、每档步数、读取校验时间、初始化/传输时间、计算至最终输出下载时间、写出时间、`integration` 的实际步数/RMS/停止原因/子段计时，以及 `total_seconds_including_io`。Torch `integration_wall_seconds` 含必要停止同步；最终文件总墙钟包含加载、验证、拓扑、搬运、计算和两份文件写出。子段时间嵌套在总墙钟中，不能重复相加。
 
 `TorchInflationContext(faces=..., nvertices=..., device="cuda:0")` 只缓存一/二环整数索引、有效掩膜及成熟法向/平均上下文。`integrate(vertices=..., niterations=10, rms_target=0.015, profile=False, callback=None)` 输入同设备 FP32 `(N,3)`，返回同设备新坐标、未去均值 sulc、步数/RMS/时间。可选只读 callback 接收 `(step,coordinates)`；不得原地改候选。`finalize(coordinates=..., original_vertices=..., sulc=...)` 返回居中/面积缩放坐标及零均值 sulc。坐标与原网格单位都是 mm，sulc 的符号是原累积投影约定。
 
 输入非法、CUDA 不可用、编译失败或非有限计算会抛异常，可能留部分文件；没有参考复制、占位文件、近似回退或 CPU 静默回退。API 不修改全局 TF32/精度策略，不启用 FP16/BF16。
+
+nofix调用保持原版默认每档10步与高分辨率xsize规则：
+
+```python
+nofix_report = run_standard_inflate(
+    input_surface="subject/surf/lh.smoothwm.nofix",  # 原始未修复拓扑的平滑网格
+    inflated_output="subject/surf/lh.inflated.nofix",  # 同顶点序surface RAS/mm
+    sulc_output=None,  # 不指定顶点图路径
+    backend="torch",  # 复用同一个完整张量积分器
+    device="cuda:0",  # 指定GPU，不静默回退
+    profile=False,  # 默认False，完整API仍含I/O墙钟
+    save_sulc=False,  # 原-no-save-sulc语义，只不写sulc
+)
+```
 
 ## 3．命令行与复现
 
@@ -122,6 +138,8 @@ python validation/recon_all/optimizations/20261009_inflate_torch/benchmark_spher
 mris_inflate -threads 4 subject/surf/lh.smoothwm diagnostic/lh.inflated
 ```
 
+nofix参考为 `mris_inflate -no-save-sulc subject/surf/lh.smoothwm.nofix benchmark/lh.inflated.nofix`，使用原版默认10步，不额外指定2步。对应Python/CLI的 `save_sulc=False` / `--no-save-sulc`。
+
 完整标准球面链的独立原软件参考还包括 `mris_sphere benchmark_subject/surf/lh.inflated diagnostic/lh.sphere`，输入目录同时提供相同被试的`lh.smoothwm`原度量。新增接线配对两方的sphere都复用FNIT成熟完整实现；它验证替换inflation与局部缓存没有引入后续差异，不把配对称为新一次官方整例验收。
 
 默认同时写输出目录下的 `lh.sulc`，半球来自表面身份；Torch 接口明确指定两个路径。官方程序只属于独立 benchmark，生产不调用系统 FreeSurfer。本轮参考为固定源码独立 Conda 构建、迁移重定位后的程序。
@@ -130,7 +148,20 @@ mris_inflate -threads 4 subject/surf/lh.smoothwm diagnostic/lh.inflated
 
 ## 5．本版真实精度、耗时和资源
 
-### 最新 v9：实际生产内部完整球面链
+### 2026-10-10：nofix默认10轮、no-save-sulc完整回归
+
+公开ds000114、FNIT79a41cdd自产 `smoothwm.nofix` 两例四侧，同A100、CPU12–15/4线程、显式物理GPU1（进程cuda:0）、缓存开启、TF32开启、无半精度。完整候选API包含读取、JIT/拓扑准备、GPU搬运、原60步积分及写出；冷解释器导入未计。每侧参考重复两次，坐标完全重现；四侧候选所有坐标、有序面、几何头零差异，均实际每档10步且无sulc文件。
+
+| 输入 | 自有完整API秒 | 同输入原参考两次秒 |
+|---|---:|---:|
+| sub-06 LH | 7.284（首次JIT） | 8.453／8.481 |
+| sub-06 RH | 1.336 | 8.553／8.465 |
+| sub-07 LH | 1.334 | 6.751／6.995 |
+| sub-07 RH | 1.298 | 6.989／7.061 |
+
+[完整四侧机器收据](../../validation/recon_all/optimizations/20261010_paint_intersection/source_surface/nofix_gpu_v4/report.json)绑定模块SHA `7eb0100a9b2e2fc8dd1a6e1da66ee37da0c29c71ec2cd2b207ef74687535dfb4`、全部输入与参考程序。allocated峰值480,955,392字节、reserved峰值633,339,904字节；父子同期显存未测，整例20GB未由此证明。必要积分和sulc累积仍执行，只取消文件写入。该阶段结果不是原始T1整例或十分钟目标证据；原始拓扑修复仍须独立验证。
+
+### v9：实际生产内部完整球面链
 
 v9直接调用冻结生产源码的`_run_accurate_sphere_pair`，使用803aec50原始T1整例自产sub-07双侧smoothwm，完整运行标准inflation、sulc和standard sphere。两种策略分别从空Numba/Triton编译缓存启动，两侧fresh worker总4线程（每侧2线程），同A100和CPU64–67。父CUDA已初始化、缓存关闭并持有活张量；只把Torch候选的surface子进程缓存设为enabled，球面法向仍为Numba，配准不参加此测试。
 
@@ -174,7 +205,7 @@ v7 进一步保持父进程 CUDA 已初始化、缓存关闭、活张量不变�
 | sub-06 | 46.299 / 44.547 | 27.270 / 17.765 | 45.423 → 22.518 | 50.427% |
 | sub-07 | 37.682 / 33.902 | 18.248 / 18.768 | 35.792 → 18.508 | 48.291% |
 
-首个 Torch 双侧组使用新空 JIT 缓存，其后复用；两种后端均新建 worker。12份候选/重复的双侧网格比较全部坐标、sulc、几何头零差异。8组父活张量SHA、父缓存环境、子实际enabled、每侧线程和TF32合同均通过。**严格同输入复现通过，未观察到优化退化；整体指标等效未判定，整例加速未测。**显式接线只适用于本页完整标准 `inflated/sulc`；nofix的 `-no-save-sulc`、quick sphere和拓扑GA不由此接口替换。球面配准缓存ABBA[未获整步收益](SPHERE_REGISTRATION_ALLOCATOR.md)，其默认inherit保持。
+首个 Torch 双侧组使用新空 JIT 缓存，其后复用；两种后端均新建 worker。12份候选/重复的双侧网格比较全部坐标、sulc、几何头零差异。8组父活张量SHA、父缓存环境、子实际enabled、每侧线程和TF32合同均通过。**严格同输入复现通过，未观察到优化退化；整体指标等效未判定，整例加速未测。**此处v7接线当时只涵盖标准 `inflated/sulc`；2026-10-10完整接口另补nofix的 `-no-save-sulc`并通过上方四侧回归。quick sphere和拓扑修复不由inflation接口替换。球面配准缓存ABBA[未获整步收益](SPHERE_REGISTRATION_ALLOCATOR.md)，其默认inherit保持。
 
 v7每个Torch worker的 allocated 峰值315,037,184–358,849,024字节、reserved394,264,576–473,956,352字节，不把不同worker的峰值相加作为同期值。指定目标卡采样峰值12,583,960,576字节，全部计算进程同期合计上界12,557,746,176字节，含共享任务；进程树归属未解决，父子树峰值null。名义间隔0.5s、最大实际间隔5.678s、无查询失败。只支持采样范围，不能保证连续峰值或宣布整例20,000,000,000字节验收通过。
 
@@ -223,6 +254,8 @@ GPU 张量 allocated/reserved 显式选择目标设备：v2 最大分别为 378,
 完整 [v2 同输入阶段报告](../../validation/recon_all/optimizations/20261009_inflate_torch/reports/a100_20261009_v5/v2_fourmesh/summary.json)、[冷 CLI](../../validation/recon_all/optimizations/20261009_inflate_torch/reports/a100_20261009_v5/v3_cold_cli/summary.json)、[缓存关闭反例](../../validation/recon_all/optimizations/20261009_inflate_torch/reports/a100_20261009_v5/v4_cache_disabled/summary.json) 及源码/输入/程序/动态库 SHA 均保留。冻结基底为 `a756fffb`，候选以逐模块 SHA 和三版 patch manifest 绑定；未把基底 commit 等同于含未提交补丁的全部实现。40 份公开收据仅替换私有目录与主机名，3476 个数字/布尔/null 字段保持原样；[映射清单](../../validation/recon_all/optimizations/20261009_inflate_torch/reports/a100_20261009_v5/public_export_manifest.json) 记录原始与公开 SHA。原始私有包 SHA 为 `7cec9a18f7b4e70e385069727e26d530bd336c084232aa8de1f89226e37f1c22`。依赖检查属于已声明 Conda 运行时，未验证物理上无预装软件的干净环境隔离。
 
 ## 6．更新与验证记录
+
+2026-10-10：新增显式 `save_sulc=False`，保持原默认10步/高分辨率规则；两例四侧nofix同输入完整坐标与原参考精确匹配，没有把nofix降为2步。旧标准API保持兼容。
 
 2026-10-09 v9补实际生产内部完整双侧球面链对照，两组独立冷JIT：完整组265.534→248.455s，所有最终几何/sulc及357轮状态严格相同，LH既有47个FP64径向负面保持。v8只读observer对多行`updates.append`记录了重复行事件，轮数合同明确失败，并由既有组错误处理取消本组另一侧；没有生产算法故障或其他任务中断。v9仅按实际迭代index去除重复事件，在同一冻结生产源码重新完整运行；v8失败日志和报告保留。新增报告仍不替代原始T1整例或官方整例验收。
 

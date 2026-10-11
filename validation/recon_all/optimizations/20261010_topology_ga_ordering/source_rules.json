@@ -1,0 +1,53 @@
+{
+  "status": "complete_readonly_fixed_source_audit",
+  "source_commit": "d932c45b7941662ea380a05efef580568b98d41a",
+  "source_repository": "https://github.com/freesurfer/freesurfer",
+  "source_file": "utils/mrisurf_defect.cpp",
+  "source_sha256": "55ace70ab09b1868a8cb152a9547879abdce790635b484bef1bf056986958187",
+  "functions": {
+    "mrisCrossoverDefectPatches": {
+      "line": 11619,
+      "random_call_sites": 1,
+      "rules": [
+        "Complete identical edge domain and complete parent permutations.",
+        "One randomNumber(0,1), strict less than 0.5 chooses the first parent.",
+        "First addition followed by alternating switch-or-keep pairs of attempts; duplicate skips also consume control attempts.",
+        "Ordered child contains every edge once; no implicit fitness or rank copy."
+      ]
+    },
+    "mrisMutateDefectPatch": {
+      "line": 11719,
+      "random_call_sites": 7,
+      "compile_time_ntry": 0,
+      "rules": [
+        "One randomNumber(0,1) per position; only strict p less than pmutation swaps.",
+        "No overlap, empty overlap or incomplete list draws randomNumber(0,N-0.1) and truncates to a position.",
+        "Complete overlap draws randomNumber(0,count-0.0001), selects an ordered edge and queries the temporary dp_indices.",
+        "Arbitrary swaps do not update dp_indices. Complete overlap swaps update only two items.",
+        "NTRY=0: no extra draw or used-edge filtering, while unreachable source call sites remain unmodified."
+      ]
+    },
+    "defectPatchRank": {
+      "line": 11832,
+      "implementation": "reuse fnit.recon_all.topology_fitness_search.rank_patch_fitness",
+      "rules": [
+        "Finite double fitness, larger is better.",
+        "Strict absolute difference less than FLT_EPSILON is a tie; earlier population position wins."
+      ]
+    }
+  },
+  "capture_contract": {
+    "format": "FNITGAO1",
+    "unchanged_original_random_call_sites": 8,
+    "reference_before_after": "pending_explicit_observer_upload_authorization",
+    "intentional_stop": "three actual mutation and three actual crossover calls; not completed GA",
+    "production_reads_reference_after": false,
+    "original_source_libraries_programs_are_production_dependencies": false
+  },
+  "random_stream_boundary": {
+    "OpenRan1": "Existing VNL generator returns a float32 value widened to double.",
+    "randomNumber": "Double range scaling of the widened OpenRan1 result; not NumPy RNG.",
+    "full_seed_priming_and_prior_consumption": "not_assessed",
+    "frozen_operator_regression": "explicit recorded low/high/value inputs only"
+  }
+}

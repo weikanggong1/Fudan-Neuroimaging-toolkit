@@ -15,6 +15,7 @@ import torch
 from . import n4_bspline_torch, n4_itk_torch_experimental
 from .profiling import autocast_state, configure_cuda_allocator
 from .thread_budget import native_thread_environment
+from .worker_program_guard import inherit_original_stage_guard
 
 
 def _sha(path):
@@ -79,6 +80,7 @@ def run_isolated_n4(*,input_path:str|Path,output_path:str|Path,report_path:str|P
     return result
 
 
+@inherit_original_stage_guard
 def run_worker(*,input_path:Path,output_path:Path,report_path:Path,device:str='cuda:0',
                threads:int=4,profile:bool=False,matmul_tf32:bool=True,
                cudnn_tf32:bool=True,code_version:str='FNIT-source-hashes')->dict:
@@ -89,6 +91,8 @@ def run_worker(*,input_path:Path,output_path:Path,report_path:Path,device:str='c
     返回输入/输出及算法SHA、完整N4详情、实际线程/精度/allocator、
     指定GPU张量峰值和API墙钟；张量峰值不是父子同期显存。同期采样由
     调用者复用FNIT sampler，不将未知值记0。不更改生产N4默认。
+    继承生产程序禁令时，在校验/CUDA初始化前安装相同守卫；正常与
+    异常退出恢复作用域，原程序尝试抛RuntimeError，不改200轮算法。
     """
     started=time.perf_counter()
     if torch.cuda.is_initialized():raise ValueError('N4 worker must start before CUDA initialization')
@@ -118,6 +122,7 @@ def run_worker(*,input_path:Path,output_path:Path,report_path:Path,device:str='c
     return report
 
 
+@inherit_original_stage_guard
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     for name in ('input','output','report'):parser.add_argument('--'+name,type=Path,required=True)

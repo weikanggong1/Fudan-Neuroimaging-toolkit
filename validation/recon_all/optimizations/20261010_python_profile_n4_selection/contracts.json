@@ -1,0 +1,109 @@
+{
+  "scope": "selector and route contracts; no real N4 or whole-pipeline timing",
+  "python_version": "3.11.16",
+  "platform": "Linux 6.18.40.1-microsoft-standard-WSL2",
+  "cpu_affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35
+  ],
+  "environment": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "OMP_NUM_THREADS": "4",
+    "NUMBA_NUM_THREADS": "4",
+    "OPENBLAS_NUM_THREADS": "4",
+    "MKL_NUM_THREADS": "4"
+  },
+  "source_sha256": {
+    "src/fnit/recon_all/python_profile.py": "127a8a3b869f1d8dc7afc4b3ac13fb46e22b34be2cbafd133ac64a9b47be78bf",
+    "tests/recon_all/test_python_profile_n4_selection.py": "60cef0ad8212b386cc0e75b456723b4a5358f2a541afbdd79b0ff57a59d85da1",
+    "src/fnit/recon_all/input_n4_chain.py": "cb3cff1cb7f7834365f77109bae71f970cc77cb88f4a354db86a98793eb1bea3"
+  },
+  "rows": [
+    {
+      "label": "v1",
+      "junit_file": "contracts-v1.xml",
+      "junit_sha256": "c79cb28c8ec83d707dab43e77e3ec2031fbdcc4706e0f419d78bd82cee4faafc",
+      "methods": 29,
+      "subtests": 15,
+      "console_pytest_seconds": 12.49,
+      "junit_cases": 44,
+      "junit_failures": 1,
+      "junit_errors": 0,
+      "junit_seconds": 12.449,
+      "failed_cases": [
+        {
+          "class": "tests.recon_all.test_n4_simpleitk_adapter.N4AdapterTests",
+          "name": "test_nonisotropic_axes_and_threads_restore_after_filter_failure",
+          "error": "ModuleNotFoundError: No module named 'SimpleITK'"
+        }
+      ],
+      "test_files": [
+        "tests/recon_all/test_python_profile_n4_selection.py",
+        "tests/recon_all/test_python_profile.py",
+        "tests/recon_all/test_n4_simpleitk_adapter.py",
+        "tests/recon_all/test_n4_execution_wiring.py"
+      ],
+      "command": "python -m pytest -q tests/recon_all/test_python_profile_n4_selection.py tests/recon_all/test_python_profile.py tests/recon_all/test_n4_simpleitk_adapter.py tests/recon_all/test_n4_execution_wiring.py --junitxml=<new-report>"
+    },
+    {
+      "label": "v2",
+      "junit_file": "contracts-v2.xml",
+      "junit_sha256": "649f2de5a75e34f09a354be79f652803aa624f601afd976e6aa8fcbbf2ba7818",
+      "methods": 24,
+      "subtests": 15,
+      "console_pytest_seconds": 14.2,
+      "junit_cases": 39,
+      "junit_failures": 0,
+      "junit_errors": 0,
+      "junit_seconds": 14.163,
+      "failed_cases": [],
+      "test_files": [
+        "tests/recon_all/test_python_profile_n4_selection.py",
+        "tests/recon_all/test_python_profile.py",
+        "tests/recon_all/test_n4_execution_wiring.py",
+        "tests/recon_all/test_python_execution_audit.py"
+      ],
+      "command": "python -m pytest -q tests/recon_all/test_python_profile_n4_selection.py tests/recon_all/test_python_profile.py tests/recon_all/test_n4_execution_wiring.py tests/recon_all/test_python_execution_audit.py --junitxml=<new-report>"
+    }
+  ],
+  "passed_focused_methods": 24,
+  "passed_focused_subtests": 15,
+  "simpleitk_import": "local dependency unavailable, retained v1 failure",
+  "production_routing_by_coordinator": "not covered by this helper receipt",
+  "overall_metric_equivalence": "not_assessed",
+  "new_MRI_jobs": 0
+}

@@ -1,0 +1,100 @@
+{
+  "scope": "telemetry query performance only; real T1 whole performance not tested",
+  "actual_source_manifest": {
+    "code_version": "66a9be092d78922bdb4eb1db992f57442aad1475",
+    "scope": "NVML sampler metadata preserves raw backend memory query semantics",
+    "files": {
+      "src/fnit/__init__.py": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size": 0
+      },
+      "src/fnit/recon_all/__init__.py": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size": 0
+      },
+      "src/fnit/recon_all/profiling.py": {
+        "sha256": "17b12fdc4e72736f64dc2834ea34a282bc726513599e8045b63d0f9eeccc5c7e",
+        "size": 21564
+      },
+      "src/fnit/recon_all/nvml_process_memory.py": {
+        "sha256": "1879606b4af4c10e088cff3c665255511dee872da91d4a9c8b2b1cb07550b348",
+        "size": 3058
+      },
+      "tools/benchmark_recon_process_memory.py": {
+        "sha256": "3479ed314497ddfc93c4d9ee914a71581ef56ebae28a1fbe71d1f1a610640e18",
+        "size": 7068
+      }
+    },
+    "dependency_wheel_sha256": "4361db337b0c551e2d101936dae2e9a60f957af26818e8c0c3a1f32b8db8d0a7"
+  },
+  "raw_archive_sha256": "63fa169a7eafe61f0b89bb49adca8b02c6fc0a706553beedd3596b1dccb3e97b",
+  "raw_archive_size": 256000,
+  "contracts": {
+    "tests": 64,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "time": 46.899
+  },
+  "whole_pipeline_acceleration": "not_assessed",
+  "20GB_own_process_budget": "not_assessed",
+  "isolation": "not_verified",
+  "runs": {
+    "cli": {
+      "status": "complete_telemetry_only",
+      "median_query_seconds": {
+        "nvidia-smi": 0.7581350980326533,
+        "nvml": 0.004505757708102465
+      },
+      "query_latency_ratio_smi_over_nvml": 168.25918017503233,
+      "fresh_process_wall_seconds": 30.880471548065543,
+      "function_wall_seconds": 26.330042868852615,
+      "target_uuid": "GPU-anonymized-device-009",
+      "initialized_at_entry": false,
+      "initialized_after_lazy_nvml": false,
+      "current_device_at_entry": null,
+      "current_device_after_queries": 0,
+      "caller_sentinel_preserved": null,
+      "sample_count": 48,
+      "failed_sample_count": 0,
+      "peak_tree_total_bytes": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "max_observed_gap_by_backend": {
+        "nvml": 0.10781378764659166,
+        "nvidia-smi": 1.5333654917776585
+      }
+    },
+    "initialized_api": {
+      "status": "complete_telemetry_only",
+      "median_query_seconds": {
+        "nvidia-smi": 0.6853895261883736,
+        "nvml": 0.003529418259859085
+      },
+      "query_latency_ratio_smi_over_nvml": 194.19334171397932,
+      "fresh_process_wall_seconds": 25.85026440769434,
+      "function_wall_seconds": 22.048290042206645,
+      "target_uuid": "GPU-anonymized-device-009",
+      "initialized_at_entry": true,
+      "initialized_after_lazy_nvml": true,
+      "current_device_at_entry": 0,
+      "current_device_after_queries": 0,
+      "caller_sentinel_preserved": true,
+      "sample_count": 48,
+      "failed_sample_count": 0,
+      "peak_tree_total_bytes": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "max_observed_gap_by_backend": {
+        "nvml": 0.11277860309928656,
+        "nvidia-smi": 1.1976189073175192
+      }
+    }
+  }
+}

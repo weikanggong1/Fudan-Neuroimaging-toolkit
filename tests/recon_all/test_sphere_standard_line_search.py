@@ -55,6 +55,20 @@ def test_first_epoch_sse_uses_native_float32_distance_weight():
     assert result["total"] == expected
 
 
+def test_distance_sse_sqrt_returns_float_before_double_accumulation():
+    # Independently compiled with the fixed source TU's headers and compiler:
+    # sqrt(float ratio) returns float, not a double square root.
+    vertices = np.asarray([[100, 0, 0], [0, 100, 0]], np.float32)
+    original_total = np.float32(float.fromhex("0x1.140f74p+16"))
+    result = first_epoch_sse(
+        vertices, np.empty((0, 3), np.int32),
+        np.asarray([0, 1, 2], np.int64), np.asarray([1, 0], np.int32),
+        np.zeros(2, np.float32), np.empty(0, np.float32), original_total)
+    assert result["distance_scale"] == float.fromhex("0x1.7ff6p-1")
+    ratio = np.float32(original_total / np.float32(4 * math.pi * 10000))
+    assert result["distance_scale"] != math.sqrt(float(ratio))
+
+
 def test_full_default_rh_sixth_native_sse_reproduces_native_dt():
     dt = [1082.1390482941101, 2164.2780965882203, 3246.4171448823304]
     sse = [768850.990010, 764907.671084, 764608.968844]

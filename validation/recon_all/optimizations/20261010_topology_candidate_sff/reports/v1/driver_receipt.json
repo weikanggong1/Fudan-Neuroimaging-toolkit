@@ -1,0 +1,53 @@
+{
+  "exit_code": 0,
+  "external_cold_script_seconds": 15.498167454265058,
+  "command": [
+    "FNIT_ROOT/envs/recon_main_20261009_v3/bin/python",
+    "FNIT_ROOT/workspaces/topology_candidate_sff_20261010_v1/tools/benchmark_recon_topology_candidate_sff.py",
+    "--neighborhood-capture",
+    "FNIT_ROOT/runs/topology_source_neighborhood_observer_20261010_v2/repeat0/neighborhood.bin",
+    "--neighborhood-repeat",
+    "FNIT_ROOT/runs/topology_source_neighborhood_observer_20261010_v2/repeat1/neighborhood.bin",
+    "--statistics-capture",
+    "FNIT_ROOT/runs/topology_source_fitness_observer_20261010_v2/repeat0/patch_statistics.bin",
+    "--statistics-repeat",
+    "FNIT_ROOT/runs/topology_source_fitness_observer_20261010_v2/repeat1/patch_statistics.bin",
+    "--volume-capture",
+    "FNIT_ROOT/runs/topology_source_fitness_observer_20261010_v2/repeat0/volume.bin",
+    "--distance-capture",
+    "FNIT_ROOT/runs/topology_source_distance_observer_20261010_v3/repeat0/distance.bin",
+    "--brain",
+    "FNIT_ROOT/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject/mri/brain.mgz",
+    "--fnit-joint-pdf",
+    "FNIT_ROOT/runs/topology_mri_likelihood_20261010_v5/candidate/candidate.npz",
+    "--reference-fitness",
+    "FNIT_ROOT/runs/topology_fitness_composition_20261010_v1/reference/repeat0.json",
+    "--reference-repeat",
+    "FNIT_ROOT/runs/topology_fitness_composition_20261010_v1/reference/repeat1.json",
+    "--post-neighborhood",
+    "FNIT_ROOT/runs/topology_source_post_sff_observer_20261010_v1/repeat0/post_neighborhood.bin",
+    "--source-manifest",
+    "FNIT_ROOT/workspaces/topology_candidate_sff_20261010_v1/TRANSFER_SOURCE_MANIFEST.json",
+    "--output",
+    "FNIT_ROOT/runs/topology_candidate_sff_20261010_v1/candidate",
+    "--threads",
+    "4"
+  ],
+  "driver_sha256": "a097999d5c11af38c9cf43638b39e4c40a77cc4f7ed87ec8e700a0ce335ef7ae",
+  "script_sha256": "6d4c68e16920326cfcf8daf74b731eaa8d542904f3e9a8fbefe7069b8acdb82b",
+  "manifest_sha256": "4921a1fdf02bddffff3eca579e641d8e4be628f1b1983e9f7816a05f2daedcef",
+  "cpu_affinity": [
+    88,
+    89,
+    90,
+    91
+  ],
+  "environment": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "OMP_NUM_THREADS": "4",
+    "NUMBA_NUM_THREADS": "4",
+    "OPENBLAS_NUM_THREADS": "4",
+    "MKL_NUM_THREADS": "4"
+  },
+  "timing_boundary": "fresh Python child imports/input loading/two complete SFF and prepared scores/comparison/all output IO; no rawMRI preparation or GA"
+}

@@ -7,19 +7,52 @@ from pathlib import Path
 
 import nibabel.freesurfer.io as fsio
 import numpy as np
+from numba import njit
+
+from .place_surface_normals import ordered_face_csr
+
+
+@njit(cache=True, fastmath=False)
+def _ordered_neighbor_storage(faces, offsets, face_ids, corners):
+    """由成熟有序入射 CSR 按 previous→following 首次出现去重。"""
+    counts = np.zeros(len(offsets)-1, np.int64)
+    storage = np.empty(2*len(face_ids), np.int64)
+    for vertex in range(len(counts)):
+        begin = 2*offsets[vertex]
+        count = 0
+        for entry in range(offsets[vertex], offsets[vertex+1]):
+            face = faces[face_ids[entry]]
+            corner = corners[entry]
+            for slot in range(2):
+                neighbor = face[(corner+2-slot) % 3]
+                present = False
+                for previous in range(count):
+                    if storage[begin+previous] == neighbor:
+                        present = True
+                        break
+                if not present:
+                    storage[begin+count] = neighbor
+                    count += 1
+        counts[vertex] = count
+    return storage, counts
 
 
 def ordered_neighbors(faces: np.ndarray, nvertices: int) -> list[list[int]]:
-    """Recreate mrisCompleteTopology_old's face-order one-ring lists."""
-    neighbors: list[list[int]] = [[] for _ in range(nvertices)]
-    for a, b, c in faces:
-        for vertex, previous, following in ((a, c, b), (b, a, c), (c, b, a)):
-            linked = neighbors[vertex]
-            if previous not in linked:
-                linked.append(int(previous))
-            if following not in linked:
-                linked.append(int(following))
-    return neighbors
+    """完整有序三角面→按原面/角点次序的一环邻接，每行独立可写。
+
+    faces为整数(F,3)，nvertices为非负整数N，包含孤立顶点。返回N行
+    list[int]：每个角点先previous再following，重复项只保留首次出现；
+    不排序邻居、不删除自环/重复角点，也不从候选外部边重造动态邻接。
+    复用ordered_face_csr的完整形状/范围校验及稳定面序；整数去重由
+    Numba执行，首次JIT另计，无新依赖或精度策略。没有全局缓存，每次
+    faces改变均重新构造。无坐标/单位/文件读写；非法类型、shape、N或
+    索引抛ValueError。对应mrisCompleteTopology内部步骤，无独立原CLI。
+    """
+    offsets, face_ids, corners = ordered_face_csr(faces, nvertices)
+    triangles = np.asarray(faces, dtype=np.int64)
+    storage, counts = _ordered_neighbor_storage(triangles, offsets, face_ids, corners)
+    return [storage[2*offsets[vertex]:2*offsets[vertex]+counts[vertex]].tolist()
+            for vertex in range(nvertices)]
 
 
 def average_positions(vertices: np.ndarray, faces: np.ndarray,

@@ -1,0 +1,40 @@
+{
+  "fixed_upstream_commit": "d932c45b7941662ea380a05efef580568b98d41a",
+  "mrisurf_defect_cpp_sha256": "55ace70ab09b1868a8cb152a9547879abdce790635b484bef1bf056986958187",
+  "source_functions": {
+    "mriDefectVolume": [
+      5291,
+      5439
+    ],
+    "defectVolumeLikelihood": [
+      5465,
+      5555
+    ],
+    "computeDefectStatistics_intensity": [
+      5565,
+      5716
+    ]
+  },
+  "type": 0,
+  "contrast": 0,
+  "default_volume_scale_per_mm": 2,
+  "source_actual_volume_resolution": 2,
+  "source_actual_histogram_bin_size": [
+    0,
+    0
+  ],
+  "geometry": "all potential EDGE endpoints in creation-time orig surface RAS; +/-1 float32 mm; ceil(scale*extent)",
+  "edge_mask": "FZERO length and original x-only while; always last point; mask is overwritten by full resampling",
+  "source_volume_indices": "float32 scale*(coordinate-origin), plus double0.5, truncate toward zero",
+  "mri_sampling": "reuse independent nibabel tkregister header transform and existing topology MRI double-interpolation; no reference local arrays",
+  "quantization": "uint8 write truncates double MRI sample",
+  "white_log_lookup": "logf white counts[nint(min(unquantized_sample,white_mean))]",
+  "gray_log_lookup": "logf gray counts[nint(max(unquantized_sample,gray_mean))]",
+  "calibrated_statistics": "source ordered float32 accumulation; bins-bin_size/2.0 writeback; 1% peak filter",
+  "source_mean_log": "logf counts[clamp(nint(mean))]",
+  "generic_library_boundary": "Python NumPy/Numba only; no original stage binary or .so consumed",
+  "input_calibration_histograms_are_upstream_stage_parameters": true,
+  "internal_matrix_signed_zero_raw_diff_preserved": true,
+  "original_private_matrix_diagnostic_script_sha256": "3195ae21bb581f103fe3433e379db0c5ba449a86ac60e494d5aba48254739d74",
+  "public_matrix_diagnostic_cli_is_parameterized_reproducer_not_original_uploaded_script": true
+}

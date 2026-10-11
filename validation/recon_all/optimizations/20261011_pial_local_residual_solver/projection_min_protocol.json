@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "algorithm": "independent_projected_pair_solver_v1",
+  "parameters": {
+    "max_displacement_mm": 1.0,
+    "minimum_area_ratio": 0.2,
+    "clearance_mm": 0.002,
+    "max_sweeps": 4,
+    "optimizer_iterations": 100,
+    "diagnostic_pair_limit": 1
+  },
+  "acceptance": {
+    "fixed_vertices": "rip union all outside cortex; preserve exact entry coordinates",
+    "ordered_faces": "unchanged",
+    "source_and_float64_pairs": "both strict subset for each accepted trial; no new pairs; full final validation",
+    "affected_faces": "all positive initial-normal dot and area ratio >=0.2",
+    "maximum_cumulative_displacement_mm": 1.0
+  },
+  "scope": "one canonical real face pair; not complete cleanup or overall equivalence",
+  "reference_coordinates_used_for_candidate": false
+}

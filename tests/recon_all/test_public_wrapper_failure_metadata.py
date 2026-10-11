@@ -45,8 +45,18 @@ class PublicWrapperFailureMetadataTests(unittest.TestCase):
         namespace = {"__package__": "fnit.recon_all", "Path": Path, "json": json,
                      "time": types.SimpleNamespace(perf_counter=lambda: self.clock),
                      "_run_recon_all_python": self.engine}
+        # 入口新增的前置校验使用实际函数；本测试选择各函数的CPU/参考
+        # 默认分支，仍无需导入Torch，不用空mock绕过参数校验。
+        validator_names = {"_normalization_controls_options",
+                           "_normalization_initial_bias_options",
+                           "_validate_inflate_backend", "_validate_sphere_finish_backend",
+                           "_validate_annotation_gibbs_backend",
+                           "_validate_remesh_scalar_storage", "_validate_mni_execution"}
+        validators = [node for node in tree.body
+                      if isinstance(node, ast.FunctionDef) and node.name in validator_names]
+        self.assertEqual({node.name for node in validators}, validator_names)
         unit = ast.Module(body=[ast.ImportFrom(module="__future__", names=[
-            ast.alias(name="annotations")], level=0), function], type_ignores=[])
+            ast.alias(name="annotations")], level=0), *validators, function], type_ignores=[])
         exec(compile(ast.fix_missing_locations(unit), str(source), "exec"), namespace)
         self.run = namespace["run_recon_all_python"]
         temporary = tempfile.TemporaryDirectory()
@@ -88,7 +98,8 @@ class PublicWrapperFailureMetadataTests(unittest.TestCase):
         self.assertEqual(json.loads(self.report_path.read_text()), report)
         self.engine.assert_called_once_with(t1="raw.nii.gz", subject_dir=self.subject,
             weights_dir="weights", assets_dir="assets", device="cuda:1", threads=4,
-            native_bin_dir="native", profile_stages=False, cuda_allocator_cache="auto")
+            native_bin_dir="native", profile_stages=False, cuda_allocator_cache="auto",
+            backend="native")
 
     def test_stage_failure_records_restored_budget_and_public_wall(self):
         original = RuntimeError("white failed")
@@ -102,6 +113,18 @@ class PublicWrapperFailureMetadataTests(unittest.TestCase):
         self.assertEqual(report["total_seconds"], 7.25)
         self.assertTrue(report["thread_budget"]["restoration_complete"])
         self.assertEqual(report["thread_budget"]["numba"]["restored"], 128)
+
+    def test_quality_failure_retains_machine_readable_diagnostics(self):
+        original = RuntimeError("sphere folds remain")
+        original.diagnostics = {"final_negative_float32": 7507,
+                                "quality_status": "failed_quality"}
+        self.fail_engine(original)
+        with self.assertRaises(RuntimeError) as raised:
+            self.call()
+        self.assertIs(raised.exception, original)
+        report = json.loads(self.report_path.read_text())
+        self.assertEqual(report["quality_failure"], original.diagnostics)
+        self.assertEqual(report["status"], "failed")
 
     def test_restore_failure_changes_written_complete_to_failed(self):
         self.engine.side_effect = lambda **kwargs: self.write_internal_report(status="complete")
@@ -170,6 +193,43 @@ class PublicWrapperFailureMetadataTests(unittest.TestCase):
             self.call()
         self.assertEqual(self.report_path.read_text(), previous)
         self.assertTrue(self.budget["restoration_complete"])
+
+    def test_group_failure_keeps_worker_quality_at_public_entry(self):
+        from fnit.recon_all.hemisphere_parallel import HemisphereGroupError
+
+        quality = {"negative_faces": 7, "stop_reason": "source_niterations_limit"}
+        group = {"operation": "surface", "workers": {
+            "lh": {"status": "failed", "quality_failure": quality},
+            "rh": {"status": "cancelled"}}}
+        error = HemisphereGroupError("surface group failed", group)
+        self.fail_engine(error)
+        with self.assertRaises(HemisphereGroupError) as raised:
+            self.call()
+        self.assertIs(raised.exception, error)
+        self.assertEqual(json.loads(self.report_path.read_text())["quality_failure"],
+                         {"stage_group": "surface", "hemispheres": {"lh": quality}})
+
+    def test_group_without_quality_does_not_invent_quality_failure(self):
+        from fnit.recon_all.hemisphere_parallel import HemisphereGroupError
+
+        group = {"operation": "pial_surface", "workers": {
+            "lh": {"status": "failed", "error": "IO failure"},
+            "rh": {"status": "cancelled"}}}
+        error = HemisphereGroupError("pial group failed", group)
+        self.fail_engine(error)
+        with self.assertRaises(HemisphereGroupError):
+            self.call()
+        self.assertNotIn("quality_failure", json.loads(self.report_path.read_text()))
+
+    def test_group_quality_reflects_final_worker_collection(self):
+        from fnit.recon_all.hemisphere_parallel import HemisphereGroupError
+
+        group = {"operation": "register", "workers": {}}
+        error = HemisphereGroupError("register group failed", group)
+        self.assertIsNone(error.diagnostics)
+        group["workers"]["rh"] = {"status": "failed", "quality_failure": {"negative_faces": 3}}
+        self.assertEqual(error.diagnostics,
+                         {"stage_group": "register", "hemispheres": {"rh": {"negative_faces": 3}}})
 
     def test_budget_setup_failure_does_not_start_engine_or_create_report(self):
         self.setup_error = ValueError("thread capacity exceeded")

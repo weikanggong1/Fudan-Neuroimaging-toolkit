@@ -14,7 +14,7 @@ from .mri_em_register import (
 )
 from .mri_em_register_em_candidate import EMObjective
 from .mri_em_register_lta import write_voxel_lta
-from .mri_em_register_optimizer import first_em_line_search
+from .mri_em_register_complete import align_em
 from .mri_em_register_search_source import find_optimal_linear_transform_source
 from .mri_em_register_translation_source import find_optimal_translation_source
 
@@ -30,8 +30,8 @@ def register_t1(nu_path: str | Path, atlas_path: str | Path,
     ``search_backend="cpu"`` keeps the validated source-order NumPy/Numba
     search. ``search_backend="torch"`` reuses FNIT's resident, chunked
     ``GCASearchScorer`` for translation and linear candidate scoring on an
-    explicit CUDA device, while the EM refinement and LTA writing remain the
-    existing Python implementation. ``reduce_on_device`` accumulates sample
+    explicit CUDA device, while complete stable/all-sample EM refinement and LTA writing run
+    on CPU without external stage programs (see GCA_COMPLETE_PYTHON.md). ``reduce_on_device`` accumulates sample
     likelihoods in CUDA before copying one score vector per candidate block;
     it is opt-in until its numeric result is checked against ordered CPU
     reduction. The Torch path is opt-in until its LTA and downstream norm
@@ -49,7 +49,8 @@ def register_t1(nu_path: str | Path, atlas_path: str | Path,
     started = time.perf_counter()
     atlas = read_gca(atlas_path)
     masked = read_masked_input(nu_path, mask_path)
-    peak, _, _ = estimate_image_white_matter_peak(atlas, masked)
+    histogram_profile = {}
+    peak, _, _ = estimate_image_white_matter_peak(atlas, masked, profile=histogram_profile)
     source = scale_input_intensity(masked, atlas_label_peak(atlas, 2), peak)
     stable_samples = find_stable_samples(atlas)
     center = gca_centroid(gca_mean_volume(atlas))
@@ -76,8 +77,14 @@ def register_t1(nu_path: str | Path, atlas_path: str | Path,
     timing["linear_search_seconds"] = time.perf_counter() - started
 
     started = time.perf_counter()
-    objective = EMObjective(atlas, find_all_samples(atlas), source)
-    matrix, cost, trials = first_em_line_search(objective, pre_em)
+    objective = EMObjective(atlas, stable_samples, source, clamp=0.0)
+    stable_matrix, stable_em = align_em(objective, pre_em, tolerance=1e-5)
+    objective.samples = find_all_samples(atlas)
+    objective.clamp = 6.0
+    matrix, final_em = align_em(objective, stable_matrix, tolerance=1e-7)
+    cost = final_em["outer_cost_after"]
+    trials = [trial for stage in (stable_em, final_em) for entry in stage["passes"]
+              for restart in entry["restarts"] for trial in restart["evaluations"]]
     timing["em_seconds"] = time.perf_counter() - started
 
     started = time.perf_counter()
@@ -87,6 +94,12 @@ def register_t1(nu_path: str | Path, atlas_path: str | Path,
     return {
         "output": str(output_path), "matrix": matrix.tolist(),
         "em_cost": cost, "em_trials": len(trials),
+        "histogram_preprocess": histogram_profile,
+        "translation_history": [{"score":float(score),"offset":[float(value) for value in offset],"matrix":matrix.tolist()}
+                                for score,offset,matrix in translation_history],
+        "linear_history": [{"scale":float(scale),"score":float(score),"matrix":matrix.tolist()}
+                           for scale,score,matrix,_ in linear_history],
+        "em_complete_protocol": {"stable": stable_em, "all_samples": final_em},
         "linear_iterations": len(linear_history), "timing": timing,
         "search_backend": search_backend, "device": device,
         "candidate_chunk": candidate_chunk, "sample_chunk": sample_chunk,

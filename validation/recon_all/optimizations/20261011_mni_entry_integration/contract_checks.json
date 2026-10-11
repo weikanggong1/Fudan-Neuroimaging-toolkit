@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "scope": "local orchestration and MNI entry contracts; no MRI, CUDA allocation, whole reconstruction or performance measurement",
+  "base_git_commit": "208e926162090da4e374536b3bc185633b06b752",
+  "tested_source_sha256": {
+    "src/fnit/recon_all/native_free.py": "19db03905962fadf12be171a1660e62a2b6e505d3e52ebda71a9c9942c4ef21e",
+    "src/fnit/recon_all/batch.py": "22012e9480b62d1a2244ab06b37e2de86edd2c5acc81c0e9c0a9c55da58b8a2d",
+    "src/fnit/recon_all/mni_nonlinear_chain.py": "52ae0e52d1359c8a5822701acc26efc91701da92dd25079404c5097e4ccedcb1",
+    "src/fnit/recon_all/surface_stats_cache.py": "9b52ee7c886decba5e085c3abbf45872aaf4b1110e5037c156446fa2f31a3924",
+    "tests/recon_all/test_python_mni_stats_boundary.py": "854cd781374a2f2b8185b3dbaedf777ad3db5cfa15cb4410eab4557e1e71a193",
+    "tests/recon_all/test_mni_execution_wiring.py": "832a759d2e49a19eb060bd487ef30e89871de937ab89b496da92f8e855c500df",
+    "tests/recon_all/test_mni_mesh_parallel.py": "956ea40dffba7f318a421193e88dff3a98384d45779d38a87fe4d1f62be0fe60",
+    "tests/recon_all/test_surface_stats_cache.py": "e75373897ce498e2c2aae8660fd24c1f864f8b6f5035dc7d8ffa85938e62b5b9",
+    "tests/recon_all/test_execution_recipe_boundary.py": "837ba07add0f20d63ec6fee5aa8a2f07503bc88029e9cdfdb93113c597a518f5",
+    "tests/recon_all/test_white_mri_device_wiring.py": "c6a73534648bfa0e9ab72bd351c90c3d2e3e558f06bbe3fd6a76ef68daf7ea78",
+    "tests/recon_all/test_n4_pipeline_dependency_preflight.py": "41f75e2b7cbdfb635f5e960026e148776c30c384928c857995a6bdc7375e93fa",
+    "tests/recon_all/test_partial_timing_missing_total.py": "50cfb3c567ef860e0a926028feab80de34b68ca90a532fb0205f5bd11ffda306",
+    "tests/recon_all/test_annotation_gibbs_wiring.py": "c2cdf449843b7584e29a1ded3d67a4e647048849d6b8a02cebd03de097602e16"
+  },
+  "tests": {
+    "passed_tests": 52,
+    "passed_subtests": 25,
+    "errors": 0,
+    "failures": 0,
+    "junit_tests": 77,
+    "seconds": 3.341,
+    "junit_sha256": "c7fb034276db0512d1cf843edf21763661b400ffc6971f72c8b5efab7b0d3343"
+  },
+  "regression_coverage": [
+    "non-CUDA complete API/batch rejects before outputs and worker launch",
+    "in-process CUDA shorthand compatibility",
+    "parallel-late explicit CUDA and thread budget",
+    "default and nondefault CUDA device forwarding",
+    "GPU-only MNI and no CPU original-program fallback",
+    "auxiliary failure restores precision and prevents downstream work",
+    "missing declared dependencies and partial failure reports preserve original exceptions",
+    "cache hit/failure restores caller TF32; unapproved dtype rejected"
+  ],
+  "declared_local_dependency": "SimpleITK 2.5.6 in isolated target; no shared Conda change",
+  "existing_real_stage_report": {
+    "path": "validation/recon_all/optimizations/20261011_metrics_install/verified_report.public.json",
+    "sha256": "548df87cc00ade3f69b5942bacb52b3a675994c9d60ee85b6aad838f8df6fbe5",
+    "tested_installed_commit": "22d4e0aa98a08b7463006981d7733c56ef60b82e",
+    "all_six_bound_stage_sources_match_integration": true,
+    "scope": "two frozen real inputs; not a run of this integration revision"
+  },
+  "strict_reproduction": "unchanged; 138-item whole comparison not run",
+  "new_whole_accuracy_regression": "not_assessed",
+  "overall_metric_equivalence": "not_assessed",
+  "end_to_end_seconds": null,
+  "process_tree_gpu_memory_bytes": null,
+  "clean_install_whole_isolation": "not_assessed",
+  "main_pushed": false
+}

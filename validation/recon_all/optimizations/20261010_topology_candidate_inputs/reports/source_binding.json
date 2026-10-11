@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "scope": "first-defect prepared candidate inputs; no full GA/whole reconstruction",
+  "source_commit": "d932c45b7941662ea380a05efef580568b98d41a",
+  "source_file_sha256": "55ace70ab09b1868a8cb152a9547879abdce790635b484bef1bf056986958187",
+  "versions": [
+    {
+      "version": 1,
+      "actual_bundle_git_head": "d76310419eb71b2d59e39d980de0e9e829ed9d41",
+      "minimal_bundle_sha256": "db58c02dc6fe05bc3efb9329c18219ba08dcb5b06648910dba9f88f5df997834",
+      "minimal_bundle_bytes": 11328,
+      "source_manifest_sha256": "ef1177ed16fc24dd2866a11c454868c2be9239e227be5066a4606893ed84fa72",
+      "actual_module_sha256": {
+        "topology_candidate_inputs": "214f5bca29a548f40738adc307eee9d70370aed30fea556a2abb09ea843c773b",
+        "topology_edge_mri_score": "eb0b284e411fd41ae5bd7d1956a0d366d06edf438fa681e758343f27e4e46150",
+        "topology_intensity_histogram": "543349dd8e687a929aeffb78f4f857a6f6bfd183c47f98c58a33f0aadb5b0086",
+        "topology_curvature_histogram": "830c88e53d6497375b1207a38f38ecfec14d65d140947c885950df20624550b6",
+        "topology_mri_likelihood": "e2867b8f3faf939cd8d7e057a62c5dd0de71e9c9b7783a4692709681e9b2207a",
+        "topology_defect_volume_priors": "7b4beb4817d16f59bc6bf720e67d2467f61f469650e38d490cee2cf4d4f526e4",
+        "thread_budget": "95cb4c4b75f187da49b50f80d6b9750404a5bb9091fe9ef9f7c6d2a179bfca44"
+      },
+      "original_report_sha256": "70a5077d724d3abf3e162cfa981a7aa9d1f3a97ae5841153a5dc0b89da94b5ce"
+    },
+    {
+      "version": 2,
+      "actual_bundle_git_head": "d76310419eb71b2d59e39d980de0e9e829ed9d41",
+      "minimal_bundle_sha256": "7c9a7580e3890f1472159d32a14226932ab1ea5d920ffa5f89a96cbefe44a100",
+      "minimal_bundle_bytes": 11594,
+      "source_manifest_sha256": "6d9b07067cf326d970860267902761ad0c9f3062f6bee6133c11922f883164e3",
+      "actual_module_sha256": {
+        "topology_candidate_inputs": "b3fc6e1e56549c3a98cf15cb31cfa42ae39949f45576796821ffbc415a9c7527",
+        "topology_candidate_pipeline": "32a8dba28654df9d2bbe5bff1b45921df4ae5ca89010645f8cf8c03232d6aef3",
+        "topology_edge_mri_score": "eb0b284e411fd41ae5bd7d1956a0d366d06edf438fa681e758343f27e4e46150",
+        "topology_intensity_histogram": "543349dd8e687a929aeffb78f4f857a6f6bfd183c47f98c58a33f0aadb5b0086",
+        "topology_curvature_histogram": "830c88e53d6497375b1207a38f38ecfec14d65d140947c885950df20624550b6",
+        "topology_mri_likelihood": "e2867b8f3faf939cd8d7e057a62c5dd0de71e9c9b7783a4692709681e9b2207a",
+        "topology_defect_volume_priors": "7b4beb4817d16f59bc6bf720e67d2467f61f469650e38d490cee2cf4d4f526e4",
+        "thread_budget": "95cb4c4b75f187da49b50f80d6b9750404a5bb9091fe9ef9f7c6d2a179bfca44"
+      },
+      "original_report_sha256": "f8fd718a94de76145f9dda74cc2d2dfccb51895d164c3c581e40844270cb1d37"
+    }
+  ],
+  "source_rules": {
+    "global_K_means": "SFF1 PDF 1%-peak F32 HISTO mean; later original SFF2 does not rebuild PDF",
+    "shared_preparation": "original domain raw MRI/median and two ORIGINAL averages once per surface",
+    "per_defect_calibration": "original-domain hull outside all marked defects",
+    "per_defect_local_volume": "current corrected ORIGINAL + complete creation ETable, not cached initial xyz",
+    "standard_weights_double": [
+      1.0,
+      10.0,
+      1.0,
+      1.0
+    ],
+    "volume_resolution": -1,
+    "local_index_scale_per_mm": 2.0
+  },
+  "reference_programs": {
+    "volume_creation_and_likelihood": "b00d5901b85a4d727a33d9120914de8e75c321cd26aedb2c579d88f3ad4901cf",
+    "global_statistics": "bce88c44eb7136111e9e28bed0cb996c411f1e10e2e03f01e0685cbd1471de64",
+    "matching_means": "874e162d91bd7fc092ee35c86e0a2c0b9abd7b33df352e28dcc9eafd4197dc7c"
+  },
+  "reference_reproducibility": "two saved captures per named phase; files checked again read-only in this task; not full recon-all reproducibility",
+  "pipeline_semantic_doc_correction": {
+    "before_source_sha256": "32a8dba28654df9d2bbe5bff1b45921df4ae5ca89010645f8cf8c03232d6aef3",
+    "after_source_sha256": "027f9d729c586a52dda8fb024e3fd50ef90f609b5de781e236e8b816b31c9f03",
+    "AST_equal_without_docstrings": true,
+    "old_tested_reports_unchanged": true
+  },
+  "complete_consumer_bug": {
+    "version": 1,
+    "missing": [
+      "volume",
+      "ras_to_voxel"
+    ],
+    "observed_by": "separate full-source GA before first candidate",
+    "failure": "TypeError: required candidate MRI inputs missing",
+    "v1_helper_success_not_full_consumer_success": true,
+    "fixed_version": 2,
+    "newMRI_or_matrix_computation": false,
+    "consumer_signature_binding_verified": true,
+    "shared_readonly_arrays_verified": true
+  },
+  "boundaries": {
+    "original_calibration_immutable": true,
+    "corrected_geometry_explicit_live": true,
+    "reference_only_after_checkpoint_saved": true,
+    "reference_outputs_not_production_inputs": true,
+    "all_outputs_and_repeat_exact": true,
+    "overall_internal_bitwise_reproduction": false,
+    "internal_matrix_different_bits": 7,
+    "complete_GA": false,
+    "whole_recon_all": false,
+    "metric_equivalence": "not_assessed",
+    "no_default_changed": true
+  },
+  "public_release": "only owned FNIT source/tests/tools, safe hashes/metrics, documentation and public benchmark derivative figures; no source archive/binaries/libraries/clinical data/credentials/licenses/server addresses"
+}

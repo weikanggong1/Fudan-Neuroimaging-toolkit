@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "status": "prepared_blocked_no_execution",
+  "protocol_date_local": "2026-10-11",
+  "timezone": "Asia/Shanghai",
+  "whole_started": false,
+  "download_allowed": false,
+  "production_schedule_changed": false,
+  "production_original_programs_allowed": false,
+  "automatic_fallback": false,
+  "execution_commit": null,
+  "execution_source_manifest_sha256": null,
+  "installed_wheel_sha256": null,
+  "scope": "two initial continuous raw T1 complete reconstructions after all mandatory component and installation gates; no stage restart or reference reuse",
+  "cases": [
+    "ds000114_sub-06",
+    "ds000114_sub-07"
+  ],
+  "case_selection": "two already verified members of unchanged frozen ten-case cohort; other eight not located in registered CFFF inputs; no case replaced after outcomes",
+  "case_order": "sequential, same physical GPU and CPU affinity for both; no concurrent cases",
+  "hardware": {
+    "suggested_gpu_uuid": "GPU-anonymized-device-004",
+    "suggested_cpu_affinity": [
+      80,
+      81,
+      82,
+      83
+    ],
+    "logical_device": "cuda:0",
+    "threads_per_case": 4,
+    "resources_reserved": false,
+    "require_fresh_recheck_before_launch": true,
+    "require_avoid_existing_frozen_jobs": true
+  },
+  "requested_recipe": {
+    "backend": "python",
+    "topology_backend": "python-ga",
+    "input_execution": "parallel",
+    "profile_stages": true,
+    "total_threads": 4,
+    "half_threads": 2,
+    "precision": "FP32/TF32 with existing verified FP32 exceptions",
+    "autocast": false,
+    "half_precision_approval": false,
+    "recipe_must_match_final_frozen_manifest": true
+  },
+  "hard_start_gates": {
+    "complete_em_and_ca_normalization": false,
+    "ga_orig_quality": false,
+    "final_pial_quality": false,
+    "final_integrated_commit": false,
+    "same_host_isolated_installed_entry_receipt": false,
+    "final_asset_and_license_binding": false,
+    "fresh_gpu_cpu_and_empty_output_recheck": false
+  },
+  "fail_closed_stage_names": [
+    "gca complete EM",
+    "CA normalization",
+    "topology GA and final orig",
+    "final white and pial",
+    "complete GPU MNI",
+    "full outputs and mesh quality"
+  ],
+  "failure_policy": "report exact phase/traceback hash and exit; no original-program fallback, no subject replacement, preserve attempt, no silent stage resume counted as continuous whole",
+  "timing": {
+    "outer_start": "before spawning fresh installed CLI process, includes interpreter startup and imports",
+    "outer_stop": "process exit, report/138-output writes, all descendants reaped and publish/cleanup finished",
+    "required_metrics": [
+      "complete CLI outer wall",
+      "API wall",
+      "each complete stage wall including I/O and sync",
+      "substep function and target synchronization waits",
+      "copy/publish/cleanup",
+      "startup admission/wait separated",
+      "parent/child CPU time"
+    ],
+    "cpu_hash_preparation_time_excluded_from_algorithm_wall": true,
+    "cold_and_warm": "record real import/JIT/cache/allocator state; no synthesized cold label; compare same cache condition",
+    "stable_speed_claim": "no single-pair causal claim in shared hardware"
+  },
+  "precision_and_gpu_monitor": {
+    "reuse_modules": [
+      "src/fnit/recon_all/profiling.py:ProcessTreeDeviceSampler",
+      "src/fnit/recon_all/nvml_process_memory.py",
+      "src/fnit/recon_all/hemisphere_worker.py",
+      "src/fnit/recon_all/execution_recipe.py:original_stage_guard"
+    ],
+    "precision_record": "parent/worker actual TF32 and autocast at entry/exit plus actual floating dtype, target UUID and allocator state; API restoration checked separately",
+    "sample_interval_seconds": 0.5,
+    "same_snapshot_parent_descendants_sum": true,
+    "sum_historical_process_peaks": false,
+    "require_trusted_driver_local_pid_mapping": true,
+    "ownership_unverified_peak_value": null,
+    "device_total_and_compute_process_sum": "separate sampled upper observations, include unrelated tasks; cannot be task memory",
+    "memory_target_bytes": 20000000000,
+    "unverified_ownership_cannot_certify_20GB": true,
+    "sampling_limit": "sampled peak may miss transient peaks; include maximum interval, failed samples and ownership completeness; no0-for-missing",
+    "nested_profiler": "target-device synchronization only when profiling enabled, do not reset outer peak"
+  },
+  "production_io_boundary": {
+    "allowed": "raw T1, own empty output, verified fixed resources, installed Python/generic libraries",
+    "denied": "original stage executables/libraries, official subjects/results, legacy frozen stage inputs, old run directories",
+    "audit_scope": "Python direct program guard plus inherited workers; full file/library access isolation needs independent OS-level proof, guard alone insufficient",
+    "reference": "independent comparison only after producer exit; do not expose official results to producer"
+  },
+  "acceptance": {
+    "all_138_files": true,
+    "production_mesh_quality": true,
+    "complete_em_ca_contract": true,
+    "precision_reference": "reuse existing original-software FP32 evidence only when same input/resource/algorithm versions bound; never relabel early v2/v3 incomplete EM outputs",
+    "strict_vs_regression_vs_equivalence": "report independently; no threshold loosening",
+    "private_brain_QC": "required, report hashes publicly; images remain private",
+    "ten_case_acceptance": "not established by first two or by preparation",
+    "quality_gates_pending": true
+  },
+  "outputs_export": "typed scalar/hash/provenance only; paths, logs, images and resources private",
+  "monitor_reference_commit": "e9e89cac07cc65ef37f8c3223e53f03968f2af05",
+  "monitor_source_sha256": {
+    "src/fnit/recon_all/profiling.py": "2192df8de8a61f71515694a8b1a56c4ce37d976a8122b19043ca2d834bfc6c09",
+    "src/fnit/recon_all/nvml_process_memory.py": "1879606b4af4c10e088cff3c665255511dee872da91d4a9c8b2b1cb07550b348",
+    "src/fnit/recon_all/hemisphere_worker.py": "bbb548e2bfdbf893047c64b38d258f0a4d68e5ae1b61e41b7d76715defa67393",
+    "src/fnit/recon_all/execution_recipe.py": "8b2a089ce197500fb1c93587e0d69e0bc5e0656646d9d15f8d1f163694834672"
+  },
+  "readiness_audit_script_sha256": "6e13b59fea151212e1460325d977e6e017becee4ad5570420165e1ed9874bd34",
+  "deform_split_audit_script_sha256": "d3006ad627f033a9f5e34716c1e9d2a5f111c9b7688101d0a34f2932961e2177"
+}

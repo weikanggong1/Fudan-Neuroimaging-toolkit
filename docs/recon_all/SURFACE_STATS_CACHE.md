@@ -100,7 +100,7 @@ FreeSurfer 皮层表面方法背景：Dale, Fischl & Sereno, *NeuroImage* 9, 179
 
 本次使用此前从原始 T1 连续生成的 `sub-01`、`sub-02` FNIT 表面作为冻结同输入。统计输入在旧实现与缓存实现之间完全相同；不重跑表面放置，也不把手动统计补跑称为整例。每轮比较双侧各六份 `.stats`，包含三套主要图谱的 white、aparc 的 pial、BA_exvivo 和 BA_exvivo.thresh 的 white。
 
-计时均在 `gpucw1`、同一物理 GPU UUID `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba` 上进行，逻辑设备 `cuda:0`，PyTorch 2.5.1、Python 3.11.16、PyTorch 线程预算 4；矩阵乘法和 cuDNN TF32 均开启，没有半精度。分配缓存策略保持 `PYTORCH_NO_CUDA_MEMORY_CACHING=1`。
+计时均在 `gpucw1`、同一物理 GPU UUID `GPU-anonymized-device-007` 上进行，逻辑设备 `cuda:0`，PyTorch 2.5.1、Python 3.11.16、PyTorch 线程预算 4；矩阵乘法和 cuDNN TF32 均开启，没有半精度。分配缓存策略保持 `PYTORCH_NO_CUDA_MEMORY_CACHING=1`。
 
 | 真实输入 | 轮次及执行顺序 | 旧实现（s） | 缓存实现（s） | 本统计阶段速度比 | 完整文本回归 |
 |---|---|---:|---:|---:|---|
@@ -185,3 +185,13 @@ with SurfaceStatsCache(device="cuda:0") as statistics_cache:  # 显式GPU与缓�
 ```
 
 本轮代码基线为 `816e5610417a4c587caf321049438a9554139016`。已完成源码公式核对、编译语法与差异检查；6项单元测试在服务器通过（2.61 s），覆盖面分摊及公开面积图兼容性、no-th3定义和版本失效。fnit_main_env缺少pytest，复用服务器已有同Python 3.11的pytest纯Python测试组件，关闭插件自动加载；计算依赖仍来自fnit_main_env。用户明确授权最小范围补丁和验证脚本上传后，候选已部署到独立验证副本。同输入GPU/官方验证已通过共享锁排队，不能把历史表格改标为本次候选结果。诊断脚本与报告保存在 `validation/recon_all/accuracy_20261003/task_05/`；未获真实验证前候选尚未验收。最终10例整例由协调者运行，整体指标等效为 `not_assessed`。
+
+
+## 2026-10-11 主曲率精度状态修复
+
+成熟子函数 `principal()` 之前会把调用方 matmul TF32 设置留为 True，包括缓存命中。现在用 try/finally 恢复进入时的开关，邻接或 SVD 异常也恢复；主曲率内部继续使用原来的 TF32、分块与公式。`morph_tensor(path, dtype=torch.float32)` 的 dtype 只接受 float32/float64，半精度和整数在读取文件前报错。未修改厚度、面积、no-th3 或图谱归约算法。
+
+本次从同一真实表面版本计算六套完整统计，并分别核查 white.preaparc、white 与 pial 缓存。最新记录见[任务5验证](../../validation/recon_all/optimizations/20261011_metrics_install/README.md)；本轮不重新宣称历史缓存提速。全部输入、参数、Python/CLI、原软件调用及参考文献沿用本页接口。
+
+
+2026-10-11 两例真实验证已完成，完整阶段、分步骤、参考ELF迁移哈希和安装范围见[本轮记录](../../validation/recon_all/optimizations/20261011_metrics_install/README.md)。新旧GPU MNI数值零差异，12套完整统计文件逐字节一致；仅本次阶段范围，整例由主集成任务单列。

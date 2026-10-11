@@ -1,0 +1,696 @@
+{
+  "scope": "complete frozen pretess-volume topology candidate fileAPI; not rawT1 wholecase",
+  "code_commit": "54f681dc+SHA-bound-topology-v8",
+  "script_sha256": "b8c31797163d34f0cea9e2e7a0e95cb014c3792161fffba00543886cc3fcd418",
+  "source_sha256": {
+    "topology_volume_python": "b6ad8b5c54a51dc9a263da3df8eeb0a2f8588b56d4c1e964d57ee509a2a1d0a9",
+    "tessellate_gpu": "1c87b10862bf7ab4d3e648339489762d5798e92a97a6c1ca7195b18368877faf",
+    "extract_main_component_python": "5079510475ff74aca6f0823f49ed4514826b2d4080e8bfc37ab523a2eee2f2ea",
+    "topology_preflight_python": "7ae02e2c7e5133a9de544361c95b9e7def7f5d92e35f3bbc27e8ca03f8d5ec00",
+    "mris_remove_intersection_python": "011e6482cc32bdb02156dd15f24e0b1d24f3a2318c148deb5def1366dcd6f210"
+  },
+  "host": "A100-8-shared",
+  "cpu_affinity": [
+    12,
+    13,
+    14,
+    15
+  ],
+  "threads": 4,
+  "device": "cpu",
+  "native_program_called": false,
+  "algorithm": "different from original GA; ordered6/26 simple-point addition",
+  "overall_equivalence": "not_assessed",
+  "cases": [
+    {
+      "case_number": 0,
+      "hemisphere": "lh",
+      "subject": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub06-candidate/subject",
+      "candidate": {
+        "algorithm": "ordered_6_26_simple_addition_with_well_composed_boundary_candidate",
+        "input_foreground_voxels": 257309,
+        "input_components_6": 1,
+        "largest_component_voxels": 257309,
+        "output_foreground_voxels": 250367,
+        "removed_foreground_voxels": 6942,
+        "foreground_dice_against_target": 0.986325924408481,
+        "seed_voxel_index_xyz": [
+          148,
+          113,
+          137
+        ],
+        "spacing_mm": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "accepted_order_sha256": "1f780f2fb3421a52a57ee0a5638f8f7661b9c5817be343052829f7b00ac93574",
+        "simple_point_tests": 422831,
+        "topology_rejections": 43243,
+        "well_composed_rejections": 129222,
+        "maximum_heap_items": 79882,
+        "setup_seconds": 6.619333499111235,
+        "growth_seconds_including_first_JIT": 1.3601504070684314,
+        "total_seconds": 7.979495252482593,
+        "overall_equivalence": "not_assessed",
+        "input_volume": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub06-candidate/subject/mri/filled-pretess255.mgz",
+        "output_volume": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/digital_topology_four_v8/case0_lh/filled.corrected.mgz",
+        "output_surface": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/digital_topology_four_v8/case0_lh/lh.orig.premesh",
+        "value": 255,
+        "device": "cpu",
+        "coordinate_units": "surface_RAS_mm",
+        "volume_dtype": "uint8",
+        "input_sha256": "956cb1ccd18d19c79ad397716e0dd4fb6eb7a1f232a70acd12401a0e1f274553",
+        "output_volume_sha256": "8451da3fe09ff4fe1ceadbf364927862354c4ad1c45d137d501581b8b79b0ef7",
+        "output_surface_sha256": "cf8bf55f353e6c14e1caf1997fca19e453fc65890677bcf40e75d5b7a6cf3acc",
+        "quad_intermediate": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/digital_topology_four_v8/case0_lh/lh.orig.premesh.topology-candidate.quad",
+        "source_sha256": "b6ad8b5c54a51dc9a263da3df8eeb0a2f8588b56d4c1e964d57ee509a2a1d0a9",
+        "mesh": {
+          "vertices": 130764,
+          "faces": 261524,
+          "edges": 392286,
+          "euler": 2,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0
+        },
+        "raw_surface_components": 1,
+        "geometric_intersecting_faces": 0,
+        "nonmanifold_vertices": 0,
+        "edge_orientation_conflicts": 0,
+        "zero_area_faces": 0,
+        "mesh_quality_status": "passed_structural_candidate",
+        "boundary_voxel_distance_mm": {
+          "method": "bidirectional_boundary_voxel_EDT_not_triangle_surface_distance",
+          "before_to_after_max": 1.7320508075688772,
+          "before_to_after_p99": 1.0,
+          "after_to_before_max": 3.1622776601683795,
+          "after_to_before_p99": 1.0
+        },
+        "total_file_API_seconds": 92.3509891377762,
+        "native_program_called": false,
+        "defect_labels": {
+          "scope": "digital topology cut-region diagnostic on original orig.nofix vertices",
+          "definition": "minimum positive 6-connected deleted-region label in eight corner-adjacent voxels",
+          "original_GA_label_equivalence": "different_algorithm_not_assessed",
+          "input_volume": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub06-candidate/subject/mri/filled-pretess255.mgz",
+          "corrected_volume": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/digital_topology_four_v8/case0_lh/filled.corrected.mgz",
+          "source_surface": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub06-candidate/subject/surf/lh.orig.nofix",
+          "output_defect_labels": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/digital_topology_four_v8/case0_lh/lh.defect_labels",
+          "input_sha256": {
+            "original_volume": "956cb1ccd18d19c79ad397716e0dd4fb6eb7a1f232a70acd12401a0e1f274553",
+            "corrected_volume": "8451da3fe09ff4fe1ceadbf364927862354c4ad1c45d137d501581b8b79b0ef7",
+            "source_surface": "1c0ba7c3b5e75b16a2fb7f314c391e170cd7bc00a0a0f8333d16f5fa9f5273bb"
+          },
+          "output_sha256": "0fc5a878e07ee5c0614297927e3a3788533ca49b6bc6fe60e64560ca6ce4f2ee",
+          "source_sha256": "b6ad8b5c54a51dc9a263da3df8eeb0a2f8588b56d4c1e964d57ee509a2a1d0a9",
+          "value": 255,
+          "deleted_voxels": 6942,
+          "deleted_regions_6": 262,
+          "vertices": 126952,
+          "faces": 253976,
+          "nonzero_label_vertices": 15907,
+          "mapped_positive_labels": 262,
+          "coordinate_units": "surface_RAS_mm",
+          "output_shape": [
+            126952
+          ],
+          "dtype": "float32_exact_integers",
+          "vertex_order": "unchanged original orig.nofix",
+          "native_program_called": false,
+          "total_seconds_including_io": 0.7589235883206129
+        }
+      },
+      "preserved_source_and_frozen_GA_diagnostics": {
+        "orig.nofix": {
+          "input_sha256": "1c0ba7c3b5e75b16a2fb7f314c391e170cd7bc00a0a0f8333d16f5fa9f5273bb",
+          "mesh": {
+            "vertices": 126952,
+            "faces": 253976,
+            "edges": 380964,
+            "euler": -36,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0
+          },
+          "coordinate_min_mm": [
+            -67.5,
+            -93.5,
+            -31.5
+          ],
+          "coordinate_max_mm": [
+            2.5,
+            82.5,
+            71.5
+          ]
+        },
+        "orig.premesh": {
+          "input_sha256": "88ccab9bec59bc36dfdad85238ae78c82c570e07bf8a868d003eefaaec317a40",
+          "mesh": {
+            "vertices": 124803,
+            "faces": 249602,
+            "edges": 374403,
+            "euler": 2,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0
+          },
+          "coordinate_min_mm": [
+            -67.44784545898438,
+            -93.41666412353516,
+            -31.155101776123047
+          ],
+          "coordinate_max_mm": [
+            2.3730156421661377,
+            82.10774230957031,
+            71.12003326416016
+          ]
+        },
+        "orig": {
+          "input_sha256": "da0ad36c8ba612c53e0a13664aa5cafdb45df98de3a5e471f7bd513d19e92e9e",
+          "mesh": {
+            "vertices": 130679,
+            "faces": 261354,
+            "edges": 392031,
+            "euler": 2,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0
+          },
+          "coordinate_min_mm": [
+            -67.36194610595703,
+            -93.39300537109375,
+            -31.15690040588379
+          ],
+          "coordinate_max_mm": [
+            2.4392249584198,
+            82.0621337890625,
+            71.15059661865234
+          ]
+        }
+      },
+      "vertex_correspondence": "different topology; no same-index comparison",
+      "triangle_surface_distance": "pending separate complete point-to-triangle comparison",
+      "downstream_sphere_white_pial_metrics": "not_run"
+    },
+    {
+      "case_number": 0,
+      "hemisphere": "rh",
+      "subject": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub06-candidate/subject",
+      "candidate": {
+        "algorithm": "ordered_6_26_simple_addition_with_well_composed_boundary_candidate",
+        "input_foreground_voxels": 255179,
+        "input_components_6": 1,
+        "largest_component_voxels": 255179,
+        "output_foreground_voxels": 246934,
+        "removed_foreground_voxels": 8245,
+        "foreground_dice_against_target": 0.9835793934831403,
+        "seed_voxel_index_xyz": [
+          115,
+          113,
+          144
+        ],
+        "spacing_mm": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "accepted_order_sha256": "53cdaa924df2a589716d8626b3f2b811aa5a4119c8cb0a271c8e6efc2e0591f7",
+        "simple_point_tests": 430426,
+        "topology_rejections": 46524,
+        "well_composed_rejections": 136969,
+        "maximum_heap_items": 81420,
+        "setup_seconds": 6.402224458754063,
+        "growth_seconds_including_first_JIT": 1.3283017445355654,
+        "total_seconds": 7.7305281814187765,
+        "overall_equivalence": "not_assessed",
+        "input_volume": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub06-candidate/subject/mri/filled-pretess127.mgz",
+        "output_volume": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/digital_topology_four_v8/case0_rh/filled.corrected.mgz",
+        "output_surface": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/digital_topology_four_v8/case0_rh/rh.orig.premesh",
+        "value": 127,
+        "device": "cpu",
+        "coordinate_units": "surface_RAS_mm",
+        "volume_dtype": "uint8",
+        "input_sha256": "738565066b3e7e0ed6a7a90b3b2c323e7e67117fe736e377700941526373c90c",
+        "output_volume_sha256": "3a842061d109458c2ef816d8e6b3e78de091455c42245e07d736ad4cc1a39bd6",
+        "output_surface_sha256": "5c43cd07dcdfcb2bb6d0ac98ae861355d11565954c02822fb396754b30137f03",
+        "quad_intermediate": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/digital_topology_four_v8/case0_rh/rh.orig.premesh.topology-candidate.quad",
+        "source_sha256": "b6ad8b5c54a51dc9a263da3df8eeb0a2f8588b56d4c1e964d57ee509a2a1d0a9",
+        "mesh": {
+          "vertices": 132732,
+          "faces": 265460,
+          "edges": 398190,
+          "euler": 2,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0
+        },
+        "raw_surface_components": 1,
+        "geometric_intersecting_faces": 0,
+        "nonmanifold_vertices": 0,
+        "edge_orientation_conflicts": 0,
+        "zero_area_faces": 0,
+        "mesh_quality_status": "passed_structural_candidate",
+        "boundary_voxel_distance_mm": {
+          "method": "bidirectional_boundary_voxel_EDT_not_triangle_surface_distance",
+          "before_to_after_max": 1.4142135623730951,
+          "before_to_after_p99": 1.0,
+          "after_to_before_max": 3.0,
+          "after_to_before_p99": 1.4142135623730951
+        },
+        "total_file_API_seconds": 88.28196714352816,
+        "native_program_called": false,
+        "defect_labels": {
+          "scope": "digital topology cut-region diagnostic on original orig.nofix vertices",
+          "definition": "minimum positive 6-connected deleted-region label in eight corner-adjacent voxels",
+          "original_GA_label_equivalence": "different_algorithm_not_assessed",
+          "input_volume": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub06-candidate/subject/mri/filled-pretess127.mgz",
+          "corrected_volume": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/digital_topology_four_v8/case0_rh/filled.corrected.mgz",
+          "source_surface": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub06-candidate/subject/surf/rh.orig.nofix",
+          "output_defect_labels": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/digital_topology_four_v8/case0_rh/rh.defect_labels",
+          "input_sha256": {
+            "original_volume": "738565066b3e7e0ed6a7a90b3b2c323e7e67117fe736e377700941526373c90c",
+            "corrected_volume": "3a842061d109458c2ef816d8e6b3e78de091455c42245e07d736ad4cc1a39bd6",
+            "source_surface": "2f43ebb229bb0aae51ab92d162733d33f8a2eb216ad876f6439659ea4db22ebd"
+          },
+          "output_sha256": "c22d60ac084a99ea9a9df292a80148ba83cb835680e3d670c91f03218f391818",
+          "source_sha256": "b6ad8b5c54a51dc9a263da3df8eeb0a2f8588b56d4c1e964d57ee509a2a1d0a9",
+          "value": 127,
+          "deleted_voxels": 8245,
+          "deleted_regions_6": 261,
+          "vertices": 127626,
+          "faces": 255312,
+          "nonzero_label_vertices": 18022,
+          "mapped_positive_labels": 261,
+          "coordinate_units": "surface_RAS_mm",
+          "output_shape": [
+            127626
+          ],
+          "dtype": "float32_exact_integers",
+          "vertex_order": "unchanged original orig.nofix",
+          "native_program_called": false,
+          "total_seconds_including_io": 0.4245495218783617
+        }
+      },
+      "preserved_source_and_frozen_GA_diagnostics": {
+        "orig.nofix": {
+          "input_sha256": "2f43ebb229bb0aae51ab92d162733d33f8a2eb216ad876f6439659ea4db22ebd",
+          "mesh": {
+            "vertices": 127626,
+            "faces": 255312,
+            "edges": 382968,
+            "euler": -30,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0
+          },
+          "coordinate_min_mm": [
+            -4.5,
+            -90.5,
+            -33.5
+          ],
+          "coordinate_max_mm": [
+            64.5,
+            85.5,
+            70.5
+          ]
+        },
+        "orig.premesh": {
+          "input_sha256": "8c6caefeb15f083ebb9ec352668f061774160cc8be1aef6f66b0ec2b5b4301cd",
+          "mesh": {
+            "vertices": 126828,
+            "faces": 253652,
+            "edges": 380478,
+            "euler": 2,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0
+          },
+          "coordinate_min_mm": [
+            -4.4795918464660645,
+            -90.41666412353516,
+            -33.38979721069336
+          ],
+          "coordinate_max_mm": [
+            64.5,
+            85.28231048583984,
+            70.5
+          ]
+        },
+        "orig": {
+          "input_sha256": "55abf0116e987c80963a8ec3f415d8a661e2924ef73bc93da94dea2d972d2e3a",
+          "mesh": {
+            "vertices": 132459,
+            "faces": 264914,
+            "edges": 397371,
+            "euler": 2,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0
+          },
+          "coordinate_min_mm": [
+            -4.452666759490967,
+            -90.3515625,
+            -33.346412658691406
+          ],
+          "coordinate_max_mm": [
+            64.5040512084961,
+            85.20094299316406,
+            70.4822998046875
+          ]
+        }
+      },
+      "vertex_correspondence": "different topology; no same-index comparison",
+      "triangle_surface_distance": "pending separate complete point-to-triangle comparison",
+      "downstream_sphere_white_pial_metrics": "not_run"
+    },
+    {
+      "case_number": 1,
+      "hemisphere": "lh",
+      "subject": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject",
+      "candidate": {
+        "algorithm": "ordered_6_26_simple_addition_with_well_composed_boundary_candidate",
+        "input_foreground_voxels": 230555,
+        "input_components_6": 1,
+        "largest_component_voxels": 230555,
+        "output_foreground_voxels": 224493,
+        "removed_foreground_voxels": 6062,
+        "foreground_dice_against_target": 0.9866783284400766,
+        "seed_voxel_index_xyz": [
+          145,
+          106,
+          130
+        ],
+        "spacing_mm": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "accepted_order_sha256": "ca5d6455591db4ebd832dba48d362276bd6eb67c004b442e89f96fc70fb2dc1e",
+        "simple_point_tests": 372632,
+        "topology_rejections": 35879,
+        "well_composed_rejections": 112261,
+        "maximum_heap_items": 72746,
+        "setup_seconds": 4.5914907194674015,
+        "growth_seconds_including_first_JIT": 0.8025379776954651,
+        "total_seconds": 5.39402921218425,
+        "overall_equivalence": "not_assessed",
+        "input_volume": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject/mri/filled-pretess255.mgz",
+        "output_volume": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/digital_topology_four_v8/case1_lh/filled.corrected.mgz",
+        "output_surface": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/digital_topology_four_v8/case1_lh/lh.orig.premesh",
+        "value": 255,
+        "device": "cpu",
+        "coordinate_units": "surface_RAS_mm",
+        "volume_dtype": "uint8",
+        "input_sha256": "80e186e2f502d6eb96dd54a3b7e74778e1e8a4ac3ebc1721158073d77a40457b",
+        "output_volume_sha256": "dd7145d7add6fcba8970c3029dd766d1f9ba9babd9677c7107adbfeb47e88b84",
+        "output_surface_sha256": "a5de8d18ac420f9efb7cb10213e53962d71e69adbffaabf9aa4a9c9e231b2eac",
+        "quad_intermediate": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/digital_topology_four_v8/case1_lh/lh.orig.premesh.topology-candidate.quad",
+        "source_sha256": "b6ad8b5c54a51dc9a263da3df8eeb0a2f8588b56d4c1e964d57ee509a2a1d0a9",
+        "mesh": {
+          "vertices": 114808,
+          "faces": 229612,
+          "edges": 344418,
+          "euler": 2,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0
+        },
+        "raw_surface_components": 1,
+        "geometric_intersecting_faces": 0,
+        "nonmanifold_vertices": 0,
+        "edge_orientation_conflicts": 0,
+        "zero_area_faces": 0,
+        "mesh_quality_status": "passed_structural_candidate",
+        "boundary_voxel_distance_mm": {
+          "method": "bidirectional_boundary_voxel_EDT_not_triangle_surface_distance",
+          "before_to_after_max": 1.4142135623730951,
+          "before_to_after_p99": 1.0,
+          "after_to_before_max": 3.0,
+          "after_to_before_p99": 1.4142135623730951
+        },
+        "total_file_API_seconds": 65.95586111210287,
+        "native_program_called": false,
+        "defect_labels": {
+          "scope": "digital topology cut-region diagnostic on original orig.nofix vertices",
+          "definition": "minimum positive 6-connected deleted-region label in eight corner-adjacent voxels",
+          "original_GA_label_equivalence": "different_algorithm_not_assessed",
+          "input_volume": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject/mri/filled-pretess255.mgz",
+          "corrected_volume": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/digital_topology_four_v8/case1_lh/filled.corrected.mgz",
+          "source_surface": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject/surf/lh.orig.nofix",
+          "output_defect_labels": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/digital_topology_four_v8/case1_lh/lh.defect_labels",
+          "input_sha256": {
+            "original_volume": "80e186e2f502d6eb96dd54a3b7e74778e1e8a4ac3ebc1721158073d77a40457b",
+            "corrected_volume": "dd7145d7add6fcba8970c3029dd766d1f9ba9babd9677c7107adbfeb47e88b84",
+            "source_surface": "cfa9c1d0f5681a87d4ae709d0b093e20fdc3466ea6525b7fc94ba61a4708b0f9"
+          },
+          "output_sha256": "10e170d8280ed73c9975d054fb80b9bdd0bc669e1ed91ae6767175f1624c7f7a",
+          "source_sha256": "b6ad8b5c54a51dc9a263da3df8eeb0a2f8588b56d4c1e964d57ee509a2a1d0a9",
+          "value": 255,
+          "deleted_voxels": 6062,
+          "deleted_regions_6": 217,
+          "vertices": 110534,
+          "faces": 221116,
+          "nonzero_label_vertices": 12768,
+          "mapped_positive_labels": 217,
+          "coordinate_units": "surface_RAS_mm",
+          "output_shape": [
+            110534
+          ],
+          "dtype": "float32_exact_integers",
+          "vertex_order": "unchanged original orig.nofix",
+          "native_program_called": false,
+          "total_seconds_including_io": 0.41396333649754524
+        }
+      },
+      "preserved_source_and_frozen_GA_diagnostics": {
+        "orig.nofix": {
+          "input_sha256": "cfa9c1d0f5681a87d4ae709d0b093e20fdc3466ea6525b7fc94ba61a4708b0f9",
+          "mesh": {
+            "vertices": 110534,
+            "faces": 221116,
+            "edges": 331674,
+            "euler": -24,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0
+          },
+          "coordinate_min_mm": [
+            -63.5,
+            -84.5,
+            -19.5
+          ],
+          "coordinate_max_mm": [
+            0.5,
+            76.5,
+            77.5
+          ]
+        },
+        "orig.premesh": {
+          "input_sha256": "4f50b9f28e8774e28a22ce5ec4d83fa9eaca071ff093bdd6da530d0f644592c0",
+          "mesh": {
+            "vertices": 108710,
+            "faces": 217416,
+            "edges": 326124,
+            "euler": 2,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0
+          },
+          "coordinate_min_mm": [
+            -63.479591369628906,
+            -84.5,
+            -19.432538986206055
+          ],
+          "coordinate_max_mm": [
+            0.14866070449352264,
+            76.46428680419922,
+            77.40357208251953
+          ]
+        },
+        "orig": {
+          "input_sha256": "9b8af07cc3abc9fe0303d9d917bb56aebe36aef4032ae30dbcc1ac1c33cb92ae",
+          "mesh": {
+            "vertices": 114247,
+            "faces": 228490,
+            "edges": 342735,
+            "euler": 2,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0
+          },
+          "coordinate_min_mm": [
+            -63.484031677246094,
+            -84.5037612915039,
+            -19.396808624267578
+          ],
+          "coordinate_max_mm": [
+            0.08952663093805313,
+            76.44828033447266,
+            77.37653350830078
+          ]
+        }
+      },
+      "vertex_correspondence": "different topology; no same-index comparison",
+      "triangle_surface_distance": "pending separate complete point-to-triangle comparison",
+      "downstream_sphere_white_pial_metrics": "not_run"
+    },
+    {
+      "case_number": 1,
+      "hemisphere": "rh",
+      "subject": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject",
+      "candidate": {
+        "algorithm": "ordered_6_26_simple_addition_with_well_composed_boundary_candidate",
+        "input_foreground_voxels": 230712,
+        "input_components_6": 1,
+        "largest_component_voxels": 230712,
+        "output_foreground_voxels": 223730,
+        "removed_foreground_voxels": 6982,
+        "foreground_dice_against_target": 0.984636103177083,
+        "seed_voxel_index_xyz": [
+          114,
+          103,
+          135
+        ],
+        "spacing_mm": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "accepted_order_sha256": "25940919c3435d98db7b79e85b0d7abc1f3209a20c1ced9f636678699ffcceec",
+        "simple_point_tests": 381973,
+        "topology_rejections": 38957,
+        "well_composed_rejections": 119287,
+        "maximum_heap_items": 76267,
+        "setup_seconds": 4.55462627671659,
+        "growth_seconds_including_first_JIT": 0.8234113603830338,
+        "total_seconds": 5.378038310445845,
+        "overall_equivalence": "not_assessed",
+        "input_volume": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject/mri/filled-pretess127.mgz",
+        "output_volume": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/digital_topology_four_v8/case1_rh/filled.corrected.mgz",
+        "output_surface": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/digital_topology_four_v8/case1_rh/rh.orig.premesh",
+        "value": 127,
+        "device": "cpu",
+        "coordinate_units": "surface_RAS_mm",
+        "volume_dtype": "uint8",
+        "input_sha256": "0146058b4febccbd380d1c4d3804ff77cbfebcb0869c214370bd80ec3cdc583e",
+        "output_volume_sha256": "61a5594f57fdc1ca0ff937c0f2a394f416fd4f64994bf87f73028ae7cca0423c",
+        "output_surface_sha256": "74d335e101e6a01c33b557f64dabc23560b9b02b6e050fe90b813313060579f8",
+        "quad_intermediate": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/digital_topology_four_v8/case1_rh/rh.orig.premesh.topology-candidate.quad",
+        "source_sha256": "b6ad8b5c54a51dc9a263da3df8eeb0a2f8588b56d4c1e964d57ee509a2a1d0a9",
+        "mesh": {
+          "vertices": 117138,
+          "faces": 234272,
+          "edges": 351408,
+          "euler": 2,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0
+        },
+        "raw_surface_components": 1,
+        "geometric_intersecting_faces": 0,
+        "nonmanifold_vertices": 0,
+        "edge_orientation_conflicts": 0,
+        "zero_area_faces": 0,
+        "mesh_quality_status": "passed_structural_candidate",
+        "boundary_voxel_distance_mm": {
+          "method": "bidirectional_boundary_voxel_EDT_not_triangle_surface_distance",
+          "before_to_after_max": 1.4142135623730951,
+          "before_to_after_p99": 1.0,
+          "after_to_before_max": 3.605551275463989,
+          "after_to_before_p99": 1.4142135623730951
+        },
+        "total_file_API_seconds": 67.69788809493184,
+        "native_program_called": false,
+        "defect_labels": {
+          "scope": "digital topology cut-region diagnostic on original orig.nofix vertices",
+          "definition": "minimum positive 6-connected deleted-region label in eight corner-adjacent voxels",
+          "original_GA_label_equivalence": "different_algorithm_not_assessed",
+          "input_volume": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject/mri/filled-pretess127.mgz",
+          "corrected_volume": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/digital_topology_four_v8/case1_rh/filled.corrected.mgz",
+          "source_surface": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject/surf/rh.orig.nofix",
+          "output_defect_labels": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/digital_topology_four_v8/case1_rh/rh.defect_labels",
+          "input_sha256": {
+            "original_volume": "0146058b4febccbd380d1c4d3804ff77cbfebcb0869c214370bd80ec3cdc583e",
+            "corrected_volume": "61a5594f57fdc1ca0ff937c0f2a394f416fd4f64994bf87f73028ae7cca0423c",
+            "source_surface": "f32d5795c85664cf3546b86107c0cb7a5ce1324790b90cb6c13e6c6bf8891932"
+          },
+          "output_sha256": "56e38988ec6a6d1356916c81161a98058412b6b02532dcb1f398f5c52357abfe",
+          "source_sha256": "b6ad8b5c54a51dc9a263da3df8eeb0a2f8588b56d4c1e964d57ee509a2a1d0a9",
+          "value": 127,
+          "deleted_voxels": 6982,
+          "deleted_regions_6": 219,
+          "vertices": 111546,
+          "faces": 223136,
+          "nonzero_label_vertices": 13691,
+          "mapped_positive_labels": 219,
+          "coordinate_units": "surface_RAS_mm",
+          "output_shape": [
+            111546
+          ],
+          "dtype": "float32_exact_integers",
+          "vertex_order": "unchanged original orig.nofix",
+          "native_program_called": false,
+          "total_seconds_including_io": 0.4268767861649394
+        }
+      },
+      "preserved_source_and_frozen_GA_diagnostics": {
+        "orig.nofix": {
+          "input_sha256": "f32d5795c85664cf3546b86107c0cb7a5ce1324790b90cb6c13e6c6bf8891932",
+          "mesh": {
+            "vertices": 111546,
+            "faces": 223136,
+            "edges": 334704,
+            "euler": -22,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0
+          },
+          "coordinate_min_mm": [
+            -2.5,
+            -87.5,
+            -14.5
+          ],
+          "coordinate_max_mm": [
+            63.5,
+            76.5,
+            75.5
+          ]
+        },
+        "orig.premesh": {
+          "input_sha256": "d806ba3e15a4b7e4e333e733b71bd4d0a5db104d06054890ec885249c433ccd1",
+          "mesh": {
+            "vertices": 109517,
+            "faces": 219030,
+            "edges": 328545,
+            "euler": 2,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0
+          },
+          "coordinate_min_mm": [
+            -2.5,
+            -87.47142791748047,
+            -14.438775062561035
+          ],
+          "coordinate_max_mm": [
+            63.46825408935547,
+            76.41837310791016,
+            75.41837310791016
+          ]
+        },
+        "orig": {
+          "input_sha256": "073cb7bd17af658806b40d6aedddd07001a27cbd3fba8403c0f7366dbacf3649",
+          "mesh": {
+            "vertices": 114951,
+            "faces": 229898,
+            "edges": 344847,
+            "euler": 2,
+            "boundary_edges": 0,
+            "nonmanifold_edges": 0
+          },
+          "coordinate_min_mm": [
+            -2.5080552101135254,
+            -87.42659759521484,
+            -14.42570972442627
+          ],
+          "coordinate_max_mm": [
+            63.465518951416016,
+            76.43682861328125,
+            75.39717864990234
+          ]
+        }
+      },
+      "vertex_correspondence": "different topology; no same-index comparison",
+      "triangle_surface_distance": "pending separate complete point-to-triangle comparison",
+      "downstream_sphere_white_pial_metrics": "not_run"
+    }
+  ],
+  "execution_status": "complete",
+  "total_benchmark_seconds_including_io_and_quality": 322.1349016055465
+}

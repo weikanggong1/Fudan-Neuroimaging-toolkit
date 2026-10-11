@@ -28,11 +28,12 @@ def _write(path: Path, result: dict) -> None:
 
 
 def run_mni_stage(*, subject: str, weights: str, assets: str,
-                  warp_binaries: list[str], device: str, threads: int) -> dict:
+                  warp_binaries: list[str | None], device: str, threads: int) -> dict:
     """复用完整 MNI GPU 链，返回输入/资源/源码和输出 SHA，不改变算法。
 
     subject 含 conform orig、MNI affine/crop；weights/assets 为已声明资源；
-    三个 warp_binaries 为兼容接口（GPU 后端不执行）。device 显式 cuda:N，
+    三个 warp_binaries 为兼容接口（GPU 后端不执行），允许三个None，
+    不要求安装未消费的原版程序；给出路径时仅记录哈希。device 显式 cuda:N，
     threads 控制已有实现。输出原有毫米前向/逆向位移与检查图，空间和 dtype
     不变。输入或计算失败抛异常；所有哈希及写出包含在阶段墙钟内。
     """
@@ -46,7 +47,7 @@ def run_mni_stage(*, subject: str, weights: str, assets: str,
               "full_template": assets_path / mni_aux_chain.TEMPLATE_DIR / "mni152.1.0mm.nii.gz"}
     input_hashes = {name: _sha(path) for name, path in inputs.items()}
     programs = {str(i): {"sha256": _sha(Path(path)), "executed": False}
-                for i, path in enumerate(warp_binaries)}
+                for i, path in enumerate(warp_binaries) if path is not None}
     # Triton launch 的 current device 必须与 tensor target 相同。局部作用域
     # 也覆盖既有逆场 kernel，退出恢复调用者设备，不使用全局 set_device。
     with torch.cuda.device(device):
@@ -64,7 +65,7 @@ def run_mni_stage(*, subject: str, weights: str, assets: str,
 
 
 def run_mni_and_validate(*, subject: str | Path, weights: str | Path, assets: str | Path,
-                         warp_binaries: tuple[str | Path, str | Path, str | Path],
+                         warp_binaries: tuple[str | Path | None, str | Path | None, str | Path | None],
                          report_path: str | Path, device: str, threads: int = 4,
                          execution: str = "parallel", profile_stages: bool = False,
                          code_version: str = "FNIT-source-hashes") -> dict:
@@ -93,7 +94,7 @@ def run_mni_and_validate(*, subject: str | Path, weights: str | Path, assets: st
     if isinstance(threads, bool) or not isinstance(threads, int) or threads < 2:
         raise ValueError("threads must be an integer >=2")
     if execution not in ("parallel", "serial") or len(warp_binaries) != 3:
-        raise ValueError("execution must be parallel/serial and exactly three declared programs are required")
+        raise ValueError("execution must be parallel/serial and exactly three program slots are required (None allowed)")
     root, report_path = Path(subject).resolve(), Path(report_path)
     if report_path.exists():
         raise FileExistsError(report_path)
@@ -129,7 +130,7 @@ def run_mni_and_validate(*, subject: str | Path, weights: str | Path, assets: st
     intervals = {}
     try:
         kwargs = dict(subject=str(root), weights=str(Path(weights).resolve()), assets=str(Path(assets).resolve()),
-                      warp_binaries=[str(Path(p).resolve()) for p in warp_binaries], device=device, threads=child_threads)
+                      warp_binaries=[str(Path(p).resolve()) if p is not None else None for p in warp_binaries], device=device, threads=child_threads)
         if execution == "parallel":
             request_path = report_path.with_suffix(".request.json")
             worker_path = report_path.with_suffix(".worker.json")

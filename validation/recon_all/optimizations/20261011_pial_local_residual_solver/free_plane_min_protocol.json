@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "algorithm": "independent_free_plane_pair_solver_v1",
+  "parameters": {
+    "max_displacement_mm": 1.0,
+    "minimum_area_ratio": 0.2,
+    "clearance_mm": 0.002,
+    "max_sweeps": 4,
+    "optimizer_iterations": 100,
+    "diagnostic_pair_limit": 1,
+    "projection_mode": "free_separating_plane"
+  },
+  "acceptance": {
+    "fixed_vertices": "rip union all outside cortex; preserve exact entry coordinates",
+    "ordered_faces": "unchanged",
+    "source_and_float64_pairs": "both strict subset for each accepted trial; no new pairs; full final validation",
+    "affected_faces": "all positive initial-normal dot and area ratio >=0.2",
+    "maximum_cumulative_displacement_mm": 1.0
+  },
+  "scope": "one canonical real face pair; free unit plane with same fixed quality gates; not complete cleanup or overall equivalence",
+  "reference_coordinates_used_for_candidate": false,
+  "candidate_plane_parameters": {
+    "direction_regularization": 1e-06,
+    "unit_norm_tolerance": 1e-09,
+    "optimizer_ftol": 1e-09,
+    "optimizer_feasibility_tolerance": 1e-09,
+    "seed_planes": "two opponent normals and three edge outward planes"
+  }
+}

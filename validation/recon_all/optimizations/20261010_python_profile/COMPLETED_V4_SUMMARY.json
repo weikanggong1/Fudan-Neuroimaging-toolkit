@@ -1,0 +1,287 @@
+{
+  "scope": "two completed raw T1 attempts; not completed reconstruction",
+  "producer_code_version": "922f569806bfdfafb9ba16355ae9660efd261eba+manifest:21bfe987f5f2cfde992578208d8235b1ed90ad2c4608c95df1b0f4c6751b9d9a",
+  "capture_sha256": "7b56215f9497288d175c38fb1004381fa11524592bf2a31968363e45b2ddbf19",
+  "summarizer_sha256": "9fd0838b3db82bf2d60be944c5f1ca008fd86c2fa755f2662c318a69bdf62804",
+  "time_units": "seconds",
+  "memory_budget_bytes": 20000000000,
+  "overall_metric_equivalence": "not_assessed",
+  "clean_environment_isolation": "not_verified",
+  "performance_speedup_of_successful_full_workflow": null,
+  "cases": {
+    "sub06": {
+      "benchmark_public_sha256": "ab559e13a7bf2280403021d4951773432b4b9a665e01368ab7158c4b08cb7705",
+      "runtime_public_sha256": "b404801c376bd767bce66a221471fc22cd02f03f89aaa8148da2b032e119abb9",
+      "input_sha256": "7e33afb28f631fac31d81e2428a6144f61aba4102859c694eeb49ee584de04f7",
+      "harness_script_sha256": "3236180447930943e5f4fd7153efad333f26647c5254af5896864cfdd83c9010",
+      "native_free_source_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+      "status": "failed",
+      "exit_code": 1,
+      "failed_stage": "register_hemisphere_group",
+      "full_workflow_complete": false,
+      "stage_count": 25,
+      "api_wall_seconds": 1363.3452393859625,
+      "cli_wall_seconds": 1368.8936572810635,
+      "full_harness_seconds": 1377.7936719246209,
+      "target_gpu_uuid": "GPU-anonymized-device-008",
+      "memory_ownership_status": "ownership_unresolved",
+      "peak_tree_total_bytes": null,
+      "peak_target_device_used_bytes_includes_other_users": 44140855296,
+      "memory_sampling_requested_seconds": 0.5,
+      "memory_sampling_max_actual_seconds": 11.925485839135945,
+      "memory_failed_sample_count": 6,
+      "memory_budget_passed": null,
+      "original_program_sha256": {},
+      "python_launch_audit_events": 839,
+      "original_program_attempts": [],
+      "python_launch_audit_passed": true,
+      "output_completeness": "not_assessed",
+      "strict_reproduction": "not_assessed",
+      "optimization_regression": "not_assessed",
+      "overall_metric_equivalence": "not_assessed",
+      "hemisphere_groups": {
+        "register": {
+          "status": "failed",
+          "group_wall_seconds": 55.08450067508966,
+          "workers": {
+            "lh": {
+              "status": "failed",
+              "error": "IndexError('index -9223372036854775808 is out of bounds for dimension 1 with size 256\\nException raised from get at /opt/conda/conda-bld/pytorch_1729647369228/work/aten/src/ATen/native/cpu/IndexKernelUtils.h:42 (most recent call first):\\nC++ CapturedTraceback:\\n#4 std::_Function_handler<std::shared_ptr<c10::LazyValue<std::string> const> (), c10::SetStackTraceFetcher(std::function<std::string ()>)::{lambda()#1}>::_M_invoke(std::_Any_data const&) from Logging.cpp:0\\n#5 c10::Error::Error(c10::SourceLocation, std::string) from ??:0\\n#6 void c10::function_ref<void (char**, long const*, long, long)>::callback_fn<at::TensorIteratorBase::loop_2d_from_1d<at::native::cpu_index_kernel<float, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1} const&, bool)::{lambda(char**, long const*, long)#1}>(at::native::cpu_index_kernel<float, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda()#1}::operator()() const::{lambda()#7}::operator()() const::{lambda(char*, char*, long)#1} const&, bool)::{lambda(char**, long const*, long)#1} const&)::{lambda(char**, long const*, long, long)#1}>(long, char**, long const*, long, long) [clone .cold] from IndexKernel.cpp.AVX2.cpp:0\\n#7 at::TensorIteratorBase::serial_for_each(c10::function_ref<void (char**, long const*, long, long)>, at::Range) const from ??:0\\n#8 void at::internal::invoke_parallel<at::parallel_for<at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1}>(long, long, long, at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1} const&)::{lambda(long, long)#1}>(long, long, long, at::parallel_for<at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1}>(long, long, long, at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long)::{lambda(long, long)#1} const&)::{lambda(long, long)#1} const) [clone ._omp_fn.0] from TensorIterator.cpp:0\\n#9 __kmp_api_GOMP_parallel from :0\\n#10 at::TensorIteratorBase::for_each(c10::function_ref<void (char**, long const*, long, long)>, long) from ??:0\\n#11 at::native::(anonymous namespace)::index_kernel(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>) from IndexKernel.cpp.AVX2.cpp:0\\n#12 at::(anonymous namespace)::wrapper_CPU_index_Tensor(at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from RegisterCPU.cpp:0\\n#13 c10::impl::wrap_kernel_functor_unboxed_<c10::impl::detail::WrapFunctionIntoFunctor_<c10::CompileTimeFunctionPointer<at::Tensor (at::Tensor const&, c10::List<std::optional<at::Tensor> > const&), &at::(anonymous namespace)::wrapper_CPU_index_Tensor>, at::Tensor, c10::guts::typelist::typelist<at::Tensor const&, c10::List<std::optional<at::Tensor> > const&> >, at::Tensor (at::Tensor const&, c10::List<std::optional<at::Tensor> > const&)>::call(c10::OperatorKernel*, c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from RegisterCPU.cpp:0\\n#14 at::_ops::index_Tensor::redispatch(c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from ??:0\\n#15 torch::autograd::VariableType::(anonymous namespace)::index_Tensor(c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from VariableType_1.cpp:0\\n#16 c10::impl::wrap_kernel_functor_unboxed_<c10::impl::detail::WrapFunctionIntoFunctor_<c10::CompileTimeFunctionPointer<at::Tensor (c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&), &torch::autograd::VariableType::(anonymous namespace)::index_Tensor>, at::Tensor, c10::guts::typelist::typelist<c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&> >, at::Tensor (c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&)>::call(c10::OperatorKernel*, c10::DispatchKeySet, at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from VariableType_1.cpp:0\\n#17 at::_ops::index_Tensor::call(at::Tensor const&, c10::List<std::optional<at::Tensor> > const&) from ??:0\\n#18 at::indexing::dispatch_index(at::Tensor const&, std::vector<at::Tensor, std::allocator<at::Tensor> >&&) from :0\\n#19 torch::autograd::THPVariable_getitem(_object*, _object*) from ??:0\\n#20 _PyEval_EvalFrameDefault from ??:0\\n#21 _PyFunction_Vectorcall from ??:0\\n#22 _PyEval_EvalFrameDefault from ??:0\\n#23 _PyFunction_Vectorcall from ??:0\\n#24 _PyEval_EvalFrameDefault from ??:0\\n#25 _PyFunction_Vectorcall from ??:0\\n#26 PyObject_Call from ??:0\\n#27 _PyEval_EvalFrameDefault from ??:0\\n#28 _PyFunction_Vectorcall from ??:0\\n#29 PyObject_Call from ??:0\\n#30 _PyEval_EvalFrameDefault from ??:0\\n#31 _PyObject_VectorcallTstate.lto_priv.4 from :0\\n#32 method_vectorcall from :0\\n#33 PyObject_Call from ??:0\\n#34 _PyEval_EvalFrameDefault from ??:0\\n#35 _PyFunction_Vectorcall from ??:0\\n#36 PyObject_Call from ??:0\\n#37 _PyEval_EvalFrameDefault from ??:0\\n#38 _PyObject_VectorcallTstate.lto_priv.4 from :0\\n#39 method_vectorcall from :0\\n#40 PyObject_Call from ??:0\\n#41 _PyEval_EvalFrameDefault from ??:0\\n#42 _PyEval_Vector from :0\\n#43 PyEval_EvalCode from ??:0\\n#44 builtin_exec from :0\\n#45 cfunction_vectorcall_FASTCALL_KEYWORDS from :0\\n#46 PyObject_Vectorcall from ??:0\\n#47 _PyEval_EvalFrameDefault from ??:0\\n#48 _PyFunction_Vectorcall from ??:0\\n#49 pymain_run_module from :0\\n#50 Py_RunMain.localalias from :0\\n#51 Py_BytesMain from ??:0\\n#52 __libc_start_main from ??:0\\n#53 _start from ??:0\\n')",
+              "failure_phase": "operation",
+              "cuda_oom": false,
+              "cuda_allocator": {
+                "requested": "disabled",
+                "cuda_initialized_at_entry": false,
+                "environment_at_entry": "1",
+                "environment_after_selection": "1",
+                "effective": "disabled",
+                "torch_stats_known_valid": false,
+                "torch_stats_known_unavailable": true
+              }
+            },
+            "rh": {
+              "status": "report_unavailable",
+              "error": null,
+              "failure_phase": null,
+              "cuda_oom": null,
+              "cuda_allocator": null
+            }
+          }
+        },
+        "surface": {
+          "status": "complete",
+          "group_wall_seconds": 796.0152369737625,
+          "workers": {
+            "lh": {
+              "status": "complete",
+              "error": null,
+              "failure_phase": null,
+              "cuda_oom": null,
+              "cuda_allocator": {
+                "requested": "enabled",
+                "cuda_initialized_at_entry": false,
+                "environment_at_entry": null,
+                "environment_after_selection": null,
+                "effective": "enabled",
+                "torch_stats_known_valid": true,
+                "torch_stats_known_unavailable": false
+              }
+            },
+            "rh": {
+              "status": "complete",
+              "error": null,
+              "failure_phase": null,
+              "cuda_oom": null,
+              "cuda_allocator": {
+                "requested": "enabled",
+                "cuda_initialized_at_entry": false,
+                "environment_at_entry": null,
+                "environment_after_selection": null,
+                "effective": "enabled",
+                "torch_stats_known_valid": true,
+                "torch_stats_known_unavailable": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "sub07": {
+      "benchmark_public_sha256": "b2f73e5642a38576804454ee7799b387f766dbdfb3b9eb9cdeeea1d8a520e977",
+      "runtime_public_sha256": "a8b14ac0685c5bb487c1a2919211ee96ef1346a73f362e39728fa2f7712222d9",
+      "input_sha256": "59ef7bed60d4db64d56d947ebed2ef62a9257c26fe879848fe24d10a490f74fc",
+      "harness_script_sha256": "3236180447930943e5f4fd7153efad333f26647c5254af5896864cfdd83c9010",
+      "native_free_source_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+      "status": "failed",
+      "exit_code": 1,
+      "failed_stage": "finish_surface_hemisphere_group",
+      "full_workflow_complete": false,
+      "stage_count": 27,
+      "api_wall_seconds": 11069.504866477102,
+      "cli_wall_seconds": 11074.20067822747,
+      "full_harness_seconds": 11083.227766726166,
+      "target_gpu_uuid": "GPU-anonymized-device-006",
+      "memory_ownership_status": "ownership_unresolved",
+      "peak_tree_total_bytes": null,
+      "peak_target_device_used_bytes_includes_other_users": 45083525120,
+      "memory_sampling_requested_seconds": 0.5,
+      "memory_sampling_max_actual_seconds": 11.522714260034263,
+      "memory_failed_sample_count": 11,
+      "memory_budget_passed": null,
+      "original_program_sha256": {},
+      "python_launch_audit_events": 10940,
+      "original_program_attempts": [],
+      "python_launch_audit_passed": true,
+      "output_completeness": "not_assessed",
+      "strict_reproduction": "not_assessed",
+      "optimization_regression": "not_assessed",
+      "overall_metric_equivalence": "not_assessed",
+      "hemisphere_groups": {
+        "annotation": {
+          "status": "complete",
+          "group_wall_seconds": 72.34620086848736,
+          "workers": {
+            "lh": {
+              "status": "complete",
+              "error": null,
+              "failure_phase": null,
+              "cuda_oom": null,
+              "cuda_allocator": {
+                "requested": "disabled",
+                "cuda_initialized_at_entry": false,
+                "environment_at_entry": "1",
+                "environment_after_selection": "1",
+                "effective": "disabled",
+                "torch_stats_known_valid": false,
+                "torch_stats_known_unavailable": true
+              }
+            },
+            "rh": {
+              "status": "complete",
+              "error": null,
+              "failure_phase": null,
+              "cuda_oom": null,
+              "cuda_allocator": {
+                "requested": "disabled",
+                "cuda_initialized_at_entry": false,
+                "environment_at_entry": "1",
+                "environment_after_selection": "1",
+                "effective": "disabled",
+                "torch_stats_known_valid": false,
+                "torch_stats_known_unavailable": true
+              }
+            }
+          }
+        },
+        "finish_surface": {
+          "status": "failed",
+          "group_wall_seconds": 9350.555894903839,
+          "workers": {
+            "lh": {
+              "status": "failed",
+              "error": "RuntimeError('source pial cleanup has residual intersections; output not written')",
+              "failure_phase": "operation",
+              "cuda_oom": false,
+              "cuda_allocator": {
+                "requested": "disabled",
+                "cuda_initialized_at_entry": false,
+                "environment_at_entry": "1",
+                "environment_after_selection": "1",
+                "effective": "disabled",
+                "torch_stats_known_valid": false,
+                "torch_stats_known_unavailable": true
+              }
+            },
+            "rh": {
+              "status": "complete",
+              "error": null,
+              "failure_phase": null,
+              "cuda_oom": null,
+              "cuda_allocator": {
+                "requested": "disabled",
+                "cuda_initialized_at_entry": false,
+                "environment_at_entry": "1",
+                "environment_after_selection": "1",
+                "effective": "disabled",
+                "torch_stats_known_valid": false,
+                "torch_stats_known_unavailable": true
+              }
+            }
+          }
+        },
+        "register": {
+          "status": "complete",
+          "group_wall_seconds": 473.7588426126167,
+          "workers": {
+            "lh": {
+              "status": "complete",
+              "error": null,
+              "failure_phase": null,
+              "cuda_oom": null,
+              "cuda_allocator": {
+                "requested": "disabled",
+                "cuda_initialized_at_entry": false,
+                "environment_at_entry": "1",
+                "environment_after_selection": "1",
+                "effective": "disabled",
+                "torch_stats_known_valid": false,
+                "torch_stats_known_unavailable": true
+              }
+            },
+            "rh": {
+              "status": "complete",
+              "error": null,
+              "failure_phase": null,
+              "cuda_oom": null,
+              "cuda_allocator": {
+                "requested": "disabled",
+                "cuda_initialized_at_entry": false,
+                "environment_at_entry": "1",
+                "environment_after_selection": "1",
+                "effective": "disabled",
+                "torch_stats_known_valid": false,
+                "torch_stats_known_unavailable": true
+              }
+            }
+          }
+        },
+        "surface": {
+          "status": "complete",
+          "group_wall_seconds": 680.6535999923944,
+          "workers": {
+            "lh": {
+              "status": "complete",
+              "error": null,
+              "failure_phase": null,
+              "cuda_oom": null,
+              "cuda_allocator": {
+                "requested": "enabled",
+                "cuda_initialized_at_entry": false,
+                "environment_at_entry": null,
+                "environment_after_selection": null,
+                "effective": "enabled",
+                "torch_stats_known_valid": true,
+                "torch_stats_known_unavailable": false
+              }
+            },
+            "rh": {
+              "status": "complete",
+              "error": null,
+              "failure_phase": null,
+              "cuda_oom": null,
+              "cuda_allocator": {
+                "requested": "enabled",
+                "cuda_initialized_at_entry": false,
+                "environment_at_entry": null,
+                "environment_after_selection": null,
+                "effective": "enabled",
+                "torch_stats_known_valid": true,
+                "torch_stats_known_unavailable": false
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

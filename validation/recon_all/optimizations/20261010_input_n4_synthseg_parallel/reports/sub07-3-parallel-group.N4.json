@@ -1,0 +1,66 @@
+{
+  "backend": "SimpleITK Python complete fixed N4 recipe",
+  "used_native_programs": false,
+  "simpleitk_version": "2.5.6",
+  "itk_version": "5.4",
+  "library_sha256": "c25cd8cf7053c8224c246744e1f1bc9af12db0c95a8221b27e9546cc4511b62c",
+  "fitting_threads": 1,
+  "reconstruction_threads": 1,
+  "actual_fitting_work_units": 1,
+  "actual_fitting_filter_threads": 1,
+  "recipe": {
+    "shrink": [
+      4,
+      4,
+      4
+    ],
+    "iterations": [
+      50,
+      50,
+      50,
+      50
+    ],
+    "convergence_threshold": 0.0,
+    "spline_order": 3,
+    "initial_control_points": [
+      4,
+      4,
+      4
+    ],
+    "histogram_bins": 200,
+    "fwhm": 0.15,
+    "wiener_noise": 0.01,
+    "mask": "all ones",
+    "mask_label": 1
+  },
+  "internal_geometry": {
+    "origin_mm": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "direction": "identity",
+    "spacing_mm": [
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "current_level": 4,
+  "elapsed_last_level_iterations": 51,
+  "timing_parts_seconds": {
+    "array_prepare_and_shrink": 0.03452729061245918,
+    "fitting": 179.90447441488504,
+    "full_bspline_reconstruction": 0.9536171220242977,
+    "exp_divide_and_array_download": 0.3573902091011405
+  },
+  "total_seconds": 185.940234513022,
+  "restored_global_threads": 1,
+  "original_global_threads": 1,
+  "array_stage_seconds": 181.25000903662294,
+  "file_io_included": true,
+  "output": "[PRIVATE_FNIT]/runs/input_stage_parallel_20261010_v2/ABBA/sub07/3-parallel/nu0.mgz",
+  "input_sha256": "713cec3c45edb17eec664dce2d939986a41481eae59c4575079c19f9e14e32e2",
+  "output_sha256": "ded9a180eb41e9f25b7c5f237a0d422e8f43fde45f26c9e9a44281b721dce3a1",
+  "implementation_sha256": "c14e8eb46fb408926ddb9a7fe3d35d97bb5201382928e87226f71f8e01041b90"
+}

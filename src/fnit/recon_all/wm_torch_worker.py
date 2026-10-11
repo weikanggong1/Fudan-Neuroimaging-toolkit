@@ -15,6 +15,7 @@ import torch
 from .mri_segment import segment_white_matter_mgz
 from .profiling import StageProfiler, autocast_state, configure_cuda_allocator
 from .thread_budget import native_thread_environment
+from .worker_program_guard import inherit_original_stage_guard
 
 
 def _sha256(path: Path) -> str:
@@ -88,6 +89,7 @@ def run_isolated_segmentation(*, source_path: Path, output_path: Path,
     return result
 
 
+@inherit_original_stage_guard
 def run_worker(*, source_path: Path, output_path: Path, report_path: Path,
                device: str = "cuda:0", threads: int = 4,
                histogram_batch_size: int = 2048, planar_batch_size: int = 256,
@@ -101,6 +103,8 @@ def run_worker(*, source_path: Path, output_path: Path, report_path: Path,
     不代表进程树占用。内部墙钟含全部校验/初始化/读写，不含模块导入。
     复用StageProfiler且默认不额外同步。输入/路径/已初始化CUDA失败抛
     异常；调用原生mri_segment的等价配方见专页，不执行原生命令。
+    继承生产环境禁令时，在任何阶段调用前启用原程序守卫；正常及异常
+    退出恢复守卫环境/作用域，保持既有线程、TF32及完整WM参数。
     """
     started = time.perf_counter()
     if torch.cuda.is_initialized():
@@ -153,6 +157,7 @@ def run_worker(*, source_path: Path, output_path: Path, report_path: Path,
     return report
 
 
+@inherit_original_stage_guard
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("source", "output", "report"):

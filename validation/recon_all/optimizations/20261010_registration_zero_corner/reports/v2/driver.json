@@ -1,0 +1,122 @@
+{
+  "status": "complete",
+  "cases": [
+    {
+      "name": "corner-checkpoint",
+      "exit_code": 0,
+      "full_cold_process_wall_seconds": 2.8654829850420356,
+      "command": [
+        "$FNIT_ROOT/envs/recon_main_20261009_v3/bin/python",
+        "-X",
+        "faulthandler",
+        "$FNIT_ROOT/workspaces/recon_registration_zero_corner_20261010_v2/incoming/benchmark_registration_v2.py",
+        "--mode",
+        "checkpoint",
+        "--source",
+        "$FNIT_ROOT/workspaces/recon_registration_zero_corner_20261010_v2/new2",
+        "--output",
+        "$FNIT_ROOT/runs/recon_registration_zero_corner_20261010_v2/corner-checkpoint",
+        "--device",
+        "cuda:5",
+        "--threads",
+        "4",
+        "--checkpoint-function",
+        "corner",
+        "--baseline-source",
+        "$FNIT_ROOT/workspaces/recon_registration_zero_corner_20261010_v1/old",
+        "--checkpoint",
+        "$FNIT_ROOT/runs/diagnose_registration_nonfinite_20261010_v1/sub06-lh/first_nonfinite.npz"
+      ],
+      "benchmark_script_sha256": "7522f04a472a60a3e72420dc1e9a616d8932e745a067f95fb88855a8b614c9f2"
+    },
+    {
+      "name": "face-checkpoint",
+      "exit_code": 0,
+      "full_cold_process_wall_seconds": 2.637754679657519,
+      "command": [
+        "$FNIT_ROOT/envs/recon_main_20261009_v3/bin/python",
+        "-X",
+        "faulthandler",
+        "$FNIT_ROOT/workspaces/recon_registration_zero_corner_20261010_v2/incoming/benchmark_registration_v2.py",
+        "--mode",
+        "checkpoint",
+        "--source",
+        "$FNIT_ROOT/workspaces/recon_registration_zero_corner_20261010_v2/new2",
+        "--output",
+        "$FNIT_ROOT/runs/recon_registration_zero_corner_20261010_v2/face-checkpoint",
+        "--device",
+        "cuda:5",
+        "--threads",
+        "4",
+        "--checkpoint-function",
+        "face",
+        "--baseline-source",
+        "$FNIT_ROOT/workspaces/recon_registration_zero_corner_20261010_v1/new",
+        "--checkpoint",
+        "$FNIT_ROOT/runs/diagnose_registration_nonfinite_20261010_v2/sub06-lh/first_nonfinite.npz"
+      ],
+      "benchmark_script_sha256": "7522f04a472a60a3e72420dc1e9a616d8932e745a067f95fb88855a8b614c9f2"
+    },
+    {
+      "name": "v4-new2",
+      "exit_code": 0,
+      "full_cold_process_wall_seconds": 283.38866933155805,
+      "command": [
+        "$FNIT_ROOT/envs/recon_main_20261009_v3/bin/python",
+        "-X",
+        "faulthandler",
+        "$FNIT_ROOT/workspaces/recon_registration_zero_corner_20261010_v2/incoming/benchmark_registration_v2.py",
+        "--mode",
+        "full",
+        "--source",
+        "$FNIT_ROOT/workspaces/recon_registration_zero_corner_20261010_v2/new2",
+        "--output",
+        "$FNIT_ROOT/runs/recon_registration_zero_corner_20261010_v2/v4-new2",
+        "--device",
+        "cuda:5",
+        "--threads",
+        "4",
+        "--subject",
+        "$FNIT_ROOT/runs/recon_python_profile_20261010_v4/sub06-candidate/subject",
+        "--atlas",
+        "$FNIT_ROOT/assets/recon_resources_20261009_v1/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+        "--hemi",
+        "lh"
+      ],
+      "benchmark_script_sha256": "7522f04a472a60a3e72420dc1e9a616d8932e745a067f95fb88855a8b614c9f2"
+    },
+    {
+      "name": "79-new2",
+      "exit_code": 0,
+      "full_cold_process_wall_seconds": 154.48351195361465,
+      "command": [
+        "$FNIT_ROOT/envs/recon_main_20261009_v3/bin/python",
+        "-X",
+        "faulthandler",
+        "$FNIT_ROOT/workspaces/recon_registration_zero_corner_20261010_v2/incoming/benchmark_registration_v2.py",
+        "--mode",
+        "full",
+        "--source",
+        "$FNIT_ROOT/workspaces/recon_registration_zero_corner_20261010_v2/new2",
+        "--output",
+        "$FNIT_ROOT/runs/recon_registration_zero_corner_20261010_v2/79-new2",
+        "--device",
+        "cuda:5",
+        "--threads",
+        "4",
+        "--subject",
+        "$FNIT_ROOT/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub06-candidate/subject",
+        "--atlas",
+        "$FNIT_ROOT/assets/recon_resources_20261009_v1/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+        "--hemi",
+        "lh"
+      ],
+      "benchmark_script_sha256": "7522f04a472a60a3e72420dc1e9a616d8932e745a067f95fb88855a8b614c9f2"
+    },
+    {
+      "name": "79-comparison",
+      "exit_code": 0,
+      "comparison_script_sha256": "a67273aa018dc37b91936fdf721831f472bc9685a430e2ec5ff4619cc2fd085f"
+    }
+  ]
+}

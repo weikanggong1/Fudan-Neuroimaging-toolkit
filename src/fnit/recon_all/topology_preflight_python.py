@@ -401,33 +401,108 @@ def defect_regions(labels: np.ndarray, faces: np.ndarray) -> list[tuple[list[int
     return regions
 
 
-def defect_border_labels(labels: np.ndarray, faces: np.ndarray) -> np.ndarray:
+def _retention_regions(labels, faces, ordered_regions):
+    """完整标签域→有序inside/border；显式合并列表不重新BFS排序。
+
+    ordered_regions=None沿用已有defect_regions。否则接受每项含vertices/
+    border的映射或(inside,border)，严格整数索引、各inside全覆盖所属正
+    标签且互不重复。允许合并后inside不连通；border须为该完整inside
+    的零标签一环集合，保留调用者顺序。同一外部顶点可在不同border中。
+    """
+    if ordered_regions is None:
+        return defect_regions(labels, faces)
+    from collections.abc import Mapping, Sequence
+    component, triangles = np.asarray(labels), np.asarray(faces)
+    if (component.ndim != 1 or component.dtype.kind not in 'iu'
+            or np.any(component < 0) or triangles.ndim != 2
+            or triangles.shape[1:] != (3,) or triangles.dtype.kind not in 'iu'):
+        raise ValueError('integer labels(N,) and ordered faces(F,3) required')
+    n = len(component)
+    if triangles.size and (triangles.min() < 0 or triangles.max() >= n):
+        raise ValueError('face vertex outside explicit label domain')
+    count = int(component.max(initial=0))
+    if (count > n or not np.array_equal(np.unique(component[component > 0]),
+                                       np.arange(1, count+1))
+            or not isinstance(ordered_regions, Sequence)
+            or len(ordered_regions) != count):
+        raise ValueError('explicit region count must cover contiguous positive labels')
+    neighbors = ordered_neighbors(triangles, n)
+    regions = []
+    for number, item in enumerate(ordered_regions, start=1):
+        if isinstance(item, Mapping):
+            if 'vertices' not in item or 'border' not in item:
+                raise ValueError('each merged region requires vertices and border')
+            raw = item['vertices'], item['border']
+        elif isinstance(item, Sequence) and len(item) == 2:
+            raw = item
+        else:
+            raise ValueError('each explicit region must be a mapping or (inside,border)')
+        rows = []
+        for value in raw:
+            row = np.asarray(value)
+            if row.size == 0 and isinstance(value, (list, tuple)):
+                row = row.astype(np.int32)
+            if (row.ndim != 1 or row.dtype.kind not in 'iu'
+                    or row.size and (row.min() < 0 or row.max() >= n)
+                    or len(np.unique(row)) != len(row)):
+                raise ValueError('region rows require unique in-range ordered integers')
+            rows.append([int(v) for v in row])
+        inside, border = rows
+        if (not inside or np.any(component[inside] != number)
+                or len(inside) != np.count_nonzero(component == number)
+                or border and np.any(component[border] != 0)):
+            raise ValueError('inside must cover its full label and border must be outside')
+        expected = {v for vertex in inside for v in neighbors[vertex] if component[v] == 0}
+        if set(border) != expected:
+            raise ValueError('complete zero-label one-ring border required')
+        regions.append((inside, border))
+    return regions
+
+
+def defect_border_labels(labels: np.ndarray, faces: np.ndarray, *,
+                         ordered_regions=None) -> np.ndarray:
     """Add each ordered border to its component's integer label map."""
     result = np.asarray(labels, np.int32).copy()
-    for number, (_, border) in enumerate(defect_regions(labels, faces), start=1):
+    for number, (_, border) in enumerate(_retention_regions(labels, faces, ordered_regions), start=1):
         result[border] = number
     return result
 
 
 def defect_retention_status(canonical: np.ndarray, original: np.ndarray,
-                            faces: np.ndarray, labels: np.ndarray) -> np.ndarray:
+                            faces: np.ndarray, labels: np.ndarray, *,
+                            ordered_regions=None) -> np.ndarray:
     """Mark initially retained (+1) or discarded (-1) defect vertices.
 
     This follows the pinned ``-ga`` pre-search checks: pairwise canonical
     distance, pairwise original distance, then inward-facing triangles.  The
     result corresponds to the native ``defect_status`` diagnostic and does not
-    choose any replacement patch edges.
+    choose any replacement patch edges.  ``ordered_regions=None`` preserves
+    the component BFS interface.  Explicit merged-region mappings or pairs
+    retain source concat order, including a disconnected merged inside union;
+    labels and complete one-ring borders are validated without reordering.
+    Original is raw nofix surface RAS/mm at this phase, before two averages;
+    canonical is centered sphere surface RAS/mm.  The fixed squared-distance
+    thresholds .01 and .75 are unchanged.  The outer border loop does not
+    compare border-to-inside: its source inner loop stops at ninside.
+    Returns int8(N,): outside0, KEEP+1, DISCARD-1.  Caller explicitly converts
+    ordered inside status==-1 to source DISCARD1/KEEP0.  No file/device changes.
+    Invalid explicit regions raise ValueError; inputs are not modified.
     """
     sphere = np.asarray(canonical, np.float32)
     orig = np.asarray(original, np.float32)
     triangles = np.asarray(faces, np.int32)
+    if ordered_regions is not None and (sphere.ndim != 2 or sphere.shape[1:] != (3,)
+            or orig.shape != sphere.shape or np.asarray(labels).shape != (len(sphere),)
+            or not np.isfinite(sphere).all() or not np.isfinite(orig).all()):
+        raise ValueError('same-order finite original/canonical (N,3) and labels(N,) required')
+    regions = _retention_regions(labels, faces, ordered_regions)
     points = sphere[triangles]
     normal = np.cross(points[:, 1] - points[:, 0], points[:, 2] - points[:, 0])
     negative = np.sum(normal * np.sum(points, axis=1), axis=1, dtype=np.float32) < 0
     inward_vertex = np.zeros(len(sphere), np.bool_)
     inward_vertex[triangles[negative]] = True
     result = np.zeros(len(sphere), np.int8)
-    for vertices, border in defect_regions(labels, triangles):
+    for vertices, border in regions:
         discarded = np.zeros(len(vertices), np.bool_)
         all_vertices = vertices + border
         for coordinates, threshold in ((sphere, np.float32(0.01)),
@@ -450,12 +525,16 @@ def defect_retention_status(canonical: np.ndarray, original: np.ndarray,
     return result
 
 
-def defect_hull_labels(labels: np.ndarray, faces: np.ndarray) -> np.ndarray:
+def defect_hull_labels(labels: np.ndarray, faces: np.ndarray, *,
+                       ordered_regions=None) -> np.ndarray:
     """Reproduce the pinned ``SMALL_CONVEX_HULL`` diagnostic labels."""
     component = np.asarray(labels, np.int32)
     neighbors = ordered_neighbors(np.asarray(faces, np.int32), len(component))
-    result = defect_border_labels(component, faces)
-    for number, (vertices, border) in enumerate(defect_regions(component, faces), start=1):
+    regions = _retention_regions(labels, faces, ordered_regions)
+    result = component.copy()
+    for number, (_, border) in enumerate(regions, start=1):
+        result[border] = number
+    for number, (vertices, border) in enumerate(regions, start=1):
         occupied = set(vertices) | set(border)
         hull = list(border)
         for vertex in border:

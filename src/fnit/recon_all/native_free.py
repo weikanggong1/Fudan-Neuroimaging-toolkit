@@ -122,14 +122,35 @@ def _run_torch_wm_edit(mri: Path, *, device: str) -> dict:
     """自产同网格WM/brain/aseg/EntoWM→wm.asegedit，保留有序Numba反馈。
 
     device为明确CUDA；固定keep-in/fill/SCM-HA/EntoWM/ACJ配方。
-    返回完整读写时间和CPU/GPU分段。原byte-path几何证明不成立、原存储
-    不受支持或CUDA错误直接抛出，不能回退原生或读取参考来补齐。
+    返回完整读写时间和CPU/GPU分段。路径搜索保留源typed/byte差异；
+    几何证明只用于安全跳过不可达搜索，证明不成立时执行完整有序搜索。
+    原存储不受支持、源内循环状态不再变化或CUDA错误直接抛出。
+    两例完整同输入与独立参考解码0差；十例未触发active分支，见
+    WM_REMOVE_PATHS.md；不回退原程序或读取参考补齐。
     """
     from .edit_wm_aseg_torch import write_wm_asegedit_hybrid_diagnostic
     return write_wm_asegedit_hybrid_diagnostic(
         wm_file=mri / "wm.seg.mgz", brain_file=mri / "brain.mgz",
         aseg_file=mri / "aseg.presurf.mgz", entowm_file=mri / "entowm.mgz",
         output_file=mri / "wm.asegedit.mgz", device=device, fill_seg_wm=True)
+
+
+def _run_python_wm_edit(mri: Path) -> dict:
+    """四张自产conform MRI→完整wm.asegedit，不执行原版编辑程序。
+
+    mri包含wm.seg、brain、aseg.presurf、entowm.mgz；网格/原存储类型须
+    满足源字节访问的4字节存储和安全网格约束。复用标准Python/Numba CPU配方，保留
+    keep-in、fill-seg-wm、SCM/HA、EntoWM和ACJ顺序，输出同网格uint8。
+    几何不可达证明失败时仍执行完整路径搜索，保留typed/byte语义。
+    返回阶段报告及路径/秒数；输入不支持或源内循环不再推进时抛异常。
+    两例完整同输入解码0差，active分支尚无真实触发，见WM_REMOVE_PATHS.md。
+    对应mri_edit_wm_with_aseg固定调用，详见WM_ASEG_TORCH.md。
+    """
+    from .edit_wm_aseg_core_python import write_wm_asegedit_profile
+    return write_wm_asegedit_profile(wm_file=mri / "wm.seg.mgz",
+        brain_file=mri / "brain.mgz", aseg_file=mri / "aseg.presurf.mgz",
+        entowm_file=mri / "entowm.mgz", output_file=mri / "wm.asegedit.mgz",
+        fill_seg_wm=True)
 
 
 def _folding_atlas(assets: Path, hemi: str) -> Path:
@@ -140,7 +161,7 @@ def _folding_atlas(assets: Path, hemi: str) -> Path:
     return atlas
 
 
-def _run_native_em_register(binary: Path, mri: Path, atlas: Path,
+def _run_native_em_register(binary: Path | None, mri: Path, atlas: Path,
                             assets: Path, *, backend: str = "original",
                             binary_sha256: str | None = None, threads: int = 4,
                             device: str = "cpu", inverse_backend: str = "cpu",
@@ -148,7 +169,8 @@ def _run_native_em_register(binary: Path, mri: Path, atlas: Path,
                             execution: str = "in-process") -> dict | None:
     """运行完整原生注册；缓存后端只改变已验证的搜索密度复用。
 
-    binary为独立Conda程序；mri含自产conformed nu/brainmask和transforms。
+    binary为独立Conda程序，仅原生后端消费；torch允许None且不查找程序。
+    mri含自产conformed nu/brainmask和transforms。
     atlas/assets为已校验GCA和资产路径。backend默认original；cpu_cached
     验证binary_sha256及能力2，threads默认4控制新子进程，保持父环境。
     输出talairach.lta包含4×4 voxel空间变换与两侧几何，返回None。
@@ -188,6 +210,8 @@ def _run_native_em_register(binary: Path, mri: Path, atlas: Path,
         return result
     if execution != "in-process":
         raise ValueError("isolated execution requires the Torch GCA backend")
+    if binary is None:
+        raise ValueError("native GCA backend requires an explicit program")
     if backend == "cpu_cached":
         from .mri_em_register_cached_conda import run_cached_em_register
         run_cached_em_register(binary=binary, mri=mri, atlas=atlas, assets=assets,
@@ -232,11 +256,112 @@ def _run_native_sphere_step(binary: Path, subject: Path, assets: Path,
     return time.perf_counter() - tick
 
 
-def _prepare_native_topology(binary: Path, subject: Path, hemi: str,
+def _run_and_publish_genetic_topology(*, subject: Path, hemi: str,
+                                      threads: int, remesh_scalar_storage: str) -> dict:
+    """自产nofix/qsphere/brain/WM→完整自有GA及orig门→发布真实表面。
+
+    subject为FNIT被试目录，hemi为lh/rh，threads为当前半球CPU预算；
+    remesh_scalar_storage为已校验的numpy/python双精度存储策略。
+    独立新目录scripts/H.topology.genetic保存完整阶段产物、原域标签及报告；
+    显式复用每缺陷不可变保留面索引，并以Numba执行完整有序阻挡扫描；
+    不缓存动态几何、不缩减候选域或改变GA控制。独立库保留Python参考。
+    完成remesh3、source_numba清理和最终网格门后，校验报告/三个文件SHA，
+    再发布surf/H.orig.premesh、H.defect_labels、H.orig。表面surface RAS/mm；
+    原域标签不采用压缩后编号，WM头和brain采样矩阵由文件接口区分。
+    返回该接口的JSON字典；耗时由调用者覆盖计算、验证和全部发布读写。
+    不启动原程序、不读取参考。缺失/篡改文件、未完成或失败网格抛异常；
+    不把未验收中间态写成最终orig。真实范围与参数见TOPOLOGY_GENETIC_FILES.md。
+    """
+    from .topology_genetic_files import run_genetic_topology_files
+    import tempfile
+
+    subject = Path(subject).resolve()
+    output = subject / "scripts" / f"{hemi}.topology.genetic"
+    result = run_genetic_topology_files(
+        input_surface=subject / "surf" / f"{hemi}.orig.nofix",
+        input_qsphere=subject / "surf" / f"{hemi}.qsphere.nofix",
+        brain=subject / "mri" / "brain.mgz", wm=subject / "mri" / "wm.mgz",
+        hemisphere=hemi, output_directory=output, threads=threads,
+        seed=1234, population_size=10, max_unchanged=10, niters=-1,
+        initial_selection=True, vertex_eliminate=True, use_overlap=False,
+        normal_status="surface", soap_iterations=5, final_orig=True,
+        face_detection_cache=True,
+        blocker_scan_backend="numba",
+        remesh_scalar_storage=remesh_scalar_storage)
+    if result.get("status") != "complete" or result.get("final_orig") is not True:
+        raise RuntimeError("complete genetic topology and final orig receipt required")
+    if result.get("quality", {}).get("status") != "passed":
+        raise RuntimeError("genetic topology final orig quality gate failed")
+    if result.get("parameters", {}).get("face_detection_cache") is not True:
+        raise RuntimeError("genetic topology did not apply the selected face cache")
+    if result.get("parameters", {}).get("blocker_scan_backend") != "numba":
+        raise RuntimeError("genetic topology did not apply the selected ordered blocker scan")
+    output = output.resolve()
+    for field in ("report_path", "completion_path"):
+        path = Path(result[field]).resolve()
+        if not path.is_relative_to(output) or not path.is_file():
+            raise RuntimeError("genetic topology receipt is missing or outside its run")
+    report_bytes = Path(result["report_path"]).read_bytes()
+    if hashlib.sha256(report_bytes).hexdigest() != result["report_sha256"]:
+        raise RuntimeError("genetic topology report SHA-256 changed")
+    recorded = json.loads(report_bytes)
+    if (recorded.get("status") != "complete" or recorded.get("final_orig") is not True
+            or recorded.get("quality") != result["quality"]
+            or recorded.get("parameters") != result["parameters"]
+            or recorded.get("output_sha256") != result["output_sha256"]):
+        raise RuntimeError("genetic topology report does not bind this complete final orig")
+    completion = json.loads(Path(result["completion_path"]).read_text())
+    if (completion.get("status") != "complete" or completion.get("final_orig") is not True
+            or completion.get("report_sha256") != result["report_sha256"]
+            or completion.get("output_sha256") != result["output_sha256"]):
+        raise RuntimeError("genetic topology completion receipt is not complete")
+    sources = {}
+    for name, suffix in (("premesh", "orig.premesh"), ("defect_labels", "defect_labels"), ("orig", "orig")):
+        path = Path(result["outputs"][name]).resolve()
+        if not path.is_relative_to(output) or not path.is_file():
+            raise RuntimeError("genetic topology artifact is missing or outside its run")
+        if hashlib.sha256(path.read_bytes()).hexdigest() != result["output_sha256"][name]:
+            raise RuntimeError(f"genetic topology {name} SHA-256 changed")
+        sources[name] = (path, subject / "surf" / f"{hemi}.{suffix}")
+    # All artifacts pass before any final filename is published. Copies retain
+    # the actual algorithm output; temporary files are verified before replace.
+    with tempfile.TemporaryDirectory(prefix=".fnit-ga-publish-", dir=subject / "surf") as temporary:
+        pending = []
+        for name, (source, destination) in sources.items():
+            candidate = Path(temporary) / destination.name
+            shutil.copyfile(source, candidate)
+            if hashlib.sha256(candidate.read_bytes()).hexdigest() != result["output_sha256"][name]:
+                raise RuntimeError(f"genetic topology {name} publication SHA-256 changed")
+            pending.append((candidate, destination))
+        for candidate, destination in pending:
+            candidate.replace(destination)
+    publication = {
+        "status": "complete", "final_quality": result["quality"],
+        "source_report": str(Path(result["report_path"]).relative_to(subject)),
+        "source_report_sha256": result["report_sha256"],
+        "outputs": {name: str(destination.relative_to(subject))
+                    for name, (_, destination) in sources.items()},
+        "output_sha256": result["output_sha256"],
+        "paths_relative_to": "subject_dir", "worker_threads": threads,
+        "face_detection_cache": True,
+        "blocker_scan_backend": "numba",
+        "strict_reproduction": "reported_separately",
+        "overall_metric_equivalence": "not_assessed",
+    }
+    (subject / "scripts" / f"{hemi}.topology.genetic.publish.json").write_text(
+        json.dumps(publication, indent=2))
+    return result
+
+
+def _prepare_native_topology(binary: Path | None, subject: Path, hemi: str,
                              assets: Path, device: str,
-                             native_inflate_binary: Path,
-                             intersection_binary: Path,
+                             native_inflate_binary: Path | None,
+                             intersection_binary: Path | None,
                              *, remesh_scalar_storage: str = "numpy",
+                             python_auxiliary: bool = False,
+                             topology_backend: str = "native",
+                             pretess_file: Path | None = None,
+                             threads: int = 4,
                              ) -> tuple[float, float, dict[str, float], float, float]:
     """完成nofix/拓扑/remesh/清理；remesh存储候选不改任何几何规则。
 
@@ -245,8 +370,21 @@ def _prepare_native_topology(binary: Path, subject: Path, hemi: str,
     原生拓扑秒、nofix子时间、remesh秒、intersection秒；均含读写。
     表面为surface RAS/mm，orig的有序面由完整算法生成；失败传播。
     官方步骤/完整参数及实测见CONDA_CPP_STAGES和REMESH_SCALAR_STORAGE。
+    python_auxiliary默认False；True使用完整标准默认10次nofix inflation
+    并关闭sulc文件写出，不改变优化次数。topology_backend默认native；
+    python必须提供pretess_file（自产uint8 conform体积），执行完整数字
+    拓扑不同算法及真实删除区缺陷映射，不启动GA程序；binary/两个兼容
+    辅助程序此时可为None。数字拓扑全质量失败即抛异常，输出/空间见
+    PYTHON_SURFACE_PIPELINE.md；整体指标等效另测，不复制orig充当修复。
+    python-ga使用完整自有有序GA；threads默认4，由表面worker显式传入
+    本半球预算，不扩大总线程数。文件接口在独立目录一次完成标准remesh、
+    最终清理和严格orig门，再校验SHA发布；不重复执行下面的公共remesh。
     """
     _validate_remesh_scalar_storage(remesh_scalar_storage)
+    if topology_backend == "python-ga" and (
+        isinstance(threads, bool) or not isinstance(threads, int) or threads < 1
+    ):
+        raise ValueError("genetic topology requires an explicit positive worker thread budget")
     from .mris_remesh_python import remesh_surface
     from .mris_remove_intersection_python import remove_intersection_surface
     from .smooth_surface_python import smooth_surface
@@ -260,20 +398,57 @@ def _prepare_native_topology(binary: Path, subject: Path, hemi: str,
     smooth_surface(surf / f"{hemi}.orig.nofix", smooth_nofix, device=device)
     python_seconds = time.perf_counter() - tick
     sphere_seconds = {}
-    sphere_seconds["inflate_nofix"] = _run_native_sphere_step(
-        native_inflate_binary, subject, assets,
-        ["-no-save-sulc", str(smooth_nofix), str(inflated_nofix)],
-        (inflated_nofix,))
+    if python_auxiliary:
+        from .inflate_standard_run import run_standard_inflate
+        nofix_report = run_standard_inflate(
+            input_surface=smooth_nofix, inflated_output=inflated_nofix,
+            sulc_output=None, save_sulc=False,
+            backend="torch" if torch.device(device).type == "cuda" else "numpy",
+            device=device, profile=False)
+        sphere_seconds["inflate_nofix"] = nofix_report["total_seconds_including_io"]
+    else:
+        if native_inflate_binary is None:
+            raise ValueError("native nofix inflation requires a declared program")
+        sphere_seconds["inflate_nofix"] = _run_native_sphere_step(
+            native_inflate_binary, subject, assets,
+            ["-no-save-sulc", str(smooth_nofix), str(inflated_nofix)],
+            (inflated_nofix,))
     tick = time.perf_counter()
     write_quick_sphere(inflated_nofix, qsphere_nofix)
     quick_seconds = time.perf_counter() - tick
     sphere_seconds["qsphere_nofix_python"] = quick_seconds
     native_started = time.perf_counter()
-    _run_native_topology(binary, subject, hemi, assets)
-    native_seconds = time.perf_counter() - native_started
+    if topology_backend == "python":
+        if pretess_file is None:
+            raise ValueError("Python topology requires an own pretess volume")
+        from .topology_volume_python import run_volume_topology
+        run_volume_topology(
+            input_volume=pretess_file, value=255 if hemi == "lh" else 127,
+            output_volume=subject / "mri" / f"filled-topology-{hemi}.mgz",
+            output_surface=surf / f"{hemi}.orig.premesh", device=device,
+            source_surface=surf / f"{hemi}.orig.nofix",
+            output_defect_labels=surf / f"{hemi}.defect_labels",
+            report_path=subject / "scripts" / f"{hemi}.topology.python.json")
+        python_seconds += time.perf_counter() - native_started
+        native_seconds = 0.0
+    elif topology_backend == "native":
+        if binary is None:
+            raise ValueError("native topology requires a declared program")
+        _run_native_topology(binary, subject, hemi, assets)
+        native_seconds = time.perf_counter() - native_started
+    elif topology_backend == "python-ga":
+        result = _run_and_publish_genetic_topology(
+            subject=subject, hemi=hemi, threads=threads,
+            remesh_scalar_storage=remesh_scalar_storage)
+        python_seconds += time.perf_counter() - native_started
+        return (python_seconds, 0.0, sphere_seconds,
+                result["seconds"]["remesh"],
+                result["seconds"]["original_intersection_cleanup"])
+    else:
+        raise ValueError("topology_backend must be native, python or python-ga")
     tick = time.perf_counter()
     remesh_surface(surf / f"{hemi}.orig.premesh", surf / f"{hemi}.orig", iterations=3,
-                   scalar_storage=remesh_scalar_storage)
+                   **({"scalar_storage": remesh_scalar_storage} if remesh_scalar_storage != "numpy" else {}))
     remesh_seconds = time.perf_counter() - tick
     tick = time.perf_counter()
     orig = surf / f"{hemi}.orig"
@@ -284,11 +459,12 @@ def _prepare_native_topology(binary: Path, subject: Path, hemi: str,
             sphere_seconds, remesh_seconds, intersection_seconds)
 
 
-def _run_accurate_sphere_pair(inflate_binary: Path, subject: Path,
+def _run_accurate_sphere_pair(inflate_binary: Path | None, subject: Path,
                               hemi: str, assets: Path, *, device: str = "cpu",
                               normals_backend: str = "numba",
                               inflate_backend: str = "native",
-                              sphere_finish_backend: str = "cpu") -> tuple[dict, dict]:
+                              sphere_finish_backend: str = "cpu",
+                              require_unfolded: bool = False) -> tuple[dict, dict]:
     """同序smoothwm→标准inflated/sulc→sphere，返回阶段秒数与球面报告。
 
     subject/hemi提供surface RAS mm网格；assets和inflate_binary供native
@@ -297,6 +473,8 @@ def _run_accurate_sphere_pair(inflate_binary: Path, subject: Path,
     法向/CPU收尾保持；sphere_finish_backend=torch复用既有完整GPU收尾，
     保留负面标记、SOAP更新、全顶点投影和停止规则；normals_backend仅选择既有法向。报告含inflate实际
     后端与完整读写秒数；异常向上传播，不复制参考或回退。nofix不属此接口。
+    require_unfolded 默认 False；Python 完整配方显式 True，在球面
+    残余翻折时写出前失败，并保留实际停止规则和质量诊断。
     """
     from .sphere_standard_run import run_standard_sphere
     if sphere_finish_backend not in {"cpu", "torch"}:
@@ -315,6 +493,8 @@ def _run_accurate_sphere_pair(inflate_binary: Path, subject: Path,
             sulc_output=sulc, backend="torch", device=device, profile=False)
         inflate_seconds = inflate_report["total_seconds_including_io"]
     elif inflate_backend == "native":
+        if inflate_binary is None:
+            raise ValueError("native standard inflation requires a declared program")
         inflate_seconds = _run_native_sphere_step(
             inflate_binary, subject, assets,
             [str(surf / f"{hemi}.smoothwm"), str(inflated)], (inflated, sulc))
@@ -324,19 +504,21 @@ def _run_accurate_sphere_pair(inflate_binary: Path, subject: Path,
     sphere_report = run_standard_sphere(
         inflated, surf / f"{hemi}.smoothwm", surf / f"{hemi}.sphere",
         finish_device=device if sphere_finish_backend == "torch" else "cpu", averaging_device=device,
+        **({"require_unfolded": True} if require_unfolded else {}),
         **({"normals_device": device} if normals_backend == "torch" else {}))
     sphere_report["inflate_runtime"] = inflate_report
     return ({"inflate": inflate_seconds,
              "sphere": sphere_report["total_seconds_including_io"]}, sphere_report)
 
 
-def _run_surface_metrics(binary: Path, subject: Path, hemi: str,
-                         assets: Path, *, device: str) -> dict[str, float]:
+def _run_surface_metrics(binary: Path | None, subject: Path, hemi: str,
+                         assets: Path, *, device: str, python_only: bool = False) -> dict[str, float]:
     """从对应的 white/pial 计算厚度、双侧面积和平均曲率顶点图。
 
     subject 为被试目录，hemi 为 lh/rh；输入表面为 surface RAS（mm），
-    顶点与有序面须对应。CUDA 使用已有 PyTorch 函数，CPU 使用 binary
-    指定的 Conda mris_place_surface；assets 是原生程序的 FNIT 资产目录。
+    顶点与有序面须对应。CUDA 或 python_only=True 使用已有自有
+    PyTorch 函数；仅参考 CPU 路径使用 binary 指定的 Conda 程序。
+    assets 是声明的资产目录；Python 路径不需要原生程序。
     写出 H.thickness（mm）、H.area/H.area.pial（mm²）、
     H.curv/H.curv.pial（mm⁻¹），返回包含读写与 GPU 同步的逐图秒数。
     参数固定为 20 跳、5 mm 最大厚度、2 阶邻域及 10 次曲率平滑，
@@ -345,7 +527,7 @@ def _run_surface_metrics(binary: Path, subject: Path, hemi: str,
     """
     surf = subject / "surf"
     white, pial = surf / f"{hemi}.white", surf / f"{hemi}.pial"
-    if torch.device(device).type == "cuda":
+    if torch.device(device).type == "cuda" or python_only:
         from .surface_area_gpu import area_map
         from .surface_curvature_gpu import curvature_map
         from .surface_thickness_gpu import thickness_map
@@ -359,12 +541,16 @@ def _run_surface_metrics(binary: Path, subject: Path, hemi: str,
             ("curv", curvature_map, {"surface": white, "output": surf / f"{hemi}.curv"}),
             ("curv.pial", curvature_map, {"surface": pial, "output": surf / f"{hemi}.curv.pial"}),
         ):
-            torch.cuda.synchronize(device)
+            if torch.device(device).type == "cuda":
+                torch.cuda.synchronize(device)
             tick = time.perf_counter()
             function(**kwargs, device=device)
-            torch.cuda.synchronize(device)
+            if torch.device(device).type == "cuda":
+                torch.cuda.synchronize(device)
             timings[name] = time.perf_counter() - tick
         return timings
+    if binary is None:
+        raise ValueError("native CPU metrics require a declared binary")
     return _run_native_surface_metrics(binary, subject, hemi, assets)
 
 
@@ -397,10 +583,25 @@ def _run_native_surface_metrics(binary: Path, subject: Path, hemi: str,
     return timings
 
 
-def _run_avg_curv(binary: Path, subject: Path, hemi: str,
-                  atlas: Path, assets: Path) -> None:
-    """执行固定的 mrisp_paint 第 6 幅图谱映射。"""
+def _run_avg_curv(binary: Path | None, subject: Path, hemi: str,
+                  atlas: Path, assets: Path, *, python_only: bool = False) -> dict | None:
+    """sphere.reg与第6幅TIFF图谱→(N,)avg_curv，五轮邻域平均。
+
+    网格为surface RAS/mm，有序顶点不变；subject/hemi指定输出，atlas为
+    已声明图谱。python_only默认False；True使用已验证的Numba CPU采样
+    和自有平均，不读取binary/assets程序，返回路径/哈希/含IO秒数字典。
+    报告落到scripts/H.avg_curv.python.json。原生返回None，失败抛异常。
+    对应mrisp_paint -a 5 atlas#6 sphere.reg avg_curv，见自有表面说明。
+    """
     output = subject / "surf" / f"{hemi}.avg_curv"
+    if python_only:
+        from .mrisp_paint_python import run_paint_atlas
+        return run_paint_atlas(atlas_path=atlas,
+            sphere_path=subject / "surf" / f"{hemi}.sphere.reg",
+            output_path=output, frame=6, averages=5, device="cpu",
+            report_path=subject / "scripts" / f"{hemi}.avg_curv.python.json")
+    if binary is None:
+        raise ValueError("native atlas paint requires a declared program")
     env = dict(os.environ, SUBJECTS_DIR=str(subject.parent),
                FREESURFER_HOME=str(assets))
     subprocess.run([str(binary), "-a", "5", f"{atlas}#6",
@@ -410,9 +611,23 @@ def _run_avg_curv(binary: Path, subject: Path, hemi: str,
         raise FileNotFoundError(output)
 
 
-def _run_curvature_stats(binary: Path, subject: Path, hemi: str,
-                         assets: Path) -> None:
-    """生成固定的 curv.stats 及 smoothwm 曲率附图。"""
+def _run_curvature_stats(binary: Path | None, subject: Path, hemi: str,
+                         assets: Path, *, device: str = "cpu",
+                         python_only: bool = False) -> dict | None:
+    """同序smoothwm/curv/sulc→完整curv.stats与八张离散曲率图。
+
+    subject/hemi为自产目录与lh/rh；图以原顶点顺序、surface RAS/mm解释。
+    python_only默认False保留参考程序，True复用自有Torch/Numba完整统计，
+    device默认cpu且不回退。生产固定零平滑和source_libm源浮点规则，
+    overwrite仅允许覆盖本阶段标准输出。返回完整路径/统计/读写秒数字典，
+    原生返回None；输入和写出失败抛异常，不复制参考。官方固定命令见下。
+    """
+    if python_only:
+        from .curvature_stats_python import write_curvature_stats
+        return write_curvature_stats(subject_dir=subject, hemisphere=hemi,
+            device=device, angle_backend="source_libm", averages=0, overwrite=True)
+    if binary is None:
+        raise ValueError("native curvature statistics require a declared binary")
     output = subject / "stats" / f"{hemi}.curv.stats"
     env = dict(os.environ, SUBJECTS_DIR=str(subject.parent),
                FREESURFER_HOME=str(assets))
@@ -461,22 +676,24 @@ def _run_defects_volume(binary: Path | None, subject: Path, hemi: str,
 
 
 def _run_white_mri_chain(subject: Path, weights: Path, assets: Path,
-                         threads: int, warp_binaries: tuple[Path, Path, Path],
+                         threads: int, warp_binaries: tuple[Path | None, Path | None, Path | None],
                          stage, *, device: str, defer_mni_nonlinear: bool = False) -> dict:
     """生成 MNI 辅助图、非线性变换和 finalsurfs；显式传递主设备。
 
     subject 提供自产 conform MRI；weights、assets 为已校验资源，threads
-    为线程数，warp_binaries 按转换/求逆/重采样排列。stage 是记录耗时和
-    失败的回调，device 为 CPU 或 CUDA。输出写入 subject，返回辅助网络实际
-    前向记录字典；原生程序或计算失败抛异常。全部网络使用 device，
+    为线程数，warp_binaries 是按转换/求逆/重采样排列的兼容参数，允许
+    三个None且不读取或执行。stage 是记录耗时和失败的回调，device 必须为
+    CUDA。输出写入 subject，返回辅助网络实际前向记录字典；计算失败抛异常。
+    全部网络使用 device，
     辅助网络卷积在局部作用域采用经同输入验证的FP32，matmul TF32不变；
-    CUDA 的 MNI warp 转换、完整求逆和检查图采用自有 GPU 后处理，CPU
-    使用原有 Conda 程序；finalsurfs复用所选device的既有后处理。空间、命令与实测
+    MNI warp 转换、完整求逆和检查图采用自有 GPU 后处理；非CUDA在任何
+    辅助图读写和前向前报错。finalsurfs复用所选device的既有后处理。空间、命令与实测
     见 MNI_NONLINEAR_CHAIN.md。后处理失败抛出异常，不静默切换后端。
     defer_mni_nonlinear默认False；True仅延后非线性，MNI affine/crop和
     finalsurfs照常生成。调用方必须在输出检查前运行完整非线性并join；
     延后本身没有近似/占位变换，也不生成标准warp文件。
     """
+    _validate_mni_execution("in-process", device, threads)
     from .finalsurfs_python import run_finalsurfs
     from .mni_aux_chain import run_mni_aux_chain
     from .mni_nonlinear_chain import run_mni_nonlinear_chain
@@ -488,7 +705,7 @@ def _run_white_mri_chain(subject: Path, weights: Path, assets: Path,
         stage("mni_nonlinear", run_mni_nonlinear_chain, subject, weights, assets,
               warp_convert=warp_binaries[0], ca_register=warp_binaries[1],
               mri_convert=warp_binaries[2], device=device, threads=threads,
-              postprocess_backend="gpu" if torch.device(device).type == "cuda" else "conda")
+              postprocess_backend="gpu")
     # ``finalsurfs_python`` has a validated CUDA implementation for the
     # volume masks and entorhinal/ACJ edits. Keep its FP32 semantics while
     # avoiding an unnecessary device round-trip on GPU recon-all runs.
@@ -496,12 +713,17 @@ def _run_white_mri_chain(subject: Path, weights: Path, assets: Path,
     return auxiliary["runtime"]
 
 
-def _place_preaparc_and_smooth(subject: Path, hemi: str, binary: Path,
-                               assets: Path, threads: int) -> dict:
+def _place_preaparc_and_smooth(subject: Path, hemi: str, binary: Path | None,
+                               assets: Path, threads: int, *, device: str = "cpu",
+                               placement_backend: str = "native") -> dict:
     from .smooth_surface_python import smooth_surface
-    from .white_preaparc_conda import run_white_preaparc
-
-    report = run_white_preaparc(subject, hemi, binary, assets, threads=threads)
+    _validate_surface_placement_backend(placement_backend)
+    if placement_backend == "python":
+        from .surface_placement_python import run_preaparc_python
+        report = run_preaparc_python(subject_dir=subject, hemi=hemi, device=device)
+    else:
+        from .white_preaparc_conda import run_white_preaparc
+        report = run_white_preaparc(subject, hemi, binary, assets, threads=threads)
     tick = time.perf_counter()
     surf = subject / "surf"
     smooth_surface(surf / f"{hemi}.white.preaparc", surf / f"{hemi}.smoothwm",
@@ -568,15 +790,17 @@ def _write_principal_curvature_maps(surf: Path, hemi: str,
 
 
 def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
-                  *, device: str, threads: int, topology_binary: Path,
-                  inflate_binary: Path, intersection_binary: Path,
+                  *, device: str, threads: int, topology_binary: Path | None,
+                  inflate_binary: Path | None, intersection_binary: Path | None,
                   place_binary: Path, defect_binary: Path | None,
                   assets: Path, defer_defects: bool = False,
                   defects_backend: str = "native",
                   sphere_normals_backend: str = "numba",
                   inflate_backend: str = "native",
                   sphere_finish_backend: str = "cpu",
-                  remesh_scalar_storage: str = "numpy") -> dict:
+                  remesh_scalar_storage: str = "numpy",
+                  surface_placement_backend: str = "native",
+                  topology_backend: str = "native") -> dict:
     """从自产filled生成单半球orig、预白质和标准球面，返回完整阶段报告。
 
     subject/hemi指被试目录和lh/rh；filled/norm为conform体积，网格为
@@ -590,6 +814,8 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
     返回顶点/面数、组件、分阶段时间、预白质/球面实际报告及placement_pending；
     写出同序标准表面/标签，后续最终放置另行执行。输入、网格或计算失败
     传播；不读取参考，不占位。原命令/真实数据见recon-all各功能页。
+    topology_backend=python-ga显式使用完整自有GA文件接口，threads按本
+    半球传入；其质量/SHA门和发布回执另见topology_genetic_publication。
     """
     _validate_remesh_scalar_storage(remesh_scalar_storage)
     from .extract_main_component_python import extract_main_component
@@ -612,12 +838,17 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
     topology_python_seconds, topology_native_seconds, pre_sphere_seconds, remesh_seconds, intersection_seconds = (
         _prepare_native_topology(topology_binary, subject, hemi, assets,
                                  device, inflate_binary, intersection_binary,
-                                 remesh_scalar_storage=remesh_scalar_storage))
+                                 remesh_scalar_storage=remesh_scalar_storage,
+                                 threads=threads,
+                                 **({"python_auxiliary": True} if surface_placement_backend == "python" else {}),
+                                 **({"topology_backend": topology_backend, "pretess_file": pretess}
+                                    if topology_backend != "native" else {})))
     if not defer_defects:
         _run_defects_volume(defect_binary, subject, hemi, assets,
                             backend=defects_backend, device=device)
     preaparc = _place_preaparc_and_smooth(subject, hemi, place_binary,
-                                         assets, threads)
+                                        assets, threads, device=device,
+                                        placement_backend=surface_placement_backend)
     base, ga = label_cortex_fix_ga(
         surf / f"{hemi}.white.preaparc", mri / "aseg.presurf.mgz",
         mri / "entowm.mgz", hemi, labels / f"{hemi}.cortex.label")
@@ -626,13 +857,18 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
     sphere_timings, sphere_report = _run_accurate_sphere_pair(
         inflate_binary, subject, hemi, assets, device=device,
         normals_backend=sphere_normals_backend, inflate_backend=inflate_backend,
-        sphere_finish_backend=sphere_finish_backend)
+        sphere_finish_backend=sphere_finish_backend,
+        require_unfolded=surface_placement_backend == "python")
     _write_principal_curvature_maps(surf, hemi, device)
     white, faces = fs.read_geometry(str(surf / f"{hemi}.smoothwm"))
     return {"hemisphere": hemi, "vertices": len(white), "faces": len(faces),
             "raw_components": components, "cortex_vertices": len(base) + len(ga),
             "topology_python_seconds": topology_python_seconds,
             "topology_native_seconds": topology_native_seconds,
+            "topology_backend": topology_backend,
+            **({"topology_genetic_publication": json.loads(
+                (subject / "scripts" / f"{hemi}.topology.genetic.publish.json").read_text())}
+               if topology_backend == "python-ga" else {}),
             "topology_remesh_seconds": remesh_seconds,
             "remesh_scalar_storage": remesh_scalar_storage,
             "topology_intersection_seconds": intersection_seconds,
@@ -642,37 +878,78 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
             "placement_pending": True}
 
 
-def _finish_cortical_surface(subject: Path, hemi: str, binary: Path,
+def _finish_python_final_white(subject: Path, hemi: str, *, device: str) -> dict:
+    """自产MRI/注释/preaparc→完整white，供独立缓存worker。
+
+    subject为标准被试目录；hemi=lh/rh；device为cpu或显式cuda:N。
+    复用run_final_white_python完整四轮与网格检查，写surface RAS/mm
+    white及conform网格mrisps.white.mgz。返回final_white_report和待完成
+    pial/指标标记；设备、输入、优化或写出失败传播，不启动原版程序。
+    同输入缓存回归见SURFACE_CUDA_ALLOCATOR，不代表整例提速。
+    """
+    from .surface_placement_python import run_final_white_python
+    report = run_final_white_python(subject_dir=subject, hemi=hemi, device=device)
+    return {"final_white_report": report, "placement_pending": True,
+            "metrics_pending": True}
+
+
+def _finish_python_pial(subject: Path, hemi: str, *, device: str) -> dict:
+    """自产完整white/MRI/标签→完整pial，保持独立低显存worker策略。
+
+    subject/hemi/device同white入口；复用run_pial_python完整四轮和清理，
+    写surface RAS/mm的pial.T1，并按官方语义复制为pial。返回pial_report、
+    放置完成及指标待办标记。失败传播，不执行指标或原版阶段程序；
+    指标在双侧pial发布屏障之后串行计算，不更改父CUDA缓存策略。
+    """
+    from .surface_placement_python import run_pial_python
+    report = run_pial_python(subject_dir=subject, hemi=hemi, device=device)
+    surf = subject / "surf"
+    shutil.copyfile(surf / f"{hemi}.pial.T1", surf / f"{hemi}.pial")
+    return {"pial_report": report, "placement_pending": False,
+            "metrics_pending": True}
+
+
+def _finish_cortical_surface(subject: Path, hemi: str, binary: Path | None,
                              assets: Path, *, device: str, threads: int,
                              defer_metrics: bool = False,
-                             white_binary: Path | None = None) -> dict:
+                             white_binary: Path | None = None,
+                             surface_placement_backend: str = "native") -> dict:
     """球面配准和注释完成后，依次放置最终white、pial并计算顶点图。
 
     subject为自产被试目录，hemi为lh/rh；binary是pial及CPU顶点图程序，
-    white_binary可单独指定white专用程序，默认复用binary。device/threads
+    white_binary可单独指定white专用程序，默认复用binary；python放置时
+    两者可为None且不启动程序。surface_placement_backend默认native，python
+    复用完整四轮优化器，返回路径、轨迹和清理报告。device/threads
     控制已有GPU顶点图和原生线程，defer_metrics默认False，供并行屏障。
     写出surface RAS/mm的white、pial.T1/pial和所需顶点图，返回各阶段路径/
     秒数/待办状态。输入、网格或执行失败传播异常；不读取官方结果。
     """
-    from .final_white_conda import run_final_white
+    _validate_surface_placement_backend(surface_placement_backend)
     surf = subject / "surf"
-    white_report = run_final_white(subject, hemi, white_binary or binary, assets, threads=threads)
-    pial_report = _run_native_pial(binary, subject, hemi, assets, threads)
-    shutil.copyfile(surf / f"{hemi}.pial.T1", surf / f"{hemi}.pial")
-    result = {"final_white_report": white_report, "pial_report": pial_report,
-              "placement_pending": False, "metrics_pending": defer_metrics}
+    if surface_placement_backend == "python":
+        result = {**_finish_python_final_white(subject, hemi, device=device),
+                  **_finish_python_pial(subject, hemi, device=device)}
+    else:
+        from .final_white_conda import run_final_white
+        white_report = run_final_white(subject, hemi, white_binary or binary, assets, threads=threads)
+        pial_report = _run_native_pial(binary, subject, hemi, assets, threads)
+        shutil.copyfile(surf / f"{hemi}.pial.T1", surf / f"{hemi}.pial")
+        result = {"final_white_report": white_report, "pial_report": pial_report,
+                  "placement_pending": False}
+    result["metrics_pending"] = defer_metrics
     if not defer_metrics:
-        result.update(_finish_cortical_metrics(subject, hemi, binary, assets, device=device))
+        result.update(_finish_cortical_metrics(subject, hemi, binary, assets, device=device,
+                                             python_only=surface_placement_backend == "python"))
     return result
 
 
 def _finish_cortical_metrics(subject: Path, hemi: str, binary: Path,
-                            assets: Path, *, device: str) -> dict:
+                            assets: Path, *, device: str, python_only: bool = False) -> dict:
     """完成已放置white/pial的指标；真实短配对显示GPU指标串行更快。"""
     from .surface_area_gpu import mid_area_map
     from .surface_roi_gpu import vertex_volume_map
     surf, labels = subject / 'surf', subject / 'label'
-    metric_seconds = _run_surface_metrics(binary, subject, hemi, assets, device=device)
+    metric_seconds = _run_surface_metrics(binary, subject, hemi, assets, device=device, python_only=python_only)
     mid_area_map(surf / f"{hemi}.area", surf / f"{hemi}.area.pial",
                  surf / f"{hemi}.area.mid", device=device)
     vertex_volume_map(surf / f"{hemi}.white", surf / f"{hemi}.pial",
@@ -810,18 +1087,23 @@ def _hemisphere_operation(subject, hemi, device, threads, operation, *, assets,
                           binaries=None, registration_atlases=None,
                           sphere_normals_backend="numba", inflate_backend="native",
                           sphere_finish_backend="cpu", annotation_gibbs_backend="python",
-                          remesh_scalar_storage="numpy"):
+                          remesh_scalar_storage="numpy", surface_placement_backend="native",
+                          topology_backend="native", profile_stages=False):
     """可exec的半球阶段入口，返回原结果与逐步读写/设备时间列表。
 
     subject为私有worker被试目录，hemi=lh/rh，device/threads为设备与
     该worker预算；assets/binaries/registration_atlases为声明资源和程序。
-    operation=surface/register/annotation/finish_surface选择原完整阶段。
+    operation=surface/register/annotation/finish_surface选择原完整阶段；
+    Python配方将最终放置拆成final_white/pial_surface，复用相同完整函数，
+    仅white新exec启用缓存，pial维持继承策略；共享发布与指标屏障不变。
     sphere_normals_backend默认numba，inflate_backend默认native，
     sphere_finish_backend默认cpu；仅surface消费这些选项，其余阶段算法保持。
     annotation_gibbs_backend默认python；numba复用已有完整有序Gibbs实现，
     仅annotation消费，GPU几何/随机序列/标签语义和缓存失效规则保持。
     remesh_scalar_storage默认numpy，仅surface消费python双精度存储候选，
     不改算法、GPU精度或线程预算。
+    profile_stages默认False；True在各子步骤前后同步明确device，保留外层
+    worker显存峰值。嵌套秒数包含在worker/组墙钟内，不重复累加。
     返回result/stages；体积为conform网格，表面为surface RAS/mm，发布
     和共享输出屏障由父调度负责。非法阶段或计算失败抛异常，不读取参考。
     原软件命令与真实阶段结果见各功能页；本内部门口无独立官方CLI。
@@ -831,8 +1113,9 @@ def _hemisphere_operation(subject, hemi, device, threads, operation, *, assets,
     _validate_remesh_scalar_storage(remesh_scalar_storage)
     subject, assets = Path(subject), Path(assets)
     binaries = {name: Path(value) for name, value in (binaries or {}).items()}
-    profiler = StageProfiler(device=device, synchronize=False,
-                             allocator=configure_cuda_allocator(device))
+    profiler = StageProfiler(device=device, synchronize=profile_stages,
+                             allocator=configure_cuda_allocator(device),
+                             reset_peak_memory=False)
     steps = []
     def step(name, function, *args, **kwargs):
         try:
@@ -843,21 +1126,25 @@ def _hemisphere_operation(subject, hemi, device, threads, operation, *, assets,
     if operation == 'surface':
         value = step(f'surface_{hemi}', _surface_pair, subject, hemi,
                      mri / 'filled.mgz', mri / 'norm.mgz', device=device,
-                     threads=threads, topology_binary=binaries['topology'],
-                     inflate_binary=binaries['inflate'], intersection_binary=binaries['intersection'],
-                     place_binary=binaries.get('white', binaries['metrics']), defect_binary=binaries.get('defect'),
+                     threads=threads, topology_binary=binaries.get('topology'),
+                     inflate_binary=binaries.get('inflate'), intersection_binary=binaries.get('intersection'),
+                     place_binary=binaries.get('white', binaries.get('metrics')), defect_binary=binaries.get('defect'),
                      assets=assets, defer_defects=True,
                      sphere_normals_backend=sphere_normals_backend, inflate_backend=inflate_backend,
                      sphere_finish_backend=sphere_finish_backend,
-                     remesh_scalar_storage=remesh_scalar_storage)
+                     remesh_scalar_storage=remesh_scalar_storage,
+                     surface_placement_backend=surface_placement_backend,
+                     topology_backend=topology_backend)
     elif operation == 'register':
         from .mris_register_run import run_register_sphere
         value = step(f'register_{hemi}', run_register_sphere,
                      surf / f'{hemi}.sphere', surf / f'{hemi}.smoothwm',
                      surf / f'{hemi}.sulc', Path(registration_atlases[hemi]),
-                     surf / f'{hemi}.sphere.reg', overlap_device='cpu', averaging_device=device)
-        step(f'avg_curv_{hemi}', _run_avg_curv, binaries['paint'], subject, hemi,
-             Path(registration_atlases[hemi]), assets)
+                     surf / f'{hemi}.sphere.reg', overlap_device='cpu', averaging_device=device,
+                     require_unfolded=surface_placement_backend == "python")
+        step(f'avg_curv_{hemi}', _run_avg_curv, binaries.get('paint'), subject, hemi,
+             Path(registration_atlases[hemi]), assets,
+             python_only=surface_placement_backend == "python")
     elif operation == 'annotation':
         from .gcsa_label_python import GCSAFeatureCache, label_surface
         value = {}
@@ -872,11 +1159,22 @@ def _hemisphere_operation(subject, hemi, device, threads, operation, *, assets,
                   gibbs_backend=annotation_gibbs_backend)
     elif operation == 'finish_surface':
         value = step(f'finish_surface_{hemi}', _finish_cortical_surface, subject,
-                     hemi, binaries['metrics'], assets, device=device, threads=threads, defer_metrics=True,
-                     white_binary=binaries.get('white'))
+                     hemi, binaries.get('metrics'), assets, device=device, threads=threads, defer_metrics=True,
+                     white_binary=binaries.get('white'), surface_placement_backend=surface_placement_backend)
+    elif operation in ('final_white', 'pial_surface'):
+        if surface_placement_backend != 'python':
+            raise ValueError('split placement operations require the Python backend')
+        function = _finish_python_final_white if operation == 'final_white' else _finish_python_pial
+        value = step(f'{operation}_{hemi}', function, subject, hemi, device=device)
     else:
         raise ValueError(f'unknown hemisphere operation: {operation}')
     return {'result': value, 'stages': steps}
+
+
+def _validate_surface_placement_backend(backend: str) -> None:
+    """python完整自有放置/native固定源码参考；非法值在输出创建前报错。"""
+    if backend not in {"native", "python"}:
+        raise ValueError("surface_placement_backend must be native or python")
 
 
 def _validate_remesh_scalar_storage(storage: str) -> None:
@@ -957,14 +1255,17 @@ def _validate_inflate_backend(backend: str, device: str, hemisphere_workers: int
 def _validate_mni_execution(execution: str, device: str, threads: int) -> None:
     """校验完整MNI调度方式；不初始化CUDA或创建目录。
 
-    in-process保留默认；parallel-late须显式cuda:N且总线程至少2，
+    完整MNI只支持CUDA自有后处理，非CUDA在校验阶段报错，不回退原生
+    程序。in-process保留默认；parallel-late须显式cuda:N且总线程至少2，
     完成全部半球写出后才与CPU网格检查并行，caller autocast须关闭；非法
     组合抛ValueError，fresh exec不继承autocast而TF32策略保持。
     """
     if execution not in {"in-process", "parallel-late"}:
         raise ValueError("mni_execution must be in-process or parallel-late")
+    target = torch.device(device)
+    if target.type != "cuda":
+        raise ValueError("Complete MNI requires CUDA; choose an explicit cuda:N device. CPU reconstruction is unsupported without a validated Python MNI backend")
     if execution == "parallel-late":
-        target = torch.device(device)
         if target.type != "cuda" or target.index is None:
             raise ValueError("parallel-late MNI requires explicit cuda:N")
         if isinstance(threads, bool) or not isinstance(threads, int) or threads < 2:
@@ -988,6 +1289,29 @@ def _validate_sphere_finish_backend(backend: str, device: str, hemisphere_worker
             raise ValueError("torch sphere finish requires explicit cuda:N")
         if hemisphere_workers != 2:
             raise ValueError("torch sphere finish requires two cached hemisphere workers")
+
+
+def _validate_input_execution(execution: str, *, n4_backend: str,
+                              n4_execution: str, device: str, threads: int) -> None:
+    """创建输出前检查N4/SynthSeg调度；串行默认，无影像或设备初始化。
+
+    parallel仅支持完整SimpleITK N4、in-process算子、显式cuda:N及总4线程；
+    内部以fresh exec执行N4=1、SynthSeg=3，拟合固定1。调用方autocast
+    必须关闭，保留既有FP32例外；非法参数抛ValueError，无输出或物理单位。
+    """
+    if execution not in {"serial", "parallel"}:
+        raise ValueError("input_execution must be serial or parallel")
+    if execution == "parallel":
+        target = torch.device(device)
+        if n4_backend != "simpleitk" or n4_execution != "in-process":
+            raise ValueError("parallel input requires simpleitk N4 with in-process execution")
+        if target.type != "cuda" or target.index is None:
+            raise ValueError("parallel input requires explicit cuda:N")
+        if isinstance(threads, bool) or not isinstance(threads, int) or threads != 4:
+            raise ValueError("parallel input requires total threads=4")
+        from .profiling import autocast_state
+        if any(autocast_state(kind)["enabled"] for kind in ("cpu", "cuda")):
+            raise ValueError("parallel input requires caller autocast disabled")
 
 
 def _complete_output_validation(subject: Path, stage, *, late_mni_options: dict | None = None) -> dict:
@@ -1028,6 +1352,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          native_optimizations: str = "auto",
                          n4_backend: str = "native",
                          n4_execution: str = "in-process",
+                         input_execution: str = "serial",
                          normalization_controls_backend: str = "cpu",
                          normalization_initial_bias_backend: str = "cpu",
                          wm_backend: str = "native",
@@ -1037,6 +1362,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          sphere_normals_backend: str = "numba",
                          inflate_backend: str = "native",
                          sphere_finish_backend: str = "cpu",
+                         surface_placement_backend: str = "native",
+                         topology_backend: str = "native",
                          annotation_gibbs_backend: str = "python",
                          remesh_scalar_storage: str = "numpy",
                          mni_execution: str = "in-process",
@@ -1053,6 +1380,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     n4_backend默认native保留Conda ITK；torch复用完整200轮PyTorch N4。
     n4_execution默认in-process；isolated仅Torch/cuda:N，完整缓存exec
     保留父CUDA/精度，输入输出SHA、实际迭代和子显存另记，不读取参考。
+    input_execution默认serial；parallel以1+3线程并行完整SimpleITK N4和
+    SynthSeg GPU，须总threads=4；复用同orig及完整标签/CSV，后续不重算。
     normalization_controls_backend默认cpu；torch复用两轮归一化的GPU邻域，
     须显式cuda:N。控制点规则、有序离群清理及其余偏置步骤保持原算法。
     normalization_initial_bias_backend默认cpu；torch只在第二轮复用GPU
@@ -1060,6 +1389,14 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     inflate_backend默认native；torch复用完整标准inflated/sulc GPU算法，
     仅支持显式cuda:N和hemisphere_workers=2，在surface子exec局部启用
     缓存。nofix、球面优化/配准和父进程CUDA策略保持，失败不回退。
+    surface_placement_backend默认native；python复用完整四轮preaparc、
+    最终white与pial，不执行放置程序或white能力探测；CPU有序计算保留，
+    CUDA只迁移完整候选与相交标记，默认400步保护且失败不回退。
+    接入/输入输出/真实回归见PYTHON_SURFACE_PIPELINE.md。
+    topology_backend默认native；backend=python将缺省解析为数字拓扑，
+    显式python-ga保留完整自有GA选择。GA CPU有序核使用半球实际threads，
+    必须通过完整标准remesh、相交清理和最终orig门后才继续放置；不调用
+    原拓扑程序。GA逐阶段回归与原始T1整例分别记录。
     sphere_finish_backend默认cpu；torch仅将标准sphere完整dense收尾迁往
     主CUDA，须cuda:N和两个fresh缓存worker，投影/停止和其余球面算法保持。
     annotation_gibbs_backend默认python；numba复用完整有序Gibbs核，
@@ -1078,7 +1415,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     defects_backend=native 使用原生投射；torch 使用完整 PyTorch 投射，仍按
     左侧清零、右侧合并执行。标签值/空间保持，随机调色板改为固定颜色。
     wm_edit_backend 默认 native；torch-hybrid 将完整 WM/aseg 编辑的静态
-    子步骤交给 CUDA，有序反馈仍复用 Numba CPU，几何/存储 guard 失败即报错。
+    子步骤交给 CUDA，有序反馈仍复用 Numba CPU。python使用完整CPU配方。
+    路径几何证明失败时执行完整源序搜索；不支持的存储/网格仍报错。
     sphere_normals_backend 默认 numba；torch 只替换标准 sphere 的有序面法向，
     完整目标函数、迭代决策及 CPU finish 保持。两个实验后端均要求 CUDA。
     wm_backend=torch-optimized复用Torch直方图与缓存平面几何，有序反馈为Numba。
@@ -1110,8 +1448,31 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     _validate_mni_execution(mni_execution, device, threads)
     from .input_n4_chain import validate_n4_execution
     validate_n4_execution(n4_backend=n4_backend, n4_execution=n4_execution, device=device)
-    if backend not in {"native", "python-gpu"}:
-        raise ValueError("backend must be native or python-gpu")
+    _validate_input_execution(input_execution, n4_backend=n4_backend,
+                              n4_execution=n4_execution, device=device, threads=threads)
+    if backend not in {"native", "python", "python-gpu"}:
+        raise ValueError("backend must be native, python or python-gpu")
+    if topology_backend not in {"native", "python", "python-ga"}:
+        raise ValueError("topology_backend must be native, python or python-ga")
+    if backend == "python":
+        from .python_profile import python_profile_options
+        expected = python_profile_options(device=device, threads=threads,
+                                          n4_backend=n4_backend, n4_execution=n4_execution,
+                                          topology_backend=topology_backend, input_execution=input_execution)
+        actual = {"native_optimizations": native_optimizations, "n4_backend": n4_backend,
+                  "n4_execution": n4_execution, "wm_backend": wm_backend, "wm_execution": wm_execution,
+                  "wm_edit_backend": wm_edit_backend, "defects_backend": defects_backend,
+                  "inflate_backend": inflate_backend, "surface_placement_backend": surface_placement_backend,
+                  "topology_backend": topology_backend, "annotation_gibbs_backend": annotation_gibbs_backend,
+                  "remesh_scalar_storage": remesh_scalar_storage, "fill_backend": fill_backend,
+                  "gca_execution": gca_execution, "gca_inverse_backend": gca_inverse_backend,
+                  "gca_candidate_chunk": gca_candidate_chunk,
+                  "normalization_controls_backend": normalization_controls_backend,
+                  "normalization_initial_bias_backend": normalization_initial_bias_backend,
+                  "sphere_finish_backend": sphere_finish_backend, "mni_execution": mni_execution,
+                  "hemisphere_workers": hemisphere_workers, "input_execution": input_execution}
+        if actual != expected:
+            raise ValueError("Python profile requires its complete own implementation recipe")
     if wm_backend not in {"native", "torch", "torch-optimized"}:
         raise ValueError("wm_backend must be native, torch or torch-optimized")
     if wm_backend != "native" and not str(device).startswith("cuda"):
@@ -1134,8 +1495,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         raise ValueError("fill_backend must be python, numba or torch-numba")
     if fill_backend == "torch-numba" and not str(device).startswith("cuda"):
         raise ValueError("fill_backend='torch-numba' requires an explicit CUDA device")
-    if wm_edit_backend not in {"native", "torch-hybrid"}:
-        raise ValueError("wm_edit_backend must be native or torch-hybrid")
+    if wm_edit_backend not in {"native", "python", "torch-hybrid"}:
+        raise ValueError("wm_edit_backend must be native, python or torch-hybrid")
     if wm_edit_backend == "torch-hybrid" and not str(device).startswith("cuda"):
         raise ValueError("wm_edit_backend='torch-hybrid' requires an explicit CUDA device")
     if defects_backend not in {"native", "torch"}:
@@ -1152,6 +1513,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         from .python_gpu_profile import require_complete
         require_complete(device=device)
     started = time.perf_counter()
+    from .input_n4_chain import require_n4_runtime_dependencies
+    n4_dependencies = require_n4_runtime_dependencies(n4_backend=n4_backend)
     from .hemisphere_parallel import validate_hemisphere_workers
     validate_hemisphere_workers(hemisphere_workers, threads)
     from .profiling import StageProfiler, configure_cuda_allocator, autocast_state
@@ -1189,28 +1552,55 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     if not verify_file(deform_weight, deform_size, deform_sha256):
         raise ValueError(f"Missing or invalid nonlinear registration weight: {deform_weight}")
     validate_core_assets(assets)
-    native_bin_dir = _native_bin_directory(native_bin_dir)
-    native_em = _native_em_register_binary(native_bin_dir)
+    _validate_surface_placement_backend(surface_placement_backend)
+    # Independent Python execution must not inspect an installed upstream program directory.
+    native_bin_dir = (Path(sys.prefix) / "bin" if backend == "python"
+                      else _native_bin_directory(native_bin_dir))
     n4_binary = (_native_binary(native_bin_dir, "fnit_n4_itk")
                  if n4_backend == "native" else None)
-    topology_binary = _native_topology_binary(native_bin_dir)
-    metrics_binary = _native_surface_metrics_binary(native_bin_dir)
+    topology_binary = (_native_topology_binary(native_bin_dir)
+                       if topology_backend == "native" else (None, None))
+    metrics_binary = (_native_surface_metrics_binary(native_bin_dir)
+                      if surface_placement_backend == "native" else (None, None))
     from .native_runtime_selection import select_native_optimizations
-    native_selection = select_native_optimizations(native_bin_dir, threads=threads,
-                                                   mode=native_optimizations, device=device)
-    white_binary = _native_binary(native_bin_dir, Path(native_selection["white_binary"]).name)
-    inflate_binary = _native_inflate_binary(native_bin_dir)
-    intersection_binary = _native_binary(native_bin_dir, "mris_remove_intersection")
-    paint_binary = _native_binary(native_bin_dir, "mrisp_paint")
-    curvature_stats_binary = _native_binary(native_bin_dir, "mris_curvature_stats")
+    if backend == "python":
+        from .execution_recipe import python_runtime_selection
+        native_selection = python_runtime_selection()
+    else:
+        native_selection = select_native_optimizations(native_bin_dir, threads=threads,
+                                                       mode=native_optimizations, device=device,
+                                                       include_white=surface_placement_backend == "native")
+    native_em = (_native_em_register_binary(native_bin_dir)
+                 if native_selection["em_backend"] != "torch" else (None, None))
+    white_binary = (_native_binary(native_bin_dir, Path(native_selection["white_binary"]).name)
+                    if surface_placement_backend == "native" else (None, None))
+    inflate_binary = (_native_inflate_binary(native_bin_dir)
+                      if surface_placement_backend == "native" or inflate_backend == "native" else (None, None))
+    # The complete Python intersection interface never executes this compatibility argument.
+    intersection_binary = (None, None)
+    paint_binary = (_native_binary(native_bin_dir, "mrisp_paint")
+                    if surface_placement_backend == "native" else (None, None))
+    curvature_stats_binary = (_native_binary(native_bin_dir, "mris_curvature_stats")
+                              if surface_placement_backend == "native" else (None, None))
     defect_binary = (_native_binary(native_bin_dir, "mri_label2vol")
                      if defects_backend == "native" else None)
-    warp_binaries = tuple(_native_binary(native_bin_dir, name) for name in
-                          ("mri_warp_convert", "mri_ca_register", "mri_convert"))
+    # Complete MNI uses the own GPU implementation in both reconstruction profiles.
+    warp_binaries = ((None, None),) * 3
     wm_segment_binary = (_native_binary(native_bin_dir, "mri_segment")
                          if wm_backend == "native" else None)
     wm_edit_binary = (_native_binary(native_bin_dir, "mri_edit_wm_with_aseg")
                       if wm_edit_backend == "native" else None)
+    from .execution_recipe import validate_program_boundary, execution_dag
+    validate_program_boundary(backend=backend, programs={
+        "n4": n4_binary[0] if n4_binary else None,
+        "topology": topology_binary[0], "metrics": metrics_binary[0],
+        "em": native_em[0], "white": white_binary[0],
+        "inflate": inflate_binary[0], "intersection": intersection_binary[0],
+        "paint": paint_binary[0], "curvature_stats": curvature_stats_binary[0],
+        "defects": defect_binary[0] if defect_binary else None,
+        "wm_segment": wm_segment_binary[0] if wm_segment_binary else None,
+        "wm_edit": wm_edit_binary[0] if wm_edit_binary else None,
+        **{f"warp_{i}": value[0] for i, value in enumerate(warp_binaries)}})
     registration_atlases = {hemi: _folding_atlas(assets, hemi)
                             for hemi in ("lh", "rh")}
     if torch.device(device).type == "cuda":
@@ -1221,6 +1611,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     profile = "single-t1-standard"
     caller_autocast = {kind: autocast_state(kind) for kind in ("cpu", "cuda")}
     report: dict = {"profile": profile, "input": str(t1),
+                    "n4_runtime_dependencies": n4_dependencies,
                     "subject_dir": str(subject), "device": device,
                     "backend": backend,
                     "n4_binary": ({"binary": str(n4_binary[0]),
@@ -1244,12 +1635,23 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                                "validation_seconds": validation_seconds},
                     "stages": [], "status": "running"}
     report["hemisphere_scheduling"] = {"workers": hemisphere_workers, "total_thread_budget": threads, "groups": [], "mode": "serial" if hemisphere_workers == 1 else "independent-exec-private-subjects"}
+    report["execution_dag"] = execution_dag(threads=threads, input_execution=input_execution,
+        mni_execution=mni_execution, hemisphere_workers=hemisphere_workers, backend=backend)
+    if backend == "python":
+        report["implementation_profile"] = {"name": "python", "declared_original_stage_programs": [],
+            "options": expected, "cpu_python_kernels_allowed": True,
+            "generic_python_libraries_allowed": True,
+            "topology_algorithm": ("FNIT complete ordered genetic topology" if topology_backend == "python-ga"
+                                   else "ordered digital topology; different from GA"),
+            "strict_reproduction": "reported_separately", "overall_metric_equivalence": "not_assessed"}
     report["n4_configuration"] = {
         "backend": n4_backend, "execution": n4_execution,
-        "implementation": "Conda ITK" if n4_backend == "native" else "FNIT complete PyTorch N4",
-        "device": "cpu" if n4_backend == "native" else device,
+        "implementation": ("Conda ITK" if n4_backend == "native" else
+                           "SimpleITK Python API; generic ITK library, no stage executable" if n4_backend == "simpleitk"
+                           else "FNIT complete PyTorch N4"),
+        "device": device if n4_backend == "torch" else "cpu",
         "production_default_changed": False,
-        "known_strict_intensity_differences": n4_backend == "torch"}
+        "known_strict_intensity_differences": n4_backend in {"torch", "simpleitk"}}
     report["normalization_configuration"] = {
         "controls_neighbor_backend": normalization_controls_backend,
         "initial_bias_backend": normalization_initial_bias_backend,
@@ -1264,7 +1666,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     report["gca_registration"] = {
         "implementation": ("FNIT PyTorch candidate scorer + Python EM"
                            if gca_backend == "torch" else "native-c++"),
-        "binary": str(native_em[0]), "sha256": native_em[1],
+        "binary": str(native_em[0]) if native_em[0] is not None else None, "sha256": native_em[1],
         "backend": gca_backend,
         "inverse_backend": gca_inverse_backend if gca_backend == "torch" else None,
         "candidate_chunk": gca_candidate_chunk if gca_backend == "torch" else None,
@@ -1273,29 +1675,45 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         "strict_native_em": gca_backend != "torch"}
     report["native_optimizations"] = native_selection
     report["topology_repair"] = {
-        "implementation": "native-c++", "binary": str(topology_binary[0]),
+        "implementation": ("FNIT complete ordered genetic topology; Python/Numba CPU" if topology_backend == "python-ga"
+                           else "FNIT ordered digital topology; different complete algorithm" if topology_backend == "python"
+                           else "native-c++"),
+        "backend": topology_backend,
+        "strict_GA_reproduction": topology_backend == "native",
+        "metric_equivalence": "not_assessed" if topology_backend != "native" else "reported_separately",
+        "strict_numerical_validation": "reported_separately",
+        "binary": str(topology_binary[0]) if topology_binary[0] is not None else None,
         "sha256": topology_binary[1],
-        "intersection_binary": str(intersection_binary[0]),
+        "intersection_implementation": "FNIT Python/Numba complete SOAP; residual intersections fail",
+        "intersection_binary": None,
         "intersection_sha256": intersection_binary[1],
         "upstream": "intensity-derived WM and aseg-guided fill"}
     report["white_matter_chain"] = {
-        "implementation": ("FNIT PyTorch hybrid segmentation + Conda C++ edit"
-                           if wm_backend != "native" else "Python + Conda C++"),
+        "implementation": (
+            ("FNIT PyTorch hybrid segmentation" if wm_backend != "native"
+             else "Conda C++ segmentation") + " + " +
+            ("Conda C++ edit" if wm_edit_binary else
+             "Python/Numba CPU edit" if wm_edit_backend == "python" else
+             "ordered Numba + PyTorch CUDA edit")),
         "mri_segment_sha256": wm_segment_binary[1] if wm_segment_binary else None,
         "segmentation_backend": wm_backend,
         "segmentation_execution": wm_execution if wm_backend != "native" else "native-subprocess",
         "edit_backend": wm_edit_backend,
-        "edit_implementation": "Conda C++" if wm_edit_binary else "ordered Numba + PyTorch CUDA",
+        "edit_implementation": ("Conda C++" if wm_edit_binary else
+                                "Python/Numba CPU" if wm_edit_backend == "python" else "ordered Numba + PyTorch CUDA"),
         "mri_edit_wm_with_aseg_sha256": wm_edit_binary[1] if wm_edit_binary else None}
     report["white_preaparc"] = {
-        "implementation": "Python MNI/aux/finalsurfs + Conda C++ placement",
-        "binary": str(white_binary[0]), "sha256": white_binary[1],
+        "implementation": ("FNIT Python/Numba + Torch candidates/cleanup" if surface_placement_backend == "python"
+                           else "Python MNI/aux/finalsurfs + Conda C++ placement"),
+        "backend": surface_placement_backend,
+        "binary": str(white_binary[0]) if white_binary[0] is not None else None, "sha256": white_binary[1],
         "final_smoothwm": "Python 3 passes on CPU",
-        "final_white_pial": "Conda source-built C++ white and pial after annotation"}
+        "final_white_pial": ("FNIT complete Python/Numba white and pial after annotation"
+                             if surface_placement_backend == "python" else "Conda source-built C++ white and pial after annotation")}
     report["surface_metrics"] = {
-        "implementation": ("PyTorch CUDA" if torch.device(device).type == "cuda"
+        "implementation": ("FNIT PyTorch " + str(device) if torch.device(device).type == "cuda" or surface_placement_backend == "python"
                            else "Conda source-built C++"),
-        "binary": str(metrics_binary[0]),
+        "binary": str(metrics_binary[0]) if metrics_binary[0] is not None else None,
         "sha256": metrics_binary[1], "upstream": "placed final white/pial"}
     report["annotation"] = {"gibbs_backend": annotation_gibbs_backend,
         "geometry_device": device, "ordered_feedback_device": "cpu",
@@ -1305,13 +1723,13 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         "scalar_storage": remesh_scalar_storage, "precision": "float64; no precision reduction",
         "iterations": 3, "topology_and_update_order": "unchanged"}
     report["sphere_generation"] = {
-        "implementation": ("FNIT Torch standard inflate + Conda nofix inflate + Python quick/standard sphere"
-                           if inflate_backend == "torch" else
-                           "Conda mris_inflate + Python quick/standard sphere"),
-        "mris_inflate": {"binary": str(inflate_binary[0]), "sha256": inflate_binary[1]},
+        "implementation": "FNIT quick/standard sphere; explicit nofix and standard inflation backends",
+        "mris_inflate": {"binary": str(inflate_binary[0]) if inflate_binary[0] is not None else None,
+                         "sha256": inflate_binary[1]},
         "normals_backend": sphere_normals_backend,
         "standard_inflate_backend": inflate_backend,
-        "nofix_inflate_backend": "native",
+        "nofix_inflate_backend": ("torch" if torch.device(device).type == "cuda" else "numpy")
+                                if surface_placement_backend == "python" else "native",
         "surface_worker_cache": "enabled" if inflate_backend == "torch" or sphere_finish_backend == "torch" else "inherit",
         "normals_device": device if sphere_normals_backend == "torch" else "cpu",
         "finish_backend": sphere_finish_backend,
@@ -1325,7 +1743,10 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         "hemisphere_seconds": {}, "reports": {}}
     report["extra_curvature"] = {
         "mrisp_paint_sha256": paint_binary[1],
-        "mris_curvature_stats_sha256": curvature_stats_binary[1]}
+        "paint_backend": "python-numba-cpu" if surface_placement_backend == "python" else "native",
+        "mris_curvature_stats_sha256": curvature_stats_binary[1],
+        "statistics_backend": "python" if surface_placement_backend == "python" else "native",
+        "reports": {}}
     report["defects_volume"] = ({"backend": "native", "binary": str(defect_binary[0]),
                                  "sha256": defect_binary[1]} if defect_binary else
                                 {"backend": "torch", "device": device,
@@ -1335,16 +1756,13 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         report["defects_volume"]["source_sha256"] = hashlib.sha256(
             Path(defects_label_volume_torch.__file__).read_bytes()).hexdigest()
     report["mni_nonlinear"] = {
-        "implementation": ("PyTorch deform + FNIT GPU warp conversion/inversion/check"
-                           if torch.device(device).type == "cuda" else
-                           "PyTorch deform + Conda source-built warp conversion"),
-        "postprocess_backend": "gpu" if torch.device(device).type == "cuda" else "conda",
-        "native_programs_used": torch.device(device).type != "cuda",
+        "implementation": "PyTorch deform + FNIT GPU warp conversion/inversion/check",
+        "postprocess_backend": "gpu",
+        "native_programs_used": False,
         "execution": mni_execution,
         "device": device,
-        "precision": "FP32 CUDA exception" if torch.device(device).type == "cuda" else "FP32 CPU",
-        "native_sha256": {name: binary[1] for name, binary in zip(
-            ("mri_warp_convert", "mri_ca_register", "mri_convert"), warp_binaries)}}
+        "precision": "FP32 CUDA exception",
+        "native_sha256": {}}
 
     profiler = StageProfiler(device=device, synchronize=profile_stages, allocator=allocator)
 
@@ -1406,13 +1824,29 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     nu0 = mri / "tmp/nu0.mgz"
     from .input_n4_chain import run_n4_stage
     n4_profile = subject / "scripts/n4.profile.json"
-    report["n4_runtime"] = stage(
-        "n4", run_n4_stage, input_path=mri / "orig.mgz", output_path=nu0,
-        n4_backend=n4_backend, n4_execution=n4_execution,
-        native_binary=n4_binary[0] if n4_binary else None,
-        device=device, threads=threads, profile=profile_stages,
-        report_path=subject / "scripts/n4-isolated.json" if n4_execution == "isolated"
-        else n4_profile if n4_backend == "native" else None)
+    precomputed_synthseg = None
+    report["input_execution"] = input_execution
+    if input_execution == "parallel":
+        from .input_stage_parallel import run_input_stage_group
+        report["input_parallel"] = stage(
+            "n4_synthseg_parallel", run_input_stage_group,
+            orig_path=mri / "orig.mgz", n4_output=nu0,
+            segmentation_output=mri / "synthseg.rca.mgz",
+            volumes_output=stats / "synthseg.vol.csv", weights_dir=weights,
+            color_lut=assets / "FreeSurferColorLUT.txt",
+            report_path=subject / "scripts/n4-synthseg-parallel.json",
+            device=device, threads=threads, execution="parallel",
+            profile_stages=profile_stages)
+        report["n4_runtime"] = report["input_parallel"]["workers"]["n4"]["value"]
+        precomputed_synthseg = report["input_parallel"]["workers"]["synthseg"]["value"]
+    else:
+        report["n4_runtime"] = stage(
+            "n4", run_n4_stage, input_path=mri / "orig.mgz", output_path=nu0,
+            n4_backend=n4_backend, n4_execution=n4_execution,
+            native_binary=n4_binary[0] if n4_binary else None,
+            device=device, threads=threads, profile=profile_stages,
+            report_path=subject / "scripts/n4-isolated.json" if n4_execution == "isolated"
+            else n4_profile if n4_backend in {"native", "simpleitk"} else None)
     stage("nu", make_nu, mri / "orig.mgz", nu0,
           initial["talairach_xfm"], mri / "nu.mgz")
     stage("T1_normalize", normalize_t1, mri / "nu.mgz",
@@ -1433,13 +1867,18 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         result.write_volumes_csv(mri / "orig.mgz", stats / "synthseg.vol.csv")
         return result
 
-    try:
-        result = stage("SynthSeg", run_synthseg_and_write)
-    finally:
-        if torch.device(device).type == "cuda":
-            torch.cuda.empty_cache()
-    stiv_mm3 = result.total_intracranial_mm3
-    report["precision"]["SynthSeg_actual_forward"] = result.precision
+    if precomputed_synthseg is None:
+        try:
+            result = stage("SynthSeg", run_synthseg_and_write)
+        finally:
+            if torch.device(device).type == "cuda":
+                torch.cuda.empty_cache()
+        stiv_mm3 = result.total_intracranial_mm3
+        report["precision"]["SynthSeg_actual_forward"] = result.precision
+    else:
+        # 完整分割和CSV已由组worker写出；这里只消费元数据，不读参考或重复模型。
+        stiv_mm3 = precomputed_synthseg["total_intracranial_mm3"]
+        report["precision"]["SynthSeg_actual_forward"] = precomputed_synthseg["precision"]
     lta = mri / "transforms/talairach.lta"
     gca = assets / "average/RB_all_2020-01-02.gca"
     report["gca_registration"]["stage_result"] = stage(
@@ -1490,6 +1929,9 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     if wm_edit_backend == "torch-hybrid":
         report["white_matter_chain"]["edit_runtime"] = stage(
             "mri_edit_wm_with_aseg", _run_torch_wm_edit, mri, device=device)
+    elif wm_edit_backend == "python":
+        report["white_matter_chain"]["edit_runtime"] = stage(
+            "mri_edit_wm_with_aseg", _run_python_wm_edit, mri)
     else:
         stage("mri_edit_wm_with_aseg", _run_native_wm_edit,
               wm_edit_binary[0], mri, assets)
@@ -1531,26 +1973,34 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     if hemisphere_workers == 2:
         from .hemisphere_parallel import run_hemisphere_group, HemisphereGroupError
         common = {'assets': str(assets),
+                  'profile_stages': profile_stages,
                   'sphere_normals_backend': sphere_normals_backend,
                   'inflate_backend': inflate_backend,
                   'sphere_finish_backend': sphere_finish_backend,
+                  'surface_placement_backend': surface_placement_backend,
+                  'topology_backend': topology_backend,
                   'annotation_gibbs_backend': annotation_gibbs_backend,
                   'remesh_scalar_storage': remesh_scalar_storage,
                   'binaries': {name: str(value) for name, value in (
-                      ('topology', topology_binary[0]), ('inflate', inflate_binary[0]),
-                      ('intersection', intersection_binary[0]), ('metrics', metrics_binary[0]),
-                      ('white', white_binary[0]),
+                      *((('topology', topology_binary[0]),) if topology_binary[0] is not None else ()),
+                      *((('inflate', inflate_binary[0]),) if inflate_binary[0] is not None else ()),
+                      *((('metrics', metrics_binary[0]), ('white', white_binary[0]))
+                        if surface_placement_backend == "native" else ()),
                       *((('defect', defect_binary[0]),) if defect_binary else ()),
-                      ('paint', paint_binary[0]))},
+                      *((('paint', paint_binary[0]),) if paint_binary[0] is not None else ()) )},
                   'registration_atlases': {hemi: str(path) for hemi, path in registration_atlases.items()}}
-        for operation in ('surface', 'register', 'annotation', 'finish_surface'):
+        placement_operations = (('final_white', 'pial_surface')
+                                if surface_placement_backend == 'python'
+                                else ('finish_surface',))
+        for operation in ('surface', 'register', 'annotation', *placement_operations):
             try:
                 group = stage(f'{operation}_hemisphere_group', run_hemisphere_group,
                               subject, operation, device=str(registration_device), threads=threads,
                               workers=hemisphere_workers, profile_stages=profile_stages, kwargs=common,
-                              cuda_allocator_cache=("enabled" if operation == "surface" and
-                                                    (inflate_backend == "torch" or
-                                                     sphere_finish_backend == "torch") else "inherit"))
+                              cuda_allocator_cache=("enabled" if operation == "final_white" or
+                                                    (operation == "surface" and
+                                                     (inflate_backend == "torch" or
+                                                      sphere_finish_backend == "torch")) else "inherit"))
             except HemisphereGroupError as error:
                 report['hemisphere_scheduling']['groups'].append(error.report)
                 try:
@@ -1568,13 +2018,14 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                 elif operation == 'register':
                     report['sphere_registration']['hemisphere_seconds'][hemi] = result['total_seconds_including_io']
                     report['sphere_registration']['reports'][hemi] = result
-                elif operation == 'finish_surface':
+                elif operation in ('finish_surface', 'final_white', 'pial_surface'):
                     report['surfaces'][hemi].update(result)
-            if operation == 'finish_surface':
+            if operation in ('finish_surface', 'pial_surface'):
                 # 实测GPU顶点指标独立exec并行更慢；放置并行、指标串行。
                 for hemi in ('lh', 'rh'):
                     metrics_result = stage(f'finish_metrics_{hemi}', _finish_cortical_metrics,
-                          subject, hemi, metrics_binary[0], assets, device=device)
+                          subject, hemi, metrics_binary[0], assets, device=device,
+                          python_only=surface_placement_backend == "python")
                     report['surfaces'][hemi].update(metrics_result)
             if operation == 'surface':
                 # 此诊断无下游计算依赖，但左右累计有先后依赖。
@@ -1597,7 +2048,9 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                            assets=assets, defects_backend=defects_backend,
                            sphere_normals_backend=sphere_normals_backend, inflate_backend=inflate_backend,
                            sphere_finish_backend=sphere_finish_backend,
-                           remesh_scalar_storage=remesh_scalar_storage)
+                           remesh_scalar_storage=remesh_scalar_storage,
+                           surface_placement_backend=surface_placement_backend,
+                           topology_backend=topology_backend)
             report.setdefault("surfaces", {})[hemi] = result
             (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
 
@@ -1608,12 +2061,14 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                            surf / f"{hemi}.sphere", surf / f"{hemi}.smoothwm",
                            surf / f"{hemi}.sulc", registration_atlases[hemi],
                            surf / f"{hemi}.sphere.reg", overlap_device="cpu",
-                           averaging_device=str(registration_device))
+                           averaging_device=str(registration_device),
+                           require_unfolded=surface_placement_backend == "python")
             report["sphere_registration"]["hemisphere_seconds"][hemi] = result[
                 "total_seconds_including_io"]
             report["sphere_registration"]["reports"][hemi] = result
             stage(f"avg_curv_{hemi}", _run_avg_curv, paint_binary[0], subject,
-                  hemi, registration_atlases[hemi], assets)
+                  hemi, registration_atlases[hemi], assets,
+                  python_only=surface_placement_backend == "python")
 
         for hemi in ("lh", "rh"):
             cache = stage(f"annot_{hemi}_prepare", GCSAFeatureCache,
@@ -1631,7 +2086,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         for hemi in ("lh", "rh"):
             result = stage(f"finish_surface_{hemi}", _finish_cortical_surface,
                            subject, hemi, metrics_binary[0], assets,
-                           device=device, threads=threads, white_binary=white_binary[0])
+                           device=device, threads=threads, white_binary=white_binary[0],
+                           surface_placement_backend=surface_placement_backend)
             report["surfaces"][hemi].update(result)
             (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
     stage("exvivo_annotations", _project_exvivo_annotations, subject, assets)
@@ -1685,8 +2141,9 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         from .segstats_surface_snr_python import write_surface_snr_stats
         stage(f"stats_{hemi}_w-g.pct", write_surface_snr_stats,
               subject, hemi, stats / f"{hemi}.w-g.pct.stats")
-        stage(f"stats_{hemi}_curv", _run_curvature_stats,
-              curvature_stats_binary[0], subject, hemi, assets)
+        report["extra_curvature"]["reports"][hemi] = stage(f"stats_{hemi}_curv", _run_curvature_stats,
+              curvature_stats_binary[0], subject, hemi, assets, device=device,
+              python_only=surface_placement_backend == "python")
     late_mni_options = None
     if mni_execution == "parallel-late":
         late_mni_options = {"subject": subject, "weights": weights, "assets": assets,
@@ -1719,6 +2176,7 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          native_optimizations: str = "auto",
                          n4_backend: str = "native",
                          n4_execution: str = "in-process",
+                         input_execution: str = "serial",
                          normalization_controls_backend: str = "cpu",
                          normalization_initial_bias_backend: str = "cpu",
                          wm_backend: str = "native",
@@ -1728,6 +2186,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          sphere_normals_backend: str = "numba",
                          inflate_backend: str = "native",
                          sphere_finish_backend: str = "cpu",
+                         surface_placement_backend: str = "native",
+                         topology_backend: str = "native",
                          annotation_gibbs_backend: str = "python",
                          remesh_scalar_storage: str = "numpy",
                          mni_execution: str = "in-process",
@@ -1744,14 +2204,24 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     hemisphere_workers=1保持串行，2启用私有被试目录的双侧 exec 进程，
     总 threads 平分，须至少2；返回 hemisphere_scheduling 组墙钟/worker报告，
     所有共享发布失败均传播到主报告。并行要求 caller autocast 关闭。
-    backend=native 使用当前已验证的混合 FNIT/Conda 实现；backend=python-gpu
+    backend=python选择完整独立Python候选：SimpleITK N4、自产WM/编辑、
+    完整数字拓扑、white/pial、inflation、图谱与统计；允许有序CPU核。
+    此配方固定双侧worker=2及其后端，忽略这些逐阶段后端的混合默认；
+    不读取native_bin_dir或执行原程序。topology_backend缺省解析为数字
+    python；显式python-ga使用完整自有GA及最终orig门，按半球线程预算
+    执行，保留原域缺陷标签及WM写出头，不重复remesh。数字拓扑不同于FS GA，严格复现、
+    整体指标等效和整例墙钟须独立评估，不能仅凭无外程认定验收。
+    backend=native 使用当前已验证的混合 FNIT/Conda 对照；backend=python-gpu
     是严格纯 Python/CUDA profile，若仍有未完成阶段会在创建输出前抛出结构化
     PurePythonGpuUnavailable，不回退到原生程序。native_optimizations=auto在CUDA使用已有Torch GCA评分+Python EM，CPU
     按原生产物能力选择缓存；white选择专用快速程序，pial保留原生。
     original固定原始原生实现。Torch GCA与原生仍有既有数值差异，单列报告。
-    n4_backend默认native，torch使用完整N4；n4_execution默认in-process，
+    n4_backend默认native，torch使用完整N4，simpleitk使用通用Python库；n4_execution默认in-process，
     isolated只允许Torch/cuda:N，复用局部缓存worker并记录完整阶段/子显存。
     非法组合在创建被试目录前报错，既有N4系统强度差异单列，不判整体等效。
+    input_execution默认serial，parallel只改变完整N4/SynthSeg调度：总4线程，
+    N4固定拟合1，SynthSeg GPU保留原图/翻转及FP32例外。二者只依赖同orig，
+    join后继续nu/归一化；分割不重复，父CUDA保持，失败整体传播。
     normalization_controls_backend=cpu保留原邻域；torch在两轮归一化复用
     同规则GPU邻域，须显式cuda:N，其余步骤/设备不变。实际选择写入报告。
     normalization_initial_bias_backend=cpu保留第二轮初始偏置；torch仅
@@ -1759,6 +2229,10 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     inflate_backend=native保留标准inflation；torch复用完整GPU算法生成
     同序inflated/sulc，须cuda:N与hemisphere_workers=2。仅surface组的
     fresh worker局部启用缓存；nofix、sphere及注册算法保持，父策略不变。
+    surface_placement_backend=native保留原放置；python接入已有完整四轮
+    preaparc/white/pial，并使用自有CPU顶点指标；CPU有序核允许保留，
+    CUDA候选/清理不改顺序、不回退或开启半精度，完整400步保护保持。
+    其他尚未替代阶段另记录，不能据此称整例脱离原版程序。
     sphere_finish_backend=cpu保留收尾，torch复用既有完整dense GPU收尾，
     要求cuda:N与两个隔离worker；局部缓存不改变父allocator/精度。
     非法组合在CUDA初始化和创建输出前抛ValueError，执行失败不回退。
@@ -1773,8 +2247,10 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     join后才检查138输出；同一原始scanner RAS毫米变换，失败传播。
     defects_backend=native 使用原生缺陷投射，torch 用本项目完整投射规则
     并保持双侧累积顺序；仅颜色表换成固定颜色，当前默认为 native。
-    wm_edit_backend=native 调用独立构建编辑程序；torch-hybrid 使用 CUDA
-    静态编辑和 Numba 有序核心，不是纯 GPU；输入证明不成立时抛异常。
+    wm_edit_backend=native 调用独立构建编辑程序；python使用完整Numba
+    CPU编辑；torch-hybrid 使用 CUDA 静态编辑和 Numba 有序核心，不是纯GPU。
+    路径几何证明失败时执行完整有序搜索，不支持的4字节存储/网格或
+    源内循环不再推进时报错。两例同输入解码0差、真实active未触发见WM_REMOVE_PATHS.md。
     wm_backend=torch-optimized复用已有Torch直方图和缓存平面几何；有序反馈仍CPU。
     wm_execution=in-process保留父策略，isolated只允许torch-optimized，
     使用完整缓存worker，不改变父CUDA/TF32，记录完整exec墙钟。
@@ -1804,6 +2280,27 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     差值为 None，并在 scope 中注明内部计时尚未完成，不推算缺失时间。
     """
     tick = time.perf_counter()
+    if backend == "python":
+        from .python_profile import python_profile_options
+        # 历史API缺省native在独立配方中解析为SimpleITK；显式Torch保持。
+        options = python_profile_options(device=device, threads=threads,
+            n4_backend="simpleitk" if n4_backend == "native" else n4_backend,
+            n4_execution=n4_execution,
+            topology_backend="python" if topology_backend == "native" else topology_backend,
+            input_execution=input_execution)
+        native_optimizations = options["native_optimizations"]
+        n4_backend, n4_execution = options["n4_backend"], options["n4_execution"]
+        wm_backend, wm_execution = options["wm_backend"], options["wm_execution"]
+        wm_edit_backend, defects_backend = options["wm_edit_backend"], options["defects_backend"]
+        inflate_backend = options["inflate_backend"]
+        surface_placement_backend, topology_backend = options["surface_placement_backend"], options["topology_backend"]
+        annotation_gibbs_backend, remesh_scalar_storage = options["annotation_gibbs_backend"], options["remesh_scalar_storage"]
+        gca_execution, gca_inverse_backend = options["gca_execution"], options["gca_inverse_backend"]
+        gca_candidate_chunk = options["gca_candidate_chunk"]
+        normalization_controls_backend = options["normalization_controls_backend"]
+        normalization_initial_bias_backend = options["normalization_initial_bias_backend"]
+        sphere_finish_backend, mni_execution = options["sphere_finish_backend"], options["mni_execution"]
+        fill_backend, hemisphere_workers = options["fill_backend"], options["hemisphere_workers"]
     _normalization_controls_options(normalization_controls_backend, device)
     _normalization_initial_bias_options(normalization_initial_bias_backend, device)
     _validate_inflate_backend(inflate_backend, device, hemisphere_workers)
@@ -1811,7 +2308,10 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     _validate_annotation_gibbs_backend(annotation_gibbs_backend)
     _validate_remesh_scalar_storage(remesh_scalar_storage)
     _validate_mni_execution(mni_execution, device, threads)
+    _validate_input_execution(input_execution, n4_backend=n4_backend,
+                              n4_execution=n4_execution, device=device, threads=threads)
     from .thread_budget import thread_budget
+    from .execution_recipe import original_stage_guard
 
     report_path = Path(subject_dir) / "fnit-native-free-run.json"
 
@@ -1824,12 +2324,14 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
             return None
 
     entry_version = report_version()
-    report = budget = pipeline_error = None
+    report = budget = pipeline_error = program_guard = None
 
     def record_public_timing(value: dict, wall: float) -> None:
         """更新本次公开入口的秒数/线程记录，最终元数据写出不计入 wall。"""
         if budget is not None:
             value["thread_budget"] = budget
+        if program_guard is not None:
+            value['stage_program_boundary'] = program_guard
         timing = value.setdefault("timing", {})
         timing["total_scope"] = (
             "API entry through validation, thread restoration, loading, transfers "
@@ -1848,7 +2350,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         value["total_seconds"] = wall
 
     try:
-        with thread_budget(threads=threads) as budget:
+        with original_stage_guard(enabled=backend == "python") as program_guard, \
+                thread_budget(threads=threads) as budget:
             try:
                 report = _run_recon_all_python(
                     t1=t1, subject_dir=subject_dir, weights_dir=weights_dir, assets_dir=assets_dir,
@@ -1858,6 +2361,7 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                     **({"native_optimizations": native_optimizations} if native_optimizations != "auto" else {}),
                     **({"n4_backend": n4_backend} if n4_backend != "native" else {}),
                     **({"n4_execution": n4_execution} if n4_execution != "in-process" else {}),
+                    **({"input_execution": input_execution} if input_execution != "serial" or backend == "python" else {}),
                     **({"normalization_controls_backend": normalization_controls_backend}
                        if normalization_controls_backend != "cpu" else {}),
                     **({"normalization_initial_bias_backend": normalization_initial_bias_backend}
@@ -1870,6 +2374,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                        if sphere_normals_backend != "numba" else {}),
                     **({"inflate_backend": inflate_backend} if inflate_backend != "native" else {}),
                     **({"sphere_finish_backend": sphere_finish_backend} if sphere_finish_backend != "cpu" else {}),
+                    **({"surface_placement_backend": surface_placement_backend} if surface_placement_backend != "native" else {}),
+                    **({"topology_backend": topology_backend} if topology_backend != "native" else {}),
                     **({"annotation_gibbs_backend": annotation_gibbs_backend}
                        if annotation_gibbs_backend != "python" else {}),
                     **({"remesh_scalar_storage": remesh_scalar_storage}
@@ -1880,6 +2386,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                     **({"gca_execution": gca_execution} if gca_execution != "in-process" else {}),
                     **({"fill_backend": fill_backend} if fill_backend != "python" else {}),
                     backend=backend)
+                if program_guard is not None:
+                    report['stage_program_boundary'] = program_guard
             except Exception as error:
                 pipeline_error = error
                 raise
@@ -1894,6 +2402,9 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
             if isinstance(report, dict):
                 record_public_timing(report, wall)
                 report.update(status="failed", error=repr(original_error))
+                quality = getattr(original_error, "diagnostics", None)
+                if isinstance(quality, dict):
+                    report["quality_failure"] = quality
                 if pipeline_error is None:
                     report["failed_stage"] = "thread_budget_restore"
                 else:
@@ -1921,10 +2432,12 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--assets-dir", type=Path, required=True)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--threads", type=int, default=4)
-    parser.add_argument("--n4-backend", choices=("native", "torch"), default="native",
-                        help="native Conda ITK or existing complete PyTorch N4; default unchanged")
+    parser.add_argument("--n4-backend", choices=("native", "torch", "simpleitk"), default="native",
+                        help="native benchmark wrapper, complete Torch N4, or SimpleITK Python API without stage executable")
     parser.add_argument("--n4-execution", choices=("in-process", "isolated"), default="in-process",
                         help="isolated only for Torch cuda:N; cached child preserves parent allocator")
+    parser.add_argument("--input-execution", choices=("serial", "parallel"), default="serial",
+                        help="parallel: complete SimpleITK N4 + SynthSeg CUDA, four threads split 1+3")
     parser.add_argument("--normalization-controls-backend", choices=("cpu", "torch"), default="cpu",
                         help="same-rule control-point neighbors; torch requires cuda:N, remaining solver unchanged")
     parser.add_argument("--normalization-initial-bias-backend", choices=("cpu", "torch"), default="cpu",
@@ -1937,6 +2450,10 @@ def main(argv: list[str] | None = None) -> None:
                         help="ordered GCSA reclassification; numba reuses the exact compiled feedback loop")
     parser.add_argument("--remesh-scalar-storage", choices=("numpy", "python"), default="numpy",
                         help="ordered CPU double-precision remesh storage; algorithm and update order preserved")
+    parser.add_argument("--surface-placement-backend", choices=("native", "python"), default="native",
+                        help="complete own Python/Numba white.preaparc, final white and pial; no original placement executable")
+    parser.add_argument("--topology-backend", choices=("native", "python", "python-ga"), default="native",
+                        help="python: 数字拓扑；python-ga: 完整自有有序GA，无原版程序，最终网格仍须验收")
     parser.add_argument("--sphere-finish-backend", choices=("cpu", "torch"), default="cpu",
                         help="existing full dense standard-sphere overlap cleanup; torch requires cuda:N and two cached surface workers")
     parser.add_argument("--native-bin-dir", type=Path)
@@ -1954,14 +2471,14 @@ def main(argv: list[str] | None = None) -> None:
                         help="isolated Torch GCA enables caching in a fresh child, preserving parent allocator")
     parser.add_argument("--fill-backend", choices=("python", "numba", "torch-numba"), default="python",
                         help="ordered fill; numba CPU heap, optionally CUDA initial boundary")
-    parser.add_argument("--wm-edit-backend", choices=("native", "torch-hybrid"), default="native",
+    parser.add_argument("--wm-edit-backend", choices=("native", "python", "torch-hybrid"), default="native",
                         help="native edit or ordered NumBa + Torch GPU edit, rejects unsupported byte-access paths")
     parser.add_argument("--defects-backend", choices=("native", "torch"), default="native",
                         help="native mri_label2vol or FNIT PyTorch exact voxel projection; colors differ")
     parser.add_argument("--sphere-normals-backend", choices=("numba", "torch"), default="numba",
                         help="ordered sphere normals on CPU or explicit CUDA; remaining solver unchanged")
-    parser.add_argument("--backend", choices=("native", "python-gpu"), default="native",
-                        help="native: current validated mixed pipeline; python-gpu: strict profile, fails before output while required ports are incomplete")
+    parser.add_argument("--backend", choices=("native", "python", "python-gpu"), default="native",
+                        help="python: complete own Python candidate including digital topology, CPU kernels allowed; native: mixed benchmark control; python-gpu: legacy strict CUDA capability diagnostic")
     parser.add_argument("--profile-stages", action="store_true",
                         help="record CUDA synchronization and parent/child CPU time")
     parser.add_argument("--cuda-allocator-cache", choices=("auto", "enabled", "disabled"),
@@ -1977,6 +2494,7 @@ def main(argv: list[str] | None = None) -> None:
                                   native_optimizations=args.native_optimizations,
                                   n4_backend=args.n4_backend,
                                   n4_execution=args.n4_execution,
+                                  input_execution=args.input_execution,
                                   normalization_controls_backend=args.normalization_controls_backend,
                                   normalization_initial_bias_backend=args.normalization_initial_bias_backend,
                                   wm_backend=args.wm_backend,
@@ -1986,6 +2504,8 @@ def main(argv: list[str] | None = None) -> None:
                                   sphere_normals_backend=args.sphere_normals_backend,
                                   inflate_backend=args.inflate_backend,
                                   sphere_finish_backend=args.sphere_finish_backend,
+                                  surface_placement_backend=args.surface_placement_backend,
+                                  topology_backend=args.topology_backend,
                                   annotation_gibbs_backend=args.annotation_gibbs_backend,
                                   remesh_scalar_storage=args.remesh_scalar_storage,
                                   mni_execution=args.mni_execution,

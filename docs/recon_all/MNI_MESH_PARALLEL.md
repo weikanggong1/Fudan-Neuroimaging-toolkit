@@ -4,6 +4,8 @@
 
 `run_mni_and_validate` 复用完整 MNI 非线性 GPU 后处理与当前生产 CPU 网格验证。两项计算读取的文件互不依赖，合并墙钟可以减少；所有必要输出和验证保持。仅在双侧表面、指标和统计阶段全部完成后调用，不在半球目录复制期间启动。
 
+2026-10-10移除CUDA路径对未消费原版程序的安装要求：`warp_binaries=(None,None,None)`有效；仅显式提供路径时记录哈希，GPU不执行这些程序。worker请求保留三槽和None，算法、模型及空间变换不变。接口修改的整例证据待本轮新运行，不沿用旧墙钟作为新提速。
+
 ```mermaid
 flowchart LR
     A[自产 orig / MNI crop / affine 与最终表面已完成] --> B[fresh exec MNI GPU 两线程]
@@ -27,11 +29,7 @@ parallel_result = run_mni_and_validate(
     subject=Path("subjects/sub06"),  # 已完成双侧表面与所有目录复制的自产被试目录
     weights=Path("resources/weights"),  # 经 SHA 校验的 SynthMorph deform 权重
     assets=Path("resources/assets"),  # 经 SHA 校验的完整及裁剪 MNI152 模板
-    warp_binaries=(  # 兼容原链的三个独立源码构建路径；GPU后端只记哈希，不执行
-        Path("resources/native/bin/mri_warp_convert"),
-        Path("resources/native/bin/mri_ca_register"),
-        Path("resources/native/bin/mri_convert"),
-    ),
+    warp_binaries=(None, None, None),  # GPU不调用原版程序，无需安装三个兼容程序
     report_path=Path("subjects/sub06/scripts/mni-mesh.json"),  # 新JSON，旁边保留worker日志
     device="cuda:1",  # 显式目标GPU；局部作用域处理当前设备可能为CUDA0的情况
     threads=4,  # 总计算线程预算；并行父2、子2
@@ -46,7 +44,7 @@ parallel_result = run_mni_and_validate(
 - `subject`：路径，必须包含 conform `mri/orig.mgz`、MNI目录中的 `invol.crop.nii.gz/aff.lta` 和双侧 `orig/white/pial/sphere.reg` 八个表面。orig 为原有 1 mm conform 网格；crop 保留 scanner RAS；表面为原有 surface RAS/mm 和有序面结构。
 - `weights`：路径，包含 `synthmorph.deform.3.h5`。不下载或修改权重。
 - `assets`：路径，包含既有 MNI152 cropped/full 1 mm模板。不替换空间或资产。
-- `warp_binaries`：三个路径，按转换/逆场/检查图的兼容顺序。只记录 SHA 和 `executed=false`，GPU 后处理不调用这些程序；文件须存在以完成版本记录。
+- `warp_binaries`：三个路径或 `None`，按转换/逆场/检查图的兼容顺序。GPU后处理不调用它们；`None` 不要求文件或记录程序哈希，显式路径须存在以完成版本记录。
 - `report_path`：不存在的新 JSON。创建旁边的 `.request.json/.worker.json/.worker.log`；不覆盖已有报告。
 - `device`：显式 `cuda:N`，必填，不静默回退 CPU。子进程保留调用者的可见设备映射。
 - `threads`：整数，默认4且至少2。parallel 使父进程取向下整除一半，子进程取余数；serial 两项各用全部预算。现有线程预算会恢复父 Torch/Numba 设置；子进程在导入库前约束 OMP/BLAS/Numba/ITK环境。控制/采样线程另有诊断范围，不据此保证每个库实际活跃线程都恒为预算值。

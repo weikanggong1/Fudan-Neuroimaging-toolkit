@@ -1,0 +1,633 @@
+{
+  "scope": "native same-input full GA repeat and printed first-defect controls; not own full-GA geometry comparison",
+  "script_sha256": "8857cc73b3de777df83848b8c199b0b6d172e1e45c0607275ae6ea2111a9f6c3",
+  "fixed_original_commit": "d932c45b7941662ea380a05efef580568b98d41a",
+  "fixed_source": {
+    "utils/mrisurf_defect.cpp": {
+      "sha256": "55ace70ab09b1868a8cb152a9547879abdce790635b484bef1bf056986958187",
+      "bytes": 493683
+    },
+    "mris_fix_topology/mris_fix_topology.cpp": {
+      "sha256": "55cca5a4f8a82baee768a94bd545955bd805a4ad446fa19995511240a5e09be1",
+      "bytes": 24557
+    },
+    "utils/utils.cpp": {
+      "sha256": "c19ae738cd9d22fada40c2f5f89ff790512fcbeab1d7c08059b249134db2eac5",
+      "bytes": 51112
+    }
+  },
+  "own_modules": {
+    "src/fnit/recon_all/topology_ga_population.py": {
+      "sha256": "ec0eff5f4b3d5690726a89369bf4b2330783423cb3139a8cf865d738ae27b7c8",
+      "bytes": 20117,
+      "tested_first_ga_sha256": "ec0eff5f4b3d5690726a89369bf4b2330783423cb3139a8cf865d738ae27b7c8",
+      "bytes_match_tested_first_ga": true
+    },
+    "src/fnit/recon_all/topology_ga_selection.py": {
+      "sha256": "a0b16c562ec405a9feb8382ed451658a5878b9ce535894fe2c25cf69331712df",
+      "bytes": 7724,
+      "tested_first_ga_sha256": "a0b16c562ec405a9feb8382ed451658a5878b9ce535894fe2c25cf69331712df",
+      "bytes_match_tested_first_ga": true
+    },
+    "src/fnit/recon_all/topology_genetic_search.py": {
+      "sha256": "c30d34d56f317d3bebecc4ee26e2395b185e54e7f681186d88440c099baf7401",
+      "bytes": 12787,
+      "tested_first_ga_sha256": "c30d34d56f317d3bebecc4ee26e2395b185e54e7f681186d88440c099baf7401",
+      "bytes_match_tested_first_ga": true
+    },
+    "src/fnit/recon_all/gcsa_permutation.py": {
+      "sha256": "c8ffb051147f163b73960af34451204ed10c92db02a4f1f61285a34127fe625f",
+      "bytes": 1463,
+      "tested_first_ga_sha256": "c8ffb051147f163b73960af34451204ed10c92db02a4f1f61285a34127fe625f",
+      "bytes_match_tested_first_ga": true
+    }
+  },
+  "static_comparisons": [
+    {
+      "item": "population_size",
+      "source_semantics": "10",
+      "original_file": "mris_fix_topology/mris_fix_topology.cpp",
+      "original_line": 112,
+      "own_file": "src/fnit/recon_all/topology_ga_population.py",
+      "own_line": 169,
+      "scope": "static source comparison"
+    },
+    {
+      "item": "max_unchanged",
+      "source_semantics": "10, not fixed generations",
+      "original_file": "mris_fix_topology/mris_fix_topology.cpp",
+      "original_line": 113,
+      "own_file": "src/fnit/recon_all/topology_ga_population.py",
+      "own_line": 170,
+      "scope": "static source comparison"
+    },
+    {
+      "item": "niters",
+      "source_semantics": "-1, no finite cap",
+      "original_file": "mris_fix_topology/mris_fix_topology.cpp",
+      "original_line": 127,
+      "own_file": "src/fnit/recon_all/topology_ga_population.py",
+      "own_line": 171,
+      "scope": "static source comparison"
+    },
+    {
+      "item": "initial_selection",
+      "source_semantics": "True via -ga",
+      "original_file": "mris_fix_topology/mris_fix_topology.cpp",
+      "original_line": 544,
+      "own_file": "src/fnit/recon_all/topology_ga_population.py",
+      "own_line": 225,
+      "scope": "static source comparison"
+    },
+    {
+      "item": "vertex_eliminate",
+      "source_semantics": "True via -ga",
+      "original_file": "mris_fix_topology/mris_fix_topology.cpp",
+      "original_line": 542,
+      "own_file": "src/fnit/recon_all/topology_ga_population.py",
+      "own_line": 275,
+      "scope": "static source comparison"
+    },
+    {
+      "item": "max_unchanged_runtime_assignment",
+      "source_semantics": "parms overrides old static default3",
+      "original_file": "utils/mrisurf_defect.cpp",
+      "original_line": 12200,
+      "own_file": "src/fnit/recon_all/topology_ga_population.py",
+      "own_line": 170,
+      "scope": "static source comparison"
+    },
+    {
+      "item": "initial_ordering",
+      "source_semantics": "slot0 identity; 11 ordered shuffle passes",
+      "original_file": "utils/mrisurf_defect.cpp",
+      "original_line": 4768,
+      "own_file": "src/fnit/recon_all/topology_ga_population.py",
+      "own_line": 96,
+      "scope": "static source comparison"
+    },
+    {
+      "item": "generation_condition",
+      "source_semantics": "nunchanged < max_unchanged",
+      "original_file": "utils/mrisurf_defect.cpp",
+      "original_line": 12801,
+      "own_file": "src/fnit/recon_all/topology_ga_population.py",
+      "own_line": 231,
+      "scope": "static source comparison"
+    },
+    {
+      "item": "strict_improvement",
+      "source_semantics": "reset unchanged and save RP only on >",
+      "original_file": "utils/mrisurf_defect.cpp",
+      "original_line": 12864,
+      "own_file": "src/fnit/recon_all/topology_ga_population.py",
+      "own_line": 215,
+      "scope": "static source comparison"
+    },
+    {
+      "item": "generation_end_FEQUAL",
+      "source_semantics": "unchanged++ else reset/euthanasia=-1",
+      "original_file": "utils/mrisurf_defect.cpp",
+      "original_line": 13261,
+      "own_file": "src/fnit/recon_all/topology_ga_population.py",
+      "own_line": 271,
+      "scope": "static source comparison"
+    },
+    {
+      "item": "euthanasia_wait",
+      "source_semantics": "5 completed generations; no reported deletion also stops",
+      "original_file": "utils/mrisurf_defect.cpp",
+      "original_line": 13281,
+      "own_file": "src/fnit/recon_all/topology_ga_population.py",
+      "own_line": 277,
+      "scope": "static source comparison"
+    },
+    {
+      "item": "periodic_elimination",
+      "source_semantics": "generation>=10 and modulo3==0",
+      "original_file": "utils/mrisurf_defect.cpp",
+      "original_line": 13307,
+      "own_file": "src/fnit/recon_all/topology_ga_population.py",
+      "own_line": 284,
+      "scope": "static source comparison"
+    },
+    {
+      "item": "seed_priming",
+      "source_semantics": "one OpenRan1 on fresh seed1234",
+      "original_file": "utils/utils.cpp",
+      "original_line": 77,
+      "own_file": "src/fnit/recon_all/topology_genetic_search.py",
+      "own_line": 30,
+      "scope": "static source comparison"
+    },
+    {
+      "item": "random_interval",
+      "source_semantics": "double low + (high-low)*OpenRan1",
+      "original_file": "utils/utils.cpp",
+      "original_line": 106,
+      "own_file": "src/fnit/recon_all/topology_genetic_search.py",
+      "own_line": 45,
+      "scope": "static source comparison"
+    },
+    {
+      "item": "native_mutation_counter",
+      "source_semantics": "strict best improvements, not attempts",
+      "original_file": "utils/mrisurf_defect.cpp",
+      "original_line": 12907,
+      "own_file": "src/fnit/recon_all/topology_ga_population.py",
+      "own_line": 240,
+      "scope": "static source comparison"
+    },
+    {
+      "item": "native_crossover_counter",
+      "source_semantics": "includes improved crossover_mutation",
+      "original_file": "utils/mrisurf_defect.cpp",
+      "original_line": 13216,
+      "own_file": "src/fnit/recon_all/topology_ga_population.py",
+      "own_line": 262,
+      "scope": "static source comparison"
+    }
+  ],
+  "default_report_sha256": "f1b2ca2abc85bf5491216d91df73bb43c9d40e79fe52c367bf0c67ef1b7d3db9",
+  "verbose_report_sha256": "9f9813ea96ba4c7e84f8e26e940c8ed8ed3cbbb2afc2e0c6f62ca9668214fc38",
+  "own_first_ga_control_sha256": "f4a929de0d98bdd49edb7126258b7506a2aaff7693279fca757e15d55dd682ef",
+  "own_first_ga_report_sha256": "26c39ecd23df92a7babc1586f9756288a36d48570d410c826703d8ce8e810c9b",
+  "own_first_ga_runtime_manifest_sha256": "7a6b55cd804e202417e0f1e7f5b1778db225a320dc4cdb8c8fc69f10e6b3cb71",
+  "own_first_ga_git_commit_at_bundle": "d76310419eb71b2d59e39d980de0e9e829ed9d41",
+  "geometric_reproduction_classifications": {
+    "strict_coordinates": true,
+    "strict_ordered_faces": true,
+    "strict_geometric_fields": true,
+    "strict_header_filename": false,
+    "strict_file_bytes": false,
+    "original_legacy_strict_decoded_field_preserved": false
+  },
+  "native_first": {
+    "completed_generations_printed": 29,
+    "exact_total_evaluations": null,
+    "exact_final_double_fitness": null,
+    "exact_rng_initial_state": null,
+    "exact_termination_code": null,
+    "last_printed_best_fitness": {
+      "completed_generation_number": 29,
+      "best_fitness_print": "-9.3042e+01",
+      "printed_value": -93.042,
+      "rounding_interval_lower": -93.0425,
+      "rounding_interval_upper": -93.0415
+    }
+  },
+  "own_first": {
+    "reported_generations": 28,
+    "completed_generation_trace_rows": 29,
+    "counts": {
+      "evaluated": 495,
+      "removed_vertices": 20,
+      "best_removed_vertices": 3,
+      "best_patch_number": 230,
+      "mutation_attempts": 253,
+      "mutation_improvements": 1,
+      "crossover_attempts": 232,
+      "crossover_improvements": 8
+    },
+    "best_fitness": -93.04168701171875,
+    "termination": "euthanasia_wait_limit"
+  },
+  "initial_fitness_comparison": [
+    {
+      "slot": 0,
+      "own_fitness": -97.76077795028687,
+      "own_six_decimal_print": "-97.760778",
+      "native_six_decimal_print": "-97.760778",
+      "printed_exact": true
+    },
+    {
+      "slot": 1,
+      "own_fitness": -105.68364810943604,
+      "own_six_decimal_print": "-105.683648",
+      "native_six_decimal_print": "-105.683649",
+      "printed_exact": false
+    },
+    {
+      "slot": 2,
+      "own_fitness": -95.16675662994385,
+      "own_six_decimal_print": "-95.166757",
+      "native_six_decimal_print": "-95.166757",
+      "printed_exact": true
+    },
+    {
+      "slot": 3,
+      "own_fitness": -95.00609064102173,
+      "own_six_decimal_print": "-95.006091",
+      "native_six_decimal_print": "-95.006091",
+      "printed_exact": true
+    },
+    {
+      "slot": 4,
+      "own_fitness": -96.75402164459229,
+      "own_six_decimal_print": "-96.754022",
+      "native_six_decimal_print": "-96.754022",
+      "printed_exact": true
+    },
+    {
+      "slot": 5,
+      "own_fitness": -101.57565069198608,
+      "own_six_decimal_print": "-101.575651",
+      "native_six_decimal_print": "-101.575651",
+      "printed_exact": true
+    },
+    {
+      "slot": 6,
+      "own_fitness": -98.27166032791138,
+      "own_six_decimal_print": "-98.271660",
+      "native_six_decimal_print": "-98.271660",
+      "printed_exact": true
+    },
+    {
+      "slot": 7,
+      "own_fitness": -97.08461284637451,
+      "own_six_decimal_print": "-97.084613",
+      "native_six_decimal_print": "-97.084613",
+      "printed_exact": true
+    },
+    {
+      "slot": 8,
+      "own_fitness": -94.60345315933228,
+      "own_six_decimal_print": "-94.603453",
+      "native_six_decimal_print": "-94.603453",
+      "printed_exact": true
+    },
+    {
+      "slot": 9,
+      "own_fitness": -94.34716367721558,
+      "own_six_decimal_print": "-94.347164",
+      "native_six_decimal_print": "-94.347164",
+      "printed_exact": true
+    }
+  ],
+  "printed_initial_fitness_equal_count": 9,
+  "generation_comparison": [
+    {
+      "own_zero_based_generation": 0,
+      "native_completed_generation_number": 1,
+      "own_best_fitness": -94.34716367721558,
+      "native_best_print": "-9.4347e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 1,
+      "native_completed_generation_number": 2,
+      "own_best_fitness": -94.25410795211792,
+      "native_best_print": "-9.4254e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 2,
+      "native_completed_generation_number": 3,
+      "own_best_fitness": -94.25410795211792,
+      "native_best_print": "-9.4254e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 3,
+      "native_completed_generation_number": 4,
+      "own_best_fitness": -94.25410795211792,
+      "native_best_print": "-9.4254e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 4,
+      "native_completed_generation_number": 5,
+      "own_best_fitness": -94.22392702102661,
+      "native_best_print": "-9.4224e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 5,
+      "native_completed_generation_number": 6,
+      "own_best_fitness": -93.88597965240479,
+      "native_best_print": "-9.3886e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 6,
+      "native_completed_generation_number": 7,
+      "own_best_fitness": -93.60149621963501,
+      "native_best_print": "-9.3601e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 7,
+      "native_completed_generation_number": 8,
+      "own_best_fitness": -93.60149621963501,
+      "native_best_print": "-9.3601e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 8,
+      "native_completed_generation_number": 9,
+      "own_best_fitness": -93.58199262619019,
+      "native_best_print": "-9.3582e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 9,
+      "native_completed_generation_number": 10,
+      "own_best_fitness": -93.58199262619019,
+      "native_best_print": "-9.3582e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 10,
+      "native_completed_generation_number": 11,
+      "own_best_fitness": -93.58199262619019,
+      "native_best_print": "-9.3582e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 11,
+      "native_completed_generation_number": 12,
+      "own_best_fitness": -93.58199262619019,
+      "native_best_print": "-9.3582e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 12,
+      "native_completed_generation_number": 13,
+      "own_best_fitness": -93.45325994491577,
+      "native_best_print": "-9.3453e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 13,
+      "native_completed_generation_number": 14,
+      "own_best_fitness": -93.04168701171875,
+      "native_best_print": "-9.3042e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 14,
+      "native_completed_generation_number": 15,
+      "own_best_fitness": -93.04168701171875,
+      "native_best_print": "-9.3042e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 15,
+      "native_completed_generation_number": 16,
+      "own_best_fitness": -93.04168701171875,
+      "native_best_print": "-9.3042e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 16,
+      "native_completed_generation_number": 17,
+      "own_best_fitness": -93.04168701171875,
+      "native_best_print": "-9.3042e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 17,
+      "native_completed_generation_number": 18,
+      "own_best_fitness": -93.04168701171875,
+      "native_best_print": "-9.3042e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 18,
+      "native_completed_generation_number": 19,
+      "own_best_fitness": -93.04168701171875,
+      "native_best_print": "-9.3042e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 19,
+      "native_completed_generation_number": 20,
+      "own_best_fitness": -93.04168701171875,
+      "native_best_print": "-9.3042e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 20,
+      "native_completed_generation_number": 21,
+      "own_best_fitness": -93.04168701171875,
+      "native_best_print": "-9.3042e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 21,
+      "native_completed_generation_number": 22,
+      "own_best_fitness": -93.04168701171875,
+      "native_best_print": "-9.3042e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 22,
+      "native_completed_generation_number": 23,
+      "own_best_fitness": -93.04168701171875,
+      "native_best_print": "-9.3042e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 23,
+      "native_completed_generation_number": 24,
+      "own_best_fitness": -93.04168701171875,
+      "native_best_print": "-9.3042e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 24,
+      "native_completed_generation_number": 25,
+      "own_best_fitness": -93.04168701171875,
+      "native_best_print": "-9.3042e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 25,
+      "native_completed_generation_number": 26,
+      "own_best_fitness": -93.04168701171875,
+      "native_best_print": "-9.3042e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 26,
+      "native_completed_generation_number": 27,
+      "own_best_fitness": -93.04168701171875,
+      "native_best_print": "-9.3042e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 27,
+      "native_completed_generation_number": 28,
+      "own_best_fitness": -93.04168701171875,
+      "native_best_print": "-9.3042e+01",
+      "printed_exact": true
+    },
+    {
+      "own_zero_based_generation": 28,
+      "native_completed_generation_number": 29,
+      "own_best_fitness": -93.04168701171875,
+      "native_best_print": "-9.3042e+01",
+      "printed_exact": true
+    }
+  ],
+  "printed_generation_best_equal_count": 29,
+  "own_deletion_counts": [
+    3,
+    3,
+    3,
+    2,
+    5,
+    2,
+    2
+  ],
+  "native_deletion_counts": [
+    3,
+    3,
+    3,
+    2,
+    5,
+    2,
+    2
+  ],
+  "ordered_deletion_counts_exact": true,
+  "improvement_event_comparison": [
+    {
+      "own_generation": 1,
+      "own_phase": "crossover",
+      "native_phase": "crossover",
+      "own_slot": 2,
+      "native_slot": 2,
+      "own_fitness": -94.25410795211792,
+      "native_fitness_print": "-9.4254e+01",
+      "phase_slot_printed_exact": true
+    },
+    {
+      "own_generation": 4,
+      "own_phase": "crossover",
+      "native_phase": "crossover",
+      "own_slot": 8,
+      "native_slot": 8,
+      "own_fitness": -94.22392702102661,
+      "native_fitness_print": "-9.4224e+01",
+      "phase_slot_printed_exact": true
+    },
+    {
+      "own_generation": 5,
+      "own_phase": "crossover",
+      "native_phase": "crossover",
+      "own_slot": 2,
+      "native_slot": 2,
+      "own_fitness": -93.88597965240479,
+      "native_fitness_print": "-9.3886e+01",
+      "phase_slot_printed_exact": true
+    },
+    {
+      "own_generation": 6,
+      "own_phase": "replacement",
+      "native_phase": "replacement",
+      "own_slot": 1,
+      "native_slot": 1,
+      "own_fitness": -93.60149621963501,
+      "native_fitness_print": "-9.3601e+01",
+      "phase_slot_printed_exact": true
+    },
+    {
+      "own_generation": 8,
+      "own_phase": "crossover",
+      "native_phase": "crossover",
+      "own_slot": 4,
+      "native_slot": 4,
+      "own_fitness": -93.58199262619019,
+      "native_fitness_print": "-9.3582e+01",
+      "phase_slot_printed_exact": true
+    },
+    {
+      "own_generation": 12,
+      "own_phase": "crossover",
+      "native_phase": "crossover",
+      "own_slot": 2,
+      "native_slot": 2,
+      "own_fitness": -93.47391700744629,
+      "native_fitness_print": "-9.3474e+01",
+      "phase_slot_printed_exact": true
+    },
+    {
+      "own_generation": 12,
+      "own_phase": "crossover",
+      "native_phase": "crossover",
+      "own_slot": 4,
+      "native_slot": 4,
+      "own_fitness": -93.45325994491577,
+      "native_fitness_print": "-9.3453e+01",
+      "phase_slot_printed_exact": true
+    },
+    {
+      "own_generation": 13,
+      "own_phase": "crossover",
+      "native_phase": "crossover",
+      "own_slot": 3,
+      "native_slot": 3,
+      "own_fitness": -93.07639360427856,
+      "native_fitness_print": "-9.3076e+01",
+      "phase_slot_printed_exact": true
+    },
+    {
+      "own_generation": 13,
+      "own_phase": "crossover",
+      "native_phase": "crossover",
+      "own_slot": 4,
+      "native_slot": 4,
+      "own_fitness": -93.04168701171875,
+      "native_fitness_print": "-9.3042e+01",
+      "phase_slot_printed_exact": true
+    }
+  ],
+  "printed_improvement_event_sequence_exact": true,
+  "own_best_in_native_last_print_rounding_interval": true,
+  "candidate_orderings_or_rng_trace_same_input_gate": "not_assessed",
+  "control_mismatch_explains_runtime": "not_supported_by_current_evidence",
+  "global_native_mutation_count_scope": "all nine defects strict improvements; cannot compare to first-defect mutation_attempts",
+  "diagnostic_counter_difference": "own crossover_mutation improvement counts only mutation_improvements; original global increments both nmut and ncross",
+  "production_changed": false,
+  "overall_metric_equivalence": "not_assessed"
+}

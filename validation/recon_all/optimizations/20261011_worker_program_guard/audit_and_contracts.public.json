@@ -1,0 +1,166 @@
+{
+  "schema": "fnit.worker_guard.delivery.v1",
+  "base_commit": "9dce8be979863ab98a9389066e882537b5a22763",
+  "tested_code_commit": "2f16c17e343104ac03ffb45de15874fc42ad6193",
+  "tracked_source_clean_at_test": true,
+  "prior_untracked_receipts_consumed_by_tests": false,
+  "source_scope": [
+    "docs/recon_all/WORKER_PROGRAM_GUARD.md",
+    "src/fnit/recon_all/gca_torch_worker.py",
+    "src/fnit/recon_all/talairach_synthmorph.py",
+    "src/fnit/recon_all/wm_torch_worker.py",
+    "src/fnit/recon_all/worker_program_guard.py",
+    "tests/recon_all/test_worker_em_binding.py",
+    "tests/recon_all/test_worker_program_guard.py",
+    "tests/recon_all/worker_guard_exec_probe.py"
+  ],
+  "protected_files_modified": false,
+  "em_binding_update": {
+    "old_finding_commit": "effa7fcf19de1f3b5fa1c02013e5c35e0553014d",
+    "old_first_direction_only_finding_applies_to_base": false,
+    "production_routes": [
+      "native_free._run_native_em_register(torch,in-process) -> register_t1",
+      "native_free._run_native_em_register(torch,isolated) -> run_isolated_registration -> run_worker -> register_t1"
+    ],
+    "complete_em_route": "stable_samples(clamp=0,tol=1e-5) -> all_samples(clamp=6,tol=1e-7) -> write_voxel_lta",
+    "optimizer_static_features": [
+      "successive L-BFGS directions",
+      "7 history pairs",
+      "20 trial More-Thuente search",
+      "restart loop",
+      "up to 6 quasi-Newton passes",
+      "EM outer termination"
+    ],
+    "runtime_binding_contract": "actual register_t1 with injected loading/optimization dependencies; both complete stages and final matrix consumption checked",
+    "optimizer_contract": "existing complete protocol tests executed on CPU; not a real-data benchmark",
+    "whole_run": "not_run",
+    "root_owned_recipe_metadata": "unchanged here; coordination owner updates separately",
+    "evidence": [
+      {
+        "file": "src/fnit/recon_all/native_free.py",
+        "start_line": 184,
+        "end_line": 211,
+        "sha256": "19db03905962fadf12be171a1660e62a2b6e505d3e52ebda71a9c9942c4ef21e"
+      },
+      {
+        "file": "src/fnit/recon_all/mri_em_register_python.py",
+        "start_line": 79,
+        "end_line": 102,
+        "sha256": "f6283e2d35e6d24ff0124999fe7ecc32ecc4bb18c1788219bc895029d4d4e3a7"
+      },
+      {
+        "file": "src/fnit/recon_all/mri_em_register_complete.py",
+        "start_line": 124,
+        "end_line": 163,
+        "sha256": "41d83d231267f09c0b2bed148eff6e1847125c49df8429ab388314c2f9d96607"
+      },
+      {
+        "file": "src/fnit/recon_all/mri_em_register_complete.py",
+        "start_line": 187,
+        "end_line": 222,
+        "sha256": "41d83d231267f09c0b2bed148eff6e1847125c49df8429ab388314c2f9d96607"
+      }
+    ]
+  },
+  "guard_fix": {
+    "activation": "read inherited FNIT_RECON_FORBID_ORIGINAL_STAGES at each call; only string 1 enables",
+    "guarded_entries": [
+      "gca_torch_worker.main",
+      "gca_torch_worker.run_worker",
+      "wm_torch_worker.main",
+      "wm_torch_worker.run_worker",
+      "talairach_synthmorph.main",
+      "talairach_synthmorph.register_talairach"
+    ],
+    "installation": "before entry function body and first stage call",
+    "restoration": "existing original_stage_guard finally restores environment flag and ContextVar on return/error; nested parent guard remains active",
+    "parent_failure": "GCA/WM actual launcher propagates child CalledProcessError and preserves parent environment/thread/TF32",
+    "reference_benchmark": "no inherited flag -> decorator does not enable a new guard; own benign executable probe executes",
+    "policy_changes": {
+      "numerical_algorithm": false,
+      "threads": false,
+      "TF32": false,
+      "allocator": false,
+      "new_dependencies": false
+    },
+    "normalized_algorithm_ast_comparison": {
+      "src/fnit/recon_all/gca_torch_worker.py": {
+        "same_algorithm_body_after_removing_guard_import_decorators_and_docstrings": true,
+        "normalized_ast_sha256": "742b1b97c32f4d9eae7ef531f44abdf6b422fe7a2e7bcbaa382ee58564af95ca"
+      },
+      "src/fnit/recon_all/wm_torch_worker.py": {
+        "same_algorithm_body_after_removing_guard_import_decorators_and_docstrings": true,
+        "normalized_ast_sha256": "6cc22769121138af4a34003cf1e403efdb6a12144954dd7f45692af012542457"
+      },
+      "src/fnit/recon_all/talairach_synthmorph.py": {
+        "same_algorithm_body_after_removing_guard_import_decorators_and_docstrings": true,
+        "normalized_ast_sha256": "5f3aec34939d57ea5f7607d504c848c548239e554afe929e2f118c44144b556e"
+      }
+    },
+    "scope_limits": [
+      "direct Python subprocess/exec/posix_spawn guard; not external shell descendant sandbox",
+      "not a full file or dynamic-library access audit",
+      "optional isolated Torch N4 remains outside this requested three-worker patch",
+      "existing fresh-worker numerical initialization remains; guard does not redefine worker reentrancy"
+    ]
+  },
+  "verification": {
+    "status": "passed",
+    "tests": 41,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "groups": {
+      "tests.recon_all.test_worker_program_guard": 23,
+      "tests.recon_all.test_worker_em_binding": 1,
+      "tests.recon_all.test_gca_isolated_worker.GCAIsolationTest": 4,
+      "tests.recon_all.test_wm_isolated_worker.WMIsolationTests": 5,
+      "tests.recon_all.test_gca_complete_protocol": 8
+    },
+    "junit_file": "contracts_frozen.xml",
+    "junit_sha256": "85c0085b98bdaec34d3c25994a76dac0ffa273878b9b6e466a8d007bb74b04d9",
+    "runtime": {
+      "python": "3.11.16",
+      "torch": "2.5.1",
+      "numba": "0.67.0",
+      "pytest": "9.1.1",
+      "numpy": "1.26.4",
+      "nibabel": "5.4.2"
+    },
+    "command": "PYTHONPATH=src python -m pytest -q tests/recon_all/test_worker_program_guard.py tests/recon_all/test_worker_em_binding.py tests/recon_all/test_gca_isolated_worker.py tests/recon_all/test_wm_isolated_worker.py tests/recon_all/test_gca_complete_protocol.py --junitxml=contracts_frozen.xml",
+    "real_exec_probe": "actual fresh Python runpy worker CLI and actual benign subprocess; first numerical stage injected, no image processing",
+    "gpu_initialized": false,
+    "images_read": false,
+    "weights_loaded": false,
+    "upstream_program_executed": false,
+    "precision_accuracy_benchmark": "not_run",
+    "wall_time_benchmark": "not_run",
+    "whole_recon": "not_run",
+    "test_suite_seconds_is_not_stage_or_whole_wall_time": true
+  },
+  "failures_preserved": [
+    {
+      "phase": "local runtime discovery",
+      "failure": "system python lacks torch; base Conda numba initialization error; selected existing fnit environment imports all three workers successfully"
+    },
+    {
+      "phase": "precommit contract",
+      "tests": 41,
+      "passed": 40,
+      "failed": 1,
+      "cause": "test fixture translation_history offset was None; register_t1 serialization requires iterable offset",
+      "resolution": "fixed only test fixture to (0,0,0); frozen code suite passed all41"
+    },
+    {
+      "phase": "first commit attempt",
+      "failure": "new clone lacked repository-local author identity",
+      "resolution": "reused existing task repository author identity locally; no global configuration change"
+    }
+  ],
+  "unchanged_real_data_evidence": {
+    "status": "not_rerun_or_relabelled",
+    "base_component_receipt": "benchmark/recon_volume_python_20261011/complete_gca.public.json",
+    "sha256": "f1c8aaa313caeca8a516c8bd2c96a47fd65ed1b2f74d790b2ec172e2addccd15"
+  },
+  "transfer_data_or_shared_index_modified": false
+}

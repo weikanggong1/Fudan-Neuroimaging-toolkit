@@ -45,8 +45,10 @@ def test_final_white_public_API_selects_complete_white_semantics(monkeypatch,tmp
     monkeypatch.setattr(final,"_place_white_preaparc",stage)
     result=final.place_final_white(subject_dir=tmp_path,hemi="rh",output=tmp_path/"rh.white",
         candidate_backend="torch_snapshot",candidate_grid_cells_per_axis=3,
-        retained_mht_backend="compiled",cleanup_marking_backend="source_torch",device="cuda:0")
+        retained_mht_backend="compiled",cleanup_marking_backend="source_torch",device="cuda:0",
+        target_search_backend="parallel")
     assert result["white_stage"] == "final_white"
     assert captured["complete"] is True and captured["final_white"] is True
     assert captured["candidate_backend"] == "torch_snapshot" and captured["steps"] == 400
     assert captured["regularization_backend"] == "cpu" and captured["sampling_backend"] == "cpu"
+    assert captured["target_search_backend"] == "parallel"

@@ -18,9 +18,28 @@ SHARED_LAST_RIGHT = {'mri/mrisps.wpa.mgz', 'mri/mrisps.white.mgz'}
 
 
 class HemisphereGroupError(RuntimeError):
+    """保留双侧组报告，并向公开入口传递真实 worker 的质量失败。
+
+    message为错误字符串，report为调度产生的完整dict；operation是阶段名，
+    workers按lh/rh保存最终报告。diagnostics仅汇总status=failed且含dict
+    quality_failure的worker；没有质量诊断时返回None，不把取消、启动、
+    IO或资源错误标为网格失败。属性在读取时提取，因此包含finally收集
+    的最终状态；不读影像、不改报告、不调用原版程序，无独立CLI。
+    """
     def __init__(self, message, report):
         super().__init__(message)
         self.report = report
+
+    @property
+    def diagnostics(self):
+        workers = self.report.get('workers', {})
+        quality = {hemi: worker['quality_failure']
+                   for hemi, worker in workers.items()
+                   if isinstance(worker, dict) and worker.get('status') == 'failed'
+                   and isinstance(worker.get('quality_failure'), dict)}
+        if not quality:
+            return None
+        return {'stage_group': self.report.get('operation'), 'hemispheres': quality}
 
 
 def validate_hemisphere_workers(workers, threads):
@@ -36,11 +55,21 @@ def _snapshot(root):
 
 
 def _owned(relative, hemi):
+    """按半球审计待发布相对文件名，返回bool，不读写影像。
+
+    relative来自自身worker目录快照，hemi为lh/rh。保留既有表面、标签、
+    统计及专属MRI规则；scripts/H.topology.genetic/**保留原层级，避免
+    同basename的状态/收据互相覆盖。另一侧GA目录不属于当前半球。
+    输入无坐标或单位；发布层拒绝非本侧GA写入，无原软件独立CLI。
+    """
     path = Path(relative)
     return (path.parts[0] in ('surf', 'label', 'stats')
             and (path.name.startswith(hemi + '.')
                  or path.name == f'autodet.gw.stats.{hemi}.dat')) or (
-                     relative == f'mri/filled-pretess{255 if hemi == "lh" else 127}.mgz')
+                     relative in {f'mri/filled-pretess{255 if hemi == "lh" else 127}.mgz',
+                                  f'mri/filled-topology-{hemi}.mgz'}) or (
+                     len(path.parts) >= 3 and path.parts[0] == 'scripts'
+                     and path.parts[1] == f'{hemi}.topology.genetic')
 
 
 def _normalize_paths(value, private, public, published_paths=None):
@@ -383,6 +412,8 @@ def run_hemisphere_group(subject, operation, *, device, threads, workers=2,
                     if hemi == 'rh':
                         pending.append((private / relative, subject / relative))
                 elif relative.startswith('scripts/'):
+                    if Path(relative).parts[1] in {'lh.topology.genetic', 'rh.topology.genetic'}:
+                        raise RuntimeError(f'undeclared genetic topology write by {hemi}: {relative}')
                     name = Path(relative).name
                     pending.append((private / relative, subject / 'scripts' / f'{operation}.{hemi}.{name}'))
                 else:

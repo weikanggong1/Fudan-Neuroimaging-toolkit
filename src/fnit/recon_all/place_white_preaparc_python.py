@@ -14,6 +14,7 @@ import time
 
 import nibabel as nib
 import numpy as np
+from numba import get_num_threads
 
 from .place_pial_python import _write_vertices_like
 from .place_surface_border import compute_border_values_first_pass
@@ -48,9 +49,12 @@ def _place_white_preaparc(
     retained_mht_backend: str = "tree",
     cleanup_candidate_grid_cells_per_axis: int = 2,
     final_white: bool = False,
+    target_search_backend: str = "serial",
 ) -> dict:
     """共享现有白质算子；complete 选择四轮而非首轮诊断调度。"""
     started = time.perf_counter()
+    if target_search_backend not in ("serial", "parallel"):
+        raise ValueError("target_search_backend must be serial or parallel")
     if complete:
         if steps < 1:
             raise ValueError("max_steps must be positive")
@@ -174,6 +178,7 @@ def _place_white_preaparc(
     border = compute_border_values_first_pass(
         volume, seg, xyz, normals, xyz, ripped, values, affine, thresholds,
         hemisphere=hemi, surface="white", sigma=2.0,
+        target_search_backend=target_search_backend,
     )
     values = average_marked_values(border[0], border[4], ripped, faces, 5)
     first_border_finished_at = time.perf_counter()
@@ -378,6 +383,7 @@ def _place_white_preaparc(
             border = compute_border_values_first_pass(
                 volume, seg, current, current_normals, xyz, ripped, values,
                 affine, thresholds, hemisphere=hemi, surface="white", sigma=sigma,
+                target_search_backend=target_search_backend,
             )
             values = average_marked_values(border[0], border[4], ripped, faces, 5)
             original_area = surface_total_area(current, faces)
@@ -436,7 +442,8 @@ def _place_white_preaparc(
         "output": str(output), "hemisphere": hemi, "steps": len(records),
         "white_stage": "final_white" if final_white else "white_preaparc",
         "regularization_backend": regularization_backend, "device": device,
-        "sampling_backend": sampling_backend,
+        "sampling_backend": sampling_backend, "target_search_backend": target_search_backend,
+        "target_search_threads": get_num_threads() if target_search_backend == "parallel" else 1,
         "complete_four_passes": complete, "candidate_backend": candidate_backend,
         "cleanup_marking_backend": cleanup_marking_backend,
         "pass_ends": pass_ends, "passes": pass_records, "initial_cleanup": initial_cleanup,
@@ -493,6 +500,7 @@ def place_white_preaparc(
     collision_profile: bool = False,
     retained_mht_backend: str = "tree",
     cleanup_candidate_grid_cells_per_axis: int = 2,
+    target_search_backend: str = "serial",
 ) -> dict:
     """实验性完整preaparc白质四轮；不替代带aparc的最终white或生产默认。
 
@@ -503,6 +511,8 @@ def place_white_preaparc(
     须明确device。sampling_backend=cpu默认，torch/triton复用既有GPU强度
     采样，MRI仅缓存一次；每步仍传入当前rip/目标/sigma，不复用过期状态。
     trace_callback接收(step,pass_index,坐标副本,试步诊断)。
+    target_search_backend默认serial；显式parallel仅将独立顶点目标搜索
+    按已有Numba线程预算并行，fastmath=False，目标平均与接受顺序不变。
     cleanup_marking_backend默认legacy；source_numba/source_torch按固定源码
     逐方向及共享1mm桶标记，Torch需device。两次清理使用同一后端，
     初始允许源程序既有残余，最终仍要求零相交；不改已验证pial默认。
@@ -532,6 +542,7 @@ def place_white_preaparc(
     return _place_white_preaparc(
         subject_dir=subject_dir, hemi=hemi, output=output, steps=max_steps,
         complete=True, output_volume=output_volume,
+        target_search_backend=target_search_backend,
         regularization_backend=regularization_backend, candidate_backend=candidate_backend,
         sampling_backend=sampling_backend, device=device, trace_callback=trace_callback,
         cleanup_marking_backend=cleanup_marking_backend,
@@ -571,6 +582,7 @@ def main() -> None:
     parser.add_argument("--collision-profile", action="store_true")
     parser.add_argument("--retained-mht-backend", choices=("tree", "compiled"), default="tree")
     parser.add_argument("--cleanup-candidate-grid-cells-per-axis", type=int, choices=(2,3),default=2)
+    parser.add_argument("--target-search-backend", choices=("serial", "parallel"), default="serial")
     parser.add_argument("--sampling-backend", choices=("cpu", "torch", "triton"), default="cpu")
     parser.add_argument("--cleanup-marking-backend", choices=("legacy", "source_numba", "source_torch"), default="legacy")
     args = parser.parse_args()
@@ -580,6 +592,7 @@ def main() -> None:
         print(json.dumps(place_white_preaparc(
             subject_dir=args.subject_dir, hemi=args.hemi, output=args.output,
             max_steps=args.max_steps, output_volume=args.output_volume,
+            target_search_backend=args.target_search_backend,
             regularization_backend=args.regularization_backend,
             candidate_backend=args.candidate_backend, sampling_backend=args.sampling_backend,
             cleanup_marking_backend=args.cleanup_marking_backend,
@@ -594,7 +607,8 @@ def main() -> None:
             or args.candidate_backend != "tree" or args.sampling_backend != "cpu"
             or args.cleanup_marking_backend != "legacy"
             or args.candidate_grid_cells_per_axis != 2 or args.collision_profile
-            or args.retained_mht_backend != "tree" or args.cleanup_candidate_grid_cells_per_axis!=2):
+            or args.retained_mht_backend != "tree" or args.cleanup_candidate_grid_cells_per_axis!=2
+            or args.target_search_backend != "serial"):
         parser.error("--output-volume, --max-steps, --sampling-backend and --candidate-backend require --complete")
     print(json.dumps(place_white_preaparc_prefix(
         subject_dir=args.subject_dir, hemi=args.hemi, output=args.output,

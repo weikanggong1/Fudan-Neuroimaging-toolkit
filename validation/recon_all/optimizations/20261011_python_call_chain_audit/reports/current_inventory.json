@@ -1,0 +1,389 @@
+{
+  "schema_version": 1,
+  "git_head_at_capture": "f18c43e97409299cd0ef5ba03aa75c6aea393839",
+  "scope": "current source conditional call-chain audit, not OS isolation or a new real pipeline execution",
+  "source_files": {
+    "src/fnit/recon_all/native_free.py": {
+      "sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+      "size_bytes": 146752
+    },
+    "src/fnit/recon_all/batch.py": {
+      "sha256": "0023e24dd3e076b0ae632c8de2fbd57b7b39030e4cc6af92f86d342bc0c4b7d4",
+      "size_bytes": 19459
+    },
+    "src/fnit/recon_all/python_profile.py": {
+      "sha256": "127a8a3b869f1d8dc7afc4b3ac13fb46e22b34be2cbafd133ac64a9b47be78bf",
+      "size_bytes": 3663
+    },
+    "src/fnit/recon_all/native_runtime_selection.py": {
+      "sha256": "dccff7899fa919d486081d3ec351b858ea552da8ffa564a41e8111cc318f2f76",
+      "size_bytes": 4334
+    },
+    "src/fnit/recon_all/input_n4_chain.py": {
+      "sha256": "cb3cff1cb7f7834365f77109bae71f970cc77cb88f4a354db86a98793eb1bea3",
+      "size_bytes": 10446
+    },
+    "src/fnit/recon_all/n4_itk.py": {
+      "sha256": "4756ac012390442d49d7a1b8537c21eaf0759793844a7be07c814ad04e83dbf4",
+      "size_bytes": 5541
+    },
+    "src/fnit/recon_all/n4_simpleitk.py": {
+      "sha256": "c14e8eb46fb408926ddb9a7fe3d35d97bb5201382928e87226f71f8e01041b90",
+      "size_bytes": 9398
+    },
+    "src/fnit/recon_all/n4_itk_torch_experimental.py": {
+      "sha256": "fdc7731ecc7c98546d23fa90d970cf87664a39bc22fdfdbfae498ae5d0867a8b",
+      "size_bytes": 14986
+    },
+    "src/fnit/recon_all/mri_segment.py": {
+      "sha256": "abee3136f2c88409746b817a845ad48afbf326005f242f4eabc123c6544613bb",
+      "size_bytes": 48564
+    },
+    "src/fnit/recon_all/edit_wm_aseg_core_python.py": {
+      "sha256": "206511ff9b524eb10fb3219a81a85ae7b8a826d439df2b8d2ccb7f8d3b61a049",
+      "size_bytes": 31199
+    },
+    "src/fnit/recon_all/wm_aseg_io.py": {
+      "sha256": "62aca11054872004c50cf38a7af2e6e4ff2af8af5f467a391acff6de03a8927d",
+      "size_bytes": 1551
+    },
+    "src/fnit/recon_all/mris_register_average_numba.py": {
+      "sha256": "956616a920f751f49d201bf5a0a17867084a4b8e810336ab849d29fb60b0648b",
+      "size_bytes": 6671
+    },
+    "src/fnit/recon_all/mris_register_average_gpu.py": {
+      "sha256": "d0e2afb1e37fdfaff7ac80913ada47fed1805ae52ff296fa34050ac0cd7d7b42",
+      "size_bytes": 2087
+    },
+    "src/fnit/recon_all/discrete_curvature_torch.py": {
+      "sha256": "2f0642af718f9d1fa08032fc3c74cc5e8be34def7f77eb8735982a39b5c41493",
+      "size_bytes": 14742
+    },
+    "src/fnit/recon_all/mni_nonlinear_chain.py": {
+      "sha256": "d33d0b0fb31cc5605c926047c7d210bae3e72cfd2dfe02ebdbcf68ec14c70faa",
+      "size_bytes": 7430
+    },
+    "src/fnit/recon_all/python_gpu_profile.py": {
+      "sha256": "0f944c42bdf2e05e461e933bef183baefaf3075b5c7cf810581213ef08efdb6d",
+      "size_bytes": 7677
+    }
+  },
+  "native_mixed_default": {
+    "device": "cuda:0",
+    "backend": "native"
+  },
+  "python_profile": {
+    "native_optimizations": "torch",
+    "n4_backend": "simpleitk",
+    "n4_execution": "in-process",
+    "wm_backend": "torch-optimized",
+    "gca_execution": "isolated",
+    "gca_inverse_backend": "torch",
+    "gca_candidate_chunk": 1024,
+    "normalization_controls_backend": "torch",
+    "normalization_initial_bias_backend": "torch",
+    "sphere_finish_backend": "torch",
+    "mni_execution": "parallel-late",
+    "wm_execution": "isolated",
+    "wm_edit_backend": "python",
+    "defects_backend": "torch",
+    "inflate_backend": "torch",
+    "surface_placement_backend": "python",
+    "topology_backend": "python",
+    "annotation_gibbs_backend": "numba",
+    "remesh_scalar_storage": "python",
+    "fill_backend": "numba",
+    "hemisphere_workers": 2
+  },
+  "python_profile_original_stage_programs_consumed_static": [],
+  "stages": [
+    {
+      "stage": "N4",
+      "original_program": "fnit_n4_itk",
+      "condition": "n4_backend=native",
+      "own_alternative": "SimpleITK complete CPU N4; explicit complete Torch N4",
+      "evidence": "src/fnit/recon_all/input_n4_chain.py:36 (run_n4_stage; full function SHA captured)",
+      "acceptance_gap": "SimpleITK native reference 28/99 voxel differences; Torch downstream changes; default fitting_threads=1",
+      "source_references": [
+        {
+          "path": "src/fnit/recon_all/input_n4_chain.py",
+          "file_sha256": "cb3cff1cb7f7834365f77109bae71f970cc77cb88f4a354db86a98793eb1bea3",
+          "bytes": 10446,
+          "function": "run_n4_stage",
+          "line": 36,
+          "end_line": 81,
+          "function_sha256": "635508088267b04622389f834196ff32653558f5687115962ea9321b879f6c3c"
+        }
+      ]
+    },
+    {
+      "stage": "WM segmentation",
+      "original_program": "mri_segment",
+      "condition": "wm_backend=native",
+      "own_alternative": "Torch histogram plus cached planes and ordered CPU rules",
+      "evidence": "src/fnit/recon_all/native_free.py:78 (_run_torch_wm_segment; full function SHA captured)",
+      "acceptance_gap": "mature threshold bug 14->13 fixed; full frozen two-case zero differences; whole separately assessed",
+      "source_references": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_run_torch_wm_segment",
+          "line": 78,
+          "end_line": 109,
+          "function_sha256": "68e735f42fe5e287cc75c746e49125113ab4700b22a5ef91b798335d4ab6b6f1"
+        }
+      ]
+    },
+    {
+      "stage": "WM/aseg edit",
+      "original_program": "mri_edit_wm_with_aseg",
+      "condition": "wm_edit_backend=native",
+      "own_alternative": "complete standard Python/Numba edit; guarded Torch hybrid optional",
+      "evidence": "src/fnit/recon_all/native_free.py:138 (_run_python_wm_edit; full function SHA captured)",
+      "acceptance_gap": "full source-order path search implemented; two frozen complete edits decoded exact; ten checkpoints had no active branch; active real-data branch not validated",
+      "source_references": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_run_python_wm_edit",
+          "line": 138,
+          "end_line": 153,
+          "function_sha256": "761a8ac1c7e4c4ad63b2d6087f08bcc0ebf2261829f537b1f7029b1be186a774"
+        }
+      ]
+    },
+    {
+      "stage": "Topology repair",
+      "original_program": "mris_fix_topology_fnit",
+      "condition": "topology_backend=native",
+      "own_alternative": "digital topology Python alternative; independent source-semantics GA standalone work",
+      "evidence": "src/fnit/recon_all/native_free.py:259 (_prepare_native_topology; full function SHA captured)",
+      "acceptance_gap": "digital topology is a different algorithm; own GA not wired into current CLI recipe; full GA/whole QC pending",
+      "source_references": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_prepare_native_topology",
+          "line": 259,
+          "end_line": 346,
+          "function_sha256": "f275f87a81a4e03c635c13ea2a2639ea39fdd71d36f56bd99dede856ee567d31"
+        }
+      ]
+    },
+    {
+      "stage": "nofix inflation",
+      "original_program": "mris_inflate",
+      "condition": "surface_placement_backend=native",
+      "own_alternative": "complete own standard nofix inflation",
+      "evidence": "src/fnit/recon_all/native_free.py:259 (_prepare_native_topology; full function SHA captured)",
+      "acceptance_gap": "inflate_backend=torch alone does not select nofix replacement; Python placement/profile does",
+      "source_references": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_prepare_native_topology",
+          "line": 259,
+          "end_line": 346,
+          "function_sha256": "f275f87a81a4e03c635c13ea2a2639ea39fdd71d36f56bd99dede856ee567d31"
+        }
+      ]
+    },
+    {
+      "stage": "standard inflation",
+      "original_program": "mris_inflate",
+      "condition": "inflate_backend=native",
+      "own_alternative": "own full Torch inflation and sulc",
+      "evidence": "src/fnit/recon_all/native_free.py:349 (_run_accurate_sphere_pair; full function SHA captured)",
+      "acceptance_gap": "frozen stage contracts do not establish raw-T1 mesh quality",
+      "source_references": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_run_accurate_sphere_pair",
+          "line": 349,
+          "end_line": 398,
+          "function_sha256": "30083bb7fb7553c46d06bda03fc2af48c5757feec7a6c94b3f834312fd8df15f"
+        }
+      ]
+    },
+    {
+      "stage": "white.preaparc",
+      "original_program": "mris_place_surface or optional white_fast",
+      "condition": "surface_placement_backend=native",
+      "own_alternative": "own full Python/Numba placement",
+      "evidence": "src/fnit/recon_all/native_free.py:601 (_place_preaparc_and_smooth; full function SHA captured)",
+      "acceptance_gap": "actual same-input stage gates; whole remains separate",
+      "source_references": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_place_preaparc_and_smooth",
+          "line": 601,
+          "end_line": 617,
+          "function_sha256": "65c6060b5ce00c3b3cbc70c615b857b7a4b7ef61b66c5dab8d2eb954490a7ca3"
+        }
+      ]
+    },
+    {
+      "stage": "final white and pial",
+      "original_program": "mris_place_surface or optional white_fast",
+      "condition": "surface_placement_backend=native",
+      "own_alternative": "own complete Python/Numba/Torch four-round placement",
+      "evidence": "src/fnit/recon_all/native_free.py:791 (_finish_cortical_surface; full function SHA captured)",
+      "acceptance_gap": "no default switch; raw whole topology/placement QC unresolved",
+      "source_references": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_finish_cortical_surface",
+          "line": 791,
+          "end_line": 822,
+          "function_sha256": "7367fb9a98572334fefe74766e0d19b2b43fd870dee7895316ed8f14f7961ad4"
+        }
+      ]
+    },
+    {
+      "stage": "avg_curv atlas paint",
+      "original_program": "mrisp_paint",
+      "condition": "surface_placement_backend=native",
+      "own_alternative": "own Python/Numba atlas sampler and ordered averages",
+      "evidence": "src/fnit/recon_all/native_free.py:473 (_run_avg_curv; full function SHA captured)",
+      "acceptance_gap": "frozen stages passed; whole separate",
+      "source_references": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_run_avg_curv",
+          "line": 473,
+          "end_line": 498,
+          "function_sha256": "1fcd27454ac9b8e2a7deea32617cbb3e172a4838edaef97c232ad463b5ec485d"
+        }
+      ]
+    },
+    {
+      "stage": "curvature statistics",
+      "original_program": "mris_curvature_stats",
+      "condition": "surface_placement_backend=native",
+      "own_alternative": "own full Python/Numba and Torch map substeps",
+      "evidence": "src/fnit/recon_all/native_free.py:501 (_run_curvature_stats; full function SHA captured)",
+      "acceptance_gap": "source_libm is NumBa/system math, not original FS shared library",
+      "source_references": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_run_curvature_stats",
+          "line": 501,
+          "end_line": 528,
+          "function_sha256": "990e6bf9030c03e90e2868eb3f45213ff69976be7048c0b55bfb1c4db7daf399"
+        }
+      ]
+    },
+    {
+      "stage": "defects projection",
+      "original_program": "mri_label2vol",
+      "condition": "defects_backend=native",
+      "own_alternative": "own full Torch projection with ordered bilateral accumulation",
+      "evidence": "src/fnit/recon_all/native_free.py:531 (_run_defects_volume; full function SHA captured)",
+      "acceptance_gap": "frozen two-case projection gate passed; full GA quality not implied",
+      "source_references": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_run_defects_volume",
+          "line": 531,
+          "end_line": 562,
+          "function_sha256": "a3393a32d0a4e824b28df6ecf95a76ed21a2c0434f23a733cbf439c32d9df073"
+        }
+      ]
+    },
+    {
+      "stage": "GCA registration",
+      "original_program": "mri_em_register",
+      "condition": "CPU auto or native_optimizations=original",
+      "own_alternative": "CUDA auto uses own Torch scoring and CPU Python EM",
+      "evidence": "src/fnit/recon_all/native_free.py:164 (_run_native_em_register; full function SHA captured)",
+      "acceptance_gap": "CUDA default does not execute native EM; Python profile isolated/Torch inverse/chunk1024",
+      "source_references": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_run_native_em_register",
+          "line": 164,
+          "end_line": 232,
+          "function_sha256": "e35c7a0544b81ee256f4e130934cee35c2e8567f32a6bd91543fcc0f82845598"
+        }
+      ]
+    },
+    {
+      "stage": "surface vertex metrics",
+      "original_program": "mris_place_surface",
+      "condition": "only non-CUDA metrics and python_only=False",
+      "own_alternative": "CUDA default/Python profile use own thickness/area/curvature",
+      "evidence": "src/fnit/recon_all/native_free.py:401 (_run_surface_metrics; full function SHA captured)",
+      "acceptance_gap": "do not count the CUDA mixed-default metric stage as native execution",
+      "source_references": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "37fc0bacc521160c7f4fd4cbd751dedf6e03eca8271fa6f052030bca53431932",
+          "bytes": 146752,
+          "function": "_run_surface_metrics",
+          "line": 401,
+          "end_line": 441,
+          "function_sha256": "9873ae51f47d733d691c7ddc040eb94b84c5a448c3465b4a8361078ae06d0202"
+        }
+      ]
+    },
+    {
+      "stage": "MNI postprocessing",
+      "original_program": "mri_warp_convert,mri_ca_register,mri_convert",
+      "condition": "device is not CUDA",
+      "own_alternative": "complete own GPU warp conversion/inversion/check",
+      "evidence": "src/fnit/recon_all/mni_nonlinear_chain.py:20 (run_mni_nonlinear_chain; full function SHA captured)",
+      "acceptance_gap": "Python recipe requires explicit CUDA; CPU native branch remains comparison",
+      "source_references": [
+        {
+          "path": "src/fnit/recon_all/mni_nonlinear_chain.py",
+          "file_sha256": "d33d0b0fb31cc5605c926047c7d210bae3e72cfd2dfe02ebdbcf68ec14c70faa",
+          "bytes": 7430,
+          "function": "run_mni_nonlinear_chain",
+          "line": 20,
+          "end_line": 132,
+          "function_sha256": "ac54a1072d2513af72e25bae00a5bbb008d8ebe42216e61fa9678574946102e8"
+        }
+      ]
+    }
+  ],
+  "already_own_without_original_stage_program": [
+    "conform and rawavg",
+    "Synth GPU family",
+    "nu and both T1 normalizations",
+    "CA normalize (default CPU Python)",
+    "mri_cc",
+    "denoise",
+    "filled (Python/Numba)",
+    "pretess/tessellate/main component",
+    "remesh/intersection",
+    "sphere/sphere.reg",
+    "GCSA annotation",
+    "ribbon/segmentation volume mapping",
+    "brain/ROI statistics"
+  ],
+  "sphere_average_dispatch": "Python recipe explicit CUDA -> Triton; optional CPU _average_cpu_cpp is not reached",
+  "pure_python_gpu_switch": "still raises structured PurePythonGpuUnavailable before output; CPU/generic library recipe is backend=python",
+  "wm_edit_production_subject_hash_whitelist": false,
+  "strict_reproduction": "not_evaluated_this_audit",
+  "whole_equivalence": "not_assessed",
+  "reused_collector_sha256": "c106ec491bfc064dba57651f22db681d96476f093118baa525d068449e2a211c",
+  "reviewed_commit": "bee263f93d1842b44ede5ecf3c791af11613f8ce"
+}

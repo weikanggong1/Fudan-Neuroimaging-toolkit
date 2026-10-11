@@ -1,0 +1,66 @@
+{
+  "status": "complete_isolated_diagnostics",
+  "commands": [
+    {
+      "command": [
+        "[PRIVATE_FNIT]/envs/recon_main_20261009_v3/bin/python",
+        "[PRIVATE_FNIT]/workspaces/topology_mri_score_diagnostics_20261010_v3/recover_capture_receipt.py",
+        "--observer-run",
+        "[PRIVATE_FNIT]/runs/topology_source_active_transform_observer_20261010_v1",
+        "--observer-workspace",
+        "[PRIVATE_FNIT]/workspaces/topology_source_active_transform_observer_20261010_v1",
+        "--prior-reference-edges",
+        "[PRIVATE_FNIT]/runs/recon_topology_source_mri_edges_20261010_v3/reference-0/edges.before.bin",
+        "--output-dir",
+        "[PRIVATE_FNIT]/runs/topology_mri_score_diagnostics_20261010_v3/capture_recovery"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 0.9499793499708176
+    },
+    {
+      "command": [
+        "[PRIVATE_FNIT]/envs/recon_main_20261009_v3/bin/python",
+        "[PRIVATE_FNIT]/workspaces/topology_mri_score_diagnostics_20261010_v3/compare_samples.py",
+        "--sample-capture",
+        "[PRIVATE_FNIT]/runs/topology_source_active_transform_observer_20261010_v1/repeat0/samples.bin",
+        "--native-preparation",
+        "[PRIVATE_FNIT]/runs/topology_source_active_transform_observer_20261010_v1/repeat0/preparation.bin",
+        "--intensity-volume",
+        "[PRIVATE_FNIT]/workspaces/recon_topology_source_mri_edges_20261010_v3/input/subject/mri/brain.mgz",
+        "--active-topology-matrix",
+        "[PRIVATE_FNIT]/runs/topology_source_active_transform_observer_20261010_v1/repeat0/active_matrix.bin",
+        "--output-report",
+        "[PRIVATE_FNIT]/runs/topology_mri_score_diagnostics_20261010_v3/samples.private.json"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 2.624450999312103
+    },
+    {
+      "command": [
+        "[PRIVATE_FNIT]/envs/recon_main_20261009_v3/bin/python",
+        "[PRIVATE_FNIT]/workspaces/topology_mri_score_diagnostics_20261010_v3/compare_preparation.py",
+        "--candidate-checkpoint",
+        "[PRIVATE_FNIT]/runs/recon_topology_source_mri_edges_20261010_v3/candidate/candidate_checkpoint.npz",
+        "--native-preparation",
+        "[PRIVATE_FNIT]/runs/topology_source_active_transform_observer_20261010_v1/repeat0/preparation.bin",
+        "--native-edges",
+        "[PRIVATE_FNIT]/runs/topology_source_active_transform_observer_20261010_v1/repeat0/edges.before.bin",
+        "--intensity-volume",
+        "[PRIVATE_FNIT]/workspaces/recon_topology_source_mri_edges_20261010_v3/input/subject/mri/brain.mgz",
+        "--active-topology-matrix",
+        "[PRIVATE_FNIT]/runs/topology_source_active_transform_observer_20261010_v1/repeat0/active_matrix.bin",
+        "--output-report",
+        "[PRIVATE_FNIT]/runs/topology_mri_score_diagnostics_20261010_v3/preparation.private.json"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 1.567097238264978
+    }
+  ],
+  "script_sha256": "0516e037cb6f09984ee70f16dec2a11ee40a25bfbc9f3b875d626fc04476cf7f",
+  "affinity": [
+    8,
+    9,
+    10,
+    11
+  ]
+}

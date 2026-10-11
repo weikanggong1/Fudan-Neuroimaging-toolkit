@@ -1,0 +1,52 @@
+{
+  "source_commit": "d932c45b7941662ea380a05efef580568b98d41a",
+  "source_defect_sha256": "55ace70ab09b1868a8cb152a9547879abdce790635b484bef1bf056986958187",
+  "source_macros_sha256": "ef58f66e501111c5f061edd4cf071c2ea4fe3062f83896c75cebcb61cab40143",
+  "source_header_sha256_reported_by_reference_builder": "c0538333ca85affab6c585c29a706aaceee106c7f9c67f6b77ff36b43f3ede3e",
+  "source_function": "mrisComputeDefectLogLikelihood",
+  "source_lines": {
+    "global_double_weights": [
+      1196,
+      1199
+    ],
+    "complete_composition": [
+      1432,
+      1500
+    ],
+    "mri_double_vertex_then_face": [
+      1421,
+      1428
+    ],
+    "unmri_float_sum_write_and_double_return": [
+      3119,
+      3123
+    ],
+    "rank_FEQUAL": [
+      11830,
+      11847
+    ]
+  },
+  "MRI_return": "double vertex field widened then double face field addition",
+  "other_component_returns": "float32 TP field widened to double; unMRI float32 white_ll + gray_ll",
+  "score_order": [
+    "MRI",
+    "unMRI",
+    "joint_curvature",
+    "normal_dot",
+    "optional face-validity penalty -10000000"
+  ],
+  "small_volume_disable": "any local volume XYZ dimension <=5 disables this unMRI term only",
+  "weights": "source globals are double; negative allowed; strict abs(weight)<translation-unit FLT_EPSILON disables term",
+  "rank": "FEQUAL uses strict abs(double_difference)<translation-unit FLT_EPSILON; ties favor earlier candidate",
+  "translation_unit_epsilon": 1.1920928955078125e-7,
+  "translation_unit_epsilon_evidence": "complete candidate v2 observer actual FLT_EPSILON; source macro fallback1e-5 is not active",
+  "actual_TP_field_bytes": 4,
+  "actual_parameter_weight_bytes": 8,
+  "global_weight_type_proof": "fixed source global double definitions lines1196-1199 plus observed parameter sizes8",
+  "default_production_GA_changed": false,
+  "real_reference_capture_status": "two complete first same-candidate source repeats exit0; core/captures/final double identical",
+  "real_reference_program_sha256": "2df26fc8f997e13eee8d1dd97c46b452e2d25980645927b1d4de31f2eec9bec7",
+  "same_complete_capture_sha256": "41071c9bc5e52c74353c856ab1cbfad7faad4c2e235a410c89188f194afa2fc0",
+  "reference_scope": "actual retessellated first complete candidate with post-curvature geometry; initial-statistics and unMRI-only snapshots not used as full proof",
+  "undefined_diagnostics": "all selected areas zero; source fll/vll/cll/qcll true IEEE0/0 NaN float32bits0xffc00000; five consumed TP core fields finite"
+}

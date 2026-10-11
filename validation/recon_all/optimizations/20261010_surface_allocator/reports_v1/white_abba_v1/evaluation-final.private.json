@@ -1,0 +1,406 @@
+{
+  "scope": "read-only completed stage diagnostic; not official benchmark or whole recon-all",
+  "host": "A100-8-shared",
+  "evaluator_sha256": "c9c99386b1a94b7aa86ff59b6401d6cacf2a220b9ebbcbde57bf99205259c35e",
+  "frozen_source_manifest_sha256": "1cad591c61e26d152712b7f3fe72c1b6dd92adb413d96f3f4238003216373b3f",
+  "run_manifest_sha256": "b5df1121ed09fc75834710096ffb2b6f9caf0ebf47b159501f9c14927682fb14",
+  "python_executable_sha256": "6896b9f6fadc9770d4e8171a23033d3c61f901bb23bf4a57ca6cbfb24a2d4cf2",
+  "inputs": {
+    "surf/lh.white.preaparc": {
+      "file_sha256": "6bb133be7461189ada0a892a3ec41131033fedb8ee1179478ca1d146b0f69f5a",
+      "bytes": 3422543,
+      "vertices": 95045,
+      "faces": 190086,
+      "coordinate_dtype": "float64",
+      "coordinate_sha256": "b35454a7d18c9859c4478c40de7aff1581fd7a91d757da0fac89b5b8e369e092",
+      "ordered_faces_sha256": "a84376a75308526ed016df87bafd50e26b6632d248d049dbc20125bd3ed8b9fc"
+    },
+    "surf/autodet.gw.stats.lh.dat": {
+      "file_sha256": "16fad6d58028a08e374fae6a0fdabc804b3f816fd185179aac5a714a973df42c",
+      "bytes": 990,
+      "threshold_text": "hemicode           1\nwhite_border_hi    106.454063\nwhite_border_low   62.000000\nwhite_outside_low  49.895580\nwhite_inside_hi    120.000000\nwhite_outside_hi   106.454063\npial_border_hi    49.895580\npial_border_low   25.686745\npial_outside_low  10.000000\npial_inside_hi    87.545937\npial_outside_hi   43.843369\nuse_mode 1\nvariablesigma 3.000000\nstd_scale 1.000000\nadWHITE_MATTER_MEAN 110.000000\nMAX_WHITE 120.000000\nMIN_BORDER_WHITE 85.000000\nMAX_BORDER_WHITE 105.000000\nMAX_GRAY 95.000000\nMID_GRAY 56.616341\nMIN_GRAY_AT_CSF_BORDER 40.000000\nMAX_GRAY_AT_CSF_BORDER 75.000000\nMIN_CSF 10.000000\nadMAX_CSF 40.000000\nwhite_mean 97.000000\nwhite_mode 97.000000\nwhite_std 9.454062\ngray_mean 62.000000\ngray_mode 62.000000\ngray_std 12.104419\nmin_border_white 62.000000\nmax_border_white 106.454063\nmin_gray_at_white_border 49.895580\nmax_gray 87.545937\nmin_gray_at_csf_border 25.686745\nmax_gray_at_csf_border 49.895580\nmin_csf 10.000000\nmax_csf 37.791161\nmax_gray_scale 0.000000\nmax_scale_down 0.200000\n"
+    },
+    "mri/brain.finalsurfs.mgz": {
+      "file_sha256": "14e5c3a99198df61ef6356c44db8ee0f54e5a9e4a44faa4c057044459272e1f5",
+      "bytes": 1121125,
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "dtype": "uint8",
+      "data_sha256": "7d2fc7ae53469765ae08bf0969f647d2752ad5b36cd664b1ecb61d94acf84bdc",
+      "affine": [
+        [
+          -1.0,
+          0.0,
+          2.3283064365386963e-10,
+          124.00959777832031
+        ],
+        [
+          2.3283064365386963e-10,
+          0.0,
+          0.9999999403953552,
+          -105.79763793945312
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0,
+          101.8306655883789
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "mri/wm.mgz": {
+      "file_sha256": "ac618d2b0143c4991e7bcad8f39264402be24a63de5b474e538fa7ca160add14",
+      "bytes": 308658,
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "dtype": "uint8",
+      "data_sha256": "d1512fddbd20f81faa1587e01861c993add1e12aa2e7d7c84f5c797edbe2bbc5",
+      "affine": [
+        [
+          -1.0,
+          0.0,
+          2.3283064365386963e-10,
+          124.00959777832031
+        ],
+        [
+          2.3283064365386963e-10,
+          0.0,
+          0.9999999403953552,
+          -105.79763793945312
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0,
+          101.8306655883789
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "mri/aseg.presurf.mgz": {
+      "file_sha256": "00289571f123b8c04e2e9a17e0c697cd6100899b7c1b49f20c1f5309cd9ffc7c",
+      "bytes": 341922,
+      "shape": [
+        256,
+        256,
+        256
+      ],
+      "dtype": ">f4",
+      "data_sha256": "176eef62734f2cd2ca31ce78f065d9396aea3b86a920cd7ec83e815484f22faa",
+      "affine": [
+        [
+          -1.0,
+          0.0,
+          2.3283064365386963e-10,
+          124.00959777832031
+        ],
+        [
+          2.3283064365386963e-10,
+          0.0,
+          0.9999999403953552,
+          -105.79763793945312
+        ],
+        [
+          0.0,
+          -1.0,
+          0.0,
+          101.8306655883789
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "voxel_size_mm": [
+        1.0,
+        1.0,
+        0.9999999403953552
+      ]
+    },
+    "label/lh.cortex.label": {
+      "file_sha256": "2b7962fccffc0fa94861c4d670bfab70df97a708f6fc67870c3830666def8864",
+      "bytes": 3842730,
+      "vertices": 87165,
+      "vertex_indices_sha256": "4e988801238bc23ef3d9b91f054e959d82bb98181555129e5ba0ac50bb83d6c3"
+    },
+    "label/lh.aparc.annot": {
+      "file_sha256": "25c30cc49100953229b5c3424d4c02f032ad1343b3fd6f0a97e51a5bd453d19d",
+      "bytes": 761873,
+      "labels_shape": [
+        95045
+      ],
+      "label_dtype": ">i4",
+      "labels_sha256": "4c72d8d1c6f38d3c07caa80b60d13d6a7c76d5c55eb4d42f9a47b6e6ec008bc9",
+      "ctab_sha256": "c6592c966f6388bfa25b63a7edd13263c11bbd447465d7d438c4be4532cb57d1"
+    }
+  },
+  "cases": [
+    {
+      "case": "01-cli-enabled",
+      "status": "complete",
+      "child_report_sha256": "a153dffe6ac66c848dcd0343e2455dadf50c2c95ddbc1226d4a20bd65eeae0d4",
+      "same_ordered_mesh_to_v4": true,
+      "coordinate_different_elements_to_v4": 0,
+      "distance_mean_mm_to_v4": 0.0,
+      "distance_p99_mm_to_v4": 0.0,
+      "distance_max_mm_to_v4": 0.0,
+      "white_bytes_equal_to_v4": true,
+      "volume_bytes_equal_to_v4": true,
+      "volume_shape_affine_equal_to_v4": true,
+      "volume_dtype_equal_to_v4": true,
+      "volume_different_voxels_to_v4": 0,
+      "trial_decisions_equal_to_v4": true,
+      "complete_api_seconds": 114.84559518378228,
+      "rusage": {
+        "ru_utime": 115.273707,
+        "ru_stime": 6.031031,
+        "ru_maxrss": 1315596,
+        "ru_minflt": 587663,
+        "ru_majflt": 0,
+        "ru_inblock": 0,
+        "ru_oublock": 0
+      },
+      "stage_seconds": {
+        "prepare": 27.48572716023773,
+        "initial_objective": 1.2470896551385522,
+        "gradient": 8.98900565970689,
+        "collision": 52.104273453354836,
+        "step_objective": 1.7774964682757854,
+        "border_updates": 21.39083429146558,
+        "cleanup": 1.5613971501588821,
+        "write": 0.1851259795948863,
+        "control": 0.09621681272983551
+      },
+      "torch_memory": {
+        "status": "available",
+        "allocated_bytes": 0,
+        "reserved_bytes": 1069547520,
+        "peak_allocated_bytes": 690560000,
+        "peak_reserved_bytes": 1069547520
+      }
+    },
+    {
+      "case": "02-cli-disabled",
+      "status": "complete",
+      "child_report_sha256": "77a028c6cabcc2ef7194866ad20dcd375bebd558bdfb8f4a2d0d31a79b546be0",
+      "same_ordered_mesh_to_v4": true,
+      "coordinate_different_elements_to_v4": 0,
+      "distance_mean_mm_to_v4": 0.0,
+      "distance_p99_mm_to_v4": 0.0,
+      "distance_max_mm_to_v4": 0.0,
+      "white_bytes_equal_to_v4": true,
+      "volume_bytes_equal_to_v4": true,
+      "volume_shape_affine_equal_to_v4": true,
+      "volume_dtype_equal_to_v4": true,
+      "volume_different_voxels_to_v4": 0,
+      "trial_decisions_equal_to_v4": true,
+      "complete_api_seconds": 1374.0540404412895,
+      "rusage": {
+        "ru_utime": 130.238237,
+        "ru_stime": 387.056367,
+        "ru_maxrss": 1286940,
+        "ru_minflt": 759472,
+        "ru_majflt": 0,
+        "ru_inblock": 0,
+        "ru_oublock": 0
+      },
+      "stage_seconds": {
+        "prepare": 87.10000274144113,
+        "initial_objective": 1.1893949396908283,
+        "gradient": 8.556246117688715,
+        "collision": 1148.2404705658555,
+        "step_objective": 1.632737834006548,
+        "border_updates": 21.170078051276505,
+        "cleanup": 105.85644329804927,
+        "write": 0.19074961449950933,
+        "control": 0.10868412908166647
+      },
+      "torch_memory": {
+        "status": "unavailable_allocator_disabled",
+        "allocated_bytes": null,
+        "reserved_bytes": null,
+        "peak_allocated_bytes": null,
+        "peak_reserved_bytes": null
+      },
+      "accepted_trajectory_equal_to_first": true,
+      "output_sha256_equal_to_first": true
+    },
+    {
+      "case": "03-cli-disabled",
+      "status": "complete",
+      "child_report_sha256": "36cb0fde71a3ce56cce63ef2be02d5f36228a132b083aeeb9a014aa3f3177572",
+      "same_ordered_mesh_to_v4": true,
+      "coordinate_different_elements_to_v4": 0,
+      "distance_mean_mm_to_v4": 0.0,
+      "distance_p99_mm_to_v4": 0.0,
+      "distance_max_mm_to_v4": 0.0,
+      "white_bytes_equal_to_v4": true,
+      "volume_bytes_equal_to_v4": true,
+      "volume_shape_affine_equal_to_v4": true,
+      "volume_dtype_equal_to_v4": true,
+      "volume_different_voxels_to_v4": 0,
+      "trial_decisions_equal_to_v4": true,
+      "complete_api_seconds": 1571.527018303983,
+      "rusage": {
+        "ru_utime": 124.613683,
+        "ru_stime": 417.509728,
+        "ru_maxrss": 1297412,
+        "ru_minflt": 733400,
+        "ru_majflt": 0,
+        "ru_inblock": 0,
+        "ru_oublock": 0
+      },
+      "stage_seconds": {
+        "prepare": 103.88183330092579,
+        "initial_objective": 1.100463311187923,
+        "gradient": 8.388557622209191,
+        "collision": 1325.8635461563244,
+        "step_objective": 1.5793722653761506,
+        "border_updates": 21.155317513272166,
+        "cleanup": 109.25019667390734,
+        "write": 0.1976166581735015,
+        "control": 0.09926740359514952
+      },
+      "torch_memory": {
+        "status": "unavailable_allocator_disabled",
+        "allocated_bytes": null,
+        "reserved_bytes": null,
+        "peak_allocated_bytes": null,
+        "peak_reserved_bytes": null
+      },
+      "accepted_trajectory_equal_to_first": true,
+      "output_sha256_equal_to_first": true
+    },
+    {
+      "case": "04-cli-enabled",
+      "status": "complete",
+      "child_report_sha256": "44f5b045d40bdf31bb9ed6fff92f8f73e53d45309623c06feecf98742722e356",
+      "same_ordered_mesh_to_v4": true,
+      "coordinate_different_elements_to_v4": 0,
+      "distance_mean_mm_to_v4": 0.0,
+      "distance_p99_mm_to_v4": 0.0,
+      "distance_max_mm_to_v4": 0.0,
+      "white_bytes_equal_to_v4": true,
+      "volume_bytes_equal_to_v4": true,
+      "volume_shape_affine_equal_to_v4": true,
+      "volume_dtype_equal_to_v4": true,
+      "volume_different_voxels_to_v4": 0,
+      "trial_decisions_equal_to_v4": true,
+      "complete_api_seconds": 108.46122517902404,
+      "rusage": {
+        "ru_utime": 108.966681,
+        "ru_stime": 5.917905,
+        "ru_maxrss": 1319020,
+        "ru_minflt": 610624,
+        "ru_majflt": 0,
+        "ru_inblock": 0,
+        "ru_oublock": 0
+      },
+      "stage_seconds": {
+        "prepare": 26.176419406197965,
+        "initial_objective": 1.1176785994321108,
+        "gradient": 8.410774418152869,
+        "collision": 48.93679000250995,
+        "step_objective": 1.612618599087,
+        "border_updates": 20.52808037865907,
+        "cleanup": 1.3993934569880366,
+        "write": 0.18062474858015776,
+        "control": 0.09093096759170294
+      },
+      "torch_memory": {
+        "status": "available",
+        "allocated_bytes": 0,
+        "reserved_bytes": 1069547520,
+        "peak_allocated_bytes": 690560000,
+        "peak_reserved_bytes": 1069547520
+      },
+      "accepted_trajectory_equal_to_first": true,
+      "output_sha256_equal_to_first": true
+    },
+    {
+      "case": "05-initialized-api-enabled",
+      "status": "complete",
+      "child_report_sha256": "038a149728ad954031d5a1c84096dc5fbdaecf49783acd60e5c8d9e1d1879bb6",
+      "same_ordered_mesh_to_v4": true,
+      "coordinate_different_elements_to_v4": 0,
+      "distance_mean_mm_to_v4": 0.0,
+      "distance_p99_mm_to_v4": 0.0,
+      "distance_max_mm_to_v4": 0.0,
+      "white_bytes_equal_to_v4": true,
+      "volume_bytes_equal_to_v4": true,
+      "volume_shape_affine_equal_to_v4": true,
+      "volume_dtype_equal_to_v4": true,
+      "volume_different_voxels_to_v4": 0,
+      "trial_decisions_equal_to_v4": true,
+      "complete_api_seconds": 107.86371787730604,
+      "rusage": {
+        "ru_utime": 108.403365,
+        "ru_stime": 5.7841000000000005,
+        "ru_maxrss": 1317032,
+        "ru_minflt": 596948,
+        "ru_majflt": 0,
+        "ru_inblock": 0,
+        "ru_oublock": 0
+      },
+      "stage_seconds": {
+        "prepare": 25.561461185105145,
+        "initial_objective": 1.1156687503680587,
+        "gradient": 8.4871213613078,
+        "collision": 48.80360179580748,
+        "step_objective": 1.5550035806372762,
+        "border_updates": 20.67473167553544,
+        "cleanup": 1.401757225394249,
+        "write": 0.14966635033488274,
+        "control": 0.10443906206637621
+      },
+      "torch_memory": {
+        "status": "available",
+        "allocated_bytes": 0,
+        "reserved_bytes": 1069547520,
+        "peak_allocated_bytes": 690560000,
+        "peak_reserved_bytes": 1069547520
+      },
+      "accepted_trajectory_equal_to_first": true,
+      "output_sha256_equal_to_first": true
+    }
+  ],
+  "overall_metric_equivalence": "not_assessed",
+  "whole_pipeline_speedup": null,
+  "cpu_model": "Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz",
+  "baseline_output_sha256": "df9eaf2ed4e709bee489c93c24e5afbe5c7854f2d7baa04e8103091c3c29f767",
+  "baseline_coordinate_sha256": "ec141a7714fd285e02820b9768b0be35fca1bf7b008948e9c67d110ae778eeef",
+  "baseline_stage_report_sha256": "cebb6cc6defee650d1476c91f94f169c4b47785b9deed92b201d1deb3b38ec3f",
+  "baseline_stage_seconds": 1387.869463593699,
+  "baseline_timing_scope": "historical v4: other GPU and two threads per hemisphere; no speed ratio to this old wall",
+  "completed_case_count": 5,
+  "running_case_directories": []
+}

@@ -40,7 +40,7 @@ def test_core_rejects_mismatched_shapes():
         edit_segmentation_no_fill(wm, wm, np.zeros((7, 8, 8), dtype=np.int32))
 
 
-def test_int32_path_proof_accepts_inaccessible_roi_and_rejects_other_roi():
+def test_int32_path_proof_and_complete_active_roi_without_seeds():
     wm = np.zeros((24, 24, 24), dtype=np.uint8)
     aseg = np.zeros(wm.shape, dtype=np.int32)
     aseg[15, 12, 12] = 17
@@ -48,5 +48,5 @@ def test_int32_path_proof_accepts_inaccessible_roi_and_rejects_other_roi():
     assert changed == 0 and np.array_equal(result, wm)
     aseg[15, 12, 12] = 0
     aseg[7, 12, 12] = 17
-    with pytest.raises(NotImplementedError):
-        remove_paths_to_cortex(wm, wm, aseg)
+    result, changed = remove_paths_to_cortex(wm, wm, aseg)
+    assert changed == 0 and np.array_equal(result, wm)

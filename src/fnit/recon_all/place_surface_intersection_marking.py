@@ -8,9 +8,61 @@ mrisMarkIntersections(FillHoles=0)内部步骤，没有独立原软件CLI。
 from __future__ import annotations
 
 import numpy as np
+from numba import njit
 from scipy.spatial import cKDTree
 
 from .place_surface_collision import _sample_mht_voxels
+
+
+@njit(cache=True)
+def _candidate_pairs_from_csr(
+    centers, radii, cell_low, cell_high, triangles, face_flags,
+    first_face, nearby_offsets, nearby_faces,
+):
+    """编译原逐行完整候选过滤，保留KD树返回次序和全部源过滤条件。
+
+    只筛选radius/cell/共享顶点，不判断碰撞。无fastmath、并行归约或阈值
+    改动。全候选预分配后返回有效前缀；每个输出仍交原双方向源谓词。
+    """
+    first = np.empty(len(nearby_faces), np.int64)
+    second = np.empty(len(nearby_faces), np.int64)
+    count = 0
+    for row in range(len(nearby_offsets)-1):
+        fa = first_face + row
+        if face_flags[fa]:
+            continue
+        for index in range(nearby_offsets[row], nearby_offsets[row+1]):
+            fb = nearby_faces[index]
+            if fb <= fa or face_flags[fb]:
+                continue
+            dx = centers[fb, 0] - centers[fa, 0]
+            dy = centers[fb, 1] - centers[fa, 1]
+            dz = centers[fb, 2] - centers[fa, 2]
+            distance_squared = (dx*dx + dy*dy) + dz*dz
+            radius = (radii[fb] + radii[fa]) + 4.0
+            if distance_squared > radius*radius:
+                continue
+            cells_overlap = True
+            for axis in range(3):
+                if cell_low[fa, axis] > cell_high[fb, axis] or cell_low[fb, axis] > cell_high[fa, axis]:
+                    cells_overlap = False
+                    break
+            if not cells_overlap:
+                continue
+            shared = False
+            for corner in range(3):
+                for other_corner in range(3):
+                    if triangles[fa, corner] == triangles[fb, other_corner]:
+                        shared = True
+                        break
+                if shared:
+                    break
+            if shared:
+                continue
+            first[count] = fa
+            second[count] = fb
+            count += 1
+    return first[:count], second[:count]
 
 
 def mark_source_intersections(
@@ -33,7 +85,9 @@ def mark_source_intersections(
 
     球半径额外4mm仅用于产生1mm源hash桶可能共有的完整候选；不把
     几何AABB当作带容差源谓词的排除条件。最终阳性必须通过已有源
-    MHT采样桶共享验证，未共享的pair不标记。
+    MHT采样桶共享验证，未共享的pair不标记。Numba路径将KD树批次列表
+    打包成CSR并编译原候选过滤，保留返回次序、半径、整数桶与共享顶点
+    规则；源双方向谓词/MHT/标记语义不变，第一次JIT需另计。
     """
     xyz = np.asarray(vertices, dtype=np.float32)
     triangles = np.asarray(faces)
@@ -120,25 +174,15 @@ def mark_source_intersections(
     for offset in range(0, len(triangles), block_faces):
         end = min(offset + block_faces, len(triangles))
         nearby = tree.query_ball_point(centers[offset:end], radii[offset:end] + maximum + 4.)
-        first_parts, second_parts = [], []
-        for fa, other in enumerate(nearby, offset):
-            if face_flags[fa]:
-                continue
-            other = np.asarray(other, dtype=np.int64)
-            other = other[(other > fa) & ~face_flags[other]]
-            if not len(other):
-                continue
-            near = np.sum((centers[other] - centers[fa]) ** 2, axis=1) <= (radii[other] + radii[fa] + 4.) ** 2
-            other = other[near]
-            cells_overlap = np.all(cell_low[fa] <= cell_high[other], axis=1) & np.all(
-                cell_low[other] <= cell_high[fa], axis=1)
-            other = other[cells_overlap]
-            other = other[np.all(triangles[fa, :, None] != triangles[other, None, :], axis=(1, 2))]
-            first_parts.append(np.full(len(other), fa, dtype=np.int64))
-            second_parts.append(other)
-        if not first_parts:
+        nearby_offsets = np.empty(len(nearby)+1, dtype=np.int64)
+        nearby_offsets[0] = 0
+        nearby_offsets[1:] = np.cumsum([len(row) for row in nearby], dtype=np.int64)
+        nearby_faces = np.concatenate(nearby, dtype=np.int64)
+        first, second = _candidate_pairs_from_csr(
+            centers, radii, cell_low, cell_high, triangles, face_flags,
+            offset, nearby_offsets, nearby_faces)
+        if not len(first):
             continue
-        first, second = np.concatenate(first_parts), np.concatenate(second_parts)
         for start in range(0, len(first), block_pairs):
             evaluate(first[start:start + block_pairs], second[start:start + block_pairs])
     marks[triangles[face_marks].ravel()] = True

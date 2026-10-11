@@ -2,6 +2,7 @@
 import hashlib
 import json
 import os
+import sys
 from pathlib import Path
 
 import pytest
@@ -55,3 +56,34 @@ def test_output_hash_mismatch_is_not_a_success(monkeypatch,tmp_path):
     monkeypatch.setattr(worker.subprocess,'run',fake_run)
     with pytest.raises(ValueError,match='hash mismatch'):
         worker.run_isolated_n4(input_path=source,output_path=output,report_path=report,device='cuda:0')
+
+
+@pytest.mark.parametrize('flag',[None,'0','1'])
+def test_inherited_n4_guard_precedes_cuda_and_preserves_policy(monkeypatch,tmp_path,flag):
+    key='FNIT_RECON_FORBID_ORIGINAL_STAGES'
+    if flag is None:monkeypatch.delenv(key,raising=False)
+    else:monkeypatch.setenv(key,flag)
+    before=(torch.backends.cuda.matmul.allow_tf32,torch.backends.cudnn.allow_tf32)
+    def first_cuda_check():
+        sys.audit('subprocess.Popen','fnit_n4_itk',[],None,None)
+        return True  # 不启用守卫时，由既有initialized CUDA门拒绝。
+    monkeypatch.setattr(torch.cuda,'is_initialized',first_cuda_check)
+    with pytest.raises(RuntimeError if flag=='1' else ValueError):
+        worker.run_worker(input_path=tmp_path/'orig',output_path=tmp_path/'nu0',
+                          report_path=tmp_path/'report',device='cuda:0')
+    assert os.environ.get(key)==flag
+    assert before==(torch.backends.cuda.matmul.allow_tf32,torch.backends.cudnn.allow_tf32)
+    assert not (tmp_path/'nu0').exists() and not (tmp_path/'report').exists()
+
+
+@pytest.mark.parametrize('flag',[None,'0','1'])
+def test_inherited_n4_cli_guard_precedes_parser(monkeypatch,flag):
+    key='FNIT_RECON_FORBID_ORIGINAL_STAGES'
+    if flag is None:monkeypatch.delenv(key,raising=False)
+    else:monkeypatch.setenv(key,flag)
+    def before_argument_parser(*args,**kwargs):
+        sys.audit('subprocess.Popen','mri_convert',[],None,None)
+        raise LookupError('test stops before parsing or image IO')
+    monkeypatch.setattr(worker.argparse,'ArgumentParser',before_argument_parser)
+    with pytest.raises(RuntimeError if flag=='1' else LookupError):worker.main()
+    assert os.environ.get(key)==flag

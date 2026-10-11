@@ -1,0 +1,96 @@
+{
+  "status": "complete",
+  "scope": "isolated target metadata and imports only; not MRI or clean Conda",
+  "source_binding_sha256": "09ba8e36bd3733e0cd740c085bc29105c7263d2ea21554c10897a3289c6a6a73",
+  "requires_dist": [
+    "torch>=2.1",
+    "numpy<2,>=1.23",
+    "scipy>=1.9",
+    "numba>=0.59",
+    "nibabel>=5",
+    "SimpleITK==2.5.6",
+    "h5py>=3.8",
+    "PyYAML>=6",
+    "Pillow>=9",
+    "scikit-learn<2,>=1.5",
+    "matplotlib>=3.7",
+    "tifffile>=2023.7",
+    "pyvista<0.50,>=0.49; extra == \"bwas-visualization\"",
+    "vtk<10,>=9.5; extra == \"bwas-visualization\"",
+    "numba>=0.59; extra == \"recon-all-python-stages\"",
+    "tifffile>=2023.7; extra == \"recon-all-python-stages\"",
+    "surfa==0.6.3; extra == \"connectome-legacy\""
+  ],
+  "entrypoint": "fnit.recon_all.native_free:main",
+  "imports": {
+    "fnit.recon_all.python_profile": {
+      "file": "$TASK_OUTPUT/installed/fnit/recon_all/python_profile.py",
+      "sha256": "398a7967eb4ac954b446a5e809f92fda1c465e670bc5eb4841931d3d7ef33f2f"
+    },
+    "fnit.recon_all.n4_simpleitk": {
+      "file": "$TASK_OUTPUT/installed/fnit/recon_all/n4_simpleitk.py",
+      "sha256": "185c0864e777796c828a6edf4d230375a8dd5953fc23ea44edf6c8c820bdc02a"
+    },
+    "fnit.recon_all.input_n4_chain": {
+      "file": "$TASK_OUTPUT/installed/fnit/recon_all/input_n4_chain.py",
+      "sha256": "cb3cff1cb7f7834365f77109bae71f970cc77cb88f4a354db86a98793eb1bea3"
+    },
+    "fnit.recon_all.native_free": {
+      "file": "$TASK_OUTPUT/installed/fnit/recon_all/native_free.py",
+      "sha256": "873b6d2cf4c2ac28af23f0de9137d46c34249a010018ef35beb1e0e791ae7c44"
+    },
+    "fnit.recon_all.place_white_preaparc_python": {
+      "file": "$TASK_OUTPUT/installed/fnit/recon_all/place_white_preaparc_python.py",
+      "sha256": "93da98e7d4c48888cbeaac64e5d031fcbf82acd3df958932e4da1f3aa810c225"
+    },
+    "fnit.recon_all.place_final_white_python": {
+      "file": "$TASK_OUTPUT/installed/fnit/recon_all/place_final_white_python.py",
+      "sha256": "fbaf26998313e8cd4d6d1e82259b72b8bca9da263d299903ed70c54267e1bdf0"
+    },
+    "fnit.recon_all.place_pial_python": {
+      "file": "$TASK_OUTPUT/installed/fnit/recon_all/place_pial_python.py",
+      "sha256": "962e36045e99210b5370a4bce1d1204b5f3dc9885e48eeb5e887c7db45518cbe"
+    },
+    "fnit.recon_all.topology_volume_python": {
+      "file": "$TASK_OUTPUT/installed/fnit/recon_all/topology_volume_python.py",
+      "sha256": "b6ad8b5c54a51dc9a263da3df8eeb0a2f8588b56d4c1e964d57ee509a2a1d0a9"
+    }
+  },
+  "simpleitk_version": "2.5.6",
+  "torch_version": "2.5.1",
+  "cuda_initialized": false,
+  "snapshot_profile": {
+    "native_optimizations": "torch",
+    "n4_backend": "simpleitk",
+    "n4_execution": "in-process",
+    "wm_backend": "torch-optimized",
+    "gca_execution": "isolated",
+    "gca_inverse_backend": "torch",
+    "gca_candidate_chunk": 1024,
+    "normalization_controls_backend": "torch",
+    "normalization_initial_bias_backend": "torch",
+    "sphere_finish_backend": "torch",
+    "mni_execution": "parallel-late",
+    "wm_execution": "isolated",
+    "wm_edit_backend": "python",
+    "defects_backend": "torch",
+    "inflate_backend": "torch",
+    "surface_placement_backend": "python",
+    "topology_backend": "python",
+    "annotation_gibbs_backend": "numba",
+    "remesh_scalar_storage": "python",
+    "fill_backend": "numba",
+    "hemisphere_workers": 2
+  },
+  "profile_option_count": 21,
+  "cuda_initialized_before_imports": false,
+  "no_CUDA_init_after_imports_profile_help": true,
+  "check_script_sha256": "8e7ea446a1df619181c913b81cc11c0b25ac00f32f1c428d77fe4e0e184cf1a6",
+  "cli_help_sha256": "2080c3c78e59bf3369f1bb703f45fe18bea383621f95ece8dd1d0f08f836b3d6",
+  "cli_help_exit_code": 0,
+  "wheel": {
+    "name": "fudan_neuroimaging_toolkit-0.16.0-cp311-cp311-linux_x86_64.whl",
+    "size_bytes": 5128145,
+    "sha256": "59a75d82614c4a6cda50598a2f14e1c07c171dec88600fbca7fd6cdf28b0a4c1"
+  }
+}

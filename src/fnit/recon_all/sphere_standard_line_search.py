@@ -57,21 +57,47 @@ def _negative_area_sse(area: np.ndarray, original_area: np.ndarray,
     return total
 
 
+def _source_sse_scales(original_total_area: np.float32,
+                       negative_area: np.float32) -> tuple[float, float]:
+    """返回源DistanceError与面积项的无量纲(double)尺度。
+
+    两个输入分别为原总面积与当前负面积的float32标量，单位mm²；
+    固定球面总面积为4π·100²。先按源float除法及sqrt(float)舍入，
+    再提升double；不改权重、候选、TF32或任意图像/坐标精度。
+    返回(distance_scale, area_scale)。内部步骤无独立CLI；调用者
+    应提供有限合法面积，非法输入沿NumPy浮点规则暴露，不裁剪。
+    """
+    total_area = np.float32(4 * math.pi * 100 * 100)
+    denominator = (np.float32(total_area - negative_area)
+                   if negative_area < total_area else total_area)
+    # The fixed C++ overload returns float before assignment to double.
+    distance_scale = float(np.sqrt(np.float32(original_total_area / denominator)))
+    area_scale = float(np.float32(original_total_area / total_area))
+    return distance_scale, area_scale
+
+
 def first_epoch_sse(vertices: np.ndarray, faces: np.ndarray,
                     offsets: np.ndarray, neighbors: np.ndarray,
                     original_distances: np.ndarray,
                     original_face_area: np.ndarray,
                     original_total_area: np.float32,
                     distance_weight: float = 0.1) -> dict:
-    """Evaluate one fixed sphere epoch distance and negative-area SSE."""
+    """计算标准球面一个固定线性距离/负面积目标函数。
+
+    vertices为float32(N,3)surface RAS/mm，faces为有序int32(F,3)；
+    offsets/neighbors为同顶点序CSR，original_distances为float32毫米距离，
+    original_face_area为float32(F,)mm²，original_total_area为float32总mm²。
+    distance_weight默认0.1，与原float参数相同；返回float64 total、
+    weighted_distance、negative_area及负面数/面积/尺度的字典。
+    固定Conda源码sqrt(float ratio)先舍入float32，再提升double参与SSE；
+    不改变TF32或影像/网格存储精度。非法网格/CSR输入沿NumPy/Numba
+    原校验抛异常，调用者须确保索引有效；不裁剪或修补非有限输入。
+    属于mris_sphere内部步骤，没有独立CLI。
+    """
     xyz = np.asarray(vertices, np.float32)
     area, _ = _face_geometry(xyz, np.asarray(faces, np.int32))
     negative_area = np.float32(-np.sum(area[area < 0], dtype=np.float64))
-    total_area = np.float32(4 * math.pi * 100 * 100)
-    denominator = (np.float32(total_area - negative_area)
-                   if negative_area < total_area else total_area)
-    distance_scale = math.sqrt(float(np.float32(original_total_area / denominator)))
-    area_scale = float(np.float32(original_total_area / total_area))
+    distance_scale, area_scale = _source_sse_scales(original_total_area, negative_area)
     distance = _distance_sse(xyz, offsets, neighbors, original_distances, distance_scale)
     negative = _negative_area_sse(area, original_face_area, area_scale)
     # INTEGRATION_PARMS stores l_dist as float before the double SSE product.

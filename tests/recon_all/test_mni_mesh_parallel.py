@@ -74,6 +74,13 @@ class MNIParallelTests(unittest.TestCase):
         self.assertEqual(result["status"], "complete")
 
     def test_child_failure_report(self): self.invoke(returncode=1)
+
+    def test_gpu_worker_request_does_not_require_unused_original_programs(self):
+        self.kwargs["warp_binaries"] = (None, None, None)
+        result, records = self.invoke()
+        request = json.loads((self.root / "report.request.json").read_text())
+        self.assertEqual(request["kwargs"]["warp_binaries"], [None, None, None])
+        self.assertEqual(result["status"], "complete")
     def test_mesh_failure_report(self): self.invoke(mesh_status="failed")
 
     def test_argument_guards(self):

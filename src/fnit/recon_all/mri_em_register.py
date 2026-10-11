@@ -193,17 +193,97 @@ def _histogram(values: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
 
 
 def _smooth_histogram(counts: np.ndarray) -> np.ndarray:
-    offsets = np.arange(-8, 9, dtype=np.float32)
-    distance = np.abs(offsets)
-    kernel = np.where(distance <= 4, np.exp(-offsets * offsets / 8),
-                      (4 - distance / 2) ** 4 / (16 * math.e * math.e)).astype(np.float32)
-    kernel /= kernel.sum(dtype=np.float32)
+    """固定sigma=2直方图平滑，逐项FP32核归一化和加权累积。"""
+    kernel = np.empty(17, np.float32)
+    total = np.float32(0)
+    for index, offset in enumerate(range(-8, 9)):
+        distance = abs(offset)
+        if distance <= 4:
+            value = np.float32(math.exp(-offset * offset / 8.0))
+        else:
+            coefficient = np.float32(1) / np.float32(16 * np.float32(math.e * math.e))
+            value = np.float32(coefficient * np.float32((4 - distance / 2.0) ** 4))
+        kernel[index] = value
+        total = np.float32(total + value)
+    kernel /= total
     result = np.empty_like(counts)
     for index in range(len(counts)):
-        first, last = max(0, index - 8), min(len(counts), index + 9)
-        weights = kernel[first - index + 8:last - index + 8]
-        result[index] = np.sum(counts[first:last] * weights, dtype=np.float32) / weights.sum()
+        weight_sum = weighted_sum = np.float32(0)
+        for offset in range(-8, 9):
+            location = index + offset
+            if 0 <= location < len(counts):
+                weight = kernel[offset + 8]
+                weight_sum = np.float32(weight_sum + weight)
+                weighted_sum = np.float32(weighted_sum + np.float32(counts[location] * weight))
+        result[index] = weighted_sum / weight_sum
     return result
+
+
+def _robust_histogram_gaussian(bins: np.ndarray, counts: np.ndarray) -> tuple[float, float]:
+    """固定uint8 GCA直方图的峰中心/截尾Gaussian宽度，独立协议实现。
+
+    bins为单位间距FP32；counts为已平滑非负FP32。再次sigma2平滑找峰，
+    由峰右侧十bin后的谷或绝对距离CDF(.3)确定拟合窗，至少12bin，
+    sigma从0.1逐次扫描、双精度SSE选择，保持边界和扫描顺序。
+    不调用原软件，不把标准差直接替换为普通样本方差。
+    """
+    if len(bins) < 2 or not np.all(np.diff(bins) == np.float32(1)):
+        raise ValueError('fixed GCA fit requires unit-spaced histogram bins')
+    smoothed = _smooth_histogram(counts)
+    center_index = int(np.argmax(smoothed))
+    center = float(bins[center_index])
+    centered = (bins - np.float32(center)).astype(np.float32)
+    valley_start = center_index + 10
+    valley = next((index for index in range(valley_start + 1, len(bins))
+                   if smoothed[index] > smoothed[index-1]), -1)
+    if valley_start >= len(bins):
+        valley = valley_start
+    if valley < 0:
+        # 合并正负距离为有序FP32计数，再按double累积/FP32存储CDF。
+        maximum_distance = int(np.max(np.abs(centered)))
+        absolute_counts = np.zeros(maximum_distance + 1, np.float32)
+        for distance, count in zip(np.abs(centered), counts):
+            at = int(distance)
+            absolute_counts[at] = np.float32(absolute_counts[at] + count)
+        cumulative = np.zeros(len(bins), np.float32)
+        for index, distance in enumerate(centered):
+            if distance >= 0:
+                cumulative[index] = np.float32(sum(float(x) for x in absolute_counts[:int(distance)+1]))
+        cumulative /= float(sum(float(x) for x in absolute_counts[:int(centered[-1])+1]))
+        threshold = float(centered[int(np.argmin(np.abs(cumulative - np.float32(.3))))])
+    else:
+        valley = min(valley, len(bins)-1)
+        while valley > center_index + 1 and counts[valley] < float(counts[center_index]) * .3:
+            valley -= 1
+        threshold = float(bins[valley]-bins[center_index])
+    low = int(-threshold) - int(centered[0])
+    high = int(threshold) - int(centered[0])
+    while low >= high:
+        low = max(0, low-1)
+        high = min(len(bins)-1, high+1)
+    if high-low < 12:
+        high += (12-(high-low)) // 2
+        low -= (12-(high-low)) // 2
+        low = max(0, low)
+        high = min(len(bins)-1, high)
+    maximum_distance = int(np.max(np.abs(centered)))
+    upper_sigma = (maximum_distance + 1) / 2.0
+    increment = float(np.float32(.1))
+    sigma = increment
+    best_error, best_sigma = math.inf, 0.0
+    root_two_pi = math.sqrt(2*math.pi)
+    while sigma <= upper_sigma:
+        predictions = [math.exp(-float(value)**2/(2*sigma*sigma))/(sigma*root_two_pi)
+                       for value in centered[low:high+1]]
+        ratios = [float(counts[low+index])/prediction for index,prediction in enumerate(predictions)
+                  if prediction > 1e-3]
+        amplitude = sum(ratios) / len(ratios)
+        error = sum((amplitude*prediction-float(counts[low+index]))**2
+                    for index,prediction in enumerate(predictions))
+        if error < best_error:
+            best_error, best_sigma = error, sigma
+        sigma += increment
+    return center, best_sigma
 
 
 def _histogram_peak(counts: np.ndarray, width: int, first: bool, fraction: float) -> int:
@@ -267,8 +347,17 @@ def _skull_box(mean_image: np.ndarray, threshold: int) -> tuple[int, int, int, i
     return left, top, back, right - left + 1, bottom - top + 1, front - back + 1
 
 
-def estimate_image_white_matter_peak(gca: GCA, masked: np.ndarray) -> tuple[int, float, tuple[int, ...]]:
-    """Get the fixed T1 histogram-scaling peak before multiplying the input."""
+def estimate_image_white_matter_peak(gca: GCA, masked: np.ndarray, *,
+                                     profile: dict | None = None) -> tuple[int, float, tuple[int, ...]]:
+    """固定GCA/同网格uint8 masked T1→强度峰、阈值和WM采样盒。
+
+    gca为已有单T1 GCA；masked为conform强度，单位任意强度值；可选
+    profile为调用者dict，追加稳健mean/sigma、宽度阈值和缩放禁用记录。
+    返回(image_peak, skull_threshold, (x,y,z,dx,dy,dz))，盒坐标为体素。
+    保持源过宽分布禁用缩放规则；内部仅Python/NumPy，不执行原程序。
+    非单位bin的固定配方拟合失败明确传播。GCA与CA normalization
+    共用本函数；真实宽分布修复与回归见GCA_COMPLETE_PYTHON.md。
+    """
 
     image = masked.astype(np.float32)
     mean_image = uniform_filter(image, size=5, mode="constant")
@@ -302,7 +391,22 @@ def estimate_image_white_matter_peak(gca: GCA, masked: np.ndarray) -> tuple[int,
     counts[bins > 240] = 0
     smooth = _smooth_histogram(counts)
     peak = _histogram_peak(smooth, 7, False, .15)
-    return int(bins[peak]), threshold, (x, y, z, dx, dy, dz)
+    robust_mean, robust_sigma = _robust_histogram_gaussian(bins, smooth)
+    atlas_peak = atlas_label_peak(gca, 2)
+    width_threshold = 10.0 * (robust_mean / atlas_peak)
+    disabled = robust_sigma > width_threshold
+    if disabled:
+        # Disable scaling by returning the atlas value, even outside local bins.
+        image_peak = int(atlas_peak)
+    else:
+        if not 0 <= peak < len(bins) or bins[peak] <= 0:
+            raise ValueError('fixed GCA histogram scaling peak is invalid')
+        image_peak = int(bins[peak])
+    if profile is not None:
+        profile.update(robust_mean=robust_mean,robust_sigma=robust_sigma,
+                       width_threshold=width_threshold,scaling_disabled=disabled,
+                       image_peak=image_peak,atlas_peak=atlas_peak)
+    return image_peak, threshold, (x, y, z, dx, dy, dz)
 
 
 def atlas_label_peak(gca: GCA, label: int) -> int:
@@ -581,7 +685,7 @@ def _vnl_affine_inverse(matrix: np.ndarray) -> np.ndarray:
 
 
 def log_sample_probability(samples: StableSamples, source: np.ndarray,
-                           source_to_atlas: np.ndarray) -> float:
+                           source_to_atlas: np.ndarray, *, clamp: float = 6.0) -> float:
     """Mean clamped GCA sample log density for a voxel-to-voxel transform."""
 
     inverse = _vnl_affine_inverse(source_to_atlas)
@@ -607,7 +711,7 @@ def log_sample_probability(samples: StableSamples, source: np.ndarray,
     likelihood = (-np.log(np.sqrt(samples.variances[inside].astype(np.float64)))
                   - .5 * mahalanobis.astype(np.float64)
                   + np.log(samples.priors[inside].astype(np.float64)))
-    log_values[inside] = np.maximum(likelihood, -6.)
+    log_values[inside] = np.maximum(likelihood, -float(clamp))
     return float(np.float32(np.float32(np.sum(log_values, dtype=np.float64)) /
                             np.float32(len(log_values))))
 

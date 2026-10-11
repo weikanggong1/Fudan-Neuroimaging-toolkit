@@ -1,5 +1,7 @@
 # recon-all 纯 Python GPU 迁移状态
 
+本页保留 2026-10-08/09 的严格 GPU 迁移记录。2026-10-10 用户明确允许所有 Python/Numba/通用 Python 库及 CPU 核，以脱离原版阶段程序为目标；当前独立 `backend="python"` 候选和本轮实际证据见[Python流程](PYTHON_SURFACE_PIPELINE.md)。本页旧 WM 差异、nofix/曲率缺口和严格 `python-gpu` 门不作为当前候选的完成结论。
+
 ## 1. 功能与支持范围
 
 最近两例完整原始T1、自产配对及实际官方评分均冻结为 `79a41cdd`；最终white独立同输入接口另绑定 `6de797b4` 和 `617d496a`。交付说明与实际影像运行分别绑定，不追标后续提交。当前可运行的是完整单 T1 混合流程；严格 `backend="python-gpu"` 仍未开放。
@@ -31,7 +33,9 @@ flowchart LR
 | 厚度/面积/平均曲率与统计 | CUDA默认复用自有Torch顶点图函数；多图谱统计缓存与TH3顶点体积已接入 | CPU设备仍用原生顶点图；smoothwm曲率衍生图/curv.stats尚有C++。TH3不替代-no-th3脑区体积 |
 | MNI 非线性与后处理 | FNIT GPU 实现；parallel-late 已接入、保持完整算法 | 两例完整组 ABBA 与原始 T1 765 整例、独立官方评分均已完成 |
 
-这些混合实现的进展不会自动将严格 capability matrix 的 blocked 移入 ready。`n4_gpu.py` 的旧平滑残差实验不是完整 ITK N4；完整后端为 `n4_itk_torch_experimental.py`。
+上表是历史混合配方的冻结记录。当前 `capability_report()` 描述严格 CUDA 配方，已修正其过时的“Python 仅预检查”和“完整曲率统计仍未实现”等说明。允许 CPU 的独立 `backend="python"` 已使用 SimpleITK、完整 Python/Numba 表面放置及统计；两例原始整例仍因网格质量失败。原 GA 的候选生成、搜索与控制器尚未完成，不能由精确的似然子项代替。当前状态及各项版本证据见 [独立 Python 流程](PYTHON_SURFACE_PIPELINE.md)。
+
+这些进展不会自动将严格 CUDA capability matrix 的 blocked 移入 ready。`n4_gpu.py` 的旧平滑残差实验不是完整 ITK N4；完整 Torch 后端为 `n4_itk_torch_experimental.py`。通用 Python 库内部实现不属于原版 FreeSurfer 阶段代码，不影响当前依赖边界。
 
 ## 2. Python 调用、输入和输出
 

@@ -1,0 +1,1096 @@
+{
+  "schema_version": 1,
+  "scope": "manual static selected call-path audit; not execution or OS isolation",
+  "frozen_source": {
+    "git_commit": "922f569806bfdfafb9ba16355ae9660efd261eba",
+    "has_overlay": true,
+    "label": "recon-python-no-upstream-cpp-v4",
+    "source_manifest_sha256": "21bfe987f5f2cfde992578208d8235b1ed90ad2c4608c95df1b0f4c6751b9d9a",
+    "declared_files": 775,
+    "tar_sha256": "5fdc490a8f3a3cb9c6abc924de76da4ae7d01422f01702703597458d62e593c7",
+    "tar_bytes": 7024640,
+    "server_manifest_verification": "775/775 size and SHA verified read-only before subset export",
+    "downloaded_subset_verified": 595,
+    "downloaded_python_modules": 564
+  },
+  "profile": {
+    "native_optimizations": "torch",
+    "n4_backend": "simpleitk",
+    "n4_execution": "in-process",
+    "wm_backend": "torch-optimized",
+    "gca_execution": "isolated",
+    "gca_inverse_backend": "torch",
+    "gca_candidate_chunk": 1024,
+    "normalization_controls_backend": "torch",
+    "normalization_initial_bias_backend": "torch",
+    "sphere_finish_backend": "torch",
+    "mni_execution": "parallel-late",
+    "wm_execution": "isolated",
+    "wm_edit_backend": "python",
+    "defects_backend": "torch",
+    "inflate_backend": "torch",
+    "surface_placement_backend": "python",
+    "topology_backend": "python",
+    "annotation_gibbs_backend": "numba",
+    "remesh_scalar_storage": "python",
+    "fill_backend": "numba",
+    "hemisphere_workers": 2
+  },
+  "profile_source": {
+    "path": "src/fnit/recon_all/python_profile.py",
+    "file_sha256": "398a7967eb4ac954b446a5e809f92fda1c465e670bc5eb4841931d3d7ef33f2f",
+    "manifest_sha256": "398a7967eb4ac954b446a5e809f92fda1c465e670bc5eb4841931d3d7ef33f2f",
+    "function": "python_profile_options",
+    "line": 7,
+    "end_line": 41,
+    "function_sha256": "58bed15d521763c03e327749a4df9bee14c582fdda62c3c41b87012948396de0",
+    "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+  },
+  "stages": [
+    {
+      "name": "profile/程序发现",
+      "implementation": "固定21选项，不消费原版程序/能力探测",
+      "selected_guard": "backend=python；mode=torch；include_white=False",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/python_profile.py",
+          "file_sha256": "398a7967eb4ac954b446a5e809f92fda1c465e670bc5eb4841931d3d7ef33f2f",
+          "manifest_sha256": "398a7967eb4ac954b446a5e809f92fda1c465e670bc5eb4841931d3d7ef33f2f",
+          "function": "python_profile_options",
+          "line": 7,
+          "end_line": 41,
+          "function_sha256": "58bed15d521763c03e327749a4df9bee14c582fdda62c3c41b87012948396de0",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "manifest_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "function": "_run_recon_all_python",
+          "line": 1145,
+          "end_line": 1903,
+          "function_sha256": "4cbf274397662be5c633c71d8fb9cc9dcbaece4b78c634311bd8b2891c9fd516",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/native_runtime_selection.py",
+          "file_sha256": "dccff7899fa919d486081d3ec351b858ea552da8ffa564a41e8111cc318f2f76",
+          "manifest_sha256": "dccff7899fa919d486081d3ec351b858ea552da8ffa564a41e8111cc318f2f76",
+          "function": "select_native_optimizations",
+          "line": 10,
+          "end_line": 71,
+          "function_sha256": "6484cddb602c60afa02a268ecbe22ee45a5817463774b2fbf70e1209fb80ace3",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    },
+    {
+      "name": "conform/SynthStrip/Talairach",
+      "implementation": "自有Python/Numba与Torch GPU",
+      "selected_guard": "显式CUDA；Talairach子进程为sys.executable -m",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/input_talairach_chain.py",
+          "file_sha256": "ab0a02eca9a738cf9c43e0cbcf179165fe187529bbc34ad1929b619fd60bc8d3",
+          "manifest_sha256": "ab0a02eca9a738cf9c43e0cbcf179165fe187529bbc34ad1929b619fd60bc8d3",
+          "function": "run_input_talairach_chain",
+          "line": 94,
+          "end_line": 147,
+          "function_sha256": "3931c7a3ff8a335cba4ecc62cbe06d68fec4bc5214989e5b6e61b78933b955a1",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/talairach_synthmorph.py",
+          "file_sha256": "4030e0b68f7dc496b4256e72bd8db542957c9d791b7a8c9f88a02e3d2cd920cc",
+          "manifest_sha256": "4030e0b68f7dc496b4256e72bd8db542957c9d791b7a8c9f88a02e3d2cd920cc",
+          "function": "register_talairach",
+          "line": 52,
+          "end_line": 76,
+          "function_sha256": "6c8cdb773724487b28d760a55e56875d5714f7e61f98d1eb907e2cc83ebec78d",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    },
+    {
+      "name": "N4/nu",
+      "implementation": "SimpleITK Python API通用ITK CPU库；自有nu转换",
+      "selected_guard": "simpleitk首分支返回，不解析原版N4程序",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/input_n4_chain.py",
+          "file_sha256": "cb3cff1cb7f7834365f77109bae71f970cc77cb88f4a354db86a98793eb1bea3",
+          "manifest_sha256": "cb3cff1cb7f7834365f77109bae71f970cc77cb88f4a354db86a98793eb1bea3",
+          "function": "run_n4_stage",
+          "line": 36,
+          "end_line": 81,
+          "function_sha256": "635508088267b04622389f834196ff32653558f5687115962ea9321b879f6c3c",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/n4_itk.py",
+          "file_sha256": "4756ac012390442d49d7a1b8537c21eaf0759793844a7be07c814ad04e83dbf4",
+          "manifest_sha256": "4756ac012390442d49d7a1b8537c21eaf0759793844a7be07c814ad04e83dbf4",
+          "function": "correct_volume",
+          "line": 23,
+          "end_line": 90,
+          "function_sha256": "6ff8a303b30a8c4b86f00cd73015658d0b3b109b9be5fce9bef466c32850b95a",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/n4_simpleitk.py",
+          "file_sha256": "185c0864e777796c828a6edf4d230375a8dd5953fc23ea44edf6c8c820bdc02a",
+          "manifest_sha256": "185c0864e777796c828a6edf4d230375a8dd5953fc23ea44edf6c8c820bdc02a",
+          "function": "correct_volume",
+          "line": 105,
+          "end_line": 138,
+          "function_sha256": "238e741d807632b82817cd60f98aa269cb0c11221283688c8d100cfe16f7e317",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/n4_wrapper.py",
+          "file_sha256": "8b8288a981ee69d9cc6bfe1af6b46463743e83ead2e542f32bc6fd50a810839e",
+          "manifest_sha256": "8b8288a981ee69d9cc6bfe1af6b46463743e83ead2e542f32bc6fd50a810839e",
+          "function": "make_nu",
+          "line": 112,
+          "end_line": 127,
+          "function_sha256": "3e802c99b6c3645a0c9cee3d90d22c61b47072445da25df5d14f3e5868378b7c",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    },
+    {
+      "name": "两轮normalize/brainmask",
+      "implementation": "自有Torch GPU与有序Numba CPU混合",
+      "selected_guard": "两轮device=CUDA；controls=torch；第二轮initial_bias=torch；动态ridge CPU",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/normalization/pipeline.py",
+          "file_sha256": "605b68b844929c852d2978fb38050cc56dcd18ff997742cb852946dfe12860ef",
+          "manifest_sha256": "605b68b844929c852d2978fb38050cc56dcd18ff997742cb852946dfe12860ef",
+          "function": "normalize_t1",
+          "line": 23,
+          "end_line": 138,
+          "function_sha256": "2551080a38681569dcd90ee08360337dd53e35ab84012b4aa3d8cb11c42463ba",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/normalization/aseg_pipeline.py",
+          "file_sha256": "bb4175e69e71ec14e06bad7895d85152632438192c642f9c7027438a3e11832c",
+          "manifest_sha256": "bb4175e69e71ec14e06bad7895d85152632438192c642f9c7027438a3e11832c",
+          "function": "normalize_t1_aseg",
+          "line": 77,
+          "end_line": 132,
+          "function_sha256": "9821555e4d66befc0301177537dab2258f3162bd86bfb8cbf748ba02e8362841",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    },
+    {
+      "name": "SynthSeg/辅助网络",
+      "implementation": "自有Torch GPU",
+      "selected_guard": "SynthSeg CUDA不进入CPU columns；EntoWM/MCA-dura/vsinus显式CUDA及既有精度例外",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "manifest_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "function": "_run_white_mri_chain",
+          "line": 555,
+          "end_line": 588,
+          "function_sha256": "258cf1d6285cea430d85ec4448c100d3e30c55b4c8d2a58e70dba28ee0ed8c29",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/synthseg_parc/cpu_conv.py",
+          "file_sha256": "234df7485ec44157c9e9d909d914dbb4d08f0d7f56d68f56400fd24891f786f4",
+          "manifest_sha256": "234df7485ec44157c9e9d909d914dbb4d08f0d7f56d68f56400fd24891f786f4",
+          "function": "CPUInferenceConv3d.forward",
+          "line": 105,
+          "end_line": 130,
+          "function_sha256": "5fc7aa65f2b0d5093f475e25b9e7cd98255b289ee58f6a52ae8ef4dc6412ba2f",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    },
+    {
+      "name": "GCA registration",
+      "implementation": "完整自有Python/Numba EM与Torch GPU评分/求逆",
+      "selected_guard": "binary=None；isolated Python worker；inverse=torch；chunk1024",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "manifest_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "function": "_run_native_em_register",
+          "line": 159,
+          "end_line": 227,
+          "function_sha256": "e35c7a0544b81ee256f4e130934cee35c2e8567f32a6bd91543fcc0f82845598",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/gca_torch_worker.py",
+          "file_sha256": "823dc7be2ed9fe2b149ade62d7e32850511358b140916c045bf6d2e453dbdb87",
+          "manifest_sha256": "823dc7be2ed9fe2b149ade62d7e32850511358b140916c045bf6d2e453dbdb87",
+          "function": "run_isolated_registration",
+          "line": 32,
+          "end_line": 73,
+          "function_sha256": "216a71315afc9f068ee4fe89d429486c7ffe8c8796c12a7712902643f8595c39",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/gca_torch_worker.py",
+          "file_sha256": "823dc7be2ed9fe2b149ade62d7e32850511358b140916c045bf6d2e453dbdb87",
+          "manifest_sha256": "823dc7be2ed9fe2b149ade62d7e32850511358b140916c045bf6d2e453dbdb87",
+          "function": "run_worker",
+          "line": 76,
+          "end_line": 163,
+          "function_sha256": "04f5cd164bfad3a7707121f2e183150b70dc6115c77e0ac2bb73fc7d5f228660",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/mri_em_register_python.py",
+          "file_sha256": "0e3c39684314f84b47a158266550f35baaf1ef67e5c7bb36df8f145aed772aef",
+          "manifest_sha256": "0e3c39684314f84b47a158266550f35baaf1ef67e5c7bb36df8f145aed772aef",
+          "function": "register_t1",
+          "line": 22,
+          "end_line": 95,
+          "function_sha256": "1b4198b8ab7b2463b0dfe270dca2af13a4d353a17922b1b041baf4a1e73767d0",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    },
+    {
+      "name": "CA normalize/corpus callosum",
+      "implementation": "自有Python/Numba CPU",
+      "selected_guard": "run_ca_normalize未传device，保持CPU默认；run_mri_cc自有",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/ca_normalize_python.py",
+          "file_sha256": "167be9d72496b7279b98e52b8f0d6c0808d2c09d02df24af1fed0fd331100b9b",
+          "manifest_sha256": "167be9d72496b7279b98e52b8f0d6c0808d2c09d02df24af1fed0fd331100b9b",
+          "function": "run_ca_normalize",
+          "line": 508,
+          "end_line": 548,
+          "function_sha256": "056bff04cc2965566186bc989b02275f0f70536fc0a6a4f13cd48d66c2be5e8b",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/mri_cc_python.py",
+          "file_sha256": "19600fbb7de784ae5bc715a3347cee40fbfb539fa1fa37cac52a53d48c0c70e8",
+          "manifest_sha256": "19600fbb7de784ae5bc715a3347cee40fbfb539fa1fa37cac52a53d48c0c70e8",
+          "function": "run_mri_cc",
+          "line": 145,
+          "end_line": 153,
+          "function_sha256": "9e607072d987aaaab746c10124484f0fc8c70f16ea1eec98f4ad6fff4790d317",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    },
+    {
+      "name": "WM segmentation",
+      "implementation": "自有Python/Numba有序CPU与Torch GPU直方图/缓存平面",
+      "selected_guard": "wm_backend=torch-optimized；isolated Python worker",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "manifest_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "function": "_run_torch_wm_segment",
+          "line": 78,
+          "end_line": 109,
+          "function_sha256": "68e735f42fe5e287cc75c746e49125113ab4700b22a5ef91b798335d4ab6b6f1",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/wm_torch_worker.py",
+          "file_sha256": "2ee098c485c62cc9a848df27a3c8489dc5961897a1477a4ba58edd7de66dd42d",
+          "manifest_sha256": "2ee098c485c62cc9a848df27a3c8489dc5961897a1477a4ba58edd7de66dd42d",
+          "function": "run_isolated_segmentation",
+          "line": 43,
+          "end_line": 88,
+          "function_sha256": "55d278599b6fbd0e38c4d3a090925362a6cb7fb6ac298e20dcaa77bf15d2ca62",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/mri_segment.py",
+          "file_sha256": "abee3136f2c88409746b817a845ad48afbf326005f242f4eabc123c6544613bb",
+          "manifest_sha256": "abee3136f2c88409746b817a845ad48afbf326005f242f4eabc123c6544613bb",
+          "function": "segment_white_matter_mgz",
+          "line": 969,
+          "end_line": 1003,
+          "function_sha256": "c0a0b4d488c7873457402b676787d3c303b3e27d1d75f5e8a3d93b0b0d7696e1",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    },
+    {
+      "name": "WM aseg/pretess/Ento-ACJ",
+      "implementation": "完整自有Python/Numba CPU编辑与Torch GPU后编辑",
+      "selected_guard": "wm_edit_backend=python；byte-path几何guard保留；生产没有被试SHA白名单",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "manifest_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "function": "_run_python_wm_edit",
+          "line": 135,
+          "end_line": 148,
+          "function_sha256": "2b8ff2dcb067ae3f7f23dd8e9c331b8fa4f018b9fbe6b4336e12902ba0368441",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/edit_wm_aseg_core_python.py",
+          "file_sha256": "6550be1a1e36e0e8ae1df6b9fc1e2774127992c241b2e299a9b7fe37f8464ea6",
+          "manifest_sha256": "6550be1a1e36e0e8ae1df6b9fc1e2774127992c241b2e299a9b7fe37f8464ea6",
+          "function": "write_wm_asegedit_profile",
+          "line": 595,
+          "end_line": 627,
+          "function_sha256": "61c7a3a84c58972a4d169b8de2ad0d0a6320490b49c505c223e1fa7dba02b6dc",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/edit_wm_aseg_core_python.py",
+          "file_sha256": "6550be1a1e36e0e8ae1df6b9fc1e2774127992c241b2e299a9b7fe37f8464ea6",
+          "manifest_sha256": "6550be1a1e36e0e8ae1df6b9fc1e2774127992c241b2e299a9b7fe37f8464ea6",
+          "function": "remove_paths_to_cortex",
+          "line": 529,
+          "end_line": 553,
+          "function_sha256": "74ad4748676700d99ce2094ffeb15c7af147707a1539055c24dc2510b833f4a9",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    },
+    {
+      "name": "filled",
+      "implementation": "完整自有Python与有序Numba CPU切割/堆/标签",
+      "selected_guard": "fill_backend=numba；初始边界CPU，不是纯GPU",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/fill_cutting_plane_python.py",
+          "file_sha256": "5bc61b2e68d6ed47dadc0dafdc488c61807435b9e28dc12c48d5e7dbf3981a04",
+          "manifest_sha256": "5bc61b2e68d6ed47dadc0dafdc488c61807435b9e28dc12c48d5e7dbf3981a04",
+          "function": "fill_mgz",
+          "line": 151,
+          "end_line": 195,
+          "function_sha256": "3cbfc98077110b6536ec31e3e74e1cdc029f42320e9797158c7a6ebea4263780",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    },
+    {
+      "name": "tessellation/topology",
+      "implementation": "自有Torch tessellation与Python/Numba数字拓扑",
+      "selected_guard": "topology_backend=python；数字拓扑不同于FS GA",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "manifest_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "function": "_surface_pair",
+          "line": 667,
+          "end_line": 746,
+          "function_sha256": "b12584100a7d91007a2db8ee0439c969f6f9726de107805d5fa7acb520de0306",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "manifest_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "function": "_prepare_native_topology",
+          "line": 254,
+          "end_line": 341,
+          "function_sha256": "f275f87a81a4e03c635c13ea2a2639ea39fdd71d36f56bd99dede856ee567d31",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/topology_volume_python.py",
+          "file_sha256": "b6ad8b5c54a51dc9a263da3df8eeb0a2f8588b56d4c1e964d57ee509a2a1d0a9",
+          "manifest_sha256": "b6ad8b5c54a51dc9a263da3df8eeb0a2f8588b56d4c1e964d57ee509a2a1d0a9",
+          "function": "run_volume_topology",
+          "line": 260,
+          "end_line": 341,
+          "function_sha256": "31b89db66663237d8cb79a0f505fca9c6b021191467ffb316dab1c91609c8945",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    },
+    {
+      "name": "remesh/intersection",
+      "implementation": "自有Python/Numba有序CPU",
+      "selected_guard": "remesh_scalar_storage=python；intersection binary=None；source_numba完整修复",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/mris_remesh_python.py",
+          "file_sha256": "17288a05177fd09fa3e757b9c84cc56466e3e2c9f6acaf6998aba1d32fa83706",
+          "manifest_sha256": "17288a05177fd09fa3e757b9c84cc56466e3e2c9f6acaf6998aba1d32fa83706",
+          "function": "remesh_surface",
+          "line": 618,
+          "end_line": 634,
+          "function_sha256": "cc16b9e2c5bfaaa84fb6848e510756cc734b5382564379551d7395cf70f12151",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/mris_remove_intersection_python.py",
+          "file_sha256": "011e6482cc32bdb02156dd15f24e0b1d24f3a2318c148deb5def1366dcd6f210",
+          "manifest_sha256": "011e6482cc32bdb02156dd15f24e0b1d24f3a2318c148deb5def1366dcd6f210",
+          "function": "remove_intersection_surface",
+          "line": 231,
+          "end_line": 246,
+          "function_sha256": "4daebc8c4c6b7fc7fc78016deff3b4e9694a43cfcfc6c0806146b73af377614c",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/mris_remove_intersection_python.py",
+          "file_sha256": "011e6482cc32bdb02156dd15f24e0b1d24f3a2318c148deb5def1366dcd6f210",
+          "manifest_sha256": "011e6482cc32bdb02156dd15f24e0b1d24f3a2318c148deb5def1366dcd6f210",
+          "function": "run_remove_intersection",
+          "line": 151,
+          "end_line": 228,
+          "function_sha256": "acdd724a37af4019c41f7adb9fa428b6c706a19d452ae126160615a43ad54a40",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    },
+    {
+      "name": "white.preaparc/white/pial",
+      "implementation": "完整四轮Python/Numba CPU与Torch GPU候选/清理",
+      "selected_guard": "surface_placement_backend=python；compiled retained MHT是@njit/objmode，不是CPP库",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/surface_placement_python.py",
+          "file_sha256": "8a34d3801b6ad2815599d8b16068420767c59085a2b3172e248eb4d8e95150dd",
+          "manifest_sha256": "8a34d3801b6ad2815599d8b16068420767c59085a2b3172e248eb4d8e95150dd",
+          "function": "placement_options",
+          "line": 13,
+          "end_line": 31,
+          "function_sha256": "90ca25a43d2ab82e34caabf28d08324a58690096eec3c607605b3156618d0842",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/surface_placement_python.py",
+          "file_sha256": "8a34d3801b6ad2815599d8b16068420767c59085a2b3172e248eb4d8e95150dd",
+          "manifest_sha256": "8a34d3801b6ad2815599d8b16068420767c59085a2b3172e248eb4d8e95150dd",
+          "function": "run_preaparc_python",
+          "line": 53,
+          "end_line": 81,
+          "function_sha256": "e10a94fbc37590efa8a2549914cadd6c16fb6c65e820eadcdf57d51d8045ae88",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/surface_placement_python.py",
+          "file_sha256": "8a34d3801b6ad2815599d8b16068420767c59085a2b3172e248eb4d8e95150dd",
+          "manifest_sha256": "8a34d3801b6ad2815599d8b16068420767c59085a2b3172e248eb4d8e95150dd",
+          "function": "run_final_white_python",
+          "line": 84,
+          "end_line": 100,
+          "function_sha256": "49df1ac4fd7a5f6d2994f2e8fb9767ede0def4a2cb75b60920b85fec46fd094b",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/surface_placement_python.py",
+          "file_sha256": "8a34d3801b6ad2815599d8b16068420767c59085a2b3172e248eb4d8e95150dd",
+          "manifest_sha256": "8a34d3801b6ad2815599d8b16068420767c59085a2b3172e248eb4d8e95150dd",
+          "function": "run_pial_python",
+          "line": 103,
+          "end_line": 119,
+          "function_sha256": "047333d6834ec14071d761115874bc8a830dabb94aa7f90aa68fa2d874da0055",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/place_surface_snapshot.py",
+          "file_sha256": "c2bac9c2f9065454d295981c38c85b58657b0a75f7278f8c124f4f6a979facbf",
+          "manifest_sha256": "c2bac9c2f9065454d295981c38c85b58657b0a75f7278f8c124f4f6a979facbf",
+          "function": "_ordered_retained_snapshot_step",
+          "line": 73,
+          "end_line": 132,
+          "function_sha256": "88f3f42cb1f2836bd85de5463faa45e5eca337971ca324b52c85f754d759907c",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    },
+    {
+      "name": "inflate/sphere",
+      "implementation": "自有Torch inflation；sphere CPU目标/步长与GPU平均/收尾",
+      "selected_guard": "inflate=torch；sphere_finish=torch；averaging_device=CUDA；normals默认CPU",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "manifest_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "function": "_run_accurate_sphere_pair",
+          "line": 344,
+          "end_line": 389,
+          "function_sha256": "a9aab1e250e70aaf0fc7086d25df17ecca125f93198d73f04385b8ea70972bb4",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/inflate_torch.py",
+          "file_sha256": "a782b5ec493d4c390131e8882b0b07ebf3d5b5e9ad39da59328b964500550aab",
+          "manifest_sha256": "a782b5ec493d4c390131e8882b0b07ebf3d5b5e9ad39da59328b964500550aab",
+          "function": "TorchInflationContext",
+          "line": 19,
+          "end_line": 217,
+          "function_sha256": "2d60455ac97e77323588ae2d10ceb677deaac468c44c02938d1e7ed3fea33965",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/sphere_standard_run.py",
+          "file_sha256": "8bb5def7ffd5e854bd580d7dbfb338969518f212d1ac9a13dd85fb66bc4b3e6a",
+          "manifest_sha256": "8bb5def7ffd5e854bd580d7dbfb338969518f212d1ac9a13dd85fb66bc4b3e6a",
+          "function": "run_standard_sphere",
+          "line": 31,
+          "end_line": 153,
+          "function_sha256": "0212279b5d372d2241ad635228d74cf79c53a506f6864d3ae314e9a9a18aa1f3",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    },
+    {
+      "name": "sphere.reg",
+      "implementation": "自有Python/Numba CPU目标/步长与Torch/Triton GPU有序平均",
+      "selected_guard": "两pass传CUDA averaging_device；overlap_device=cpu；不走CPU CPP平均器",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "manifest_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "function": "_hemisphere_operation",
+          "line": 923,
+          "end_line": 997,
+          "function_sha256": "8f4c1b94d39a50bdfa5165db64ee02ebd6fecb875e91318bcfe6abc7502d053a",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/mris_register_run.py",
+          "file_sha256": "216c58cfc9a18bf2ab617fd5808ccae4e87ff4c1f7dd1eecaedbd0832fa03c8a",
+          "manifest_sha256": "216c58cfc9a18bf2ab617fd5808ccae4e87ff4c1f7dd1eecaedbd0832fa03c8a",
+          "function": "run_register_sphere",
+          "line": 16,
+          "end_line": 54,
+          "function_sha256": "21a1dff4c4eb3083570cab73b0891a76a96a70df6acd49ddc3a74bb526befff9",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/mris_register_sulc_run.py",
+          "file_sha256": "c0faa8b852e75079d7b7da00f2a19db9637f2f308c94c34422c9a484886da1a1",
+          "manifest_sha256": "c0faa8b852e75079d7b7da00f2a19db9637f2f308c94c34422c9a484886da1a1",
+          "function": "run_register_sulc",
+          "line": 32,
+          "end_line": 138,
+          "function_sha256": "c5141e75661931bb378c1e7bb887b4a94f361fe4ba565fcd35be3343029d513e",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/mris_register_smoothwm_run.py",
+          "file_sha256": "1de5d4c6ed20fd8f9b6c8c158604a3ca1a8c69ecabf90352d62010e663e53519",
+          "manifest_sha256": "1de5d4c6ed20fd8f9b6c8c158604a3ca1a8c69ecabf90352d62010e663e53519",
+          "function": "run_register_smoothwm",
+          "line": 35,
+          "end_line": 171,
+          "function_sha256": "fc8c4fcfb1c03260e86bc683015ecedbd9617921cdca593f0a5bc5202f66c6d2",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/mris_register_average_numba.py",
+          "file_sha256": "956616a920f751f49d201bf5a0a17867084a4b8e810336ab849d29fb60b0648b",
+          "manifest_sha256": "956616a920f751f49d201bf5a0a17867084a4b8e810336ab849d29fb60b0648b",
+          "function": "RegistrationGradientAverager.__call__",
+          "line": 119,
+          "end_line": 135,
+          "function_sha256": "53107bdf1f7905bbbbf5b719d3a5277ae9efb93429aabea3ca6b7d4a81c193e3",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    },
+    {
+      "name": "avg_curv/extra annotation",
+      "implementation": "自有Python/Numba CPU采样与标签映射",
+      "selected_guard": "python_only=True；avg_curv平均复用average_marked_values，不走CPP平均器",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "manifest_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "function": "_run_avg_curv",
+          "line": 463,
+          "end_line": 488,
+          "function_sha256": "1fcd27454ac9b8e2a7deea32617cbb3e172a4838edaef97c232ad463b5ec485d",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/mrisp_paint_python.py",
+          "file_sha256": "3dd7515a8759371ccec1a4c6b4f280310a252708396debdfb822abac2cdae163",
+          "manifest_sha256": "3dd7515a8759371ccec1a4c6b4f280310a252708396debdfb822abac2cdae163",
+          "function": "paint_atlas_values",
+          "line": 74,
+          "end_line": 113,
+          "function_sha256": "b765c32bc21577717f23e242160125f4b084c731ab3b5e58f10d96300cd2ee1d",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "manifest_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "function": "_project_exvivo_annotations",
+          "line": 812,
+          "end_line": 841,
+          "function_sha256": "4ac1f436e599bb20942241eb2cdf74ec3d9df481ff5161a082951676386bccac",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    },
+    {
+      "name": "GCSA annotation",
+      "implementation": "自有Torch GPU特征与有序Numba CPU Gibbs",
+      "selected_guard": "annotation_gibbs_backend=numba；按表面版本缓存",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/gcsa_label_python.py",
+          "file_sha256": "a3446d19f8f33d9fbb43ff3654d76932733d000ec0e563e4a8ed030dc4933ffa",
+          "manifest_sha256": "a3446d19f8f33d9fbb43ff3654d76932733d000ec0e563e4a8ed030dc4933ffa",
+          "function": "GCSAFeatureCache",
+          "line": 33,
+          "end_line": 101,
+          "function_sha256": "cc37dd682df495aa8a34e2794e1b37f64f2cc945f6fc2082647109e742f1ee0f",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/gcsa_label_python.py",
+          "file_sha256": "a3446d19f8f33d9fbb43ff3654d76932733d000ec0e563e4a8ed030dc4933ffa",
+          "manifest_sha256": "a3446d19f8f33d9fbb43ff3654d76932733d000ec0e563e4a8ed030dc4933ffa",
+          "function": "label_surface",
+          "line": 125,
+          "end_line": 196,
+          "function_sha256": "72feffd30b0a86ca02c76b12d6a00206f73aadcd6306710f68414f74d2188755",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    },
+    {
+      "name": "defects volume",
+      "implementation": "自有Torch GPU投射与Python格式写出",
+      "selected_guard": "defects_backend=torch；提前return；LH→RH共享输出顺序保留",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "manifest_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "function": "_run_defects_volume",
+          "line": 521,
+          "end_line": 552,
+          "function_sha256": "a3393a32d0a4e824b28df6ecf95a76ed21a2c0434f23a733cbf439c32d9df073",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/defects_label_volume_torch.py",
+          "file_sha256": "807b123d7e1ac47021864dfe5b486fa1ca3e9dd6eecbef792d469fe8552d12e5",
+          "manifest_sha256": "807b123d7e1ac47021864dfe5b486fa1ca3e9dd6eecbef792d469fe8552d12e5",
+          "function": "defects_to_volume",
+          "line": 166,
+          "end_line": 249,
+          "function_sha256": "dcb1183f1418e9908c64c1135d46c4a8fb48e3e499ddc0ae3567798cecda5e2c",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    },
+    {
+      "name": "thickness/area/curv",
+      "implementation": "自有Torch GPU几何与SciPy/Numba CPU空间查询",
+      "selected_guard": "Python/CUDA分支，没有原版指标程序",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "manifest_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "function": "_run_surface_metrics",
+          "line": 392,
+          "end_line": 431,
+          "function_sha256": "f899426f87204fcbd2bb306c897fa21acb347c06ff58c54ea9e3244f1a560e68",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/surface_thickness_gpu.py",
+          "file_sha256": "ab019eb7d413c7b08f01ad6b2e499c406ab513cb531d723142c2db2d6c12e961",
+          "manifest_sha256": "ab019eb7d413c7b08f01ad6b2e499c406ab513cb531d723142c2db2d6c12e961",
+          "function": "thickness_map",
+          "line": 129,
+          "end_line": 193,
+          "function_sha256": "459d125da7ace77caface818bdde07ee01a1f66c2ade5d65e59be6ff4692413a",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/surface_area_gpu.py",
+          "file_sha256": "ad60ee9c6b3e45464650ac15f2fce7bc2ea3a6cb519c15f371f4f653f45964a8",
+          "manifest_sha256": "ad60ee9c6b3e45464650ac15f2fce7bc2ea3a6cb519c15f371f4f653f45964a8",
+          "function": "area_map",
+          "line": 29,
+          "end_line": 32,
+          "function_sha256": "512fed1a7eda3c8d00eb5b466ac1c5c03f530440735fdcd4883471afb5fe7dd5",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/surface_curvature_gpu.py",
+          "file_sha256": "7af66e0b23dd19cabe8e20e7ea75686531eb87550e599d318f35dc24f7efc8e0",
+          "manifest_sha256": "7af66e0b23dd19cabe8e20e7ea75686531eb87550e599d318f35dc24f7efc8e0",
+          "function": "curvature_map",
+          "line": 96,
+          "end_line": 105,
+          "function_sha256": "1dadf2e41d0e0c5eb3e095a6bd37510e04cd1b901e853fc9879847ec673f0b1b",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    },
+    {
+      "name": "curv.stats/八派生图",
+      "implementation": "自有Torch离散曲率与有序Numba统计/系统libm",
+      "selected_guard": "python_only=True；source_libm=Numba np.arccos，不是原FS库",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "manifest_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "function": "_run_curvature_stats",
+          "line": 491,
+          "end_line": 518,
+          "function_sha256": "990e6bf9030c03e90e2868eb3f45213ff69976be7048c0b55bfb1c4db7daf399",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/curvature_stats_python.py",
+          "file_sha256": "e4b715d2fa99330f426ecd47a1c2fc3622dbb3284151eb5ae3c5d9772784be10",
+          "manifest_sha256": "e4b715d2fa99330f426ecd47a1c2fc3622dbb3284151eb5ae3c5d9772784be10",
+          "function": "write_curvature_stats",
+          "line": 166,
+          "end_line": 319,
+          "function_sha256": "c1a3a47717249ca9c2fd99a6dd60c188cd9f540c90656340d10423e3751d78f2",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/discrete_curvature_torch.py",
+          "file_sha256": "2f0642af718f9d1fa08032fc3c74cc5e8be34def7f77eb8735982a39b5c41493",
+          "manifest_sha256": "2f0642af718f9d1fa08032fc3c74cc5e8be34def7f77eb8735982a39b5c41493",
+          "function": "_source_acosf",
+          "line": 23,
+          "end_line": 29,
+          "function_sha256": "316ac629a870c2aa826d0a6c6e3ada6221537e2e308cc545a6aacb578ba7ce9d",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    },
+    {
+      "name": "jacobian/contrast/ribbon/volume maps",
+      "implementation": "自有Python/Numba与Torch CPU",
+      "selected_guard": "jacobian与contrast明确CPU；标签/体积映射为自有函数",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "manifest_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "function": "_project_parcels",
+          "line": 800,
+          "end_line": 809,
+          "function_sha256": "f9d37630739d22fbbe9c6e394074f3b3e5422bd971d14470c827d0d5b15bcc26",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "manifest_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "function": "_project_wmparc",
+          "line": 844,
+          "end_line": 849,
+          "function_sha256": "6ea96ff52c4412466040ad7298df028aad6ffc1940649f58d11634f28b9e910f",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "manifest_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "function": "_run_recon_all_python",
+          "line": 1145,
+          "end_line": 1903,
+          "function_sha256": "4cbf274397662be5c633c71d8fb9cc9dcbaece4b78c634311bd8b2891c9fd516",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    },
+    {
+      "name": "ROI/aseg/wmparc/brainvol stats",
+      "implementation": "自有GPU统计基量与Python/Numba CPU归约/写出",
+      "selected_guard": "SurfaceStatsCache CUDA；no-th3脑区定义保留",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "manifest_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "function": "_write_hemisphere_stats",
+          "line": 901,
+          "end_line": 919,
+          "function_sha256": "0acda8c56b3f0f9aca3f84268a6ae4b88c50e102c9d55c391e9acb60ef907a21",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/surface_stats_cache.py",
+          "file_sha256": "6f64b40773c61d46fd167c34a74530d9475dd7992b6607c99df14511826ab2a1",
+          "manifest_sha256": "6f64b40773c61d46fd167c34a74530d9475dd7992b6607c99df14511826ab2a1",
+          "function": "SurfaceStatsCache",
+          "line": 42,
+          "end_line": 336,
+          "function_sha256": "7713b9bf5d810ba56a346118b0a86f5f9e4490954a9a02d60ddebf9682565749",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/anatomical_stats_file.py",
+          "file_sha256": "3aef07cbf0788276341125774717f1e0555a1197b2faeba5c9b75610a468df53",
+          "manifest_sha256": "3aef07cbf0788276341125774717f1e0555a1197b2faeba5c9b75610a468df53",
+          "function": "write_anatomical_stats",
+          "line": 10,
+          "end_line": 58,
+          "function_sha256": "1ba697098a3a8327ee04b60cef4d5770efdc6af6c11198fc969a487635e28f9c",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    },
+    {
+      "name": "MNI affine/nonlinear/inverse/check",
+      "implementation": "自有SynthMorph Torch GPU与GPU采样/逆场",
+      "selected_guard": "parallel-late；postprocess=gpu；三个原版program None；Python fresh exec及CPU mesh2+2",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/mni_aux_chain.py",
+          "file_sha256": "60b5c9d1255208df19f9a1eb6ccda300562829d5476a012488784e8ae7f4a2be",
+          "manifest_sha256": "60b5c9d1255208df19f9a1eb6ccda300562829d5476a012488784e8ae7f4a2be",
+          "function": "run_mni_aux_chain",
+          "line": 148,
+          "end_line": 180,
+          "function_sha256": "263c734743e99a816ba4f82b6320241f82c271ab75a9dab25c9571b063e0a6b6",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/mni_mesh_parallel.py",
+          "file_sha256": "5a79b715c48391dd50fdb8e40f999c4624092eeeebeaebd926ac7fed987b9b46",
+          "manifest_sha256": "5a79b715c48391dd50fdb8e40f999c4624092eeeebeaebd926ac7fed987b9b46",
+          "function": "run_mni_stage",
+          "line": 30,
+          "end_line": 64,
+          "function_sha256": "9a79e5516d3e0b628ce628ff10d9ae02cbda1f05e02cc6a5c07b72e21e5c6b3c",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/mni_mesh_parallel.py",
+          "file_sha256": "5a79b715c48391dd50fdb8e40f999c4624092eeeebeaebd926ac7fed987b9b46",
+          "manifest_sha256": "5a79b715c48391dd50fdb8e40f999c4624092eeeebeaebd926ac7fed987b9b46",
+          "function": "run_mni_and_validate",
+          "line": 67,
+          "end_line": 202,
+          "function_sha256": "530b5c6424bc192a372e7f3d5c92f748099e5ab8dbfb2d08dd819a67e365fab0",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/mni_nonlinear_chain.py",
+          "file_sha256": "d33d0b0fb31cc5605c926047c7d210bae3e72cfd2dfe02ebdbcf68ec14c70faa",
+          "manifest_sha256": "d33d0b0fb31cc5605c926047c7d210bae3e72cfd2dfe02ebdbcf68ec14c70faa",
+          "function": "run_mni_nonlinear_chain",
+          "line": 20,
+          "end_line": 132,
+          "function_sha256": "ac54a1072d2513af72e25bae00a5bbb008d8ebe42216e61fa9678574946102e8",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    },
+    {
+      "name": "输出/网格校验",
+      "implementation": "自有Python/NumPy/Numba CPU",
+      "selected_guard": "join后完整检查，失败抛异常；整体等效未判定",
+      "original_FS_stage_selected": false,
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "manifest_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "function": "_complete_output_validation",
+          "line": 1117,
+          "end_line": 1142,
+          "function_sha256": "8f4b69cd211c8c0d79f42754539cc89992878e7907afa92f0eb2c608796f2281",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "manifest_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "function": "_validate_meshes",
+          "line": 865,
+          "end_line": 898,
+          "function_sha256": "b82b7813fdf36d8a4aee6efb36745ecb83f33b84cc93b2bced66c144fd14f0a4",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    }
+  ],
+  "unselected_local_CPP_routes": [
+    {
+      "name": "CPU sphere/register CPP averager",
+      "selected": false,
+      "guard": "Averager CUDA分支不调用average_gradients_exact_cpu",
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/mris_register_average_numba.py",
+          "file_sha256": "956616a920f751f49d201bf5a0a17867084a4b8e810336ab849d29fb60b0648b",
+          "manifest_sha256": "956616a920f751f49d201bf5a0a17867084a4b8e810336ab849d29fb60b0648b",
+          "function": "average_gradients_exact_cpu",
+          "line": 57,
+          "end_line": 80,
+          "function_sha256": "f2abfb5db630b33ba7a425c3942ff6bc9adf2040289ebc4867e7f8418c1d5f9f",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/mris_register_average_numba.py",
+          "file_sha256": "956616a920f751f49d201bf5a0a17867084a4b8e810336ab849d29fb60b0648b",
+          "manifest_sha256": "956616a920f751f49d201bf5a0a17867084a4b8e810336ab849d29fb60b0648b",
+          "function": "RegistrationGradientAverager.__call__",
+          "line": 119,
+          "end_line": 135,
+          "function_sha256": "53107bdf1f7905bbbbf5b719d3a5277ae9efb93429aabea3ca6b7d4a81c193e3",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/_average_cpu_cpp.py",
+          "file_sha256": "03ba0229b6d8052d933a8e56d6558db35f030d5e3251c026e504486d3ca214bd",
+          "manifest_sha256": "03ba0229b6d8052d933a8e56d6558db35f030d5e3251c026e504486d3ca214bd",
+          "function": "_bind",
+          "line": 159,
+          "end_line": 171,
+          "function_sha256": "76212535a80ecc64040793b4cbc1608db08bb7d2f6506387687aa8a511b7c261",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    },
+    {
+      "name": "SynthSeg CPU columns CPP/ctypes",
+      "selected": false,
+      "guard": "CPUInferenceConv3d需要image.device=cpu；CUDA不惰性导入或构建",
+      "evidence": [
+        {
+          "path": "src/fnit/synthseg_parc/cpu_conv.py",
+          "file_sha256": "234df7485ec44157c9e9d909d914dbb4d08f0d7f56d68f56400fd24891f786f4",
+          "manifest_sha256": "234df7485ec44157c9e9d909d914dbb4d08f0d7f56d68f56400fd24891f786f4",
+          "function": "CPUInferenceConv3d.forward",
+          "line": 105,
+          "end_line": 130,
+          "function_sha256": "5fc7aa65f2b0d5093f475e25b9e7cd98255b289ee58f6a52ae8ef4dc6412ba2f",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    },
+    {
+      "name": "SynthMorph CPU joint Eigen CPP/ctypes",
+      "selected": false,
+      "guard": "requires moving and fixed CPU；GPU不导入_cpu_eigen",
+      "evidence": [
+        {
+          "path": "src/fnit/synthmorph/models.py",
+          "file_sha256": "f0ceefbcfbb665ffd5295ffa9f2e967cef0e1d303d0e72d37fd1cd71df26c026",
+          "manifest_sha256": "f0ceefbcfbb665ffd5295ffa9f2e967cef0e1d303d0e72d37fd1cd71df26c026",
+          "function": "_cpu_joint_inference_enabled",
+          "line": 113,
+          "end_line": 119,
+          "function_sha256": "0252ef9db62bb79a612a3bb72eaa5fd50b7b1e4866726b4dc32d40146ccac970",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/synthmorph/models.py",
+          "file_sha256": "f0ceefbcfbb665ffd5295ffa9f2e967cef0e1d303d0e72d37fd1cd71df26c026",
+          "manifest_sha256": "f0ceefbcfbb665ffd5295ffa9f2e967cef0e1d303d0e72d37fd1cd71df26c026",
+          "function": "AffineNetwork.forward",
+          "line": 322,
+          "end_line": 365,
+          "function_sha256": "fee06c46fe9afd6d86612087d18ccf47980e328a2acc4e2d7fbf9809638114f8",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/synthmorph/models.py",
+          "file_sha256": "f0ceefbcfbb665ffd5295ffa9f2e967cef0e1d303d0e72d37fd1cd71df26c026",
+          "manifest_sha256": "f0ceefbcfbb665ffd5295ffa9f2e967cef0e1d303d0e72d37fd1cd71df26c026",
+          "function": "_cpu_joint_matrix_sqrt",
+          "line": 286,
+          "end_line": 298,
+          "function_sha256": "931d1fa401d44989ff4e205ee4f832335ced4d39a51e9e6458d77ad4992dbe5f",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    }
+  ],
+  "conclusion": "No original FS stage executable, original FS stage-linked library or CPP build fallback selected in reviewed frozen fixed-profile paths",
+  "generic_compiled_libraries_allowed": [
+    "SimpleITK/ITK",
+    "PyTorch/CUDA/Triton",
+    "NumPy/SciPy",
+    "Numba and system libm"
+  ],
+  "Python_workers": "sys.executable fresh exec for Talairach/GCA/WM/hemi/MNI; not original FS program execution",
+  "IO_and_monitoring": "nibabel.freesurfer.io is format IO; nvidia-smi is monitoring; asset path FREESURFER_HOME does not prove program use",
+  "findings": [
+    {
+      "id": "WM-METADATA-001",
+      "severity": "metadata-only",
+      "line": 1456,
+      "description": "顶级WM implementation错误写Conda C++ edit；实际wm_edit_backend=python为完整自有编辑，edit_implementation正确；已通知root，新版修复，不改变冻结v4",
+      "evidence": [
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "manifest_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "function": "_run_recon_all_python",
+          "line": 1145,
+          "end_line": 1903,
+          "function_sha256": "4cbf274397662be5c633c71d8fb9cc9dcbaece4b78c634311bd8b2891c9fd516",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        },
+        {
+          "path": "src/fnit/recon_all/native_free.py",
+          "file_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "manifest_sha256": "b6e7ee25d8cbd19af1d07bb7cbba3b624bbbfc733f17232781f4194b8a79c13b",
+          "function": "_run_python_wm_edit",
+          "line": 135,
+          "end_line": 148,
+          "function_sha256": "2b8ff2dcb067ae3f7f23dd8e9c331b8fa4f018b9fbe6b4336e12902ba0368441",
+          "function_sha_scope": "exact UTF-8 lines including decorators and original line endings"
+        }
+      ]
+    }
+  ],
+  "boundaries": {
+    "static": "manual guard/call-path review with exact function SHA; not formal reachability proof",
+    "runtime_execution_audit": "not performed by this task",
+    "clean_OS_isolation": "not_verified",
+    "new_MRI_GPU_jobs": 0,
+    "precision": "TF32 default and existing per-stage FP32 exceptions; no new FP16/BF16",
+    "time_and_memory": "not measured by this static audit",
+    "strict_reproduction": "not established by static review",
+    "overall_metric_equivalence": "not_assessed",
+    "topology": "independent digital topology differs from FS GA"
+  }
+}

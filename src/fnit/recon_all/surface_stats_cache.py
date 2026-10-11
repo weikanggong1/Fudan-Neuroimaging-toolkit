@@ -107,6 +107,8 @@ class SurfaceStatsCache:
 
     def morph_tensor(self, path: str | Path, dtype: torch.dtype) -> torch.Tensor:
         """缓存指定 dtype 的 morph 张量；只做 float32/float64 明确转换。"""
+        if dtype not in (torch.float32, torch.float64):
+            raise ValueError("Stats cache morph dtype must be float32 or float64")
         key = "morph", _file_version(path), dtype
         if key not in self._tensors:
             self._tensors[key] = torch.as_tensor(
@@ -185,22 +187,26 @@ class SurfaceStatsCache:
         from .surface_roi_curvature_gpu import _principal_curvatures_tensor
         from .surface_thickness_gpu import _normals
 
-        if self.device.type == "cuda":
-            torch.backends.cuda.matmul.allow_tf32 = True
-        if "principal" not in geometry.derived:
-            if "normal" not in geometry.derived:
-                geometry.derived["normal"] = _normals(geometry.xyz, geometry.triangles)
-            normal = geometry.derived["normal"]
-            _, _, indices, mask = _neighbours(geometry.faces, len(geometry.xyz))
-            geometry.derived["two_hop_neighbours"] = torch.as_tensor(indices, device=self.device)
-            geometry.derived["two_hop_mask"] = torch.as_tensor(mask, device=self.device)
-            principal = _principal_curvatures_tensor(
-                geometry.xyz, normal, geometry.derived["two_hop_neighbours"],
-                geometry.derived["two_hop_mask"])
-            values = principal.cpu().numpy()
-            geometry.derived["principal"] = values[:, 0], values[:, 1]
-            self.counters["principal_curvature_computations"] += 1
-        return geometry.derived["principal"]
+        previous_tf32 = torch.backends.cuda.matmul.allow_tf32
+        try:
+            if self.device.type == "cuda":
+                torch.backends.cuda.matmul.allow_tf32 = True
+            if "principal" not in geometry.derived:
+                if "normal" not in geometry.derived:
+                    geometry.derived["normal"] = _normals(geometry.xyz, geometry.triangles)
+                normal = geometry.derived["normal"]
+                _, _, indices, mask = _neighbours(geometry.faces, len(geometry.xyz))
+                geometry.derived["two_hop_neighbours"] = torch.as_tensor(indices, device=self.device)
+                geometry.derived["two_hop_mask"] = torch.as_tensor(mask, device=self.device)
+                principal = _principal_curvatures_tensor(
+                    geometry.xyz, normal, geometry.derived["two_hop_neighbours"],
+                    geometry.derived["two_hop_mask"])
+                values = principal.cpu().numpy()
+                geometry.derived["principal"] = values[:, 0], values[:, 1]
+                self.counters["principal_curvature_computations"] += 1
+            return geometry.derived["principal"]
+        finally:
+            torch.backends.cuda.matmul.allow_tf32 = previous_tf32
 
     @torch.inference_mode()
     def no_th3_volume(self, white: str | Path, pial: str | Path,

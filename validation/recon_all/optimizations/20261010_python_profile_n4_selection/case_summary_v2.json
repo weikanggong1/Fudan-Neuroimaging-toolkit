@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "scope": "case mapping correction derived from existing original N4 reports; no new MRI execution",
+  "script_sha256": "1b4c2cd0bbedf2601d042f899da94ca8e8bcd757700fa47592b72013be569fb8",
+  "correction": {
+    "document": "docs/recon_all/PYTHON_PROFILE_N4_SELECTION.md",
+    "previous_simpleitk_sub06_sub07": [
+      28,
+      99
+    ],
+    "correct_simpleitk_sub06_sub07": [
+      99,
+      28
+    ],
+    "torch_nu0_sub06_sub07_unchanged": [
+      4016,
+      3259
+    ],
+    "filled_sub06_sub07_unchanged": [
+      4671,
+      2291
+    ]
+  },
+  "rows": [
+    {
+      "case": "sub06",
+      "simpleitk_same_input_stage": {
+        "array_report": {
+          "path": "validation/recon_all/optimizations/20261010_n4_simpleitk/reports/sub06_array.json",
+          "sha256": "84708d56f6489b6f68774135ac944f43ae0f9d4115dc61763ca8205e974df7b8"
+        },
+        "file_report": {
+          "path": "validation/recon_all/optimizations/20261010_n4_simpleitk/reports/sub06_file.json",
+          "sha256": "b917f34da4f73684e8d52ef00b437099422f8ff998babb50c99434141d85c520"
+        },
+        "orig_file_sha256": "04ce13b5b3a7a22ab94536e4fab89868e985ce435069f4517d5840aa202b95ea",
+        "code_version": "54f681dc:N4-SimpleITK-file-api-overlay",
+        "different_uint8_voxels_to_native": 99,
+        "maximum_absolute_error": 1,
+        "full_file_API_seconds": 185.29012457095087
+      },
+      "torch_cached_same_input_stage": {
+        "case_field": "ds000114_sub-06",
+        "report": {
+          "path": "validation/recon_all/optimizations/20261009_n4_torch_substages/reports/input_chain_a100_20261009_v2/cached_worker/summary.json",
+          "sha256": "739913524661ca22a5a24cd43817ef7b73c87e8e68fbebfc5b58a7bafff8105e"
+        },
+        "orig_file_sha256": "4107fc4dbf62e4e5b070b7fc4bd7e8047dbb1d263d6b0730a90867dd042f6ea4",
+        "code_version": "803aec50+frozen-N4-worker-v2",
+        "different_uint8_voxels_to_native": 4016,
+        "negative_differences": 0,
+        "positive_differences": 4016,
+        "cold_CLI_seconds": 11.037236218340695
+      },
+      "torch_continuous_prefix": {
+        "report": {
+          "path": "validation/recon_all/optimizations/20261010_n4_continuous_prefix/reports/sub06.json",
+          "sha256": "27213205cbeee06ab7693e1a44aa0185446987440e1a015bdce75ae80960f354"
+        },
+        "raw_T1_sha256": "7e33afb28f631fac31d81e2428a6144f61aba4102859c694eeb49ee584de04f7",
+        "code_version": [
+          "e34a1829:raw-T1:GPU-normalization+standard-inflate+late-MNI+dense-GPU-finish;archive=145f0f656ea3a97101b2d43a96a7c5c5e3f0849a990401216e41a65f871f7933",
+          "e34a1829:raw-T1:GPU-normalization+standard-inflate+late-MNI+dense-GPU-finish+cached-full-Torch-N4;archive=145f0f656ea3a97101b2d43a96a7c5c5e3f0849a990401216e41a65f871f7933"
+        ],
+        "nu0_different_voxels": 4016,
+        "filled_different_voxels": 4671,
+        "filled_minimum_Dice": 0.9953641059431221
+      }
+    },
+    {
+      "case": "sub07",
+      "simpleitk_same_input_stage": {
+        "array_report": {
+          "path": "validation/recon_all/optimizations/20261010_n4_simpleitk/reports/sub07_array.json",
+          "sha256": "c33ac96387879f6eedd0703be17790ae0e4e0c35dbb4804926c6af94a8036eab"
+        },
+        "file_report": {
+          "path": "validation/recon_all/optimizations/20261010_n4_simpleitk/reports/sub07_file.json",
+          "sha256": "e783c228a759f0ee54df9256d727b0518fdc2308315291562f24ae162ce7859f"
+        },
+        "orig_file_sha256": "713cec3c45edb17eec664dce2d939986a41481eae59c4575079c19f9e14e32e2",
+        "code_version": "54f681dc:N4-SimpleITK-file-api-overlay",
+        "different_uint8_voxels_to_native": 28,
+        "maximum_absolute_error": 1,
+        "full_file_API_seconds": 186.38168290816247
+      },
+      "torch_cached_same_input_stage": {
+        "case_field": "ds000114_sub-07",
+        "report": {
+          "path": "validation/recon_all/optimizations/20261009_n4_torch_substages/reports/input_chain_a100_20261009_v2/cached_worker/summary.json",
+          "sha256": "739913524661ca22a5a24cd43817ef7b73c87e8e68fbebfc5b58a7bafff8105e"
+        },
+        "orig_file_sha256": "bde15a986a9c93149ac80a3454ba5ca9550ae31800f68dc03ff635cb87529d06",
+        "code_version": "803aec50+frozen-N4-worker-v2",
+        "different_uint8_voxels_to_native": 3259,
+        "negative_differences": 0,
+        "positive_differences": 3259,
+        "cold_CLI_seconds": 9.978122713975608
+      },
+      "torch_continuous_prefix": {
+        "report": {
+          "path": "validation/recon_all/optimizations/20261010_n4_continuous_prefix/reports/sub07.json",
+          "sha256": "2d93b2374979a3b1047db0317f2a2011e5c81c706c35316e0b071483989821f7"
+        },
+        "raw_T1_sha256": "59ef7bed60d4db64d56d947ebed2ef62a9257c26fe879848fe24d10a490f74fc",
+        "code_version": [
+          "e34a1829:raw-T1:GPU-normalization+standard-inflate+late-MNI+dense-GPU-finish;archive=145f0f656ea3a97101b2d43a96a7c5c5e3f0849a990401216e41a65f871f7933",
+          "e34a1829:raw-T1:GPU-normalization+standard-inflate+late-MNI+dense-GPU-finish+cached-full-Torch-N4;archive=145f0f656ea3a97101b2d43a96a7c5c5e3f0849a990401216e41a65f871f7933"
+        ],
+        "nu0_different_voxels": 3259,
+        "filled_different_voxels": 2291,
+        "filled_minimum_Dice": 0.9972209767519434
+      }
+    }
+  ],
+  "original_reports_unchanged": true,
+  "input_boundary": "SimpleITK and cached-Torch rows use their own frozen upstream/version; do not claim identical inputs across batches",
+  "overall_metric_equivalence": "not_assessed"
+}

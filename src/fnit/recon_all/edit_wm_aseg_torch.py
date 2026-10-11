@@ -1,7 +1,7 @@
 """WM/aseg 的确定性 PyTorch 子阶段，保持体素网格和整数标签语义。
 
-只替换输入决定、无需有序反馈的 MTL 补白质和后编辑；有序核心及
-remove_paths_to_cortex 尚未迁移。默认 CUDA，可用 CPU 做同输入诊断。
+输入决定的 MTL 补白质和后编辑使用 GPU；有序核心和字节路径搜索
+复用完整自有 NumBa 实现。默认 CUDA，可用 CPU 做确定性子项诊断。
 """
 from __future__ import annotations
 
@@ -16,6 +16,8 @@ import torch.nn.functional as F
 
 from .mgh_compat import save_same_dtype_mgh
 from .wm_edits_gpu import _amygdala_cortex_junction_torch
+from .wm_aseg_io import (integer_label_array as _integer_label_array,
+                        validate_aseg_storage as _validate_hybrid_aseg_storage)
 
 
 def _validate(wm: torch.Tensor, aseg: torch.Tensor) -> None:
@@ -30,29 +32,6 @@ def _labels(seg: torch.Tensor, values: tuple[int, ...]) -> torch.Tensor:
     for value in values:
         result |= seg == value
     return result
-
-
-def _integer_label_array(image: nib.MGHImage) -> np.ndarray:
-    """MGH may encode exact integer labels as float32; reject fractional labels."""
-    source = np.asarray(image.dataobj)
-    if (not np.isfinite(source).all() or source.min() < np.iinfo(np.int32).min
-            or source.max() > np.iinfo(np.int32).max):
-        raise ValueError("label volume is not finite int32-compatible data")
-    result = np.asarray(source, dtype=np.int32, order="C")
-    if not np.array_equal(source, result):
-        raise ValueError("label volume contains noninteger values")
-    return result
-
-
-def _validate_hybrid_aseg_storage(image: nib.MGHImage) -> None:
-    """完整混合接口的byte-access证明只覆盖原始4字节int32/float32存储。
-
-    image为nibabel读取的aseg影像；float32还需随后精确整数检查。
-    拒绝int16/uint8等其他存储；转换到int32不能替代原存储几何证明。
-    """
-    storage = image.get_data_dtype().newbyteorder("=")
-    if storage not in (np.dtype(np.int32), np.dtype(np.float32)):
-        raise ValueError("complete hybrid byte-access proof requires original int32 or float32 aseg storage")
 
 
 def _dilate(mask: torch.Tensor, radius: int = 1) -> torch.Tensor:
@@ -304,13 +283,15 @@ def write_late_wm_edits_torch(core_file: str | Path, aseg_file: str | Path,
 def edit_wm_aseg_hybrid_diagnostic(wm: np.ndarray, brain: np.ndarray,
                                   aseg: np.ndarray, entowm: np.ndarray, *,
                                   device: str = "cuda:0",
-                                  fill_seg_wm: bool = False) -> tuple[np.ndarray, dict]:
+                                  fill_seg_wm: bool = False,
+                                  aseg_storage_dtype: str | np.dtype = "int32") -> tuple[np.ndarray, dict]:
     """同输入完整 WM 编辑诊断：有序 Numba 前段 + Torch 确定性子阶段。
 
     输入为同网格3D数组，WM/brain uint8、aseg/entowm int32；device
-    默认cuda:0，fill_seg_wm默认False。保留remove_paths的几何no-op证明，
-    未覆盖的byte-access路径抛NotImplementedError。原固定被试公共入口
-    保持不变；fill静态候选在首遍WM分支消费，固定filled传播移至GPU。
+    默认cuda:0，fill_seg_wm默认False。aseg_storage_dtype默认int32，
+    可显式float32保留原四字节临时MRI存储；路径搜索复用完整有序
+    NumBa实现，确定不终止的源状态抛RuntimeError，不返回近似结果。
+    fill静态候选在首遍WM分支消费，固定filled传播移至GPU。
     返回新uint8 WM和分步时间/限制字典，不调用原生程序或读取参考。
     """
     from .edit_wm_aseg_core_python import (
@@ -327,7 +308,8 @@ def edit_wm_aseg_hybrid_diagnostic(wm: np.ndarray, brain: np.ndarray,
         raise ValueError("expected same-grid uint8 WM/brain and int32 aseg/entowm")
     started = time.perf_counter()
     tick = started
-    ordered, path_changed = remove_paths_to_cortex(wm, brain, aseg)
+    ordered, path_changed = remove_paths_to_cortex(wm, brain, aseg,
+        aseg_storage_dtype=aseg_storage_dtype)
     path_seconds = time.perf_counter() - tick
     tick = time.perf_counter()
     labels = torch.as_tensor(aseg, device=target)
@@ -367,6 +349,8 @@ def edit_wm_aseg_hybrid_diagnostic(wm: np.ndarray, brain: np.ndarray,
             "post_ordered_scans_cpu": post_scan_seconds, "mtl_late_and_transfers": cuda_seconds},
         "total_seconds": time.perf_counter() - started,
         "path_proof_changed": int(path_changed), "fill_seg_wm": fill_seg_wm,
+        "paths_filled": int(path_changed),
+        "aseg_storage_dtype": np.dtype(aseg_storage_dtype).newbyteorder("=").name,
         "fill_insertion": "native first ordered WM-case scan; fixed filled flags GPU propagation",
         "production_default": False}
 
@@ -382,7 +366,7 @@ def write_wm_asegedit_hybrid_diagnostic(wm_file: str | Path,
 
     wm_file/brain_file为同网格3D uint8 MGH/MGZ，aseg_file/entowm_file
     为同网格整数语义标签。aseg原存储须int32或float32精确整数，
-    byte-access证明不能用int16/uint8先转换到int32来替代。
+    临时byte-access保留原类型，不能用int16/uint8先转换替代。
     output_file保存新WM并保留wm_file头/尾。
     device默认cuda:0、fill_seg_wm默认False，限制同array诊断接口。
     返回分段时间及包含加载/搬运/压缩/写出的total_seconds。
@@ -403,7 +387,8 @@ def write_wm_asegedit_hybrid_diagnostic(wm_file: str | Path,
                  for image in images[:2]]
     aseg, entowm = [_integer_label_array(image) for image in images[2:]]
     output, report = edit_wm_aseg_hybrid_diagnostic(wm, brain, aseg, entowm,
-                               device=device, fill_seg_wm=fill_seg_wm)
+        device=device, fill_seg_wm=fill_seg_wm,
+        aseg_storage_dtype=images[2].get_data_dtype())
     save_same_dtype_mgh(wm_file, output_file, output)
     report["array_stage_seconds"] = report["total_seconds"]
     report["total_seconds"] = time.perf_counter() - started

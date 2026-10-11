@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import os
-import subprocess
 import time
 from pathlib import Path
 
@@ -18,26 +16,26 @@ from .mni_aux_chain import TEMPLATE_DIR, write_mni_voxel_lta
 
 
 def run_mni_nonlinear_chain(subject_dir: str | Path, weights_dir: str | Path,
-                            assets_dir: str | Path, *, warp_convert: str | Path,
-                            ca_register: str | Path, mri_convert: str | Path,
-                            device: str = "cpu", threads: int = 4,
-                            postprocess_backend: str = "conda", chunk_slices: int = 16) -> dict:
+                            assets_dir: str | Path, *, warp_convert: str | Path | None = None,
+                            ca_register: str | Path | None = None, mri_convert: str | Path | None = None,
+                            device: str = "cuda:0", threads: int = 4,
+                            postprocess_backend: str = "gpu", chunk_slices: int = 16) -> dict:
     """将个体裁剪 T1 配准到 MNI152，并写出前向、逆向 warp 和检查图。
 
     subject_dir 提供 conform orig、裁剪 T1 与初始 affine LTA；weights_dir
-    和 assets_dir 提供固定权重与 1 mm MNI 模板。三个具名原生程序路径分别
-    完成 warp 转换、求逆和最近邻检查图。device 默认 CPU，threads 默认 4。
+    和 assets_dir 提供固定权重与 1 mm MNI 模板。三个原生路径仅保留旧调用签名兼容，默认 None、不读取或执行。
+    device 默认 cuda:0，threads 默认 4。
     CUDA 的本阶段固定使用 FP32：同输入验证表明 TF32 会放大位移误差；
     其他阶段的 TF32 设置在返回时恢复。返回三个绝对输出路径、模型、设备、
     精度设置及各子步骤秒数；NIfTI 位移单位为 mm。
-    postprocess_backend默认conda，gpu为完整GPU后处理候选；仅gpu要求显式CUDA。
+    postprocess_backend默认且只支持gpu，复用已有完整GPU后处理。
     chunk_slices默认16，为GPU转换/检查图的X方向分块大小，不减少求逆范围。
-    三个原生程序路径只在conda后端消费；gpu不调用它们。
+    conda后端在任何输入读取或目录写入前报错；独立benchmark保留旧参考。
     缺少输入、后处理失败或输出网格不符时抛出异常，不静默回退。
     """
-    if postprocess_backend not in ("conda", "gpu"):
-        raise ValueError("postprocess_backend must be conda or gpu")
-    if postprocess_backend == "gpu" and torch.device(device).type != "cuda":
+    if postprocess_backend != "gpu":
+        raise ValueError("Production MNI chain requires postprocess_backend='gpu'; native programs belong to independent benchmarks")
+    if torch.device(device).type != "cuda":
         raise ValueError("GPU postprocessing requires an explicit CUDA device")
     if threads < 1 or chunk_slices < 1:
         raise ValueError("threads and chunk_slices must be positive")
@@ -87,38 +85,19 @@ def run_mni_nonlinear_chain(subject_dir: str | Path, weights_dir: str | Path,
     forward = transforms / "warp.to.mni152.1.0mm.1.0mm.nii.gz"
     inverse = transforms / "warp.to.mni152.1.0mm.1.0mm.inv.nii.gz"
     check = transforms / "test.nii.gz"
-    environment = dict(os.environ, FREESURFER_HOME=str(Path(assets_dir)))
     postprocess_report = {}
-    if postprocess_backend == "gpu":
-        from .mni_warp_sampling import convert_mni_warp, resample_mni_check
-        from .mni_warp_inverse import invert_mni_warp
-        postprocess_report["conversion"] = convert_mni_warp(
-            ras_warp, crop, original, full_target, temporary / "reg.crop-to-invol.lta",
-            temporary / "reg.crop-to-full.lta", forward, device=device,
-            chunk_slices=chunk_slices)
-        timings["warp_convert"] = postprocess_report["conversion"]["total_seconds"]
-        postprocess_report["inverse"] = invert_mni_warp(forward, inverse, device=device)
-        timings["warp_inverse"] = postprocess_report["inverse"]["total_seconds"]
-        postprocess_report["check"] = resample_mni_check(
-            original, forward, check, device=device, chunk_slices=chunk_slices)
-        timings["resample_check"] = postprocess_report["check"]["total_seconds"]
-    else:
-        tick = time.perf_counter()
-        subprocess.run([str(warp_convert), "--inras", str(ras_warp),
-                        "--insrcgeom", str(crop), "--outfswarp", str(forward),
-                        "--vg-thresh", "1e-4", "--lta1-inv",
-                        str(temporary / "reg.crop-to-invol.lta"), "--lta2",
-                        str(temporary / "reg.crop-to-full.lta")],
-                       env=environment, check=True)
-        timings["warp_convert"] = time.perf_counter() - tick
-        tick = time.perf_counter()
-        subprocess.run([str(ca_register), "-invert-and-save", str(forward),
-                        str(inverse)], env=environment, check=True)
-        timings["warp_inverse"] = time.perf_counter() - tick
-        tick = time.perf_counter()
-        subprocess.run([str(mri_convert), "-rt", "nearest", str(original),
-                        "-at", str(forward), str(check)], env=environment, check=True)
-        timings["resample_check"] = time.perf_counter() - tick
+    from .mni_warp_sampling import convert_mni_warp, resample_mni_check
+    from .mni_warp_inverse import invert_mni_warp
+    postprocess_report["conversion"] = convert_mni_warp(
+        ras_warp, crop, original, full_target, temporary / "reg.crop-to-invol.lta",
+        temporary / "reg.crop-to-full.lta", forward, device=device,
+        chunk_slices=chunk_slices)
+    timings["warp_convert"] = postprocess_report["conversion"]["total_seconds"]
+    postprocess_report["inverse"] = invert_mni_warp(forward, inverse, device=device)
+    timings["warp_inverse"] = postprocess_report["inverse"]["total_seconds"]
+    postprocess_report["check"] = resample_mni_check(
+        original, forward, check, device=device, chunk_slices=chunk_slices)
+    timings["resample_check"] = postprocess_report["check"]["total_seconds"]
     if nib.load(str(forward)).shape != (*nib.load(str(full_target)).shape, 1, 3) \
             or nib.load(str(inverse)).shape != (*original_image.shape, 1, 3) \
             or nib.load(str(check)).shape != nib.load(str(full_target)).shape:

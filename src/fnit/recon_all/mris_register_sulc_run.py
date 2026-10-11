@@ -19,7 +19,7 @@ from .mris_register_kernels import center_sphere, normalize_mean_curvature, proj
 from .mris_register_line_search import first_registration_line_search, first_registration_sse
 from .mris_register_nonlinear import (
     apply_spherical_gradient, correlation_gradient_add,
-    first_area_gradient, first_distance_gradient,
+    distance_gradient, first_area_gradient,
     prepare_registration_force_cache, registration_total_area,
     sphere_arc_distances, sphere_vertex_normals, tangent_basis,
 )
@@ -43,6 +43,8 @@ def run_register_sulc(sphere: str | Path, smoothwm: str | Path,
     完整 rounds 与 float32 顺序不变。max_updates 默认 1024 是未收敛时
     的报错上限，不能减少正常轮次来加速。输出路径与逐轮轨迹、时间、
     刚体搜索信息返回为 dict；表面坐标为 surface RAS/mm。
+    每轮距离力直接复用同一projected状态已经计算的法向和弧距，沿用
+    完整distance_gradient；坐标更新后重新计算，不跨试步或轮次缓存。
     """
     started = time.perf_counter()
     sphere, smoothwm, sulc = Path(sphere), Path(smoothwm), Path(sulc)
@@ -99,8 +101,9 @@ def run_register_sulc(sphere: str | Path, smoothwm: str | Path,
         avg_vertex_dist = float(distances.double().sum() / degrees.sum())
         force = first_area_gradient(
             vertices, original, projected, triangles,
-            first_distance_gradient(vertices, original, projected, triangles,
-                                    project=False, cache=cache),
+            distance_gradient(projected, normals, neighbors, degrees,
+                              distances, original_distances, cache.three_hop_neighbors,
+                              original_area, total_area, 5.0),
             project=False, cache=cache)
         e1, e2 = tangent_basis(normals)
         force = correlation_gradient_add(force, projected, curvature, e1, e2,

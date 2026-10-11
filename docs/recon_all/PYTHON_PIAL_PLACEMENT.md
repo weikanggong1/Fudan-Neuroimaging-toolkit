@@ -1,6 +1,10 @@
 # Python pial.T1 表面放置
 
-`fnit.recon_all.place_pial_python.place_pial_t1` 实现 FreeSurfer 8.2 `mris_place_surface --pial` 的四轮几何优化，以及内侧壁固定和表面相交修复。它在 CPU 上使用 NumPy、Numba 和 nibabel，可单独调用并用于同输入算法核对。标准 `fnit-recon-all` 在最终 white 放置后使用[Conda 源码构建的原生 pial](NATIVE_PIAL_PLACEMENT.md)；原因及同输入差异见该页。GPU 采样后端和静态索引优化的历史验证分别记在本文后续章节及表面热点报告；本轮候选仍须绑定自己的完整阶段结果。
+2026-10-11 接口更新：显式 `backend="python"` 的 recon-all 使用自有四轮 pial；本页历次原生默认与阶段耗时描述保留各自冻结版本范围。新增 MRI 同网格输入预检在强度准备前拒绝错位或无效空间，合法输入沿用原计算。最新真实头几何/变换结果和全部限制见[七节校验记录](../../validation/recon_all/optimizations/20261011_pial_volume_geometry/README.md)。
+
+`fnit.recon_all.place_pial_python.place_pial_t1` 实现 FreeSurfer 8.2 `mris_place_surface --pial` 的四轮几何优化，以及内侧壁固定和表面相交修复。它复用 NumPy/Numba 的有序计算、PyTorch 的完整 GPU 候选和源标记，以及 nibabel 的数据读写，可单独调用并用于同输入算法核对。本轮连续链直接调用自有放置函数；原版阶段只在隔离参考目录执行。历史 [Conda 原生 pial 基线](NATIVE_PIAL_PLACEMENT.md) 保留其冻结版本的同输入差异，标准整例调度由总控集成验收。GPU 采样后端和静态索引优化的历史验证分别记在本文后续章节及表面热点报告；本轮候选仍须绑定自己的完整阶段结果。
+
+2026-10-11 清理模式修订：当前默认 `cleanup_constraint_mode="source_rip"`，清理仅使用源 rip 作为固定及 SOAP 邻居排除掩膜；非 rip 的 cortex 外顶点仍可移动并贡献邻居项。四轮优化使用原 rip；四轮结束后，pin 步骤先将 cortex 外顶点放回 white，再按选定模式清理。v11/v15 历史并集诊断使用“原 rip 与 cortex 外顶点”的并集，同时限制移动并排除新增固定顶点的 SOAP 邻居贡献；当前仅通过显式 `cortex_pinned_union` 选项启用。v19 默认模式允许的 cortex 外 954 个坐标元素变化与并集模式的固定坐标零变化分别报告，两种模式的严格几何质量均失败。所有清理后端在源标记仍非零时抛出异常，不写标准 pial 输出；源标记为零本身也不能证明完整 proper 自相交和 white/pial 穿越通过。模式定义与真实回归范围见[完整七节记录](../../validation/recon_all/optimizations/20261011_fnit2_chain/README.md)。
 
 ## 输入、输出与调用
 
@@ -10,11 +14,13 @@
 | --- | --- |
 | `surf/{hemi}.white` | 提供有序顶点、面、体积几何和表面标签；pial 优化从其坐标开始。 |
 | `surf/autodet.gw.stats.{hemi}.dat` | 被试的灰白质强度阈值。 |
-| `label/{hemi}.cortex+hipamyg.label` | 放置与相交修复使用的顶点 rip 掩膜。 |
+| `label/{hemi}.cortex+hipamyg.label` | 四轮放置及默认 source_rip 清理使用的顶点 rip 掩膜；显式 cortex_pinned_union 清理另加入 cortex 外顶点。 |
 | `label/{hemi}.cortex.label` | 优化后将内侧壁固定回 white。 |
 | `mri/brain.finalsurfs.mgz` | 放置所用强度图与体素几何。 |
 | `mri/wm.mgz` | 强度预处理使用的白质类别。 |
 | `mri/aseg.presurf.mgz` | 边界搜索所用分割。 |
+
+三张 MRI 须为相同三维 shape 和 scanner RAS affine，间距正且头几何有限；white 坐标和完整体积几何须有效。失败抛 `ValueError`，不创建输出、不进入强度准备或四轮优化。各 MRI 的 `vox2ras_tkr` 可以因 MGH 方向/间距分解而不同，WM/aseg 的共享体素索引未消费这两个矩阵；实际 surface RAS/mm→voxel 仍由 white 头与 brain 头的既有函数计算。表面 `valid=1` 支持原格式 `#` 行尾注释；`0` 或无注释的多余文本拒绝。未新增参数或运行依赖。
 
 ```python
 from fnit.recon_all.place_pial_python import place_pial_t1
@@ -177,8 +183,9 @@ flowchart LR
 | `retained_mht_backend` | tree；compiled只允许snapshot/torch_snapshot，将已有实时有序重试循环编译，真正命中仍使用原桶规则；首次JIT计入阶段时间 |
 | `cleanup_marking_backend` | legacy；source_numba/source_torch显式复用源有向MHT标记，后者要求device；不换soap或停滞规则，源清理最终非零抛异常，不写表面 |
 | `cleanup_candidate_grid_cells_per_axis` | 2；显式3只用于source_torch，与试步网格选项独立；非法组合在读取前拒绝 |
+| `cleanup_constraint_mode` | source_rip；默认仅沿用四轮原rip，SOAP保留非rip但cortex外邻居贡献。显式cortex_pinned_union才同时冻结并排除这些邻居；属于强化诊断策略，与源清理分开验收 |
 
-成功报告新增同名字段，记录实际选项。其余全部参数、坐标/单位和七项
+成功报告新增同名字段，记录实际选项。失败清理的异常携带 cleanup_diagnostics，独立benchmark也记录实际模式及残余。模式在读取输入前校验；四轮优化期间rip不变。v11/v15冻结版本的并集路径是cortex_pinned_union历史结果，不能转称为当前source_rip默认结果。其余全部参数、坐标/单位和七项
 前置保持本文定义；profile仅诊断时同步指定GPU，不给默认CPU路径加屏障。
 
 ```python

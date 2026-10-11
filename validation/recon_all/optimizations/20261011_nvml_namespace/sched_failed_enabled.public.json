@@ -1,0 +1,807 @@
+{
+  "scope": "small controlled allocation probe; not reconstruction/benchmark or 20GB bound",
+  "script_sha256": "96985af8f67c642b2860c4a45a215abed671b15c01a628a71bb114a9425f81d1",
+  "monitor_source_sha256": {
+    "fnit.recon_all.profiling": "43fd54dd7217d789ff4eac0b6b9be702112444e9caf545f7f2f1c3f81acf09f8",
+    "fnit.recon_all.nvml_process_memory": "1879606b4af4c10e088cff3c665255511dee872da91d4a9c8b2b1cb07550b348"
+  },
+  "kernel_release": "3.10.0-1160.el7.x86_64",
+  "identity": {
+    "local_pid": 56900,
+    "pid_namespace": "pid:[4026542021]",
+    "starttime_ticks": 446860748,
+    "nspid_chain": null,
+    "errors": []
+  },
+  "host_proc_candidates": [
+    {
+      "candidate": "/host/proc",
+      "status": "absent"
+    },
+    {
+      "candidate": "/hostproc",
+      "status": "absent"
+    },
+    {
+      "candidate": "/run/host/proc",
+      "status": "absent"
+    },
+    {
+      "candidate": "/mnt/host/proc",
+      "status": "absent"
+    },
+    {
+      "candidate": "/proc/1/root/proc",
+      "status": "PermissionError"
+    }
+  ],
+  "device": {
+    "physical_index": 6,
+    "uuid": "GPU-anonymized-device-009",
+    "logical": "cuda:0"
+  },
+  "observed_idle_gate": {
+    "compute_process_count": 0,
+    "graphics_process_count": 0,
+    "gpu_utilization_percent": 0,
+    "device_used_bytes": 925302784,
+    "explicit_expected_baseline_bytes": 925302784
+  },
+  "sched_mapping_requested": true,
+  "allocator_requested": "enabled",
+  "precision_before": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "autocast": false
+  },
+  "parent_payload_mib": 128,
+  "child_payload_mib": 256,
+  "snapshots": [
+    {
+      "phase": "before_cuda",
+      "sched_mapping_evidence": [
+        {
+          "local_pid": 56900,
+          "sched_driver_pid": 3659,
+          "sched_comm_matches_local": true,
+          "same_uuid_nvml_row_present": false,
+          "nvml_name_matches": false,
+          "identity_unchanged": true,
+          "status": "not_verified"
+        }
+      ],
+      "monotonic": 4468613.132805715,
+      "query_span_seconds": 0.0043046735227108,
+      "parent": {
+        "identity": {
+          "local_pid": 56900,
+          "pid_namespace": "pid:[4026542021]",
+          "starttime_ticks": 446860748,
+          "nspid_chain": null,
+          "errors": []
+        },
+        "cuda_initialized": false,
+        "torch_stats_valid_for_peak": true,
+        "torch_allocated_bytes": null,
+        "torch_reserved_bytes": null,
+        "torch_peak_allocated_bytes": null,
+        "torch_peak_reserved_bytes": null,
+        "payload_live_bytes": 0
+      },
+      "child": null,
+      "nvml_processes": [],
+      "device_used_bytes": 925302784,
+      "device_error_type": null,
+      "same_snapshot_nvml_all_process_sum_bytes": 0,
+      "attributed_tree_total_bytes": null,
+      "sampler_ownership": "unresolved",
+      "mapping_unavailable_reasons": [
+        "nspid_unavailable",
+        "trusted_driver_to_local_pid_mapping_not_supplied"
+      ],
+      "sampler_mapping_status": "unavailable",
+      "held_payload_total_bytes": 0
+    },
+    {
+      "phase": "parent_context",
+      "sched_mapping_evidence": [
+        {
+          "local_pid": 56900,
+          "sched_driver_pid": 3659,
+          "sched_comm_matches_local": true,
+          "same_uuid_nvml_row_present": false,
+          "nvml_name_matches": false,
+          "identity_unchanged": true,
+          "status": "not_verified"
+        }
+      ],
+      "monotonic": 4468614.439622119,
+      "query_span_seconds": 0.020748053677380085,
+      "parent": {
+        "identity": {
+          "local_pid": 56900,
+          "pid_namespace": "pid:[4026542021]",
+          "starttime_ticks": 446860748,
+          "nspid_chain": null,
+          "errors": []
+        },
+        "cuda_initialized": true,
+        "torch_stats_valid_for_peak": true,
+        "torch_allocated_bytes": 0,
+        "torch_reserved_bytes": 0,
+        "torch_peak_allocated_bytes": 0,
+        "torch_peak_reserved_bytes": 0,
+        "payload_live_bytes": 0
+      },
+      "child": null,
+      "nvml_processes": [],
+      "device_used_bytes": 928710656,
+      "device_error_type": null,
+      "same_snapshot_nvml_all_process_sum_bytes": 0,
+      "attributed_tree_total_bytes": null,
+      "sampler_ownership": "unresolved",
+      "mapping_unavailable_reasons": [
+        "nspid_unavailable",
+        "trusted_driver_to_local_pid_mapping_not_supplied"
+      ],
+      "sampler_mapping_status": "unavailable",
+      "held_payload_total_bytes": 0
+    },
+    {
+      "phase": "parent_allocate",
+      "sched_mapping_evidence": [
+        {
+          "local_pid": 56900,
+          "status": "unavailable",
+          "error_type": "NVMLError_NotFound"
+        }
+      ],
+      "monotonic": 4468615.263155305,
+      "query_span_seconds": 0.0027601029723882675,
+      "parent": {
+        "identity": {
+          "local_pid": 56900,
+          "pid_namespace": "pid:[4026542021]",
+          "starttime_ticks": 446860748,
+          "nspid_chain": null,
+          "errors": []
+        },
+        "cuda_initialized": true,
+        "torch_stats_valid_for_peak": true,
+        "torch_allocated_bytes": 134217728,
+        "torch_reserved_bytes": 134217728,
+        "torch_peak_allocated_bytes": 134217728,
+        "torch_peak_reserved_bytes": 134217728,
+        "payload_live_bytes": 134217728
+      },
+      "child": null,
+      "nvml_processes": [
+        {
+          "pid": 3659,
+          "bytes": 648019968
+        }
+      ],
+      "device_used_bytes": 1582563328,
+      "device_error_type": null,
+      "same_snapshot_nvml_all_process_sum_bytes": 648019968,
+      "attributed_tree_total_bytes": null,
+      "sampler_ownership": "unresolved",
+      "mapping_unavailable_reasons": [
+        "nspid_unavailable",
+        "trusted_driver_to_local_pid_mapping_not_supplied"
+      ],
+      "sampler_mapping_status": "unavailable",
+      "held_payload_total_bytes": 134217728
+    },
+    {
+      "phase": "child_before_cuda",
+      "sched_mapping_evidence": [
+        {
+          "local_pid": 56900,
+          "status": "unavailable",
+          "error_type": "NVMLError_NotFound"
+        },
+        {
+          "local_pid": 56994,
+          "sched_driver_pid": 5317,
+          "sched_comm_matches_local": true,
+          "same_uuid_nvml_row_present": false,
+          "nvml_name_matches": false,
+          "identity_unchanged": true,
+          "status": "not_verified"
+        }
+      ],
+      "monotonic": 4468617.850322138,
+      "query_span_seconds": 0.006675029173493385,
+      "parent": {
+        "identity": {
+          "local_pid": 56900,
+          "pid_namespace": "pid:[4026542021]",
+          "starttime_ticks": 446860748,
+          "nspid_chain": null,
+          "errors": []
+        },
+        "cuda_initialized": true,
+        "torch_stats_valid_for_peak": true,
+        "torch_allocated_bytes": 134217728,
+        "torch_reserved_bytes": 134217728,
+        "torch_peak_allocated_bytes": 134217728,
+        "torch_peak_reserved_bytes": 134217728,
+        "payload_live_bytes": 134217728
+      },
+      "child": {
+        "identity": {
+          "local_pid": 56994,
+          "pid_namespace": "pid:[4026542021]",
+          "starttime_ticks": 446861526,
+          "nspid_chain": null,
+          "errors": []
+        },
+        "precision": {
+          "matmul_tf32": false,
+          "cudnn_tf32": true,
+          "autocast": false
+        },
+        "cuda_initialized": false,
+        "allocator_disabled_environment_present": false,
+        "torch_stats_valid_for_peak": true,
+        "torch_allocated_bytes": null,
+        "torch_reserved_bytes": null,
+        "torch_peak_allocated_bytes": null,
+        "torch_peak_reserved_bytes": null,
+        "payload_live_bytes": 0,
+        "monotonic": 4468617.549971571
+      },
+      "nvml_processes": [
+        {
+          "pid": 3659,
+          "bytes": 648019968
+        }
+      ],
+      "device_used_bytes": 1582563328,
+      "device_error_type": null,
+      "same_snapshot_nvml_all_process_sum_bytes": 648019968,
+      "attributed_tree_total_bytes": null,
+      "sampler_ownership": "unresolved",
+      "mapping_unavailable_reasons": [
+        "nspid_unavailable",
+        "trusted_driver_to_local_pid_mapping_not_supplied"
+      ],
+      "sampler_mapping_status": "unavailable",
+      "held_payload_total_bytes": 134217728
+    },
+    {
+      "phase": "child_context",
+      "sched_mapping_evidence": [
+        {
+          "local_pid": 56900,
+          "status": "unavailable",
+          "error_type": "NVMLError_NotFound"
+        },
+        {
+          "local_pid": 56994,
+          "sched_driver_pid": 5317,
+          "sched_comm_matches_local": true,
+          "same_uuid_nvml_row_present": false,
+          "nvml_name_matches": false,
+          "identity_unchanged": true,
+          "status": "not_verified"
+        }
+      ],
+      "monotonic": 4468618.6266508,
+      "query_span_seconds": 0.003537900745868683,
+      "parent": {
+        "identity": {
+          "local_pid": 56900,
+          "pid_namespace": "pid:[4026542021]",
+          "starttime_ticks": 446860748,
+          "nspid_chain": null,
+          "errors": []
+        },
+        "cuda_initialized": true,
+        "torch_stats_valid_for_peak": true,
+        "torch_allocated_bytes": 134217728,
+        "torch_reserved_bytes": 134217728,
+        "torch_peak_allocated_bytes": 134217728,
+        "torch_peak_reserved_bytes": 134217728,
+        "payload_live_bytes": 134217728
+      },
+      "child": {
+        "identity": {
+          "local_pid": 56994,
+          "pid_namespace": "pid:[4026542021]",
+          "starttime_ticks": 446861526,
+          "nspid_chain": null,
+          "errors": []
+        },
+        "precision": {
+          "matmul_tf32": false,
+          "cudnn_tf32": true,
+          "autocast": false
+        },
+        "cuda_initialized": true,
+        "allocator_disabled_environment_present": false,
+        "torch_stats_valid_for_peak": true,
+        "torch_allocated_bytes": 0,
+        "torch_reserved_bytes": 0,
+        "torch_peak_allocated_bytes": 0,
+        "torch_peak_reserved_bytes": 0,
+        "payload_live_bytes": 0,
+        "monotonic": 4468618.326394359
+      },
+      "nvml_processes": [
+        {
+          "pid": 3659,
+          "bytes": 648019968
+        }
+      ],
+      "device_used_bytes": 1582563328,
+      "device_error_type": null,
+      "same_snapshot_nvml_all_process_sum_bytes": 648019968,
+      "attributed_tree_total_bytes": null,
+      "sampler_ownership": "unresolved",
+      "mapping_unavailable_reasons": [
+        "nspid_unavailable",
+        "trusted_driver_to_local_pid_mapping_not_supplied"
+      ],
+      "sampler_mapping_status": "unavailable",
+      "held_payload_total_bytes": 134217728
+    },
+    {
+      "phase": "both_allocate",
+      "sched_mapping_evidence": [
+        {
+          "local_pid": 56900,
+          "status": "unavailable",
+          "error_type": "NVMLError_NotFound"
+        },
+        {
+          "local_pid": 56994,
+          "status": "unavailable",
+          "error_type": "NVMLError_NotFound"
+        }
+      ],
+      "monotonic": 4468619.407620485,
+      "query_span_seconds": 0.008620986714959145,
+      "parent": {
+        "identity": {
+          "local_pid": 56900,
+          "pid_namespace": "pid:[4026542021]",
+          "starttime_ticks": 446860748,
+          "nspid_chain": null,
+          "errors": []
+        },
+        "cuda_initialized": true,
+        "torch_stats_valid_for_peak": true,
+        "torch_allocated_bytes": 134217728,
+        "torch_reserved_bytes": 134217728,
+        "torch_peak_allocated_bytes": 134217728,
+        "torch_peak_reserved_bytes": 134217728,
+        "payload_live_bytes": 134217728
+      },
+      "child": {
+        "identity": {
+          "local_pid": 56994,
+          "pid_namespace": "pid:[4026542021]",
+          "starttime_ticks": 446861526,
+          "nspid_chain": null,
+          "errors": []
+        },
+        "precision": {
+          "matmul_tf32": false,
+          "cudnn_tf32": true,
+          "autocast": false
+        },
+        "cuda_initialized": true,
+        "allocator_disabled_environment_present": false,
+        "torch_stats_valid_for_peak": true,
+        "torch_allocated_bytes": 268435456,
+        "torch_reserved_bytes": 268435456,
+        "torch_peak_allocated_bytes": 268435456,
+        "torch_peak_reserved_bytes": 268435456,
+        "payload_live_bytes": 268435456,
+        "monotonic": 4468619.107278531
+      },
+      "nvml_processes": [
+        {
+          "pid": 3659,
+          "bytes": 648019968
+        },
+        {
+          "pid": 5317,
+          "bytes": 782237696
+        }
+      ],
+      "device_used_bytes": 2370633728,
+      "device_error_type": null,
+      "same_snapshot_nvml_all_process_sum_bytes": 1430257664,
+      "attributed_tree_total_bytes": null,
+      "sampler_ownership": "unresolved",
+      "mapping_unavailable_reasons": [
+        "nspid_unavailable",
+        "trusted_driver_to_local_pid_mapping_not_supplied"
+      ],
+      "sampler_mapping_status": "unavailable",
+      "held_payload_total_bytes": 402653184
+    },
+    {
+      "phase": "child_free_cache_retained",
+      "sched_mapping_evidence": [
+        {
+          "local_pid": 56900,
+          "status": "unavailable",
+          "error_type": "NVMLError_NotFound"
+        },
+        {
+          "local_pid": 56994,
+          "status": "unavailable",
+          "error_type": "NVMLError_NotFound"
+        }
+      ],
+      "monotonic": 4468619.71756051,
+      "query_span_seconds": 0.016238230280578136,
+      "parent": {
+        "identity": {
+          "local_pid": 56900,
+          "pid_namespace": "pid:[4026542021]",
+          "starttime_ticks": 446860748,
+          "nspid_chain": null,
+          "errors": []
+        },
+        "cuda_initialized": true,
+        "torch_stats_valid_for_peak": true,
+        "torch_allocated_bytes": 134217728,
+        "torch_reserved_bytes": 134217728,
+        "torch_peak_allocated_bytes": 134217728,
+        "torch_peak_reserved_bytes": 134217728,
+        "payload_live_bytes": 134217728
+      },
+      "child": {
+        "identity": {
+          "local_pid": 56994,
+          "pid_namespace": "pid:[4026542021]",
+          "starttime_ticks": 446861526,
+          "nspid_chain": null,
+          "errors": []
+        },
+        "precision": {
+          "matmul_tf32": false,
+          "cudnn_tf32": true,
+          "autocast": false
+        },
+        "cuda_initialized": true,
+        "allocator_disabled_environment_present": false,
+        "torch_stats_valid_for_peak": true,
+        "torch_allocated_bytes": 0,
+        "torch_reserved_bytes": 268435456,
+        "torch_peak_allocated_bytes": 268435456,
+        "torch_peak_reserved_bytes": 268435456,
+        "payload_live_bytes": 0,
+        "monotonic": 4468619.417113226
+      },
+      "nvml_processes": [
+        {
+          "pid": 3659,
+          "bytes": 648019968
+        },
+        {
+          "pid": 5317,
+          "bytes": 782237696
+        }
+      ],
+      "device_used_bytes": 2370633728,
+      "device_error_type": null,
+      "same_snapshot_nvml_all_process_sum_bytes": 1430257664,
+      "attributed_tree_total_bytes": null,
+      "sampler_ownership": "unresolved",
+      "mapping_unavailable_reasons": [
+        "nspid_unavailable",
+        "trusted_driver_to_local_pid_mapping_not_supplied"
+      ],
+      "sampler_mapping_status": "unavailable",
+      "held_payload_total_bytes": 134217728
+    },
+    {
+      "phase": "child_flush_cache",
+      "sched_mapping_evidence": [
+        {
+          "local_pid": 56900,
+          "status": "unavailable",
+          "error_type": "NVMLError_NotFound"
+        },
+        {
+          "local_pid": 56994,
+          "status": "unavailable",
+          "error_type": "NVMLError_NotFound"
+        }
+      ],
+      "monotonic": 4468620.040936895,
+      "query_span_seconds": 0.002737957052886486,
+      "parent": {
+        "identity": {
+          "local_pid": 56900,
+          "pid_namespace": "pid:[4026542021]",
+          "starttime_ticks": 446860748,
+          "nspid_chain": null,
+          "errors": []
+        },
+        "cuda_initialized": true,
+        "torch_stats_valid_for_peak": true,
+        "torch_allocated_bytes": 134217728,
+        "torch_reserved_bytes": 134217728,
+        "torch_peak_allocated_bytes": 134217728,
+        "torch_peak_reserved_bytes": 134217728,
+        "payload_live_bytes": 134217728
+      },
+      "child": {
+        "identity": {
+          "local_pid": 56994,
+          "pid_namespace": "pid:[4026542021]",
+          "starttime_ticks": 446861526,
+          "nspid_chain": null,
+          "errors": []
+        },
+        "precision": {
+          "matmul_tf32": false,
+          "cudnn_tf32": true,
+          "autocast": false
+        },
+        "cuda_initialized": true,
+        "allocator_disabled_environment_present": false,
+        "torch_stats_valid_for_peak": true,
+        "torch_allocated_bytes": 0,
+        "torch_reserved_bytes": 0,
+        "torch_peak_allocated_bytes": 268435456,
+        "torch_peak_reserved_bytes": 268435456,
+        "payload_live_bytes": 0,
+        "monotonic": 4468619.740634559
+      },
+      "nvml_processes": [
+        {
+          "pid": 3659,
+          "bytes": 648019968
+        },
+        {
+          "pid": 5317,
+          "bytes": 513802240
+        }
+      ],
+      "device_used_bytes": 2102198272,
+      "device_error_type": null,
+      "same_snapshot_nvml_all_process_sum_bytes": 1161822208,
+      "attributed_tree_total_bytes": null,
+      "sampler_ownership": "unresolved",
+      "mapping_unavailable_reasons": [
+        "nspid_unavailable",
+        "trusted_driver_to_local_pid_mapping_not_supplied"
+      ],
+      "sampler_mapping_status": "unavailable",
+      "held_payload_total_bytes": 134217728
+    },
+    {
+      "phase": "child_exited",
+      "sched_mapping_evidence": [
+        {
+          "local_pid": 56900,
+          "status": "unavailable",
+          "error_type": "NVMLError_NotFound"
+        }
+      ],
+      "monotonic": 4468621.376304676,
+      "query_span_seconds": 0.0065261004492640495,
+      "parent": {
+        "identity": {
+          "local_pid": 56900,
+          "pid_namespace": "pid:[4026542021]",
+          "starttime_ticks": 446860748,
+          "nspid_chain": null,
+          "errors": []
+        },
+        "cuda_initialized": true,
+        "torch_stats_valid_for_peak": true,
+        "torch_allocated_bytes": 134217728,
+        "torch_reserved_bytes": 134217728,
+        "torch_peak_allocated_bytes": 134217728,
+        "torch_peak_reserved_bytes": 134217728,
+        "payload_live_bytes": 134217728
+      },
+      "child": null,
+      "nvml_processes": [
+        {
+          "pid": 3659,
+          "bytes": 648019968
+        }
+      ],
+      "device_used_bytes": 1582563328,
+      "device_error_type": null,
+      "same_snapshot_nvml_all_process_sum_bytes": 648019968,
+      "attributed_tree_total_bytes": null,
+      "sampler_ownership": "unresolved",
+      "mapping_unavailable_reasons": [
+        "nspid_unavailable",
+        "trusted_driver_to_local_pid_mapping_not_supplied"
+      ],
+      "sampler_mapping_status": "unavailable",
+      "held_payload_total_bytes": 134217728
+    },
+    {
+      "phase": "parent_free_cache_retained",
+      "sched_mapping_evidence": [
+        {
+          "local_pid": 56900,
+          "status": "unavailable",
+          "error_type": "NVMLError_NotFound"
+        }
+      ],
+      "monotonic": 4468621.683214044,
+      "query_span_seconds": 0.004387261345982552,
+      "parent": {
+        "identity": {
+          "local_pid": 56900,
+          "pid_namespace": "pid:[4026542021]",
+          "starttime_ticks": 446860748,
+          "nspid_chain": null,
+          "errors": []
+        },
+        "cuda_initialized": true,
+        "torch_stats_valid_for_peak": true,
+        "torch_allocated_bytes": 0,
+        "torch_reserved_bytes": 134217728,
+        "torch_peak_allocated_bytes": 134217728,
+        "torch_peak_reserved_bytes": 134217728,
+        "payload_live_bytes": 0
+      },
+      "child": null,
+      "nvml_processes": [
+        {
+          "pid": 3659,
+          "bytes": 648019968
+        }
+      ],
+      "device_used_bytes": 1582563328,
+      "device_error_type": null,
+      "same_snapshot_nvml_all_process_sum_bytes": 648019968,
+      "attributed_tree_total_bytes": null,
+      "sampler_ownership": "unresolved",
+      "mapping_unavailable_reasons": [
+        "nspid_unavailable",
+        "trusted_driver_to_local_pid_mapping_not_supplied"
+      ],
+      "sampler_mapping_status": "unavailable",
+      "held_payload_total_bytes": 0
+    },
+    {
+      "phase": "parent_flush_cache",
+      "sched_mapping_evidence": [
+        {
+          "local_pid": 56900,
+          "status": "unavailable",
+          "error_type": "NVMLError_NotFound"
+        }
+      ],
+      "monotonic": 4468621.988768913,
+      "query_span_seconds": 0.008261216804385185,
+      "parent": {
+        "identity": {
+          "local_pid": 56900,
+          "pid_namespace": "pid:[4026542021]",
+          "starttime_ticks": 446860748,
+          "nspid_chain": null,
+          "errors": []
+        },
+        "cuda_initialized": true,
+        "torch_stats_valid_for_peak": true,
+        "torch_allocated_bytes": 0,
+        "torch_reserved_bytes": 0,
+        "torch_peak_allocated_bytes": 134217728,
+        "torch_peak_reserved_bytes": 134217728,
+        "payload_live_bytes": 0
+      },
+      "child": null,
+      "nvml_processes": [
+        {
+          "pid": 3659,
+          "bytes": 513802240
+        }
+      ],
+      "device_used_bytes": 1448345600,
+      "device_error_type": null,
+      "same_snapshot_nvml_all_process_sum_bytes": 513802240,
+      "attributed_tree_total_bytes": null,
+      "sampler_ownership": "unresolved",
+      "mapping_unavailable_reasons": [
+        "nspid_unavailable",
+        "trusted_driver_to_local_pid_mapping_not_supplied"
+      ],
+      "sampler_mapping_status": "unavailable",
+      "held_payload_total_bytes": 0
+    }
+  ],
+  "pid1_namespace": {
+    "status": "PermissionError"
+  },
+  "proc_mounts": [
+    {
+      "root": "/",
+      "mount": "/proc"
+    },
+    {
+      "root": "/driver/nvidia/gpus/0000:19:00.0",
+      "mount": "/proc/driver/nvidia/gpus/0000:19:00.0"
+    },
+    {
+      "root": "/driver/nvidia/gpus/0000:48:00.0",
+      "mount": "/proc/driver/nvidia/gpus/0000:48:00.0"
+    },
+    {
+      "root": "/driver/nvidia/gpus/0000:4d:00.0",
+      "mount": "/proc/driver/nvidia/gpus/0000:4d:00.0"
+    },
+    {
+      "root": "/driver/nvidia/gpus/0000:89:00.0",
+      "mount": "/proc/driver/nvidia/gpus/0000:89:00.0"
+    },
+    {
+      "root": "/driver/nvidia/gpus/0000:8e:00.0",
+      "mount": "/proc/driver/nvidia/gpus/0000:8e:00.0"
+    },
+    {
+      "root": "/driver/nvidia/gpus/0000:ad:00.0",
+      "mount": "/proc/driver/nvidia/gpus/0000:ad:00.0"
+    },
+    {
+      "root": "/driver/nvidia/gpus/0000:b3:00.0",
+      "mount": "/proc/driver/nvidia/gpus/0000:b3:00.0"
+    },
+    {
+      "root": "/driver/nvidia/gpus/0000:13:00.0",
+      "mount": "/proc/driver/nvidia/gpus/0000:13:00.0"
+    },
+    {
+      "root": "/asound",
+      "mount": "/proc/asound"
+    },
+    {
+      "root": "/bus",
+      "mount": "/proc/bus"
+    },
+    {
+      "root": "/fs",
+      "mount": "/proc/fs"
+    },
+    {
+      "root": "/irq",
+      "mount": "/proc/irq"
+    },
+    {
+      "root": "/sys",
+      "mount": "/proc/sys"
+    },
+    {
+      "root": "/sysrq-trigger",
+      "mount": "/proc/sysrq-trigger"
+    }
+  ],
+  "precision_after": {
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "autocast": false
+  },
+  "status": "completed_sched_mapping_probe",
+  "trusted_host_pid_map_supplied": true,
+  "correlated_driver_candidates": {
+    "parent": [
+      3659
+    ],
+    "child": [
+      5317
+    ],
+    "classification": "empirical temporal correlation only; not trusted host/local PID binding"
+  },
+  "sampler_summary": {
+    "failed_sample_count": 0,
+    "peak_tree_total_bytes": null,
+    "status": "ownership_unresolved"
+  },
+  "ownership_conclusion": "Explicit owned sched PID plus NVML UUID/name mapping evaluated at each snapshot; inspect per-row verification and tree sums; no global kernel or whole-memory guarantee"
+}

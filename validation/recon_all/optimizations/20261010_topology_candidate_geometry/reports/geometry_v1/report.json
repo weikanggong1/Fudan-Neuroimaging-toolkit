@@ -1,0 +1,181 @@
+{
+  "status": "strict_candidate_geometry_passed",
+  "scope": "same initial pre-retess candidate\u2192ordered face detection\u219225smooth\u219240match\u2192normals; frozen calibrated means, no full GA",
+  "initial_input_sha256": {
+    "before": "17daded056d9d2601cf39558c0aa041f27a93387cf5902063fecc5432b4abfab",
+    "brain": "977f6fb298d38e10588cd636f4db38ca8c3456265b24d6d80d00d54e60e98eed"
+  },
+  "calibrated_means": [
+    85.10910034179688,
+    62.694217681884766,
+    -0.09168962389230728,
+    -0.03310907259583473
+  ],
+  "reference_input_consumed": false,
+  "comparison_reference_sha256": {
+    "smooth": "9c18947cb63f081644a4f0cabd538d5fc1c45d2af286dd996f95a7ee0e139704",
+    "after": "28f35b64708fdee66c68b27f047d7bdf85ee943669b708cb29c17aabcaa1df2c"
+  },
+  "source_sha256": {
+    "tools/benchmark_recon_topology_candidate_geometry.py": "bb5ca22b838c355a73ddf7e140f8589a2e2208d1e9870f79735ab7cf11b4d755",
+    "tools/benchmark_recon_topology_match_fields.py": "7a5afddcfaa0d968af71e6e842381b598a83fbb1ff437297e8bff064bbc2238e",
+    "tools/benchmark_recon_topology_retess_fields.py": "4c45a6de5d24e8c1e888a76ec38e00b74f9b1ee204bfd81f60f5415214256995",
+    "src/fnit/recon_all/topology_retessellation_dynamic.py": "1c03cd592820585cc2123fc4950ef440588fa35ad87da0456a5c0982e1f74b61",
+    "src/fnit/recon_all/topology_retessellation_python.py": "4b20a92f9ec1c4f1cc728a26b1fabbae3817497e50f238fdc2fb73e309b42de0",
+    "src/fnit/recon_all/topology_preflight_python.py": "7ae02e2c7e5133a9de544361c95b9e7def7f5d92e35f3bbc27e8ca03f8d5ec00",
+    "src/fnit/recon_all/topology_defect_smooth.py": "95d863b3b725028b458cafe198aecd87f7b5a98b78151f9daaaa307c61fd861b",
+    "src/fnit/recon_all/topology_defect_mri_match.py": "64cfcb38a7f8b5aba7ce9bb2861a5dd293365488dbbf05097f3657b03f448c84",
+    "src/fnit/recon_all/topology_candidate_normals.py": "d9bedc28b8afd73a5816a343c7f6a6b1889b6ed473921bfc209afe05c8a1a84b",
+    "src/fnit/recon_all/topology_edge_mri_score.py": "eb0b284e411fd41ae5bd7d1956a0d366d06edf438fa681e758343f27e4e46150"
+  },
+  "loading_seconds": 0.14159170724451542,
+  "results": [
+    {
+      "label": "cold",
+      "seconds": {
+        "retess_and_face_detection": 6.188327659852803,
+        "smooth_25": 1.1553436117246747,
+        "match_40": 1.4756552577018738,
+        "complete_face_and_selected_vertex_normals": 1.0023972298949957,
+        "write": 0.9357312535867095
+      }
+    },
+    {
+      "label": "repeat",
+      "seconds": {
+        "retess_and_face_detection": 4.038636157289147,
+        "smooth_25": 0.3892662515863776,
+        "match_40": 0.5747473435476422,
+        "complete_face_and_selected_vertex_normals": 0.47374760638922453,
+        "write": 0.9318771548569202
+      }
+    }
+  ],
+  "checks": [
+    {
+      "arrays": {
+        "faces": {
+          "shape_same": true,
+          "bytes_exact": true
+        },
+        "selected_vertices": {
+          "shape_same": true,
+          "bytes_exact": true
+        },
+        "selected_faces": {
+          "shape_same": true,
+          "bytes_exact": true
+        },
+        "neighbor_offsets": {
+          "shape_same": true,
+          "bytes_exact": true
+        },
+        "neighbors": {
+          "shape_same": true,
+          "bytes_exact": true
+        },
+        "incident_offsets": {
+          "shape_same": true,
+          "bytes_exact": true
+        },
+        "incident_faces": {
+          "shape_same": true,
+          "bytes_exact": true
+        },
+        "incident_corners": {
+          "shape_same": true,
+          "bytes_exact": true
+        }
+      },
+      "smooth": {
+        "different_float_elements": 0,
+        "different_vertices": 0,
+        "max_mm": 0.0,
+        "p99_mm": 0.0,
+        "mean_mm": 0.0,
+        "exact": true
+      },
+      "matched": {
+        "different_float_elements": 0,
+        "different_vertices": 0,
+        "max_mm": 0.0,
+        "p99_mm": 0.0,
+        "mean_mm": 0.0,
+        "exact": true
+      },
+      "selected_normals": {
+        "different_float_elements": 0,
+        "different_vertices": 0,
+        "max_mm": 0.0,
+        "p99_mm": 0.0,
+        "mean_mm": 0.0,
+        "exact": true
+      }
+    },
+    {
+      "arrays": {
+        "faces": {
+          "shape_same": true,
+          "bytes_exact": true
+        },
+        "selected_vertices": {
+          "shape_same": true,
+          "bytes_exact": true
+        },
+        "selected_faces": {
+          "shape_same": true,
+          "bytes_exact": true
+        },
+        "neighbor_offsets": {
+          "shape_same": true,
+          "bytes_exact": true
+        },
+        "neighbors": {
+          "shape_same": true,
+          "bytes_exact": true
+        },
+        "incident_offsets": {
+          "shape_same": true,
+          "bytes_exact": true
+        },
+        "incident_faces": {
+          "shape_same": true,
+          "bytes_exact": true
+        },
+        "incident_corners": {
+          "shape_same": true,
+          "bytes_exact": true
+        }
+      },
+      "smooth": {
+        "different_float_elements": 0,
+        "different_vertices": 0,
+        "max_mm": 0.0,
+        "p99_mm": 0.0,
+        "mean_mm": 0.0,
+        "exact": true
+      },
+      "matched": {
+        "different_float_elements": 0,
+        "different_vertices": 0,
+        "max_mm": 0.0,
+        "p99_mm": 0.0,
+        "mean_mm": 0.0,
+        "exact": true
+      },
+      "selected_normals": {
+        "different_float_elements": 0,
+        "different_vertices": 0,
+        "max_mm": 0.0,
+        "p99_mm": 0.0,
+        "mean_mm": 0.0,
+        "exact": true
+      }
+    }
+  ],
+  "complete_ga": false,
+  "final_mesh_quality": "not_assessed",
+  "overall_metric_equivalence": "not_assessed",
+  "original_private_receipt_sha256": "fc2d3f342a0d540d6f6ee385939ba1b506f6faa734205ebc33b77a0c6b27d137",
+  "selected_fields_exact": true
+}

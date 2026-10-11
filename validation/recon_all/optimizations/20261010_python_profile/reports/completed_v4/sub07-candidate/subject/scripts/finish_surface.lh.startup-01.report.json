@@ -1,0 +1,68 @@
+{
+  "status": "failed",
+  "pid": 67962,
+  "started_monotonic": 4381878.341036632,
+  "logical_device": "cuda:0",
+  "precision": {
+    "matmul_tf32": true,
+    "cudnn_tf32": true
+  },
+  "operation_entered": true,
+  "cuda_allocator": {
+    "requested": "disabled",
+    "cuda_initialized_at_entry": false,
+    "environment_at_entry": "1",
+    "environment_after_selection": "1",
+    "effective": "disabled",
+    "torch_stats_known_valid": false,
+    "torch_stats_known_unavailable": true
+  },
+  "actual_cuda_device": {
+    "name": "NVIDIA A100-SXM4-80GB",
+    "uuid": "c73c197f-ed60-b001-2c90-a538e261907b"
+  },
+  "cuda_bootstrap_seconds": 5.12039287853986,
+  "ready_monotonic": 4381886.368250266,
+  "go_monotonic": 4381889.847693714,
+  "operation_started_monotonic": 4381890.02507168,
+  "stage": {
+    "name": "finish_surface",
+    "seconds": 9331.034327249974,
+    "function_seconds": 9331.034221887589,
+    "cuda_pre_sync_seconds": 5.252659320831299e-05,
+    "cuda_post_sync_seconds": 0.0,
+    "cuda_synchronized": true,
+    "cuda_synchronization_requested": true,
+    "parent_cpu_seconds": 2909.095374772,
+    "child_cpu_seconds": 0.027297,
+    "torch_memory_stats_status": "unavailable",
+    "error": "RuntimeError('source pial cleanup has residual intersections; output not written')"
+  },
+  "thread_budget": {
+    "requested_threads": 2,
+    "scope": "Torch process intraop and current caller Numba thread mask",
+    "torch": {
+      "before": 2,
+      "effective": 2,
+      "interop_unchanged": 1,
+      "restored": 2
+    },
+    "numba": {
+      "before": 2,
+      "effective": 2,
+      "initial_capacity": 2,
+      "mask_only": true,
+      "threading_layer": "tbb",
+      "restored": 2
+    },
+    "environment_modified": false,
+    "restoration_complete": true
+  },
+  "failure_phase": "operation",
+  "cuda_oom": false,
+  "error": "RuntimeError('source pial cleanup has residual intersections; output not written')",
+  "traceback": "Traceback (most recent call last):\n  File \"[PRIVATE_FNIT]/workspaces/recon_python_profile_20261010_v4/src/fnit/recon_all/hemisphere_worker.py\", line 89, in main\n    report['value'] = profiler.run(request['operation'], function,\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/workspaces/recon_python_profile_20261010_v4/src/fnit/recon_all/profiling.py\", line 134, in run\n    value = function(*args, **kwargs)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/workspaces/recon_python_profile_20261010_v4/src/fnit/recon_all/native_free.py\", line 992, in _hemisphere_operation\n    value = step(f'finish_surface_{hemi}', _finish_cortical_surface, subject,\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/workspaces/recon_python_profile_20261010_v4/src/fnit/recon_all/native_free.py\", line 954, in step\n    return profiler.run(name, function, *args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/workspaces/recon_python_profile_20261010_v4/src/fnit/recon_all/profiling.py\", line 134, in run\n    value = function(*args, **kwargs)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/workspaces/recon_python_profile_20261010_v4/src/fnit/recon_all/native_free.py\", line 769, in _finish_cortical_surface\n    pial_report = run_pial_python(subject_dir=subject, hemi=hemi, device=device)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/workspaces/recon_python_profile_20261010_v4/src/fnit/recon_all/surface_placement_python.py\", line 114, in run_pial_python\n    report = place_pial_t1(subject=subject, hemisphere=hemi,\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"[PRIVATE_FNIT]/workspaces/recon_python_profile_20261010_v4/src/fnit/recon_all/place_pial_python.py\", line 375, in place_pial_t1\n    raise RuntimeError(\"source pial cleanup has residual intersections; output not written\")\nRuntimeError: source pial cleanup has residual intersections; output not written\n",
+  "cuda_initialized_after_failure": true,
+  "finished_monotonic": 4391221.085860945,
+  "total_seconds": 9342.744824313559
+}

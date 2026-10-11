@@ -1,0 +1,92 @@
+{
+  "schema": "fnit.gpu_pid_namespace.installed_metadata.v1",
+  "status": "passed",
+  "source_manifest_sha256": "282db973ed18f098fec52bacd5a5cff45f1f7bbcc3d4da72f937eb81eea7370c",
+  "module_source_commit": "89e0da3e469295047d31636b9bba918f284af1cb",
+  "git_head_at_bundle": "89e0da3e469295047d31636b9bba918f284af1cb",
+  "installation": {
+    "mode": "temporary_PYTHONPATH_two_module_target",
+    "full_fnit_package_installation": false,
+    "installed_modules": {
+      "profiling.py": {
+        "sha256": "43fd54dd7217d789ff4eac0b6b9be702112444e9caf545f7f2f1c3f81acf09f8",
+        "bytes": 28023
+      },
+      "nvml_process_memory.py": {
+        "sha256": "1879606b4af4c10e088cff3c665255511dee872da91d4a9c8b2b1cb07550b348",
+        "bytes": 3058
+      }
+    },
+    "verifier_sha256": "96129644626c65672734a211482f126666379f698cc0b217bccbdc5555dceb27"
+  },
+  "versions": {
+    "python": "3.11.16",
+    "torch": "2.5.1",
+    "kernel": "3.10.0-1160.el7.x86_64",
+    "nvidia_ml_py": null
+  },
+  "process_identity": {
+    "local_pid": 733,
+    "nspid_chain": null,
+    "pid_namespace": "pid:[4026542021]",
+    "starttime_ticks": 444968523,
+    "identity_error": null
+  },
+  "mapping": {
+    "status": "unavailable",
+    "source": "local_proc_metadata_only",
+    "unavailable_reasons": [
+      "nspid_unavailable",
+      "trusted_driver_to_local_pid_mapping_not_supplied"
+    ]
+  },
+  "mapping_aliases_count": 0,
+  "controls_before": {
+    "cuda_initialized": false,
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "torch_intraop_threads": 4,
+    "torch_interop_threads": 64
+  },
+  "controls_after": {
+    "cuda_initialized": false,
+    "matmul_tf32": false,
+    "cudnn_tf32": true,
+    "torch_intraop_threads": 4,
+    "torch_interop_threads": 64
+  },
+  "changed_environment_keys": [],
+  "cpu_sampler": {
+    "status": "not_applicable",
+    "query_backend": null,
+    "peak_tree_total_bytes": null,
+    "peak_target_compute_process_sum_bytes": null,
+    "peak_target_device_used_bytes": null
+  },
+  "checks": {
+    "module_bytes_equal": true,
+    "cuda_not_initialized": true,
+    "controls_unchanged": true,
+    "environment_unchanged": true,
+    "no_automatic_driver_pid_aliases": true,
+    "cpu_device_not_applicable": true,
+    "cpu_samples_empty": true,
+    "query_backend_not_selected": true,
+    "nvml_instance_not_created": true,
+    "no_pynvml_import_by_sampler": true
+  },
+  "seconds": {
+    "validation_and_installation": 0.004422602243721485,
+    "torch_and_actual_module_import": 2.6741903368383646,
+    "complete_probe": 2.679591305553913
+  },
+  "gpu_query_performed": false,
+  "gpu_uuid_exported": false,
+  "new_cuda_workload": false,
+  "new_mri_computation": false,
+  "old_environment_prefix_modified": false,
+  "frozen_raw_sources_modified": false,
+  "read_cmdline": false,
+  "read_private_logs": false,
+  "scope": "actual installed sampler with allowed own proc identity; no live GPU ownership mapping or MRI validation"
+}

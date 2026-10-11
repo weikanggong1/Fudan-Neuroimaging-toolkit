@@ -87,7 +87,7 @@ isolated_wm_report = run_isolated_segmentation(
 
 前三路径为必填`Path`；输出和报告须为不同的新路径。返回字典包含`api`、源强度/输出/执行模块SHA、`worker_pid`、实际`logical_device`、GPU名称、子进程缓存策略、TF32/autocast状态、线程环境、阶段报告与allocated/reserved字节。`isolated_cli_wall_seconds`包含父参数校验、子exec/导入/初始化、哈希、全部文件API和退出；`worker_api_wall_seconds_including_validation_init_read_transfer_write`排除模块导入。allocated/reserved不是进程树显存，后者由benchmark公共采样器记录。
 
-底层`run_worker`参数与上例相同，device默认cuda:0、code_version必填，必须在CUDA初始化前新进程调用。它开启子TF32，没有半精度或参考输入。不支持GPU输入张量直接传给子进程，避免fork继承CUDA；传递源图路径。非法线程/批量/设备抛`ValueError`，已有输出/报告抛`FileExistsError`，子失败抛`CalledProcessError`、保留失败现场，不自动换原生或重试。生产默认仍保留native WM，原生64/235已有差异不能因隔离而消除。
+底层`run_worker`参数与上例相同，device默认cuda:0、code_version必填，必须在CUDA初始化前新进程调用。它开启子TF32，没有半精度或参考输入。不支持GPU输入张量直接传给子进程，避免fork继承CUDA；传递源图路径。非法线程/批量/设备抛`ValueError`，已有输出/报告抛`FileExistsError`，子失败抛`CalledProcessError`、保留失败现场，不自动换原生或重试。生产默认仍保留native WM，当时的64/235差异随后于2026-10-10定位到共用整数阈值14→13并修复，两例完整0差异，见[最新完整WM说明](WM_NATIVE_INDEPENDENT.md)。
 
 ## 3. 命令行与复现
 
@@ -179,7 +179,7 @@ mri_segment -wsizemm 13 -mprage antsdn.brain.mgz wm.seg.mgz
 | sub-07 | 46.2170 | 4.1230 | 11.210× | 24.8703 | 0 |
 | sub-06 | 68.4448 | 3.9024 | 17.539× | 28.9925 | 0 |
 
-全部20组件图、完整WM、MGH头、affine和dtype均相同。此处完整API仍是单次观测，完整API三方配对另报，不将它与别的时段中位数相除。相对既有Python算子没有新增误差；从生产native WM切换到自有完整WM会带入既有64/235体素差异，最终脑区指标仍须随原始T1整例评价，不能直接标成生产流程无退化。
+全部20组件图、完整WM、MGH头、affine和dtype均相同。此处完整API仍是单次观测，完整API三方配对另报，不将它与别的时段中位数相除。相对既有Python算子没有新增误差；当时从生产native WM切换会带入64/235体素差异；现版已修复该阈值错误，最终脑区指标仍须随原始T1整例评价，不能直接标成生产流程无退化。
 
 随后同一A100、四线程和亲和性进行了完整WM三方配对：原生→旧平面→缓存→缓存→旧平面→原生。两个自有路径均使用相同GPU直方图，只替换平面子阶段。文件接口和原生命令的墙钟包括读取、H2D/D2H、全部有序规则及压缩写出；解释器、顶层导入和CUDA上下文初始化另列，不计入表中。
 
@@ -213,7 +213,7 @@ V4完整配对的`PYTORCH_NO_CUDA_MEMORY_CACHING`未设置，即缓存开启。�
 | sub-06 / fresh | 39.8800 | 36.9807 | 0 | 是 |
 | sub-06 / initialized | 35.2188 | 33.2690 | 0 | 是 |
 
-四份MGZ与V4 cached输出SHA相同，逐标签Dice1、最大/P99误差0、dtype/affine/MGH头相同；原生已有64/235差异保留。五项标准库隔离测试通过：父策略保留、已初始化worker拒绝、禁止覆盖、无效参数、带空格路径/成功报告；这些测试不代替真实回归。
+四份MGZ与V4 cached输出SHA相同，逐标签Dice1、最大/P99误差0、dtype/affine/MGH头相同；此处保留当时的原生64/235差异；现版修复证据见[最新完整WM说明](WM_NATIVE_INDEPENDENT.md)。五项标准库隔离测试通过：父策略保留、已初始化worker拒绝、禁止覆盖、无效参数、带空格路径/成功报告；这些测试不代替真实回归。
 
 子allocated峰值211,383,296/213,785,600字节、reserved257,949,696/253,755,392字节。公共ProcessTreeDeviceSampler因容器PID归属不明记`ownership_unresolved`、父子同期合计None；四个窗口目标卡采样保守上界分别871,366,656、1,365,245,952、776,994,816、1,361,051,648字节。请求间隔0.5秒，实际最大间隔4.210/10.600/3.610/3.287秒，NVML查询耗时明显；没有连续峰值证明。全部退出0、cgroup failcnt增量0。这里每种父状态各一次，不能当ABBA/稳定吞吐；与V4原生三方中位数只并列，不能宣称配对原生速度比。原始T1整例提速与整体等效仍未测。
 
@@ -226,6 +226,8 @@ V4完整配对的`PYTORCH_NO_CUDA_MEMORY_CACHING`未设置，即缓存开启。�
 绘图复用`benchmark/plot_fill_boundary_torch.py`：`--label-kind wm`选择WM掩膜显示，默认filled检查0/127/255；`--runtime-label`明确实际计算范围。`--source`为同网格uint8强度，`--reference`仅供比较，`--candidate`为新输出，`--output`为不存在的PNG，`--case-label`为公开被试标题，`--slice-z`默认128且为合法z体素。网格/dtype/输出路径错误抛错，JSON记录全部输入和PNG/脚本SHA。不做独立算法计算，没有原软件对应绘图命令。
 
 ## 6. 更新与 benchmark 记录
+
+2026-10-10：两例真实逐阶段定位修复亮非白质整数阈值，13个检查点及最终WM全部0体素差异；新增完整CPU标准编辑API。历史测量数值保留，现版见[标准WM自有实现](WM_NATIVE_INDEPENDENT.md)。
 
 2026-10-09：依据完整 WM 剖析增加静态几何缓存与编译有序扫描，完成两例CPU/GPU阶段回归和A100完整文件接口三方配对；保留现有 Python 参考作回归，暂不改变默认后端。所有真实报告绑定执行源码、输入、参考和设备；不完整会话独立保存，不能补跑后称为一次连续测量。
 

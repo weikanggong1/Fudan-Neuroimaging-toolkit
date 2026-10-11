@@ -1,0 +1,324 @@
+{
+  "scope": "frozen_same_input_file_API_not_raw_T1_whole_case",
+  "code_commit": "54f681dc-plus-hashed-own-paint-v3",
+  "candidate_source_sha256": {
+    "mrisp_paint_python": "3dd7515a8759371ccec1a4c6b4f280310a252708396debdfb822abac2cdae163",
+    "mris_register_atlas": "38170e443c7ed83d7c145cf4a9cef3daf34f4da1177363cd7841677b1177ca74",
+    "place_surface_smoothing": "5e413a3df69833020be34fdbf8e4b2b6b80e00ddc6b54ac09717527dbf718d07",
+    "mris_remove_intersection_python": "011e6482cc32bdb02156dd15f24e0b1d24f3a2318c148deb5def1366dcd6f210",
+    "place_surface_final_cleanup": "cee87f5e12e48d12a9aadd0198f2b06e68a9eca875cefa0d91b3b7f93ff2f8c0",
+    "place_surface_intersection_marking": "63ea29f2af2183abc2ded01a6cf0053aa659a753d158c4710f8212c5e4fe4e71",
+    "place_surface_collision": "f36213cfa1c8e65b2dfa69490ab4978e140d7852cbefb0834ed3f991ac84b166",
+    "place_surface_collision_torch": "adac1598f162d5c0fb27afeac6d8625c8da7d66ae781205c1153b00403ba799a",
+    "place_surface_candidates_torch": "502b5da1aaa2275d48b106885a603fe797c74fb24fadcca1a53e0a641db243b8",
+    "inflate_standard_run": "7eb0100a9b2e2fc8dd1a6e1da66ee37da0c29c71ec2cd2b207ef74687535dfb4",
+    "inflate_python": "01561d309ae100b86f15b5c7b677d4b60302864b8c75cd6fa87436358e9aae98",
+    "inflate_torch": "a782b5ec493d4c390131e8882b0b07ebf3d5b5e9ad39da59328b964500550aab",
+    "inflate_topology": "52245a1f107cf0f39f828dc334c3b033b3f57089454ccbcae83936883206c8f5",
+    "place_surface_normals": "82d3c174f892f146f6a2b937cda8d457ca6f07f274ed146d5e5bc37f5e48e6b9",
+    "sphere_standard_python": "017172cae935775f3e55ec7cdee72c54d6db904021c78896a77d99690a23cc97"
+  },
+  "script_sha256": "6beb13a194f95e5a507e8e33fc54c6b4a83581b84300aaf9cacb27147b7338af",
+  "host": "A100-8-shared",
+  "platform": "Linux-3.10.0-1160.el7.x86_64-x86_64-with-glibc2.27",
+  "cpu_affinity": [
+    8,
+    9,
+    10,
+    11
+  ],
+  "threads": 4,
+  "device": "cpu",
+  "torch_version": "2.5.1",
+  "precision": {
+    "matmul_tf32": true,
+    "cudnn_tf32": true,
+    "autocast": false,
+    "image_coordinate_dtype": "float32",
+    "intersection_predicate_dtype": "float64"
+  },
+  "allocator_environment": {
+    "PYTORCH_NO_CUDA_MEMORY_CACHING": null,
+    "PYTORCH_ALLOC_CONF": null,
+    "PYTORCH_CUDA_ALLOC_CONF": null
+  },
+  "paint": [
+    {
+      "case_number": 0,
+      "hemisphere": "lh",
+      "candidate": {
+        "scope": "complete_fixed_paint_file_API_not_recon_all",
+        "atlas_path": "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+        "sphere_path": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub06-candidate/subject/surf/lh.sphere.reg",
+        "output_path": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/paint_cpu_v3/lh.paint_case0.candidate",
+        "frame_zero_based": 6,
+        "averages": 5,
+        "device": "cpu",
+        "sampling_backend": "source_numba",
+        "vertices": 130679,
+        "faces": 261354,
+        "dtype": "float32",
+        "vertex_order": "same_as_input_sphere",
+        "input_coordinate_units": "surface_RAS_mm",
+        "input_sha256": {
+          "atlas": "92f1dc820d778a67c143d4ea82597fd71a89ddc738dfa555b7ca32ed21e95c97",
+          "sphere": "9725f1b3438d0a7fd3ecaa642fb66447ea7b38fb52edc0fa8c578ae09a44a251"
+        },
+        "output_sha256": "9a20076d3966d03759d2b6a2cc3e5fc50dea2686298b6c1bed83776b98a059d5",
+        "source_sha256": "3dd7515a8759371ccec1a4c6b4f280310a252708396debdfb822abac2cdae163",
+        "read_seconds": 0.09431505296379328,
+        "compute_seconds": 5.7696493268013,
+        "write_seconds": 0.0015061264857649803,
+        "total_seconds_including_io": 5.865470506250858,
+        "native_program_called": false
+      },
+      "reference": {
+        "command": [
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/native/bin/mrisp_paint",
+          "-a",
+          "5",
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif#6",
+          "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub06-candidate/subject/surf/lh.sphere.reg",
+          "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/paint_cpu_v3/lh.paint_case0.reference"
+        ],
+        "returncode": 0,
+        "seconds_including_process_start_and_io": 0.6118065072223544
+      },
+      "reference_repeat": {
+        "command": [
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/native/bin/mrisp_paint",
+          "-a",
+          "5",
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif#6",
+          "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub06-candidate/subject/surf/lh.sphere.reg",
+          "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/paint_cpu_v3/lh.paint_case0.repeat"
+        ],
+        "returncode": 0,
+        "seconds_including_process_start_and_io": 0.5680027594789863
+      },
+      "reference_program_sha256": "624b2f14cfd91d2f72f446d8bd1b5b1b3ca0d6c664168e8f933bdfdf48f18dcb",
+      "reference_repeat_error": {
+        "different_elements": 0,
+        "maximum": 0.0,
+        "p99": 0.0,
+        "mean": 0.0
+      },
+      "candidate_reference_error": {
+        "different_elements": 0,
+        "maximum": 0.0,
+        "p99": 0.0,
+        "mean": 0.0
+      },
+      "morph_bytes_equal": true
+    },
+    {
+      "case_number": 0,
+      "hemisphere": "rh",
+      "candidate": {
+        "scope": "complete_fixed_paint_file_API_not_recon_all",
+        "atlas_path": "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+        "sphere_path": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub06-candidate/subject/surf/rh.sphere.reg",
+        "output_path": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/paint_cpu_v3/rh.paint_case0.candidate",
+        "frame_zero_based": 6,
+        "averages": 5,
+        "device": "cpu",
+        "sampling_backend": "source_numba",
+        "vertices": 132459,
+        "faces": 264914,
+        "dtype": "float32",
+        "vertex_order": "same_as_input_sphere",
+        "input_coordinate_units": "surface_RAS_mm",
+        "input_sha256": {
+          "atlas": "1064e4c0ae0440f5071b4369f29a09860f1abf6eddc90a271d10cd0ff7e60043",
+          "sphere": "689125dc2ecc52a77651edd667767a8a885b5fd429e49a6e93b0c628f8ad47e3"
+        },
+        "output_sha256": "159e93fc0789a97afec11145cd3f10b6f29385ff2f04c740a4a505d0b855e8ea",
+        "source_sha256": "3dd7515a8759371ccec1a4c6b4f280310a252708396debdfb822abac2cdae163",
+        "read_seconds": 0.015955953858792782,
+        "compute_seconds": 5.642442125827074,
+        "write_seconds": 0.002073892392218113,
+        "total_seconds_including_io": 5.660471972078085,
+        "native_program_called": false
+      },
+      "reference": {
+        "command": [
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/native/bin/mrisp_paint",
+          "-a",
+          "5",
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif#6",
+          "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub06-candidate/subject/surf/rh.sphere.reg",
+          "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/paint_cpu_v3/rh.paint_case0.reference"
+        ],
+        "returncode": 0,
+        "seconds_including_process_start_and_io": 0.6293906047940254
+      },
+      "reference_repeat": {
+        "command": [
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/native/bin/mrisp_paint",
+          "-a",
+          "5",
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif#6",
+          "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub06-candidate/subject/surf/rh.sphere.reg",
+          "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/paint_cpu_v3/rh.paint_case0.repeat"
+        ],
+        "returncode": 0,
+        "seconds_including_process_start_and_io": 0.5614688564091921
+      },
+      "reference_program_sha256": "624b2f14cfd91d2f72f446d8bd1b5b1b3ca0d6c664168e8f933bdfdf48f18dcb",
+      "reference_repeat_error": {
+        "different_elements": 0,
+        "maximum": 0.0,
+        "p99": 0.0,
+        "mean": 0.0
+      },
+      "candidate_reference_error": {
+        "different_elements": 0,
+        "maximum": 0.0,
+        "p99": 0.0,
+        "mean": 0.0
+      },
+      "morph_bytes_equal": true
+    },
+    {
+      "case_number": 1,
+      "hemisphere": "lh",
+      "candidate": {
+        "scope": "complete_fixed_paint_file_API_not_recon_all",
+        "atlas_path": "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+        "sphere_path": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject/surf/lh.sphere.reg",
+        "output_path": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/paint_cpu_v3/lh.paint_case1.candidate",
+        "frame_zero_based": 6,
+        "averages": 5,
+        "device": "cpu",
+        "sampling_backend": "source_numba",
+        "vertices": 114247,
+        "faces": 228490,
+        "dtype": "float32",
+        "vertex_order": "same_as_input_sphere",
+        "input_coordinate_units": "surface_RAS_mm",
+        "input_sha256": {
+          "atlas": "92f1dc820d778a67c143d4ea82597fd71a89ddc738dfa555b7ca32ed21e95c97",
+          "sphere": "89f2b183b955ac20df570ada00eb559bb88ccc66498a107ac5811e0b1e55f835"
+        },
+        "output_sha256": "96cc7f410998d7853bd3dc74357b09c463020fa6e75fb9bd9af421ac356c609e",
+        "source_sha256": "3dd7515a8759371ccec1a4c6b4f280310a252708396debdfb822abac2cdae163",
+        "read_seconds": 0.04736098926514387,
+        "compute_seconds": 5.039077787660062,
+        "write_seconds": 0.0021995939314365387,
+        "total_seconds_including_io": 5.088638370856643,
+        "native_program_called": false
+      },
+      "reference": {
+        "command": [
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/native/bin/mrisp_paint",
+          "-a",
+          "5",
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif#6",
+          "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject/surf/lh.sphere.reg",
+          "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/paint_cpu_v3/lh.paint_case1.reference"
+        ],
+        "returncode": 0,
+        "seconds_including_process_start_and_io": 0.6398764010518789
+      },
+      "reference_repeat": {
+        "command": [
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/native/bin/mrisp_paint",
+          "-a",
+          "5",
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif#6",
+          "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject/surf/lh.sphere.reg",
+          "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/paint_cpu_v3/lh.paint_case1.repeat"
+        ],
+        "returncode": 0,
+        "seconds_including_process_start_and_io": 0.5112339239567518
+      },
+      "reference_program_sha256": "624b2f14cfd91d2f72f446d8bd1b5b1b3ca0d6c664168e8f933bdfdf48f18dcb",
+      "reference_repeat_error": {
+        "different_elements": 0,
+        "maximum": 0.0,
+        "p99": 0.0,
+        "mean": 0.0
+      },
+      "candidate_reference_error": {
+        "different_elements": 0,
+        "maximum": 0.0,
+        "p99": 0.0,
+        "mean": 0.0
+      },
+      "morph_bytes_equal": true
+    },
+    {
+      "case_number": 1,
+      "hemisphere": "rh",
+      "candidate": {
+        "scope": "complete_fixed_paint_file_API_not_recon_all",
+        "atlas_path": "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+        "sphere_path": "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject/surf/rh.sphere.reg",
+        "output_path": "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/paint_cpu_v3/rh.paint_case1.candidate",
+        "frame_zero_based": 6,
+        "averages": 5,
+        "device": "cpu",
+        "sampling_backend": "source_numba",
+        "vertices": 114951,
+        "faces": 229898,
+        "dtype": "float32",
+        "vertex_order": "same_as_input_sphere",
+        "input_coordinate_units": "surface_RAS_mm",
+        "input_sha256": {
+          "atlas": "1064e4c0ae0440f5071b4369f29a09860f1abf6eddc90a271d10cd0ff7e60043",
+          "sphere": "86f5335e636fca5db5bf72d9dc32509826c26b995a563cbd171081c72d180603"
+        },
+        "output_sha256": "ce3c112158a47fbb4fbf890430af12f6d90954d5f165d6b916eeccbbfe36da7d",
+        "source_sha256": "3dd7515a8759371ccec1a4c6b4f280310a252708396debdfb822abac2cdae163",
+        "read_seconds": 0.0127680329605937,
+        "compute_seconds": 4.923517416231334,
+        "write_seconds": 0.0009085517376661301,
+        "total_seconds_including_io": 4.937194000929594,
+        "native_program_called": false
+      },
+      "reference": {
+        "command": [
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/native/bin/mrisp_paint",
+          "-a",
+          "5",
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif#6",
+          "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject/surf/rh.sphere.reg",
+          "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/paint_cpu_v3/rh.paint_case1.reference"
+        ],
+        "returncode": 0,
+        "seconds_including_process_start_and_io": 0.5437158495187759
+      },
+      "reference_repeat": {
+        "command": [
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/native/bin/mrisp_paint",
+          "-a",
+          "5",
+          "[PRIVATE_FNIT]/assets/recon_resources_20261009_v1/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif#6",
+          "[PRIVATE_FNIT]/runs/recon_e2e_gcsa_remesh_79a41cdd_20261010_v1/sub07-candidate/subject/surf/rh.sphere.reg",
+          "[PRIVATE_FNIT]/runs/paint_intersection_54f681dc_20261010_v1/paint_cpu_v3/rh.paint_case1.repeat"
+        ],
+        "returncode": 0,
+        "seconds_including_process_start_and_io": 0.5001494940370321
+      },
+      "reference_program_sha256": "624b2f14cfd91d2f72f446d8bd1b5b1b3ca0d6c664168e8f933bdfdf48f18dcb",
+      "reference_repeat_error": {
+        "different_elements": 0,
+        "maximum": 0.0,
+        "p99": 0.0,
+        "mean": 0.0
+      },
+      "candidate_reference_error": {
+        "different_elements": 0,
+        "maximum": 0.0,
+        "p99": 0.0,
+        "mean": 0.0
+      },
+      "morph_bytes_equal": true
+    }
+  ],
+  "intersection": [],
+  "nofix_inflate": [],
+  "overall_equivalence": "not_assessed",
+  "benchmark_total_seconds_including_loading_transfers_io_and_references": 26.49038656707853,
+  "execution_status": "complete"
+}

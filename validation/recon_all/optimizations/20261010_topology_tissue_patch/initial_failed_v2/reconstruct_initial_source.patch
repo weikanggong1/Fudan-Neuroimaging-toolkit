@@ -1,0 +1,161 @@
+--- src/fnit/recon_all/topology_tissue_patch_python.py
++++ src/fnit/recon_all/topology_tissue_patch_python.py
+@@ -24,7 +24,6 @@
+ from .topology_preflight_python import topology_counts
+ from .topology_volume_python import _nonmanifold_vertex_links
+ from .mris_remove_intersection_python import mark_intersections, _write_preserving_surface
+-from .place_surface_collision import asynchronous_first_step
+ 
+ 
+ def _sha(path):
+@@ -70,67 +69,14 @@
+ 
+ def _summary(values):
+     values=np.asarray(values,np.float64)
+-    return {'mean':float(values.mean()) if len(values) else 0.0,
+-            'p99':float(np.percentile(values,99)) if len(values) else 0.0,
+-            'maximum':float(values.max()) if len(values) else 0.0,
+-            'minimum':float(values.min()) if len(values) else 0.0}
+-
+-
+-def _face_cross(vertices,faces):
+-    points=np.asarray(vertices,np.float64)[faces]
+-    return np.cross(points[:,1]-points[:,0],points[:,2]-points[:,0])
+-
+-
+-def _ordered_collision_acceptor(faces,selected,trace,motion_limit_mm, *, active_cache=None):
+-    """复用完整顺序接受器；每轮面反转时二分回退，最多12次。"""
+-    ripped=~np.asarray(selected,bool)
+-
+-    def accept(current,proposal,iteration):
+-        started=time.perf_counter()
+-        delta=proposal.astype(np.float64)-current
+-        distances=np.linalg.norm(delta,axis=1)
+-        clipped=distances>motion_limit_mm
+-        delta[clipped]*=(motion_limit_mm/distances[clipped])[:,None]
+-        before_cross=_face_cross(current,faces)
+-        attempts=[]
+-        accepted=current.copy()
+-        for halving in range(13):
+-            trial=np.float32(current+delta*(.5**halving))
+-            diagnostics={}
+-            if active_cache is None:
+-                candidate,order=asynchronous_first_step(
+-                    vertices=current,faces=faces,proposed=trial,ripped=ripped,
+-                    candidate_backend='snapshot',candidate_diagnostics=diagnostics)
+-            else:
+-                candidate,order,diagnostics=active_cache.step(current=current,proposal=trial,faces=faces)
+-            after_cross=_face_cross(candidate,faces)
+-            orientation=np.einsum('ij,ij->i',before_cross,after_cross)
+-            norms=np.linalg.norm(after_cross,axis=1)
+-            invalid=int(np.count_nonzero((orientation<=0)|(norms<=0)))
+-            attempts.append({'halving':halving,'scale':.5**halving,
+-                'invalid_or_zero_faces':invalid,'ordered_vertices':len(order),
+-                'candidate_diagnostics':diagnostics})
+-            if invalid==0 and np.isfinite(candidate).all():
+-                accepted=candidate
+-                break
+-        change=np.linalg.norm(accepted.astype(np.float64)-current,axis=1)
+-        trace.append({'iteration':iteration,'motion_limit_mm':motion_limit_mm,
+-            'clipped_vertices':int(clipped.sum()),'proposal_displacement_mm':_summary(distances),
+-            'accepted_displacement_mm':_summary(change),'accepted_changed_vertices':int(np.count_nonzero(change)),
+-            'attempts':attempts,'accepted_coordinates_sha256':hashlib.sha256(accepted.astype('<f4').tobytes()).hexdigest(),
+-            'proposal_coordinates_sha256':hashlib.sha256(proposal.astype('<f4').tobytes()).hexdigest(),
+-            'acceptance_wall_seconds':time.perf_counter()-started})
+-        return accepted
+-
+-    return accept
++    return {'mean':float(values.mean()),'p99':float(np.percentile(values,99)),'maximum':float(values.max(initial=0)),
++            'minimum':float(values.min(initial=0))}
+ 
+ 
+ def run_tissue_patch(*, input_surface: str | Path, intensity_volume: str | Path,
+                      output_surface: str | Path, log_shape_prior: float = 0.0,
+                      normal_offset_mm: float = 0.5, require_quality: bool = True,
+-                     report_path: str | Path | None = None,
+-                     collision_acceptance: str = 'ordered',
+-                     step_motion_limit_mm: float = 0.3) -> dict:
++                     report_path: str | Path | None = None) -> dict:
+     """完整局部MRI拟合原语，返回自产候选与完整QC，非完整GA或生产默认。
+ 
+     input_surface为已球面拓扑三角面surface RAS/mm，intensity_volume为
+@@ -144,11 +90,6 @@
+     顶点复用已有完整40步defect_mri_match，其余固定。返回输入、模块、
+     输出SHA、似然、组件、位移、顶点/边流形/闭合/Euler/自相交/面积QC
+     和包含I/O/JIT墙钟。拓扑面序不变，无边重连、遗传搜索或体素删填。
+-    collision_acceptance默认ordered：复用完整顺序动态碰撞接受；每轮
+-    提案单顶点位移限制为step_motion_limit_mm（默认0.3mm，须≤0.3），
+-    发现面反转或零面积时整轮二分回退，最多12次，失败保持该轮输入。
+-    none仅复现未受碰撞控制的40轮原语，用于失败诊断。两种都执行
+-    独立最终结构QC，不能用局部接受记录代替最终相交和形状评价。
+     """
+     started=time.perf_counter()
+     input_surface,intensity_volume,output_surface=map(Path,(input_surface,intensity_volume,output_surface))
+@@ -156,13 +97,6 @@
+         raise ValueError('input/output paths must differ')
+     if not np.isfinite(log_shape_prior) or not np.isfinite(normal_offset_mm) or normal_offset_mm<=0:
+         raise ValueError('finite prior and positive finite offset required')
+-    if collision_acceptance not in {'ordered','ordered-active','none'}:
+-        raise ValueError('collision_acceptance must be ordered, ordered-active or none')
+-    if not np.isfinite(step_motion_limit_mm) or not 0<step_motion_limit_mm<=.3:
+-        raise ValueError('positive step_motion_limit_mm <= 0.3 required')
+-    if not isinstance(require_quality,bool): raise ValueError('require_quality must be bool')
+-    if report_path is not None and Path(report_path).resolve() in {p.resolve() for p in (input_surface,intensity_volume,output_surface)}:
+-        raise ValueError('report path must differ from input/output paths')
+     xyz,faces,metadata=fsio.read_geometry(str(input_surface),read_metadata=True)
+     if not metadata or not np.isfinite(xyz).all(): raise ValueError('finite surface with volume geometry required')
+     xyz=np.ascontiguousarray(xyz,np.float32);faces=np.ascontiguousarray(faces,np.int32)
+@@ -174,17 +108,10 @@
+     white,gray=_sample_sides(xyz,normals,np.ascontiguousarray(volume),matrix,np.float32(normal_offset_mm))
+     score,hist=_score(white,gray,neighbors,float(log_shape_prior));inside=np.flatnonzero(score>0).astype(np.int32)
+     setup_done=time.perf_counter()
+-    trace=[]
+-    mask=np.zeros(len(xyz),bool);mask[inside]=True
+-    active_cache=None
+-    if collision_acceptance=='ordered-active':
+-        from .topology_collision_cache_python import FixedPatchCollisionCache
+-        active_cache=FixedPatchCollisionCache(faces=faces,selected=mask)
+     if len(inside):
+         corrected=defect_mri_match(xyz=xyz,faces=faces,inside_vertices=inside,
+             runtime_neighbors=[neighbors[int(v)] for v in inside],volume=volume,ras_to_voxel=matrix,
+-            white_mean=float(hist['white_mean']),gray_mean=float(hist['gray_mean']),
+-            step_acceptor=_ordered_collision_acceptor(faces,mask,trace,float(step_motion_limit_mm),active_cache=active_cache) if collision_acceptance!='none' else None)
++            white_mean=float(hist['white_mean']),gray_mean=float(hist['gray_mean']))
+     else: corrected=xyz.copy()
+     fit_done=time.perf_counter()
+     final_normals=initial_vertex_normals(vertices=corrected,triangles=faces)
+@@ -199,6 +126,7 @@
+     _,edge_inverse=np.unique(np.sort(all_edges,axis=1),axis=0,return_inverse=True)
+     orientation_conflicts=int(np.count_nonzero(np.bincount(edge_inverse,weights=signs)))
+     quality=(counts.euler==2 and full_components==1 and counts.boundary_edges==0 and counts.nonmanifold_edges==0 and nonmanifold==0 and orientation_conflicts==0 and intersections==0 and np.all(area>0) and np.isfinite(corrected).all())
++    mask=np.zeros(len(xyz),bool);mask[inside]=True
+     edges=np.concatenate([faces[:,[0,1]],faces[:,[1,2]],faces[:,[2,0]]]);edges=edges[mask[edges].all(axis=1)]
+     mapping=np.full(len(xyz),-1,np.int64);mapping[inside]=np.arange(len(inside))
+     if len(inside):
+@@ -208,10 +136,9 @@
+     displacement=np.linalg.norm(corrected.astype(np.float64)-xyz,axis=1)
+     report={'scope':'MRI tissue-cost local patch primitive, not complete topology or GA solver','input_surface':str(input_surface),'intensity_volume':str(intensity_volume),
+         'input_sha256':{'surface':_sha(input_surface),'MRI':_sha(intensity_volume)},'source_sha256':_sha(__file__),
+-        'reused_module_sha256':{name:_sha(Path(__file__).with_name(name+'.py')) for name in ['topology_intensity_histogram','topology_defect_mri_match','place_surface_normals','topology_volume_python','mris_remove_intersection_python','place_surface_collision','place_surface_snapshot','topology_collision_cache_python']},
++        'reused_module_sha256':{name:_sha(Path(__file__).with_name(name+'.py')) for name in ['topology_intensity_histogram','topology_defect_mri_match','place_surface_normals','topology_volume_python','mris_remove_intersection_python']},
+         'output_surface':str(output_surface),'native_program_called':False,'device':'cpu','precision':'float32 geometry; source MRI uint8; float64 likelihood ratio',
+         'log_shape_prior':float(log_shape_prior),'normal_offset_mm':float(normal_offset_mm),'patch_iterations':40 if len(inside) else 0,
+-        'collision_acceptance':collision_acceptance,'step_motion_limit_mm':float(step_motion_limit_mm),'ordered_step_trace':trace,
+         'selected_vertices':len(inside),'selected_vertex_indices_sha256':hashlib.sha256(inside.astype('<i4').tobytes()).hexdigest(),'selected_components':int(components),'selected_component_sizes':sizes,
+         'white_histogram_mean':float(hist['white_mean']),'gray_histogram_mean':float(hist['gray_mean']),
+         'selection_score':_summary(score),'white_sample_before':_summary(white),'gray_sample_before':_summary(gray),
+@@ -237,13 +164,10 @@
+     parser.add_argument('--input-surface',type=Path,required=True);parser.add_argument('--intensity-volume',type=Path,required=True)
+     parser.add_argument('--output-surface',type=Path,required=True);parser.add_argument('--report-path',type=Path,required=True)
+     parser.add_argument('--log-shape-prior',type=float,default=0.0);parser.add_argument('--normal-offset-mm',type=float,default=.5)
+-    parser.add_argument('--collision-acceptance',choices=('ordered','ordered-active','none'),default='ordered')
+-    parser.add_argument('--step-motion-limit-mm',type=float,default=.3)
+     parser.add_argument('--allow-failed-diagnostic-output',action='store_true')
+     args=parser.parse_args()
+     run_tissue_patch(input_surface=args.input_surface,intensity_volume=args.intensity_volume,output_surface=args.output_surface,
+-        log_shape_prior=args.log_shape_prior,normal_offset_mm=args.normal_offset_mm,require_quality=not args.allow_failed_diagnostic_output,report_path=args.report_path,
+-        collision_acceptance=args.collision_acceptance,step_motion_limit_mm=args.step_motion_limit_mm)
++        log_shape_prior=args.log_shape_prior,normal_offset_mm=args.normal_offset_mm,require_quality=not args.allow_failed_diagnostic_output,report_path=args.report_path)
+ 
+ 
+ if __name__=='__main__': main()

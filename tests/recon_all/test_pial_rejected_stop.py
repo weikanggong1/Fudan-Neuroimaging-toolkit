@@ -13,9 +13,10 @@ def test_profile_rejects_ambiguous_cuda_device_before_input_reads(tmp_path):
                             regularization_backend="torch", device="cuda")
 
 
+@pytest.mark.parametrize("target_backend", ["serial", "parallel"])
 @pytest.mark.parametrize("profile", [False, True])
 @pytest.mark.parametrize("compiled", [False, True])
-def test_final_rejected_trial_restores_coordinates_and_completes_four_passes(tmp_path, monkeypatch, profile, compiled):
+def test_final_rejected_trial_restores_coordinates_and_completes_four_passes(tmp_path, monkeypatch, profile, compiled, target_backend):
     for folder in ('surf', 'mri', 'label'):
         (tmp_path/folder).mkdir()
     xyz = np.array([[0,0,0], [1,0,0], [0,1,0]], dtype=np.float32)
@@ -31,8 +32,11 @@ def test_final_rejected_trial_restores_coordinates_and_completes_four_passes(tmp
         nib.save(nib.MGHImage(np.ones((4,4,4), dtype=np.float32), np.eye(4)), str(tmp_path/f'mri/{name}.mgz'))
     (tmp_path/'surf/autodet.gw.stats.lh.dat').write_text('MID_GRAY 50\n'+''.join(
         f'pial_{name} 50\n' for name in ('inside_hi','border_hi','border_low','outside_low','outside_hi')))
-    monkeypatch.setattr(stage, 'compute_border_values_first_pass', lambda *a,**k:
-        (np.ones(3), None, None, None, np.ones(3,dtype=np.bool_), np.ones(3)))
+    target_calls=[]
+    def targets(*args, **kwargs):
+        target_calls.append(kwargs["target_search_backend"])
+        return (np.ones(3), None, None, None, np.ones(3,dtype=np.bool_), np.ones(3))
+    monkeypatch.setattr(stage, 'compute_border_values_first_pass', targets)
     monkeypatch.setattr(stage, 'average_marked_values', lambda values,*a: values)
     monkeypatch.setattr(stage, 'intensity_error', lambda *a,**k: (1.,1.,None))
     monkeypatch.setattr(stage, 'intensity_gradient', lambda *a,**k: np.ones((3,3),dtype=np.float32))
@@ -59,8 +63,11 @@ def test_final_rejected_trial_restores_coordinates_and_completes_four_passes(tmp
         candidate_grid_cells_per_axis=3,retained_mht_backend='compiled',
         cleanup_marking_backend='source_torch',cleanup_candidate_grid_cells_per_axis=3,device='cpu')
     report=stage.place_pial_t1(subject=tmp_path, hemisphere='lh', output=tmp_path/'surf/lh.pial.T1',
-                              max_steps=4, profile=profile, trace_callback=lambda *args: trace.append(args),**selected)
+                              max_steps=4, profile=profile, target_search_backend=target_backend,
+                              trace_callback=lambda *args: trace.append(args),**selected)
     assert report['pass_ends']==[1,2,3,4]
+    assert target_calls == [target_backend]*4
+    assert report['target_search_backend'] == target_backend
     actual,actual_faces=fs.read_geometry(report['output'])
     np.testing.assert_array_equal(actual,xyz)
     np.testing.assert_array_equal(actual_faces,faces)

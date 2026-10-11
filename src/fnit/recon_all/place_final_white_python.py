@@ -14,6 +14,7 @@ def place_final_white(
     retained_mht_backend: str = "tree", cleanup_marking_backend: str = "legacy",
     cleanup_candidate_grid_cells_per_axis: int = 2,
     collision_profile: bool = False, device: str | None = None, trace_callback=None,
+    target_search_backend: str = "serial",
 ) -> dict:
     """从preaparc、cortex与aparc执行最终white四轮；尚未生产接线。
 
@@ -23,6 +24,8 @@ def place_final_white(
     label/annot对应完全相同顶点顺序。output为独立表面路径；可选
     output_volume写uint8预处理MRI并保留几何。max_steps默认400，
     其他显式后端/设备/trace参数沿用完整place_white_preaparc。
+    target_search_backend默认serial；parallel仅并行独立目标搜索，
+    使用既定Numba线程数、fastmath=False，不并行有序平均或顶点接受。
     不平滑输入；--rip-label关闭midline，仅在独立原preaparc上执行
     注释BG过滤和247标记。不套用preaparc冻结规则，不调用外部程序
     或读取原生输出。
@@ -45,6 +48,7 @@ def place_final_white(
         raise ValueError("experimental final white outputs cannot overwrite inputs or each other")
     return _place_white_preaparc(subject_dir=subject, hemi=hemi, output=output,
         steps=max_steps, complete=True, final_white=True, output_volume=output_volume,
+        target_search_backend=target_search_backend,
         regularization_backend=regularization_backend, sampling_backend=sampling_backend,
         candidate_backend=candidate_backend, candidate_grid_cells_per_axis=candidate_grid_cells_per_axis,
         retained_mht_backend=retained_mht_backend, cleanup_marking_backend=cleanup_marking_backend,

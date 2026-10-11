@@ -1,0 +1,215 @@
+{
+  "schema": "fnit.topology.small_volume_audit.v1",
+  "status": "verified_existing_implementation",
+  "code_changed": false,
+  "defaults_changed": false,
+  "precision_changed": false,
+  "scope": "固定源停止/权重语义审计与现有小体积合同；不是真实MRI benchmark、整例性能或完整GA验收",
+  "source_reference": {
+    "git_commit": "d932c45b7941662ea380a05efef580568b98d41a",
+    "file": "utils/mrisurf_defect.cpp",
+    "sha256": "55ace70ab09b1868a8cb152a9547879abdce790635b484bef1bf056986958187",
+    "function": "mrisComputeDefectLogLikelihood",
+    "small_volume_disable_lines": [
+      1476,
+      1477
+    ],
+    "requested_weight_restore_line": 1495,
+    "source_body_published": false
+  },
+  "runtime_version_check": {
+    "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
+    "packages": {
+      "numpy": "1.26.4",
+      "numba": "0.67.0",
+      "torch": "2.5.1",
+      "pytest": "9.1.1"
+    }
+  },
+  "runtime_check_boundary": "测试后只读核对同一未更改环境；不替换为历史环境记录",
+  "version_binding": {
+    "git_head_observed_immediately_after_test": "cd531cbb34a1a6a91aee067c0b4dec26d5465a57",
+    "test_start_head": "not captured; no later commit substituted",
+    "source_sha256": {
+      "src/fnit/recon_all/topology_candidate_pipeline.py": "027f9d729c586a52dda8fb024e3fd50ef90f609b5de781e236e8b816b31c9f03",
+      "src/fnit/recon_all/topology_patch_fitness.py": "59111c5f764d535625276402b756c6f9240a87ab5396886e81606f93df074827",
+      "src/fnit/recon_all/topology_fitness_search.py": "d9f90820de241418a13211de193245d0a5a7279df54dce21a0044f6d3e7ba091",
+      "tests/recon_all/test_topology_patch_fitness.py": "f8a74af1de1759a05dfe4e4dd99212ffb7aed7aba2e544b667b0e4d82e4eb9bd",
+      "tests/recon_all/test_topology_fitness_search.py": "d877d93530baba418eb38894352bda58e0e58f42e059c5df27f021af8ebafcb0"
+    },
+    "owned_source_and_test_dirty_diff": ""
+  },
+  "call_chain": [
+    {
+      "file": "src/fnit/recon_all/topology_candidate_pipeline.py",
+      "function": "evaluate_candidate",
+      "lines": [
+        164,
+        178
+      ],
+      "role": "将local_priors.volume_shape及请求权重传入prepared scorer；关闭unMRI时保留candidate displacement的curvbak"
+    },
+    {
+      "file": "src/fnit/recon_all/topology_patch_fitness.py",
+      "function": "_inputs",
+      "lines": [
+        46,
+        47
+      ],
+      "role": "核实际局部uint8数组shape与distance_inputs.volume_shape一致"
+    },
+    {
+      "file": "src/fnit/recon_all/topology_patch_fitness.py",
+      "function": "evaluate_prepared_patch_fitness",
+      "lines": [
+        84,
+        114
+      ],
+      "role": "shape送composer取得effective权重；仅启用时执行有向距离/unMRI及其反馈"
+    },
+    {
+      "file": "src/fnit/recon_all/topology_fitness_search.py",
+      "function": "compose_patch_fitness",
+      "lines": [
+        63,
+        89
+      ],
+      "role": "每次新建requested字典和effective副本；任一维度<=5时当次effective.l_unmri=0，无跨调用全局状态"
+    }
+  ],
+  "contracts": {
+    "command": "OMP_NUM_THREADS=4 NUMBA_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 PYTHONPATH=src:tools python -m pytest -q tests/recon_all/test_topology_fitness_search.py tests/recon_all/test_topology_patch_fitness.py -k 'source_small_local_volume_only_disables_unmri or new_candidate_restores_requested_volume_weight_without_hidden_state or source_small_volume_skips_only_unmri' --junitxml=contracts.xml",
+    "dependency_overlay": "同一已安装Python环境及本地声明测试依赖；原样算法源码",
+    "thread_environment": {
+      "OMP_NUM_THREADS": 4,
+      "NUMBA_NUM_THREADS": 4,
+      "MKL_NUM_THREADS": 4,
+      "OPENBLAS_NUM_THREADS": 4
+    },
+    "selected_tests": 8,
+    "deselected": 48,
+    "exit_code": 0,
+    "stdout_summary": "8 passed, 48 deselected in 7.21s",
+    "cases": [
+      {
+        "classname": "tests.recon_all.test_topology_fitness_search",
+        "name": "test_source_small_local_volume_only_disables_unmri[shape0]",
+        "time": "0.001"
+      },
+      {
+        "classname": "tests.recon_all.test_topology_fitness_search",
+        "name": "test_source_small_local_volume_only_disables_unmri[shape1]",
+        "time": "0.001"
+      },
+      {
+        "classname": "tests.recon_all.test_topology_fitness_search",
+        "name": "test_source_small_local_volume_only_disables_unmri[shape2]",
+        "time": "0.002"
+      },
+      {
+        "classname": "tests.recon_all.test_topology_fitness_search",
+        "name": "test_source_small_local_volume_only_disables_unmri[shape3]",
+        "time": "0.001"
+      },
+      {
+        "classname": "tests.recon_all.test_topology_fitness_search",
+        "name": "test_new_candidate_restores_requested_volume_weight_without_hidden_state",
+        "time": "0.001"
+      },
+      {
+        "classname": "tests.recon_all.test_topology_patch_fitness",
+        "name": "test_source_small_volume_skips_only_unmri[shape0]",
+        "time": "0.003"
+      },
+      {
+        "classname": "tests.recon_all.test_topology_patch_fitness",
+        "name": "test_source_small_volume_skips_only_unmri[shape1]",
+        "time": "0.003"
+      },
+      {
+        "classname": "tests.recon_all.test_topology_patch_fitness",
+        "name": "test_source_small_volume_skips_only_unmri[shape2]",
+        "time": "0.002"
+      }
+    ],
+    "original_junit_sha256": "7e203b76593a2381a7d3e948eb0ab4f6a2ddcf4e24e135b80cfda79797715274",
+    "public_junit_sha256": "ae894a93ee4335cdb7127e1d7fb99c12e9436a294593275b2dea8f1675316690",
+    "sanitization": "仅移除hostname属性；测试名称、数值、时间和结果不变"
+  },
+  "asserted_behavior": {
+    "composer_small_shapes": [
+      [
+        5,
+        7,
+        8
+      ],
+      [
+        8,
+        5,
+        8
+      ],
+      [
+        8,
+        7,
+        5
+      ],
+      [
+        1,
+        1,
+        1
+      ]
+    ],
+    "composer_requested_l_unmri": 10.0,
+    "composer_small_effective_l_unmri": 0.0,
+    "successive_small_then_large": {
+      "shapes": [
+        [
+          5,
+          6,
+          6
+        ],
+        [
+          6,
+          6,
+          6
+        ]
+      ],
+      "fitness": [
+        0.0,
+        -10.0
+      ],
+      "restoration": "大体积调用使用默认请求权重10，不继承上一调用临时0"
+    },
+    "prepared_small_shapes": [
+      [
+        5,
+        7,
+        7
+      ],
+      [
+        7,
+        5,
+        7
+      ],
+      [
+        7,
+        7,
+        5
+      ]
+    ],
+    "prepared_small_executed": [
+      "mri",
+      "curvature",
+      "normal"
+    ],
+    "prepared_small_fitness": -12.0,
+    "prepared_small_distance": null,
+    "prepared_small_unmri_feedback": null
+  },
+  "not_assessed": {
+    "real_small_volume_fixture": "本轮未发现或执行真实<=5局部卷；局部边界使用已有模拟合同，未将其当真实benchmark",
+    "whole_ga": "由协调者独立正在运行；本报告不覆盖",
+    "precision_or_speed": "没有数值算法更改/无速度比",
+    "GPU_memory": "CPU合同，未测GPU显存，不将null写为0"
+  }
+}

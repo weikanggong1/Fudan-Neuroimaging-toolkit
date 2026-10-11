@@ -1,0 +1,96 @@
+{
+  "status": "complete",
+  "scope": "full Python file N4 stage; not raw-T1 continuous reconstruction",
+  "code_version": "54f681dc:N4-SimpleITK-file-api-overlay",
+  "script_sha256": "5a4eed68af83bf2aa931c8b671bb16e53a79a51f8ad9b34594ac33332fdfc84f",
+  "module_sha256": "185c0864e777796c828a6edf4d230375a8dd5953fc23ea44edf6c8c820bdc02a",
+  "wrapper_sha256": "4756ac012390442d49d7a1b8537c21eaf0759793844a7be07c814ad04e83dbf4",
+  "input_chain_sha256": "cb3cff1cb7f7834365f77109bae71f970cc77cb88f4a354db86a98793eb1bea3",
+  "source_sha256": "04ce13b5b3a7a22ab94536e4fab89868e985ce435069f4517d5840aa202b95ea",
+  "baseline_report_sha256": "fec246e6a224735cd1d603310e69b29899e324fee60e51c32e89bf43457a3cd2",
+  "output_sha256": "47eca291283f22b380285441ad8c6e8248a2bb6f3601d0dac83b5f317a5ec98f",
+  "comparisons": {
+    "previous_python_quantized": {
+      "different_voxels": 0,
+      "maximum_absolute_error": 0,
+      "p99_absolute_error": 0.0,
+      "mean_absolute_error": 0.0
+    },
+    "native_quantized": {
+      "different_voxels": 99,
+      "maximum_absolute_error": 1,
+      "p99_absolute_error": 0.0,
+      "mean_absolute_error": 5.900859832763672e-06
+    }
+  },
+  "geometry_exact": true,
+  "shape_exact": true,
+  "output_dtype": "uint8",
+  "detail": {
+    "backend": "simpleitk_python",
+    "used_native_programs": false,
+    "simpleitk_version": "2.5.6",
+    "itk_version": "5.4",
+    "library_sha256": "c25cd8cf7053c8224c246744e1f1bc9af12db0c95a8221b27e9546cc4511b62c",
+    "fitting_threads": 1,
+    "reconstruction_threads": 4,
+    "recipe": {
+      "shrink": [
+        4,
+        4,
+        4
+      ],
+      "iterations": [
+        50,
+        50,
+        50,
+        50
+      ],
+      "convergence_threshold": 0.0,
+      "spline_order": 3,
+      "initial_control_points": [
+        4,
+        4,
+        4
+      ],
+      "histogram_bins": 200,
+      "fwhm": 0.15,
+      "wiener_noise": 0.01,
+      "mask": "all ones",
+      "mask_label": 1
+    },
+    "internal_geometry": {
+      "origin_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "direction": "identity",
+      "spacing_mm": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "current_level": 4,
+    "elapsed_last_level_iterations": 51,
+    "timing_parts_seconds": {
+      "array_prepare_and_shrink": 0.03593243006616831,
+      "fitting": 181.3224626602605,
+      "full_bspline_reconstruction": 0.24083533883094788,
+      "exp_divide_and_array_download": 0.22523948177695274
+    },
+    "total_seconds": 185.29012457095087,
+    "restored_global_threads": 4,
+    "original_global_threads": 4,
+    "array_stage_seconds": 181.82446991093457,
+    "file_io_included": true,
+    "output": "PRIVATE_FNIT/runs/recon_n4_python_file_api_20261010_v2/sub06/nu0.mgz",
+    "input_sha256": "04ce13b5b3a7a22ab94536e4fab89868e985ce435069f4517d5840aa202b95ea",
+    "output_sha256": "47eca291283f22b380285441ad8c6e8248a2bb6f3601d0dac83b5f317a5ec98f",
+    "implementation_sha256": "185c0864e777796c828a6edf4d230375a8dd5953fc23ea44edf6c8c820bdc02a",
+    "execution": "in-process",
+    "device": "cpu"
+  },
+  "threads": 4
+}

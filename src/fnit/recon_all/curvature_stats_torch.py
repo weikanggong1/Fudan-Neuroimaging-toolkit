@@ -24,7 +24,8 @@ def curvature_derivatives_tensor(k1: torch.Tensor, k2: torch.Tensor) -> dict[str
     输入单位 mm⁻¹，必须同网格/同顶点顺序；k1/k2 的顺序按上游定义保留。
     BE/S/FI 单位 mm⁻²，C 为 mm⁻¹。保留固定 d932 源码的 float/double
     表达式：BE 与 S 为 FP32 算术，C 在 FP32 平方和后用 double sqrt，
-    FI 的 fabs/减法/乘法为 double 后转 FP32。不改变输入、TF32或autocast。
+    固定Conda构建中FI的fabs(float)/减法/乘法均为FP32；此前误提升为double
+    会在退化区域放大为局部差异。不改变输入、TF32或autocast。
     非Tensor抛TypeError；非一维、非FP32、形状或设备不一致抛ValueError。
     不扫描输入数值的有限性，避免内部GPU同步；调用方需保证输入有限。
     """
@@ -36,9 +37,9 @@ def curvature_derivatives_tensor(k1: torch.Tensor, k2: torch.Tensor) -> dict[str
         raise ValueError("k1 and k2 must be float32 on the same device")
     bending = k1 * k1 + k2 * k2
     difference = k1 - k2
-    absolute1, absolute2 = k1.double().abs(), k2.double().abs()
+    absolute1, absolute2 = k1.abs(), k2.abs()
     return {"BE": bending, "C": torch.sqrt(bending.double() * 0.5).float(),
-            "FI": (absolute1 * (absolute1 - absolute2)).float(),
+            "FI": absolute1 * (absolute1 - absolute2),
             "S": difference * difference}
 
 

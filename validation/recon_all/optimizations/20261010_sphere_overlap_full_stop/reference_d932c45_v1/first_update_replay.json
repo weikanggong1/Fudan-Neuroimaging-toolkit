@@ -1,0 +1,294 @@
+{
+  "status": "complete",
+  "scope": "isolated diagnostic native checkpoint cross-input; never producer",
+  "native_snapshot_phase": "after initial projection/metric properties/starting SSE; before first gradient",
+  "script_sha256": "91f4d16818474e22d9fcbc4a7740e4328a104d629484c8dbaaa8814bdd2d6115",
+  "inputs_sha256": {
+    "native_before": "4ba72c32e85dde5af442c334685fb21f1fbef631ff042997593418d0a56c7037",
+    "native_after": "fc4fce71f7c5edab96b35f04e6531b8cdb86a7795b9939fa4f171fad3b2b0be0",
+    "python_before": "7ffdee4c58094c3514570fad2833345e29d3ef030f764fdb29b40435581257fb",
+    "python_after": "f07d47256e563d01a7fbd6734c431c3206ff896dad5d039c82fac5fe639fcadd",
+    "smoothwm": "c97fa5327ea89849a7c866b6ad083274d8aee98b40fce3c09dcf1fc541c2f2d8"
+  },
+  "threads": 4,
+  "affinity": [
+    88,
+    89,
+    90,
+    91
+  ],
+  "seed": 1234,
+  "averaging_rounds": 1024,
+  "distance_weight": 1e-06,
+  "source_files_sha256": {
+    "fnit.recon_all.batch": "217709c94d3b640572c99eba2fe32ca40f87ef9f3921c3b4fa747dad42b913b9",
+    "fnit.recon_all": "d9691fbe92139d94364422748de32dff8cbc7f9d3b8408e4d45dc2abf878108a",
+    "fnit.recon_all.smooth_surface_python": "7ae11634300dfb8957dc80357642fc6bfe31be7b04f7694bdc5bb51383f447b9",
+    "fnit.recon_all.inflate_center_python": "bbb720cd05f9979da8c6da2f4f6ce797094bb3c01740bd71ea15445b2ddd7428",
+    "fnit.recon_all.inflate_python": "01561d309ae100b86f15b5c7b677d4b60302864b8c75cd6fa87436358e9aae98",
+    "fnit.recon_all.sphere_python": "21172e853cc062b5015cd5bcdf5dcb02bcd2833abe1d1f5afa3a7af3d64e60a6",
+    "fnit.recon_all.sphere_standard_python": "017172cae935775f3e55ec7cdee72c54d6db904021c78896a77d99690a23cc97",
+    "fnit.recon_all.sphere_standard_metric": "dde4f42db3f8f526c2ccb1c1379db4edc5369b0f41cbb72ed8b84dc14030ca92",
+    "fnit.recon_all.place_surface_normals": "82d3c174f892f146f6a2b937cda8d457ca6f07f274ed146d5e5bc37f5e48e6b9",
+    "fnit.recon_all.sphere_standard_unfold": "c72f611f920fc9bfcc62f68de68a4fdea6277a3703c30e7e7f0bf14aaec32deb",
+    "fnit.recon_all.sphere_standard_line_search": "ddba4a431a277437cf66aee37a2b2ad0787815924ed4895ad5d35f7b54a744c0",
+    "fnit.recon_all.sphere_standard_nonlinear": "b0255b17fc99337e96ed86666a1bd50ce8c4de7cf325d9fde64c5af4d9bf6bcb",
+    "fnit.recon_all.sphere_standard_average": "f79dc72a574d3bef756f06b97ab2546d35662c1d6acbd769e034fa542d84bd78"
+  },
+  "cases": [
+    {
+      "name": "python-initial-control",
+      "seconds_including_jit": 5.088956351391971,
+      "gradient_report": {
+        "negative_faces": 12680,
+        "original_area_mm2": 70671.453125,
+        "current_positive_face_area_mm2": 127043.6953125,
+        "sphere_metric_total_area_mm2": 125663.703125,
+        "distance_scale": 0.7499237060546875,
+        "area_scale": 0.5623855590820312,
+        "distance_weight": 1e-06
+      },
+      "search": {
+        "mean_delta": 0.0015842289134524526,
+        "max_delta": 0.029586477214049632,
+        "min_dt": 0.6312219096044247,
+        "max_dt": 7700.907297173981,
+        "starting_sse": {
+          "total": 2752.5947382302757,
+          "weighted_distance": 41.22428621493037,
+          "negative_area": 2711.370452015345,
+          "negative_faces": 12680,
+          "metric_negative_area_mm2": 1390.0595703125,
+          "distance_scale": 0.7541061689724706,
+          "area_scale": 0.5623855590820312
+        },
+        "initial_candidates": [
+          {
+            "dt": 0.6312219096044247,
+            "sse": 2751.3340638488326
+          },
+          {
+            "dt": 6.312219096044247,
+            "sse": 2738.1480465190803
+          },
+          {
+            "dt": 63.12219096044247,
+            "sse": 2624.9712943423456
+          },
+          {
+            "dt": 631.2219096044247,
+            "sse": 1871.971889362766
+          },
+          {
+            "dt": 6312.219096044247,
+            "sse": 14758.733010318962
+          }
+        ],
+        "quadratic": {
+          "a": 0.0006602108478546143,
+          "b": -0.89886474609375,
+          "c": 2743.6953125,
+          "predicted_dt": 1361.4813232421875
+        },
+        "candidates": [
+          {
+            "dt": 315.61095480221235,
+            "sse": 2242.19028072899
+          },
+          {
+            "dt": 631.2219096044247,
+            "sse": 1871.971889362766
+          },
+          {
+            "dt": 946.8328644066371,
+            "sse": 1633.294582557171
+          },
+          {
+            "dt": 0.0,
+            "sse": 2752.5947382302757
+          },
+          {
+            "dt": 1361.4813232421875,
+            "sse": 1628.041988850392
+          }
+        ],
+        "selected_index": 4,
+        "selected_dt": 1361.4813232421875
+      },
+      "compare_native_after": {
+        "shape_equal": true,
+        "different_elements": 238114,
+        "max_abs": 0.00408172607421875,
+        "p99_abs": 0.0021209716796875,
+        "left_sha256": "2f4b4325a883742ec974938bbe98c943d53093f097da65178fcc80bece48e291",
+        "right_sha256": "198a5152b4d6753d2648639721d83276d3f2c9be603911cfea40d79a29b4cceb",
+        "mean_distance_mm": 0.00032269018862508575,
+        "max_distance_mm": 0.005067969963700008,
+        "p99_distance_mm": 0.0029918731695227447
+      },
+      "compare_python_after": {
+        "shape_equal": true,
+        "different_elements": 0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "left_sha256": "2f4b4325a883742ec974938bbe98c943d53093f097da65178fcc80bece48e291",
+        "right_sha256": "2f4b4325a883742ec974938bbe98c943d53093f097da65178fcc80bece48e291",
+        "mean_distance_mm": 0.0,
+        "max_distance_mm": 0.0,
+        "p99_distance_mm": 0.0
+      },
+      "compare_recorded_python_average": {
+        "shape_equal": true,
+        "different_elements": 0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "left_sha256": "fcf978762fcf020d1ca23f2d3c26c9181ad8a94c6c0fab81fd9fb3317554cc19",
+        "right_sha256": "fcf978762fcf020d1ca23f2d3c26c9181ad8a94c6c0fab81fd9fb3317554cc19",
+        "mean_distance_mm": 0.0,
+        "max_distance_mm": 0.0,
+        "p99_distance_mm": 0.0
+      }
+    },
+    {
+      "name": "native-initial-diagnostic",
+      "seconds_including_jit": 0.7923826351761818,
+      "gradient_report": {
+        "negative_faces": 12679,
+        "original_area_mm2": 70671.453125,
+        "current_positive_face_area_mm2": 127043.703125,
+        "sphere_metric_total_area_mm2": 125663.703125,
+        "distance_scale": 0.7499237060546875,
+        "area_scale": 0.5623855590820312,
+        "distance_weight": 1e-06
+      },
+      "search": {
+        "mean_delta": 0.0015842268224424056,
+        "max_delta": 0.029586415241709168,
+        "min_dt": 0.6312227427498659,
+        "max_dt": 7700.917461548363,
+        "starting_sse": {
+          "total": 2752.5938211417642,
+          "weighted_distance": 41.22436402255817,
+          "negative_area": 2711.369457119206,
+          "negative_faces": 12679,
+          "metric_negative_area_mm2": 1390.0589599609375,
+          "distance_scale": 0.7541061689724706,
+          "area_scale": 0.5623855590820312
+        },
+        "initial_candidates": [
+          {
+            "dt": 0.6312227427498659,
+            "sse": 2751.334100692178
+          },
+          {
+            "dt": 6.312227427498659,
+            "sse": 2738.1480535876517
+          },
+          {
+            "dt": 63.12227427498659,
+            "sse": 2624.9715249511187
+          },
+          {
+            "dt": 631.2227427498659,
+            "sse": 1871.9753579723113
+          },
+          {
+            "dt": 6312.227427498659,
+            "sse": 14758.08856847801
+          }
+        ],
+        "quadratic": {
+          "a": 0.0006603598594665527,
+          "b": -0.898956298828125,
+          "c": 2744.015625,
+          "predicted_dt": 1361.312744140625
+        },
+        "candidates": [
+          {
+            "dt": 315.61137137493296,
+            "sse": 2242.1920227804417
+          },
+          {
+            "dt": 631.2227427498659,
+            "sse": 1871.9753579723113
+          },
+          {
+            "dt": 946.8341141247988,
+            "sse": 1633.2988212036537
+          },
+          {
+            "dt": 0.0,
+            "sse": 2752.5938211417642
+          },
+          {
+            "dt": 1361.312744140625,
+            "sse": 1628.0494246294554
+          }
+        ],
+        "selected_index": 4,
+        "selected_dt": 1361.312744140625
+      },
+      "compare_native_after": {
+        "shape_equal": true,
+        "different_elements": 0,
+        "max_abs": 0.0,
+        "p99_abs": 0.0,
+        "left_sha256": "198a5152b4d6753d2648639721d83276d3f2c9be603911cfea40d79a29b4cceb",
+        "right_sha256": "198a5152b4d6753d2648639721d83276d3f2c9be603911cfea40d79a29b4cceb",
+        "mean_distance_mm": 0.0,
+        "max_distance_mm": 0.0,
+        "p99_distance_mm": 0.0
+      },
+      "compare_python_after": {
+        "shape_equal": true,
+        "different_elements": 238114,
+        "max_abs": 0.00408172607421875,
+        "p99_abs": 0.0021209716796875,
+        "left_sha256": "198a5152b4d6753d2648639721d83276d3f2c9be603911cfea40d79a29b4cceb",
+        "right_sha256": "2f4b4325a883742ec974938bbe98c943d53093f097da65178fcc80bece48e291",
+        "mean_distance_mm": 0.00032269018862508575,
+        "max_distance_mm": 0.005067969963700008,
+        "p99_distance_mm": 0.0029918731695227447
+      },
+      "compare_recorded_python_average": {
+        "shape_equal": true,
+        "different_elements": 284931,
+        "max_abs": 2.494372893124819e-06,
+        "p99_abs": 7.946258119773084e-07,
+        "left_sha256": "086963e3b5c23a8bbe25ecf14e11160e138e12a6a476f426c86366b17f77324b",
+        "right_sha256": "fcf978762fcf020d1ca23f2d3c26c9181ad8a94c6c0fab81fd9fb3317554cc19",
+        "mean_distance_mm": 1.2707693251615664e-07,
+        "max_distance_mm": 2.831044429487247e-06,
+        "p99_distance_mm": 1.9031922333662765e-06
+      }
+    }
+  ],
+  "metric_sampling": {
+    "vertices": 95045,
+    "samples": 7542866,
+    "max_candidates": 430,
+    "topology_seconds": 3.8666785517707467,
+    "sampling_seconds_including_jit": 10.57244272902608
+  },
+  "reciprocal_pairs": 5139105,
+  "reciprocal_seconds": 0.4666589982807636,
+  "sampled_metric_sha256": {
+    "offsets": "c60375b5a0addfc76e712c3c28c819953b5ebcfaedc977dd73e1e367336f1b5f",
+    "neighbors": "f019ff92cdb6e32fa854446ea5896a4dca0d6ef4d292246ef7d7cfdb8adce8b8",
+    "raw_distances": "540d6c7e306a84cda0e0c9239aa281bf61d53d48cfb9cd9c067e98ae077b91ec",
+    "symmetric_distances": "e8e9fcdb2355e8b2cdeb65e789a9e61d6798be0f30bb9275ca3b6b0e565d15ed"
+  },
+  "initial_state_comparison": {
+    "shape_equal": true,
+    "different_elements": 85038,
+    "max_abs": 7.62939453125e-06,
+    "p99_abs": 7.62939453125e-06,
+    "left_sha256": "8f085b026e902180adf33a3cf9284357cef3e6e450929ea94dead0fbed7e06f8",
+    "right_sha256": "a9100c41d8f5ecc1246b12e6c91107d9b02edc517e044d1032193f4d491ba01c",
+    "mean_distance_mm": 2.295590761513391e-06,
+    "max_distance_mm": 1.1444091796875e-05,
+    "p99_distance_mm": 9.344061823971473e-06
+  },
+  "total_seconds_including_io": 26.488372462801635,
+  "private_raw_report_sha256": "761e6d803980c56aa725ba29b3e4ff5836ea76c485f9bf34fe2bb12cf935acc2"
+}

@@ -1,0 +1,378 @@
+{
+  "scope": "new raw T1 continuous N4-prefix versus previous SimpleITK continuous prefix; not full recon-all",
+  "strict_reproduction": "failed; both cases have nonzero intensity and WM/filled differences",
+  "optimization_regression": "quantitative downstream differences measured; no formally confirmed global equivalence decision",
+  "overall_metric_equivalence": "not_assessed",
+  "controlled_speedup_established": false,
+  "versions_reference_candidate": [
+    "516a93e287d1610b50201e48e6c49cf63ff7e1a4+dirty-prefix:655ac22bd8d0503652bba5947db64704f398fc867b247cb9e9e3c9484ac687b3",
+    "9fd532d89a49a06ba6c21aab6c947322984e44cc+dirty-torch-prefix:49b10856233ab2e12238a30e012456b37d8bbce25445c87c178a7a3a11be27cc"
+  ],
+  "source_manifests_reference_candidate": [
+    "655ac22bd8d0503652bba5947db64704f398fc867b247cb9e9e3c9484ac687b3",
+    "49b10856233ab2e12238a30e012456b37d8bbce25445c87c178a7a3a11be27cc"
+  ],
+  "same_non_n4_recipe_count": 19,
+  "all_pre_n4_values_geometry_equal": true,
+  "all_volume_geometry_dtype_equal": true,
+  "stage_entry_function_sha_equal": true,
+  "full_manifest_changed_files": [
+    "src/fnit/recon_all/batch.py",
+    "src/fnit/recon_all/native_free.py",
+    "src/fnit/recon_all/python_profile.py",
+    "src/fnit/recon_all/topology_defect_normal_likelihood.py",
+    "src/fnit/recon_all/topology_edge_mri_score.py",
+    "src/fnit/recon_all/topology_mri_likelihood.py",
+    "tools/benchmark_recon_input_prefix.py",
+    "tools/benchmark_recon_torch_end_to_end.py",
+    "tools/recon_python_execution_audit/sitecustomize.py"
+  ],
+  "cases": {
+    "sub06": {
+      "comparison_public_sha256": "0ae35f4a1f34177c212af09e2dc18b1c43b81379e97f17f272b1838baa25711d",
+      "volumes": {
+        "rawavg.mgz": {
+          "different_voxels": 0,
+          "max_abs_error": 0.0,
+          "p99_abs_error": 0.0
+        },
+        "orig.mgz": {
+          "different_voxels": 0,
+          "max_abs_error": 0.0,
+          "p99_abs_error": 0.0
+        },
+        "tmp/nu0.mgz": {
+          "different_voxels": 4115,
+          "max_abs_error": 1.0,
+          "p99_abs_error": 0.0
+        },
+        "nu.mgz": {
+          "different_voxels": 3801,
+          "max_abs_error": 3.0,
+          "p99_abs_error": 0.0
+        },
+        "T1.mgz": {
+          "different_voxels": 465058,
+          "max_abs_error": 23.0,
+          "p99_abs_error": 1.0
+        },
+        "brainmask.mgz": {
+          "different_voxels": 200967,
+          "max_abs_error": 23.0,
+          "p99_abs_error": 1.0
+        },
+        "synthseg.rca.mgz": {
+          "different_voxels": 0,
+          "max_abs_error": 0.0,
+          "p99_abs_error": 0.0
+        },
+        "norm.mgz": {
+          "different_voxels": 551092,
+          "max_abs_error": 7.0,
+          "p99_abs_error": 1.0
+        },
+        "brain.mgz": {
+          "different_voxels": 754675,
+          "max_abs_error": 22.0,
+          "p99_abs_error": 2.0
+        },
+        "aseg.presurf.mgz": {
+          "different_voxels": 0,
+          "max_abs_error": 0.0,
+          "p99_abs_error": 0.0
+        },
+        "wm.seg.mgz": {
+          "different_voxels": 203295,
+          "max_abs_error": 230.0,
+          "p99_abs_error": 1.0
+        },
+        "wm.asegedit.mgz": {
+          "different_voxels": 144368,
+          "max_abs_error": 250.0,
+          "p99_abs_error": 0.0
+        },
+        "wm.mgz": {
+          "different_voxels": 144810,
+          "max_abs_error": 250.0,
+          "p99_abs_error": 0.0
+        },
+        "filled.mgz": {
+          "different_voxels": 4592,
+          "max_abs_error": 255.0,
+          "p99_abs_error": 0.0
+        }
+      },
+      "WM_ge5_dice": {
+        "wm.seg.mgz": 0.9850898808558369,
+        "wm.asegedit.mgz": 0.9919008569991328,
+        "wm.mgz": 0.9917526511302586
+      },
+      "filled_per_label": {
+        "per_label_including_background": {
+          "0": {
+            "reference_voxels": 16264750,
+            "candidate_voxels": 16265966,
+            "difference_voxels": 1216,
+            "dice": 0.9998588411026674,
+            "name": "background"
+          },
+          "127": {
+            "reference_voxels": 255231,
+            "candidate_voxels": 254781,
+            "difference_voxels": -450,
+            "dice": 0.995470694807181,
+            "name": "right hemisphere"
+          },
+          "255": {
+            "reference_voxels": 257235,
+            "candidate_voxels": 256469,
+            "difference_voxels": -766,
+            "dice": 0.9955577531029542,
+            "name": "left hemisphere"
+          }
+        },
+        "minimum_foreground_dice": 0.995470694807181,
+        "median_foreground_dice": 0.9955142239550676,
+        "dice_unit": "dimensionless; labels retain declared LUT / filled hemisphere semantics"
+      },
+      "LTA_different_elements": 4,
+      "LTA_max_abs_atlas_voxel": 0.30466651916503906,
+      "CSV_numeric_values_equal": true,
+      "timing": {
+        "controlled_speedup_established": false,
+        "public_API_seconds_including_reads_writes_reference_candidate": [
+          464.2847222117707,
+          373.25553239975125
+        ],
+        "fresh_CLI_seconds_reference_candidate": [
+          475.02638612501323,
+          400.39461204968393
+        ],
+        "diagnostic_seconds_including_imports_hashing_reference_candidate": [
+          473.86653476487845,
+          396.53953308518976
+        ],
+        "scope": "actual synchronized stage wall includes writes; nested timers not added; different versions/time/load are diagnostic observations"
+      },
+      "memory_sample_summaries": [
+        {
+          "status": "ownership_unresolved",
+          "target_gpu_uuid": "GPU-anonymized-device-006",
+          "sampling_interval_seconds": 0.5,
+          "query_backend_requested": "auto",
+          "query_backend": "nvml",
+          "query_backend_errors": [],
+          "query_closed": true,
+          "device_memory_query_sources": [
+            "nvmlDeviceGetMemoryInfo(v1).used_bytes"
+          ],
+          "max_observed_interval_seconds": 0.5938940765336156,
+          "failed_samples": [],
+          "peak_tree_total_bytes": null,
+          "observed_resolved_tree_peak_bytes": null,
+          "peak_target_compute_process_sum_bytes": 11916017664,
+          "peak_target_device_used_bytes": 12850561024,
+          "scope": "simultaneous process snapshot on target GPU; unresolved host/container PID ownership is null; device total is separate and includes other users; consecutive queries are not exactly simultaneous",
+          "worker_pids": []
+        },
+        {
+          "status": "ownership_unresolved",
+          "target_gpu_uuid": "GPU-anonymized-device-006",
+          "sampling_interval_seconds": 0.5,
+          "query_backend_requested": "auto",
+          "query_backend": "nvml",
+          "query_backend_errors": [],
+          "query_closed": true,
+          "device_memory_query_sources": [
+            "nvmlDeviceGetMemoryInfo(v1).used_bytes"
+          ],
+          "max_observed_interval_seconds": 0.5836360929533839,
+          "failed_samples": [],
+          "peak_tree_total_bytes": null,
+          "observed_resolved_tree_peak_bytes": null,
+          "peak_target_compute_process_sum_bytes": 11983126528,
+          "peak_target_device_used_bytes": 12917669888,
+          "scope": "simultaneous process snapshot on target GPU; unresolved host/container PID ownership is null; device total is separate and includes other users; consecutive queries are not exactly simultaneous",
+          "worker_pids": []
+        }
+      ],
+      "N4_Torch_gpu_tensor_peaks_bytes": {
+        "allocated_peak_bytes": 1295297024,
+        "reserved_peak_bytes": 1384120320
+      }
+    },
+    "sub07": {
+      "comparison_public_sha256": "b463848fcefb47cfa15837f2cb542455de6dc14baec4870d406bb80ac7e35aff",
+      "volumes": {
+        "rawavg.mgz": {
+          "different_voxels": 0,
+          "max_abs_error": 0.0,
+          "p99_abs_error": 0.0
+        },
+        "orig.mgz": {
+          "different_voxels": 0,
+          "max_abs_error": 0.0,
+          "p99_abs_error": 0.0
+        },
+        "tmp/nu0.mgz": {
+          "different_voxels": 3245,
+          "max_abs_error": 1.0,
+          "p99_abs_error": 0.0
+        },
+        "nu.mgz": {
+          "different_voxels": 9216,
+          "max_abs_error": 3.0,
+          "p99_abs_error": 0.0
+        },
+        "T1.mgz": {
+          "different_voxels": 24383,
+          "max_abs_error": 13.0,
+          "p99_abs_error": 0.0
+        },
+        "brainmask.mgz": {
+          "different_voxels": 5801,
+          "max_abs_error": 13.0,
+          "p99_abs_error": 0.0
+        },
+        "synthseg.rca.mgz": {
+          "different_voxels": 0,
+          "max_abs_error": 0.0,
+          "p99_abs_error": 0.0
+        },
+        "norm.mgz": {
+          "different_voxels": 52520,
+          "max_abs_error": 4.0,
+          "p99_abs_error": 0.0
+        },
+        "brain.mgz": {
+          "different_voxels": 184870,
+          "max_abs_error": 16.0,
+          "p99_abs_error": 1.0
+        },
+        "aseg.presurf.mgz": {
+          "different_voxels": 0,
+          "max_abs_error": 0.0,
+          "p99_abs_error": 0.0
+        },
+        "wm.seg.mgz": {
+          "different_voxels": 61703,
+          "max_abs_error": 230.0,
+          "p99_abs_error": 0.0
+        },
+        "wm.asegedit.mgz": {
+          "different_voxels": 44208,
+          "max_abs_error": 250.0,
+          "p99_abs_error": 0.0
+        },
+        "wm.mgz": {
+          "different_voxels": 44290,
+          "max_abs_error": 250.0,
+          "p99_abs_error": 0.0
+        },
+        "filled.mgz": {
+          "different_voxels": 2289,
+          "max_abs_error": 255.0,
+          "p99_abs_error": 0.0
+        }
+      },
+      "WM_ge5_dice": {
+        "wm.seg.mgz": 0.9953101955153948,
+        "wm.asegedit.mgz": 0.9972740739499109,
+        "wm.mgz": 0.997255203284544
+      },
+      "filled_per_label": {
+        "per_label_including_background": {
+          "0": {
+            "reference_voxels": 16315975,
+            "candidate_voxels": 16315162,
+            "difference_voxels": -813,
+            "dice": 0.9999298522757574,
+            "name": "background"
+          },
+          "127": {
+            "reference_voxels": 230699,
+            "candidate_voxels": 230920,
+            "difference_voxels": 221,
+            "dice": 0.9978142147528589,
+            "name": "right hemisphere"
+          },
+          "255": {
+            "reference_voxels": 230542,
+            "candidate_voxels": 231134,
+            "difference_voxels": 592,
+            "dice": 0.9972274928737903,
+            "name": "left hemisphere"
+          }
+        },
+        "minimum_foreground_dice": 0.9972274928737903,
+        "median_foreground_dice": 0.9975208538133247,
+        "dice_unit": "dimensionless; labels retain declared LUT / filled hemisphere semantics"
+      },
+      "LTA_different_elements": 0,
+      "LTA_max_abs_atlas_voxel": 0.0,
+      "CSV_numeric_values_equal": true,
+      "timing": {
+        "controlled_speedup_established": false,
+        "public_API_seconds_including_reads_writes_reference_candidate": [
+          486.8586847772822,
+          360.4578093364835
+        ],
+        "fresh_CLI_seconds_reference_candidate": [
+          510.2001294195652,
+          393.81693405658007
+        ],
+        "diagnostic_seconds_including_imports_hashing_reference_candidate": [
+          505.8902316922322,
+          383.739660278894
+        ],
+        "scope": "actual synchronized stage wall includes writes; nested timers not added; different versions/time/load are diagnostic observations"
+      },
+      "memory_sample_summaries": [
+        {
+          "status": "ownership_unresolved",
+          "target_gpu_uuid": "GPU-anonymized-device-009",
+          "sampling_interval_seconds": 0.5,
+          "query_backend_requested": "auto",
+          "query_backend": "nvml",
+          "query_backend_errors": [],
+          "query_closed": true,
+          "device_memory_query_sources": [
+            "nvmlDeviceGetMemoryInfo(v1).used_bytes"
+          ],
+          "max_observed_interval_seconds": 0.5502723986282945,
+          "failed_samples": [],
+          "peak_tree_total_bytes": null,
+          "observed_resolved_tree_peak_bytes": null,
+          "peak_target_compute_process_sum_bytes": 11983126528,
+          "peak_target_device_used_bytes": 12917669888,
+          "scope": "simultaneous process snapshot on target GPU; unresolved host/container PID ownership is null; device total is separate and includes other users; consecutive queries are not exactly simultaneous",
+          "worker_pids": []
+        },
+        {
+          "status": "ownership_unresolved",
+          "target_gpu_uuid": "GPU-anonymized-device-009",
+          "sampling_interval_seconds": 0.5,
+          "query_backend_requested": "auto",
+          "query_backend": "nvml",
+          "query_backend_errors": [],
+          "query_closed": true,
+          "device_memory_query_sources": [
+            "nvmlDeviceGetMemoryInfo(v1).used_bytes"
+          ],
+          "max_observed_interval_seconds": 0.5932312402874231,
+          "failed_samples": [],
+          "peak_tree_total_bytes": null,
+          "observed_resolved_tree_peak_bytes": null,
+          "peak_target_compute_process_sum_bytes": 11916017664,
+          "peak_target_device_used_bytes": 12850561024,
+          "scope": "simultaneous process snapshot on target GPU; unresolved host/container PID ownership is null; device total is separate and includes other users; consecutive queries are not exactly simultaneous",
+          "worker_pids": []
+        }
+      ],
+      "N4_Torch_gpu_tensor_peaks_bytes": {
+        "allocated_peak_bytes": 1295297024,
+        "reserved_peak_bytes": 1384120320
+      }
+    }
+  }
+}

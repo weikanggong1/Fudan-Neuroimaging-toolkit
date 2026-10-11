@@ -1,0 +1,37 @@
+{
+  "scope": "CPU fault-injection contracts; no GPU/MRI/probe rerun",
+  "status": "failed",
+  "exit_code": 1,
+  "seconds": 0.17542965523898602,
+  "python": "3.11.16",
+  "torch": "2.5.1",
+  "pytest": "8.3.5",
+  "before": {
+    "cuda_initialized": false,
+    "matmul_tf32": false,
+    "cudnn_tf32": true
+  },
+  "after": {
+    "cuda_initialized": false,
+    "matmul_tf32": false,
+    "cudnn_tf32": true
+  },
+  "source_sha256": {
+    "tools/diagnose_recon_nvml_namespace.py": "af8640b5624bc1eef6c57c6bc1fef073434ec3990da9e2439016c968b17583af",
+    "tests/recon_all/test_nvml_namespace_failure_contract.py": "fd2bea4a74cad83e605de8687becc586f15700fbcaf4505b5bb6c95e603ebf14"
+  },
+  "production_monitor_sha256": {
+    "fnit.recon_all.profiling": "43fd54dd7217d789ff4eac0b6b9be702112444e9caf545f7f2f1c3f81acf09f8",
+    "fnit.recon_all.nvml_process_memory": "1879606b4af4c10e088cff3c665255511dee872da91d4a9c8b2b1cb07550b348"
+  },
+  "whole_memory_20gb": "not_assessed",
+  "old_real_reports": "unchanged; bound to actual previous execution source",
+  "pytest_summary": {
+    "tests": 24,
+    "failures": 3,
+    "errors": 0,
+    "skipped": 0
+  },
+  "failure_type": "ModuleNotFoundError: pynvml; existing dependency target omitted from CPU test PYTHONPATH",
+  "resolution": "added existing nvidia-ml-py target to independent CPU task PYTHONPATH; no installation or environment modification"
+}

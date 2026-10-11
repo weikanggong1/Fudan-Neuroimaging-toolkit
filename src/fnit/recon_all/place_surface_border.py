@@ -1,13 +1,14 @@
-"""First FreeSurfer 8.2 border-intensity search on a fixed surface state.
+"""固定表面状态的白质/软脑膜目标强度搜索，自有 Num ba 实现。
 
-The operation accepts the preprocessed MRI, surface normals and rip mask as
-inputs. It does not perform volume preprocessing, ripping or vertex placement.
+输入为已预处理 MRI、surface RAS 坐标/法向和 rip 标记；此处不执行
+MRI 预处理、rip 或表面优化。复用固定源码的候选扩展及峰选择规则。
 """
 
 from __future__ import annotations
 
 import numpy as np
-from numba import njit
+from numba import njit, prange
+from types import FunctionType
 
 
 _LH_LABELS = np.array([2, 3, 4, 5, 7, 8, 10, 11, 12, 13, 17, 18, 26, 28, 30, 31], dtype=np.int32)
@@ -105,7 +106,8 @@ def _search(
     marked = np.zeros(nvertices, dtype=np.int32)
     used_sigma = np.zeros(nvertices, dtype=np.float32)
     inside_hi, border_hi, border_low, outside_low, outside_hi = thresholds
-    for v in range(nvertices):
+    # 未启用parallel的dispatcher将prange按原串行range执行。
+    for v in prange(nvertices):
         if ripped[v]:
             continue
         px, py, pz = float(xyz[v, 0]), float(xyz[v, 1]), float(xyz[v, 2])
@@ -172,13 +174,15 @@ def _search(
                 if pial and _sample(volume, next_x, next_y, next_z) < border_low:
                     next_mag = 0.0
                 if abs(mag) > abs(prev_mag) and abs(mag) > abs(next_mag) and border_low <= value <= border_hi:
-                    ox, oy, oz = _voxel(affine, px + nx * (d + 1.0), py + ny * (d + 1.0), pz + nz * (d + 1.0))
+                    # 固定源码 dist+1 的1是整数，先以float计算距离、乘积和
+                    # 坐标；d+1.0在Numba提升double，会改变外侧阈值筛选。
+                    ox, oy, oz = _voxel(affine, np.float32(px + np.float32(nx * np.float32(d + 1.0))), np.float32(py + np.float32(ny * np.float32(d + 1.0))), np.float32(pz + np.float32(nz * np.float32(d + 1.0))))
                     next_val = _sample(volume, ox, oy, oz)
                     if outside_low <= next_val <= border_hi and next_val <= outside_hi and (not local_max or max_mag < abs(mag)):
                         local_max = True
                         best_dist, max_mag, max_mag_val = d, abs(mag), value
                 elif not local_max and abs(mag) > max_mag and border_low <= value <= border_hi:
-                    ox, oy, oz = _voxel(affine, px + nx * (d + 1.0), py + ny * (d + 1.0), pz + nz * (d + 1.0))
+                    ox, oy, oz = _voxel(affine, np.float32(px + np.float32(nx * np.float32(d + 1.0))), np.float32(py + np.float32(ny * np.float32(d + 1.0))), np.float32(pz + np.float32(nz * np.float32(d + 1.0))))
                     next_val = _sample(volume, ox, oy, oz)
                     if outside_low <= next_val <= border_hi and next_val < outside_hi:
                         best_dist, max_mag, max_mag_val = d, abs(mag), value
@@ -214,6 +218,24 @@ def _search(
     return values, distances, means, target, marked, used_sigma
 
 
+def _parallel_search_dispatcher():
+    """从同一函数体创建并行dispatcher，使用独立缓存名，不复制搜索算法。
+
+    只改函数身份和编译选项；每顶点内部运算及float32舍入保留。
+    线程数由调用方既定Numba预算控制，此处不修改全局线程或精度。
+    """
+    source = _search.py_func
+    function = FunctionType(source.__code__.replace(co_name="_search_parallel"),
+                            source.__globals__, "_search_parallel",
+                            source.__defaults__, source.__closure__)
+    function.__qualname__ = "_search_parallel"
+    function.__module__ = __name__
+    return njit(cache=True, parallel=True, fastmath=False)(function)
+
+
+_search_parallel = _parallel_search_dispatcher()
+
+
 def compute_border_values_first_pass(
     volume: np.ndarray,
     segmentation: np.ndarray,
@@ -229,14 +251,42 @@ def compute_border_values_first_pass(
     surface: str = "white",
     sigma: float = 2.0,
     max_thickness: float = 10.0,
+    target_search_backend: str = "serial",
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """Return target intensity, normal distance, gradient, xyz, mark, sigma."""
+    """计算一次固定状态下的目标值，供完整四轮放置流程复用。
+
+    输入：volume为已预处理(W,H,D)强度图，转换为uint8；segmentation为
+    同网格标签图，转换为int32；surface_xyz、surface_normals、original_xyz
+    分别为(N,3)的surface RAS毫米坐标、单位法向及初始坐标，转换为float32；
+    ripped与previous_values为(N,)的排除标记和上轮目标值；sras2vox为(4,4)
+    surface RAS毫米到体素索引仿射；thresholds为五项强度阈值，顺序为
+    inside_hi/border_hi/border_low/outside_low/outside_hi，计算使用float64。
+    hemisphere仅lh/rh；surface默认white，也支持pial；sigma默认2.0，单位
+    为体素；max_thickness默认10.0mm，限定法向搜索总距离（包含初始位移）。
+    target_search_backend默认serial；parallel只并行独立顶点搜索，使用同一
+    函数体和已有Numba线程预算，fastmath=False。有序目标平均与顶点接受
+    不在此函数内，不因本选项改变。首次JIT属于调用墙钟，无静默回退。
+
+    输出依次为(N,)float32目标强度、法向距离mm、峰导数、(N,3)float32
+    目标surface RAS毫米坐标、(N,)int32有效标记、(N,)float32实际sigma。
+    峰导数仅本次找到峰时更新；本接口没有上轮mean输入，因此回退时返回0，
+    完整放置不使用该诊断量。没有找到新目标时保留previous_values。
+
+    hemisphere/surface/target_search_backend非法抛ValueError；不可转换输入抛NumPy转换异常。
+    其余输入须满足上述shape、同网格及有限值契约，Numba路径不对所有
+    越界或非有限输入提供保护。对应mris_place_surface内部
+    MRIScomputeBorderValues_new，无独立官方CLI；真实逐轮证据见
+    docs/recon_all/WHITE_BORDER_TARGET_PRECISION_20261010.md。
+    """
     if hemisphere not in ("lh", "rh"):
         raise ValueError("hemisphere must be lh or rh")
     if surface not in ("white", "pial"):
         raise ValueError("surface must be white or pial")
+    if target_search_backend not in ("serial", "parallel"):
+        raise ValueError("target_search_backend must be serial or parallel")
     source_volume = np.asarray(volume, dtype=np.uint8)
-    return _search(
+    search = _search if target_search_backend == "serial" else _search_parallel
+    return search(
         source_volume,
         np.where(source_volume == 255, 0, source_volume).astype(np.uint8),
         np.asarray(segmentation, dtype=np.int32),

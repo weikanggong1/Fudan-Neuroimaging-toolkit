@@ -1,0 +1,128 @@
+{
+  "status": "complete",
+  "case": "ds000114_sub06_ses-test",
+  "scope": "complete same-input N4 file API; dependency recovery, not whole reconstruction",
+  "code_version": "af1e782d:N4-dependency-preflight-overlay",
+  "driver_sha256": "8aa0c7027323f322e6c0c835841f800541ab832aa7a7f3a9e834a36b63894014",
+  "module_sha256": {
+    "input_n4_chain": "a5a27caca93eb7b186827f43429f07a1c404f1170054f5dfb039e232fa6d67d8",
+    "n4_simpleitk": "06435c4277a0a64a535646d76d1240482ed768199188b072d4716f7cc0b681e0",
+    "n4_itk": "4756ac012390442d49d7a1b8537c21eaf0759793844a7be07c814ad04e83dbf4",
+    "mgh_compat": "351a7edde1e06c400e9379a2c94d8055396307237b2198cdf8527468d3ac510d"
+  },
+  "input_sha256_before": "04ce13b5b3a7a22ab94536e4fab89868e985ce435069f4517d5840aa202b95ea",
+  "input_sha256_after": "04ce13b5b3a7a22ab94536e4fab89868e985ce435069f4517d5840aa202b95ea",
+  "reference_report_sha256": "2beb9ef64259f651ebfb1021779dbbca4f2822d2094ffc4ff477c1516f8df5f9",
+  "reference_output_sha256": "47eca291283f22b380285441ad8c6e8248a2bb6f3601d0dac83b5f317a5ec98f",
+  "reference_module_sha256": "185c0864e777796c828a6edf4d230375a8dd5953fc23ea44edf6c8c820bdc02a",
+  "output": "nu0.mgz",
+  "output_sha256": "47eca291283f22b380285441ad8c6e8248a2bb6f3601d0dac83b5f317a5ec98f",
+  "raw_output_file_exact": true,
+  "different_voxels": 0,
+  "maximum_absolute_error": 0,
+  "p99_absolute_error": 0.0,
+  "geometry_exact": {
+    "shape": true,
+    "dtype": true,
+    "affine": true,
+    "vox2ras_tkr": true
+  },
+  "library": {
+    "backend": "simpleitk",
+    "required": true,
+    "simpleitk_version": "2.5.6",
+    "itk_version": "5.4",
+    "library_sha256": "c25cd8cf7053c8224c246744e1f1bc9af12db0c95a8221b27e9546cc4511b62c"
+  },
+  "api_seconds_including_image_io_and_preflight": 187.91351321619004,
+  "detail": {
+    "backend": "simpleitk_python",
+    "used_native_programs": false,
+    "simpleitk_version": "2.5.6",
+    "itk_version": "5.4",
+    "library_sha256": "c25cd8cf7053c8224c246744e1f1bc9af12db0c95a8221b27e9546cc4511b62c",
+    "fitting_threads": 1,
+    "reconstruction_threads": 4,
+    "actual_fitting_work_units": 1,
+    "actual_fitting_filter_threads": 1,
+    "recipe": {
+      "shrink": [
+        4,
+        4,
+        4
+      ],
+      "iterations": [
+        50,
+        50,
+        50,
+        50
+      ],
+      "convergence_threshold": 0.0,
+      "spline_order": 3,
+      "initial_control_points": [
+        4,
+        4,
+        4
+      ],
+      "histogram_bins": 200,
+      "fwhm": 0.15,
+      "wiener_noise": 0.01,
+      "mask": "all ones",
+      "mask_label": 1
+    },
+    "internal_geometry": {
+      "origin_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "direction": "identity",
+      "spacing_mm": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "current_level": 4,
+    "elapsed_last_level_iterations": 51,
+    "timing_parts_seconds": {
+      "array_prepare_and_shrink": 0.05703740660101175,
+      "fitting": 181.00135621242225,
+      "full_bspline_reconstruction": 0.5084451017901301,
+      "exp_divide_and_array_download": 1.0497074499726295
+    },
+    "total_seconds": 187.49245939124376,
+    "restored_global_threads": 4,
+    "original_global_threads": 4,
+    "array_stage_seconds": 182.61654617078602,
+    "file_io_included": true,
+    "input_sha256": "04ce13b5b3a7a22ab94536e4fab89868e985ce435069f4517d5840aa202b95ea",
+    "output_sha256": "47eca291283f22b380285441ad8c6e8248a2bb6f3601d0dac83b5f317a5ec98f",
+    "implementation_sha256": "06435c4277a0a64a535646d76d1240482ed768199188b072d4716f7cc0b681e0",
+    "execution": "in-process",
+    "device": "cpu"
+  },
+  "cpu_affinity": [
+    100,
+    101,
+    102,
+    103
+  ],
+  "cpu_threads_budget": 4,
+  "fitting_threads": 1,
+  "reconstruction_threads": 4,
+  "shared_host_load": "other FNIT jobs active; observation without paired speed claim",
+  "cuda_initialized_before": false,
+  "cuda_initialized_after": false,
+  "tf32_before": [
+    false,
+    true
+  ],
+  "tf32_after": [
+    false,
+    true
+  ],
+  "used_native_programs": false,
+  "overall_equivalence": "not_assessed",
+  "full_workflow_complete": false
+}

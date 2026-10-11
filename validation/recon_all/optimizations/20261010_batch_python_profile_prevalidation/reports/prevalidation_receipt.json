@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "status": "focused_prevalidation_and_cli_contracts_passed",
+  "before_after_reproductions": [
+    {
+      "configuration": "isolated_WM_with_mixed_defaults",
+      "options": {
+        "wm_execution": "isolated"
+      },
+      "before": {
+        "accepted_empty_job_preflight": false,
+        "error": "isolated WM requires torch-optimized backend"
+      },
+      "after": {
+        "accepted_empty_job_preflight": true,
+        "error": null
+      }
+    },
+    {
+      "configuration": "Torch_inflation_with_one_worker_default",
+      "options": {
+        "inflate_backend": "torch"
+      },
+      "before": {
+        "accepted_empty_job_preflight": false,
+        "error": "torch inflate_backend requires two cached hemisphere workers"
+      },
+      "after": {
+        "accepted_empty_job_preflight": true,
+        "error": null
+      }
+    }
+  ],
+  "cuda_initialized_before": false,
+  "cuda_initialized_after": false,
+  "real_MRI_pipeline_run": false,
+  "original_stage_program_run": false,
+  "new_real_precision_or_speed_measurement": false,
+  "gpu_memory_bytes": null,
+  "whole_equivalence": "not_assessed"
+}
