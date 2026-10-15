@@ -9,6 +9,8 @@ import types
 import unittest
 from unittest.mock import patch
 
+import numpy as np
+
 
 PATH = Path(__file__).resolve().parents[2] / "validation/recon_all/optimizations/20261002_parallel/compare_whole_cases.py"
 SPEC = importlib.util.spec_from_file_location("whole_comparison_driver", PATH)
@@ -17,6 +19,51 @@ SPEC.loader.exec_module(DRIVER)
 
 
 class WholeComparisonDriverTests(unittest.TestCase):
+    @staticmethod
+    def _mgh_frame_fixture():
+        """模拟 MGH float32 仿射写出与 surface footer 文本读取。"""
+        dimensions = np.array([256, 256, 256], dtype=np.int32)
+        center = np.array([2.7182818, 1.23456789, 3.141593], dtype=np.float32)
+        header = {"goodRASFlag": np.int16(1), "dims": np.r_[dimensions, 1],
+                  "delta": np.ones(3, dtype=np.float32),
+                  "Mdc": np.eye(3, dtype=np.float32), "Pxyz_c": center}
+        basis = header["Mdc"].T * header["delta"]
+        affine = np.eye(4, dtype=np.float32)
+        affine[:3, :3] = basis
+        affine[:3, 3] = center - basis.dot(dimensions) / 2
+        image = types.SimpleNamespace(header=header, affine=affine, shape=(256, 256, 256))
+        footer = {"head": np.array([2, 0, 20]), "valid": "1", "volume": dimensions,
+                  "voxelsize": np.ones(3), "xras": np.array([1., 0., 0.]),
+                  "yras": np.array([0., 1., 0.]), "zras": np.array([0., 0., 1.]),
+                  "cras": center.astype(np.float64)}
+        return footer, image
+
+    def test_surface_footer_accepts_mgh_float32_roundtrip_not_fixed_affine_atol(self):
+        footer, image = self._mgh_frame_fixture()
+        result = DRIVER.surface_footer_frame((footer, dict(footer)), (image, image))
+        self.assertTrue(result["compatible"])
+        self.assertGreater(result["footer_to_mri_affine_max_abs_differences_mm"][0], 1e-6)
+        self.assertTrue(all(all(row["fields"].values()) and row["mgh_good_ras"]
+                            for row in result["footer_mgh_header_matches"]))
+
+    def test_surface_footer_rejects_one_float32_ulp_change_even_within_pair_tolerance(self):
+        footer, image = self._mgh_frame_fixture()
+        changed = dict(footer)
+        changed["cras"] = footer["cras"].copy()
+        changed["cras"][0] = float(np.nextafter(np.float32(changed["cras"][0]), np.float32(np.inf)))
+        result = DRIVER.surface_footer_frame((footer, changed), (image, image))
+        self.assertFalse(result["compatible"])
+        self.assertIn("candidate:footer_differs_from_mri_scanner_fields", result["issues"])
+        self.assertNotIn("cras_exceeds_atol", result["issues"])
+
+    def test_surface_footer_requires_stored_mgh_scanner_geometry(self):
+        footer, image = self._mgh_frame_fixture()
+        invalid = types.SimpleNamespace(header={**image.header, "goodRASFlag": np.int16(0)},
+                                        affine=image.affine, shape=image.shape)
+        result = DRIVER.surface_footer_frame((footer, footer), (image, invalid))
+        self.assertFalse(result["compatible"])
+        self.assertIn("candidate:mri_scanner_ras_not_stored", result["issues"])
+
     def test_common_lock_blocks_an_independent_file_description(self):
         with tempfile.TemporaryDirectory() as name:
             path = Path(name) / "common.lock"

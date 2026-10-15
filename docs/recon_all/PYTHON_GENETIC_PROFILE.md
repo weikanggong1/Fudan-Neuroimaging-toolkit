@@ -14,7 +14,7 @@ flowchart LR
   Q --> W[发布 / white.preaparc / sphere.reg / white / pial]
 ```
 
-已有冻结单半球运行完成九缺陷与最终 `orig`，与旧自有基线的404项数组相同；当前合并配方的原始T1整例仍未完成。接线不表示整例已通过，也不改变严格诊断、网格质量或整体指标等效的验收状态。
+已有冻结单半球运行完成九缺陷与最终 `orig`，与旧自有基线的404项数组相同。后续 cbaffa 合并配方的[两例原始 T1 整例及 v2 事后评估](../../validation/recon_all/optimizations/20261016_gpucw1_cbaffa_two_case/README.md)均退出 0、输出 138/138，生产网格门通过；两例分区、表面距离和脑区统计评估已完成，严格逐文件复现分别为 14/138、23/138，整体指标等效仍未判定。冻结阶段的同输入结论与这次整例分别记录。
 
 ## 2. Python 调用、输入与输出
 
@@ -134,11 +134,11 @@ mris_remove_intersection subject/surf/lh.orig subject/surf/lh.orig
 | 冻结单半球九缺陷与最终 orig | 九缺陷CLI15196.729秒，后续orig CLI183.192秒；404项数组与旧自有基线相同；最终网格Euler2、单连通、相交0 | 对应旧Python扫描/面缓存冻结版本；与原生网格顶点数不同，不能逐索引比较，非当前配方整例提速 |
 | 后续合并源码离线安装 | Git `342aa4dd`，24模块source/wheel/installed SHA相同；构建2.401、安装0.766、入口10.242秒 | 完整EM和可选GPU距离接口导入通过；不初始化CUDA、不运行影像 |
 | 隔离worker守卫后的离线安装 | Git `9292a0a7`，29模块source/wheel/installed SHA相同；构建2.294、安装0.849、入口17.429秒 | GCA、WM、Talairach、Torch N4的fresh CLI继承生产禁令；36项合同通过，不运行MRI |
-| 当前配方原始 T1 整例 | 尚未完成本次生产配方评估 | 严格复现、整体指标等效、20 GB 整例峰值和十分钟目标未判定/未达到 |
+| cbaffa 配方原始 T1 整例 | 两例退出 0、各 138/138 输出、生产网格门通过；完整外层墙钟 19,448.046／12,094.283 秒，详见[两例报告](../../validation/recon_all/optimizations/20261016_gpucw1_cbaffa_two_case/README.md) | 严格逐文件诊断 14/138、23/138；十分钟目标未达到。整体指标等效、FNIT 自身 20 GB 峰值和同环境提速未判定 |
 
 真实脑图与全部 496 项比较见[首缺陷完整报告](../../validation/recon_all/optimizations/20261011_topology_genetic_face_cache/README.md)，阶段 ABBA 见[保留面索引报告](../../validation/recon_all/optimizations/20261011_topology_face_detection_cache/README.md)，原生重复见[参考重复报告](../../validation/recon_all/optimizations/20261011_topology_native_repeat/README.md)。首缺陷脑图显示自产几何及索引误差，不能称官方整例误差图。既有数字拓扑整例的局部形状/球面失败保留在[旧版完整报告](../../validation/recon_all/optimizations/20261010_python_profile/README.md)，不改标为本次 GA 配方结果。
 
-GA 新接口没有新增依赖；NumPy、Numba、SciPy、nibabel 和 PyTorch 已由主页 Conda/包安装声明。[当前面缓存配方的合同及安装报告](../../validation/recon_all/optimizations/20261011_python_genetic_profile_cached_route/README.md)绑定实际代码及wheel哈希；[首版接线记录](../../validation/recon_all/optimizations/20261011_python_genetic_profile/README.md)保留原始版本。面缓存科学阶段见[实际库入口报告](../../validation/recon_all/optimizations/20261011_topology_genetic_face_cache_wiring/README.md)。独立安装验证使用已有依赖，导入/配方解析不初始化CUDA、不覆盖调用者精度；当前GPU前向和无预装脑影像软件的干净Conda整例尚未验证。
+GA 新接口没有新增依赖；NumPy、Numba、SciPy、nibabel 和 PyTorch 已由主页 Conda/包安装声明。[2026-10-11 面缓存配方的合同及安装报告](../../validation/recon_all/optimizations/20261011_python_genetic_profile_cached_route/README.md)绑定当时的代码及wheel哈希；[首版接线记录](../../validation/recon_all/optimizations/20261011_python_genetic_profile/README.md)保留原始版本。面缓存科学阶段见[实际库入口报告](../../validation/recon_all/optimizations/20261011_topology_genetic_face_cache_wiring/README.md)。该次独立安装验证使用已有依赖，导入/配方解析不初始化CUDA、不覆盖调用者精度；该安装产物的 GPU 前向和无预装脑影像软件的干净 Conda 整例仍未验证。cbaffa GPU 整例见上方独立报告。
 
 [当前查询边复用报告](../../validation/recon_all/optimizations/20261011_topology_query_half/README.md)另存完整首缺陷、第四候选及直接库入口的各自冻结源码、全部负结果和脑图；没有将旧整例版本改标为新扫描核。[九缺陷完成报告](../../validation/recon_all/optimizations/20261011_topology_genetic_repair_cache/README.md)保留旧基线对照、原生重复和双向点到三角面距离：最大值约1.090/6.828 mm，整体指标等效未判定。
 

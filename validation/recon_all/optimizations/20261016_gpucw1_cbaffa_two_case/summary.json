@@ -1,0 +1,733 @@
+{
+  "schema_version": "1.0",
+  "report_scope": "cbaffa_two_raw_t1_complete_run_final_v2_posthoc_evaluation",
+  "report_date": "2026-10-16",
+  "science_source_commit": "cbaffa990c7f1d9c0df418762025f6a1507f0092",
+  "source_mapping_digest_sha256": "680f4ba6f898fd727be003d1e73991a9abbdbbddd8124d872380cd878b1307d6",
+  "resource_mapping_digest_sha256": "c01d77debbc11046db102990fdb954ca8df72560362d2f818262a5440689fb3b",
+  "case_count": 2,
+  "pair_execution_complete": true,
+  "strict_reproduction": "failed",
+  "overall_metric_equivalence": "not_assessed",
+  "controlled_optimization_regression": "not_assessed",
+  "same_environment_end_to_end_speedup": "not_assessed",
+  "cases": {
+    "ds000114_sub-06": {
+      "input_kind": "public_raw_t1w",
+      "execution": "complete",
+      "exit_code": 0,
+      "output_completeness": {
+        "present": 138,
+        "expected": 138,
+        "status": "passed"
+      },
+      "production_mesh_gate": "passed",
+      "benchmark_sha256": "efe9dd0bfd0f6224cb34068092aea23dee762e83b1c421aab5d2c38466a5ecca",
+      "strict_reproduction": {
+        "passed": 14,
+        "expected": 138,
+        "status": "failed"
+      },
+      "timing_seconds": {
+        "case_outer": 19448.046,
+        "cli": 19413.989,
+        "topology_ga_lh": 17145.582,
+        "topology_ga_rh": 12380.305,
+        "hemispheres_parallel": true
+      },
+      "filled_different_voxels": 13,
+      "aparc_68_matched_regions": {
+        "thick_avg_mae_mm": 0.01818,
+        "surface_area_mae_mm2": 27.79,
+        "gray_volume_mae_mm3": 72.96,
+        "p90_absolute_relative_error_percent": {
+          "thick_avg": 1.346,
+          "surface_area": 2.873,
+          "gray_volume": 3.077
+        }
+      },
+      "mesh_quality": {
+        "candidate_proper_white_pial_crossings": {
+          "lh": 384,
+          "rh": 256
+        },
+        "archived_reference_proper_white_pial_crossings": {
+          "lh": 441,
+          "rh": 269
+        },
+        "globally_crossing_free": false,
+        "independent_v2": {
+          "status": "measured",
+          "coverage": "all topology vertex links, all white faces for cross-surface checks, all sphere and sphere.reg signed face areas on each candidate hemisphere",
+          "hemispheres": {
+            "lh": {
+              "vertices": 129917,
+              "faces": 259830,
+              "topology_valid": true,
+              "components": 1,
+              "euler": 2,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "vertex_links_checked": 129917,
+              "noncycle_vertex_links": 0,
+              "white_faces_examined": 259830,
+              "white_faces_total": 259830,
+              "proper_white_pial_crossings": 384,
+              "sphere_negative_faces": 0,
+              "sphere_reg_negative_faces": 0,
+              "white_self_intersections": 0,
+              "pial_self_intersections": 0
+            },
+            "rh": {
+              "vertices": 131673,
+              "faces": 263342,
+              "topology_valid": true,
+              "components": 1,
+              "euler": 2,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "vertex_links_checked": 131673,
+              "noncycle_vertex_links": 0,
+              "white_faces_examined": 263342,
+              "white_faces_total": 263342,
+              "proper_white_pial_crossings": 256,
+              "sphere_negative_faces": 0,
+              "sphere_reg_negative_faces": 0,
+              "white_self_intersections": 0,
+              "pial_self_intersections": 0
+            }
+          },
+          "reference_self_intersections": {
+            "lh_white": 0,
+            "lh_pial": 0,
+            "rh_white": 0,
+            "rh_pial": 0
+          }
+        }
+      },
+      "bidirectional_sampled_vertex_to_opposite_triangle_distance_mm": {
+        "status": "complete_v2",
+        "method": "sampled_vertices_to_opposite_triangle_mesh",
+        "unit": "surface RAS mm",
+        "continuous_hausdorff": false,
+        "same_index_comparison_valid": false,
+        "stages": {
+          "lh_white": {
+            "ordered_faces_equal": false,
+            "reference_vertices": 129504,
+            "candidate_vertices": 129917,
+            "candidate_to_reference_triangle": {
+              "mean_mm": 0.04318119612292296,
+              "p99_mm": 0.3079166301264094,
+              "max_mm": 3.447883506266313,
+              "over_0_1_mm": 12398
+            },
+            "reference_to_candidate_triangle": {
+              "mean_mm": 0.045190476544261095,
+              "p99_mm": 0.3168642369475301,
+              "max_mm": 4.981527934572088,
+              "over_0_1_mm": 12631
+            }
+          },
+          "lh_pial": {
+            "ordered_faces_equal": false,
+            "reference_vertices": 129504,
+            "candidate_vertices": 129917,
+            "candidate_to_reference_triangle": {
+              "mean_mm": 0.07586709022167447,
+              "p99_mm": 0.5844920956945576,
+              "max_mm": 4.900049017920093,
+              "over_0_1_mm": 27315
+            },
+            "reference_to_candidate_triangle": {
+              "mean_mm": 0.07505792588625543,
+              "p99_mm": 0.5877491396680068,
+              "max_mm": 3.062295859821706,
+              "over_0_1_mm": 27193
+            }
+          },
+          "rh_white": {
+            "ordered_faces_equal": false,
+            "reference_vertices": 131629,
+            "candidate_vertices": 131673,
+            "candidate_to_reference_triangle": {
+              "mean_mm": 0.04495165563686196,
+              "p99_mm": 0.3037509039467222,
+              "max_mm": 3.0945555228801167,
+              "over_0_1_mm": 13805
+            },
+            "reference_to_candidate_triangle": {
+              "mean_mm": 0.04573779260089978,
+              "p99_mm": 0.3108320607538336,
+              "max_mm": 1.9861596158697588,
+              "over_0_1_mm": 14044
+            }
+          },
+          "rh_pial": {
+            "ordered_faces_equal": false,
+            "reference_vertices": 131629,
+            "candidate_vertices": 131673,
+            "candidate_to_reference_triangle": {
+              "mean_mm": 0.07061538477750348,
+              "p99_mm": 0.5137718899364602,
+              "max_mm": 2.3387381372878413,
+              "over_0_1_mm": 26295
+            },
+            "reference_to_candidate_triangle": {
+              "mean_mm": 0.07152566208317593,
+              "p99_mm": 0.5273723932704875,
+              "max_mm": 2.5261056067399656,
+              "over_0_1_mm": 26770
+            }
+          }
+        }
+      },
+      "segmentation_dice": {
+        "status": "measured_v2",
+        "scope": "per nonbackground label in either volume; minimum, P05 and median over labels",
+        "files": {
+          "aseg.mgz": {
+            "different_voxels": 19933,
+            "minimum": 0.9777020398084106,
+            "p05": 0.988867397290951,
+            "median": 1
+          },
+          "aparc+aseg.mgz": {
+            "different_voxels": 29865,
+            "minimum": 0.8827410087252607,
+            "p05": 0.9054846549875287,
+            "median": 0.9628873408599568
+          },
+          "aparc.a2009s+aseg.mgz": {
+            "different_voxels": 42256,
+            "minimum": 0.6961832061068702,
+            "p05": 0.8387727263927711,
+            "median": 0.9319361842726329
+          },
+          "aparc.DKTatlas+aseg.mgz": {
+            "different_voxels": 28208,
+            "minimum": 0.881120646138314,
+            "p05": 0.9250588714865351,
+            "median": 0.9667551779075942
+          },
+          "wmparc.mgz": {
+            "different_voxels": 41918,
+            "minimum": 0.8729508196721312,
+            "p05": 0.9060181056620704,
+            "median": 0.9613365155131265
+          },
+          "ribbon.mgz": {
+            "different_voxels": 24735,
+            "minimum": 0.973510711684717,
+            "p05": 0.9735974173409712,
+            "median": 0.983265487509082
+          },
+          "filled.mgz": {
+            "different_voxels": 13,
+            "minimum": 0.9999745860954663,
+            "p05": 0.9999750685108378,
+            "median": 0.999979410249182
+          }
+        },
+        "tiny_label_77_wm_hypointensities": null
+      },
+      "local_anomalies": {
+        "status": "regional_extrema_and_sampled_surface_measured; same_index_vertex_maps_not_assessed_without_correspondence",
+        "aparc_68_largest_absolute_relative_error_by_measure": {
+          "ThickAvg": {
+            "region": "rh/entorhinal",
+            "relative_percent": 4.214046822742471,
+            "reference": 2.99,
+            "candidate": 3.116
+          },
+          "SurfArea": {
+            "region": "lh/frontalpole",
+            "relative_percent": 8.227848101265822,
+            "reference": 316,
+            "candidate": 342
+          },
+          "GrayVol": {
+            "region": "lh/frontalpole",
+            "relative_percent": 8.363309352517986,
+            "reference": 1112,
+            "candidate": 1205
+          }
+        },
+        "largest_reported_sampled_surface_distance_mm": 4.981527934572088
+      },
+      "gpu_memory": {
+        "fnit_process_tree_sampled_peak_bytes": null,
+        "ownership_status": "unresolved",
+        "target_gpu_whole_card_sampled_peak_bytes": 24428675072,
+        "external_processes_included": true,
+        "under_20000000000_bytes_verified": null
+      },
+      "posthoc_v2": {
+        "evaluation_exit_code": 0,
+        "status": "complete",
+        "comparison_wall_seconds": 1224.8759742979892,
+        "artifact_sha256": {
+          "evaluation.json": "99fd3483e25aa591e6c5b2299f18adec0148b9ef74f5b432528640292be32bba",
+          "dice_candidate_vs_official.json": "5ca86499e4cf3a5a3ea224b557963eba9f555caa3cd1a32a3ba855233226a3ff",
+          "no_th3_candidate_vs_official.json": "19b90a75b98d71dce149adf2a6ac8fd6276b73354245d2b68253d9e15fe55581",
+          "region_candidate_vs_official.json": "25147dd9c5bc0503c913c3d3dede1aff782b239a0665c37838684af6e5999acf",
+          "quality_candidate/report.json": "b437a94b0c7244a55fa6b5e0252163d1da94f070cb8775661c5b2789809f1862",
+          "quality_official/report.json": "189113be54ebe4d2db1609006e1134689216a7fb5960261570400cb4086156bf",
+          "geometry_candidate_vs_official.json": "1fbcc56750b8abf065de430b255714ea4ab564b186074ec438ee159413af1ab4",
+          "surface_candidate_vs_official.json": "a886fd2f81dff1d1a812f0538bdc08d6454a7ce11bdd247eb17d94b6a2d452f9"
+        }
+      },
+      "no_th3_region_volume": {
+        "status": "measured_v2",
+        "unit": "mm3",
+        "scope": "common -no-th3 algorithm on each own output mesh; separate from raw stats GrayVol and TH3 vertex volume",
+        "reference_raw_stats_explicit_mode": [
+          "-no-th3"
+        ],
+        "candidate_raw_stats_explicit_mode": [
+          "unspecified"
+        ],
+        "atlases": {
+          "aparc": {
+            "matched_regions": 68,
+            "mae": 72.88473647982146,
+            "p90_absolute_relative_error_percent": 3.1109091591334836,
+            "maximum_absolute_error": 318.1236020429533
+          },
+          "aparc.DKTatlas": {
+            "matched_regions": 62,
+            "mae": 72.29579240748124,
+            "p90_absolute_relative_error_percent": 3.943828872390444,
+            "maximum_absolute_error": 253.41403976310357
+          },
+          "aparc.a2009s": {
+            "matched_regions": 148,
+            "mae": 77.18698750758914,
+            "p90_absolute_relative_error_percent": 8.32452342171824,
+            "maximum_absolute_error": 281.26013093450206
+          }
+        }
+      },
+      "figures": {
+        "status": "private_generated_and_sha256_verified",
+        "scope": [
+          "T1 with white/pial overlay",
+          "68-region errors",
+          "local region boundary; not a surface-distance heatmap"
+        ],
+        "script_sha256": "c9adfdb8338f3a8213461320667013cb28ca6723217ee0d98702a6215acfe7eb",
+        "provenance_sha256": "826d035e4261ccb088da5e0c7ccd0272e4a9be37a2445152f1cb90f51e1bba9f",
+        "output_hashes_match_provenance": true,
+        "files_sha256": {
+          "t1_surface_overlay.png": "448fe92487994d6414a9f235682bb6cfd696e06682a26528e9a7f649b0fe67a5",
+          "region_errors.png": "509d0d6b2534838b33e20a2afa3ff1281142ea7e1aedaed9681e1069e6aa90d9",
+          "local_region_boundary.png": "44ac2799f13f319726ce60a81393be4c9ec3b33fb8fd85ad43f319ef08f95402"
+        }
+      }
+    },
+    "ds000114_sub-07": {
+      "input_kind": "public_raw_t1w",
+      "execution": "complete",
+      "exit_code": 0,
+      "output_completeness": {
+        "present": 138,
+        "expected": 138,
+        "status": "passed"
+      },
+      "production_mesh_gate": "passed",
+      "benchmark_sha256": "c5cd0b0c5d7b492fef91edcab7b388dbbdf7de8a89df62df7cfa757522d2ec3b",
+      "strict_reproduction": {
+        "passed": 23,
+        "expected": 138,
+        "status": "failed"
+      },
+      "timing_seconds": {
+        "case_outer": 12094.283,
+        "cli": 12082.773,
+        "topology_ga_lh": 7632.393,
+        "topology_ga_rh": 9671.259,
+        "hemispheres_parallel": true
+      },
+      "filled_different_voxels": 0,
+      "aparc_68_matched_regions": {
+        "thick_avg_mae_mm": 0.03259,
+        "surface_area_mae_mm2": 27.72,
+        "gray_volume_mae_mm3": 95.18,
+        "p90_absolute_relative_error_percent": {
+          "thick_avg": 3.037,
+          "surface_area": 3.704,
+          "gray_volume": 4.064
+        }
+      },
+      "mesh_quality": {
+        "candidate_proper_white_pial_crossings": {
+          "lh": 221,
+          "rh": 170
+        },
+        "archived_reference_proper_white_pial_crossings": {
+          "lh": 240,
+          "rh": 213
+        },
+        "globally_crossing_free": false,
+        "independent_v2": {
+          "status": "measured",
+          "coverage": "all topology vertex links, all white faces for cross-surface checks, all sphere and sphere.reg signed face areas on each candidate hemisphere",
+          "hemispheres": {
+            "lh": {
+              "vertices": 114378,
+              "faces": 228752,
+              "topology_valid": true,
+              "components": 1,
+              "euler": 2,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "vertex_links_checked": 114378,
+              "noncycle_vertex_links": 0,
+              "white_faces_examined": 228752,
+              "white_faces_total": 228752,
+              "proper_white_pial_crossings": 221,
+              "sphere_negative_faces": 0,
+              "sphere_reg_negative_faces": 0,
+              "white_self_intersections": 0,
+              "pial_self_intersections": 0
+            },
+            "rh": {
+              "vertices": 115203,
+              "faces": 230402,
+              "topology_valid": true,
+              "components": 1,
+              "euler": 2,
+              "boundary_edges": 0,
+              "nonmanifold_edges": 0,
+              "vertex_links_checked": 115203,
+              "noncycle_vertex_links": 0,
+              "white_faces_examined": 230402,
+              "white_faces_total": 230402,
+              "proper_white_pial_crossings": 170,
+              "sphere_negative_faces": 0,
+              "sphere_reg_negative_faces": 0,
+              "white_self_intersections": 0,
+              "pial_self_intersections": 0
+            }
+          },
+          "reference_self_intersections": {
+            "lh_white": 0,
+            "lh_pial": 0,
+            "rh_white": 7,
+            "rh_pial": 4
+          }
+        }
+      },
+      "bidirectional_sampled_vertex_to_opposite_triangle_distance_mm": {
+        "status": "complete_v2",
+        "method": "sampled_vertices_to_opposite_triangle_mesh",
+        "unit": "surface RAS mm",
+        "continuous_hausdorff": false,
+        "same_index_comparison_valid": false,
+        "stages": {
+          "lh_white": {
+            "ordered_faces_equal": false,
+            "reference_vertices": 114221,
+            "candidate_vertices": 114378,
+            "candidate_to_reference_triangle": {
+              "mean_mm": 0.035486588459366364,
+              "p99_mm": 0.2444254024035051,
+              "max_mm": 1.343781115458811,
+              "over_0_1_mm": 8038
+            },
+            "reference_to_candidate_triangle": {
+              "mean_mm": 0.037205795735625664,
+              "p99_mm": 0.2581231684714026,
+              "max_mm": 6.1296414685761125,
+              "over_0_1_mm": 8105
+            }
+          },
+          "lh_pial": {
+            "ordered_faces_equal": false,
+            "reference_vertices": 114221,
+            "candidate_vertices": 114378,
+            "candidate_to_reference_triangle": {
+              "mean_mm": 0.06388421193916102,
+              "p99_mm": 0.45440781364068245,
+              "max_mm": 2.6710906456219696,
+              "over_0_1_mm": 20119
+            },
+            "reference_to_candidate_triangle": {
+              "mean_mm": 0.06306103929487455,
+              "p99_mm": 0.4390050008967766,
+              "max_mm": 2.808595438943071,
+              "over_0_1_mm": 20105
+            }
+          },
+          "rh_white": {
+            "ordered_faces_equal": false,
+            "reference_vertices": 115082,
+            "candidate_vertices": 115203,
+            "candidate_to_reference_triangle": {
+              "mean_mm": 0.039591867137976154,
+              "p99_mm": 0.2838931351284506,
+              "max_mm": 2.4582242261893423,
+              "over_0_1_mm": 9832
+            },
+            "reference_to_candidate_triangle": {
+              "mean_mm": 0.038781733170368655,
+              "p99_mm": 0.2630444800652374,
+              "max_mm": 2.273234229332074,
+              "over_0_1_mm": 8949
+            }
+          },
+          "rh_pial": {
+            "ordered_faces_equal": false,
+            "reference_vertices": 115082,
+            "candidate_vertices": 115203,
+            "candidate_to_reference_triangle": {
+              "mean_mm": 0.08283937355821218,
+              "p99_mm": 0.5038718820634408,
+              "max_mm": 3.0578881415089323,
+              "over_0_1_mm": 30579
+            },
+            "reference_to_candidate_triangle": {
+              "mean_mm": 0.08183702344696925,
+              "p99_mm": 0.5061164639066423,
+              "max_mm": 2.9499638944821185,
+              "over_0_1_mm": 29631
+            }
+          }
+        }
+      },
+      "segmentation_dice": {
+        "status": "measured_v2",
+        "scope": "per nonbackground label in either volume; minimum, P05 and median over labels",
+        "files": {
+          "aseg.mgz": {
+            "different_voxels": 14310,
+            "minimum": 0.6666666666666666,
+            "p05": 0.9821267270581061,
+            "median": 1
+          },
+          "aparc+aseg.mgz": {
+            "different_voxels": 23285,
+            "minimum": 0.6666666666666666,
+            "p05": 0.9187970985652418,
+            "median": 0.9643469753912381
+          },
+          "aparc.a2009s+aseg.mgz": {
+            "different_voxels": 35256,
+            "minimum": 0.6666666666666666,
+            "p05": 0.8290513969742243,
+            "median": 0.929701733503066
+          },
+          "aparc.DKTatlas+aseg.mgz": {
+            "different_voxels": 21211,
+            "minimum": 0.6666666666666666,
+            "p05": 0.9302324112353985,
+            "median": 0.9699960485422052
+          },
+          "wmparc.mgz": {
+            "different_voxels": 35137,
+            "minimum": 0.8686294416243655,
+            "p05": 0.911388227019142,
+            "median": 0.9621641381831475
+          },
+          "ribbon.mgz": {
+            "different_voxels": 18462,
+            "minimum": 0.9747738981824533,
+            "p05": 0.9754174245538576,
+            "median": 0.9864973509655546
+          },
+          "filled.mgz": {
+            "different_voxels": 0,
+            "minimum": 1,
+            "p05": 1,
+            "median": 1
+          }
+        },
+        "tiny_label_77_wm_hypointensities": {
+          "aseg.mgz": {
+            "name": "WM-hypointensities",
+            "reference_voxels": 1,
+            "candidate_voxels": 2,
+            "dice": 0.6666666666666666
+          },
+          "aparc+aseg.mgz": {
+            "name": "WM-hypointensities",
+            "reference_voxels": 1,
+            "candidate_voxels": 2,
+            "dice": 0.6666666666666666
+          },
+          "aparc.a2009s+aseg.mgz": {
+            "name": "WM-hypointensities",
+            "reference_voxels": 1,
+            "candidate_voxels": 2,
+            "dice": 0.6666666666666666
+          },
+          "aparc.DKTatlas+aseg.mgz": {
+            "name": "WM-hypointensities",
+            "reference_voxels": 1,
+            "candidate_voxels": 2,
+            "dice": 0.6666666666666666
+          }
+        }
+      },
+      "local_anomalies": {
+        "status": "regional_extrema_and_sampled_surface_measured; same_index_vertex_maps_not_assessed_without_correspondence",
+        "aparc_68_largest_absolute_relative_error_by_measure": {
+          "ThickAvg": {
+            "region": "rh/entorhinal",
+            "relative_percent": 6.504672897196277,
+            "reference": 2.675,
+            "candidate": 2.849
+          },
+          "SurfArea": {
+            "region": "lh/rostralanteriorcingulate",
+            "relative_percent": -18.309859154929576,
+            "reference": 710,
+            "candidate": 580
+          },
+          "GrayVol": {
+            "region": "lh/rostralanteriorcingulate",
+            "relative_percent": -11.366384522370012,
+            "reference": 1654,
+            "candidate": 1466
+          }
+        },
+        "largest_reported_sampled_surface_distance_mm": 6.1296414685761125
+      },
+      "gpu_memory": {
+        "fnit_process_tree_sampled_peak_bytes": null,
+        "ownership_status": "unresolved",
+        "target_gpu_whole_card_sampled_peak_bytes": 63715672064,
+        "external_processes_included": true,
+        "under_20000000000_bytes_verified": null
+      },
+      "posthoc_v2": {
+        "evaluation_exit_code": 0,
+        "status": "complete",
+        "comparison_wall_seconds": 1119.2841348149814,
+        "artifact_sha256": {
+          "evaluation.json": "df45febf140e569c3022c5b75cc10df780a1046e8fa26fa4b1f507f03a4c07aa",
+          "dice_candidate_vs_official.json": "a9154e00399eec8d3a08173eff1e3671a03fa23cf98911602035bde85c92b730",
+          "no_th3_candidate_vs_official.json": "8a767520bf377d09eef6b0a669ea67a8fb0228245df8959041442f3719562551",
+          "region_candidate_vs_official.json": "ba49c38c0a971d5bc6b36600db92561331a866b701612e81c0d8ec10c25097c1",
+          "quality_candidate/report.json": "a2467e622e3672ad7651280571d2239d093c24f285eb676b6a67ad307f196dea",
+          "quality_official/report.json": "c187a7725e4697d3d3faaf8044941ceda398985fe19de5f48e17a68f53d4aac5",
+          "geometry_candidate_vs_official.json": "327da04a07a1b44d48a83a170e6698ee0e8937d417e97fe57ddec898c03ceaf4",
+          "surface_candidate_vs_official.json": "c7b76c2231d2fc10d202f99c4004aba52463c859ced06cfbc2556ac98ddf116a"
+        }
+      },
+      "no_th3_region_volume": {
+        "status": "measured_v2",
+        "unit": "mm3",
+        "scope": "common -no-th3 algorithm on each own output mesh; separate from raw stats GrayVol and TH3 vertex volume",
+        "reference_raw_stats_explicit_mode": [
+          "-no-th3"
+        ],
+        "candidate_raw_stats_explicit_mode": [
+          "unspecified"
+        ],
+        "atlases": {
+          "aparc": {
+            "matched_regions": 68,
+            "mae": 95.1783609517904,
+            "p90_absolute_relative_error_percent": 4.073615596910372,
+            "maximum_absolute_error": 594.2505924172656
+          },
+          "aparc.DKTatlas": {
+            "matched_regions": 62,
+            "mae": 87.40061958962733,
+            "p90_absolute_relative_error_percent": 3.7345637363484263,
+            "maximum_absolute_error": 460.34197192902866
+          },
+          "aparc.a2009s": {
+            "matched_regions": 148,
+            "mae": 81.91088178973628,
+            "p90_absolute_relative_error_percent": 9.938280709400843,
+            "maximum_absolute_error": 409.34608926245346
+          }
+        }
+      },
+      "figures": {
+        "status": "private_generated_and_sha256_verified",
+        "scope": [
+          "T1 with white/pial overlay",
+          "68-region errors",
+          "local region boundary; not a surface-distance heatmap"
+        ],
+        "script_sha256": "c9adfdb8338f3a8213461320667013cb28ca6723217ee0d98702a6215acfe7eb",
+        "provenance_sha256": "4921bc5a9afc9b2cc675bac210a4c488be5094f535a2716f12f2699aa0c5116f",
+        "output_hashes_match_provenance": true,
+        "files_sha256": {
+          "t1_surface_overlay.png": "38a57a0d7657100b6ecf4c0a3ecaa2b27d93427c39d6ee4b3d1d7bf6fe213fb9",
+          "region_errors.png": "58149f6ec6b21f4f3fc4b6a22f1e5a966dba8483918007f5bb111d828844bc64",
+          "local_region_boundary.png": "21d46b2d60c995f194ce8f1b2180ce1d718d764e1f06e3d1dcc7506f3988f64a"
+        }
+      }
+    }
+  },
+  "gpu_lease": {
+    "original_exit_audit": "failed",
+    "reason": "external_process_from_different_uid_could_not_be_identified",
+    "original_receipt_preserved": true,
+    "science_exit_codes": {
+      "ds000114_sub-06": 0,
+      "ds000114_sub-07": 0
+    }
+  },
+  "reference_view": {
+    "official_version": "freesurfer-linux-centos7_x86_64-8.2.0-20260314-d932c45",
+    "ordinary_files": 700,
+    "symlinks": 0,
+    "manifest_sha256": "e6aa553acfe943b4dd753804b7fbf57e6916c89d16f3c65003a677515be303be",
+    "production_input": false,
+    "historical_official_wall_seconds": {
+      "ds000114_sub-06": 5735.362919188105,
+      "ds000114_sub-07": 6138.304222329054
+    },
+    "same_environment_paired_timing": false
+  },
+  "provenance_limits": [
+    "The two cases started from public raw T1w images and separate empty output directories.",
+    "A successful science exit and the production mesh gate do not imply strict reproduction or metric equivalence.",
+    "The topology GA hemispheres ran in parallel and their stage durations must not be added to the case wall time.",
+    "Whole-card GPU samples include external processes; FNIT-owned simultaneous peak is unresolved.",
+    "The historical official wall time is not a controlled same-environment speed comparison.",
+    "No prospective overall metric-equivalence threshold has been confirmed.",
+    "V1 sub-06 surface-distance block was a float32 MGH footer/MRI-affine evaluator gate on both sides; completed v2 re-evaluates unchanged scientific outputs.",
+    "All final white/pial meshes differ in vertex count from archived references; bidirectional sampled vertex-to-triangle distances are shape diagnostics, not same-index differences or continuous Hausdorff distances.",
+    "Extended mesh checks cover all candidate vertices and white faces but find white/pial crossings in both cases; sub-07 archived reference also has 7 right-white and 4 right-pial self-intersecting faces.",
+    "Private figures are hash-verified and not redistributed; no surface-distance heatmap was generated."
+  ],
+  "posthoc_evaluation": {
+    "version": "v2_footer",
+    "status": "complete_both_cases",
+    "evaluator_source_sha256": {
+      "evaluate_recon_torch_run.py": "4b1e117f87609afdf4f632369dfe48e862cea2e339bf772b1e5e2307523af7a8",
+      "recon_evaluation_checks.py": "f00fca03c0e323c21075358b619481e30de9039da70aadfedf23d8fc96e8d7ea",
+      "compare_whole_cases.py": "79dd2ec3237300ea0dcfb7de44f789ebe36791fc25d502d7187da7f51dea41b7"
+    },
+    "science_outputs_rerun": false,
+    "reference_outputs_rerun": false,
+    "mgh_float32_footer_gate": {
+      "v1_case": "ds000114_sub-06",
+      "v1_reference_and_candidate_footer_to_mri_max_abs_mm": [
+        0.000006318092346191406,
+        0.000006317290001334186
+      ],
+      "v1_atol_mm": 0.000001,
+      "common_conform_and_tkras": true,
+      "diagnosis": "v1 evaluator over-strict affine comparison against float32 MGH quantization on both sides; corrected evaluator v2 completed",
+      "v2_surface_distance_status": "complete"
+    },
+    "surface_stage_coverage": {
+      "ds000114_sub_06": {
+        "bidirectional_sampled_triangle_distance_stages": 16,
+        "total_stages": 16
+      },
+      "ds000114_sub_07": {
+        "bidirectional_sampled_triangle_distance_stages": 14,
+        "exact_ordered_orig_nofix_stages": 2,
+        "total_stages": 16
+      }
+    }
+  }
+}

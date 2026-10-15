@@ -67,12 +67,12 @@ GCA 对应独立参考中的 `mri_em_register`，拓扑 GA 对应 `mris_fix_topo
 
 现有[GPU 距离同输入实验](TOPOLOGY_GPU_DISTANCE_FITNESS.md)在一例真实冻结缺陷上完成完整首缺陷配对：CPU/GPU 均有 495 次搜索评分及 1 次最终评分，完整 CLI 为 1275.139/1225.616 秒，最终状态逐字节一致。这只验证该阶段当时的冻结源码，不是四项组合或当前整例提速。状态打包、GCA、半球调度各有单独阶段记录；本页不把其局部收益相加。
 
-[旧 f016 两例整例报告](../../validation/recon_all/optimizations/20261014_gpucw1_f016_partial/README.md)记录 sub-07 完成且 138/138 输出、23/138 严格逐文件通过，sub-06 在拓扑质量门失败。它不是随后修复的整例结果，也没有证明本页四项组合通过；该版本的最终脑区误差、网格局部异常、历史官方时间及受外部进程污染的显存样本均在报告中单列。当前组合的两例空目录整例、同条件速度、进程树峰值和整体指标等效均待评估，不能用阶段测试代替。公开报告未附私有 T1 脑图；真实第四缺陷的[距离差图](../../validation/recon_all/optimizations/20261011_fnit4_gpu_fitness/fourth_real_roi.png)只对应旧阶段输入。
+[旧 f016 两例整例报告](../../validation/recon_all/optimizations/20261014_gpucw1_f016_partial/README.md)记录 sub-07 完成且 138/138 输出、23/138 严格逐文件通过，sub-06 在拓扑质量门失败。它不是随后修复的整例结果；该版本的最终脑区误差、网格局部异常、历史官方时间及受外部进程污染的显存样本均在报告中单列。[cbaffa 两例原始 T1 空目录整例](../../validation/recon_all/optimizations/20261016_gpucw1_cbaffa_two_case/README.md)均退出 0，138/138 输出和生产网格门通过，严格逐文件诊断分别为 14/138、23/138。四项组合的同条件提速、FNIT 自身显存峰值及整体指标等效仍未判定，不能用阶段测试或历史官方耗时补出结论。公开报告未附私有 T1 脑图；真实第四缺陷的[距离差图](../../validation/recon_all/optimizations/20261011_fnit4_gpu_fitness/fourth_real_roi.png)只对应旧阶段输入。
 
 ## 6. 更新与参考
 
 - 2026-10-11：完整 GPU 距离阶段的同输入门和后端选择已分别记录；默认选择未因此改变。
 - 2026-10-14：冻结 f016 两例运行仅一例完成，拓扑质量和整例等效问题保留。
-- 本次文档补齐现有接口约束；未新增科学运行或重标旧 benchmark。
+- 2026-10-16：cbaffa 两例整例及 v2 事后评估已完成，未判定项见上方报告；v1 的 MGH 头量化误判单列为评估器历史问题，历史阶段 benchmark 仍绑定原版本。
 
 实现见 [`python_profile.py`](../../src/fnit/recon_all/python_profile.py)、[`native_free.py`](../../src/fnit/recon_all/native_free.py)、[`hemisphere_pipeline.py`](../../src/fnit/recon_all/hemisphere_pipeline.py)。原算法见固定[FreeSurfer 源码](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a)及 Fischl, Liu & Dale, *IEEE TMI* 20:70–80 (2001), [DOI:10.1109/42.906426](https://doi.org/10.1109/42.906426)；GPU 核采用 [Triton](https://github.com/triton-lang/triton)。

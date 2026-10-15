@@ -4,7 +4,7 @@
 
 当前独立Python候选的[2026-10-11合并、真实阶段回归、失败项和最终安装结果](INTEGRATION_RESULTS_20261011.md)单独记录；旧版本证据继续绑定其原源码。[公开源码与实测版本的对应关系](PUBLICATION_SNAPSHOT_20261011.md)说明报告派生哈希和安装源码核对范围。
 
-第二轮候选选项见[接线与验收边界](ROUND2_INTEGRATION.md)、[持久双半球调度](PERSISTENT_HEMISPHERE_PIPELINE.md)和[Triton 编译器选择](TRITON_RUNTIME.md)；[f016 两例部分整例记录](../../validation/recon_all/optimizations/20261014_gpucw1_f016_partial/README.md)单列旧版结果，不能代表后续补丁的两例验收。
+第二轮候选选项见[接线与验收边界](ROUND2_INTEGRATION.md)、[持久双半球调度](PERSISTENT_HEMISPHERE_PIPELINE.md)和[Triton 编译器选择](TRITON_RUNTIME.md)；[f016 两例部分整例记录](../../validation/recon_all/optimizations/20261014_gpucw1_f016_partial/README.md)单列旧版结果。[cbaffa 两例原始 T1 整例与完成的 v2 事后评估](../../validation/recon_all/optimizations/20261016_gpucw1_cbaffa_two_case/README.md)分别记录执行、138 项输出、网格质量和数值诊断，整体指标等效与同环境提速尚未判定。
 
 [返回首页](../../README.md) · [完整旧文档与更早证据](../../validation/recon_all/readme_archive_20261005.md)
 
@@ -21,17 +21,17 @@
 
 当前十分钟目标的热点和五个优化任务见 [2026-10-07 性能热点与任务](HOTSPOT_ACCELERATION_20261007.md)。
 当前纯 Python GPU 迁移矩阵和阻断项见 [2026-10-08 迁移状态](PYTHON_GPU_STATUS_20261008.md)。
-2026-10-10起以脱离原版阶段程序为目标，允许Python/Numba等CPU计算；`backend="python"`完整独立候选、阶段误差和原始整例结果见[自有Python流程](PYTHON_SURFACE_PIPELINE.md)。数字拓扑与原GA不同，整体指标等效未判定。新增显式 `topology_backend="python-ga"` 复用[安装包内的完整自有 GA](PYTHON_GENETIC_PROFILE.md)，原始整例验收仍待完成。
-原始T1的独立Python v4两例已退出并失败，球面配准和pial相交质量仍待修复；[最终整例收据](../../validation/recon_all/optimizations/20261010_python_profile/README.md)与后续阶段优化分开。
-2026-10-11的完整GA有序扫描已接入自有Numba并通过同输入回归，本地与服务器的[实际新wheel安装](../../validation/recon_all/optimizations/20261011_python_ga_blocker_route/README.md)核对十二模块及依赖；[当前原始T1实际前段](../../validation/recon_all/optimizations/20261011_python_ga_volume_prefix/README.md)对旧Python前段无新增数组或几何误差。新安装产物的整例、最终质量与整体等效仍待验证。
+2026-10-10起以脱离原版阶段程序为目标，允许Python/Numba等CPU计算；`backend="python"`完整独立候选、阶段误差和原始整例结果见[自有Python流程](PYTHON_SURFACE_PIPELINE.md)。数字拓扑与原GA不同，整体指标等效未判定。显式 `topology_backend="python-ga"` 复用[安装包内的完整自有 GA](PYTHON_GENETIC_PROFILE.md)；cbaffa 两例已完成执行、138 项输出和生产网格门，严格逐文件复现未通过，整体指标等效未判定，见[现版整例报告](../../validation/recon_all/optimizations/20261016_gpucw1_cbaffa_two_case/README.md)。
+2026-10-10 的独立Python v4两例已退出并失败，当时球面配准和pial相交质量未通过；[该版最终整例收据](../../validation/recon_all/optimizations/20261010_python_profile/README.md)与后续阶段优化分开。
+2026-10-11的完整GA有序扫描已接入自有Numba并通过同输入回归，本地与服务器的[该版 wheel 安装](../../validation/recon_all/optimizations/20261011_python_ga_blocker_route/README.md)核对十二模块及依赖；[该版原始T1前段](../../validation/recon_all/optimizations/20261011_python_ga_volume_prefix/README.md)对旧Python前段无新增数组或几何误差。该安装产物的整例、最终质量与整体等效当时尚未验证；后续 cbaffa 源码整例单独报告。
 
 新版有序扫描配方已完成[原始 T1 自产前段回归](../../validation/recon_all/optimizations/20261011_python_ga_raw_v3_prefix/README.md)：新旧 14 张 MRI 的数组、几何、dtype 和 LTA 全同，MRI 文件 SHA 为 8/14 相同；对应旧v2/v3整例已退出并失败，各28/138输出，详见[现场退出核查](../../validation/recon_all/optimizations/20261011_current_whole_preparation/README.md)；尚无本轮最终安装包的完整提速、表面质量或整体等效结论。
 后续[查询边向量复用](TOPOLOGY_BLOCKER_QUERY_REUSE.md)通过完整首缺陷、第四候选及直接库入口回归；首缺陷冷CLI观察为1357.057→1217.854秒，短阶段冷启动变慢的结果也保留。该核尚未用于上述冻结整例，不能把阶段观察当作整例提速。
 原拓扑算法的独立迁移已完成[候选几何](TOPOLOGY_CANDIDATE_GEOMETRY.md)、[校准先验](TOPOLOGY_DEFECT_CALIBRATION.md)、[候选评分](TOPOLOGY_PATCH_FITNESS.md)、[反馈统计](TOPOLOGY_CANDIDATE_STATISTICS.md)及[状态恢复](TOPOLOGY_CANDIDATE_STATE.md)的真实冻结阶段回归；[自产初始基底](TOPOLOGY_GENETIC_BASE_PREPARE.md)的完整坐标、有序面与K1/K2已通过同输入对照。各报告保留实际版本和比较范围。
-[连续候选状态](TOPOLOGY_CANDIDATE_CYCLE.md)、[全局先验](TOPOLOGY_GLOBAL_PRIORS.md)和[最终缺陷写回](TOPOLOGY_GA_FINALIZE.md)保留各自冻结阶段回归；[自产首缺陷完整搜索](TOPOLOGY_GENETIC_SEARCH.md)已完成29轮（轨迹索引0–28）/495次搜索评分及1次最终评分，首候选9组逐位一致，冷子CLI2502.916秒。全部9缺陷的[自有premesh控制器](TOPOLOGY_GENETIC_REPAIR.md)继续运行，成功后自动进入[标准remesh与最终orig验证](TOPOLOGY_GENETIC_ORIG.md)；两者与原始T1整例分别记录。完整源赢家及整体指标等效尚未判定，不改生产默认。
+[连续候选状态](TOPOLOGY_CANDIDATE_CYCLE.md)、[全局先验](TOPOLOGY_GLOBAL_PRIORS.md)和[最终缺陷写回](TOPOLOGY_GA_FINALIZE.md)保留各自冻结阶段回归；[自产首缺陷完整搜索](TOPOLOGY_GENETIC_SEARCH.md)已完成29轮（轨迹索引0–28）/495次搜索评分及1次最终评分，首候选9组逐位一致，冷子CLI2502.916秒。当时全部9缺陷的[自有premesh控制器](TOPOLOGY_GENETIC_REPAIR.md)继续运行，成功后自动进入[标准remesh与最终orig验证](TOPOLOGY_GENETIC_ORIG.md)；后续原始T1整例见 cbaffa 报告。该阶段完整源赢家及整体指标等效尚未判定，不改生产默认。
 2026-10-11的同输入阶段改进见[相交候选过滤](SOURCE_INTERSECTION_CANDIDATE_FILTER.md)与[同候选邻接复用](TOPOLOGY_CANDIDATE_INCIDENT_REUSE.md)：完整清理API缩短41.23%，候选/写回阶段CLI缩短10.58%，输出保持；不能相加或视为整例收益。WM完整路径搜索已接入[CPU及Torch混合入口](WM_REMOVE_PATHS.md)，两例解码体素与固定源参考一致，活跃路径的真实数据覆盖仍有限。最终orig的完成检查也已补修，详见上述功能页。
-完整自产 GA/orig 与原生参考的[全网格比较](GENETIC_MESH_COMPARISON.md)已排队，等待自产完成门；不同网格只报告双向点到三角面距离。[pial 终态诊断](PIAL_RESIDUAL_CLEANUP_DIAGNOSTIC.md)确认同输入两次原生参考与自有结果坐标一致，但均保留32个相交面，网格质量仍失败。
-面发现的[不可变保留面索引复用](TOPOLOGY_FACE_DETECTION_CACHE.md)通过同输入完整阶段ABBA，162项状态与控制不变，CLI中位数76.883→72.862秒（本组缩短5.23%）。后续[完整默认首缺陷搜索](TOPOLOGY_GENETIC_FACE_CACHE.md)的全部496评分、29轮、随机流、80字段和三份检查点相同；CLI2263.423→1329.629秒是跨时段观察，不是受控整例提速，全部九缺陷仍待验证。状态缓存的短阶段冷CLI曾变慢，[默认保持关闭](TOPOLOGY_CANDIDATE_STATE_CACHE.md)；后续[完整首缺陷状态缓存](TOPOLOGY_GENETIC_STATE_CACHE.md)保留输出一致及暖评分略慢的结果，跨时段总耗时另报。原生参考的[同输入重复与控制诊断](../../validation/recon_all/optimizations/20261011_topology_native_repeat/README.md)保留一处六位打印差异。
+该阶段记录写成时，完整自产 GA/orig 与原生参考的[全网格比较](GENETIC_MESH_COMPARISON.md)已排队，等待自产完成门；不同网格只报告双向点到三角面距离。[pial 终态诊断](PIAL_RESIDUAL_CLEANUP_DIAGNOSTIC.md)确认同输入两次原生参考与自有结果坐标一致，但均保留32个相交面，网格质量仍失败。
+面发现的[不可变保留面索引复用](TOPOLOGY_FACE_DETECTION_CACHE.md)通过同输入完整阶段ABBA，162项状态与控制不变，CLI中位数76.883→72.862秒（本组缩短5.23%）。后续[完整默认首缺陷搜索](TOPOLOGY_GENETIC_FACE_CACHE.md)的全部496评分、29轮、随机流、80字段和三份检查点相同；CLI2263.423→1329.629秒是跨时段观察，不是受控整例提速，该阶段当时未验证全部九缺陷。状态缓存的短阶段冷CLI曾变慢，[默认保持关闭](TOPOLOGY_CANDIDATE_STATE_CACHE.md)；后续[完整首缺陷状态缓存](TOPOLOGY_GENETIC_STATE_CACHE.md)保留输出一致及暖评分略慢的结果，跨时段总耗时另报。原生参考的[同输入重复与控制诊断](../../validation/recon_all/optimizations/20261011_topology_native_repeat/README.md)保留一处六位打印差异。
 输入并行接线后的两例原始T1→filled已完成，14图及LTA无新增数值差，完整前段耗时方向不一致；保留串行默认，见[前段回归、耗时、显存与脑图](../../validation/recon_all/optimizations/20261010_input_n4_synthseg_prefix/README.md)。
 完整SimpleITK Python N4、参数和两例同输入误差见 [N4独立Python库实现](N4_SIMPLEITK.md)；
 完整固定N4 PyTorch实验及真实误差见 [本轮N4](N4_COMPLETE_TORCH_20261009.md)；
@@ -50,7 +50,7 @@ GCA候选评分及新批量求逆见 [GCA说明](MRI_EM_TORCH_BACKEND.md)。
 按完整同输入ABBA检验重复法向和弧距计算的移除；阶段收益与整例结果分开。
 原始T1空目录配对采用[整例复现脚本](TORCH_INTEGRATION_20261009.md)。
 容器 PID 与 GPU 显存归属的记录规则见[进程显存说明](GPU_PROCESS_MEMORY.md)。
-局部内核收益与完整阶段、整例收益分别记录，独立Python候选的完整生产验收仍未通过。
+局部内核收益与完整阶段、整例收益分别记录。cbaffa 两例的执行、输出和生产网格门已通过；严格逐文件复现未通过，整体指标等效仍未判定。
 ## 1. 功能简介
 
 `fnit-recon-all`从一幅原始T1w生成体积分割、双侧white/pial表面、顶点指标、脑区标注与统计。标准单T1入口目前不支持多T1、T2/FLAIR或纵向重建。
@@ -426,7 +426,9 @@ recon-all -i subject_T1w.nii.gz -s sub01 -sd reference/subjects -all -openmp 4
 
 ## 5. 最新精度和运行时间
 
-最新完整自产配对及实际官方评分冻结为 **79a41cdd**：复用完整有序Numba Gibbs与CPU remesh双精度标量存储后，两例从原始T1/空目录连续完成，CLI **2718.390/2653.001秒**，完整harness **2737.822/2672.439秒**。相对同机同线程e34，本组慢28.0508%/29.0136%，没有整例提速；注释组缩短17.675/13.171秒，多个未改算法阶段也变慢，因果原因尚未隔离。138输出、生产网格、16张同序表面、七分割及68区统计保持，20/44顶点图有零容差尾差。实际官方严格复现仍6/138、7/138，厚度MAE **0.044824/0.050676mm**，整体等效未判定。完整阶段、544条逐区误差、实际官方距离/脑图、显存归属未知和安装范围见[本版两例完整报告](../../validation/recon_all/optimizations/20261010_whole_gcsa_remesh_a100_79a41cdd/README.md)，[变慢分解](../../validation/recon_all/optimizations/20261010_gcsa_remesh_runtime_diagnostics/README.md)保留全部观察。默认仍为旧Gibbs/remesh后端，十分钟与纯PyTorch目标尚未达到。
+**2026-10-16 cbaffa 两例原始 T1／空目录整例**均退出 0，138/138 输出与生产网格门通过；完整外层墙钟为 **19,448.046／12,094.283 秒**。严格逐文件诊断为 **14/138、23/138**，整体指标等效、受控退化和同环境提速均未判定；FNIT 自身显存峰值因进程归属未解析，不能据整卡采样判定 20 GB 预算。两例完成的 v2 事后评估包含分区 Dice、双向表面距离、脑区误差、局部异常和扩展网格检查，见[cbaffa 两例报告](../../validation/recon_all/optimizations/20261016_gpucw1_cbaffa_two_case/README.md)。
+
+2026-10-10 的完整自产配对及实际官方评分冻结为 **79a41cdd**：复用完整有序Numba Gibbs与CPU remesh双精度标量存储后，两例从原始T1/空目录连续完成，CLI **2718.390/2653.001秒**，完整harness **2737.822/2672.439秒**。相对同机同线程e34，本组慢28.0508%/29.0136%，没有整例提速；注释组缩短17.675/13.171秒，多个未改算法阶段也变慢，因果原因尚未隔离。138输出、生产网格、16张同序表面、七分割及68区统计保持，20/44顶点图有零容差尾差。实际官方严格复现仍6/138、7/138，厚度MAE **0.044824/0.050676mm**，整体等效未判定。完整阶段、544条逐区误差、实际官方距离/脑图、显存归属未知和安装范围见[该版两例完整报告](../../validation/recon_all/optimizations/20261010_whole_gcsa_remesh_a100_79a41cdd/README.md)，[变慢分解](../../validation/recon_all/optimizations/20261010_gcsa_remesh_runtime_diagnostics/README.md)保留全部观察。该版默认仍为旧Gibbs/remesh后端，十分钟与纯PyTorch目标尚未达到。
 
 后续完整Torch N4的原始连续链已检查到filled：少量N4量化差异在注册/归一化与WM链放大，该实验未改变native对照的N4默认；完整结果见[本次前段诊断](../../validation/recon_all/optimizations/20261010_n4_continuous_prefix/README.md)。 新增[两例四输入交叉归因](../../validation/recon_all/optimizations/20261010_n4_gca_cross_inputs/README.md)及[完整下游/失败形状诊断](N4_WHOLE_DIAGNOSTICS_20261010.md)：sub07仍因RH white自相交10面失败，诊断恢复不改变生产失败状态。[最终white实验接口](PYTHON_FINAL_WHITE.md)四侧匹配当前生产程序，但原始整例替换尚未测。
 
@@ -436,7 +438,7 @@ recon-all -i subject_T1w.nii.gz -s sub01 -sd reference/subjects -all -openmp 4
 
 2026-10-09 A100 整例冻结 `803aec50`：两例原始T1空目录控制/候选均完成，CLI **6137.234→2255.064秒、6040.677→2281.571秒**，同硬件/四线程配对提速 **2.72×、2.65×**。四次138输出与生产网格完整；新旧138项容差比较通过，有序面、表面坐标、分割及68区统计相同，零容差顶点图尾差仍完整保留。与官方严格复现为6/138、7/138，整体指标等效未判定。全部阶段、官方误差、局部质量、显存限制和脑图见[两例完整配对结果](../../validation/recon_all/optimizations/20261009_whole_pair_a100_803aec50/README.md)。该整例未包含后续N4、WM和GPU归一化实验；新接线的整例另行验证，十分钟目标尚未达到。
 
-最新2026-10-04正式CPU全链为冻结v3（e91dd25，实际归档/逐文件SHA见[身份](../../validation/smri_cpu/task5/recon_complete_cpu_v3/manifest.public.json)），公开CC0 OpenNeuro ds000114 snapshot1.0.2一例原始T1。参考FreeSurfer8.2.0-1默认-all-openmp8；CPU评测节点 Xeon Gold6418H同8物理核预算、8线程，CPU未启用CUDA。完整wall含新进程、校验、读写和全部计算，排除锁等待及事后评分；非ABBA且共享负载。
+2026-10-04 的正式CPU全链为冻结v3（e91dd25，实际归档/逐文件SHA见[身份](../../validation/smri_cpu/task5/recon_complete_cpu_v3/manifest.public.json)），公开CC0 OpenNeuro ds000114 snapshot1.0.2一例原始T1。参考FreeSurfer8.2.0-1默认-all-openmp8；CPU评测节点 Xeon Gold6418H同8物理核预算、8线程，CPU未启用CUDA。完整wall含新进程、校验、读写和全部计算，排除锁等待及事后评分；非ABBA且共享负载。
 
 ### 端到端 benchmark
 
@@ -472,6 +474,7 @@ recon-all -i subject_T1w.nii.gz -s sub01 -sd reference/subjects -all -openmp 4
 
 | 日期 | commit / version | 变化 | benchmark |
 |---|---|---|---|
+| 2026-10-16 | cbaffa99 / 独立 Python 配方 | 两例原始 T1 空目录完整执行；GA 双侧并行 | [两例整例和 v2 事后评估](../../validation/recon_all/optimizations/20261016_gpucw1_cbaffa_two_case/README.md)：两例各 138/138 输出、生产网格门通过；严格诊断 14/138、23/138，整体指标等效与同环境提速未判定 |
 | 2026-10-10 | 79a41cdd / A100 | 完整有序Gibbs与remesh容器候选；默认不变 | [两例真实完整对照/官方评分](../../validation/recon_all/optimizations/20261010_whole_gcsa_remesh_a100_79a41cdd/README.md)：2718.390/2653.001秒，本组慢28–29%，同序几何/分区/统计保持，因果未隔离 |
 | 2026-10-10 | e34a1829 / A100 | 完整dense GPU球面收尾；其余规则保持 | [两例原始T1完整对照与实际官方评分](../../validation/recon_all/optimizations/20261010_whole_sphere_finish_a100_e34a1829/README.md)：2122.900/2056.372秒，无可靠整例提速，指标/有序几何保持 |
 | 2026-10-09 | 765c0fe9 / A100 | 完整MNI与末尾CPU网格检查并行 | [两例原始T1完整结果](../../validation/recon_all/optimizations/20261009_whole_late_mni_a100_765c0fe9/README.md)：2117.283/2061.494秒，相对589缩短1.148%/2.344% |

@@ -19,6 +19,10 @@ import subprocess
 import time
 
 
+# include/uapi/linux/nsfs.h: PID_NS_INIT_INO = 0xEFFFFFFC.
+INITIAL_PID_NAMESPACE = f"pid:[{0xEFFFFFFC}]"
+
+
 def save(path, value):
     path = Path(path)
     temporary = path.with_name(path.name + f".{os.getpid()}.tmp")
@@ -275,6 +279,152 @@ def process_chain(pid):
     return None
 
 
+def local_procfs_namespace_anchor():
+    """证明 /proc 的 PID 编号与本进程所在命名空间一致，供旧内核权限受限场景使用。"""
+    try:
+        own_pid = os.getpid()
+        own_stat = Path("/proc/self/stat").read_text()
+        own_status = Path("/proc/self/status").read_text().splitlines()
+        init_stat = Path("/proc/1/stat").read_text()
+        init_status = Path("/proc/1/status").read_text().splitlines()
+        mountinfo = Path("/proc/self/mountinfo").read_text().splitlines()
+        def field(lines, name):
+            rows = [row.split()[1:] for row in lines if row.startswith(name + ":")]
+            return rows[0] if len(rows) == 1 else None
+        namespace = os.readlink("/proc/self/ns/pid")
+        proc_mounts = []
+        for row in mountinfo:
+            mount, separator, filesystem = row.partition(" - ")
+            fields = mount.split()
+            if separator and len(fields) >= 5 and fields[4] == "/proc":
+                proc_mounts.append((fields[3], filesystem.split()[0]))
+        if (not own_stat.startswith(f"{own_pid} (")
+                or field(own_status, "Pid") != [str(own_pid)]
+                or field(own_status, "Tgid") != [str(own_pid)]
+                or not init_stat.startswith("1 (")
+                or int(init_stat.rsplit(")", 1)[1].split()[1]) != 0
+                or field(init_status, "Pid") != ["1"]
+                or field(init_status, "Tgid") != ["1"]
+                or field(init_status, "PPid") != ["0"]
+                or proc_mounts != [("/", "proc")]
+                or re.fullmatch(r"pid:\[[0-9]+\]", namespace) is None):
+            return None
+        return namespace
+    except (OSError, ValueError, IndexError, UnicodeError):
+        return None
+
+
+def process_ownership_identity(pid):
+    """只用内核 stat/status 与本地 procfs 锚点读取父链，不要求跨 UID 的 exe/cmdline。"""
+    path = Path("/proc") / str(pid)
+    try:
+        stat = path.joinpath("stat").read_text()
+        if not stat.startswith(f"{pid} ("):
+            return None
+        comm = stat[len(f"{pid} ("):].rsplit(")", 1)[0]
+        fields = stat.rsplit(")", 1)[1].split()
+        status = path.joinpath("status").read_text().splitlines()
+        values = {}
+        for key in ("Pid", "Tgid", "PPid", "Uid"):
+            rows = [row.split()[1:] for row in status if row.startswith(key + ":")]
+            if len(rows) != 1:
+                return None
+            values[key] = [int(value) for value in rows[0]]
+        namespace_rows = [row.split()[1:] for row in status if row.startswith("NSpid:")]
+        if len(namespace_rows) > 1:
+            return None
+        namespace_pids = ([int(value) for value in namespace_rows[0]]
+                          if namespace_rows else [pid])
+        parent_pid = int(fields[1])
+        start_ticks = int(fields[19])
+        if (not comm or fields[0] == "Z" or parent_pid < 0 or start_ticks <= 0
+                or values["Pid"] != [pid] or values["Tgid"] != [pid]
+                or values["PPid"] != [parent_pid]
+                or namespace_pids != [pid] or len(values["Uid"]) != 4
+                or any(uid < 0 for uid in values["Uid"])):
+            return None
+        local_namespace = local_procfs_namespace_anchor()
+        if local_namespace is None:
+            return None
+        try:
+            namespace = os.readlink(path / "ns" / "pid")
+            namespace_source = "direct_ns_symlink"
+        except PermissionError:
+            # 旧内核无 NSpid，跨 UID 的 ns 链接不可读；同一 procfs 的
+            # stat/status PID 与 PPID 链仍可由本进程和 PID 1 锚点核验。
+            # 目标自身的 PID 命名空间未知，不能记作已经直接核验。
+            namespace = None
+            namespace_source = "permission_denied"
+        if namespace is not None and namespace != local_namespace:
+            return None
+        repeated = path.joinpath("stat").read_text()
+        if not repeated.startswith(f"{pid} ("):
+            return None
+        repeated_comm = repeated[len(f"{pid} ("):].rsplit(")", 1)[0]
+        repeated_fields = repeated.rsplit(")", 1)[1].split()
+        if (repeated_comm != comm or repeated_fields[0] == "Z"
+                or int(repeated_fields[1]) != parent_pid
+                or int(repeated_fields[19]) != start_ticks):
+            return None
+        return {"pid": pid, "ppid": parent_pid, "start_ticks": start_ticks,
+                "uids": values["Uid"], "namespace_pids": namespace_pids,
+                "pid_namespace": namespace, "pid_namespace_source": namespace_source,
+                "procfs_view_namespace": local_namespace,
+                "comm": comm}
+    except (OSError, ValueError, IndexError, UnicodeError):
+        return None
+
+
+def process_ownership_chain(pid):
+    """权限受限时仍核对到 PID 1；缺失任何祖先都不能推断外部归属。"""
+    chain = []
+    seen = set()
+    while pid != 0 and pid not in seen:
+        seen.add(pid)
+        identity = process_ownership_identity(pid)
+        if identity is None:
+            return None
+        chain.append(identity)
+        if pid == 1:
+            return chain if identity["ppid"] == 0 else None
+        pid = identity["ppid"]
+    return None
+
+
+def distinct_uid_external_chain(pid, *, observed, adopted, lease_pid,
+                                lease_start_ticks, child_pid, child_start_ticks):
+    """双重最小父链证明异 UID 外部进程；同 UID 或任何证据缺失均返回 None。"""
+    if local_procfs_namespace_anchor() != INITIAL_PID_NAMESPACE:
+        return None
+    lease = process_identity(lease_pid)
+    if lease is None or lease["start_ticks"] != lease_start_ticks:
+        return None
+    first = process_ownership_chain(pid)
+    second = process_ownership_chain(pid)
+    if first is None or second is None or len(first) != len(second):
+        return None
+    fields = ("pid", "ppid", "start_ticks", "uids", "namespace_pids",
+              "pid_namespace", "pid_namespace_source", "procfs_view_namespace", "comm")
+    if any(tuple(a[key] for key in fields) != tuple(b[key] for key in fields)
+           for a, b in zip(first, second)):
+        return None
+    lease_uids = set(lease["uids"])
+    if (first[0]["procfs_view_namespace"] != lease["pid_namespace"]
+            or not set(first[0]["uids"]).isdisjoint(lease_uids)
+            or not all(set(row["uids"]).isdisjoint(lease_uids) for row in first[:-1])):
+        return None
+    for row in first:
+        row_pid, start_ticks = row["pid"], row["start_ticks"]
+        if (row_pid == lease_pid and start_ticks == lease_start_ticks
+                or row_pid == child_pid and
+                   (child_start_ticks is None or start_ticks == child_start_ticks)
+                or observed.get(row_pid) == start_ticks
+                or (row_pid in adopted and
+                    adopted[row_pid]["start_ticks"] == start_ticks)):
+            return None
+    return first
+
+
 def process_name_matches(entry, identity):
     """GPU 进程名称至少要和 /proc 的 argv0 或 exe 路径精确相符。"""
     name = entry["process_name"]
@@ -285,7 +435,7 @@ def process_name_matches(entry, identity):
 def audit_gpu_process_ownership(snapshot, second_snapshot, *, observed, adopted,
                                 lease_pid, lease_start_ticks, child_pid,
                                 child_start_ticks):
-    """只豁免两次 GPU 快照间身份、UID、完整父链均稳定的外部进程。
+    """只豁免初始 PID 命名空间中身份、UID、完整父链均稳定的外部进程。
 
     已观测/收养的同启动时钟后代一律保留阻断。其他 PID 必须可映射到
     同一 /proc 命名空间，且父链稳定到 PID 1。subreaper 能收养作业产生的
@@ -294,20 +444,40 @@ def audit_gpu_process_ownership(snapshot, second_snapshot, *, observed, adopted,
     before = gpu_process_entries(snapshot)
     after = gpu_process_entries(second_snapshot)
     after_by_pid = {entry["pid"]: entry for entry in after}
+    host_pid_namespace_verified = local_procfs_namespace_anchor() == INITIAL_PID_NAMESPACE
     audit = []
     unresolved = []
     external = []
     for entry in before:
         pid = entry["pid"]
         evidence = {"pid": pid, "gpu_process_name": entry["process_name"],
-                    "raw": entry["raw"], "classification": "unresolved"}
+                    "raw": entry["raw"], "classification": "unresolved",
+                    "host_pid_namespace_verified": host_pid_namespace_verified}
         first_chain = process_chain(pid)
         second_entry = after_by_pid.get(pid)
         second_chain = process_chain(pid) if second_entry is not None else None
         evidence["ancestry_first"] = first_chain
         evidence["ancestry_second"] = second_chain
         if first_chain is None or second_chain is None:
-            evidence["reason"] = "PID/UID/父链或命名空间不可核验"
+            redacted_chain = None
+            if (host_pid_namespace_verified and second_entry is not None
+                    and second_entry["process_name"] == entry["process_name"]):
+                redacted_chain = distinct_uid_external_chain(
+                    pid, observed=observed, adopted=adopted,
+                    lease_pid=lease_pid, lease_start_ticks=lease_start_ticks,
+                    child_pid=child_pid, child_start_ticks=child_start_ticks)
+            if (redacted_chain is not None and
+                    os.path.basename(entry["process_name"]) != redacted_chain[0]["comm"]):
+                evidence["reason"] = "GPU进程名称与内核comm不符"
+                redacted_chain = None
+            if redacted_chain is None:
+                if "reason" not in evidence:
+                    evidence["reason"] = "PID/UID/父链或命名空间不可核验"
+            else:
+                evidence["classification"] = "external"
+                evidence["reason"] = "异UID且双重稳定的完整内核父链；无需跨UID读取命令行"
+                evidence["kernel_ancestry"] = redacted_chain
+                external.append(entry["raw"])
         elif (first_chain[0]["state"] == "Z" or second_chain[0]["state"] == "Z"
               or second_entry["process_name"] != entry["process_name"]
               or [row["pid"] for row in first_chain] != [row["pid"] for row in second_chain]
@@ -333,6 +503,8 @@ def audit_gpu_process_ownership(snapshot, second_snapshot, *, observed, adopted,
                             for row in first_chain))
             if owned:
                 evidence["reason"] = "作业自有PID或subreaper后代仍存活"
+            elif not host_pid_namespace_verified:
+                evidence["reason"] = "无法证明GPU驱动PID与本地/proc同属初始PID命名空间"
             else:
                 evidence["classification"] = "external"
                 evidence["reason"] = "稳定且不属于作业树的完整父链"

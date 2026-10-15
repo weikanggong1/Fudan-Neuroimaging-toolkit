@@ -197,14 +197,13 @@ def receipts(case: dict) -> dict:
 
 
 def surface_footer_frame(metadatas: tuple[dict, dict], images: tuple) -> dict:
-    """比较 surface volume_info 的空间含义，并核对各自 MRI 的 scanner RAS。"""
+    """核对表面 footer 与各自 MGH 头储存的 scanner RAS 字段。"""
     import numpy as np
 
     numeric_atol = {"voxelsize": 1e-8, "xras": 1e-8, "yras": 1e-8,
                     "zras": 1e-8, "cras": 1e-6}
-    affine_atol = 1e-6  # mm；与整例 MRI scanner affine 空间门一致。
     required = {"head", "valid", "volume", *numeric_atol}
-    issues, values, affine_differences = [], [], []
+    issues, values, affine_differences, header_matches = [], [], [], []
     for index, (metadata, image) in enumerate(zip(metadatas, images)):
         side = ("reference", "candidate")[index]
         missing = required - set(metadata)
@@ -248,8 +247,29 @@ def surface_footer_frame(metadatas: tuple[dict, dict], images: tuple) -> dict:
         footer_affine[:3, 3] = numbers["cras"] - basis @ (volume / 2)
         difference = float(np.max(np.abs(footer_affine - image.affine)))
         affine_differences.append(difference)
-        if not np.isfinite(difference) or difference > affine_atol:
-            issues.append(f"{side}:footer_differs_from_mri_scanner_affine")
+        # MGH 的 delta/Mdc/Pxyz_c 储存为 float32；nibabel 构造仿射时
+        # 最终也将平移量写入 float32 矩阵。这里用 float64 重建 footer，
+        # 可能与 image.affine 相差半个 float32 ULP。逐项核对储存字段，
+        # 避免给仅作诊断的仿射差值设任意 mm 门槛。
+        try:
+            header = image.header
+            ras_valid = int(np.asarray(header["goodRASFlag"]).item()) == 1
+            field_matches = {
+                "volume": np.array_equal(volume, np.asarray(header["dims"][:3])),
+                "voxelsize": np.array_equal(numbers["voxelsize"].astype(np.float32), header["delta"]),
+                "directions": np.array_equal(
+                    np.stack([numbers[field] for field in ("xras", "yras", "zras")]).astype(np.float32),
+                    header["Mdc"]),
+                "center": np.array_equal(numbers["cras"].astype(np.float32), header["Pxyz_c"]),
+            }
+        except (AttributeError, KeyError, TypeError, ValueError):
+            ras_valid, field_matches = False, {}
+        header_matches.append({"side": side, "mgh_good_ras": ras_valid,
+                               "fields": {field: bool(matched) for field, matched in field_matches.items()}})
+        if not ras_valid:
+            issues.append(f"{side}:mri_scanner_ras_not_stored")
+        if not field_matches or not all(field_matches.values()):
+            issues.append(f"{side}:footer_differs_from_mri_scanner_fields")
         values.append({"head": metadata["head"], "volume": volume, **numbers})
 
     deltas = {}
@@ -271,7 +291,8 @@ def surface_footer_frame(metadatas: tuple[dict, dict], images: tuple) -> dict:
     return {"compatible": not issues and len(values) == 2,
             "numeric_max_abs_differences": deltas, "numeric_atol": numeric_atol,
             "footer_to_mri_affine_max_abs_differences_mm": affine_differences,
-            "footer_to_mri_affine_atol_mm": affine_atol, "issues": issues}
+            "footer_to_mri_affine_rule": "diagnostic only; footer fields cast to MGH float32 must equal orig.mgz stored delta/Mdc/Pxyz_c and dims",
+            "footer_mgh_header_matches": header_matches, "issues": issues}
 
 
 def geometry(reference: Path, candidate: Path, surface_tool) -> dict:
@@ -319,7 +340,7 @@ def geometry(reference: Path, candidate: Path, surface_tool) -> dict:
                 "surface_ras_mm_comparable": frame, "geometry_footer_data_equal": bool(footer_equal),
                 "geometry_footer_frame": footer_frame,
                 "geometry_footer_present": [bool(value) for value in metadata],
-                "frame_basis": "conform scanner affine and exact vox2ras_tkr; valid volume_info, matching MRI volume and scanner affine, bounded numeric footer deltas; filename excluded",
+                "frame_basis": "conform scanner affine and exact vox2ras_tkr; valid volume_info whose float32 fields match the MGH scanner header, bounded cross-subject footer deltas; filename excluded",
                 "ordered_faces_and_vertex_counts_equal": bool(ordered),
                 "each_output_ordered_topology_matches_own_white": bool(matches_white),
                 "topology": topologies, "vertex_correspondence": bool(frame and ordered and matches_white and all(t['valid'] for t in topologies))}
