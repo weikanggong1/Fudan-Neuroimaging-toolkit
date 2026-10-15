@@ -59,25 +59,36 @@ def main():
     parser.add_argument("--remesh-scalar-storage", choices=("numpy", "python"), default="numpy")
     parser.add_argument("--mni-execution", choices=("in-process", "parallel-late"), default="in-process")
     parser.add_argument("--hemisphere-workers", type=int, choices=(1, 2), default=2)
+    parser.add_argument("--hemisphere-execution", choices=("groups", "persistent"), default="groups")
     parser.add_argument("--defects-backend", choices=("native", "torch"), default="torch")
     parser.add_argument("--wm-edit-backend", choices=("native", "python", "torch-hybrid"), default="native")
     parser.add_argument("--wm-backend", choices=("native", "torch", "torch-optimized"), default="native")
     parser.add_argument("--wm-execution", choices=("in-process", "isolated"), default="in-process")
     parser.add_argument("--gca-inverse-backend", choices=("cpu", "torch"), default="cpu")
-    parser.add_argument("--gca-candidate-chunk", type=int, default=64)
+    parser.add_argument("--gca-candidate-chunk", type=int)
+    parser.add_argument("--gca-reuse-atlas-context", action="store_true")
     parser.add_argument("--gca-execution", choices=("in-process", "isolated"), default="in-process")
     parser.add_argument("--fill-backend", choices=("python", "numba", "torch-numba"), default="python")
     parser.add_argument("--sphere-normals-backend", choices=("numba", "torch"), default="numba")
+    parser.add_argument("--topology-distance-backend", choices=("serial", "parallel", "gpu_defect_signed_distance"), default="serial")
+    parser.add_argument("--topology-state-backend", choices=("legacy", "packed"), default="legacy")
     parser.add_argument("--native-optimizations", choices=("auto", "original", "torch"), default="auto")
     parser.add_argument("--code-version", required=True)
     args = parser.parse_args()
+    if args.gca_candidate_chunk is None:
+        args.gca_candidate_chunk = 1024 if args.backend == "python" else 64
     if args.backend == "python":
         from fnit.recon_all.python_profile import python_profile_options
         for key, value in python_profile_options(device=args.device, threads=args.threads,
                 n4_backend="simpleitk" if args.n4_backend == "native" else args.n4_backend,
                 n4_execution=args.n4_execution,
                 input_execution=args.input_execution,
-                topology_backend="python" if args.topology_backend == "native" else args.topology_backend).items():
+                topology_backend="python" if args.topology_backend == "native" else args.topology_backend,
+                hemisphere_execution=args.hemisphere_execution,
+                gca_reuse_atlas_context=args.gca_reuse_atlas_context,
+                gca_candidate_chunk=args.gca_candidate_chunk,
+                topology_distance_backend=args.topology_distance_backend,
+                topology_state_backend=args.topology_state_backend).items():
             setattr(args, key, value)
     elif args.native_bin_dir is None:
         parser.error("--native-bin-dir is required for the mixed benchmark control")
@@ -125,6 +136,8 @@ def main():
             for row in Path("/proc/cpuinfo").read_text().splitlines() if row.startswith("model name")), None),
         "cpu_affinity": sorted(os.sched_getaffinity(0)), "threads": args.threads,
         "backend": args.backend, "topology_backend": args.topology_backend,
+        "topology_distance_backend": args.topology_distance_backend,
+        "topology_state_backend": args.topology_state_backend,
         "device": args.device, "defects_backend": args.defects_backend,
         "sphere_normals_backend": args.sphere_normals_backend,
         "wm_edit_backend": args.wm_edit_backend,
@@ -143,7 +156,9 @@ def main():
         "wm_execution": args.wm_execution,
         "gca_inverse_backend": args.gca_inverse_backend,
         "gca_candidate_chunk": args.gca_candidate_chunk,
+        "gca_reuse_atlas_context": args.gca_reuse_atlas_context,
         "gca_execution": args.gca_execution,
+        "hemisphere_execution": args.hemisphere_execution,
         "fill_backend": args.fill_backend,
         "environment": {key: os.environ.get(key) for key in (
             "CUDA_VISIBLE_DEVICES", "OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS",
@@ -161,6 +176,7 @@ def main():
                "--weights-dir", str(args.weights_dir), "--assets-dir", str(args.assets_dir),
                "--backend", args.backend, "--device", args.device,
                "--threads", str(args.threads), "--hemisphere-workers", str(args.hemisphere_workers),
+               "--hemisphere-execution", args.hemisphere_execution,
                "--native-optimizations", args.native_optimizations,
                "--defects-backend", args.defects_backend, "--profile-stages"]
     if args.backend != "python":
@@ -170,6 +186,8 @@ def main():
     command += ["--wm-backend", args.wm_backend, "--gca-inverse-backend", args.gca_inverse_backend,
                 "--gca-candidate-chunk", str(args.gca_candidate_chunk), "--gca-execution", args.gca_execution,
                 "--fill-backend", args.fill_backend]
+    if args.gca_reuse_atlas_context:
+        command += ["--gca-reuse-atlas-context"]
     command += ["--n4-backend", args.n4_backend, "--n4-execution", args.n4_execution]
     command += ["--input-execution", args.input_execution]
     command += ["--normalization-controls-backend", args.normalization_controls_backend]
@@ -178,6 +196,8 @@ def main():
     command += ["--sphere-finish-backend", args.sphere_finish_backend]
     command += ["--surface-placement-backend", args.surface_placement_backend]
     command += ["--topology-backend", args.topology_backend]
+    command += ["--topology-distance-backend", args.topology_distance_backend,
+                "--topology-state-backend", args.topology_state_backend]
     command += ["--annotation-gibbs-backend", args.annotation_gibbs_backend]
     command += ["--remesh-scalar-storage", args.remesh_scalar_storage]
     command += ["--mni-execution", args.mni_execution]

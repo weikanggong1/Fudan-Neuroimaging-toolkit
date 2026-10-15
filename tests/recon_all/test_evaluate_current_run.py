@@ -20,9 +20,15 @@ class EvaluationBindingTests(unittest.TestCase):
             generator = source / "native_free.py"; generator.write_text("# binding fixture\n")
             raw = root / "raw.txt"; raw.write_text("provenance fixture, not real T1\n")
             report = {"execution": "complete", "exit_code": 0, "input_sha256": MODULE.sha(raw),
+                      "backend": "python", "topology_backend": "python-ga",
+                      "native_program_sha256": {}, "threads": 4,
+                      "execution_audit": {"status": "complete", "passed": True,
+                                          "original_program_attempts": []},
+                      "runtime_status": "complete", "cli_wall_seconds": 1.0,
+                      "full_harness_seconds": 1.1,
                       "source_sha256": {"recon_all/native_free.py": MODULE.sha(generator)}}
             runtime = {"input": str(raw), "status": "complete", "output_validation":
-                       {"expected": 138, "present": 138, "missing": []}}
+                       {"status": "passed", "expected": 138, "present": 138, "missing": []}}
             benchmark = root / "benchmark.json"; benchmark.write_text(json.dumps(report))
             runtime_path = subject / "fnit-native-free-run.json"; runtime_path.write_text(json.dumps(runtime))
             manifest = {"cases": {"public-case": {"input_sha256": MODULE.sha(raw)}}}
