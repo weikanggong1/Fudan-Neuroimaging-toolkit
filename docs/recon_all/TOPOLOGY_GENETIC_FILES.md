@@ -47,6 +47,7 @@ result = run_genetic_topology_files(
     face_detection_cache=False,  # 显式每缺陷面身份缓存；默认关闭，不缓存动态几何判定
     normal_status="surface",  # 当前完整接口支持标准三角表面
     soap_iterations=5,  # 全部缺陷结束后的源序 SOAP
+    failure_state_callback=None,  # 默认不保存失败网格；私有诊断可显式接收独立副本
     final_orig=True,  # 包括一次 remesh 和严格最终 orig 门
     remesh_scalar_storage="python",  # 当前 Python 配方的 CPU 双精度标量存储
 )
@@ -68,6 +69,7 @@ print(result["seconds"]["complete_file_api"])
 | `initial_selection`、`vertex_eliminate` | 默认 `True`；关闭后报告为非标准策略 |
 | `use_overlap` | 默认 `False`，对应标准关闭策略；显式 `True` 调用已有完整重叠准备 |
 | `face_detection_cache` | 默认 `False`；仅接受 Python `bool` 或 `numpy.bool_`，规范为 Python 布尔值后传给完整 GA 并记录参数。`True` 每缺陷按当前保留面准备身份缓存，搜索与最终写回复用；下个缺陷重新准备，不缓存动态邻接、几何或相交判定。整数、字符串、数组等非法值在创建输出目录前失败 |
+| `failure_state_callback` | 默认 `None`；仅 GA 最终质量失败时接收 compact ORIGINAL/CURRENT 坐标、面、rip、有序 CSR 和质量诊断的独立副本。文件接口不会自动保存；调用者须在私有目录管理诊断数据，回调异常传播。CLI 不开放此回调 |
 | `normal_status`、`soap_iterations` | 默认 `surface` 和 5；不另加 epsilon、近似几何或停止阈值 |
 | `final_orig` | 默认 `False`；`True` 要求严格最终 orig 成功 |
 | `remesh_scalar_storage` | 默认 `numpy`，也可 `python`；两者均为 CPU 双精度，当前 Python 配方选择 `python` |
@@ -111,6 +113,34 @@ python -m fnit.recon_all.topology_genetic_files \
 
 命令输出返回字典 JSON，失败返回非零退出码。`--no-final-orig` 仅请求中间 premesh；`--face-detection-cache` 显式开启面身份缓存，省略或 `--no-face-detection-cache` 均关闭。这里未改变任何生产默认，上层接线另行验收。
 
+若要复核源标记器与独立几何检查的分歧，可在私有计算目录运行同输入阶段回放。它使用上方生产 GA 参数并额外保存压缩 CURRENT 的源清理末态；这些诊断文件不属于整例标准输出。
+
+```bash
+python tools/replay_recon_topology_current.py \
+  --input-surface own_subject/surf/lh.orig.nofix \
+  --input-qsphere own_subject/surf/lh.qsphere.nofix \
+  --brain own_subject/mri/brain.mgz \
+  --wm own_subject/mri/wm.mgz \
+  --hemisphere lh \
+  --output-directory private_new_stage_replay \
+  --threads 2
+```
+
+`source_cleaned_current.private.npz` 保存源有向清理后的坐标、面、rip 与有序 CSR；若最终质量失败，`failed_current.private.npz` 另保存失败态。两者坐标为 surface RAS/mm，不可发布为合格 `orig`。输入、源码、诊断文件的 SHA-256 及阶段墙钟写入 `stage_replay.private.json`；诊断插桩的读写时间在墙钟内，不能代替未插桩生产整例计时。
+
+若失败 worker 已删除私有 nofix/qsphere，而自身 MRI 前段仍保留，可先在新目录用同一成熟函数重建阶段输入：
+
+```bash
+python tools/reconstruct_recon_topology_inputs.py \
+  --filled own_subject/mri/filled.mgz \
+  --norm own_subject/mri/norm.mgz \
+  --hemisphere lh \
+  --output-directory private_new_input_reconstruction \
+  --device cuda:0
+```
+
+输入均为同一 FNIT 被试的 conform MGZ；生成的 nofix/qsphere 与原流程一样采用 surface RAS/mm。`reconstruction.private.json` 记录输入/输出 SHA、设备和含读写墙钟。若原失败 worker 没有留下输入 SHA，重建结果只能标为“由同一自产前段和函数重算”，不能声称与丢失文件逐字节一致；可用仍保留输入的其他病例检查重算稳定性。
+
 ## 4. 对应原软件调用
 
 原版仅在独立 benchmark 中作参考，例如固定源码构建的命令：
@@ -142,6 +172,7 @@ export SUBJECTS_DIR="$REFERENCE_SUBJECTS_DIRECTORY"  # 隔离参考目录，不�
 - 后续接口版：显式转发每缺陷面身份缓存，默认仍关闭；布尔参数在创建目录前校验，报告记录实际选择。收窄自产来源字段，区分四个调用者文件与内部 GA 状态；旧报告字段与旧科学结果不重写。
 - 明确 raw 标签、base、compact 和 remesh 四个编号域；压缩 premesh ORIGINAL 与 TMP/CURRENT 诊断分开。
 - 新增源与输出 SHA、同输入文件前后校验、每缺陷摘要、私有新目录、失败无完成标记和可迁移的相对输出路径。
+- 2026-10-14：新增可选失败状态回调，仅供隔离诊断；默认输出和正常算法路径不变。本次真实 T1 复跑尚未完成，不把接口测试算作修复验证。
 - 接线审查修正首版适配器错误的 `torch` remesh 枚举；真实成熟文件函数仅接受 `numpy/python`，新增文件读写合同验证当前 Python 配方可传播。首轮仅 `numpy` 的 10 项合同不当成这一兼容门。
 - 既有真实核心结果、首缺陷搜索结果和全缺陷结果保留原版本边界。历史 `generations=28` 是末代索引，若轨迹为 0…28，实际共 29 轮，不把它改成执行 28 轮。
 

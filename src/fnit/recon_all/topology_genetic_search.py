@@ -17,6 +17,8 @@ from .topology_ga_finalize import finalize_defect_patch
 class TopologyRandomStream:
     """复用已验证VNL流并做double区间缩放；一个半球只初始化一次。
 
+    audit_callback默认None；可显式具名(index,low,high,value)观测每次缩放后的
+    double调用，返回值忽略，异常传播，不记录prime、不改变生成器或调用顺序。
     seed为有符号32位整数，先消费setRandomSeed对应的一次OpenRan1。
     实例以具名或位置low/high调用，必须是有限实数且low<=high；
     即使区间宽零也消费一次随机量，返回Python double。draws只计
@@ -24,7 +26,10 @@ class TopologyRandomStream:
     全局随机状态；非法seed/区间ValueError。不保证调用方此前阶段
     没有消费随机数；需要共享流时显式传同一实例。无独立原CLI。
     """
-    def __init__(self, *, seed):
+    def __init__(self, *, seed, audit_callback=None):
+        if audit_callback is not None and not callable(audit_callback):
+            raise ValueError("audit_callback must be callable or None")
+        self.audit_callback = audit_callback
         a = np.asarray(seed)
         if a.ndim or a.dtype.kind not in 'iu' or not -(1 << 31) <= int(a) < (1 << 31):
             raise ValueError('explicit signed int32 seed required')
@@ -45,7 +50,10 @@ class TopologyRandomStream:
             raise ValueError('random high must not be below low')
         value = self.generator.open_ran1()
         self.draws += 1
-        return lo + (hi-lo)*value
+        scaled = lo + (hi-lo)*value
+        if self.audit_callback is not None:
+            self.audit_callback(index=self.draws-1, low=lo, high=hi, value=scaled)
+        return scaled
 
 
 def source_population_limits(*, edge_count, population_size, max_unchanged):
@@ -73,7 +81,12 @@ def source_population_limits(*, edge_count, population_size, max_unchanged):
 
 
 def _selection_groups(defect_inputs, edge_count):
-    """ETable域分组→原ES域行，保留全部空槽，不能当成两个相同索引域。"""
+    """ETable域分组→原ES域行；零旧边返回源NULL对应的None/None。
+
+    空ES必须同时为零行分组，对应segmentIntersectingEdges(nes=0)在
+    分配前返回NULL。其他输入保留全部空槽；非空ES零有效组由排序器
+    报错，不能转换为NULL或跳过候选。两个索引域不能混用。
+    """
     old=np.asarray(defect_inputs['old_edge_table_indices'])
     if (old.ndim!=1 or old.dtype.kind not in 'iu' or np.any(old<0)
             or np.any(old>=edge_count) or len(np.unique(old))!=len(old)):
@@ -88,11 +101,16 @@ def _selection_groups(defect_inputs, edge_count):
         mapped=inverse[a]
         if np.any(mapped<0):raise ValueError('segment references an edge outside the old ES')
         groups.append(mapped.astype(np.int32,copy=True))
+    if len(old)==0:
+        # Fixed d932 source, segmentIntersectingEdges: nes == 0 returns NULL.
+        # No SEGMENTATION/max_segments slots exist in that source branch.
+        if groups:raise ValueError('zero old ES requires zero segment rows')
+        return None,None
     return old.astype(np.int32,copy=True),groups
 
 
 def prepare_genetic_defect_evaluator(*, surface_state, defect_inputs, candidate_inputs,
-        face_detection_cache=False, blocker_scan_backend='python', distance_backend='serial'):
+        face_detection_cache=False, blocker_scan_backend='python', distance_backend='serial', distance_device=None, state_backend="legacy"):
     """自产当前corrected完整状态/有序边/先验→源DVS及可复用评分回调。
 
     surface_state为完整一环state，含同域canonical_vertices；shape、空间
@@ -106,7 +124,11 @@ def prepare_genetic_defect_evaluator(*, surface_state, defect_inputs, candidate_
     blocker_scan_backend默认python；仅接受python/numba。numba将同一成熟
     球面边谓词的完整首阻挡顺序扫描放入编译循环，无自动回退或fastmath。
     搜索、最终评分及最终几何共用同一显式选择，不改变dtype或判定规则。
-    distance_backend默认serial，仅接受serial/parallel；复制candidate_inputs
+    state_backend默认legacy，显式packed需任务5完整状态API，搜索、最终评分与
+    几何发布均传同一选择；缺实现明确失败，不退回legacy，不启用旧缓存。
+    distance_device默认None；GPU后端必须显式可用cuda:N，CPU选择不接设备。
+    GPU仅使用已验证的gpu_defect_signed_distance，失败不回退；原CPU路径保留。
+    distance_backend默认serial，接受serial/parallel/gpu_defect_signed_distance；复制candidate_inputs
     后用本具名参数选择距离核，搜索及最终评分共用。不修改调用方字典，
     不更改Numba线程mask；parallel预算须由调用方thread_budget明确限制。
     最终纯几何不执行距离；unMRI跳过状态由实际候选distance_policy报告。
@@ -118,12 +140,14 @@ def prepare_genetic_defect_evaluator(*, surface_state, defect_inputs, candidate_
     非法类型/索引/域或未知模式ValueError，子函数异常传播。
     """
     start=time.perf_counter()
+    from .topology_ga_backend_policy import validate_state_backend, state_backend_arguments
+    validate_state_backend(state_backend)
     if not isinstance(face_detection_cache,(bool,np.bool_)):
         raise ValueError('explicit bool face_detection_cache required')
     if not isinstance(blocker_scan_backend,str) or blocker_scan_backend not in ('python','numba'):
         raise ValueError('blocker_scan_backend must be python or numba')
-    if not isinstance(distance_backend,str) or distance_backend not in ('serial','parallel'):
-        raise ValueError('distance_backend must be serial or parallel')
+    from .topology_distance_policy import validate_distance_policy
+    distance_device=validate_distance_policy(distance_backend=distance_backend,distance_device=distance_device)
     n,top,nf=_one_ring_state(surface_state)
     if not isinstance(defect_inputs,Mapping) or not isinstance(candidate_inputs,Mapping):
         raise ValueError('explicit self-generated defect and candidate mappings required')
@@ -163,21 +187,22 @@ def prepare_genetic_defect_evaluator(*, surface_state, defect_inputs, candidate_
     snapshot=record_candidate_state(surface_state=surface_state,defect_vertices=r['inside_vertices'],
         convex_hull_vertices=r['hull_vertices'],border_vertices=r['border_vertices'],
         vertex_translation=np.arange(n,dtype=np.int32),profile='chull')
-    selected_inputs=dict(candidate_inputs,distance_backend=distance_backend)
+    selected_inputs=dict(candidate_inputs,distance_backend=distance_backend,distance_device=distance_device)
     evaluator=CandidateCycleEvaluator(surface_state=surface_state,snapshot=snapshot,
-        retessellation_inputs=r,candidate_inputs=selected_inputs)
+        retessellation_inputs=r,candidate_inputs=selected_inputs,
+        **state_backend_arguments(state_backend=state_backend,target=CandidateCycleEvaluator))
     return dict(evaluator=evaluator,segment_edge_numbers=numbers,segment_rows=groups,
         overlap_arguments=overlap,overlap_policy='computed'if active else'disabled',
         prepare_seconds=time.perf_counter()-start,
         face_detection_cache=bool(face_detection_cache),blocker_scan_backend=blocker_scan_backend,
-        distance_backend=distance_backend)
+        distance_backend=distance_backend,distance_device=distance_device,state_backend=state_backend)
 
 
 def search_and_finalize_defect(*, surface_state, defect_inputs, candidate_inputs,
         draw_random_number, population_size, max_unchanged, niters,
         initial_selection, vertex_eliminate, deletion_count, elimination_threshold,
         check_surface_intersection, intersection_checker, face_detection_cache=False,
-        blocker_scan_backend='python', distance_backend='serial'):
+        blocker_scan_backend='python', distance_backend='serial', distance_device=None, state_backend="legacy"):
     """一个自产完整缺陷→完整种群搜索、连续持久状态与最优最终几何。
 
     前三个输入与prepare_genetic_defect_evaluator一致。RNG回调必须
@@ -206,7 +231,7 @@ def search_and_finalize_defect(*, surface_state, defect_inputs, candidate_inputs
     prepared=prepare_genetic_defect_evaluator(surface_state=surface_state,
         defect_inputs=defect_inputs,candidate_inputs=candidate_inputs,
         face_detection_cache=face_detection_cache,blocker_scan_backend=blocker_scan_backend,
-        distance_backend=distance_backend)
+        distance_backend=distance_backend,distance_device=distance_device,state_backend=state_backend)
     evaluator=prepared['evaluator'];r=evaluator.retessellation_inputs
     limits=source_population_limits(edge_count=len(r['candidate_edges']),
         population_size=population_size,max_unchanged=max_unchanged)
@@ -230,7 +255,8 @@ def search_and_finalize_defect(*, surface_state, defect_inputs, candidate_inputs
         retessellation_inputs=evaluator.retessellation_inputs,candidate_inputs=evaluator.candidate_inputs,
         best_ordering=search['best_ordering'],best_discarded=search['best_discarded'],
         best_fitness=search['best_fitness'],use_counts=search['use_counts'],vertex_fitness=search['vertex_fitness'],
-        check_surface_intersection=check_surface_intersection,intersection_checker=intersection_checker)
+        check_surface_intersection=check_surface_intersection,intersection_checker=intersection_checker,
+        state_backend=state_backend)
     final_seconds=time.perf_counter()-tick
     return dict(surface_state=final['surface_state'],search=search,finalization=final,
         deletion_count=search['deletion_count'],elimination_threshold=search['elimination_threshold'],
@@ -239,6 +265,6 @@ def search_and_finalize_defect(*, surface_state, defect_inputs, candidate_inputs
         seconds=dict(prepare=prepared['prepare_seconds'],search=search_seconds,
             finalization=final_seconds,complete_api=time.perf_counter()-start),
         face_detection_cache=bool(face_detection_cache),blocker_scan_backend=blocker_scan_backend,
-        distance_backend=distance_backend,
+        distance_backend=distance_backend,distance_device=distance_device,state_backend=state_backend,
         final_distance_policy=final.get('final_evaluation',{}).get('candidate',{}).get('distance_policy'),
         complete_ga=False,whole_surface_quality='not_assessed',overall_metric_equivalence='not_assessed')

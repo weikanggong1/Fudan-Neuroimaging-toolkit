@@ -166,7 +166,8 @@ def _run_native_em_register(binary: Path | None, mri: Path, atlas: Path,
                             binary_sha256: str | None = None, threads: int = 4,
                             device: str = "cpu", inverse_backend: str = "cpu",
                             candidate_chunk: int = 64,
-                            execution: str = "in-process") -> dict | None:
+                            execution: str = "in-process",
+                            reuse_atlas_context: bool = False) -> dict | None:
     """运行完整原生注册；缓存后端只改变已验证的搜索密度复用。
 
     binary为独立Conda程序，仅原生后端消费；torch允许None且不查找程序。
@@ -178,6 +179,8 @@ def _run_native_em_register(binary: Path | None, mri: Path, atlas: Path,
     参数。torch求逆复用同余子式，不改变候选网格、EM和LTA几何。
     execution=in-process保留父allocator；isolated仅用于Torch，新exec阶段
     内开启CUDA缓存，退出释放资源，不改变已初始化父CUDA/精度/缓存设置。
+    reuse_atlas_context默认False；True只在同次完整Torch注册中复用不可变
+    协方差/分类器，不改变优化器，调用者验证CUDA后端。
     原生执行/输入/输出/能力失败抛异常；Torch返回分段报告，原生返回None。
     """
     if backend == "torch":
@@ -196,13 +199,15 @@ def _run_native_em_register(binary: Path | None, mri: Path, atlas: Path,
                 atlas_path=atlas, output_path=mri / "transforms/talairach.lta",
                 report_path=mri.parent / "scripts/gca-isolated.json", device=device,
                 threads=threads, candidate_chunk=candidate_chunk,
-                inverse_backend=inverse_backend)
+                inverse_backend=inverse_backend,
+                **({"reuse_atlas_context": True} if reuse_atlas_context else {}))
         elif execution == "in-process":
             result = register_t1(
                 mri / "nu.mgz", atlas, mri / "brainmask.mgz",
                 mri / "transforms/talairach.lta", device=device,
                 search_backend="torch", candidate_chunk=candidate_chunk, sample_chunk=8192,
-                reduce_on_device=True, inverse_backend=inverse_backend)
+                reduce_on_device=True, inverse_backend=inverse_backend,
+                **({"reuse_atlas_context": True} if reuse_atlas_context else {}))
         else:
             raise ValueError("invalid GCA execution")
         if not (mri / "transforms/talairach.lta").is_file():
@@ -257,11 +262,17 @@ def _run_native_sphere_step(binary: Path, subject: Path, assets: Path,
 
 
 def _run_and_publish_genetic_topology(*, subject: Path, hemi: str,
-                                      threads: int, remesh_scalar_storage: str) -> dict:
+                                      threads: int, remesh_scalar_storage: str,
+                                      distance_backend: str = "serial",
+                                      distance_device: str | None = None,
+                                      state_backend: str = "legacy") -> dict:
     """自产nofix/qsphere/brain/WM→完整自有GA及orig门→发布真实表面。
 
     subject为FNIT被试目录，hemi为lh/rh，threads为当前半球CPU预算；
     remesh_scalar_storage为已校验的numpy/python双精度存储策略。
+    distance_backend默认serial，parallel/GPU仅执行同公式完整距离；GPU
+    distance_device为显式cuda:N。state_backend默认legacy，packed每候选
+    完整装配，不持久缓存变化几何。选项/实测见ROUND2_INTEGRATION.md。
     独立新目录scripts/H.topology.genetic保存完整阶段产物、原域标签及报告；
     显式复用每缺陷不可变保留面索引，并以Numba执行完整有序阻挡扫描；
     不缓存动态几何、不缩减候选域或改变GA控制。独立库保留Python参考。
@@ -287,7 +298,10 @@ def _run_and_publish_genetic_topology(*, subject: Path, hemi: str,
         normal_status="surface", soap_iterations=5, final_orig=True,
         face_detection_cache=True,
         blocker_scan_backend="numba",
-        remesh_scalar_storage=remesh_scalar_storage)
+        remesh_scalar_storage=remesh_scalar_storage,
+        **({"distance_backend": distance_backend, "distance_device": distance_device}
+           if distance_backend != "serial" else {}),
+        **({"state_backend": state_backend} if state_backend != "legacy" else {}))
     if result.get("status") != "complete" or result.get("final_orig") is not True:
         raise RuntimeError("complete genetic topology and final orig receipt required")
     if result.get("quality", {}).get("status") != "passed":
@@ -360,6 +374,8 @@ def _prepare_native_topology(binary: Path | None, subject: Path, hemi: str,
                              *, remesh_scalar_storage: str = "numpy",
                              python_auxiliary: bool = False,
                              topology_backend: str = "native",
+                             topology_distance_backend: str = "serial",
+                             topology_state_backend: str = "legacy",
                              pretess_file: Path | None = None,
                              threads: int = 4,
                              ) -> tuple[float, float, dict[str, float], float, float]:
@@ -379,6 +395,8 @@ def _prepare_native_topology(binary: Path | None, subject: Path, hemi: str,
     python-ga使用完整自有有序GA；threads默认4，由表面worker显式传入
     本半球预算，不扩大总线程数。文件接口在独立目录一次完成标准remesh、
     最终清理和严格orig门，再校验SHA发布；不重复执行下面的公共remesh。
+    topology_distance_backend默认serial，topology_state_backend默认legacy，
+    仅向完整python-ga传递；GPU距离消费device，packed不改变完整搜索。
     """
     _validate_remesh_scalar_storage(remesh_scalar_storage)
     if topology_backend == "python-ga" and (
@@ -439,7 +457,10 @@ def _prepare_native_topology(binary: Path | None, subject: Path, hemi: str,
     elif topology_backend == "python-ga":
         result = _run_and_publish_genetic_topology(
             subject=subject, hemi=hemi, threads=threads,
-            remesh_scalar_storage=remesh_scalar_storage)
+            remesh_scalar_storage=remesh_scalar_storage,
+            distance_backend=topology_distance_backend,
+            distance_device=device if topology_distance_backend == "gpu_defect_signed_distance" else None,
+            state_backend=topology_state_backend)
         python_seconds += time.perf_counter() - native_started
         return (python_seconds, 0.0, sphere_seconds,
                 result["seconds"]["remesh"],
@@ -800,7 +821,9 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
                   sphere_finish_backend: str = "cpu",
                   remesh_scalar_storage: str = "numpy",
                   surface_placement_backend: str = "native",
-                  topology_backend: str = "native") -> dict:
+                  topology_backend: str = "native",
+                  topology_distance_backend: str = "serial",
+                  topology_state_backend: str = "legacy") -> dict:
     """从自产filled生成单半球orig、预白质和标准球面，返回完整阶段报告。
 
     subject/hemi指被试目录和lh/rh；filled/norm为conform体积，网格为
@@ -816,6 +839,8 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
     传播；不读取参考，不占位。原命令/真实数据见recon-all各功能页。
     topology_backend=python-ga显式使用完整自有GA文件接口，threads按本
     半球传入；其质量/SHA门和发布回执另见topology_genetic_publication。
+    topology_distance_backend=serial与topology_state_backend=legacy保持默认；
+    非默认仅完整GA，逐项意义/限制见ROUND2_INTEGRATION.md。
     """
     _validate_remesh_scalar_storage(remesh_scalar_storage)
     from .extract_main_component_python import extract_main_component
@@ -840,6 +865,10 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
                                  device, inflate_binary, intersection_binary,
                                  remesh_scalar_storage=remesh_scalar_storage,
                                  threads=threads,
+                                 **({"topology_distance_backend": topology_distance_backend}
+                                    if topology_distance_backend != "serial" else {}),
+                                 **({"topology_state_backend": topology_state_backend}
+                                    if topology_state_backend != "legacy" else {}),
                                  **({"python_auxiliary": True} if surface_placement_backend == "python" else {}),
                                  **({"topology_backend": topology_backend, "pretess_file": pretess}
                                     if topology_backend != "native" else {})))
@@ -1088,7 +1117,8 @@ def _hemisphere_operation(subject, hemi, device, threads, operation, *, assets,
                           sphere_normals_backend="numba", inflate_backend="native",
                           sphere_finish_backend="cpu", annotation_gibbs_backend="python",
                           remesh_scalar_storage="numpy", surface_placement_backend="native",
-                          topology_backend="native", profile_stages=False):
+                          topology_backend="native", profile_stages=False,
+                          topology_distance_backend="serial", topology_state_backend="legacy"):
     """可exec的半球阶段入口，返回原结果与逐步读写/设备时间列表。
 
     subject为私有worker被试目录，hemi=lh/rh，device/threads为设备与
@@ -1102,6 +1132,8 @@ def _hemisphere_operation(subject, hemi, device, threads, operation, *, assets,
     仅annotation消费，GPU几何/随机序列/标签语义和缓存失效规则保持。
     remesh_scalar_storage默认numpy，仅surface消费python双精度存储候选，
     不改算法、GPU精度或线程预算。
+    topology_distance_backend默认serial、topology_state_backend默认legacy；
+    仅surface消费，按完整GA文件接口传递，不改变其他操作。
     profile_stages默认False；True在各子步骤前后同步明确device，保留外层
     worker显存峰值。嵌套秒数包含在worker/组墙钟内，不重复累加。
     返回result/stages；体积为conform网格，表面为surface RAS/mm，发布
@@ -1134,7 +1166,11 @@ def _hemisphere_operation(subject, hemi, device, threads, operation, *, assets,
                      sphere_finish_backend=sphere_finish_backend,
                      remesh_scalar_storage=remesh_scalar_storage,
                      surface_placement_backend=surface_placement_backend,
-                     topology_backend=topology_backend)
+                     topology_backend=topology_backend,
+                     **({"topology_distance_backend": topology_distance_backend}
+                        if topology_distance_backend != "serial" else {}),
+                     **({"topology_state_backend": topology_state_backend}
+                        if topology_state_backend != "legacy" else {}))
     elif operation == 'register':
         from .mris_register_run import run_register_sphere
         value = step(f'register_{hemi}', run_register_sphere,
@@ -1198,6 +1234,63 @@ def _validate_annotation_gibbs_backend(backend: str) -> None:
     """
     if backend not in {"python", "numba"}:
         raise ValueError("annotation_gibbs_backend must be python or numba")
+
+
+def _validate_hemisphere_execution(execution: str, *, backend: str, workers: int) -> None:
+    """校验半球生命周期，不初始化CUDA或写文件。
+
+    execution为groups（默认）或persistent；后者仅支持完整Python候选
+    和两个隔离worker，调用者仍约束总线程并关闭autocast。不改变MRI、
+    坐标/标签或优化器。非法组合抛ValueError；返回None，无独立官方CLI。
+    """
+    if not isinstance(execution, str) or execution not in {"groups", "persistent"}:
+        raise ValueError("hemisphere_execution must be groups or persistent")
+    if execution == "persistent" and (backend != "python" or workers != 2):
+        raise ValueError("persistent hemispheres require backend='python' and two workers")
+
+
+def _validate_round2_options(*, topology_backend: str,
+                             topology_distance_backend: str,
+                             topology_state_backend: str,
+                             gca_reuse_atlas_context: bool,
+                             device: str, native_optimizations: str) -> None:
+    """校验显式候选后端；不初始化设备、不读取数据、不写出目录。
+
+    topology_backend须为python-ga才可选择非默认距离或状态装配；距离
+    serial/parallel为同公式CPU，gpu_defect_signed_distance须显式cuda:N。
+    状态legacy/packed均完整装配，不缓存变化几何或改变随机序列。
+    gca_reuse_atlas_context是布尔值，True仅用于CUDA Torch GCA的同次调用。
+    默认serial/legacy/False保持既有执行；非法组合抛ValueError，无返回值。
+    属原拓扑/注册命令内部步骤，参数及实测见ROUND2_INTEGRATION.md。
+    """
+    if not isinstance(topology_distance_backend, str) or topology_distance_backend not in {
+            "serial", "parallel", "gpu_defect_signed_distance"}:
+        raise ValueError("invalid topology distance backend")
+    if not isinstance(topology_state_backend, str) or topology_state_backend not in {"legacy", "packed"}:
+        raise ValueError("invalid topology state backend")
+    if type(gca_reuse_atlas_context) is not bool:
+        raise ValueError("gca_reuse_atlas_context must be bool")
+    if topology_backend != "python-ga" and (
+            topology_distance_backend != "serial" or topology_state_backend != "legacy"):
+        raise ValueError("topology candidate options require complete python-ga")
+    if topology_distance_backend == "gpu_defect_signed_distance" or gca_reuse_atlas_context:
+        target = torch.device(device)
+        if target.type != "cuda" or target.index is None:
+            raise ValueError("candidate GPU options require explicit cuda:N")
+    if gca_reuse_atlas_context and native_optimizations == "original":
+        raise ValueError("atlas context reuse requires the Torch GCA implementation")
+
+
+def _consume_hemisphere_result(report: dict, operation: str, hemi: str, value: dict) -> None:
+    """将已原子发布的半球阶段结果写入本次报告，不重复累计嵌套耗时。"""
+    result = value["result"]
+    if operation == "surface":
+        report.setdefault("surfaces", {})[hemi] = result
+    elif operation == "register":
+        report["sphere_registration"]["hemisphere_seconds"][hemi] = result["total_seconds_including_io"]
+        report["sphere_registration"]["reports"][hemi] = result
+    elif operation in ("finish_surface", "final_white", "pial_surface"):
+        report["surfaces"][hemi].update(result)
 
 
 def _normalization_controls_options(backend: str, device: str) -> dict:
@@ -1349,6 +1442,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          profile_stages: bool = False,
                          cuda_allocator_cache: str = "auto",
                          hemisphere_workers: int = 1,
+                         hemisphere_execution: str = "groups",
                          native_optimizations: str = "auto",
                          n4_backend: str = "native",
                          n4_execution: str = "in-process",
@@ -1364,12 +1458,15 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          sphere_finish_backend: str = "cpu",
                          surface_placement_backend: str = "native",
                          topology_backend: str = "native",
+                         topology_distance_backend: str = "serial",
+                         topology_state_backend: str = "legacy",
                          annotation_gibbs_backend: str = "python",
                          remesh_scalar_storage: str = "numpy",
                          mni_execution: str = "in-process",
                          gca_inverse_backend: str = "cpu",
                          gca_candidate_chunk: int = 64,
                          gca_execution: str = "in-process",
+                         gca_reuse_atlas_context: bool = False,
                          fill_backend: str = "python",
                          backend: str = "native") -> dict:
     """从单幅原始 T1 连续生成 conform 体积、双侧表面和脑区统计。
@@ -1426,10 +1523,17 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     默认64，只改变完整候选的分块，非默认设置须使用CUDA的Torch GCA后端。
     gca_execution=in-process保留父缓存策略；isolated在独立exec内启用缓存，
     子进程结束释放GPU资源，不修改父CUDA状态；仅CUDA Torch GCA可用。
+    新增gca_reuse_atlas_context默认False（同次GCA复用）；
+    topology_distance_backend默认serial，topology_state_backend默认legacy；
+    非默认拓扑选项仅完整python-ga，GPU须cuda:N；返回报告记录实际选择，
+    全参数、阶段返回和真实范围见ROUND2_INTEGRATION.md。
     fill_backend默认python；numba复用有序CPU堆，torch-numba另用CUDA初始边界。
     三者均保留切割、距离场与标签规则；torch-numba要求CUDA，失败不回退。
     hemisphere_workers 默认1保持串行，2用独立 exec 半球进程；总 threads
     在双侧之间平分（奇数向下取整），父进程保留依赖屏障和共享发布。
+    CUDA首次科学JIT前核验并选择当前环境ptxas；显式编译器设置优先。
+    triton_runtime记录版本/SHA和缓存状态，不改变TF32或影像算法。
+    同进程已缓存其他编译器时要求新解释器，不清第三方JIT缓存。
     profile_stages=False 不增加阶段 CUDA 同步；True 分别记录前同步、函数、
     后同步和父子 CPU 秒数。cuda_allocator_cache=auto 延续首次 CUDA 调用
     关闭缓存的策略，并保留已初始化 API 的 allocator；enabled/disabled
@@ -1440,6 +1544,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     输出结构、限制、官方命令和真实数据见 docs/recon_all/README.md。
     """
     normalization_options = _normalization_controls_options(normalization_controls_backend, device)
+    _validate_hemisphere_execution(hemisphere_execution, backend=backend, workers=hemisphere_workers)
     initial_bias_options = _normalization_initial_bias_options(normalization_initial_bias_backend, device)
     _validate_inflate_backend(inflate_backend, device, hemisphere_workers)
     _validate_sphere_finish_backend(sphere_finish_backend, device, hemisphere_workers)
@@ -1454,11 +1559,20 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         raise ValueError("backend must be native, python or python-gpu")
     if topology_backend not in {"native", "python", "python-ga"}:
         raise ValueError("topology_backend must be native, python or python-ga")
+    _validate_round2_options(topology_backend=topology_backend,
+        topology_distance_backend=topology_distance_backend, topology_state_backend=topology_state_backend,
+        gca_reuse_atlas_context=gca_reuse_atlas_context, device=device,
+        native_optimizations=native_optimizations)
     if backend == "python":
         from .python_profile import python_profile_options
         expected = python_profile_options(device=device, threads=threads,
                                           n4_backend=n4_backend, n4_execution=n4_execution,
-                                          topology_backend=topology_backend, input_execution=input_execution)
+                                          topology_backend=topology_backend, input_execution=input_execution,
+                                          hemisphere_execution=hemisphere_execution,
+                                          gca_reuse_atlas_context=gca_reuse_atlas_context,
+                                          gca_candidate_chunk=gca_candidate_chunk,
+                                          topology_distance_backend=topology_distance_backend,
+                                          topology_state_backend=topology_state_backend)
         actual = {"native_optimizations": native_optimizations, "n4_backend": n4_backend,
                   "n4_execution": n4_execution, "wm_backend": wm_backend, "wm_execution": wm_execution,
                   "wm_edit_backend": wm_edit_backend, "defects_backend": defects_backend,
@@ -1470,7 +1584,11 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                   "normalization_controls_backend": normalization_controls_backend,
                   "normalization_initial_bias_backend": normalization_initial_bias_backend,
                   "sphere_finish_backend": sphere_finish_backend, "mni_execution": mni_execution,
-                  "hemisphere_workers": hemisphere_workers, "input_execution": input_execution}
+                  "hemisphere_workers": hemisphere_workers, "input_execution": input_execution,
+                  "hemisphere_execution": hemisphere_execution,
+                  "gca_reuse_atlas_context": gca_reuse_atlas_context,
+                  "topology_distance_backend": topology_distance_backend,
+                  "topology_state_backend": topology_state_backend}
         if actual != expected:
             raise ValueError("Python profile requires its complete own implementation recipe")
     if wm_backend not in {"native", "torch", "torch-optimized"}:
@@ -1515,6 +1633,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     started = time.perf_counter()
     from .input_n4_chain import require_n4_runtime_dependencies
     n4_dependencies = require_n4_runtime_dependencies(n4_backend=n4_backend)
+    from .triton_runtime import configure_triton_compiler
+    triton_runtime = configure_triton_compiler(device=str(device))
     from .hemisphere_parallel import validate_hemisphere_workers
     validate_hemisphere_workers(hemisphere_workers, threads)
     from .profiling import StageProfiler, configure_cuda_allocator, autocast_state
@@ -1612,6 +1732,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     caller_autocast = {kind: autocast_state(kind) for kind in ("cpu", "cuda")}
     report: dict = {"profile": profile, "input": str(t1),
                     "n4_runtime_dependencies": n4_dependencies,
+                    "triton_runtime": triton_runtime,
                     "subject_dir": str(subject), "device": device,
                     "backend": backend,
                     "n4_binary": ({"binary": str(n4_binary[0]),
@@ -1671,6 +1792,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         "inverse_backend": gca_inverse_backend if gca_backend == "torch" else None,
         "candidate_chunk": gca_candidate_chunk if gca_backend == "torch" else None,
         "execution": gca_execution if gca_backend == "torch" else "native-subprocess",
+        "reuse_atlas_context": gca_reuse_atlas_context if gca_backend == "torch" else False,
         "device": device if gca_backend == "torch" else "cpu",
         "strict_native_em": gca_backend != "torch"}
     report["native_optimizations"] = native_selection
@@ -1679,6 +1801,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                            else "FNIT ordered digital topology; different complete algorithm" if topology_backend == "python"
                            else "native-c++"),
         "backend": topology_backend,
+        "distance_backend": topology_distance_backend if topology_backend == "python-ga" else None,
+        "state_backend": topology_state_backend if topology_backend == "python-ga" else None,
         "strict_GA_reproduction": topology_backend == "native",
         "metric_equivalence": "not_assessed" if topology_backend != "native" else "reported_separately",
         "strict_numerical_validation": "reported_separately",
@@ -1885,7 +2009,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
           "mri_em_register", _run_native_em_register, native_em[0], mri, gca, assets,
           backend=native_selection["em_backend"], binary_sha256=native_em[1],
           threads=threads, device=device, inverse_backend=gca_inverse_backend,
-          candidate_chunk=gca_candidate_chunk, execution=gca_execution)
+          candidate_chunk=gca_candidate_chunk, execution=gca_execution,
+          **({"reuse_atlas_context": True} if gca_reuse_atlas_context else {}))
     stage("mri_ca_normalize", run_ca_normalize, mri / "nu.mgz",
           mri / "brainmask.mgz", gca,
           lta, mri / "norm.mgz", mri / "ctrl_pts.mgz")
@@ -1979,6 +2104,10 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                   'sphere_finish_backend': sphere_finish_backend,
                   'surface_placement_backend': surface_placement_backend,
                   'topology_backend': topology_backend,
+                  **({'topology_distance_backend': topology_distance_backend}
+                     if topology_distance_backend != 'serial' else {}),
+                  **({'topology_state_backend': topology_state_backend}
+                     if topology_state_backend != 'legacy' else {}),
                   'annotation_gibbs_backend': annotation_gibbs_backend,
                   'remesh_scalar_storage': remesh_scalar_storage,
                   'binaries': {name: str(value) for name, value in (
@@ -1992,48 +2121,57 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         placement_operations = (('final_white', 'pial_surface')
                                 if surface_placement_backend == 'python'
                                 else ('finish_surface',))
-        for operation in ('surface', 'register', 'annotation', *placement_operations):
-            try:
-                group = stage(f'{operation}_hemisphere_group', run_hemisphere_group,
-                              subject, operation, device=str(registration_device), threads=threads,
-                              workers=hemisphere_workers, profile_stages=profile_stages, kwargs=common,
-                              cuda_allocator_cache=("enabled" if operation == "final_white" or
-                                                    (operation == "surface" and
-                                                     (inflate_backend == "torch" or
-                                                      sphere_finish_backend == "torch")) else "inherit"))
-            except HemisphereGroupError as error:
-                report['hemisphere_scheduling']['groups'].append(error.report)
+        report['hemisphere_scheduling']['execution'] = hemisphere_execution
+        if hemisphere_execution == "persistent":
+            from .hemisphere_integration import run_persistent_cortical_chain
+            run_persistent_cortical_chain(
+                subject=subject, report=report, stage=stage, common_kwargs=common,
+                device=device, registration_device=registration_device, threads=threads,
+                profile_stages=profile_stages, assets=assets,
+                defects_backend=defects_backend)
+        else:
+            for operation in ('surface', 'register', 'annotation', *placement_operations):
                 try:
-                    (subject / 'fnit-native-free-run.json').write_text(json.dumps(report, indent=2))
-                except Exception as metadata_error:
-                    error.add_note(f"Group failure metadata could not be saved: {metadata_error!r}")
-                raise
-            report['hemisphere_scheduling']['groups'].append(group)
-            for hemi in ('lh', 'rh'):
-                value = group['values'][hemi]
-                # Worker 步骤用于诊断，不加到父组墙钟形成重复计时。
-                result = value['result']
+                    group = stage(f'{operation}_hemisphere_group', run_hemisphere_group,
+                                  subject, operation, device=str(registration_device), threads=threads,
+                                  workers=hemisphere_workers, profile_stages=profile_stages, kwargs=common,
+                                  cuda_allocator_cache=("enabled" if operation == "final_white" or
+                                                        (operation == "surface" and
+                                                         (inflate_backend == "torch" or
+                                                          sphere_finish_backend == "torch")) else "inherit"))
+                except HemisphereGroupError as error:
+                    report['hemisphere_scheduling']['groups'].append(error.report)
+                    try:
+                        (subject / 'fnit-native-free-run.json').write_text(json.dumps(report, indent=2))
+                    except Exception as metadata_error:
+                        error.add_note(f"Group failure metadata could not be saved: {metadata_error!r}")
+                    raise
+                report['hemisphere_scheduling']['groups'].append(group)
+                for hemi in ('lh', 'rh'):
+                    value = group['values'][hemi]
+                    # Worker 步骤用于诊断，不加到父组墙钟形成重复计时。
+                    result = value['result']
+                    if operation == 'surface':
+                        report.setdefault('surfaces', {})[hemi] = result
+                    elif operation == 'register':
+                        report['sphere_registration']['hemisphere_seconds'][hemi] = result['total_seconds_including_io']
+                        report['sphere_registration']['reports'][hemi] = result
+                    elif operation in ('finish_surface', 'final_white', 'pial_surface'):
+                        report['surfaces'][hemi].update(result)
+                if operation in ('finish_surface', 'pial_surface'):
+                    # 实测GPU顶点指标独立exec并行更慢；放置并行、指标串行。
+                    for hemi in ('lh', 'rh'):
+                        metrics_result = stage(f'finish_metrics_{hemi}', _finish_cortical_metrics,
+                              subject, hemi, metrics_binary[0], assets, device=device,
+                              python_only=surface_placement_backend == "python")
+                        report['surfaces'][hemi].update(metrics_result)
                 if operation == 'surface':
-                    report.setdefault('surfaces', {})[hemi] = result
-                elif operation == 'register':
-                    report['sphere_registration']['hemisphere_seconds'][hemi] = result['total_seconds_including_io']
-                    report['sphere_registration']['reports'][hemi] = result
-                elif operation in ('finish_surface', 'final_white', 'pial_surface'):
-                    report['surfaces'][hemi].update(result)
-            if operation in ('finish_surface', 'pial_surface'):
-                # 实测GPU顶点指标独立exec并行更慢；放置并行、指标串行。
-                for hemi in ('lh', 'rh'):
-                    metrics_result = stage(f'finish_metrics_{hemi}', _finish_cortical_metrics,
-                          subject, hemi, metrics_binary[0], assets, device=device,
-                          python_only=surface_placement_backend == "python")
-                    report['surfaces'][hemi].update(metrics_result)
-            if operation == 'surface':
-                # 此诊断无下游计算依赖，但左右累计有先后依赖。
-                for hemi in ('lh', 'rh'):
-                    stage(f'defects_{hemi}', _run_defects_volume,
-                          defect_binary[0] if defect_binary else None, subject, hemi, assets,
-                          backend=defects_backend, device=device)
-            (subject / 'fnit-native-free-run.json').write_text(json.dumps(report, indent=2))
+                    # 此诊断无下游计算依赖，但左右累计有先后依赖。
+                    for hemi in ('lh', 'rh'):
+                        stage(f'defects_{hemi}', _run_defects_volume,
+                              defect_binary[0] if defect_binary else None, subject, hemi, assets,
+                              backend=defects_backend, device=device)
+                (subject / 'fnit-native-free-run.json').write_text(json.dumps(report, indent=2))
         surf = subject / 'surf'
     else:
         for hemi in ("lh", "rh"):
@@ -2050,7 +2188,11 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                            sphere_finish_backend=sphere_finish_backend,
                            remesh_scalar_storage=remesh_scalar_storage,
                            surface_placement_backend=surface_placement_backend,
-                           topology_backend=topology_backend)
+                           topology_backend=topology_backend,
+                           **({"topology_distance_backend": topology_distance_backend}
+                              if topology_distance_backend != "serial" else {}),
+                           **({"topology_state_backend": topology_state_backend}
+                              if topology_state_backend != "legacy" else {}))
             report.setdefault("surfaces", {})[hemi] = result
             (subject / "fnit-native-free-run.json").write_text(json.dumps(report, indent=2))
 
@@ -2173,6 +2315,7 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          profile_stages: bool = False,
                          cuda_allocator_cache: str = "auto",
                          hemisphere_workers: int = 1,
+                         hemisphere_execution: str = "groups",
                          native_optimizations: str = "auto",
                          n4_backend: str = "native",
                          n4_execution: str = "in-process",
@@ -2188,12 +2331,15 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          sphere_finish_backend: str = "cpu",
                          surface_placement_backend: str = "native",
                          topology_backend: str = "native",
+                         topology_distance_backend: str = "serial",
+                         topology_state_backend: str = "legacy",
                          annotation_gibbs_backend: str = "python",
                          remesh_scalar_storage: str = "numpy",
                          mni_execution: str = "in-process",
                          gca_inverse_backend: str = "cpu",
                          gca_candidate_chunk: int = 64,
                          gca_execution: str = "in-process",
+                         gca_reuse_atlas_context: bool = False,
                          fill_backend: str = "python",
                          backend: str = "native") -> dict:
     """从原始单 T1 连续重建；输入、输出及坐标定义见 recon-all 中文说明。
@@ -2204,6 +2350,13 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     hemisphere_workers=1保持串行，2启用私有被试目录的双侧 exec 进程，
     总 threads 平分，须至少2；返回 hemisphere_scheduling 组墙钟/worker报告，
     所有共享发布失败均传播到主报告。并行要求 caller autocast 关闭。
+    新增gca_reuse_atlas_context默认False（同次GCA复用）；
+    topology_distance_backend默认serial，topology_state_backend默认legacy；
+    非默认拓扑选项仅完整python-ga，GPU须cuda:N；返回报告记录实际选择，
+    全参数、阶段返回和真实范围见ROUND2_INTEGRATION.md。
+    hemisphere_execution默认groups保留阶段屏障；persistent仅完整Python
+    配方，在各自半球依赖满足后连续推进，一侧一个fresh worker/私有目录。
+    共享defects仍LH→RH累计，终态指标仍串行，失败保留部分回执但不验收。
     backend=python选择完整独立Python候选：SimpleITK N4、自产WM/编辑、
     完整数字拓扑、white/pial、inflation、图谱与统计；允许有序CPU核。
     此配方固定双侧worker=2及其后端，忽略这些逐阶段后端的混合默认；
@@ -2261,6 +2414,9 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     有序CPU堆，torch-numba另用CUDA初始边界；所有实验均失败报错而不回退。
     sphere_normals_backend=numba 使用已有法向；torch 使用同设备有序
     Torch 法向，其余标准 sphere 阶段保持原计算，要求显式 CUDA 设备。
+    CUDA首次科学JIT前选择当前环境编译器，尊重显式TRITON_PTXAS_PATH，
+    triton_runtime返回其版本/SHA和缓存核验；不重置已初始化CUDA或改精度。
+    本进程缓存其他编译器时抛RuntimeError要求新解释器，详见TRITON_RUNTIME.md。
     profile_stages=False 不插入阶段同步；True 分列 CUDA 等待与父子 CPU 秒数。
     球面配准在 device 上执行完整有序 float32 梯度平均，其余目标函数、
     步长决策及末尾清理保持 CPU；不自动启用半精度，计时包含往返传输。
@@ -2287,7 +2443,10 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
             n4_backend="simpleitk" if n4_backend == "native" else n4_backend,
             n4_execution=n4_execution,
             topology_backend="python" if topology_backend == "native" else topology_backend,
-            input_execution=input_execution)
+            input_execution=input_execution, hemisphere_execution=hemisphere_execution,
+            gca_reuse_atlas_context=gca_reuse_atlas_context,
+            gca_candidate_chunk=1024 if gca_candidate_chunk == 64 else gca_candidate_chunk,
+            topology_distance_backend=topology_distance_backend, topology_state_backend=topology_state_backend)
         native_optimizations = options["native_optimizations"]
         n4_backend, n4_execution = options["n4_backend"], options["n4_execution"]
         wm_backend, wm_execution = options["wm_backend"], options["wm_execution"]
@@ -2301,6 +2460,11 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         normalization_initial_bias_backend = options["normalization_initial_bias_backend"]
         sphere_finish_backend, mni_execution = options["sphere_finish_backend"], options["mni_execution"]
         fill_backend, hemisphere_workers = options["fill_backend"], options["hemisphere_workers"]
+    _validate_hemisphere_execution(hemisphere_execution, backend=backend, workers=hemisphere_workers)
+    _validate_round2_options(topology_backend=topology_backend,
+        topology_distance_backend=topology_distance_backend, topology_state_backend=topology_state_backend,
+        gca_reuse_atlas_context=gca_reuse_atlas_context, device=device,
+        native_optimizations=native_optimizations)
     _normalization_controls_options(normalization_controls_backend, device)
     _normalization_initial_bias_options(normalization_initial_bias_backend, device)
     _validate_inflate_backend(inflate_backend, device, hemisphere_workers)
@@ -2358,6 +2522,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                     device=device, threads=threads, native_bin_dir=native_bin_dir,
                     profile_stages=profile_stages, cuda_allocator_cache=cuda_allocator_cache,
                     **({"hemisphere_workers": hemisphere_workers} if hemisphere_workers != 1 else {}),
+                    **({"hemisphere_execution": hemisphere_execution}
+                       if hemisphere_execution != "groups" or backend == "python" else {}),
                     **({"native_optimizations": native_optimizations} if native_optimizations != "auto" else {}),
                     **({"n4_backend": n4_backend} if n4_backend != "native" else {}),
                     **({"n4_execution": n4_execution} if n4_execution != "in-process" else {}),
@@ -2376,6 +2542,10 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                     **({"sphere_finish_backend": sphere_finish_backend} if sphere_finish_backend != "cpu" else {}),
                     **({"surface_placement_backend": surface_placement_backend} if surface_placement_backend != "native" else {}),
                     **({"topology_backend": topology_backend} if topology_backend != "native" else {}),
+                    **({"topology_distance_backend": topology_distance_backend}
+                       if topology_distance_backend != "serial" or backend == "python" else {}),
+                    **({"topology_state_backend": topology_state_backend}
+                       if topology_state_backend != "legacy" or backend == "python" else {}),
                     **({"annotation_gibbs_backend": annotation_gibbs_backend}
                        if annotation_gibbs_backend != "python" else {}),
                     **({"remesh_scalar_storage": remesh_scalar_storage}
@@ -2384,6 +2554,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                     **({"gca_inverse_backend": gca_inverse_backend} if gca_inverse_backend != "cpu" else {}),
                     **({"gca_candidate_chunk": gca_candidate_chunk} if gca_candidate_chunk != 64 else {}),
                     **({"gca_execution": gca_execution} if gca_execution != "in-process" else {}),
+                    **({"gca_reuse_atlas_context": gca_reuse_atlas_context}
+                       if gca_reuse_atlas_context or backend == "python" else {}),
                     **({"fill_backend": fill_backend} if fill_backend != "python" else {}),
                     backend=backend)
                 if program_guard is not None:
@@ -2431,6 +2603,8 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--weights-dir", type=Path, required=True)
     parser.add_argument("--assets-dir", type=Path, required=True)
     parser.add_argument("--device", default="cuda:0")
+    parser.add_argument("--hemisphere-execution", choices=("groups", "persistent"), default="groups",
+                        help="persistent: complete Python only, one private workspace and fresh worker per hemisphere")
     parser.add_argument("--threads", type=int, default=4)
     parser.add_argument("--n4-backend", choices=("native", "torch", "simpleitk"), default="native",
                         help="native benchmark wrapper, complete Torch N4, or SimpleITK Python API without stage executable")
@@ -2465,6 +2639,10 @@ def main(argv: list[str] | None = None) -> None:
                         help="native, existing Torch hybrid, or Torch histograms/cached geometry with ordered CPU feedback")
     parser.add_argument("--wm-execution", choices=("in-process", "isolated"), default="in-process",
                         help="isolated torch-optimized WM enables caching in a fresh child, preserving parent CUDA")
+    parser.add_argument("--gca-reuse-atlas-context", action="store_true",
+                        help="reuse immutable covariance/classifier context within complete Torch GCA call")
+    parser.add_argument("--topology-distance-backend", choices=("serial", "parallel", "gpu_defect_signed_distance"), default="serial")
+    parser.add_argument("--topology-state-backend", choices=("legacy", "packed"), default="legacy")
     parser.add_argument("--gca-inverse-backend", choices=("cpu", "torch"), default="cpu")
     parser.add_argument("--gca-candidate-chunk", type=int, default=64)
     parser.add_argument("--gca-execution", choices=("in-process", "isolated"), default="in-process",
@@ -2491,6 +2669,7 @@ def main(argv: list[str] | None = None) -> None:
                                   profile_stages=args.profile_stages,
                                   cuda_allocator_cache=args.cuda_allocator_cache,
                                   hemisphere_workers=args.hemisphere_workers,
+                                  hemisphere_execution=args.hemisphere_execution,
                                   native_optimizations=args.native_optimizations,
                                   n4_backend=args.n4_backend,
                                   n4_execution=args.n4_execution,
@@ -2506,12 +2685,15 @@ def main(argv: list[str] | None = None) -> None:
                                   sphere_finish_backend=args.sphere_finish_backend,
                                   surface_placement_backend=args.surface_placement_backend,
                                   topology_backend=args.topology_backend,
+                                  topology_distance_backend=args.topology_distance_backend,
+                                  topology_state_backend=args.topology_state_backend,
                                   annotation_gibbs_backend=args.annotation_gibbs_backend,
                                   remesh_scalar_storage=args.remesh_scalar_storage,
                                   mni_execution=args.mni_execution,
                                   gca_inverse_backend=args.gca_inverse_backend,
                                   gca_candidate_chunk=args.gca_candidate_chunk,
                                   gca_execution=args.gca_execution,
+                                  gca_reuse_atlas_context=args.gca_reuse_atlas_context,
                                   fill_backend=args.fill_backend,
                                   backend=args.backend)
     print(json.dumps(report, indent=2))

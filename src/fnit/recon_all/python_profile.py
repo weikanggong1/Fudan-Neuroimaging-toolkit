@@ -8,7 +8,12 @@ def python_profile_options(*, device: str = "cuda:0", threads: int = 4,
                            n4_backend: str = "simpleitk",
                            n4_execution: str = "in-process",
                            topology_backend: str = "python",
-                           input_execution: str = "serial") -> dict:
+                           input_execution: str = "serial",
+                           hemisphere_execution: str = "groups",
+                           gca_reuse_atlas_context: bool = False,
+                           gca_candidate_chunk: int = 1024,
+                           topology_distance_backend: str = "serial",
+                           topology_state_backend: str = "legacy") -> dict:
     """返回独立Python候选的固定调度选项，不初始化CUDA或读写数据。
 
     device须为显式cuda:N；当前完整MNI/WM接口仍需GPU，CPU核允许保留。
@@ -31,6 +36,12 @@ def python_profile_options(*, device: str = "cuda:0", threads: int = 4,
     预算、非法N4后端或执行组合抛ValueError，缺依赖/数据由后续预检报错，
     不回退原程序。Torch已有量化/下游差异单列，选择后端不判指标等效。
     输入DAG选择属于完整配方；非法组合不隐式改回串行或触发计算。
+    hemisphere_execution默认groups保留逐阶段双侧屏障；persistent显式
+    选择一次私有拷贝/worker的连续半球链，依赖和共享缺陷累计语义保持。
+    gca_reuse_atlas_context默认False，topology_distance_backend默认serial，
+    topology_state_backend默认legacy；显式非默认只改变对应调度键，
+    按ROUND2_INTEGRATION.md校验GPU/GCA和完整GA依赖，不默默回退。
+    gca_candidate_chunk默认1024，显式正整数改变完整候选批量，不缩搜索。
     没有独立官方CLI；组合参考和真实验证见PYTHON_SURFACE_PIPELINE.md。
     """
     try:
@@ -54,12 +65,26 @@ def python_profile_options(*, device: str = "cuda:0", threads: int = 4,
     if input_execution == "parallel" and (
             n4_backend != "simpleitk" or n4_execution != "in-process" or threads != 4):
         raise ValueError("parallel Python input requires SimpleITK in-process and total threads=4")
+    if not isinstance(hemisphere_execution, str) or hemisphere_execution not in {"groups", "persistent"}:
+        raise ValueError("hemisphere_execution must be groups or persistent")
+    if type(gca_candidate_chunk) is not int or gca_candidate_chunk < 1:
+        raise ValueError("gca_candidate_chunk must be a positive integer")
+    from .native_free import _validate_round2_options
+    _validate_round2_options(topology_backend=topology_backend,
+        topology_distance_backend=topology_distance_backend,
+        topology_state_backend=topology_state_backend,
+        gca_reuse_atlas_context=gca_reuse_atlas_context,
+        device=device, native_optimizations="torch")
     return {
+        "hemisphere_execution": hemisphere_execution,
+        "gca_reuse_atlas_context": gca_reuse_atlas_context,
+        "topology_distance_backend": topology_distance_backend,
+        "topology_state_backend": topology_state_backend,
         "input_execution": input_execution,
         "native_optimizations": "torch", "n4_backend": n4_backend,
         "n4_execution": n4_execution, "wm_backend": "torch-optimized",
         "gca_execution": "isolated", "gca_inverse_backend": "torch",
-        "gca_candidate_chunk": 1024,
+        "gca_candidate_chunk": gca_candidate_chunk,
         "normalization_controls_backend": "torch",
         "normalization_initial_bias_backend": "torch",
         "sphere_finish_backend": "torch", "mni_execution": "parallel-late",

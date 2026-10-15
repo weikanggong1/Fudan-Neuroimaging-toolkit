@@ -58,6 +58,50 @@ def _scan(xyz, a, b, scan_vertices, row_mapping, rows, valid, audit):
     return -1,-1,calls,sequence[:calls] if audit else sequence
 
 
+@njit(cache=True, fastmath=False)
+def _prepare_edge_query_fields(xyz, vertex, row):
+    """同一不可变 canonical 的原 F32→F64 端点及原 np.cross；逐边保留。"""
+    fields=np.empty((len(row),9),np.float64)
+    u2=xyz[vertex].astype(np.float64)
+    for index in range(len(row)):
+        u3=xyz[row[index]].astype(np.float64)
+        fields[index,:3]=u2;fields[index,3:6]=u3
+        fields[index,6:]=np.cross(u2,u3)
+    return fields
+
+
+@njit(cache=True, fastmath=False)
+def _scan_prepared(xyz,a,b,scan_vertices,row_mapping,rows,edge_fields,valid,audit):
+    capacity=0
+    if audit:
+        for v in scan_vertices:capacity+=len(rows[row_mapping[v]])
+    sequence=np.empty((capacity,5),np.int32);calls=0
+    u0=xyz[a].astype(np.float64);u1=xyz[b].astype(np.float64)
+    query_normal=np.cross(u0,u1)
+    for v in scan_vertices:
+        if v==a or v==b:continue
+        slot=row_mapping[v]
+        for index in range(len(rows[slot])):
+            w=rows[slot][index]
+            if w==a or w==b or not valid[w]:continue
+            field=edge_fields[slot][index]
+            a0=np.dot(u0,field[6:]);a1=np.dot(u1,field[6:])
+            a2=np.dot(field[:3],query_normal);a3=np.dot(field[3:6],query_normal)
+            if abs(a0)<1e-7 or abs(a1)<1e-7 or abs(a2)<1e-7 or abs(a3)<1e-7:
+                hit=_edge_intersects(xyz,a,b,v,w)
+            else:
+                product0=a0*a1;product1=a2*a3
+                if product0>0 or product1>0:hit=False
+                elif product0<0 or product1<0:hit=True
+                else:hit=_edge_intersects(xyz,a,b,v,w)
+            if audit:
+                sequence[calls,0]=a;sequence[calls,1]=b
+                sequence[calls,2]=v;sequence[calls,3]=w;sequence[calls,4]=int(hit)
+            calls+=1
+            if hit:return int(v),int(w),calls,sequence[:calls]
+    return -1,-1,calls,sequence[:calls]if audit else sequence
+
+
 class OrderedBlockerScan:
     """一个candidate的动态有序扫描缓冲，不跨候选或几何状态缓存。
 
@@ -76,14 +120,27 @@ class OrderedBlockerScan:
     query_mask记录缓冲覆盖域；扫描额外hull子域时必须属于该域。
     sync只更新有query的行；其他行从未被扫描。调用者负责动态邻接
     修改次序；本类不执行GA、分类/删除/接受或生产质量检查。
+    canonical默认None，每次查询读取当前坐标；显式提供不可变bytes-backed
+    F32(N,3)时绑定同一对象，准备每条有序边的F64端点及原叉积，sync
+    重新计算改变行；查询不省略任何边、dot、退化fallback或审计条目。
+    新canonical必须新建scanner；绑定可变坐标或查询另一对象明确拒绝。
     audit默认False；True返回有序实际谓词序列的SHA-256诊断，包含
     临时缓冲与哈希开销。canonical有限性由成熟重连接口一次校验。
     """
-    def __init__(self, *, scan_vertices, neighbor_rows, audit=False):
+    def __init__(self, *, scan_vertices, neighbor_rows, audit=False, canonical=None):
         start=time.perf_counter();scan=np.asarray(scan_vertices)
         n=len(neighbor_rows)
         if not isinstance(audit,(bool,np.bool_)):raise ValueError('audit must be bool or np.bool_')
         self.audit=bool(audit);self.sequence_digest=hashlib.sha256() if audit else None
+        self.canonical=canonical;self.edge_fields=None
+        if canonical is not None:
+            owner=canonical
+            while isinstance(owner,np.ndarray):owner=owner.base
+            if (not isinstance(canonical,np.ndarray)or canonical.dtype!=np.float32
+                    or canonical.shape!=(n,3)or canonical.flags.writeable
+                    or not isinstance(owner,bytes)or not np.isfinite(canonical).all()):
+                raise ValueError('canonical requires immutable bytes-backed finite float32 (N,3)')
+
         if (scan.ndim!=1 or scan.dtype.kind not in 'iu'
                 or scan.size and (scan.min()<0 or scan.max()>=n)):
             raise ValueError('complete integer source query vertex sequence required')
@@ -96,6 +153,12 @@ class OrderedBlockerScan:
                 row=self._row(neighbor_rows[vertex],n)
                 self.mapping[vertex]=len(self.rows)
                 self.rows.append(row)
+        if canonical is not None:
+            self.edge_fields=List();self.edge_fields.append(np.empty((0,9),np.float64))
+            for vertex in scan:
+                slot=int(self.mapping[int(vertex)])
+                if slot==len(self.edge_fields):
+                    self.edge_fields.append(_prepare_edge_query_fields(canonical,int(vertex),self.rows[slot]))
         self.preparation_seconds=time.perf_counter()-start
         self.calls=0;self.predicate_calls=0
 
@@ -113,14 +176,23 @@ class OrderedBlockerScan:
                 or vertex<0 or vertex>=len(self.mapping)):
             raise ValueError('valid integer query vertex required')
         slot=self.mapping[vertex]
-        if slot>=0:self.rows[int(slot)]=self._row(row,len(self.mapping))
+        if slot>=0:
+            current=self._row(row,len(self.mapping))
+            self.rows[int(slot)]=current
+            if self.edge_fields is not None:
+                self.edge_fields[int(slot)]=_prepare_edge_query_fields(self.canonical,int(vertex),current)
 
     def first_blocker(self, *, xyz, a, b, scan_vertices, valid):
         scan=np.asarray(scan_vertices)
         if (scan.ndim!=1 or scan.dtype!=np.int32 or scan.size and
                 (scan.min()<0 or scan.max()>=len(self.mapping) or np.any(self.mapping[scan]<0))):
             raise ValueError('ordered scan must stay inside prepared query rows')
-        v,w,count,sequence=_scan(xyz,a,b,scan,self.mapping,self.rows,valid,self.audit)
+        if self.canonical is not None:
+            if xyz is not self.canonical:
+                raise ValueError('prepared edge fields require the same immutable canonical object')
+            v,w,count,sequence=_scan_prepared(xyz,a,b,scan,self.mapping,self.rows,self.edge_fields,valid,self.audit)
+        else:
+            v,w,count,sequence=_scan(xyz,a,b,scan,self.mapping,self.rows,valid,self.audit)
         self.calls+=1;self.predicate_calls+=count
         if self.audit:self.sequence_digest.update(sequence.astype('<i4',copy=False).tobytes())
         return None if v<0 else (v,w)

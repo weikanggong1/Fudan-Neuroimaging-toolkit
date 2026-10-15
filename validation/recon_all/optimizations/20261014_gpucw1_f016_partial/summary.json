@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "report_scope": "historical_f016_partial_two_case_run_and_sub07_posthoc_evaluation",
+  "science_source_commit": "f01689e5a771405eca2458c842f5b6f448002d24",
+  "reference_software": "freesurfer-linux-centos7_x86_64-8.2.0-20260314-d932c45",
+  "case_count": 2,
+  "pair_complete": false,
+  "overall_metric_equivalence": "not_assessed_no_confirmed_prospective_thresholds",
+  "optimization_regression": "not_assessed_waiting_same_case_control",
+  "cases": {
+    "ds000114_sub-06": {
+      "execution": "failed",
+      "exit_code": 1,
+      "input_sha256": "7e33afb28f631fac31d81e2428a6144f61aba4102859c694eeb49ee584de04f7",
+      "science_benchmark_sha256": "76f8981f923785be9ea7a82b3ac7555591e586eb133ad60db707911163c4a1a4",
+      "failure_stage": "left_topology_ga_compact_current_gate",
+      "failure_diagnostic": {
+        "source_intersection_count": 0,
+        "independent_geometric_intersection_count": 2
+      },
+      "outputs_complete": false,
+      "strict_reproduction": "not_assessed_incomplete_run",
+      "cli_wall_seconds": 17197.969,
+      "harness_wall_seconds": 17205.347,
+      "case_outer_wall_seconds": 17210.098187,
+      "followup_source_patch_evaluated_end_to_end": false
+    },
+    "ds000114_sub-07": {
+      "execution": "complete",
+      "exit_code": 0,
+      "runtime_status": "complete",
+      "input_sha256": "59ef7bed60d4db64d56d947ebed2ef62a9257c26fe879848fe24d10a490f74fc",
+      "run_report_sha256": "d52be25b78ed78c97f2b9f08e83033bf7d2ccd230294dfdeaf31a032f3a022ba",
+      "science_benchmark_sha256": "940292f1fa77fe49df690869c1a0a7d7157817a441acf4d06d48a2b366c5676a",
+      "posthoc_evaluation_status": "complete",
+      "posthoc_evaluation_report_sha256": "e25dccbdd0979a0318b306c8dd0aaa3708cc5806339160c27fcdce9dbcb16fcd",
+      "posthoc_surface_report_sha256": "12f8e09cc34366244e991e598b387257b5c7204f09ee8cc36b4fab4165213b2e",
+      "output_completeness": {"present": 138, "expected": 138},
+      "strict_reproduction": {"passed": 23, "expected": 138},
+      "timing_seconds": {
+        "cli": 11989.272791,
+        "harness_main_entry_including_preflight_and_hashing": 11998.872405,
+        "case_outer": 12004.18,
+        "historical_official_reference": 6138.304,
+        "controlled_pairwise_speedup": null
+      },
+      "surface_correspondence": {
+        "orig_nofix_ordered_faces_and_coordinates_equal": true,
+        "first_detected_topology_divergence": "orig.premesh",
+        "final_white_pial_same_index_comparison_valid": false,
+        "reason": "candidate_and_reference_vertex_and_face_counts_differ"
+      },
+      "bidirectional_sampled_vertex_to_opposite_triangle_distance_mm": {
+        "lh_white": {"candidate_to_reference_mean": 0.0354866, "reference_to_candidate_mean": 0.0372058, "candidate_to_reference_p99": 0.2444, "reference_to_candidate_p99": 0.2581, "reference_to_candidate_max": 6.1296},
+        "rh_white": {"candidate_to_reference_mean": 0.0395919, "reference_to_candidate_mean": 0.0387817, "candidate_to_reference_p99": 0.2839, "reference_to_candidate_p99": 0.2630},
+        "lh_pial": {"candidate_to_reference_mean": 0.0638842, "reference_to_candidate_mean": 0.063061, "candidate_to_reference_p99": 0.4544, "reference_to_candidate_p99": 0.439},
+        "rh_pial": {"candidate_to_reference_mean": 0.0828394, "reference_to_candidate_mean": 0.081837, "candidate_to_reference_p99": 0.5039, "reference_to_candidate_p99": 0.5061}
+      },
+      "aparc_68_matched_regions": {
+        "thick_avg_mae_mm": 0.032588,
+        "surface_area_mae_mm2": 27.7206,
+        "gray_volume_mae_mm3": 95.1765,
+        "p90_absolute_relative_error_percent": {"thick_avg": 3.0365, "surface_area": 3.7041, "gray_volume": 4.064},
+        "selected_local_outliers": [
+          {"hemisphere": "rh", "region": "entorhinal", "metric": "thick_avg", "difference_mm": 0.174, "relative_difference_percent": 6.5},
+          {"hemisphere": "lh", "region": "rostralanteriorcingulate", "metric": "surface_area", "relative_difference_percent": -18.31},
+          {"hemisphere": "lh", "region": "rostralanteriorcingulate", "metric": "gray_volume", "relative_difference_percent": -11.37}
+        ]
+      },
+      "segmentation_dice": {
+        "aseg": {"median": 1.0, "p05": 0.9821267},
+        "aparc_plus_aseg": {"median": 0.964347, "p05": 0.918797},
+        "a2009s": {"median": 0.9297, "p05": 0.8291},
+        "dkt": {"median": 0.97, "p05": 0.9302},
+        "filled": {"all_voxels_equal": true, "dice": 1.0}
+      },
+      "mesh_quality": {
+        "candidate_lh_vertices": 114378,
+        "candidate_lh_faces": 228752,
+        "candidate_rh_vertices": 115203,
+        "candidate_rh_faces": 230402,
+        "candidate_white_and_pial_self_intersections": 0,
+        "candidate_sphere_local_flipped_faces": 0,
+        "candidate_proper_white_pial_crossings": {"lh": 221, "rh": 170},
+        "archived_reference_proper_white_pial_crossings": {"lh": 240, "rh": 213},
+        "archived_reference_rh_self_intersections": {"white": 7, "pial": 4},
+        "globally_crossing_free": false
+      },
+      "figures_generated_in_private_report": ["t1_surface_overlay.png", "region_errors.png", "local_region_boundary.png"]
+    }
+  },
+  "lease_and_memory": {
+    "old_lease_status": "dispatch_or_exit_audit_failed",
+    "old_lease_exit_marker_present": false,
+    "old_gpu_lock_unresolved": true,
+    "target_gpu_whole_card_sampled_peak_bytes": 33703329792,
+    "target_gpu_external_process_contamination": true,
+    "fnit_process_tree_sampled_peak_bytes": null,
+    "fnit_under_20000000000_bytes_verified": false
+  },
+  "reference_view": {
+    "ordinary_files": 700,
+    "symlinks": 0,
+    "manifest_sha256": "e6aa553acfe943b4dd753804b7fbf57e6916c89d16f3c65003a677515be303be",
+    "production_input": false
+  },
+  "posthoc_evaluator": {
+    "strict_footer_difference_preserved": true,
+    "numeric_surface_frame_comparison_uses_fixed_tight_tolerance": true,
+    "comparator_sha256": "ac37f94a8e106495ec8b431b5f80970be73e15024770b45671ba8c4c34b19b27",
+    "unit_tests_passed": 8,
+    "unit_tests_total": 8
+  },
+  "provenance_limits": [
+    "Sub-07 was produced by the historical f016 science source, not the later topology patch.",
+    "Sub-06 failed and the two-case validation is incomplete.",
+    "The main-entry harness includes preflight and hashing but excludes parent interpreter initial imports and final metadata publication; the supervisor case-outer time is listed separately.",
+    "The archived official wall time is from another run period and is not a controlled paired speed measurement.",
+    "Whole-card GPU use includes another user's process; FNIT-owned peak is unresolved.",
+    "No prospective overall metric-equivalence threshold has been confirmed."
+  ]
+}

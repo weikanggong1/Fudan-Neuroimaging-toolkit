@@ -190,13 +190,13 @@ def _cancel(processes):
 
 def run_hemisphere_group(subject, operation, *, device, threads, workers=2,
                          profile_stages=False, callable_path='fnit.recon_all.native_free:_hemisphere_operation',
-                         kwargs=None, startup_wait_seconds=30, cuda_allocator_cache='inherit'):
+                         kwargs=None, startup_wait_seconds=90, cuda_allocator_cache='inherit'):
     """在私有完整拷贝中执行双侧任务，成功屏障后逐文件原子发布。
 
     subject 是自产被试目录；operation 标识阶段；kwargs 为 JSON 可序列化
     公共参数。threads 是总预算，workers=1/2 时分别分配全部/一半预算
     （奇数向下取整）。device 是显式 CPU/CUDA 设备；不 fork CUDA 状态。
-    startup_wait_seconds 默认30秒，为每批算法进入前的固定启动预算；
+    startup_wait_seconds 默认90秒，为每批算法进入前的固定启动预算；
     0禁资源重启但单次启动仍有90秒期限。仅可信的pre-GO CUDA OOM可重启。
     返回 values[lh/rh]、独立 workers 报告、组墙钟、重叠及同期显存记录。
     启动 worker 前同步 CUDA 并释放父进程空闲缓存，不改变 live tensor 或缓存策略。
@@ -504,3 +504,9 @@ def run_hemisphere_group(subject, operation, *, device, threads, workers=2,
             else:
                 raise HemisphereGroupError(f'{operation} hemisphere finalization failed: {message}', report) from final_errors[0][1]
     return report
+
+
+def run_hemisphere_pipeline(subject, operations, *, device, threads, **kwargs):
+    """持久半球入口；保留旧组接口，参数/回调见 PERSISTENT_HEMISPHERE_PIPELINE.md。"""
+    from .hemisphere_pipeline import run_hemisphere_pipeline as execute_pipeline
+    return execute_pipeline(subject, operations, device=device, threads=threads, **kwargs)

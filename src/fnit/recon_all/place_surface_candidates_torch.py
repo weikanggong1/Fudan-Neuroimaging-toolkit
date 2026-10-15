@@ -19,6 +19,7 @@ def conservative_face_candidates_torch(
     source_low=None, source_high=None, query_low=None, query_high=None,
     motion_bound: float | None = None, source_faces=None, query_faces=None,
     grid_cells_per_axis: int = 2,
+    collect_counts: bool = True, transfer_buffer_bytes: int = 128000000,
 ):
     """以完整网格单元查询构建球候选CSR，可安全排除不可能接触的面。
 
@@ -35,10 +36,16 @@ def conservative_face_candidates_torch(
     CUDA/OOM及输入/坐标编码异常传播，不静默切CPU或截断查询。
     grid_cells_per_axis默认2；实验3使用更小完整单元和最多27桶查询，
     不减少半径或候选、保持相同FP64球/bbox/共享顶点过滤。
+    collect_counts=False仅省去未消费的球筛统计同步，该计数返回None；
+    transfer_buffer_bytes限定跨查询块暂存的int32候选与int64行计数字节，
+    默认128MB，满后批量回传CPU。单个完整块可独立超过此暂存预算；
+    maximum_chunk_candidates仍控制其大小，不能截断。
     """
     target = torch.device(device)
     if target.type not in ("cpu", "cuda") or target.type == "cuda" and target.index is None:
         raise ValueError("device must be cpu or an explicitly indexed CUDA target")
+    if transfer_buffer_bytes < 1:
+        raise ValueError("transfer_buffer_bytes must be positive")
     if query_chunk_size < 1 or maximum_chunk_candidates < 1:
         raise ValueError("chunk sizes must be positive")
     if not isinstance(grid_cells_per_axis, int) or grid_cells_per_axis not in (2, 3):
@@ -124,6 +131,17 @@ def conservative_face_candidates_torch(
                           dtype=torch.int64, device=target)
     cells_per_query = len(shifts)
     offsets, parts, start = [0], [], 0
+    pending_parts, pending_counts, pending_bytes = [], [], 0
+    def flush():
+        # Bound retained device outputs, then transfer a contiguous CSR segment.
+        nonlocal pending_parts, pending_counts, pending_bytes
+        if not pending_counts:
+            return
+        row_counts = torch.cat(pending_counts).cpu().numpy()
+        part = torch.cat(pending_parts).cpu().numpy()
+        offsets.extend((np.cumsum(row_counts, dtype=np.int64)+offsets[-1]).tolist())
+        parts.append(part)
+        pending_parts, pending_counts, pending_bytes = [], [], 0
     while start < len(queries):
         stop = min(start+query_chunk_size, len(queries))
         while True:
@@ -151,7 +169,8 @@ def conservative_face_candidates_torch(
             rr = radius[start:stop][query_ids]
             squared_radius = rr*rr
             keep = squared <= squared_radius+64*eps*(squared.abs()+squared_radius.abs()+1)
-            info["sphere_candidates"] += int(keep.sum())
+            if collect_counts:
+                info["sphere_candidates"] += int(keep.sum())
             if use_boxes:
                 # Both triangles can move by bound. The checked runtime bound
                 # makes disjoint expanded initial boxes impossible to intersect.
@@ -162,13 +181,22 @@ def conservative_face_candidates_torch(
                 shared = (sf[ids, :, None] == qf[query_ids+start, None, :]).any(2).any(1)
                 keep &= ~shared
             ids, query_ids = ids[keep], query_ids[keep]
-            row_counts = torch.bincount(query_ids, minlength=stop-start).cpu().numpy()
-            part = ids.to(torch.int32).cpu().numpy()
+            row_counts = torch.bincount(query_ids, minlength=stop-start)
+            part = ids.to(torch.int32)
         else:
-            row_counts, part = np.zeros(stop-start, np.int64), np.empty(0, np.int32)
-        prefix_cpu = np.cumsum(row_counts, dtype=np.int64)+offsets[-1]
-        offsets.extend(prefix_cpu.tolist())
-        parts.append(part)
-        info["retained_candidates"] += len(part)
+            row_counts = torch.zeros(stop-start, dtype=torch.int64, device=target)
+            part = torch.empty(0, dtype=torch.int32, device=target)
+        size_bytes = row_counts.numel()*8 + part.numel()*4
+        if pending_bytes + size_bytes > transfer_buffer_bytes:
+            flush()
+        pending_counts.append(row_counts); pending_parts.append(part)
+        pending_bytes += size_bytes
+        if pending_bytes >= transfer_buffer_bytes:
+            flush()
+        info["retained_candidates"] += part.numel()
         start = stop
+    flush()
+    if not collect_counts:
+        info["sphere_candidates"] = None
+    info["transfer_buffer_bytes"] = transfer_buffer_bytes
     return np.asarray(offsets, np.int64), np.concatenate(parts), info

@@ -14,12 +14,17 @@ flowchart TD
   F -->|下一缺陷携带状态及同一随机流| D
   F -->|全部缺陷结束| G[五轮SOAP及源序压缩]
   G --> H[CURRENT等于TMP、原有序CSR相交清理]
-  H --> I[严格检查CURRENT与网格结构]
-  I --> J[恢复ORIGINAL、输出premesh]
+  H --> I[源与独立几何判据检查CURRENT]
+  I -->|仅独立几何残余| H2[同一rip和有序CSR再清理一次]
+  H2 --> I2[双判据与结构复检]
+  I -->|无需二次清理| I2
+  I2 -->|全部通过| J[恢复ORIGINAL、输出premesh]
   J --> K[既有标准remesh、ORIGINAL清理及最终质量门]
 ```
 
 这是实验性的premesh阶段，尚未替换生产拓扑默认。后续remesh和最终相交清理是必要步骤。源程序也在清理CURRENT后恢复ORIGINAL写出；ORIGINAL premesh中的相交仅在此阶段记录，最终`orig`仍须通过完整质量门。
+
+当源有向标记已经为零、独立几何检测仍发现CURRENT相交，且其余结构与有限值检查通过时，控制器用现有几何标记SOAP对同一压缩网格再清理一次。它沿用相同的冻结顶点和有序邻接，随后重新检查源标记与独立几何标记是否都为零；仍有相交就失败，不写合格premesh。二次清理只作用于CURRENT诊断坐标，写出的premesh仍是原流程恢复的ORIGINAL。
 
 新增显式 `distance_backend="serial"|"parallel"`，默认 serial。搜索与最终评分共用选择；实际 unMRI 跳过时记录 actual=null，Numba mask/slab 与采样 OS 线程数分开。参数、真实六评分和预算证据见 [距离路由](TOPOLOGY_GENETIC_DISTANCE_ROUTING.md)。
 
@@ -47,6 +52,7 @@ premesh_report = repair_genetic_topology(
     normal_status="surface",  # 完整控制器仅支持标准三角表面，metadata.status必须0
     soap_iterations=5,  # 源最终五轮F32、双pass、含中心点的SOAP
     progress_callback=None,  # 可选具名回调，在每缺陷完整写回后接收自产结果
+    failure_state_callback=None,  # 默认不保存失败网格；私有诊断可显式提供回调
 )
 premesh_vertices = premesh_report["surface_state"]["current_vertices"]  # 恢复后的ORIGINAL
 premesh_faces = premesh_report["surface_state"]["faces"]  # 压缩后的有序面
@@ -68,6 +74,7 @@ premesh_faces = premesh_report["surface_state"]["faces"]  # 压缩后的有序�
 | `normal_status` | 默认且仅支持`surface`。非默认球面patch恢复还有canonical同步语义，不在此完整控制器中开放 |
 | `soap_iterations` | 默认5，非负整数；不同轮数明确标实验政策 |
 | `progress_callback` | 默认None；可传`callable(*, defect_number, result)`，在完整最终写回后执行；异常原样传播，耗时计入完整API |
+| `failure_state_callback` | 默认None；仅最终质量门失败时调用，传入压缩ORIGINAL/CURRENT坐标、面、rip、有序CSR、质量和清理诊断的独立副本。回调本身不写文件；调用者可选择在私有隔离目录保存，异常原样传播 |
 
 当前只支持标准`optimal_mapping=0`。原始canonical/法向/白灰采样缓存不能用于会改写原球面坐标的其他mapping分支。当前corrected邻接、每缺陷局部MRI、种群状态和迭代坐标不作跨缺陷静态缓存。
 
@@ -77,12 +84,12 @@ premesh_faces = premesh_report["surface_state"]["faces"]  # 压缩后的有序�
 - `metadata`：自身元信息深复制；内部`register_mat=None`不属于nibabel表面footer的序列化字段。
 - `raw_to_base_vertex_translation`、`base_to_compact_vertex_translation`：对应原域长度的int32映射，删除项−1；`original_domain_defect_labels`为raw域int32 `(N,)`，0表示非缺陷。
 - `per_defect`：源序列表，含实际边/内点数、政策、代数、计数、终止、最佳/最终评分、连续删除状态、随机消费量和完整分段秒数。
-- `current_cleanup_vertices`：清理后的CURRENT/TMP `(M,3)`，单独保留，不能用它覆盖premesh ORIGINAL；`current_cleanup`为完整修复轨迹。
+- `current_cleanup_vertices`：清理后的CURRENT/TMP `(M,3)`，单独保留，不能用它覆盖premesh ORIGINAL；`current_cleanup`保留源标记修复的原有字段，并以`independent_geometric_fallback`记录二次清理是否触发、前后两种交面数和该次SOAP诊断。
 - `finish`：SOAP与压缩报告、源→新顶点/面映射；`quality`分别报告拓扑、有限值、链接、朝向、两坐标槽的两种相交判据、零面积面。
 - `seconds`：包括校验、JIT、全部搜索、回调和质量检查的API墙钟，不含外部读写。`complete_ga=True`仅指所有缺陷已执行；`final_mesh_quality/strict_source_final_reproduction/overall_metric_equivalence`仍分开记录。
 - `required_next_steps`：标准remesh、ORIGINAL相交清理和最终网格质量检查，不能把premesh成功当作整例成功。
 
-不修改调用者输入、不改变CUDA/TF32或启用半精度。非法策略/坐标域/不完整状态抛`ValueError`；未覆盖的normal坐标扰动明确失败；算子和回调异常传播；CURRENT残余相交或结构失败抛`RuntimeError`，不返回完成结果。接口不写文件，失败不会返回`status="failed"`字典。
+不修改调用者输入、不改变CUDA/TF32或启用半精度。非法策略/坐标域/不完整状态抛`ValueError`；未覆盖的normal坐标扰动明确失败；算子和回调异常传播；CURRENT残余相交或结构失败抛`RuntimeError`，不返回完成结果。接口不写文件，失败不会返回`status="failed"`字典。公开T1的本次二次清理精度和耗时须以新的同输入阶段运行报告为准，旧报告不能视为修复验证。
 
 ## 3. 命令行调用
 

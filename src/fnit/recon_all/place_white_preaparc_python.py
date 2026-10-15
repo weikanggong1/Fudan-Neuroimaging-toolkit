@@ -245,6 +245,8 @@ def _place_white_preaparc(
         "initial": xyz, "ripped": ripped, "target_values": values,
         "initial_sse": initial_sse, "initial_rms": initial_rms,
     } if diagnostics is not None else {}
+    from .place_surface_topology_cache import PlacementTopologyCache
+    topology_cache = PlacementTopologyCache(faces, len(current))
     for step in range(1, steps + 1):
         stage_start = time.perf_counter()
         normals = normal_cache.evaluate(current)
@@ -305,7 +307,7 @@ def _place_white_preaparc(
                 candidate_device=device if candidate_backend == "torch_snapshot" else None,
                 candidate_grid_cells_per_axis=candidate_grid_cells_per_axis,
                 candidate_diagnostics=candidate_details,
-                retained_mht_backend=retained_mht_backend,
+                retained_mht_backend=retained_mht_backend, topology_cache=topology_cache,
             )
             collision_elapsed = time.perf_counter() - trial_start
             collision_seconds += collision_elapsed

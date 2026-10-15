@@ -8,7 +8,7 @@ import time
 import numpy as np
 
 from .mri_em_register import (
-    atlas_label_peak, estimate_image_white_matter_peak, find_all_samples,
+    GCARegistrationContext, atlas_label_peak, estimate_image_white_matter_peak, find_all_samples,
     find_stable_samples, gca_centroid, gca_mean_volume, read_gca,
     read_masked_input, scale_input_intensity,
 )
@@ -24,7 +24,7 @@ def register_t1(nu_path: str | Path, atlas_path: str | Path,
                 device: str = "cpu", search_backend: str = "cpu",
                 candidate_chunk: int = 64, sample_chunk: int = 8192,
                 reduce_on_device: bool = False,
-                inverse_backend: str = "cpu") -> dict:
+                inverse_backend: str = "cpu", reuse_atlas_context: bool = False) -> dict:
     """Build a Talairach LTA without invoking a FreeSurfer executable.
 
     ``search_backend="cpu"`` keeps the validated source-order NumPy/Numba
@@ -44,16 +44,20 @@ def register_t1(nu_path: str | Path, atlas_path: str | Path,
     if inverse_backend not in {"cpu", "torch"} or (inverse_backend == "torch" and search_backend != "torch"):
         raise ValueError("inverse_backend='torch' requires search_backend='torch'")
 
+    if not isinstance(reuse_atlas_context, bool):
+        raise TypeError("reuse_atlas_context must be boolean")
+
     timing = {}
     overall_started = time.perf_counter()
     started = time.perf_counter()
     atlas = read_gca(atlas_path)
+    context = GCARegistrationContext(atlas) if reuse_atlas_context else None
     masked = read_masked_input(nu_path, mask_path)
     histogram_profile = {}
     peak, _, _ = estimate_image_white_matter_peak(atlas, masked, profile=histogram_profile)
     source = scale_input_intensity(masked, atlas_label_peak(atlas, 2), peak)
-    stable_samples = find_stable_samples(atlas)
-    center = gca_centroid(gca_mean_volume(atlas))
+    stable_samples = find_stable_samples(atlas, context=context)
+    center = gca_centroid(gca_mean_volume(atlas, context=context))
     timing["prepare_seconds"] = time.perf_counter() - started
 
     scorer = None
@@ -77,9 +81,9 @@ def register_t1(nu_path: str | Path, atlas_path: str | Path,
     timing["linear_search_seconds"] = time.perf_counter() - started
 
     started = time.perf_counter()
-    objective = EMObjective(atlas, stable_samples, source, clamp=0.0)
+    objective = EMObjective(atlas, stable_samples, source, clamp=0.0, context=context)
     stable_matrix, stable_em = align_em(objective, pre_em, tolerance=1e-5)
-    objective.samples = find_all_samples(atlas)
+    objective.samples = find_all_samples(atlas, context=context)
     objective.clamp = 6.0
     matrix, final_em = align_em(objective, stable_matrix, tolerance=1e-7)
     cost = final_em["outer_cost_after"]
@@ -104,7 +108,7 @@ def register_t1(nu_path: str | Path, atlas_path: str | Path,
         "search_backend": search_backend, "device": device,
         "candidate_chunk": candidate_chunk, "sample_chunk": sample_chunk,
         "reduce_on_device": reduce_on_device,
-        "inverse_backend": inverse_backend,
+        "inverse_backend": inverse_backend, "reuse_atlas_context": reuse_atlas_context,
     }
 
 
@@ -119,13 +123,14 @@ def main() -> None:
     parser.add_argument("--candidate-chunk", type=int, default=64)
     parser.add_argument("--sample-chunk", type=int, default=8192)
     parser.add_argument("--reduce-on-device", action="store_true")
+    parser.add_argument("--reuse-atlas-context", action="store_true")
     parser.add_argument("--inverse-backend", choices=("cpu", "torch"), default="cpu")
     args = parser.parse_args()
     print(json.dumps(register_t1(
         args.nu, args.atlas, args.mask, args.output,
         device=args.device, search_backend=args.search_backend,
         candidate_chunk=args.candidate_chunk, sample_chunk=args.sample_chunk,
-        reduce_on_device=args.reduce_on_device, inverse_backend=args.inverse_backend), indent=2))
+        reduce_on_device=args.reduce_on_device, inverse_backend=args.inverse_backend, reuse_atlas_context=args.reuse_atlas_context), indent=2))
 
 
 if __name__ == "__main__":

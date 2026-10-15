@@ -214,6 +214,7 @@ def _assign_vertices(face_svi, incident, offsets, ripped):
 
 def subvolume_assignment(
     vertices: np.ndarray, faces: np.ndarray, proposed: np.ndarray, ripped: np.ndarray,
+    *, incident_csr=None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Return fixed first-step geometry plus ordered face/vertex subvolumes."""
     xyz = np.asarray(vertices, dtype=np.float32)
@@ -226,10 +227,13 @@ def subvolume_assignment(
     verge = np.float32(np.float32(lengths * np.float32(0.02)) + np.float32(0.01))
     geometry = np.concatenate((np.stack((low, high), axis=1).ravel(), lengths, verge)).astype(np.float32)
     face_svi = _assign_faces(bounds, triangles, geometry)
-    flat = triangles.ravel()
-    order = np.argsort(flat, kind="stable") // 3
-    offsets = np.zeros(len(xyz) + 1, dtype=np.int64)
-    offsets[1:] = np.cumsum(np.bincount(flat, minlength=len(xyz)))
+    if incident_csr is None:
+        flat = triangles.ravel()
+        order = np.argsort(flat, kind="stable") // 3
+        offsets = np.zeros(len(xyz) + 1, dtype=np.int64)
+        offsets[1:] = np.cumsum(np.bincount(flat, minlength=len(xyz)))
+    else:
+        order, offsets = incident_csr
     vertex_svi = _assign_vertices(face_svi, order, offsets, ripped)
     return geometry, face_svi, vertex_svi
 
@@ -468,6 +472,7 @@ def asynchronous_first_step(
     candidate_diagnostics: dict | None = None,
     candidate_grid_cells_per_axis: int = 2,
     retained_mht_backend: str = "tree",
+    topology_cache=None,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Replay sorted subvolumes with dynamic triangle collision tests.
 
@@ -486,6 +491,9 @@ def asynchronous_first_step(
     backend. retained_mht_backend="compiled" is an explicit snapshot-only
     experiment: the live ordered loop is compiled, while actual triangle hits
     retain the original FP64 Python face-bucket replay. Default tree is unchanged.
+    Optional topology_cache binds static incident CSR to the complete face version;
+    changed faces or vertex count fail before candidate reuse. CPU trees are built
+    only on paths which consume them; dynamic geometry is rebuilt each trial.
     Coordinates and offsets are float32 surface RAS/mm; face indices
     and returned order address the unchanged mesh. Invalid input, exceeded
     motion bounds and CUDA/OOM errors propagate. No candidate limit truncation.
@@ -507,7 +515,16 @@ def asynchronous_first_step(
         raise ValueError("accepted_offsets requires unrounded offsets")
     triangles = np.asarray(faces, dtype=np.int32)
     next_xyz = np.asarray(proposed, dtype=np.float32)
-    geometry, _, vertex_svi = subvolume_assignment(xyz, triangles, next_xyz, ripped)
+    if topology_cache is None:
+        flat = triangles.ravel()
+        incident = np.argsort(flat, kind="stable") // 3
+        incident_offsets = np.zeros(len(xyz) + 1, dtype=np.int64)
+        incident_offsets[1:] = np.cumsum(np.bincount(flat, minlength=len(xyz)))
+    else:
+        topology_cache.validate(triangles, len(xyz))
+        incident, incident_offsets = topology_cache.incident, topology_cache.incident_offsets
+    geometry, _, vertex_svi = subvolume_assignment(xyz, triangles, next_xyz, ripped,
+        incident_csr=(incident, incident_offsets))
     if offsets is not None:
         offsets = np.asarray(offsets, dtype=np.float32)
         if ordered_neighbors is None:
@@ -530,13 +547,14 @@ def asynchronous_first_step(
     initial_radii = np.linalg.norm(
         original_triangles.astype(np.float64) - initial_centers[:, None, :], axis=2,
     ).max(axis=1)
-    tree = cKDTree(initial_centers)
-    flat = triangles.ravel()
-    incident = np.argsort(flat, kind="stable") // 3
-    incident_offsets = np.zeros(len(xyz) + 1, dtype=np.int64)
-    incident_offsets[1:] = np.cumsum(np.bincount(flat, minlength=len(xyz)))
+    use_snapshot = candidate_backend in ("snapshot", "torch_snapshot") and fast and (trial is None or retained_mht_backend == "compiled")
+    # CUDA snapshot only consumes its complete GPU index; materialize the CPU
+    # tree only for an actual CPU query (including retained tree retries).
+    tree = None if use_snapshot and candidate_backend == "torch_snapshot" else cKDTree(initial_centers)
     maximum_radius = float(initial_radii.max())
-    if candidate_backend in ("snapshot", "torch_snapshot") and fast and (trial is None or retained_mht_backend == "compiled"):
+    if candidate_diagnostics is not None:
+        candidate_diagnostics.update(cpu_tree_built=tree is not None, topology_cached=topology_cache is not None)
+    if use_snapshot:
         from .place_surface_snapshot import snapshot_ordered_step
         result = snapshot_ordered_step(xyz, triangles, next_xyz, order, incident, incident_offsets,
             neighbor_indices if offsets is not None else None,
@@ -545,7 +563,7 @@ def asynchronous_first_step(
             candidate_device=candidate_device if candidate_backend == "torch_snapshot" else None,
             candidate_diagnostics=candidate_diagnostics,
             candidate_grid_cells_per_axis=candidate_grid_cells_per_axis,
-            stale_mht_trial=trial,order_rank=order_rank)
+            stale_mht_trial=trial,order_rank=order_rank, topology_cache=topology_cache)
         return result, order
     if candidate_diagnostics is not None:
         candidate_diagnostics["effective_candidate_backend"]="tree_retained_mht" if trial is not None else "tree"

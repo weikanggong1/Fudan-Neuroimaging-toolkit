@@ -11,9 +11,13 @@ import argparse
 import hashlib
 import importlib.util
 import json
+import math
 from pathlib import Path
 import sys
 import time
+
+from recon_evaluation_checks import (all_partition_stats, independent_self_intersections,
+                                     validate_reference_manifest)
 
 
 def sha(path: Path) -> str:
@@ -37,10 +41,24 @@ def validate_candidate(*, benchmark_path: Path, source_root: Path,
     runtime = json.loads((benchmark_path.parent / "subject/fnit-native-free-run.json").read_text())
     if report.get("execution") != "complete" or report.get("exit_code") != 0:
         raise ValueError("candidate raw T1 execution did not complete successfully")
+    if (report.get("backend") != "python" or report.get("topology_backend") != "python-ga"
+            or report.get("native_program_sha256") != {} or report.get("threads") != 4):
+        raise ValueError("candidate is not the frozen four-thread Python GA profile")
+    audit = report.get("execution_audit")
+    if (not isinstance(audit, dict) or audit.get("status") != "complete"
+            or audit.get("passed") is not True or audit.get("original_program_attempts")):
+        raise ValueError("candidate Python execution audit is incomplete or blocked a program")
+    if (report.get("runtime_status") != "complete" or
+            any(not isinstance(report.get(name), (int, float)) or
+                isinstance(report.get(name), bool) or
+                not math.isfinite(report[name]) or report[name] <= 0
+                for name in ("cli_wall_seconds", "full_harness_seconds"))):
+        raise ValueError("candidate complete runtime and positive whole-case wall times required")
     if runtime.get("status") != "complete":
         raise ValueError("candidate output/production mesh validation failed")
     complete = runtime.get("output_validation", {})
-    if complete.get("expected") != 138 or complete.get("present") != 138 or complete.get("missing"):
+    if (complete.get("status") != "passed" or complete.get("expected") != 138
+            or complete.get("present") != 138 or complete.get("missing")):
         raise ValueError("candidate fixed 138 output manifest is incomplete")
     if report.get("input_sha256") != reference_manifest["cases"][case]["input_sha256"]:
         raise ValueError("candidate and official original T1 hashes differ")
@@ -63,6 +81,8 @@ def main() -> int:
     parser.add_argument("--benchmark", type=Path, required=True)
     parser.add_argument("--source-root", type=Path, required=True)
     parser.add_argument("--reference-root", type=Path, required=True)
+    parser.add_argument("--reference-manifest-sha256",
+                        help="可选预先冻结的参考清单SHA-256；给出时必须一致")
     parser.add_argument("--case", required=True)
     parser.add_argument("--driver", type=Path, required=True)
     parser.add_argument("--scripts-dir", type=Path, required=True)
@@ -74,8 +94,21 @@ def main() -> int:
         raise ValueError("existing frozen comparison uses four threads")
     if args.output.exists():
         raise FileExistsError(args.output)
-    manifest_path = args.reference_root / "TRANSFER_MANIFEST.private.json"
-    manifest = json.loads(manifest_path.read_text())
+    started = time.perf_counter()
+    # 只读取此根目录内的清单文件；来源文字source从不作为数据入口。
+    from fnit.recon_all.expected_outputs import paths as expected_paths
+    required = (*expected_paths(), "label/lh.cortex.label", "label/rh.cortex.label")
+    manifest, reference_binding = validate_reference_manifest(
+        reference_root=args.reference_root, case=args.case,
+        required_paths=required,
+        expected_manifest_sha256=args.reference_manifest_sha256)
+    # 可选前期表面若存在，也必须在已核验清单中；不扩展固定138清单。
+    for hemi in ("lh", "rh"):
+        for stage in ("orig.nofix", "orig.premesh"):
+            relative = "subjects/" + args.case + "/surf/" + hemi + "." + stage
+            path = args.reference_root / relative
+            if path.is_symlink() or (path.exists() and relative not in manifest["files"]):
+                raise ValueError("optional reference surface is not a declared plain file")
     benchmark, runtime = validate_candidate(benchmark_path=args.benchmark,
         source_root=args.source_root, case=args.case, reference_manifest=manifest)
     reference = args.reference_root / "subjects" / args.case
@@ -86,7 +119,6 @@ def main() -> int:
     driver.configure_runtime()
     args.output.mkdir(parents=True)
     save = lambda name, data: driver.write(args.output / name, data)
-    started = time.perf_counter()
     state = {"scope": "one complete raw T1 candidate versus archived official; not optimized/control pairing",
         "status": "running", "case": args.case, "execution_complete": True,
         "output_validation": runtime["output_validation"], "production_mesh_validation": runtime["mesh_validation"],
@@ -94,9 +126,11 @@ def main() -> int:
         "run_sha256": sha(subject / "fnit-native-free-run.json"),
         "tested_code_version": benchmark["code_version"],
         "generator_source_sha256": benchmark["source_sha256"],
-        "reference_manifest_sha256": sha(manifest_path),
+        "reference_manifest_sha256": reference_binding["manifest_sha256"],
+        "reference_byte_validation": reference_binding,
         "reference": manifest["cases"][args.case],
-        "comparator_sha256": {str(p): sha(p) for p in [Path(__file__), args.driver, *args.scripts_dir.glob("*.py")]},
+        "comparator_sha256": {str(p): sha(p) for p in [Path(__file__),
+            Path(__file__).with_name("recon_evaluation_checks.py"), args.driver, *args.scripts_dir.glob("*.py")]},
         "cli_wall_seconds": benchmark["cli_wall_seconds"],
         "full_harness_seconds": benchmark["full_harness_seconds"],
         "process_memory": {k:v for k,v in benchmark.get("process_memory",{}).items() if k!="samples"},
@@ -111,6 +145,16 @@ def main() -> int:
         strict = driver.compare_pair(reference, subject, "candidate_vs_official", benchmark["code_version"],
             config, args.output, commands, no_th3, cache)
         state["strict_reproduction"] = strict
+        region_tool = driver.tool("compare_region_stats", args.scripts_dir)
+        save("all_regions_candidate_vs_official.json", all_partition_stats(
+            reference=reference, candidate=subject, region_tool=region_tool))
+        # 官方无FNIT生产报告；独立重算四张表面，不能把缺失报告解释成零。
+        self_intersections = independent_self_intersections(subject=reference, threads=args.threads)
+        save("self_intersections_official.json", self_intersections)
+        state["independent_official_self_intersections"] = {
+            "report_sha256": sha(args.output / "self_intersections_official.json"),
+            "quality_status": self_intersections["quality_status"],
+            "seconds": self_intersections["seconds"]}
         save("distance_cache.json", cache.report())
         cache.clear()
         for role, path in (("candidate", subject), ("official", reference)):
@@ -134,7 +178,7 @@ def main() -> int:
     finally:
         cache.clear()
         state["comparison_wall_seconds"] = time.perf_counter() - started
-        state["timing_scope"] = "post-run diagnostics and figures; excluded from recon-all runtime"
+        state["timing_scope"] = "post-run reference/source validation, diagnostics and figures; excluded from recon-all runtime; excludes initial imports and final evaluation report publication"
         save("evaluation.json", state)
 
 

@@ -8,6 +8,7 @@ from array import array
 from dataclasses import dataclass
 from pathlib import Path
 import math
+import hashlib
 import struct
 
 import nibabel as nib
@@ -469,17 +470,70 @@ def regularize_covariance(gca: GCA) -> CovarianceCheck:
                            int(np.count_nonzero(ill_conditioned)), variances)
 
 
-def find_stable_samples(gca: GCA) -> StableSamples:
+@dataclass(frozen=True)
+class GCARegistrationContext:
+    """One registration's immutable covariance/label lookup; never a global cache.
+
+    gca is the actual parsed atlas. Each consumer checks object identity and a
+    content/geometry signature before reuse; a different or mutated atlas fails.
+    The registration owns its atlas for this context's whole lifetime. Derived
+    arrays are read-only; no precision, selection or accumulation order changes.
+    """
+    gca: GCA
+
+    @staticmethod
+    def _signature(gca: GCA) -> str:
+        digest = hashlib.sha256()
+        for name in GCA.__dataclass_fields__:
+            value = getattr(gca, name)
+            digest.update(name.encode())
+            if isinstance(value, np.ndarray):
+                digest.update(repr((value.shape, value.dtype.str)).encode())
+                digest.update(memoryview(np.ascontiguousarray(value)).cast('B'))
+            else:
+                digest.update(repr(value).encode())
+        return digest.hexdigest()
+
+    def __post_init__(self) -> None:
+        signature = self._signature(self.gca)
+        covariance = regularize_covariance(self.gca)
+        covariance.variances.setflags(write=False)
+        maximum = int(max(self.gca.node_labels.max(), self.gca.prior_labels.max()))
+        node_ids = np.repeat(np.arange(len(self.gca.node_training), dtype=np.int32),
+                             np.diff(self.gca.node_offsets))
+        classifiers = np.full((len(self.gca.node_training), maximum + 1), -1, np.int32)
+        classifiers[node_ids, self.gca.node_labels] = np.arange(len(self.gca.node_labels), dtype=np.int32)
+        classifiers.setflags(write=False)
+        object.__setattr__(self, 'signature', signature)
+        object.__setattr__(self, 'covariance', covariance)
+        object.__setattr__(self, 'classifiers', classifiers)
+
+    def validate(self, gca: GCA) -> None:
+        if gca is not self.gca or self._signature(gca) != self.signature:
+            raise ValueError('GCA context belongs to a different or modified atlas')
+
+    def classifier(self, label_count: int) -> np.ndarray:
+        if label_count <= int(self.gca.node_labels.max()):
+            raise IndexError('atlas node label exceeds consumer lookup width')
+        return self.classifiers[:, :label_count]
+
+
+def find_stable_samples(gca: GCA, *, context: GCARegistrationContext | None = None) -> StableSamples:
     """Select the fixed T1 profile's 8-mm, ``-uns 3`` GCA samples."""
 
     if gca.prior_shape != (128, 128, 128) or gca.node_shape != (64, 64, 64):
         raise ValueError("Expected the fixed 2020 single-T1 GCA")
-    corrected_variances = regularize_covariance(gca).variances
+    if context is not None:
+        context.validate(gca)
+    corrected_variances = (regularize_covariance(gca) if context is None else context.covariance).variances
     max_label = int(max(gca.prior_labels.max(), gca.node_labels.max()))
-    node_ids = np.repeat(np.arange(len(gca.node_training), dtype=np.int32),
-                         np.diff(gca.node_offsets))
-    classifier = np.full((len(gca.node_training), max_label + 1), -1, np.int32)
-    classifier[node_ids, gca.node_labels] = np.arange(len(gca.node_labels), dtype=np.int32)
+    if context is None:
+        node_ids = np.repeat(np.arange(len(gca.node_training), dtype=np.int32),
+                             np.diff(gca.node_offsets))
+        classifier = np.full((len(gca.node_training), max_label + 1), -1, np.int32)
+        classifier[node_ids, gca.node_labels] = np.arange(len(gca.node_labels), dtype=np.int32)
+    else:
+        classifier = context.classifier(max_label + 1)
 
     cells = np.repeat(np.arange(len(gca.prior_training), dtype=np.int32),
                       np.diff(gca.prior_offsets))
@@ -601,32 +655,40 @@ def find_all_sample_sites(gca: GCA) -> tuple[np.ndarray, np.ndarray, np.ndarray]
     return coordinates, gca.prior_labels[indices], gca.prior_values[indices]
 
 
-def find_all_samples(gca: GCA) -> StableSamples:
+def find_all_samples(gca: GCA, *, context: GCARegistrationContext | None = None) -> StableSamples:
     """Attach atlas means and corrected variances to every final EM site."""
 
     coordinates, labels, priors = find_all_sample_sites(gca)
-    node_ids = np.repeat(np.arange(len(gca.node_training), dtype=np.int32),
-                         np.diff(gca.node_offsets))
-    classifier = np.full((len(gca.node_training), int(gca.node_labels.max()) + 1),
-                         -1, np.int32)
-    classifier[node_ids, gca.node_labels] = np.arange(len(gca.node_labels), dtype=np.int32)
+    if context is None:
+        node_ids = np.repeat(np.arange(len(gca.node_training), dtype=np.int32),
+                             np.diff(gca.node_offsets))
+        classifier = np.full((len(gca.node_training), int(gca.node_labels.max()) + 1),
+                             -1, np.int32)
+        classifier[node_ids, gca.node_labels] = np.arange(len(gca.node_labels), dtype=np.int32)
+    else:
+        context.validate(gca)
+        classifier = context.classifier(int(gca.node_labels.max()) + 1)
     node_coordinates = coordinates // int(gca.node_spacing / gca.prior_spacing)
     node = np.ravel_multi_index(node_coordinates.T, gca.node_shape)
     chosen = classifier[node, labels]
     if np.any(chosen < 0):
         raise ValueError("Final GCA sample lacks a direct node classifier")
-    variances = regularize_covariance(gca).variances
+    variances = (regularize_covariance(gca) if context is None else context.covariance).variances
     return StableSamples(coordinates, labels, gca.node_means[chosen],
                          variances[chosen], priors)
 
 
-def gca_mean_volume(gca: GCA) -> np.ndarray:
+def gca_mean_volume(gca: GCA, *, context: GCARegistrationContext | None = None) -> np.ndarray:
     """Rasterize ``GCAmri`` onto the 256³ uchar Talairach volume."""
 
-    node_ids = np.repeat(np.arange(len(gca.node_training), dtype=np.int32),
-                         np.diff(gca.node_offsets))
-    classifier = np.full((len(gca.node_training), int(gca.prior_labels.max()) + 1), -1, np.int32)
-    classifier[node_ids, gca.node_labels] = np.arange(len(gca.node_labels), dtype=np.int32)
+    if context is None:
+        node_ids = np.repeat(np.arange(len(gca.node_training), dtype=np.int32),
+                             np.diff(gca.node_offsets))
+        classifier = np.full((len(gca.node_training), int(gca.prior_labels.max()) + 1), -1, np.int32)
+        classifier[node_ids, gca.node_labels] = np.arange(len(gca.node_labels), dtype=np.int32)
+    else:
+        context.validate(gca)
+        classifier = context.classifier(int(gca.prior_labels.max()) + 1)
     cells = np.repeat(np.arange(len(gca.prior_training), dtype=np.int32),
                       np.diff(gca.prior_offsets))
     xp, yz = divmod(cells, 128 * 128)

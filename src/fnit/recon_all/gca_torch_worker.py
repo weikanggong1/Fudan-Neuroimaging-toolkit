@@ -35,7 +35,7 @@ def run_isolated_registration(*, nu_path: Path, mask_path: Path, atlas_path: Pat
                               device: str, threads: int = 4,
                               candidate_chunk: int = 1024,
                               inverse_backend: str = "torch",
-                              code_version: str = "FNIT-source-hashes") -> dict:
+                              code_version: str = "FNIT-source-hashes", reuse_atlas_context: bool = False) -> dict:
     """从父API启动新exec注册，子进程缓存开启，父allocator和精度不变。
 
     文件/空间/参数同run_worker；必须指定逻辑CUDA设备，保留父进程的
@@ -64,6 +64,8 @@ def run_isolated_registration(*, nu_path: Path, mask_path: Path, atlas_path: Pat
                "--report", str(report_path), "--device", device,
                "--threads", str(threads), "--candidate-chunk", str(candidate_chunk),
                "--inverse-backend", inverse_backend, "--code-version", code_version]
+    if reuse_atlas_context:
+        command.append("--reuse-atlas-context")
     subprocess.run(command, env=environment, check=True)
     result = json.loads(report_path.read_text())
     result["isolated_cli_wall_seconds"] = time.perf_counter() - tick
@@ -78,7 +80,7 @@ def run_isolated_registration(*, nu_path: Path, mask_path: Path, atlas_path: Pat
 def run_worker(*, nu_path: Path, mask_path: Path, atlas_path: Path,
                output_path: Path, report_path: Path, device: str = "cuda:0",
                threads: int = 4, candidate_chunk: int = 1024,
-               inverse_backend: str = "torch", code_version: str) -> dict:
+               inverse_backend: str = "torch", code_version: str, reuse_atlas_context: bool = False) -> dict:
     """运行单次完整FNIT注册并写LTA/JSON，输入输出均为文件路径。
 
     nu为3D强度图，mask为同shape/affine掩膜，atlas为固定GCA；输入空间为
@@ -133,7 +135,7 @@ def run_worker(*, nu_path: Path, mask_path: Path, atlas_path: Path,
             nu_path=nu_path, atlas_path=atlas_path, mask_path=mask_path,
             output_path=output_path, device=device, search_backend="torch",
             candidate_chunk=candidate_chunk, sample_chunk=8192,
-            reduce_on_device=True, inverse_backend=inverse_backend)
+            reduce_on_device=True, inverse_backend=inverse_backend, reuse_atlas_context=reuse_atlas_context)
         torch.cuda.synchronize(device)
     finally:
         GCASearchScorer.score_many = original
@@ -179,12 +181,14 @@ def main() -> None:
     parser.add_argument("--threads", type=int, default=4)
     parser.add_argument("--candidate-chunk", type=int, default=1024)
     parser.add_argument("--inverse-backend", choices=("cpu", "torch"), default="torch")
+    parser.add_argument("--reuse-atlas-context", action="store_true")
     parser.add_argument("--code-version", required=True)
     args = parser.parse_args()
     run_worker(nu_path=args.nu, mask_path=args.mask, atlas_path=args.atlas,
                output_path=args.output, report_path=args.report, device=args.device,
                threads=args.threads, candidate_chunk=args.candidate_chunk,
-               inverse_backend=args.inverse_backend, code_version=args.code_version)
+               inverse_backend=args.inverse_backend, code_version=args.code_version,
+               reuse_atlas_context=args.reuse_atlas_context)
 
 
 if __name__ == "__main__":

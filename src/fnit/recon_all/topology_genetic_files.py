@@ -211,7 +211,8 @@ def run_genetic_topology_files(*, input_surface, input_qsphere, brain, wm, hemis
         niters=-1, initial_selection=True, vertex_eliminate=True, use_overlap=False,
         normal_status="surface", soap_iterations=5, final_orig=False,
         remesh_scalar_storage="numpy", face_detection_cache=False, blocker_scan_backend="python",
-        distance_backend="serial"):
+        distance_backend="serial", distance_device=None, state_backend="legacy", random_audit_callback=None, defect_observer=None,
+        failure_state_callback=None):
     """四个自产文件→完整自有 GA、原域标签和可选严格最终 orig。
 
     input_surface/input_qsphere 是同 N、同有序面的 nofix/qsphere 三角表面；
@@ -225,6 +226,13 @@ def run_genetic_topology_files(*, input_surface, input_qsphere, brain, wm, hemis
     True复用完整控制器的每缺陷面身份缓存，不缓存动态几何/邻接判定。
     blocker_scan_backend默认python，可显式numba；同一成熟谓词与完整顺序，
     无自动回退。非法选择在创建输出目录前拒绝，报告记录core实际返回值。
+    state_backend默认legacy，显式packed需任务5完整状态API，搜索、最终评分与
+    几何发布均传同一选择；缺实现明确失败，不退回legacy，不启用旧缓存。
+    random_audit_callback/defect_observer默认None，仅Python接口；分别具名观测
+    (index,low,high,value)和(defect_number,result)，用于完整流/全域状态验证。
+    返回值忽略，异常传播；观察者不得修改result。默认不新增审计读写。
+    distance_device默认None；GPU后端gpu_defect_signed_distance须显式cuda:N，
+    验证可用设备，无CPU回退；CPU路径不接受设备。
     distance_backend默认serial，可显式parallel；只选择现有有序F32距离
     核，在threads总预算内按不重叠x slab执行，不并行候选。参数先校验，
     core返回选择必须一致；报告分开记录requested/returned选择及每缺陷
@@ -237,14 +245,23 @@ def run_genetic_topology_files(*, input_surface, input_qsphere, brain, wm, hemis
     report_path/report_sha256/completion_path、maps/per_defect路径、具名seconds、
     premesh_quality及最终quality。标签始终rawN/fnum rawF；premesh为压缩M域的
     ORIGINAL，不写TMP清理坐标；remesh后编号另变，无伪造remesh映射。
-    无原版程序/源码/参考输出/tools运行依赖、无全局猴补，无模型或CUDA操作。
+    无原版程序/源码/参考输出/tools运行依赖、无全局猴补，无模型操作；仅显式GPU距离选择使用CUDA。
     非法数据/映射/已存在目录ValueError，计算或质量失败传播异常并留failure.json；
     失败不写COMPLETE.json，已产生的中间文件仅供诊断，不能按其存在判定成功。
+    failure_state_callback默认None；仅完整GA最终质量门失败时由核心传递
+    compact坐标、面、rip、有序CSR和双判据诊断的独立副本。接口不自动
+    写出失败网格；显式调用者负责私有目录和数据权限，回调异常原样传播。
     四文件上游由调用者声明，不依据文件名推定自产；哈希/格式/编号只校验
     本次输入。internal_ga_inputs_self_generated只指本阶段内部GA状态；
     reference_inputs_used=False仅指阶段未额外读取独立参考，不证明上游来源。
     """
     started = time.perf_counter()
+    from .topology_ga_backend_policy import validate_state_backend
+    validate_state_backend(state_backend)
+    for name, callback in (("random_audit_callback", random_audit_callback), ("defect_observer", defect_observer),
+                           ("failure_state_callback", failure_state_callback)):
+        if callback is not None and not callable(callback):
+            raise ValueError(name + " must be callable or None")
     if hemisphere not in ("lh", "rh"):
         raise ValueError("hemisphere must be lh or rh")
     if isinstance(threads, (bool, np.bool_)) or not isinstance(threads, Integral) or threads < 1:
@@ -256,8 +273,8 @@ def run_genetic_topology_files(*, input_surface, input_qsphere, brain, wm, hemis
     face_detection_cache = bool(face_detection_cache)
     if not isinstance(blocker_scan_backend, str) or blocker_scan_backend not in ("python", "numba"):
         raise ValueError("blocker_scan_backend must be python or numba")
-    if not isinstance(distance_backend, str) or distance_backend not in ("serial", "parallel"):
-        raise ValueError("distance_backend must be serial or parallel")
+    from .topology_distance_policy import validate_distance_policy
+    distance_device = validate_distance_policy(distance_backend=distance_backend, distance_device=distance_device)
     if remesh_scalar_storage not in ("numpy", "python"):
         raise ValueError("remesh_scalar_storage must be numpy or python")
     directory = Path(output_directory).resolve()
@@ -296,6 +313,8 @@ def run_genetic_topology_files(*, input_surface, input_qsphere, brain, wm, hemis
                 legacy_last_generation_index=search["generations"], termination=search["termination"])
             with progress_path.open("a") as stream:
                 stream.write(json.dumps(_json_value(row), ensure_ascii=False, allow_nan=False) + "\n")
+            if defect_observer is not None:
+                defect_observer(defect_number=defect_number, result=result)
 
         with thread_budget(threads=int(threads)) as budget_report:
             tick = time.perf_counter()
@@ -305,11 +324,19 @@ def run_genetic_topology_files(*, input_surface, input_qsphere, brain, wm, hemis
                 initial_selection=initial_selection, vertex_eliminate=vertex_eliminate, use_overlap=use_overlap,
                 normal_status=normal_status, soap_iterations=soap_iterations, progress_callback=progress,
                 face_detection_cache=face_detection_cache, blocker_scan_backend=blocker_scan_backend,
-                distance_backend=distance_backend)
+                distance_backend=distance_backend, distance_device=distance_device, state_backend=state_backend,
+                random_audit_callback=random_audit_callback,
+                failure_state_callback=failure_state_callback)
             if result.get("blocker_scan_backend") != blocker_scan_backend:
                 raise RuntimeError("core blocker_scan_backend differs from the requested backend")
             if result.get("distance_backend") != distance_backend:
                 raise RuntimeError("core distance_backend differs from the requested backend")
+            core_distance_device = result.get("distance_device")
+            core_state_backend = result.get("state_backend", "legacy")
+            if core_distance_device != distance_device:
+                raise RuntimeError("core distance_device differs from the requested device")
+            if core_state_backend != state_backend:
+                raise RuntimeError("core state_backend differs from the requested backend")
             seconds["genetic_api"] = time.perf_counter() - tick
             original, compact_faces, raw_to_base, base_to_compact, labels, cleaned_current = \
                 _checked_core_result(result, vertices, faces)
@@ -387,12 +414,14 @@ def run_genetic_topology_files(*, input_surface, input_qsphere, brain, wm, hemis
                 vertex_eliminate=vertex_eliminate, use_overlap=use_overlap, normal_status=normal_status,
                 face_detection_cache=face_detection_cache,
                 blocker_scan_backend=result["blocker_scan_backend"],
-                distance_backend=result["distance_backend"],
+                distance_backend=result["distance_backend"], distance_device=core_distance_device, state_backend=core_state_backend,
                 soap_iterations=soap_iterations, remesh_iterations=3 if final_orig else None,
                 remesh_scalar_storage=remesh_scalar_storage), thread_budget=budget_report,
             distance_backend_policy=dict(requested=distance_backend,returned=result["distance_backend"],
+                requested_device=distance_device, returned_device=core_distance_device,
                 per_defect_final_evaluation=[row.get("final_distance_policy") for row in result["per_defect"]],
                 worker_count_observed=False),
+            state_backend_policy=dict(requested=state_backend, returned=core_state_backend),
             sampling_matrix=matrix, sampling_matrix_source="brain_MGHHeader_tkregister_RAS_to_voxel",
             written_geometry=wm_geometry, written_geometry_source="wm_MGHHeader",
             domains=dict(raw_vertices=len(vertices), raw_faces=len(faces), compact_vertices=len(original),
@@ -423,6 +452,8 @@ def run_genetic_topology_files(*, input_surface, input_qsphere, brain, wm, hemis
     except Exception as error:
         _write_json(directory / "failure.json", dict(status="failed", final_orig=bool(final_orig),
             error_type=type(error).__name__, error=str(error), seconds=seconds,
+            parameters_requested=dict(distance_backend=distance_backend, distance_device=distance_device, state_backend=state_backend),
+            actual_core_parameters_confirmed=False,
             complete_file_api_seconds=time.perf_counter() - started,
             native_program_called=False, whole_recon_all="not_assessed"))
         raise
@@ -443,7 +474,9 @@ def main(argv=None):
     parser.add_argument("--use-overlap", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--face-detection-cache", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--blocker-scan-backend", choices=("python", "numba"), default="python")
-    parser.add_argument("--distance-backend", choices=("serial", "parallel"), default="serial")
+    parser.add_argument("--distance-backend", choices=("serial", "parallel", "gpu_defect_signed_distance"), default="serial")
+    parser.add_argument("--distance-device", default=None)
+    parser.add_argument("--state-backend", choices=("legacy", "packed"), default="legacy")
     parser.add_argument("--normal-status", choices=("surface",), default="surface")
     parser.add_argument("--soap-iterations", type=int, default=5)
     parser.add_argument("--final-orig", action=argparse.BooleanOptionalAction, default=False)

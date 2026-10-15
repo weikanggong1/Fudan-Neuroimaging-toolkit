@@ -157,6 +157,27 @@ class GeneticFilesContracts(unittest.TestCase):
                 self.assertEqual(report["domains"]["defect_labels"], "raw_nofix_vertices_F32_with_raw_face_count")
                 json.dumps(report, allow_nan=False)
 
+    def test_failure_state_observer_is_opt_in_and_forwarded_to_core(self):
+        observed = []
+        callback = lambda **values: observed.append(values)
+        with tempfile.TemporaryDirectory() as temporary:
+            args = self.fixture(Path(temporary))
+            def core(**kwargs):
+                self.assertIs(kwargs["failure_state_callback"], callback)
+                return self.result()
+            with patch.object(api, "repair_genetic_topology", side_effect=core), \
+                    patch.object(api, "thread_budget", side_effect=self.budget):
+                report = api.run_genetic_topology_files(**args, failure_state_callback=callback)
+            self.assertEqual(report["status"], "complete")
+            self.assertEqual(observed, [])
+        with tempfile.TemporaryDirectory() as temporary:
+            args = self.fixture(Path(temporary))
+            with patch.object(api, "repair_genetic_topology") as core:
+                with self.assertRaisesRegex(ValueError, "failure_state_callback must be callable"):
+                    api.run_genetic_topology_files(**args, failure_state_callback=3)
+                core.assert_not_called()
+            self.assertFalse(args["output_directory"].exists())
+
     def test_invalid_face_cache_fails_before_directory_creation(self):
         for selected in (None, 0, 1, "true", [], np.array(True)):
             with self.subTest(selected=selected), tempfile.TemporaryDirectory() as temporary:

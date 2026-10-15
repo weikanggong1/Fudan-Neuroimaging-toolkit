@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import resource
 import time
+import threading
 
 import torch
 
@@ -79,6 +80,11 @@ def configure_cuda_allocator(device: str, policy: str = "auto") -> dict:
             "torch_stats_known_unavailable": known_disabled}
 
 
+# CUDA peak counters belong to a process/device, not to a profiler instance.
+_cuda_profile_depths: dict[int, int] = {}
+_cuda_profile_depth_lock = threading.Lock()
+
+
 class StageProfiler:
     """记录函数全程、父子 CPU 时间及可选 CUDA 同步，结果单位为秒/字节。
 
@@ -87,6 +93,8 @@ class StageProfiler:
     包含前同步、函数和后同步。allocator 是 configure_cuda_allocator 的
     返回值。reset_peak_memory默认True；嵌套子步骤设False，同步目标设备
     但不重置外层worker的峰值，子步骤显存明确标为自外层reset以来。
+    同一进程、同一设备的嵌套run（包括不同实例）不重置外层峰值；
+    子行记录累计范围及设备嵌套深度。并发调用共享计数器，也不独占显存统计。
     缓存关闭时不把零统计当作零显存；初始化前的 CPU 阶段不建立
     CUDA context。失败时 last_row 仍记录错误，原异常继续抛出。
     """
@@ -97,12 +105,14 @@ class StageProfiler:
         self.synchronize = synchronize
         self.allocator = allocator
         self.reset_peak_memory = reset_peak_memory
+        self._active_depth = 0
         self.last_row: dict = {}
 
     def _cuda_active(self) -> bool:
         return self.device.type == "cuda" and torch.cuda.is_initialized()
 
-    def _memory(self) -> dict:
+    def _memory(self, *, reset_peak_memory: bool | None = None) -> dict:
+        reset = self.reset_peak_memory if reset_peak_memory is None else reset_peak_memory
         if not self._cuda_active() or self.allocator["torch_stats_known_unavailable"]:
             return {"torch_memory_stats_status": "unavailable"}
         allocated = int(torch.cuda.max_memory_allocated(self.device))
@@ -111,8 +121,8 @@ class StageProfiler:
             return {"torch_memory_stats_status": "unavailable_or_allocator_not_observed"}
         return {"torch_memory_stats_status": "available",
                 "gpu_peak_allocated_bytes": allocated, "gpu_peak_reserved_bytes": reserved,
-                "gpu_peak_scope": ("stage" if self.synchronize and self.reset_peak_memory
-                                   else "since_cuda_initialization" if self.reset_peak_memory
+                "gpu_peak_scope": ("stage" if self.synchronize and reset
+                                   else "since_cuda_initialization" if reset
                                    else "since_enclosing_reset_or_cuda_initialization")}
 
     def run(self, name: str, function, *args, **kwargs):
@@ -126,6 +136,19 @@ class StageProfiler:
         error = None
         body = 0.0
         body_tick = None
+        nesting_depth = self._active_depth
+        # Resolve bare cuda only after initialization; CPU stages create no context.
+        cuda_key = None
+        device_depth = 0
+        if self._cuda_active():
+            cuda_key = (self.device.index if self.device.index is not None
+                        else torch.cuda.current_device())
+            with _cuda_profile_depth_lock:
+                device_depth = _cuda_profile_depths.get(cuda_key, 0)
+                _cuda_profile_depths[cuda_key] = device_depth + 1
+        reset = self.reset_peak_memory and nesting_depth == 0 and device_depth == 0
+        self._active_depth += 1
+        reset_performed = False
         try:
             if self.synchronize and self._cuda_active():
                 sync_tick = time.perf_counter()
@@ -134,8 +157,9 @@ class StageProfiler:
                     synchronized = True
                 finally:
                     pre = time.perf_counter() - sync_tick
-                if self.reset_peak_memory and self._memory()["torch_memory_stats_status"] == "available":
+                if reset and self._memory()["torch_memory_stats_status"] == "available":
                     torch.cuda.reset_peak_memory_stats(self.device)
+                    reset_performed = True
             body_tick = time.perf_counter()
             value = function(*args, **kwargs)
             body = time.perf_counter() - body_tick
@@ -156,7 +180,7 @@ class StageProfiler:
         finally:
             child_after = resource.getrusage(resource.RUSAGE_CHILDREN)
             try:
-                memory = self._memory()
+                memory = self._memory(reset_peak_memory=reset_performed)
             except Exception as memory_error:
                 memory = {"torch_memory_stats_status": "failed",
                           "torch_memory_stats_error": repr(memory_error)}
@@ -165,12 +189,23 @@ class StageProfiler:
                              "cuda_pre_sync_seconds": pre, "cuda_post_sync_seconds": post,
                              "cuda_synchronized": synchronized,
                              "cuda_synchronization_requested": self.synchronize,
+                             "profiling_nesting_depth": nesting_depth,
+                             "cuda_device_profiling_depth": device_depth,
+                             "cuda_peak_reset_performed": reset_performed,
                              "parent_cpu_seconds": time.process_time() - cpu,
                              "child_cpu_seconds": ((child_after.ru_utime + child_after.ru_stime)
                                                    - (child.ru_utime + child.ru_stime)),
                              **memory}
             if error is not None:
                 self.last_row["error"] = error
+            self._active_depth -= 1
+            if cuda_key is not None:
+                with _cuda_profile_depth_lock:
+                    remaining = _cuda_profile_depths[cuda_key] - 1
+                    if remaining:
+                        _cuda_profile_depths[cuda_key] = remaining
+                    else:
+                        del _cuda_profile_depths[cuda_key]
 
 
 def parallel_intervals(workers: dict) -> dict:

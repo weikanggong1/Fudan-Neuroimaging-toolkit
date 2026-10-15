@@ -57,6 +57,8 @@ def _tangent(normal):
 @njit(cache=True, fastmath=False)
 def _stable_norm2(a, b):
     """Double EISPACK stable norm; preserve its ordered refinement."""
+    if not np.isfinite(a) or not np.isfinite(b):
+        raise ValueError("nonfinite candidate SFF eigen norm input")
     high = max(abs(a), abs(b))
     if high == 0.:
         return high
@@ -76,6 +78,8 @@ def _stable_norm2(a, b):
 @njit(cache=True, fastmath=False)
 def _eigen2(q):
     """Specialized symmetric 2×2 EISPACK QL, then source abs ordering."""
+    if not np.isfinite(q).all():
+        raise ValueError("nonfinite candidate SFF Hessian")
     d = np.array([np.float64(q[0, 0]), np.float64(q[1, 1])])
     e = np.array([np.float64(q[1, 0]), 0.])
     vectors = np.eye(2, dtype=np.float64)
@@ -86,7 +90,15 @@ def _eigen2(q):
         if test < size:
             test = size
         right = left
-        while test + abs(e[right]) != test:
+        while True:
+            # The two-element EISPACK sentinel must remain finite. Guard the
+            # index before reading it, including after a failed rotation.
+            if right >= len(e):
+                raise ValueError("candidate SFF eigen scan exceeds two-element domain")
+            if not np.isfinite(test) or not np.isfinite(e[right]):
+                raise ValueError("nonfinite candidate SFF eigen scan")
+            if test + abs(e[right]) == test:
+                break
             right += 1
         if right != left:
             old = d[left]
@@ -127,6 +139,8 @@ def _eigen2(q):
             vectors[row, 0], vectors[row, 1] = vectors[row, 1], vectors[row, 0]
     values = d.astype(np.float32)
     vectors32 = vectors.astype(np.float32)
+    if not np.isfinite(values).all() or not np.isfinite(vectors32).all():
+        raise ValueError("nonfinite candidate SFF eigen result")
     # The source qsort retains the first item on an equal-absolute pair.
     if abs(values[0]) < abs(values[1]):
         values[0], values[1] = values[1], values[0]
@@ -148,6 +162,8 @@ def _fit(xyz, normals, offsets, neighbors, selected, initial_k1, initial_k2, ini
     for p in range(len(selected)):
         vertex = selected[p]
         first, second = _tangent(normals[vertex])
+        if not np.isfinite(first).all() or not np.isfinite(second).all():
+            raise ValueError("nonfinite candidate SFF tangent")
         e1[vertex], e2[vertex] = first, second
         count = offsets[vertex + 1] - offsets[vertex]
         if count == 0:
@@ -167,8 +183,13 @@ def _fit(xyz, normals, offsets, neighbors, selected, initial_k1, initial_k2, ini
             design[row, 2] = f(v * v)
             heights[row] = _dot3(normals[vertex], delta)
             radius2 = f(u * u + v * v)
+            if (not np.isfinite(design[row]).all() or not np.isfinite(heights[row])
+                    or not np.isfinite(radius2)):
+                raise ValueError("nonfinite candidate SFF design or radius")
             if abs(radius2) >= _EPS:
                 local = div(heights[row], radius2)
+                if not np.isfinite(local):
+                    raise ValueError("nonfinite candidate SFF local curvature")
                 if local > maximum:
                     maximum = local
                 if local < minimum:
@@ -178,6 +199,8 @@ def _fit(xyz, normals, offsets, neighbors, selected, initial_k1, initial_k2, ini
             for j in range(3):
                 for row in range(count):
                     gram[i, j] = add(gram[i, j], mul(design[row, i], design[row, j]))
+        if not np.isfinite(gram).all():
+            raise ValueError("nonfinite candidate SFF Gram matrix")
         grams[p] = gram
         zero = True
         for i in range(3):
@@ -190,6 +213,8 @@ def _fit(xyz, normals, offsets, neighbors, selected, initial_k1, initial_k2, ini
             kinds[p] = 3
         else:
             _, singular, _ = svdc_3(gram)
+            if not np.isfinite(singular).all():
+                raise ValueError("nonfinite candidate SFF singular values")
             low, high = singular[0], singular[0]
             for j in range(1, 3):
                 value = abs(singular[j])
@@ -198,12 +223,18 @@ def _fit(xyz, normals, offsets, neighbors, selected, initial_k1, initial_k2, ini
                 if value < low:
                     low = value
             conditions[p] = f(1.e8) if abs(low) < _EPS else div(high, low)
+            if not np.isfinite(conditions[p]):
+                raise ValueError("nonfinite candidate SFF condition number")
             inverse = svd_inverse_3(gram)
+            if not np.isfinite(inverse).all():
+                raise ValueError("nonfinite candidate SFF inverse")
             rhs = np.zeros(3, np.float32)
             coefficients = np.zeros(3, np.float32)
             for i in range(3):
                 for row in range(count):
                     rhs[i] = add(rhs[i], mul(design[row, i], heights[row]))
+            if not np.isfinite(rhs).all():
+                raise ValueError("nonfinite candidate SFF right hand side")
             rhs_all[p] = rhs
             for i in range(3):
                 for j in range(3):
@@ -211,6 +242,8 @@ def _fit(xyz, normals, offsets, neighbors, selected, initial_k1, initial_k2, ini
             q = np.empty((2, 2), np.float32)
             q[0, 0], q[0, 1] = mul(2, coefficients[0]), mul(2, coefficients[1])
             q[1, 0], q[1, 1] = q[0, 1], mul(2, coefficients[2])
+            if not np.isfinite(q).all():
+                raise ValueError("nonfinite candidate SFF Hessian")
             hessian_all[p] = q
             if conditions[p] >= 500000.:
                 k1[vertex], k2[vertex] = maximum, minimum
@@ -242,7 +275,7 @@ def candidate_second_fundamental_form(*, original_vertices, vertex_normals,
     返回完整 k1/k2/tangent_e1/e2 副本、patch 有序 condition_number/
     fit_kind(0无邻点、1拟合、2病态回退、3零矩阵)、gram/rhs/hessian
     诊断、API seconds；gram 单位mm⁴、rhs mm³、Hessian mm⁻¹。
-    malformed shape/CSR/越界/重复patch/非有限输入抛 ValueError；VNL
+    malformed shape/CSR/越界/重复patch/非有限输入或拟合中间量抛 ValueError；VNL
     不收敛抛 RuntimeError。source zero-normal 与零矩阵按原状态分支
     保留，不填参考或占位输出。不会改变全局线程、TF32或CUDA设置。
     对应固定 mris_fix_topology 内部 computeDefectSecondFundamentalForm，

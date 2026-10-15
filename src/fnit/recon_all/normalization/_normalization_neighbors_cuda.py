@@ -1,6 +1,9 @@
 """控制点邻域的融合 Triton 内核；不改变跨迭代控制图反馈。"""
 from __future__ import annotations
 
+from ..triton_runtime import configure_triton_compiler
+configure_triton_compiler(device="cuda:0")
+
 import triton
 import triton.language as tl
 import torch

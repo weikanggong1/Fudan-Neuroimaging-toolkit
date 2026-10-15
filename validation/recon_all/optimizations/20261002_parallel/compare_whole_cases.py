@@ -18,6 +18,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import re
 import shlex
 import subprocess
 import sys
@@ -195,8 +196,86 @@ def receipts(case: dict) -> dict:
     return result
 
 
+def surface_footer_frame(metadatas: tuple[dict, dict], images: tuple) -> dict:
+    """比较 surface volume_info 的空间含义，并核对各自 MRI 的 scanner RAS。"""
+    import numpy as np
+
+    numeric_atol = {"voxelsize": 1e-8, "xras": 1e-8, "yras": 1e-8,
+                    "zras": 1e-8, "cras": 1e-6}
+    affine_atol = 1e-6  # mm；与整例 MRI scanner affine 空间门一致。
+    required = {"head", "valid", "volume", *numeric_atol}
+    issues, values, affine_differences = [], [], []
+    for index, (metadata, image) in enumerate(zip(metadatas, images)):
+        side = ("reference", "candidate")[index]
+        missing = required - set(metadata)
+        if missing:
+            issues.append(f"{side}:missing_volume_info:{','.join(sorted(missing))}")
+            continue
+        valid = metadata["valid"]
+        if isinstance(valid, str):
+            match = re.fullmatch(r"\s*([01])(?:\s*\#.*)?\s*", valid)
+            valid = int(match.group(1)) if match else None
+        elif isinstance(valid, (int, np.integer)):
+            valid = int(valid)
+        else:
+            valid = None
+        if valid != 1:
+            issues.append(f"{side}:invalid_volume_info_flag")
+        volume = np.asarray(metadata["volume"])
+        if (volume.shape != (3,) or not np.issubdtype(volume.dtype, np.integer) or
+                np.any(volume <= 0) or tuple(volume) != tuple(image.shape[:3])):
+            issues.append(f"{side}:volume_differs_from_mri")
+            continue
+        numbers = {}
+        for field in numeric_atol:
+            try:
+                array = np.asarray(metadata[field], dtype=np.float64)
+            except (TypeError, ValueError):
+                array = np.empty(0)
+            if array.shape != (3,) or not np.isfinite(array).all():
+                issues.append(f"{side}:invalid_{field}")
+                break
+            numbers[field] = array
+        if len(numbers) != len(numeric_atol):
+            continue
+        if np.any(numbers["voxelsize"] <= 0):
+            issues.append(f"{side}:invalid_voxelsize")
+            continue
+        basis = np.column_stack([numbers[field] for field in ("xras", "yras", "zras")])
+        basis *= numbers["voxelsize"]
+        footer_affine = np.eye(4)
+        footer_affine[:3, :3] = basis
+        footer_affine[:3, 3] = numbers["cras"] - basis @ (volume / 2)
+        difference = float(np.max(np.abs(footer_affine - image.affine)))
+        affine_differences.append(difference)
+        if not np.isfinite(difference) or difference > affine_atol:
+            issues.append(f"{side}:footer_differs_from_mri_scanner_affine")
+        values.append({"head": metadata["head"], "volume": volume, **numbers})
+
+    deltas = {}
+    if len(values) == 2:
+        for field in ("head", "volume"):
+            if not np.array_equal(values[0][field], values[1][field]):
+                issues.append(f"{field}_differs")
+        for field, atol in numeric_atol.items():
+            difference = float(np.max(np.abs(values[0][field] - values[1][field])))
+            deltas[field] = difference
+            if difference > atol:
+                issues.append(f"{field}_exceeds_atol")
+        extras = [set(metadata) - required - {"filename"} for metadata in metadatas]
+        if extras[0] != extras[1]:
+            issues.append("unrecognized_volume_info_keys_differ")
+        for field in sorted(extras[0] & extras[1]):
+            if not np.array_equal(metadatas[0].get(field), metadatas[1].get(field)):
+                issues.append(f"unrecognized_volume_info_differs:{field}")
+    return {"compatible": not issues and len(values) == 2,
+            "numeric_max_abs_differences": deltas, "numeric_atol": numeric_atol,
+            "footer_to_mri_affine_max_abs_differences_mm": affine_differences,
+            "footer_to_mri_affine_atol_mm": affine_atol, "issues": issues}
+
+
 def geometry(reference: Path, candidate: Path, surface_tool) -> dict:
-    """复用拓扑检查，明确相同TkRAS框架；不重采样或修补网格。"""
+    """复用拓扑检查，以 MRI 和 volume_info 的空间含义判定 surface RAS。"""
     import nibabel as nib
     import nibabel.freesurfer.io as fs
     import numpy as np
@@ -223,6 +302,7 @@ def geometry(reference: Path, candidate: Path, surface_tool) -> dict:
             fields = set(metadata[0]) | set(metadata[1])
             footer_equal = all(np.array_equal(metadata[0].get(field), metadata[1].get(field))
                                for field in fields if field != "filename")
+            footer_frame = surface_footer_frame(tuple(metadata), tuple(images))
             valid = all(x.ndim == 2 and x.shape[1] == 3 and len(x) and np.isfinite(x).all()
                         and f.ndim == 2 and f.shape[1] == 3 and len(f) and
                         np.issubdtype(f.dtype, np.integer) and np.all((f >= 0) & (f < len(x)))
@@ -234,11 +314,12 @@ def geometry(reference: Path, candidate: Path, surface_tool) -> dict:
             ordered = valid and pairs[0][0].shape == pairs[1][0].shape and np.array_equal(pairs[0][1], pairs[1][1])
             matches_white = valid and all(x.shape == w.shape and np.array_equal(f, wf)
                                          for (x, f, _), (w, wf) in zip(pairs, whites))
-            frame = bool(conform and footer_equal)
+            frame = bool(conform and footer_frame["compatible"])
             result["surfaces"][key] = {"status": "available" if valid else "invalid_arrays",
                 "surface_ras_mm_comparable": frame, "geometry_footer_data_equal": bool(footer_equal),
+                "geometry_footer_frame": footer_frame,
                 "geometry_footer_present": [bool(value) for value in metadata],
-                "frame_basis": "conform scanner affine and vox2ras_tkr plus available surface volume_info; filename excluded",
+                "frame_basis": "conform scanner affine and exact vox2ras_tkr; valid volume_info, matching MRI volume and scanner affine, bounded numeric footer deltas; filename excluded",
                 "ordered_faces_and_vertex_counts_equal": bool(ordered),
                 "each_output_ordered_topology_matches_own_white": bool(matches_white),
                 "topology": topologies, "vertex_correspondence": bool(frame and ordered and matches_white and all(t['valid'] for t in topologies))}

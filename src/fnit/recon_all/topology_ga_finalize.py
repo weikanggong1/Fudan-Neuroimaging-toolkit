@@ -58,7 +58,7 @@ def finalize_vertex_usage(*, vertex_marks, vertex_rip, candidate_edges, edge_use
 
 def finalize_defect_patch(*, surface_state, snapshot, retessellation_inputs,
         candidate_inputs, best_ordering, best_discarded, best_fitness,
-        use_counts, vertex_fitness, check_surface_intersection, intersection_checker):
+        use_counts, vertex_fitness, check_surface_intersection, intersection_checker, state_backend="legacy"):
     """GA搜索末态→最优状态回填→最终评分/恢复→重连/MRI匹配→清理。
 
     surface_state为完整自产一环/all候选末态，包含DVS及持久K/E/fx/
@@ -73,7 +73,8 @@ def finalize_defect_patch(*, surface_state, snapshot, retessellation_inputs,
     check_surface_intersection为显式bool；为True时intersection_checker
     必须为具名回调(original_vertices,faces,patch_faces)→非负整数相交面
     数，为False时必须None。本标志只复现源可选检查，不替代生产质量门。
-    全参必填。仅重设缺陷内rip为最优DISCARD的0/1，保留外部signed值；
+    state_backend默认legacy；packed显式传给任务5闭环及末次几何发布，
+    缺兼容实现时失败，不退回旧版。不启用跨候选缓存。其他参数必填。仅重设缺陷内rip为最优DISCARD的0/1，保留外部signed值；
     最终再评分一次，更新RP、选择性恢复和边复位后，完整重做几何。
     第二次几何不重复SFF/位移/评分/RP；保留最后评分真实K/E/fx/curvbak。
     最终分数与搜索最优不同只记录，不替换为历史分数。
@@ -87,6 +88,8 @@ def finalize_defect_patch(*, surface_state, snapshot, retessellation_inputs,
     失败不发布半成品。不改变CUDA/TF32/半精度/线程，不调用原版程序。
     """
     start = time.perf_counter()
+    from .topology_ga_backend_policy import validate_state_backend, state_backend_arguments
+    validate_state_backend(state_backend)
     n, _, nf = _one_ring_state(surface_state)
     if not isinstance(retessellation_inputs, Mapping) or not isinstance(candidate_inputs, Mapping):
         raise ValueError('complete explicit retessellation and candidate parameter mappings required')
@@ -122,7 +125,8 @@ def finalize_defect_patch(*, surface_state, snapshot, retessellation_inputs,
     tick = time.perf_counter()
     evaluation = evaluate_candidate_cycle(surface_state=state, snapshot=snapshot,
         retessellation_inputs=args, candidate_inputs=candidate_inputs,
-        use_counts=use_counts, vertex_fitness=vertex_fitness)
+        use_counts=use_counts, vertex_fitness=vertex_fitness,
+        **state_backend_arguments(state_backend=state_backend,target=evaluate_candidate_cycle))
     seconds = dict(final_score_restore=time.perf_counter()-tick)
     restored = evaluation['surface_state']
     args['edge_used'] = evaluation['edge_used']
@@ -140,7 +144,8 @@ def finalize_defect_patch(*, surface_state, snapshot, retessellation_inputs,
     materialized = materialize_candidate_state(initial=restored, result=dict(geometry=geometry,
         vertex_normals=normals, face_area=face_area,
         flattened_vertices=restored['flattened_vertices'], vertex_curvbak=restored['curvbak'],
-        sff={key:restored[key] for key in ('k1', 'k2', 'tangent_e1', 'tangent_e2')}))
+        sff={key:restored[key] for key in ('k1', 'k2', 'tangent_e1', 'tangent_e2')}),
+        **state_backend_arguments(state_backend=state_backend,target=materialize_candidate_state))
     seconds['final_retessellation_and_match'] = time.perf_counter()-tick
     tick = time.perf_counter()
     intersections = None

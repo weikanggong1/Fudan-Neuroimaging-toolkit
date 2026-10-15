@@ -91,7 +91,7 @@ def evaluate_candidate(*, surface_state, retessellation_inputs, volume, ras_to_v
         k1_histogram, k2_histogram, joint_curvature_pdf, joint_origin_mm_inv,
         joint_spacing_mm_inv, mri_weight=1., volume_unmri_weight=10.,
         normal_dot_weight=1., quadratic_curvature_weight=1., distance_backend='serial',
-        distance_evaluator=None):
+        distance_evaluator=None, distance_device=None):
     """同一完整初态及自产先验→一个完整候选的几何/SFF/五项/反馈副本。
 
     surface_state为create_genetic_base同语义完整状态：有限float32 orig/
@@ -110,7 +110,9 @@ def evaluate_candidate(*, surface_state, retessellation_inputs, volume, ras_to_v
     必填，不隐式生成先验或初态；四个源double权重默认1/10/1/1。
     distance_evaluator默认None，可显式传入完整距离callable；实际后端
     从距离返回的actual_backend记录，缺省保持既有CPU接口和控制流。
-    distance_backend默认serial，只接受serial/parallel；选择已有同序
+    distance_device默认None；GPU后端必须显式可用cuda:N，CPU选择不接设备。
+    GPU仅使用已验证的gpu_defect_signed_distance，失败不回退；原CPU路径保留。
+    distance_backend默认serial，接受serial/parallel/gpu_defect_signed_distance；选择已有同序
     F32距离核。parallel按调用方当前Numba线程mask划分互不重叠x slab，
     本函数不更改mask；调用方用thread_budget显式限制总CPU预算。
     即使unMRI权重为零或局部任一轴<=5，仍先校验此参数；此时不执行
@@ -127,8 +129,11 @@ def evaluate_candidate(*, surface_state, retessellation_inputs, volume, ras_to_v
     源face_check失败仍按原fitness罚分，不输出最终标准表面、不降低QC。
     """
     start=time.perf_counter()
-    if not isinstance(distance_backend,str) or distance_backend not in ('serial','parallel'):
-        raise ValueError('distance_backend must be serial or parallel')
+    from .topology_distance_policy import validate_distance_policy
+    distance_device=validate_distance_policy(distance_backend=distance_backend,distance_device=distance_device)
+    from .topology_distance_policy import resolve_distance_evaluator
+    kernel_backend,distance_evaluator=resolve_distance_evaluator(distance_backend=distance_backend,
+        distance_device=distance_device,distance_evaluator=distance_evaluator)
     initial=_state(surface_state,retessellation_inputs)
     if not isinstance(local_priors,Mapping):raise ValueError('explicit independently generated local_priors required')
     weight=np.asarray([mri_weight,volume_unmri_weight,normal_dot_weight,quadratic_curvature_weight])
@@ -176,7 +181,7 @@ def evaluate_candidate(*, surface_state, retessellation_inputs, volume, ras_to_v
     distance=dict(original_vertices=xyz,faces=geometry['faces'],face_normals=geometry['face_normals'],
         incident_offsets=geometry['incident_offsets'],incident_faces=geometry['incident_faces'],incident_corners=geometry['incident_corners'],
         volume_shape=local_priors['volume_shape'],volume_origin_mm=local_priors['volume_origin_mm'],volume_index_scale_per_mm=local_priors['volume_index_scale_per_mm'],
-        backend=distance_backend)
+        backend=kernel_backend)
     volume_input={key:local_priors[key] for key in ['defect_intensity_volume','white_log_probability','gray_log_probability',
         'initial_white_mean_log_probability','initial_gray_mean_log_probability','volume_origin_mm','volume_index_scale_per_mm']}
     volume_input.update(initial_white_mean_intensity=local_priors['white_mean'],initial_gray_mean_intensity=local_priors['gray_mean'],
@@ -197,12 +202,12 @@ def evaluate_candidate(*, surface_state, retessellation_inputs, volume, ras_to_v
             from numba import get_num_threads
             mask=int(get_num_threads())
             slabs=min(mask,int(local_priors['volume_shape'][0]))
-        else:slabs=1
+        elif distance_backend=='serial':slabs=1
     distance_policy=dict(requested_backend=distance_backend,executed=executed,
         actual_backend=fitness['distance'].get('actual_backend', distance_backend) if executed else None,skipped_unmri=not executed,
         caller_numba_thread_mask=mask,slab_count=slabs,
         effective_unmri_weight=float(fitness['composition']['effective_weights']['l_unmri']),
-        worker_count_observed=False)
+        worker_count_observed=False,requested_device=distance_device)
     seconds['complete_candidate_api_including_validation']=time.perf_counter()-start
     return dict(geometry=geometry,sff=sff,fitness=fitness,face_check=face_check,vertex_normals=normal,
         vertex_curvbak=feedback,flattened_vertices=sampling,face_area=face_area,displacement=displacement,seconds=seconds,

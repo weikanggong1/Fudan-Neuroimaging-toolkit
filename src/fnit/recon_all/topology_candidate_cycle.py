@@ -128,9 +128,18 @@ def _publish_candidate_attributes(*,initial,result,top,neighbors,incidents,corne
     return output
 
 
-def materialize_candidate_state(*, initial, result, state_context=None):
+def _validate_state_backend(state_backend, state_context):
+    if not isinstance(state_backend, str) or state_backend not in ('legacy', 'packed'):
+        raise ValueError('state_backend must be legacy or packed')
+    if state_backend == 'packed' and state_context is not None:
+        raise ValueError('packed backend uses current-call state, not persistent state_context')
+
+
+def materialize_candidate_state(*, initial, result, state_context=None, state_backend="legacy"):
     """已有 complete candidate→完整新状态；不重新评分、统计或恢复。
 
+    state_backend='legacy' 保留原入口；'packed' 每次重新打包全部当前
+    有效行，完整校验后用独立缓冲行视图发布。packed 与持久上下文互斥。
     initial/result 分别是原 full 一环 state 和 evaluate_candidate 返回。
     复用同一装配核心，保持有序 base 前缀、追加邻接和 incidence；
     保留未评分属性/currentXYZ，更新真实 K/E/fx/curvbak 和已存在的
@@ -140,6 +149,10 @@ def materialize_candidate_state(*, initial, result, state_context=None):
     批量前缀检查及独立行视图。无文件/线程切换；缺状态或未支持
     动态删除/多环明确 ValueError。结果尚不是 final mesh QA。
     """
+    _validate_state_backend(state_backend, state_context)
+    if state_backend == 'packed':
+        from .topology_state_pack import materialize_candidate_state_packed
+        return materialize_candidate_state_packed(initial=initial, result=result)
     if state_context is not None:
         from .topology_candidate_state_cache import materialize_candidate_state_cached
         return materialize_candidate_state_cached(initial=initial,result=result,context=state_context)
@@ -147,9 +160,11 @@ def materialize_candidate_state(*, initial, result, state_context=None):
 
 
 def evaluate_candidate_cycle(*, surface_state, snapshot, retessellation_inputs,
-        candidate_inputs, use_counts, vertex_fitness, state_context=None):
+        candidate_inputs, use_counts, vertex_fitness, state_context=None, state_backend="legacy"):
     """完整显式初态→一次评分/RP/原 DVS 恢复/边复位，返回新状态。
 
+    state_backend='packed' 显式选择本次完整打包，不缓存跨候选动态状态；
+    默认legacy。seconds.state_materialization 单独记录完整装配校验时间。
     surface_state 包含原 full base producer/DVS 的完整字段和源计数；
     坐标为 float32(N,3) surface RAS/mm。snapshot 为同顶点版本原序
     record_candidate_state 结果，不能来自不同网格或参考 after。
@@ -169,6 +184,7 @@ def evaluate_candidate_cycle(*, surface_state, snapshot, retessellation_inputs,
     输入不修改；nsize>1、some 模式或不完整存储明确 ValueError。
     中间候选的 incidence penalty 与最终质量门分开，不执行最终写出。
     """
+    _validate_state_backend(state_backend, state_context)
     start=time.perf_counter();validated=_one_ring_state(surface_state);nf=validated[2]
     if not isinstance(snapshot,DefectVertexSnapshot) or not isinstance(candidate_inputs,Mapping):
         raise ValueError('explicit own DVS snapshot and candidate parameter mapping required')
@@ -187,10 +203,15 @@ def evaluate_candidate_cycle(*, surface_state, snapshot, retessellation_inputs,
     # call's validated base metadata instead of checking the same 3*N row
     # capacities twice. Each next candidate and each independent public
     # materialization still validates its current state from scratch.
-    if state_context is None:
+    tick=time.perf_counter()
+    if state_backend == 'packed':
+        from .topology_state_pack import materialize_candidate_state_packed
+        current=materialize_candidate_state_packed(initial=surface_state,result=result,validated=validated)
+    elif state_context is None:
         current=_candidate_state_validated(initial=surface_state,result=result,validated=validated)
     else:
         current=materialize_candidate_state(initial=surface_state,result=result,state_context=state_context)
+    times['state_materialization']=time.perf_counter()-tick
     tick=time.perf_counter()
     score=result['fitness']['composition']['fitness']
     stats=update_candidate_statistics(vertex_marks=current['vertex_marks'],vertex_curvbak=current['curvbak'],
@@ -212,6 +233,8 @@ def evaluate_candidate_cycle(*, surface_state, snapshot, retessellation_inputs,
 class CandidateCycleEvaluator:
     """串行 GA 回调适配器；成功才发布状态，不重做基底或冻结初始化。
 
+    state_backend 与 evaluate_candidate_cycle 相同；实例可在下一次调用前
+    显式设置该字符串，每次重新验证。实例不共享候选状态或全局函数。
     构造参数与 evaluate_candidate_cycle 相同但没有 RP 数组；
     state_context 默认 None，可显式传同基底已验证上下文。调用仅
     接 ordering/discarded_defect_vertices/vertex_rip/use_counts/
@@ -219,8 +242,10 @@ class CandidateCycleEvaluator:
     在实例中。外层删除后的 rip/status 必须由下一调用显式给定，不能
     在构造时冻结删除策略。只能同一线程按源顺序调用，不支持并发。
     """
-    def __init__(self,*,surface_state,snapshot,retessellation_inputs,candidate_inputs,state_context=None):
+    def __init__(self,*,surface_state,snapshot,retessellation_inputs,candidate_inputs,state_context=None, state_backend="legacy"):
+        _validate_state_backend(state_backend, state_context)
         _one_ring_state(surface_state)
+        self.state_backend=state_backend
         self.surface_state=dict(surface_state);self.snapshot=snapshot
         self.retessellation_inputs=dict(retessellation_inputs);self.candidate_inputs=dict(candidate_inputs)
         self.last_result=None;self.state_context=state_context
@@ -239,7 +264,8 @@ class CandidateCycleEvaluator:
             inside_discarded=np.asarray(discarded_defect_vertices).copy(),vertex_rip=stored_rip!=0)
         result=evaluate_candidate_cycle(surface_state=state,snapshot=self.snapshot,
             retessellation_inputs=args,candidate_inputs=self.candidate_inputs,
-            use_counts=use_counts,vertex_fitness=vertex_fitness,state_context=self.state_context)
+            use_counts=use_counts,vertex_fitness=vertex_fitness,state_context=self.state_context,
+            state_backend=self.state_backend)
         self.surface_state=result['surface_state']
         self.retessellation_inputs['edge_used']=result['edge_used']
         self.last_result=result

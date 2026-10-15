@@ -4,6 +4,8 @@
 沿同一stream依次启动wavefront和三轴卷积，CPU规则保持原接口。
 """
 import torch
+from ..triton_runtime import configure_triton_compiler
+configure_triton_compiler(device="cuda:0")
 import triton
 import triton.language as tl
 

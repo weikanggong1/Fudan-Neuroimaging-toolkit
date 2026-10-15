@@ -6,12 +6,12 @@ import numpy as np
 from numba import njit
 
 from .mri_em_register import (
-    GCA, StableSamples, _vnl_affine_inverse, log_sample_probability,
+    GCA, GCARegistrationContext, StableSamples, _vnl_affine_inverse, log_sample_probability,
     regularize_covariance,
 )
 
 
-@njit
+@njit(cache=True)
 def _accumulate_gradient(voxels: np.ndarray, derivative: np.ndarray,
                          mean: np.ndarray, variance: np.ndarray,
                          intensity: np.ndarray, sample_count: int,
@@ -50,17 +50,23 @@ class EMObjective:
     samples: StableSamples
     source: np.ndarray
     clamp: float = 6.0
+    context: GCARegistrationContext | None = None
 
     def __post_init__(self) -> None:
-        node_ids = np.repeat(np.arange(len(self.gca.node_training), dtype=np.int32),
-                             np.diff(self.gca.node_offsets))
-        self.classifiers = np.full(
-            (len(self.gca.node_training), int(self.gca.node_labels.max()) + 1),
-            -1, np.int32,
-        )
-        self.classifiers[node_ids, self.gca.node_labels] = np.arange(
-            len(self.gca.node_labels), dtype=np.int32)
-        self.variances = regularize_covariance(self.gca).variances
+        if self.context is not None:
+            self.context.validate(self.gca)
+            self.classifiers = self.context.classifier(int(self.gca.node_labels.max()) + 1)
+            self.variances = self.context.covariance.variances
+        else:
+            node_ids = np.repeat(np.arange(len(self.gca.node_training), dtype=np.int32),
+                                 np.diff(self.gca.node_offsets))
+            self.classifiers = np.full(
+                (len(self.gca.node_training), int(self.gca.node_labels.max()) + 1),
+                -1, np.int32,
+            )
+            self.classifiers[node_ids, self.gca.node_labels] = np.arange(
+                len(self.gca.node_labels), dtype=np.int32)
+            self.variances = regularize_covariance(self.gca).variances
 
     def cost(self, matrix: np.ndarray) -> float:
         return -log_sample_probability(self.samples, self.source, matrix, clamp=self.clamp)

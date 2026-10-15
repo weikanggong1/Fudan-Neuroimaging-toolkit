@@ -5,6 +5,7 @@ import hashlib
 import importlib
 import importlib.metadata
 import json
+import subprocess
 from pathlib import Path
 
 _DEPENDENCIES = {
@@ -22,7 +23,9 @@ def check_python_runtime(*, require_nvml: bool = False,
     require_nvml默认False：NVML仅监测，缺失不影响计算；True时缺失报失败。
     assets_dir默认None，不读资源；传目录时复用固定core大小/SHA校验，不下载。
     返回JSON兼容字典：status、dependencies（版本/可加载状态/文件哈希）、
-    missing、incompatible、assets及whole_isolation。失败用status='failed'表示；
+    missing、incompatible、triton_compiler、assets及whole_isolation。编译器
+    只读核验显式设置或当前环境ptxas版本/SHA；不编译/加载科学内核。
+    失败用status='failed'表示；
     CLI另返回非零。依赖导入失败不回退原程序，不初始化CUDA、不查询PATH。
     报告不含安装绝对路径、服务器地址或账号；不代替真实整例隔离验证。
     """
@@ -53,6 +56,13 @@ def check_python_runtime(*, require_nvml: bool = False,
             if required:
                 result['missing'].append(distribution)
         result['dependencies'][distribution] = row
+    if not result['missing']:
+        from .triton_runtime import inspect_triton_compiler
+        try:
+            result['triton_compiler'] = inspect_triton_compiler(device='cuda:0')
+        except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
+            result['triton_compiler'] = {'status': 'unavailable', 'error_type': type(error).__name__}
+            result['incompatible'].append('CUDA ptxas must be available in the declared environment or explicit configuration')
     if assets_dir is not None:
         from .assets import validate_core_assets, CORE_ASSETS, ASSET_FILES
         try:

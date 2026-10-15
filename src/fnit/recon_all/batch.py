@@ -16,6 +16,7 @@ def run_recon_all_python_batch(
     native_bin_dir: str | Path | None = None,
     profile_stages: bool = False, cuda_allocator_cache: str = "auto",
     hemisphere_workers: int = 1,
+    hemisphere_execution: str = "groups",
     native_optimizations: str = "auto",
     n4_backend: str = "native",
     n4_execution: str = "in-process",
@@ -31,12 +32,15 @@ def run_recon_all_python_batch(
     sphere_finish_backend: str = "cpu",
     surface_placement_backend: str = "native",
     topology_backend: str = "native",
+    topology_distance_backend: str = "serial",
+    topology_state_backend: str = "legacy",
     annotation_gibbs_backend: str = "python",
     remesh_scalar_storage: str = "numpy",
     mni_execution: str = "in-process",
     gca_inverse_backend: str = "cpu",
     gca_candidate_chunk: int = 64,
     gca_execution: str = "in-process",
+    gca_reuse_atlas_context: bool = False,
     fill_backend: str = "python",
     backend: str = "native",
 ) -> list[dict]:
@@ -48,7 +52,10 @@ def run_recon_all_python_batch(
     profile_stages=False 不增加阶段同步；cuda_allocator_cache=auto
     延续低显存默认，也可在子进程初始化前选择 enabled/disabled。
     输出体积为 conform 网格，表面为 surface RAS/mm；输出/错误语义同
-    单例入口。输入非法抛 ValueError/FileNotFoundError，任务失败汇总为
+    单例入口。gca_reuse_atlas_context默认False，topology_distance_backend
+    默认serial、topology_state_backend默认legacy；传入每设备实际CLI，
+    非默认要求CUDA GCA/完整python-ga，含义及验证见ROUND2_INTEGRATION.md。
+    输入非法抛 ValueError/FileNotFoundError，任务失败汇总为
     RuntimeError。每设备仅执行一个被试；hemisphere_workers 默认1，设2时被试内部
     独立进程并行双侧，threads 在双侧之间分配（总预算不翻倍）。
     backend=python在每个CLI选择完整独立Python候选配方，允许CPU核、
@@ -121,7 +128,10 @@ def run_recon_all_python_batch(
                 n4_backend="simpleitk" if n4_backend == "native" else n4_backend,
                 n4_execution=n4_execution,
                 topology_backend="python" if topology_backend == "native" else topology_backend,
-                input_execution=input_execution)
+                input_execution=input_execution, hemisphere_execution=hemisphere_execution,
+                gca_reuse_atlas_context=gca_reuse_atlas_context,
+                gca_candidate_chunk=1024 if gca_candidate_chunk == 64 else gca_candidate_chunk,
+                topology_distance_backend=topology_distance_backend, topology_state_backend=topology_state_backend)
         if options is not None:
             # 与公开单例先解析再校验的顺序一致；不在batch另建第二套默认。
             native_optimizations = options["native_optimizations"]
@@ -137,7 +147,13 @@ def run_recon_all_python_batch(
             normalization_initial_bias_backend = options["normalization_initial_bias_backend"]
             sphere_finish_backend, mni_execution = options["sphere_finish_backend"], options["mni_execution"]
             fill_backend, hemisphere_workers = options["fill_backend"], options["hemisphere_workers"]
+    from .native_free import _validate_hemisphere_execution, _validate_round2_options
+    _validate_hemisphere_execution(hemisphere_execution, backend=backend, workers=hemisphere_workers)
     for target in devices:
+        _validate_round2_options(topology_backend=topology_backend,
+            topology_distance_backend=topology_distance_backend, topology_state_backend=topology_state_backend,
+            gca_reuse_atlas_context=gca_reuse_atlas_context, device=target,
+            native_optimizations=native_optimizations)
         _validate_input_execution(input_execution,
             n4_backend=n4_backend,
             n4_execution=n4_execution,
@@ -255,6 +271,10 @@ def run_recon_all_python_batch(
                 command += ["--surface-placement-backend", surface_placement_backend]
             if topology_backend != "native":
                 command += ["--topology-backend", topology_backend]
+            if topology_distance_backend != "serial":
+                command += ["--topology-distance-backend", topology_distance_backend]
+            if topology_state_backend != "legacy":
+                command += ["--topology-state-backend", topology_state_backend]
             if annotation_gibbs_backend != "python":
                 command += ["--annotation-gibbs-backend", annotation_gibbs_backend]
             if remesh_scalar_storage != "numpy":
@@ -277,8 +297,12 @@ def run_recon_all_python_batch(
                 command += ["--gca-candidate-chunk", str(gca_candidate_chunk)]
             if gca_execution != "in-process":
                 command += ["--gca-execution", gca_execution]
+            if gca_reuse_atlas_context:
+                command += ["--gca-reuse-atlas-context"]
             if fill_backend != "python":
                 command += ["--fill-backend", fill_backend]
+            if hemisphere_execution != "groups":
+                command += ["--hemisphere-execution", hemisphere_execution]
             if hemisphere_workers != 1:
                 command += ["--hemisphere-workers", str(hemisphere_workers)]
             if native_optimizations != "auto":

@@ -137,7 +137,7 @@ def snapshot_ordered_step(xyz,triangles,proposal,order,incident,incident_offsets
                           vertex_svi,min_neighbor_mm,tree,centers,radii,maximum_radius,
                           *, candidate_device=None, candidate_diagnostics=None,
                           candidate_grid_cells_per_axis=2,
-                          stale_mht_trial=None,order_rank=None):
+                          stale_mht_trial=None,order_rank=None,topology_cache=None):
     """One first trial; build a conservative union then filter exact query radii.
 
     Every vertex moves only after preceding accepted updates. Current candidate
@@ -180,8 +180,11 @@ def snapshot_ordered_step(xyz,triangles,proposal,order,incident,incident_offsets
         candidate_offsets,candidates,details=conservative_face_candidates_torch(
             centers,centers,((radii+maximum_radius)+1.0)+3.0*bound,
             source_low=low,source_high=high,query_low=low,query_high=high,
-            motion_bound=bound,source_faces=triangles,query_faces=triangles,
-            device=candidate_device, grid_cells_per_axis=candidate_grid_cells_per_axis)
+            motion_bound=bound,
+            source_faces=triangles if topology_cache is None else topology_cache.device_faces(candidate_device),
+            query_faces=triangles if topology_cache is None else topology_cache.device_faces(candidate_device),
+            device=candidate_device, grid_cells_per_axis=candidate_grid_cells_per_axis,
+            collect_counts=candidate_diagnostics is not None)
         if candidate_diagnostics is not None:candidate_diagnostics.update(details)
     if candidate_diagnostics is not None:
         candidate_diagnostics.update(candidate_build_seconds=time.perf_counter()-build_started,

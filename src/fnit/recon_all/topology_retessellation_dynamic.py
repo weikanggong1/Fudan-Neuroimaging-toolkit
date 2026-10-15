@@ -127,6 +127,8 @@ def retessellate_ordered_edges(*, canonical, base_faces, neighbors, candidate_ed
     blocker_scan_backend默认python；显式numba将同一完整首阻挡扫描
     和已有谓词放在编译循环内。只复制实际query邻接行，每次源加边/
     删边同步对应行，返回的全N邻接copy仍保留；不缩减源扫描范围。
+    prepared不可变canonical内复用原F64边端点/叉积，改变行立即重新准备；
+    不跨候选保存scanner，无prepared基底时仍逐查询读取当前canonical。
     blocker_scan_audit默认False；显式True逐条记录实际谓词调用的
     (a,b,v,w,hit)有序little-endian int32 SHA-256与总数，只用于验证。
     该审计含临时缓冲/哈希开销，不能当未观测吞吐；不改变判定。
@@ -208,7 +210,8 @@ def retessellate_ordered_edges(*, canonical, base_faces, neighbors, candidate_ed
     predicate_digest=hashlib.sha256() if blocker_scan_audit else None
     if blocker_scan_backend=='numba':
         from .topology_edge_blocker_scan import OrderedBlockerScan
-        scanner=OrderedBlockerScan(scan_vertices=full_scan,neighbor_rows=rows,audit=blocker_scan_audit)
+        scanner=OrderedBlockerScan(scan_vertices=full_scan,neighbor_rows=rows,audit=blocker_scan_audit,
+            canonical=xyz if base_context is not None else None)
     def writable_row(v):
         if isinstance(rows[v],tuple):
             rows[v]=list(rows[v]);links[v]=set(links[v]);copied_rows.add(v)

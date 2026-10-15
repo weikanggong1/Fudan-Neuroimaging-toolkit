@@ -349,6 +349,8 @@ def place_pial_t1(
     current, cropped = xyz.copy(), np.zeros(len(xyz), dtype=np.int32)
     dt, reductions, outer_pass = 0.5, 0, 0
     pass_ends: list[int] = []
+    from .place_surface_topology_cache import PlacementTopologyCache
+    topology_cache = PlacementTopologyCache(faces, len(current))
     for step in range(1, max_steps + 1):
         gradient_started = profile_boundary()
         momentum = gradient(current, cropped)
@@ -367,7 +369,8 @@ def place_pial_t1(
                 candidate_backend=candidate_backend,
                 candidate_grid_cells_per_axis=candidate_grid_cells_per_axis,
                 retained_mht_backend=retained_mht_backend,
-                candidate_device=device if candidate_backend == "torch_snapshot" else None)
+                candidate_device=device if candidate_backend == "torch_snapshot" else None,
+                topology_cache=topology_cache)
             record_section("collision", collision_started)
             blocked = np.any(proposal != current, axis=1) & np.all(
                 candidate == current, axis=1)

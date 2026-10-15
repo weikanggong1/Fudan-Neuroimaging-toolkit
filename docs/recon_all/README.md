@@ -4,6 +4,8 @@
 
 当前独立Python候选的[2026-10-11合并、真实阶段回归、失败项和最终安装结果](INTEGRATION_RESULTS_20261011.md)单独记录；旧版本证据继续绑定其原源码。[公开源码与实测版本的对应关系](PUBLICATION_SNAPSHOT_20261011.md)说明报告派生哈希和安装源码核对范围。
 
+第二轮候选选项见[接线与验收边界](ROUND2_INTEGRATION.md)、[持久双半球调度](PERSISTENT_HEMISPHERE_PIPELINE.md)和[Triton 编译器选择](TRITON_RUNTIME.md)；[f016 两例部分整例记录](../../validation/recon_all/optimizations/20261014_gpucw1_f016_partial/README.md)单列旧版结果，不能代表后续补丁的两例验收。
+
 [返回首页](../../README.md) · [完整旧文档与更早证据](../../validation/recon_all/readme_archive_20261005.md)
 
 | 项目 | 内容 |

@@ -29,8 +29,9 @@ def stage_fixture():
 
 
 class WholeControlContracts(unittest.TestCase):
-    def exercise(self, *, quality='passed', callback=None):
+    def exercise(self, *, quality='passed', callback=None, failure_callback=None):
         xyz,initial,base,ctx=stage_fixture();current_inputs=[];locals_used=[];draws=[];policies=[];cleaner={};quality_args={}
+        quality_reports=iter(quality) if isinstance(quality,tuple) else None
         def next_inputs(**kw):
             current_inputs.append(kw['current_surface_state'])
             self.assertEqual(kw['defect_number'],len(current_inputs)-1)
@@ -54,9 +55,11 @@ class WholeControlContracts(unittest.TestCase):
             s['neighbor_storage']=[np.array([2,1],np.int32),[],[]]
             return dict(surface_state=s,metadata=kw['metadata'],vertex_translation=np.arange(3,dtype=np.int32))
         def cleanup(**kw):
+            cleaner.setdefault('calls',[]).append(kw)
             cleaner.update(kw);return kw['vertices']+np.float32(1),{'intersecting_faces_after':0}
         def quality_check(s,cleaned):
-            quality_args.update(state=s,cleaned=cleaned);return {'status':quality}
+            quality_args.update(state=s,cleaned=cleaned)
+            return next(quality_reports) if quality_reports is not None else {'status':quality}
         with contextlib.ExitStack()as stack:
             mocks={}
             for name,behavior in (('prepare_nofix_genetic_base',lambda **kw:base),
@@ -67,7 +70,8 @@ class WholeControlContracts(unittest.TestCase):
                 mocks[name]=stack.enter_context(patch.object(module,name,side_effect=behavior))
             result=module.repair_genetic_topology(vertices=xyz,faces=np.array([[0,1,2]],np.int32),qsphere_vertices=xyz,
                 volume=np.zeros((2,2,2),np.uint8),ras_to_voxel=np.eye(4),source_metadata={'status':0},
-                threads=1,seed=1234,progress_callback=callback)
+                threads=1,seed=1234,progress_callback=callback,
+                failure_state_callback=failure_callback)
         return result,initial,current_inputs,locals_used,draws,policies,cleaner,quality_args,mocks
 
     def test_original_cache_once_but_each_defect_consumes_previous_corrected_state(self):
@@ -105,8 +109,46 @@ class WholeControlContracts(unittest.TestCase):
         with self.assertRaises(ValueError):module._ordered_csr({'vertex_topology':top,'neighbor_storage':[[3,2],[],[3,1,0],[0]]})
 
     def test_failed_final_quality_is_not_reported_as_complete(self):
+        observed=[]
         with self.assertRaisesRegex(RuntimeError,'failed premesh structure/current cleanup'):
-            self.exercise(quality='failed')
+            self.exercise(quality='failed',failure_callback=lambda **kw:observed.append(kw))
+        self.assertEqual(len(observed),1)
+        self.assertEqual(observed[0]['quality']['status'],'failed')
+        np.testing.assert_array_equal(observed[0]['faces'],[[0,1,2]])
+        np.testing.assert_array_equal(observed[0]['current_cleanup_vertices'],np.full((3,3),10,np.float32))
+
+    def test_only_independent_geometric_residual_triggers_bounded_fallback(self):
+        residual=dict(status='failed',topology={'valid':True},finite_coordinates=True,
+            nonmanifold_vertices=0,edge_orientation_conflicts=0,
+            current_source_intersecting_faces=0,current_geometric_intersecting_faces=2)
+        passed=dict(residual,status='passed',current_geometric_intersecting_faces=0)
+        observed=[]
+        out,_,_,_,_,_,cleaner,qa,mocks=self.exercise(
+            quality=(residual,passed),failure_callback=lambda **kw:observed.append(kw))
+        self.assertEqual(mocks['_quality'].call_count,2)
+        self.assertEqual([call['marking_backend'] for call in cleaner['calls']],['source_numba','legacy'])
+        self.assertIs(cleaner['calls'][0]['ordered_neighbor_offsets'],
+                      cleaner['calls'][1]['ordered_neighbor_offsets'])
+        self.assertIs(cleaner['calls'][0]['ordered_neighbors'],cleaner['calls'][1]['ordered_neighbors'])
+        np.testing.assert_array_equal(out['current_cleanup_vertices'],np.full((3,3),11,np.float32))
+        np.testing.assert_array_equal(qa['cleaned'],out['current_cleanup_vertices'])
+        self.assertEqual(out['quality']['status'],'passed')
+        self.assertEqual(out['current_cleanup']['intersecting_faces_after'],0)
+        self.assertEqual(out['current_cleanup']['independent_geometric_fallback']['geometric_intersecting_faces_before'],2)
+        self.assertEqual(out['current_cleanup']['independent_geometric_fallback']['geometric_intersecting_faces_after'],0)
+        self.assertFalse(observed)
+
+    def test_fallback_does_not_override_remaining_source_intersection(self):
+        residual=dict(status='failed',topology={'valid':True},finite_coordinates=True,
+            nonmanifold_vertices=0,edge_orientation_conflicts=0,
+            current_source_intersecting_faces=0,current_geometric_intersecting_faces=2)
+        still_failed=dict(residual,current_source_intersecting_faces=1,current_geometric_intersecting_faces=0)
+        observed=[]
+        with self.assertRaisesRegex(RuntimeError,'failed premesh structure/current cleanup'):
+            self.exercise(quality=(residual,still_failed),failure_callback=lambda **kw:observed.append(kw))
+        self.assertEqual(len(observed),1)
+        self.assertEqual(observed[0]['quality']['current_source_intersecting_faces'],1)
+        self.assertEqual(observed[0]['current_cleanup']['independent_geometric_fallback']['status'],'attempted')
 
     def test_original_premesh_intersections_are_diagnostic_but_current_must_be_clean(self):
         # A real closed, oriented tetrahedron checks structural predicates;
@@ -138,7 +180,8 @@ class WholeControlContracts(unittest.TestCase):
             for bad in ({'niters':True},{'niters':-2},{'population_size':True},{'soap_iterations':True},
                     {'normal_status':'plane'},{'normal_status':'spherical_patch'},
                     {'source_metadata':{'status':2}},{'source_metadata':{'status':False}},
-                    {'progress_callback':5},{'use_overlap':1},{'source_metadata':None}):
+                    {'progress_callback':5},{'failure_state_callback':5},
+                    {'use_overlap':1},{'source_metadata':None}):
                 with self.subTest(bad=bad),self.assertRaises(ValueError):module.repair_genetic_topology(**dict(kw,**bad))
             base.assert_not_called()
 

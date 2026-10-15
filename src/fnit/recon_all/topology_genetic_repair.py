@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from copy import deepcopy
 import time
 import numpy as np
 
@@ -79,12 +80,24 @@ def _quality(state, current_cleanup_vertices):
         overall_metric_equivalence='not_assessed',strict_source_final_reproduction='not_assessed')
 
 
+def _only_geometric_current_residual(quality):
+    """仅当 CURRENT 的独立几何交数是唯一失败项时尝试二次清理。"""
+    return bool(quality.get('status') == 'failed'
+        and bool(quality.get('topology', {}).get('valid'))
+        and bool(quality.get('finite_coordinates'))
+        and quality.get('nonmanifold_vertices') == 0
+        and quality.get('edge_orientation_conflicts') == 0
+        and quality.get('current_source_intersecting_faces') == 0
+        and quality.get('current_geometric_intersecting_faces', 0) > 0)
+
+
 def repair_genetic_topology(*, vertices, faces, qsphere_vertices, volume,
         ras_to_voxel, source_metadata, threads=4, seed=1234,
         population_size=10, max_unchanged=10, niters=-1,
         initial_selection=True, vertex_eliminate=True, use_overlap=False,
         normal_status='surface', soap_iterations=5, progress_callback=None,
-        face_detection_cache=False, blocker_scan_backend='python', distance_backend='serial'):
+        face_detection_cache=False, blocker_scan_backend='python', distance_backend='serial', distance_device=None, state_backend="legacy", random_audit_callback=None,
+        failure_state_callback=None):
     """同有序自身nofix/qsphere/MRI→全部缺陷完整自有搜索与premesh。
 
     vertices/qsphere_vertices为有限F32(N,3) surface RAS/mm，faces为共同
@@ -95,14 +108,23 @@ def repair_genetic_topology(*, vertices, faces, qsphere_vertices, volume,
     vertex_eliminate默认True，use_overlap默认False，沿用原标准GA。
     finite niters或关闭策略按实际记录，不标标准政策。normal_status
     默认surface，本完整控制器只支持标准三角表面状态；soap_iterations默认5。
+    random_audit_callback默认None，显式具名(index,low,high,value)观测完整半球
+    连续随机流，返回值忽略，不改变区间/值或跨缺陷顺序；失败传播。
     progress_callback默认None，可传callable(*,defect_number,result)在每
     缺陷完整写回后观测自产结果；回调不接参考路径，异常传播，不隐藏。
+    failure_state_callback默认None；仅最终双相交/结构质量门失败时，显式
+    回调可收到compact ORIGINAL/CURRENT、面、rip、有序邻接、质量和清理诊断
+    的独立副本。生产默认不保存影像或顶点；回调自行管理私有目录，异常传播。
     face_detection_cache默认False，仅接受bool/np.bool_；True时每缺陷开始根据
     当前保留面准备一次不可变索引，由该缺陷搜索和最终写回共同消费，
     下一个缺陷重新准备。动态邻接、几何及判定结果始终实时计算。
     blocker_scan_backend默认python，可显式numba；按原顺序扫描全部阻挡边，
     每缺陷搜索、最终评分和最终几何均传同一选择，无失败回退。
-    distance_backend默认serial，仅接受serial/parallel；每缺陷候选和最终
+    state_backend默认legacy，显式packed需任务5完整状态API，搜索、最终评分与
+    几何发布均传同一选择；缺实现明确失败，不退回legacy，不启用旧缓存。
+    distance_device默认None；GPU后端必须显式可用cuda:N，CPU选择不接设备。
+    GPU仅使用已验证的gpu_defect_signed_distance，失败不回退；原CPU路径保留。
+    distance_backend默认serial，接受serial/parallel/gpu_defect_signed_distance；每缺陷候选和最终
     评分透传同一距离核选择。parallel仅在本threads预算内执行，未改变
     候选顺序或随机流。返回请求选择及各缺陷最终评分的实际执行/skip
     记录，局部任一轴<=5或unMRI权重为零不声明执行parallel。
@@ -115,12 +137,14 @@ def repair_genetic_topology(*, vertices, faces, qsphere_vertices, volume,
     然后恢复ORIGINAL为premesh写出坐标。两槽都报告，CURRENT清理及
     拓扑结构严格检查；ORIGINAL的相交/零面积是中间态诊断，后续标准
     remesh及ORIGINAL相交清理不可省略，最终网格门另行检查。
+    如果源标记为零而独立几何核仍见CURRENT相交，用同一rip和有序邻接
+    对CURRENT再做一次几何标记SOAP；复检两核仍须同时为零，失败不发布。
 
     返回完整surface_state、metadata、original_domain_defect_labels、
     raw→base与base→compact映射、按序per_defect控制/耗时、finish报告、
     current_cleanup_vertices/diagnostics、quality与包括校验的seconds。
     不保留每候选大数组作为长期cache，不加载参考/文件/原版程序；外部
-    读写不计API秒。CPU NumPy/Numba，无CUDA/精度默认变更或新依赖。
+    读写不计API秒。CPU NumPy/Numba，GPU距离仅显式选择，不改精度默认或新增依赖。
     仅支持标准optimal_mapping=0；原始canonical缓存不可用于改变原
     球面坐标的其他mapping分支。此接口不是最终orig或完整recon-all。
     完整执行和质量通过分别记录；原完整GA数值/指标等效仍需独立对照。
@@ -129,16 +153,22 @@ def repair_genetic_topology(*, vertices, faces, qsphere_vertices, volume,
     输入不改；线程预算上下文恢复。对应mris_fix_topology -ga内部链。
     """
     started=time.perf_counter()
+    from .topology_ga_backend_policy import validate_state_backend
+    validate_state_backend(state_backend)
+    if random_audit_callback is not None and not callable(random_audit_callback):
+        raise ValueError("random_audit_callback must be callable or None")
     if progress_callback is not None and not callable(progress_callback):
         raise ValueError('progress_callback must be callable or None')
+    if failure_state_callback is not None and not callable(failure_state_callback):
+        raise ValueError('failure_state_callback must be callable or None')
     if not isinstance(use_overlap,(bool,np.bool_)):
         raise ValueError('explicit bool overlap policy required')
     if not isinstance(face_detection_cache,(bool,np.bool_)):
         raise ValueError('explicit bool face_detection_cache required')
     if not isinstance(blocker_scan_backend,str) or blocker_scan_backend not in ('python','numba'):
         raise ValueError('blocker_scan_backend must be python or numba')
-    if not isinstance(distance_backend,str) or distance_backend not in ('serial','parallel'):
-        raise ValueError('distance_backend must be serial or parallel')
+    from .topology_distance_policy import validate_distance_policy
+    distance_device=validate_distance_policy(distance_backend=distance_backend,distance_device=distance_device)
     source_population_limits(edge_count=0,population_size=population_size,max_unchanged=max_unchanged)
     if (isinstance(niters,(bool,np.bool_)) or not isinstance(niters,(int,np.integer)) or niters < -1
             or not isinstance(initial_selection,(bool,np.bool_))
@@ -153,7 +183,7 @@ def repair_genetic_topology(*, vertices, faces, qsphere_vertices, volume,
     status=np.asarray(source_metadata.get('status'))
     if status.ndim or status.dtype.kind not in 'iu' or int(status)!=0:
         raise ValueError('complete controller requires triangular surface metadata.status=0')
-    stages={};records=[];random=TopologyRandomStream(seed=seed)
+    stages={};records=[];random=TopologyRandomStream(seed=seed,audit_callback=random_audit_callback)
     with thread_budget(threads=threads):
         tick=time.perf_counter()
         base=prepare_nofix_genetic_base(vertices=vertices,faces=faces,qsphere_vertices=qsphere_vertices,
@@ -190,7 +220,7 @@ def repair_genetic_topology(*, vertices, faces, qsphere_vertices, volume,
                 deletion_count=deletion_count,elimination_threshold=threshold,
                 check_surface_intersection=False,intersection_checker=None,
                 face_detection_cache=face_detection_cache,blocker_scan_backend=blocker_scan_backend,
-                distance_backend=distance_backend)
+                distance_backend=distance_backend,distance_device=distance_device,state_backend=state_backend)
             state=result['surface_state'];deletion_count=result['deletion_count'];threshold=result['elimination_threshold']
             search=result['search'];final=result['finalization']
             records.append(dict(defect_number=defect_number,edges=len(edges['edge_vertices']),
@@ -211,13 +241,43 @@ def repair_genetic_topology(*, vertices, faces, qsphere_vertices, volume,
             vertex_translation=translation,normal_status=normal_status,iterations=soap_iterations)
         state=finished['surface_state'];stages['finish_and_compact']=time.perf_counter()-tick
         offsets,neighbors=_ordered_csr(state);tick=time.perf_counter()
-        cleaned,cleanup=repair_intersections(vertices=state['current_vertices'],faces=state['faces'][:state['nfaces']],
-            ripped=np.asarray(state['vertex_rip'])!=0,marking_backend='source_numba',device=None,
+        compact_faces=np.asarray(state['faces'])[:state['nfaces']]
+        ripped=np.asarray(state['vertex_rip'])!=0
+        cleaned,cleanup=repair_intersections(vertices=state['current_vertices'],faces=compact_faces,
+            ripped=ripped,marking_backend='source_numba',device=None,
             ordered_neighbor_offsets=offsets,ordered_neighbors=neighbors)
         stages['current_intersection_cleanup']=time.perf_counter()-tick
         state=dict(state);state['current_vertices']=np.array(state['original_vertices'],copy=True)
-        tick=time.perf_counter();quality=_quality(state,cleaned);stages['quality']=time.perf_counter()-tick
-        if quality['status']!='passed':raise RuntimeError('complete genetic topology failed premesh structure/current cleanup: '+repr(quality))
+        quality_started=time.perf_counter();quality=_quality(state,cleaned)
+        quality_seconds=time.perf_counter()-quality_started
+        cleanup=dict(cleanup)
+        if _only_geometric_current_residual(quality):
+            before=quality['current_geometric_intersecting_faces']
+            tick=time.perf_counter()
+            cleaned,geometric_cleanup=repair_intersections(vertices=cleaned,faces=compact_faces,
+                ripped=ripped,marking_backend='legacy',device=None,
+                ordered_neighbor_offsets=offsets,ordered_neighbors=neighbors)
+            stages['current_geometric_fallback_cleanup']=time.perf_counter()-tick
+            quality_started=time.perf_counter();quality=_quality(state,cleaned)
+            quality_seconds+=time.perf_counter()-quality_started
+            cleanup['independent_geometric_fallback']=dict(status='attempted',
+                geometric_intersecting_faces_before=before,
+                geometric_intersecting_faces_after=quality['current_geometric_intersecting_faces'],
+                source_intersecting_faces_after=quality['current_source_intersecting_faces'],
+                marking_backend='legacy',diagnostics=geometric_cleanup)
+        else:
+            stages['current_geometric_fallback_cleanup']=0.0
+            cleanup['independent_geometric_fallback']=dict(status='not_needed')
+        stages['quality']=quality_seconds
+        if quality['status']!='passed':
+            if failure_state_callback is not None:
+                failure_state_callback(original_vertices=np.array(state['original_vertices'],copy=True),
+                    current_cleanup_vertices=np.array(cleaned,copy=True),
+                    faces=np.array(compact_faces,copy=True),vertex_rip=np.array(ripped,copy=True),
+                    ordered_neighbor_offsets=np.array(offsets,copy=True),
+                    ordered_neighbors=np.array(neighbors,copy=True),
+                    quality=deepcopy(quality),current_cleanup=deepcopy(cleanup))
+            raise RuntimeError('complete genetic topology failed premesh structure/current cleanup: '+repr(quality))
     return dict(surface_state=state,metadata=finished['metadata'],per_defect=records,random_draws=random.draws,
         original_domain_defect_labels=np.array(labels,copy=True),raw_to_base_vertex_translation=np.array(translation,copy=True),
         base_to_compact_vertex_translation=finished['vertex_translation'],
@@ -227,7 +287,7 @@ def repair_genetic_topology(*, vertices, faces, qsphere_vertices, volume,
         final_mesh_quality='not_assessed',required_next_steps=('standard_remesh','original_intersection_cleanup','final_mesh_quality'),
         strict_source_final_reproduction='not_assessed',overall_metric_equivalence='not_assessed',
         face_detection_cache=bool(face_detection_cache),blocker_scan_backend=blocker_scan_backend,
-        distance_backend=distance_backend,
+        distance_backend=distance_backend,distance_device=distance_device,state_backend=state_backend,
         standard_policy=bool(population_size==10 and max_unchanged==10 and niters==-1
             and initial_selection and vertex_eliminate and not use_overlap and soap_iterations==5
             and normal_status=='surface'))
