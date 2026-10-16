@@ -55,6 +55,7 @@ def main():
     parser.add_argument("--sphere-finish-backend", choices=("cpu", "torch"), default="cpu")
     parser.add_argument("--surface-placement-backend", choices=("native", "python"), default="native")
     parser.add_argument("--topology-backend", choices=("native", "python", "python-ga"), default="native")
+    parser.add_argument("--topology-finish-backend", choices=("python", "conda-cpp"), default="python")
     parser.add_argument("--annotation-gibbs-backend", choices=("python", "numba"), default="python")
     parser.add_argument("--remesh-scalar-storage", choices=("numpy", "python"), default="numpy")
     parser.add_argument("--mni-execution", choices=("in-process", "parallel-late"), default="in-process")
@@ -95,10 +96,13 @@ def main():
     from fnit.recon_all.native_free import (_normalization_controls_options, _normalization_initial_bias_options,
                                           _validate_inflate_backend, _validate_mni_execution,
                                           _validate_sphere_finish_backend, _validate_annotation_gibbs_backend,
-                                          _validate_remesh_scalar_storage, _validate_surface_placement_backend)
+                                          _validate_remesh_scalar_storage, _validate_surface_placement_backend,
+                                          _validate_topology_finish_backend)
     _validate_annotation_gibbs_backend(args.annotation_gibbs_backend)
     _validate_remesh_scalar_storage(args.remesh_scalar_storage)
     _validate_surface_placement_backend(args.surface_placement_backend)
+    _validate_topology_finish_backend(args.topology_finish_backend,
+                                      topology_backend=args.topology_backend, backend=args.backend)
     _normalization_controls_options(args.normalization_controls_backend, args.device)
     _normalization_initial_bias_options(args.normalization_initial_bias_backend, args.device)
     _validate_inflate_backend(args.inflate_backend, args.device, args.hemisphere_workers)
@@ -136,6 +140,7 @@ def main():
             for row in Path("/proc/cpuinfo").read_text().splitlines() if row.startswith("model name")), None),
         "cpu_affinity": sorted(os.sched_getaffinity(0)), "threads": args.threads,
         "backend": args.backend, "topology_backend": args.topology_backend,
+        "topology_finish_backend": args.topology_finish_backend,
         "topology_distance_backend": args.topology_distance_backend,
         "topology_state_backend": args.topology_state_backend,
         "device": args.device, "defects_backend": args.defects_backend,
@@ -196,6 +201,7 @@ def main():
     command += ["--sphere-finish-backend", args.sphere_finish_backend]
     command += ["--surface-placement-backend", args.surface_placement_backend]
     command += ["--topology-backend", args.topology_backend]
+    command += ["--topology-finish-backend", args.topology_finish_backend]
     command += ["--topology-distance-backend", args.topology_distance_backend,
                 "--topology-state-backend", args.topology_state_backend]
     command += ["--annotation-gibbs-backend", args.annotation_gibbs_backend]

@@ -59,7 +59,7 @@ if [[ "$source_commit" != "$expected_commit" ]]; then
   echo "FreeSurfer source commit must be $expected_commit; found $source_commit" >&2
   exit 2
 fi
-for file in LICENSE.txt CMakeLists.txt utils/CMakeLists.txt mri_em_register/CMakeLists.txt mris_fix_topology/CMakeLists.txt mris_make_surfaces/CMakeLists.txt mris_inflate/CMakeLists.txt mri_segment/CMakeLists.txt mri_edit_wm_with_aseg/CMakeLists.txt mri_warp_convert/CMakeLists.txt mris_expand/CMakeLists.txt resurf/Code/mris_multimodal_refinement.h; do
+for file in LICENSE.txt CMakeLists.txt utils/CMakeLists.txt mri_em_register/CMakeLists.txt mris_fix_topology/CMakeLists.txt mris_remesh/CMakeLists.txt mris_remesh/mris_remesh.cpp mris_make_surfaces/CMakeLists.txt mris_inflate/CMakeLists.txt mri_segment/CMakeLists.txt mri_edit_wm_with_aseg/CMakeLists.txt mri_warp_convert/CMakeLists.txt mris_expand/CMakeLists.txt resurf/Code/mris_multimodal_refinement.h; do
   test -s "$source_dir/$file" || { echo "missing source: $file" >&2; exit 2; }
 done
 itk_config=$(find "$CONDA_PREFIX/lib/cmake" -maxdepth 3 -name ITKConfig.cmake -print -quit)
@@ -110,6 +110,17 @@ if(MINIMAL)
 endif()
 CMAKE
 fi
+# mris_remesh is another upstream target omitted from MINIMAL. Keep the
+# fixed-source target intact and add it only to this installer-owned copy.
+if ! grep -q FNIT_RECON_REMESH_TARGET "$build_source/CMakeLists.txt"; then
+  cat >> "$build_source/CMakeLists.txt" <<'CMAKE'
+
+# FNIT_RECON_REMESH_TARGET
+if(MINIMAL)
+  add_subdirectory(mris_remesh)
+endif()
+CMAKE
+fi
 diff -u "$source_dir/CMakeLists.txt" "$build_source/CMakeLists.txt" > "$output_dir/conda-cmake.patch" || true
 # Patch only this installer's source copy. The complete native optimizer stays
 # in mri_em_register; its scorer is selected explicitly by FNIT_GCA_SCORER.
@@ -147,7 +158,7 @@ cmake -S "$build_source" -B "$build_dir" -G Ninja \
   -DDISABLE_LINEPROF=ON -DINFANT_MODULE=OFF -DQATOOLS_MODULE=OFF \
   -DDISTRIBUTE_FSPYTHON=OFF -DINSTALL_PYTHON_DEPENDENCIES=OFF \
   2>&1 | tee "$output_dir/configure.log"
-targets=(mri_em_register mri_segment mri_edit_wm_with_aseg mris_fix_topology mris_remove_intersection mris_inflate mris_place_surface mrisp_paint mris_curvature_stats mri_label2vol mri_warp_convert mri_ca_register mri_convert mris_expand)
+targets=(mri_em_register mri_segment mri_edit_wm_with_aseg mris_fix_topology mris_remesh mris_remove_intersection mris_inflate mris_place_surface mrisp_paint mris_curvature_stats mri_label2vol mri_warp_convert mri_ca_register mri_convert mris_expand)
 cmake --build "$build_dir" --parallel 4 --target "${targets[@]}" 2>&1 | tee "$output_dir/build.log"
 for target in "${targets[@]}"; do
   binary=$(find "$build_dir" -type f -name "$target" -perm /111 -print -quit)

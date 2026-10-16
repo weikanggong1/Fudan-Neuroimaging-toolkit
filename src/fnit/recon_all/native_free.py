@@ -47,6 +47,19 @@ def _native_topology_binary(native_bin_dir: str | Path) -> tuple[Path, str]:
     return _native_binary(native_bin_dir, "mris_fix_topology_fnit")
 
 
+def _validate_topology_finish_backend(value: str, *, topology_backend: str,
+                                      backend: str) -> None:
+    """校验 remesh/相交后端；Conda 路径仅用于显式混合性能配方。
+
+    value 默认 python，保持有序 remesh 和严格自有清理；conda-cpp 要求
+    native GA 与非纯 Python profile。非法组合在创建被试输出前失败。
+    """
+    if value not in {"python", "conda-cpp"}:
+        raise ValueError("topology_finish_backend must be python or conda-cpp")
+    if value == "conda-cpp" and (topology_backend != "native" or backend != "native"):
+        raise ValueError("Conda C++ topology finish requires the native GA and mixed native profile")
+
+
 def _native_surface_metrics_binary(native_bin_dir: str | Path) -> tuple[Path, str]:
     return _native_binary(native_bin_dir, "mris_place_surface")
 
@@ -261,6 +274,306 @@ def _run_native_sphere_step(binary: Path, subject: Path, assets: Path,
     return time.perf_counter() - tick
 
 
+def _same_surface_volume_info(first: dict | None, second: dict | None) -> bool:
+    """比较两张 surface RAS 表面的 MRI 几何头，不依赖字典数组真值转换。"""
+    if first is None or second is None:
+        return first is None and second is None
+    return first.keys() == second.keys() and all(
+        np.array_equal(first[key], second[key]) for key in first)
+
+
+def _bounded_geometric_intersections(vertices: np.ndarray, faces: np.ndarray,
+                                     *, large_face_radius_mm: float = 8.0) -> tuple[int, dict]:
+    """逐面有界候选复用既有三角形谓词，返回相交面数和半径诊断。
+
+    输入为 surface RAS 毫米三角面；小面以各自半径查询小面 KD 树，
+    大面逐面查询全体面，不生成全局 query_pairs 数组。两类的并集覆盖
+    原半径和 AABB 候选；共享顶点排除及 1e-5 边界保持。输出几何面数，
+    无写出；非法半径或坐标直接报错。供原生清理后的独立零相交门。
+    """
+    from scipy.spatial import cKDTree
+    from .mris_remove_intersection_python import _triangles_intersect
+
+    if not np.isfinite(large_face_radius_mm) or large_face_radius_mm <= 0:
+        raise ValueError("large_face_radius_mm must be finite and positive")
+    xyz = np.asarray(vertices, dtype=np.float64)
+    mesh = np.asarray(faces, dtype=np.int32)
+    triangles = xyz[mesh]
+    centers = triangles.mean(axis=1)
+    radii = np.linalg.norm(triangles - centers[:, None], axis=2).max(axis=1)
+    low, high = triangles.min(axis=1), triangles.max(axis=1)
+    marked = np.zeros(len(mesh), dtype=bool)
+    small = np.flatnonzero(radii <= large_face_radius_mm)
+    large = np.flatnonzero(radii > large_face_radius_mm)
+    pairs_tested = 0
+
+    def check(first: int, second: int) -> None:
+        nonlocal pairs_tested
+        if (np.sum((centers[first] - centers[second]) ** 2)
+                > (radii[first] + radii[second] + 1e-5) ** 2):
+            return
+        if (np.any(low[first] > high[second] + 1e-5)
+                or np.any(low[second] > high[first] + 1e-5)
+                or np.any(mesh[first, :, None] == mesh[second, None, :])):
+            return
+        pairs_tested += 1
+        if _triangles_intersect(triangles[first], triangles[second]):
+            marked[first] = True
+            marked[second] = True
+
+    if len(small):
+        small_tree = cKDTree(centers[small])
+        maximum_small = float(radii[small].max())
+        for face in small:
+            nearby = small_tree.query_ball_point(
+                centers[face], float(radii[face]) + maximum_small + 1e-5)
+            for neighbor in nearby:
+                other = int(small[neighbor])
+                if other > face:
+                    check(int(face), other)
+    if len(large):
+        all_tree = cKDTree(centers)
+        maximum = float(radii.max())
+        is_large = np.zeros(len(mesh), dtype=bool)
+        is_large[large] = True
+        for face in large:
+            nearby = all_tree.query_ball_point(
+                centers[face], float(radii[face]) + maximum + 1e-5)
+            for other in nearby:
+                if other != face and (not is_large[other] or other > face):
+                    check(int(face), int(other))
+    return int(marked.sum()), {"max_face_radius_mm": float(radii.max(initial=0.0)),
+                               "large_face_radius_mm": float(large_face_radius_mm),
+                               "large_faces": int(len(large)),
+                               "predicate_pairs_tested": int(pairs_tested),
+                               "candidate_strategy": "bounded per-face KD tree; exact existing triangle predicate"}
+
+
+def _read_native_surface(path: Path) -> tuple[np.ndarray, np.ndarray, dict | None]:
+    """读取 surface RAS 毫米三角面并验证非空、有限坐标和有界索引。"""
+    if not path.is_file() or path.stat().st_size == 0:
+        raise FileNotFoundError(f"native surface is missing or empty: {path}")
+    vertices, faces, volume_info = fs.read_geometry(str(path), read_metadata=True)
+    if (vertices.ndim != 2 or vertices.shape[1] != 3 or not len(vertices)
+            or faces.ndim != 2 or faces.shape[1] != 3 or not len(faces)
+            or not np.isfinite(vertices).all() or faces.min() < 0
+            or faces.max() >= len(vertices)):
+        raise RuntimeError(f"native surface has invalid vertices or faces: {path}")
+    return vertices, faces, volume_info
+
+
+def _native_final_mesh_structure(vertices: np.ndarray, faces: np.ndarray) -> dict:
+    """复用闭合单连通 genus-0 门，并检查顶点流形、方向与零面积。"""
+    from .compare_subject import _topology
+    from .topology_volume_python import _nonmanifold_vertex_links
+
+    topology = _topology(vertices, faces)
+    topology["valid"] = bool(topology["valid"])
+    if not topology["valid"]:
+        return {"status": "failed", "topology": topology,
+                "nonmanifold_vertices": None, "edge_orientation_conflicts": None,
+                "zero_area_faces": None}
+    links = int(_nonmanifold_vertex_links(np.ascontiguousarray(faces, np.int32), len(vertices)))
+    directed = np.concatenate((faces[:, [0, 1]], faces[:, [1, 2]], faces[:, [2, 0]]))
+    _, groups = np.unique(np.sort(directed, axis=1), axis=0, return_inverse=True)
+    signs = np.where(directed[:, 0] < directed[:, 1], 1, -1)
+    conflicts = int(np.count_nonzero(np.bincount(groups, weights=signs)))
+    triangles = vertices[faces].astype(np.float64)
+    area2 = np.linalg.norm(np.cross(triangles[:, 1] - triangles[:, 0],
+                                    triangles[:, 2] - triangles[:, 0]), axis=1)
+    zeros = int(np.count_nonzero(area2 == 0))
+    passed = bool(topology["valid"] and links == conflicts == zeros == 0
+                  and np.isfinite(area2).all())
+    return {"status": "passed" if passed else "failed", "topology": topology,
+            "nonmanifold_vertices": links, "edge_orientation_conflicts": conflicts,
+            "zero_area_faces": zeros}
+
+
+def _run_native_remesh(binary: Path, subject: Path, hemi: str, assets: Path,
+                       *, input_path: Path) -> float:
+    """Conda 自编译 mris_remesh 三轮，输出只留私有候选供末次清理。
+
+    input_path 必须是已清理的 premesh 同序网格；检查其有序面和 MRI 几何头
+    与自产 orig.premesh 相同。输出 surface RAS 毫米候选可改变拓扑，但须
+    非空、有限且保留 MRI 几何头。返回包含输入校验、CLI 和文件检查的秒数；
+    失败保留候选与 JSON，绝不发布 orig。原命令带 -i/-o/--remesh/--iters。
+    """
+    tick = time.perf_counter()
+    surf = subject / "surf"
+    premesh = surf / f"{hemi}.orig.premesh"
+    candidate = surf / f".{hemi}.orig.native-remesh.candidate"
+    receipt = subject / "scripts" / f"{hemi}.native-remesh.json"
+    if candidate.exists() or receipt.exists():
+        raise FileExistsError(f"preserve previous native remesh evidence: {candidate}")
+    report = {"backend": "conda-cpp", "binary": str(binary),
+              "input": str(input_path), "premesh": str(premesh),
+              "candidate": str(candidate), "output": str(candidate),
+              "coordinate_space": "surface_RAS_mm", "iterations": 3,
+              "published_to_orig": False, "status": "running"}
+    env = dict(os.environ, SUBJECTS_DIR=str(subject.parent), FREESURFER_HOME=str(assets))
+    try:
+        premesh_vertices, premesh_faces, premesh_info = _read_native_surface(premesh)
+        source_vertices, source_faces, source_info = _read_native_surface(input_path)
+        report.update(ordered_input_faces_preserved=bool(len(source_vertices) == len(premesh_vertices)
+                      and np.array_equal(source_faces, premesh_faces)),
+                      input_volume_info_preserved=_same_surface_volume_info(premesh_info, source_info),
+                      binary_sha256=hashlib.sha256(binary.read_bytes()).hexdigest(),
+                      input_sha256=hashlib.sha256(input_path.read_bytes()).hexdigest())
+        if not report["ordered_input_faces_preserved"] or not report["input_volume_info_preserved"]:
+            raise RuntimeError("native remesh input changed the ordered premesh faces or MRI geometry")
+        subprocess.run([str(binary), "-i", str(input_path), "-o", str(candidate),
+                        "--remesh", "--iters", "3"],
+                       cwd=subject / "scripts", env=env, check=True)
+        vertices, faces, output_info = _read_native_surface(candidate)
+        report.update(vertices=len(vertices), faces=len(faces),
+                      volume_info_preserved=_same_surface_volume_info(source_info, output_info),
+                      candidate_sha256=hashlib.sha256(candidate.read_bytes()).hexdigest())
+        if not report["volume_info_preserved"]:
+            raise RuntimeError(f"native remesh changed MRI geometry: {candidate}")
+        report["status"] = "complete"
+    except Exception as error:
+        report.update(status="failed", error=f"{type(error).__name__}: {error}")
+        raise
+    finally:
+        report["seconds_before_receipt_write"] = time.perf_counter() - tick
+        receipt.write_text(json.dumps(report, indent=2) + "\n")
+    return time.perf_counter() - tick
+
+
+def _run_native_intersection(binary: Path, subject: Path, hemi: str,
+                             assets: Path, *, phase: str) -> float:
+    """原生 preclean/postclean 写私有候选；末次清理还须通过双谓词和结构门。
+
+    preclean 输入自产 premesh、保持有序面和 MRI 头；postclean 输入 remesh
+    候选，并检查闭合连通 genus-0、顶点流形、方向、零面积和双谓词零相交。
+    两阶段均不覆盖输入或 orig。失败保留候选/JSON；返回含校验及读写秒数。
+    对应 mris_remove_intersection INPUT OUTPUT；phase 仅取这两个值。
+    """
+    if phase not in {"preclean", "postclean"}:
+        raise ValueError("native intersection phase must be preclean or postclean")
+    tick = time.perf_counter()
+    surf, scripts = subject / "surf", subject / "scripts"
+    source = (surf / f"{hemi}.orig.premesh" if phase == "preclean" else
+              surf / f".{hemi}.orig.native-remesh.candidate")
+    candidate = (surf / f".{hemi}.orig.native-preclean.candidate" if phase == "preclean" else
+                 surf / f".{hemi}.orig.native-intersection.candidate")
+    receipt = scripts / f"{hemi}.native-{phase if phase == 'preclean' else 'intersection'}.json"
+    if candidate.exists() or receipt.exists():
+        raise FileExistsError(f"preserve previous native intersection evidence: {candidate}")
+    report = {"backend": "conda-cpp", "phase": phase, "binary": str(binary),
+              "input": str(source), "candidate": str(candidate), "output": str(candidate),
+              "coordinate_space": "surface_RAS_mm", "published_to_orig": False,
+              "status": "running"}
+    env = dict(os.environ, SUBJECTS_DIR=str(subject.parent), FREESURFER_HOME=str(assets))
+    try:
+        original_vertices, original_faces, original_info = _read_native_surface(source)
+        report.update(binary_sha256=hashlib.sha256(binary.read_bytes()).hexdigest(),
+                      input_sha256=hashlib.sha256(source.read_bytes()).hexdigest())
+        subprocess.run([str(binary), str(source), str(candidate)], cwd=scripts,
+                       env=env, check=True)
+        vertices, faces, output_info = _read_native_surface(candidate)
+        ordered_faces = np.array_equal(faces, original_faces)
+        finite = len(vertices) == len(original_vertices) and np.isfinite(vertices).all()
+        info_preserved = _same_surface_volume_info(original_info, output_info)
+        report.update(vertices=len(vertices), faces=len(faces),
+                      ordered_faces_preserved=ordered_faces,
+                      finite_coordinates=bool(finite),
+                      volume_info_preserved=info_preserved,
+                      candidate_sha256=hashlib.sha256(candidate.read_bytes()).hexdigest())
+        if not ordered_faces or not finite or not info_preserved:
+            raise RuntimeError("native intersection changed the ordered mesh, MRI geometry or produced nonfinite coordinates")
+        if phase == "postclean":
+            report["mesh_structure"] = _native_final_mesh_structure(vertices, faces)
+            if report["mesh_structure"]["status"] != "passed":
+                raise RuntimeError("native intersection output failed the final structural mesh gate")
+            from .place_surface_intersection_marking import mark_source_intersections
+            geometric_faces, geometry_diagnostics = _bounded_geometric_intersections(vertices, faces)
+            report["geometric_recheck"] = geometry_diagnostics
+            _, source_faces = mark_source_intersections(vertices, faces, predicate_backend="numba")
+            report.update(source_intersecting_faces_after_independent_recheck=int(source_faces),
+                          geometric_intersecting_faces_after_independent_recheck=int(geometric_faces))
+            if source_faces or geometric_faces:
+                raise RuntimeError(f"native intersection left {source_faces} source / "
+                                   f"{geometric_faces} geometric intersecting faces")
+        report["status"] = "complete"
+    except Exception as error:
+        report.update(status="failed", error=f"{type(error).__name__}: {error}")
+        raise
+    finally:
+        report["seconds_before_receipt_write"] = time.perf_counter() - tick
+        receipt.write_text(json.dumps(report, indent=2) + "\n")
+    return time.perf_counter() - tick
+
+
+def _finish_native_topology(*, subject: Path, hemi: str, assets: Path,
+                             remesh_binary: Path,
+                             intersection_binary: Path) -> tuple[float, float]:
+    """原生预清理→三轮 remesh→末次清理，全部通过后原子发布 orig。
+
+    subject/hemi 定位自产 orig.premesh（surface RAS/mm、有序三角面）；
+    assets 为声明资产目录，两个 binary 为固定源码 Conda 独立编译程序。
+    三份私有候选和各阶段 JSON 永久保留，原始 premesh 不覆盖。末次清理
+    校验头几何、闭合单连通 genus-0、流形、方向、零面积及双谓词零相交。
+    返回 remesh 秒数及两次清理/发布总秒数，包含校验、CLI 和全部读写。
+    失败抛原异常、保留现场，orig 不创建或不改变；对应官方三个命令见
+    NATIVE_TOPOLOGY_FINISH.md，真实阶段回归及整例结果由版本绑定报告记录。
+    """
+    surf, scripts = subject / "surf", subject / "scripts"
+    premesh = surf / f"{hemi}.orig.premesh"
+    preclean = surf / f".{hemi}.orig.native-preclean.candidate"
+    final_candidate = surf / f".{hemi}.orig.native-intersection.candidate"
+    publication_candidate = surf / f".{hemi}.orig.native-publish.candidate"
+    orig = surf / f"{hemi}.orig"
+    receipt = scripts / f"{hemi}.native-topology-finish.json"
+    if receipt.exists() or publication_candidate.exists():
+        raise FileExistsError(f"preserve previous native topology publication evidence: {receipt}")
+    report = {"backend": "conda-cpp", "input": str(premesh), "output": str(orig),
+              "candidate": str(final_candidate), "coordinate_space": "surface_RAS_mm",
+              "steps": ["preclean", "remesh3", "postclean", "atomic_publication"],
+              "published_to_orig": False, "status": "running"}
+    tick = time.perf_counter()
+    try:
+        premesh_sha = hashlib.sha256(premesh.read_bytes()).hexdigest()
+        report["input_sha256"] = premesh_sha
+        preclean_seconds = _run_native_intersection(
+            intersection_binary, subject, hemi, assets, phase="preclean")
+        remesh_seconds = _run_native_remesh(
+            remesh_binary, subject, hemi, assets, input_path=preclean)
+        postclean_seconds = _run_native_intersection(
+            intersection_binary, subject, hemi, assets, phase="postclean")
+        report["stage_seconds"] = {"preclean": preclean_seconds,
+                                   "remesh": remesh_seconds,
+                                   "postclean": postclean_seconds}
+        if hashlib.sha256(premesh.read_bytes()).hexdigest() != premesh_sha:
+            raise RuntimeError("native topology chain changed the original premesh")
+        final_receipt = json.loads((scripts / f"{hemi}.native-intersection.json").read_text())
+        final_sha = hashlib.sha256(final_candidate.read_bytes()).hexdigest()
+        if (final_receipt.get("status") != "complete"
+                or final_receipt.get("candidate_sha256") != final_sha
+                or final_receipt.get("mesh_structure", {}).get("status") != "passed"
+                or final_receipt.get("source_intersecting_faces_after_independent_recheck") != 0
+                or final_receipt.get("geometric_intersecting_faces_after_independent_recheck") != 0):
+            raise RuntimeError("native topology final candidate is not bound to a complete zero-intersection receipt")
+        publication_started = time.perf_counter()
+        shutil.copyfile(final_candidate, publication_candidate)
+        if hashlib.sha256(publication_candidate.read_bytes()).hexdigest() != final_sha:
+            raise RuntimeError("native topology publication SHA-256 changed")
+        # This is the only operation that changes the public orig filename.
+        publication_candidate.replace(orig)
+        publication_seconds = time.perf_counter() - publication_started
+        report["stage_seconds"]["publication"] = publication_seconds
+        report.update(status="complete", published_to_orig=True,
+                      output_sha256=final_sha,
+                      final_mesh_structure=final_receipt["mesh_structure"])
+    except Exception as error:
+        report.update(status="failed", error=f"{type(error).__name__}: {error}")
+        raise
+    finally:
+        report["seconds_before_receipt_write"] = time.perf_counter() - tick
+        receipt.write_text(json.dumps(report, indent=2) + "\n")
+    return remesh_seconds, time.perf_counter() - tick - remesh_seconds
+
+
 def _run_and_publish_genetic_topology(*, subject: Path, hemi: str,
                                       threads: int, remesh_scalar_storage: str,
                                       distance_backend: str = "serial",
@@ -371,7 +684,9 @@ def _prepare_native_topology(binary: Path | None, subject: Path, hemi: str,
                              assets: Path, device: str,
                              native_inflate_binary: Path | None,
                              intersection_binary: Path | None,
-                             *, remesh_scalar_storage: str = "numpy",
+                             *, remesh_binary: Path | None = None,
+                             topology_finish_backend: str = "python",
+                             remesh_scalar_storage: str = "numpy",
                              python_auxiliary: bool = False,
                              topology_backend: str = "native",
                              topology_distance_backend: str = "serial",
@@ -392,6 +707,8 @@ def _prepare_native_topology(binary: Path | None, subject: Path, hemi: str,
     拓扑不同算法及真实删除区缺陷映射，不启动GA程序；binary/两个兼容
     辅助程序此时可为None。数字拓扑全质量失败即抛异常，输出/空间见
     PYTHON_SURFACE_PIPELINE.md；整体指标等效另测，不复制orig充当修复。
+    topology_finish_backend默认python；conda-cpp仅与native GA搭配，使用
+    Conda自编译预清理、三轮remesh及末次相交清理；完整链通过结构与双谓词零残余门后才原子发布。
     python-ga使用完整自有有序GA；threads默认4，由表面worker显式传入
     本半球预算，不扩大总线程数。文件接口在独立目录一次完成标准remesh、
     最终清理和严格orig门，再校验SHA发布；不重复执行下面的公共remesh。
@@ -399,6 +716,9 @@ def _prepare_native_topology(binary: Path | None, subject: Path, hemi: str,
     仅向完整python-ga传递；GPU距离消费device，packed不改变完整搜索。
     """
     _validate_remesh_scalar_storage(remesh_scalar_storage)
+    _validate_topology_finish_backend(topology_finish_backend,
+                                      topology_backend=topology_backend,
+                                      backend="native" if topology_backend == "native" else "python")
     if topology_backend == "python-ga" and (
         isinstance(threads, bool) or not isinstance(threads, int) or threads < 1
     ):
@@ -467,16 +787,25 @@ def _prepare_native_topology(binary: Path | None, subject: Path, hemi: str,
                 result["seconds"]["original_intersection_cleanup"])
     else:
         raise ValueError("topology_backend must be native, python or python-ga")
-    tick = time.perf_counter()
-    remesh_surface(surf / f"{hemi}.orig.premesh", surf / f"{hemi}.orig", iterations=3,
-                   **({"scalar_storage": remesh_scalar_storage} if remesh_scalar_storage != "numpy" else {}))
-    remesh_seconds = time.perf_counter() - tick
-    tick = time.perf_counter()
-    orig = surf / f"{hemi}.orig"
-    remove_intersection_surface(orig, orig, binary=intersection_binary,
-                                assets_dir=assets)
-    intersection_seconds = time.perf_counter() - tick
-    return (python_seconds + remesh_seconds + intersection_seconds, native_seconds,
+    if topology_finish_backend == "conda-cpp":
+        if remesh_binary is None or intersection_binary is None:
+            raise ValueError("native topology finish requires declared Conda remesh and intersection programs")
+        remesh_seconds, intersection_seconds = _finish_native_topology(
+            subject=subject, hemi=hemi, assets=assets,
+            remesh_binary=remesh_binary, intersection_binary=intersection_binary)
+    else:
+        tick = time.perf_counter()
+        orig = surf / f"{hemi}.orig"
+        remesh_surface(surf / f"{hemi}.orig.premesh", orig, iterations=3,
+                       **({"scalar_storage": remesh_scalar_storage} if remesh_scalar_storage != "numpy" else {}))
+        remesh_seconds = time.perf_counter() - tick
+        tick = time.perf_counter()
+        remove_intersection_surface(orig, orig, binary=intersection_binary,
+                                    assets_dir=assets)
+        intersection_seconds = time.perf_counter() - tick
+    python_total = (python_seconds if topology_finish_backend == "conda-cpp" else
+                    python_seconds + remesh_seconds + intersection_seconds)
+    return (python_total, native_seconds,
             sphere_seconds, remesh_seconds, intersection_seconds)
 
 
@@ -813,6 +1142,7 @@ def _write_principal_curvature_maps(surf: Path, hemi: str,
 def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
                   *, device: str, threads: int, topology_binary: Path | None,
                   inflate_binary: Path | None, intersection_binary: Path | None,
+                  remesh_binary: Path | None = None,
                   place_binary: Path, defect_binary: Path | None,
                   assets: Path, defer_defects: bool = False,
                   defects_backend: str = "native",
@@ -822,6 +1152,7 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
                   remesh_scalar_storage: str = "numpy",
                   surface_placement_backend: str = "native",
                   topology_backend: str = "native",
+                  topology_finish_backend: str = "python",
                   topology_distance_backend: str = "serial",
                   topology_state_backend: str = "legacy") -> dict:
     """从自产filled生成单半球orig、预白质和标准球面，返回完整阶段报告。
@@ -839,6 +1170,8 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
     传播；不读取参考，不占位。原命令/真实数据见recon-all各功能页。
     topology_backend=python-ga显式使用完整自有GA文件接口，threads按本
     半球传入；其质量/SHA门和发布回执另见topology_genetic_publication。
+    topology_finish_backend默认python；显式conda-cpp只用于native GA后续
+    三轮remesh与相交清理，两个独立程序均需在已声明的Conda bin中。
     topology_distance_backend=serial与topology_state_backend=legacy保持默认；
     非默认仅完整GA，逐项意义/限制见ROUND2_INTEGRATION.md。
     """
@@ -863,6 +1196,8 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
     topology_python_seconds, topology_native_seconds, pre_sphere_seconds, remesh_seconds, intersection_seconds = (
         _prepare_native_topology(topology_binary, subject, hemi, assets,
                                  device, inflate_binary, intersection_binary,
+                                 remesh_binary=remesh_binary,
+                                 topology_finish_backend=topology_finish_backend,
                                  remesh_scalar_storage=remesh_scalar_storage,
                                  threads=threads,
                                  **({"topology_distance_backend": topology_distance_backend}
@@ -895,6 +1230,7 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
             "topology_python_seconds": topology_python_seconds,
             "topology_native_seconds": topology_native_seconds,
             "topology_backend": topology_backend,
+            "topology_finish_backend": topology_finish_backend,
             **({"topology_genetic_publication": json.loads(
                 (subject / "scripts" / f"{hemi}.topology.genetic.publish.json").read_text())}
                if topology_backend == "python-ga" else {}),
@@ -1117,7 +1453,8 @@ def _hemisphere_operation(subject, hemi, device, threads, operation, *, assets,
                           sphere_normals_backend="numba", inflate_backend="native",
                           sphere_finish_backend="cpu", annotation_gibbs_backend="python",
                           remesh_scalar_storage="numpy", surface_placement_backend="native",
-                          topology_backend="native", profile_stages=False,
+                          topology_backend="native", topology_finish_backend="python",
+                          profile_stages=False,
                           topology_distance_backend="serial", topology_state_backend="legacy"):
     """可exec的半球阶段入口，返回原结果与逐步读写/设备时间列表。
 
@@ -1132,6 +1469,8 @@ def _hemisphere_operation(subject, hemi, device, threads, operation, *, assets,
     仅annotation消费，GPU几何/随机序列/标签语义和缓存失效规则保持。
     remesh_scalar_storage默认numpy，仅surface消费python双精度存储候选，
     不改算法、GPU精度或线程预算。
+    topology_finish_backend默认python；conda-cpp只消费surface阶段的
+    remesh/intersection程序，其余半球组仍按原有依赖屏障执行。
     topology_distance_backend默认serial、topology_state_backend默认legacy；
     仅surface消费，按完整GA文件接口传递，不改变其他操作。
     profile_stages默认False；True在各子步骤前后同步明确device，保留外层
@@ -1160,6 +1499,7 @@ def _hemisphere_operation(subject, hemi, device, threads, operation, *, assets,
                      mri / 'filled.mgz', mri / 'norm.mgz', device=device,
                      threads=threads, topology_binary=binaries.get('topology'),
                      inflate_binary=binaries.get('inflate'), intersection_binary=binaries.get('intersection'),
+                     remesh_binary=binaries.get('remesh'),
                      place_binary=binaries.get('white', binaries.get('metrics')), defect_binary=binaries.get('defect'),
                      assets=assets, defer_defects=True,
                      sphere_normals_backend=sphere_normals_backend, inflate_backend=inflate_backend,
@@ -1167,6 +1507,7 @@ def _hemisphere_operation(subject, hemi, device, threads, operation, *, assets,
                      remesh_scalar_storage=remesh_scalar_storage,
                      surface_placement_backend=surface_placement_backend,
                      topology_backend=topology_backend,
+                     topology_finish_backend=topology_finish_backend,
                      **({"topology_distance_backend": topology_distance_backend}
                         if topology_distance_backend != "serial" else {}),
                      **({"topology_state_backend": topology_state_backend}
@@ -1458,6 +1799,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          sphere_finish_backend: str = "cpu",
                          surface_placement_backend: str = "native",
                          topology_backend: str = "native",
+                         topology_finish_backend: str = "python",
                          topology_distance_backend: str = "serial",
                          topology_state_backend: str = "legacy",
                          annotation_gibbs_backend: str = "python",
@@ -1501,6 +1843,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     首次JIT及打包成本计入阶段，GPU几何设备与总CPU预算不变。
     remesh_scalar_storage默认numpy；python复用同序拆缩/双精度平滑，
     仅减少CPU标量调度开销，不改拓扑/阈值/停止规则，读写计入秒数。
+    topology_finish_backend默认python保留现有收尾；conda-cpp仅与native
+    GA及混合native profile搭配，程序退出后仍独立检查零相交。
     mni_execution默认in-process；parallel-late将完整非线性延后到全部
     半球写出之后，与CPU网格检查按同一threads预算并行，join后检查输出。
     要求cuda:N及显式整数threads>=2；错误传播，不生成占位文件。
@@ -1559,6 +1903,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         raise ValueError("backend must be native, python or python-gpu")
     if topology_backend not in {"native", "python", "python-ga"}:
         raise ValueError("topology_backend must be native, python or python-ga")
+    _validate_topology_finish_backend(topology_finish_backend,
+                                      topology_backend=topology_backend, backend=backend)
     _validate_round2_options(topology_backend=topology_backend,
         topology_distance_backend=topology_distance_backend, topology_state_backend=topology_state_backend,
         gca_reuse_atlas_context=gca_reuse_atlas_context, device=device,
@@ -1680,6 +2026,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                  if n4_backend == "native" else None)
     topology_binary = (_native_topology_binary(native_bin_dir)
                        if topology_backend == "native" else (None, None))
+    remesh_binary = (_native_binary(native_bin_dir, "mris_remesh")
+                     if topology_finish_backend == "conda-cpp" else (None, None))
     metrics_binary = (_native_surface_metrics_binary(native_bin_dir)
                       if surface_placement_backend == "native" else (None, None))
     from .native_runtime_selection import select_native_optimizations
@@ -1696,8 +2044,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                     if surface_placement_backend == "native" else (None, None))
     inflate_binary = (_native_inflate_binary(native_bin_dir)
                       if surface_placement_backend == "native" or inflate_backend == "native" else (None, None))
-    # The complete Python intersection interface never executes this compatibility argument.
-    intersection_binary = (None, None)
+    intersection_binary = (_native_binary(native_bin_dir, "mris_remove_intersection")
+                           if topology_finish_backend == "conda-cpp" else (None, None))
     paint_binary = (_native_binary(native_bin_dir, "mrisp_paint")
                     if surface_placement_backend == "native" else (None, None))
     curvature_stats_binary = (_native_binary(native_bin_dir, "mris_curvature_stats")
@@ -1715,7 +2063,8 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         "n4": n4_binary[0] if n4_binary else None,
         "topology": topology_binary[0], "metrics": metrics_binary[0],
         "em": native_em[0], "white": white_binary[0],
-        "inflate": inflate_binary[0], "intersection": intersection_binary[0],
+        "inflate": inflate_binary[0], "remesh": remesh_binary[0],
+        "intersection": intersection_binary[0],
         "paint": paint_binary[0], "curvature_stats": curvature_stats_binary[0],
         "defects": defect_binary[0] if defect_binary else None,
         "wm_segment": wm_segment_binary[0] if wm_segment_binary else None,
@@ -1808,8 +2157,11 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         "strict_numerical_validation": "reported_separately",
         "binary": str(topology_binary[0]) if topology_binary[0] is not None else None,
         "sha256": topology_binary[1],
-        "intersection_implementation": "FNIT Python/Numba complete SOAP; residual intersections fail",
-        "intersection_binary": None,
+        "finish_backend": topology_finish_backend,
+        "intersection_implementation": ("Conda source-built C++ with independent double zero gate"
+                                         if topology_finish_backend == "conda-cpp" else
+                                         "FNIT Python/Numba complete SOAP; residual intersections fail"),
+        "intersection_binary": str(intersection_binary[0]) if intersection_binary[0] else None,
         "intersection_sha256": intersection_binary[1],
         "upstream": "intensity-derived WM and aseg-guided fill"}
     report["white_matter_chain"] = {
@@ -1843,9 +2195,15 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
         "geometry_device": device, "ordered_feedback_device": "cpu",
         "implementation": "FNIT Torch geometry + ordered " + annotation_gibbs_backend,
         "random_sequence": "existing VnlRandom/permutation; no seed or order change"}
-    report["remesh"] = {"implementation": "FNIT ordered Python/Numba CPU",
-        "scalar_storage": remesh_scalar_storage, "precision": "float64; no precision reduction",
-        "iterations": 3, "topology_and_update_order": "unchanged"}
+    report["remesh"] = {"implementation": ("Conda source-built C++" if topology_finish_backend == "conda-cpp"
+                                            else "FNIT ordered Python/Numba CPU"),
+        "backend": topology_finish_backend,
+        "binary": str(remesh_binary[0]) if remesh_binary[0] else None,
+        "sha256": remesh_binary[1],
+        "scalar_storage": remesh_scalar_storage if topology_finish_backend == "python" else None,
+        "precision": "float64; no precision reduction" if topology_finish_backend == "python" else "pinned Conda program",
+        "iterations": 3,
+        "topology_and_update_order": "FNIT ordered" if topology_finish_backend == "python" else "pinned Conda source"}
     report["sphere_generation"] = {
         "implementation": "FNIT quick/standard sphere; explicit nofix and standard inflation backends",
         "mris_inflate": {"binary": str(inflate_binary[0]) if inflate_binary[0] is not None else None,
@@ -2104,6 +2462,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                   'sphere_finish_backend': sphere_finish_backend,
                   'surface_placement_backend': surface_placement_backend,
                   'topology_backend': topology_backend,
+                  'topology_finish_backend': topology_finish_backend,
                   **({'topology_distance_backend': topology_distance_backend}
                      if topology_distance_backend != 'serial' else {}),
                   **({'topology_state_backend': topology_state_backend}
@@ -2112,6 +2471,9 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                   'remesh_scalar_storage': remesh_scalar_storage,
                   'binaries': {name: str(value) for name, value in (
                       *((('topology', topology_binary[0]),) if topology_binary[0] is not None else ()),
+                      *((('remesh', remesh_binary[0]),) if remesh_binary[0] is not None else ()),
+                      *((('intersection', intersection_binary[0]),)
+                        if intersection_binary[0] is not None else ()),
                       *((('inflate', inflate_binary[0]),) if inflate_binary[0] is not None else ()),
                       *((('metrics', metrics_binary[0]), ('white', white_binary[0]))
                         if surface_placement_backend == "native" else ()),
@@ -2181,6 +2543,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                            topology_binary=topology_binary[0],
                            inflate_binary=inflate_binary[0],
                            intersection_binary=intersection_binary[0],
+                           remesh_binary=remesh_binary[0],
                            place_binary=white_binary[0],
                            defect_binary=defect_binary[0] if defect_binary else None,
                            assets=assets, defects_backend=defects_backend,
@@ -2189,6 +2552,7 @@ def _run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                            remesh_scalar_storage=remesh_scalar_storage,
                            surface_placement_backend=surface_placement_backend,
                            topology_backend=topology_backend,
+                           topology_finish_backend=topology_finish_backend,
                            **({"topology_distance_backend": topology_distance_backend}
                               if topology_distance_backend != "serial" else {}),
                            **({"topology_state_backend": topology_state_backend}
@@ -2331,6 +2695,7 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                          sphere_finish_backend: str = "cpu",
                          surface_placement_backend: str = "native",
                          topology_backend: str = "native",
+                         topology_finish_backend: str = "python",
                          topology_distance_backend: str = "serial",
                          topology_state_backend: str = "legacy",
                          annotation_gibbs_backend: str = "python",
@@ -2394,6 +2759,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
     GPU几何设备/线程预算保持，编译/打包/读写计入实际阶段报告。
     remesh_scalar_storage默认numpy；python为完整有序remesh的CPU双精度
     存储候选，算法/阈值/停止及总线程保持；不称GPU重网格。
+    topology_finish_backend默认python；conda-cpp显式运行声明Conda目录内
+    独立源码构建的remesh与相交程序，输出经双谓词零残余和几何门。
     mni_execution=in-process保留默认；parallel-late在全部统计/半球写出后
     运行完整MNI GPU子exec，与CPU网格检查共享总threads预算（至少2）。
     要求cuda:N；返回mni_mesh_parallel完整报告及原mni_nonlinear.runtime，
@@ -2542,6 +2909,8 @@ def run_recon_all_python(t1: str | Path, subject_dir: str | Path,
                     **({"sphere_finish_backend": sphere_finish_backend} if sphere_finish_backend != "cpu" else {}),
                     **({"surface_placement_backend": surface_placement_backend} if surface_placement_backend != "native" else {}),
                     **({"topology_backend": topology_backend} if topology_backend != "native" else {}),
+                    **({"topology_finish_backend": topology_finish_backend}
+                       if topology_finish_backend != "python" else {}),
                     **({"topology_distance_backend": topology_distance_backend}
                        if topology_distance_backend != "serial" or backend == "python" else {}),
                     **({"topology_state_backend": topology_state_backend}
@@ -2628,6 +2997,8 @@ def main(argv: list[str] | None = None) -> None:
                         help="complete own Python/Numba white.preaparc, final white and pial; no original placement executable")
     parser.add_argument("--topology-backend", choices=("native", "python", "python-ga"), default="native",
                         help="python: 数字拓扑；python-ga: 完整自有有序GA，无原版程序，最终网格仍须验收")
+    parser.add_argument("--topology-finish-backend", choices=("python", "conda-cpp"), default="python",
+                        help="explicit Conda source-built remesh3 and intersection with independent zero-residual gate")
     parser.add_argument("--sphere-finish-backend", choices=("cpu", "torch"), default="cpu",
                         help="existing full dense standard-sphere overlap cleanup; torch requires cuda:N and two cached surface workers")
     parser.add_argument("--native-bin-dir", type=Path)
@@ -2685,6 +3056,7 @@ def main(argv: list[str] | None = None) -> None:
                                   sphere_finish_backend=args.sphere_finish_backend,
                                   surface_placement_backend=args.surface_placement_backend,
                                   topology_backend=args.topology_backend,
+                                  topology_finish_backend=args.topology_finish_backend,
                                   topology_distance_backend=args.topology_distance_backend,
                                   topology_state_backend=args.topology_state_backend,
                                   annotation_gibbs_backend=args.annotation_gibbs_backend,
