@@ -178,7 +178,7 @@ python export_report_tables.py --cohort-report "$public_cohort_report" \
   --reference-stages "$public_reference_stages_report"
 ```
 
-本轮实际运行的 [frozen v12](frozen_harnesses/watch_cohort_v12.py) 于 12:13:27 gpucw1 host-clock 启动，仅用 CPU、CUDA 不可见；12:17:42 首批已完成四例精度及九张 PNG，见 [dispatch](paired_batches/v12_batch_001/dispatch.public.json)，future corrected 自动接入。原 v12 源码/运行目录保持；canonical v13 增加导入前 SHA、禁 pyc 与有界失败重试，尚未替换正在正常运行的 v12。[五项故障注入控制](watcher_v13_contract_02.public.json)验证缺报告/坏 JSON 恢复、持续失败 attention、源漂移拒绝和历史保留；仅为无 MRI 的 orchestration 控制。原三项非法恢复声明及三个保护 root 均拒绝，派生 metadata 控制不计 MRI benchmark；原 QC passed 分支现另有 CON08/09 真实完成证据。
+本轮实际运行的 [frozen v12](frozen_harnesses/watch_cohort_v12.py) 于 12:13:27 accelerator-a-1 host-clock 启动，仅用 CPU、CUDA 不可见；12:17:42 首批已完成四例精度及九张 PNG，见 [dispatch](paired_batches/v12_batch_001/dispatch.public.json)，future corrected 自动接入。原 v12 源码/运行目录保持；canonical v13 增加导入前 SHA、禁 pyc 与有界失败重试，尚未替换正在正常运行的 v12。[五项故障注入控制](watcher_v13_contract_02.public.json)验证缺报告/坏 JSON 恢复、持续失败 attention、源漂移拒绝和历史保留；仅为无 MRI 的 orchestration 控制。原三项非法恢复声明及三个保护 root 均拒绝，派生 metadata 控制不计 MRI benchmark；原 QC passed 分支现另有 CON08/09 真实完成证据。
 
 正式 CON01 的整链完成后，独立准备其真实显示几何；私有 manifest 格式见上文：
 
@@ -231,7 +231,7 @@ CON08/CON09/CON10/CON11 原 wrapper 已完整通过保存 QC，随后 strict 补
 
 ### 正式 v4：十例执行与全帧比较完成
 
-正式 `1128bc52` 已从 raw T1w/BOLD 完成 CON01/CON03/CON04/CON05/CON06/CON07/CON08/CON09/CON10/CON11 的自动 volume、FNIT 完整重建、MSMSulc 和最终 surface，并完成独立全帧配对。数据固定 ds001226 v5.0.1、CC0、CON01/03–11，每例完整 180 帧，TR 2.1 或 2.4 s；CON02 沿用既有 dMRI 队列选择，不是本轮 T1w/BOLD 质量排除。[16:49:42 gpucw1 host-clock 快照](paired_batches/v12_batch_007/runtime_snapshot.public.json)显示正式执行完成 **10/10**、全帧配对比较 **10/10**，FNIT 10 complete／0 running／0 pending；参考 10 例 strict corrected 已齐。十例完整队列已全部执行并保存全帧比较；初始两例、首四例及旧 v2/v3 快照保持原字节。 `complete` 表示执行与全帧统计完成，尚未建立两条实现的等价性；CON07 候选、CON09 参考及 CON10 双方的球面质量异常分别保留。
+正式 `1128bc52` 已从 raw T1w/BOLD 完成 CON01/CON03/CON04/CON05/CON06/CON07/CON08/CON09/CON10/CON11 的自动 volume、FNIT 完整重建、MSMSulc 和最终 surface，并完成独立全帧配对。数据固定 ds001226 v5.0.1、CC0、CON01/03–11，每例完整 180 帧，TR 2.1 或 2.4 s；CON02 沿用既有 dMRI 队列选择，不是本轮 T1w/BOLD 质量排除。[16:49:42 accelerator-a-1 host-clock 快照](paired_batches/v12_batch_007/runtime_snapshot.public.json)显示正式执行完成 **10/10**、全帧配对比较 **10/10**，FNIT 10 complete／0 running／0 pending；参考 10 例 strict corrected 已齐。十例完整队列已全部执行并保存全帧比较；初始两例、首四例及旧 v2/v3 快照保持原字节。 `complete` 表示执行与全帧统计完成，尚未建立两条实现的等价性；CON07 候选、CON09 参考及 CON10 双方的球面质量异常分别保留。
 
 十例 FNIT API 的中位墙钟为 **4,604.252 s（76.738 min）**，queue 完整进程中位数为 **4,621.708 s**；原参考容器进程中位数为 **12,288.721 s**。自动 volume（含 ICA/AROMA clean）、完整重建 adapter、MSMSulc 的逐病例中位数分别为 254.317、4,170.757、120.288 s，阶段有嵌套和并行，不能相加重造整例墙钟。MNI volume 的平均时间 r 在十个病例中的中位数为 **0.545735**（范围 0.488992–0.626175），全域 NRMSE 中位数为 **22.394%**（范围 15.402%–31.917%）。91k CIFTI 的平均时间 r 在十个病例中的中位数为 **0.724853**（范围 0.531948–0.776488），全域 NRMSE 中位数为 **8.904%**（范围 7.546%–16.103%）。这些是十个病例指标的等权统计；空间 P05–P95 另列，不作为置信区间。不同硬件、线程及工作范围的时长分别报告；完整执行没有建立数值或几何等价。
 
@@ -459,7 +459,7 @@ CON10 的[实际保存球面追加读数](reconstruction_completed/CON10.saved-M
 
 两例均完整 180 帧/TR2.1，左右 GIFTI 为 180×32,492、CIFTI 为 180×91,282，全部有限；raw/副本/源码/helper/runner/config 前后 SHA 守卫通过。两路线 CIFTI 文件 SHA 完全相同。volume 副本来源于旧 `01de7f30` v2 CON01 的已完成 volume 输出；完整 v2 surface 后续失败，不能将副本的相同 MRI bytes 重标为新 producer/冷运行。该单被试 CPU 控制排除冷 volume、重建、复制、ZIP 导入和进程排队，不计入正式十例 raw 整链或 GPU 性能。首次示例副本因 DatasetLinks 相对路径格式错误在 surface 重算前失败，原记录保留；fresh 副本仅修准备格式，冻结科学源码未改。
 
-[同 gpucw1 CON01 CPU 完整原软件控制](hardware_control.md)也已完成，原容器 **12,859.637 s**、原 filename 检查失败 wrapper **12,924.445 s**、独立补检 **9.046 s**，见[corrected 原报告](hardware_control_completed/CON01.public.json)。同 raw、180 帧/TR2.1、严格保存检查通过；该单例不替代 CPU10 参考、不加入十例中位数/精度、不将补检拼成连续墙钟。同主机仍有不同线程/功能范围和共享负载，单次控制不支持通用加速结论。
+[同 accelerator-a-1 CON01 CPU 完整原软件控制](hardware_control.md)也已完成，原容器 **12,859.637 s**、原 filename 检查失败 wrapper **12,924.445 s**、独立补检 **9.046 s**，见[corrected 原报告](hardware_control_completed/CON01.public.json)。同 raw、180 帧/TR2.1、严格保存检查通过；该单例不替代 CPU10 参考、不加入十例中位数/精度、不将补检拼成连续墙钟。同主机仍有不同线程/功能范围和共享负载，单次控制不支持通用加速结论。
 
 ### 子功能与历史范围
 

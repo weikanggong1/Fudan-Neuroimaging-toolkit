@@ -1,7 +1,7 @@
 """Read existing receipts only; writes JSON to stdout, never launches algorithms."""
 import pathlib,json,hashlib,datetime
-R=pathlib.Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003')
-N=pathlib.Path('/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003')
+R=pathlib.Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003')
+N=pathlib.Path('/data/fnit/runs/recon_accuracy_20261003')
 receipts={}
 def sha(p):
  h=hashlib.sha256()
@@ -13,7 +13,7 @@ def read(p):
  if not p.is_file():return {}
  b=p.read_bytes();receipts[str(p)]={'sha256':hashlib.sha256(b).hexdigest(),'bytes':len(b)};return json.loads(b)
 def ref(p):return {'path':str(p),'sha256':receipts.get(str(p),{}).get('sha256')}
-cohort=read(R/'cohort/cohort_verified.json'); index=read('/cwStorage/home/gongwk/Notebook_code/FNIT/INDEX.json')
+cohort=read(R/'cohort/cohort_verified.json'); index=read('/data/fnit/INDEX.json')
 def run(cp,expected,kind):
  c=read(cp)
  if not c:return None

@@ -1,4 +1,6 @@
-# fMRI Volume pipeline
+# FNIT_fMRIVolume_pipeline
+
+> 统一 Python 入口：[`FNIT_fMRIVolume_pipeline`](../API_REFERENCE.md)，从 `fnit` 导入。下文配置、结果类型和细分算子保留高级兼容接口。
 
 | 摘要 | 内容 |
 |---|---|
@@ -96,13 +98,13 @@ fnit-setup-fmri-surface-assets --output-dir /data/hcp_assets --fmriprep
 ```
 
 ```python
-from fnit import fMRIVolume_pipeline
+from fnit import FNIT_fMRIVolume_pipeline
 
 bids_directory = "/data/bids"                         # 原始 BIDS 数据目录
 output_directory = "/data/derivatives/fnit"           # 新建的衍生结果目录
 mni_template_path = "/data/hcp_assets/fmriprep/tpl-MNI152NLin6Asym_res-02_T1w.nii.gz"  # 标准目标
 mni_mask_path = "/data/hcp_assets/fmriprep/tpl-MNI152NLin6Asym_res-02_desc-brain_mask.nii.gz"  # 目标脑掩膜
-volume_result = fMRIVolume_pipeline(                   # 返回已保存结果的路径与计时
+volume_result = FNIT_fMRIVolume_pipeline(                   # 返回已保存结果的路径与计时
     bids_root=bids_directory,
     derivatives_root=output_directory,
     subject="01",                                    # 选择 sub-01

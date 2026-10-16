@@ -6,7 +6,7 @@ from pathlib import Path
 import socket
 import subprocess
 
-root = Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002')
+root = Path('/data/workspaces/fnit_connectome_tenraw_20261002')
 own = root / 'task_04'
 digest = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
 old = own / 'final_raw_matrix_tools_v1/configuration.json'
@@ -56,8 +56,8 @@ output = root.parent / 'fnit_connectome_final_raw_task04_20261003_v7'
 log = own / 'final_raw_matrix_twenty_v7.log'
 receipt = own / 'final_raw_matrix_twenty_v7.launch.json'
 assert not any(p.exists() for p in (output, log, receipt))
-assert socket.gethostname() == 'nodecw10'
-argv = ['/cwStorage/home/gongwk/anaconda3/bin/python3.11', '-u', str(tool), '--config', str(path),
+assert socket.gethostname() == 'compute-a-10'
+argv = ['/data/user/anaconda3/bin/python3.11', '-u', str(tool), '--config', str(path),
         '--config-sha256', digest(path), '--output-root', str(output)]
 env = dict(os.environ, CUDA_VISIBLE_DEVICES='', PYTHONDONTWRITEBYTECODE='1', OMP_NUM_THREADS='1', OPENBLAS_NUM_THREADS='1')
 with log.open('xb') as stream:

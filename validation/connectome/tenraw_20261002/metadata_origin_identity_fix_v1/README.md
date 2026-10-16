@@ -35,7 +35,7 @@ CUDA_VISIBLE_DEVICES='' python -m pytest -q \
 
 ## 5. 实际验证与时间
 
-headcw 同一 FNIT Python，CUDA 不可见。修复前的新增非空 ledger 测试在两个 reader 中均真实失败；修复后这项通过。after-v1 尚缺 mixed caller archive；v2/v3 暴露仓库遗漏共用 base 模块，原失败输出全部保留。补齐 byte-identical 成熟 base 后，49 tests＋40 subtests 全部通过，pytest 7.08 秒、外层7.418秒，无 MRI/GPU。对应真实十例脑图与320矩阵无损结果见[最终审计](../task_05/final_actual_chain/README.md)。
+control-host 同一 FNIT Python，CUDA 不可见。修复前的新增非空 ledger 测试在两个 reader 中均真实失败；修复后这项通过。after-v1 尚缺 mixed caller archive；v2/v3 暴露仓库遗漏共用 base 模块，原失败输出全部保留。补齐 byte-identical 成熟 base 后，49 tests＋40 subtests 全部通过，pytest 7.08 秒、外层7.418秒，无 MRI/GPU。对应真实十例脑图与320矩阵无损结果见[最终审计](../task_05/final_actual_chain/README.md)。
 
 ## 6. 最近版本
 

@@ -99,7 +99,7 @@ fnit UKBConnectome_pipeline \
 |`run_cuda_component.py`|`--root` 新 task05 目录、`--python` 已有 Conda Python。冻结 worker/helper/source/reference SHA 后用共享 flock 后台串行执行，状态写 cuda_controller_v1；不重新排科学任务或修改源|
 |`make_fixed_tck_brain_image.py`|`--reference` 实际成功 CPU common report；`--output` 新 PNG，同时输出 SHA sidecar。使用现有 Conda Pillow，只显示真实 FA/atlas/端点|
 
-GPU 用固定 UUID `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba`、共享 `/tmp/fnit-recon-five-20261002-gongwk.gpu.lock`，保持 TF32 默认及 `expandable_segments:True`。该阶段无 CUDA 子进程。官方程序仅 reference 使用，生产不调用。
+GPU 用固定 UUID `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba`、共享 `/tmp/fnit-recon-five-20261002-benchmark-user.gpu.lock`，保持 TF32 默认及 `expandable_segments:True`。该阶段无 CUDA 子进程。官方程序仅 reference 使用，生产不调用。
 
 ## 4. 对应官方命令与源码消费类型
 

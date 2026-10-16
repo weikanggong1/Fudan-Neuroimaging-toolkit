@@ -53,7 +53,7 @@ FP32 continuous prior 对官方 continuous prior 的最大差为 `3.12e-7 / 2.69
 | 左 HA | -0.002009 | 3.9611e-8 | 6.5212e-6 | 1.593 |
 | 右 HA | -0.002153 | 3.1406e-8 | 3.3586e-5 | 1.433 |
 
-详细记录见 [丘脑混合](thalamus_hybrid.public.json)、[左混合](ha_left_hybrid.public.json)、[右混合](ha_right_hybrid.public.json)。nodecw7 使用相同 8 核 `32,36,40,44,48,52,56,60` 和 `nodecw7.gems.cpu8.lock`，Torch/Numba/OMP/BLAS 均为 8。单次共享状态计算含不同缓存准备，仅作实现选择观察，不声明速度收益。
+详细记录见 [丘脑混合](thalamus_hybrid.public.json)、[左混合](ha_left_hybrid.public.json)、[右混合](ha_right_hybrid.public.json)。compute-a-7 使用相同 8 核 `32,36,40,44,48,52,56,60` 和 `compute-a-7.gems.cpu8.lock`，Torch/Numba/OMP/BLAS 均为 8。单次共享状态计算含不同缓存准备，仅作实现选择观察，不声明速度收益。
 
 官方 Python API 不暴露 tetrahedron owner IDs。本轮比较了真实 continuous raster、覆盖和完整梯度；没有宣称所有形变位置上的官方 owner 逐值等价。
 

@@ -49,7 +49,7 @@ gradient_body.py 使用 stdlib AST 摘取原语句，SOURCE_AST_BINDINGS.public.
 
 唯一授权 worker 的上限/成功实际数量：sampler1、coordinates1、projection1、state-prefix2、LM-prefix2、FSL-order-prefix2、实际 bending.normal1、常量读取4；evaluate/linearize/gradient-method/dense-field-expansion/design-diagonal/PCG/SCG/H-callback/native 全0。无新 H/diag/normal-cache、原 MRI、全配准或 GPU。
 
-nodecw7，亲和性32,36,40,44,48,52,56,60；Torch8/interop1、OMP/MKL/OpenBLAS/Numba8。记录实际 Python/Torch/NumPy/nibabel/Numba 版本及 canonical env/default 解析匹配；实际环境 prefix 只给 basename/路径hash，Python二进制给SHA/大小。CUDA_VISIBLE_DEVICES空，移除loader/BLAS override，RLIMIT_AS20,000,000,000B（address space不是物理峰值），私有 umask077、目录700、文件600。shared outerCPU锁后自身inner锁；等待19000s、controller19600s、science180s+TERM/kill5s，有限 detached 调度、不重试。
+compute-a-7，亲和性32,36,40,44,48,52,56,60；Torch8/interop1、OMP/MKL/OpenBLAS/Numba8。记录实际 Python/Torch/NumPy/nibabel/Numba 版本及 canonical env/default 解析匹配；实际环境 prefix 只给 basename/路径hash，Python二进制给SHA/大小。CUDA_VISIBLE_DEVICES空，移除loader/BLAS override，RLIMIT_AS20,000,000,000B（address space不是物理峰值），私有 umask077、目录700、文件600。shared outerCPU锁后自身inner锁；等待19000s、controller19600s、science180s+TERM/kill5s，有限 detached 调度、不重试。
 
 runner 科学失败后仍执行 after-preflight，并保留 science RC；worker 任意已开始科学的失败也保存已恢复 operands 的后置 hash、flags/CUDA/DSO snapshot及前后 source/input/freeze。异常不标 accepted；stdout/summary/三exit原记录保留。DSO只是前后文件身份快照，不宣称全程 syscall 审计。源/计时/JIT/文件读取等时钟仅观察，不作速度比。
 

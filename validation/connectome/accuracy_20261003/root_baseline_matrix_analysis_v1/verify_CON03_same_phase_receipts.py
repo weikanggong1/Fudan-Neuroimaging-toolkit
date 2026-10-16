@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 import sys
 
-ROOT = Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1')
+ROOT = Path('/data/workspaces/fnit_connectome_accuracy_20261003_v1')
 CONFIG_SHA = 'f8eba1cbf3eab2baa549172b32be2c9d3b1014ad478f6e3702d7987378f52f8c'
 SCIENCE = {'baseline': '328c398496c5b90f459381ca462ba6597cbbe5f2e9700f0b1a273f1408962bac',
            'candidate': 'a27fe1ad0aca34c23b62017dc0bacb6b7a4c44d3423bf855a840509ffc1b6e82'}

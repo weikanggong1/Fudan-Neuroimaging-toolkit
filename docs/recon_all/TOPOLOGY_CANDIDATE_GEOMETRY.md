@@ -129,7 +129,7 @@ mris_fix_topology -mgz -sphere qsphere.nofix -inflated inflated.nofix \
 
 ## 5. 最新真实精度、时间与脑图
 
-公开 ds000114 sub07 ses-test LH，输入绑定79a41cdd原始T1链。CFFF同机、
+公开 ds000114 sub07 ses-test LH，输入绑定79a41cdd原始T1链。accelerator-b同机、
 CPU8–11、线程预算4、CUDA隐藏；共享负载。所有源码、程序、原影像与候选
 哈希见[完整报告](../../validation/recon_all/optimizations/20261010_topology_candidate_geometry/README.md)。
 

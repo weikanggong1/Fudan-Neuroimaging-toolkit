@@ -2,7 +2,7 @@
 
 实际计算源码：`ff372d73f106e850b999fbc95ae0b324cd315cbf`。最终文档提交不改写这一版本记录。
 两例均从原始 T1 和空目录运行；sub-01 使用已初始化 CUDA 的 Python API，sub-02 使用 CLI。
-H100、gpucw1、目标 GPU UUID 与线程预算 4 固定；单次共享服务器观察，未测稳定吞吐。
+H100、accelerator-a-1、目标 GPU UUID 与线程预算 4 固定；单次共享服务器观察，未测稳定吞吐。
 [完整机器报告](final_whole_summary.json)、[精简指标](final_metric_summary.json)及原始文件保留 SHA-256。
 整体指标等效没有已确认阈值，保持 `not_assessed`；严格138比较继续用于排错。
 

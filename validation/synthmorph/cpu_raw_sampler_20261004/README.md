@@ -20,11 +20,11 @@
 
 256 未保存独立官方 raw 数组，所以其官方直接 raw 对照未测；已通过同 extent 完整官方 normalized 输入及 v29 raw 对照。实际各输入文件、矩阵、预期/候选数组 SHA 见 [replay.public.json](replay.public.json)。raw 与 normalized 门分别评分，没有用仅归一化相同替代 raw 检查。
 
-27 项合同样例覆盖 B=2/C=3、非连续输入、半整数、clipping、极远域外 `±1e30`、0/自定义 3.25/None fill，均与 v29 逐位相同且输入不变。它们是局部合同测试，不代替真实 benchmark。实际 nodecw7 NumBa 0.61.2 生成的两个数组布局签名汇编未发现融合乘加；LLVM/汇编 SHA 已保存。本地 NumBa 0.67 同样通过有限边界门。
+27 项合同样例覆盖 B=2/C=3、非连续输入、半整数、clipping、极远域外 `±1e30`、0/自定义 3.25/None fill，均与 v29 逐位相同且输入不变。它们是局部合同测试，不代替真实 benchmark。实际 compute-a-7 NumBa 0.61.2 生成的两个数组布局签名汇编未发现融合乘加；LLVM/汇编 SHA 已保存。本地 NumBa 0.67 同样通过有限边界门。
 
 ## 八核 microbenchmark
 
-nodecw7 同一 `0,4,8,12,16,20,24,28` 核组，公共 `nodecw7.synth.cpu8.lock`；OMP/MKL/OpenBLAS/NumBa/Torch 均为 8，interop=1，GPU hidden。各图暖调用 v29→候选→候选→v29；计时包括原坐标生成、candidate finite-coordinate guard、分配和全部采样。读取、哈希、评分在计时外，没有额外保存影像。
+compute-a-7 同一 `0,4,8,12,16,20,24,28` 核组，公共 `compute-a-7.synth.cpu8.lock`；OMP/MKL/OpenBLAS/NumBa/Torch 均为 8，interop=1，GPU hidden。各图暖调用 v29→候选→候选→v29；计时包括原坐标生成、candidate finite-coordinate guard、分配和全部采样。读取、哈希、评分在计时外，没有额外保存影像。
 
 | 每图暖调用中位数 | v29 Torch | NumBa 原型 | 比值 |
 | --- | ---: | ---: | ---: |
@@ -59,7 +59,7 @@ root 已批准推进 CPU 限定安全 wrapper。Morph 任务负责复制新 help
 
 ## 2026-10-05：最终 helper 的真实门已通过
 
-新 frozen 版本使用 preprocessing `1c9f370c5904804b66e4ad7a51c4b558b19982c583846f210689f2766010139b`、实际 helper `f87ae99bf1a4fb8fc42eb196801871dbaa7f141f135bcb4a761a7c979ebfdfcd`，kernel AST 与先前 ready 版本相同。最终 driver 在 nodecw7 固定八核、GEMS 共用锁与 Synth 自己的锁下完成；NumBa `0.61.2`、Torch `2.5.1`，CUDA 隐藏。
+新 frozen 版本使用 preprocessing `1c9f370c5904804b66e4ad7a51c4b558b19982c583846f210689f2766010139b`、实际 helper `f87ae99bf1a4fb8fc42eb196801871dbaa7f141f135bcb4a761a7c979ebfdfcd`，kernel AST 与先前 ready 版本相同。最终 driver 在 compute-a-7 固定八核、GEMS 共用锁与 Synth 自己的锁下完成；NumBa `0.61.2`、Torch `2.5.1`，CUDA 隐藏。
 
 四幅真实 192/256 raw 采样和全部 normalized 输入各 **47,710,208 值**，旧 Torch / 官方对照的数值与位模式差异全部为 0；192 另有 14,155,776 个官方 raw 值逐位一致。256 的独立官方 raw 未保存，范围保持原说明。实际后端为 NumBa、请求 8 线程；四组输入与原 einsum locations 的 SHA 未改变，线程 mask 全部恢复。服务器默认浮点政策下的 subnormal / signed-zero 合同也逐位通过，没有切换 FTZ/DAZ。
 

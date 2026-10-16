@@ -48,7 +48,7 @@ mris_smooth -n 3 -nw -seed 1234 \
 
 ## 冻结官方输入的真实数据对照
 
-在 `gpucw1`，两种实现均读取这例去标识真实 T1 已保存的**同一组官方双侧 `white.preaparc`**。T1 SHA-256 为 `f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a`，官方程序版本为 FreeSurfer 8.2.0。交替运行 3 组配对测试，计入文件 I/O 和原生程序启动，不计 Python 导入。比较范围为有序 float32 坐标、有序面和 FreeSurfer 体积几何。
+在 `accelerator-a-1`，两种实现均读取这例去标识真实 T1 已保存的**同一组官方双侧 `white.preaparc`**。T1 SHA-256 为 `f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a`，官方程序版本为 FreeSurfer 8.2.0。交替运行 3 组配对测试，计入文件 I/O 和原生程序启动，不计 Python 导入。比较范围为有序 float32 坐标、有序面和 FreeSurfer 体积几何。
 
 | 半球 | 顶点 / 面 | 完全相同的坐标分量 | 最大差异 | Python 墙钟中位数 | 官方墙钟中位数 |
 | --- | ---: | ---: | ---: | ---: | ---: |

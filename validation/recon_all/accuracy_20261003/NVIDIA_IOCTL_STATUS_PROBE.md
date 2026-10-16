@@ -26,7 +26,7 @@
 
 ```bash
 # 在独立诊断源码目录构建，产物保留在该诊断目录。
-FNIT_DIAG_PYTHON_ENV=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env
+FNIT_DIAG_PYTHON_ENV=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env
 "${FNIT_DIAG_PYTHON_ENV}/bin/x86_64-conda-linux-gnu-gcc" \
   -std=c11 -O2 -Wall -Wextra -Werror -shared -fPIC \
   nvidia_ioctl_status_probe.c -ldl -o nvidia_ioctl_status_probe.so

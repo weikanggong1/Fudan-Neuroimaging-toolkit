@@ -14,7 +14,7 @@ GPU acceleration has not yet been validated.
 - Command: `mri_em_register -uns 3 -mask brainmask.mgz nu.mgz
   RB_all_2020-01-02.gca transforms/talairach.lta`.
 - Fixed subject: `work/reconall_main_20260924/single_subjects/fs_sub01/mri` on
-  headcw. Atlas SHA-256:
+  control-host. Atlas SHA-256:
   `2fcd276a39800f01f93a4c8828ae6d0a8cea3d8b8b9fe1599d4ee54e806be93e`.
 - Native full command from `work/reference_recon_all.log`: 236.52 s, 4 OpenMP
   threads. Its final voxel-to-voxel matrix is in the reference
@@ -64,14 +64,14 @@ passes required by other T1 inputs have not been validated.
 The experimental `mri_em_register_python.py` independently read the fixed
 subject's `nu.mgz`, `brainmask.mgz`, and atlas and wrote
 `work/reconall_python_gpu_20260925/em_stage_exact_source_fs_sub01/talairach.lta`
-on headcw. `validate_mri_em_stage.py` exited 0 against the native LTA:
+on control-host. `validate_mri_em_stage.py` exited 0 against the native LTA:
 geometry and 23 nonmatrix metadata lines agree, the maximum matrix error is
 `7.450580596923828e-9` (within the `2e-5` gate), and **0 of 315,638** atlas
 samples map to a different rounded source voxel. The LTA is numerically and
 voxel-mapping equivalent on this subject; it is not byte-identical because
 the matrix has one float32-ULP difference and generated header comments differ.
 
-The corrected Python command took **230.20 s** wall time on headcw (Python
+The corrected Python command took **230.20 s** wall time on control-host (Python
 reported 229.51 s in-stage): input preparation 10.14 s, translation 8.29 s,
 nine linear-search iterations 205.25 s, EM 5.75 s, and writing 0.09 s.
 The available native full-command reference took **236.52 s** on the same
@@ -126,12 +126,12 @@ operation and has no GPU benchmark.
 
 Run `test_mri_em_register_inputs.py` for the six focused tests. Run
 `validate_mri_em_register_inputs.py ATLAS NU MASK DIAGNOSTICS` for the fixed
-subject comparison; both passed on headcw with Python 3, NumPy, nibabel, and
+subject comparison; both passed on control-host with Python 3, NumPy, nibabel, and
 SciPy/PyTorch available in the existing environment.
 
 `validate_mri_em_first_divergence.py ATLAS NU MASK` is the minimal numerical
 gate. It holds 31 native float32 trial matrices and objective returns
-as validation fixtures; they are never used by the implementation. On headcw
+as validation fixtures; they are never used by the implementation. On control-host
 it checked 315,638 samples in 7.601 s and exited `0` with all 31 costs
 equal and the gradient error under `2e-7`. The six focused tests also passed, including exact comparison of the
 native 4×4 prior-to-source matrix. The native values came from the installed stripped

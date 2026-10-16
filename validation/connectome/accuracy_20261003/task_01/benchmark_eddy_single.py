@@ -57,7 +57,7 @@ def main():
               "previous_runs": [{k: v for k, v in row.items() if k != "GPU_monitor"}
                                 for row in paired["cases"][args.subject]["runs"]]}
     (args.output / "summary.json").write_text(json.dumps(report, indent=2) + "\n")
-    with open("/tmp/fnit-recon-five-20261002-gongwk.gpu.lock", "a+") as lock:
+    with open("/tmp/fnit-recon-five-20261002-benchmark-user.gpu.lock", "a+") as lock:
         start = time.perf_counter()
         fcntl.flock(lock, fcntl.LOCK_EX)
         wait = time.perf_counter() - start

@@ -9,7 +9,7 @@ import sys
 import time
 
 
-ROOT = Path("/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1")
+ROOT = Path("/data/workspaces/fnit_connectome_accuracy_20261003_v1")
 CONTROL = ROOT / "final_cohort_wait_v1"
 CONFIG = ROOT / "formal_frozen_v1/accuracy_configuration.json"
 CONFIG_SHA = "f8eba1cbf3eab2baa549172b32be2c9d3b1014ad478f6e3702d7987378f52f8c"

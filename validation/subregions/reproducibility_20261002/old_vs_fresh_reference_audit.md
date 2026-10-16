@@ -4,7 +4,7 @@
 
 [只读审计记录](old_vs_fresh_reference_audit.json)覆盖历史官方文件、当前三项输入、当前官方源码的大小、SHA、mtime，以及旧/新输出的完整网格。四个结构各自的 native、HR 共 **8 对输出，shape 和 affine 均逐位一致**。右 AAA 的 atlas ID 为 7010；在相同网格上，旧官方 native/HR 有 **0/1** 个硬标签体素，本轮官方有 **24/626** 个。这是标签内容变化，不能用网格相位解释。
 
-服务器 `plus/subjects/fs_sub01/mri` 当前不存在。已恢复 `/tmp/fnit_official_gpucw1_full_{thal,hippo}_20260929.py`、对应 `.log` 及 launcher `.sh`。驱动声明 `set_thread_count(4)`，使用与本轮相同的 `reconall_reference_gpucw1/fs_sub01/mri/{norm,aseg,wmparc}.mgz` 路径；launcher 选择实际 FreeSurfer 8.2 的 `fspython`，日志显示 FreeSurfer 8.2.0-1 加载并正常完成。不能将其当作 threads=1 的试验。
+服务器 `plus/subjects/fs_sub01/mri` 当前不存在。已恢复 `/tmp/fnit_official_accelerator-a-1_full_{thal,hippo}_20260929.py`、对应 `.log` 及 launcher `.sh`。驱动声明 `set_thread_count(4)`，使用与本轮相同的 `reconall_reference_accelerator-a-1/fs_sub01/mri/{norm,aseg,wmparc}.mgz` 路径；launcher 选择实际 FreeSurfer 8.2 的 `fspython`，日志显示 FreeSurfer 8.2.0-1 加载并正常完成。不能将其当作 threads=1 的试验。
 
 ## 尚无法恢复的生成条件
 

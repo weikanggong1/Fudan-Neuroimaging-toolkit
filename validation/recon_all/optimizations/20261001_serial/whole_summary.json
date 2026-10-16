@@ -2,7 +2,7 @@
   "schema": "fnit_serial_whole_v1",
   "resources": {
     "code_commit": "61926c7dceae2f9097fa296e306cf1efa0a09191",
-    "host": "gpucw1",
+    "host": "accelerator-a-1",
     "cpu": "Intel(R) Xeon(R) Gold 6430",
     "utc": "2026-10-01T18:57:25.966047+00:00",
     "hardware_only": false,
@@ -568,8 +568,8 @@
       },
       "candidate_commit": "61926c7dceae2f9097fa296e306cf1efa0a09191",
       "candidate_archive_sha256": "6d231caff2f394b5f40eaf4119bcbc1a45e42a7387c90436c6ef8114ba9fc705",
-      "input": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/examples/data/sub-01_T1w.nii.gz",
-      "host": "gpucw1",
+      "input": "/data/workspaces/freesurfer_synth/examples/data/sub-01_T1w.nii.gz",
+      "host": "accelerator-a-1",
       "gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
       "invocation": "initialized_cuda_api",
       "baseline_reused": true,
@@ -585,14 +585,14 @@
       "timing_scope": "same monitor command boundary; imports, validation, models, transfer and IO included; single observation, not stable throughput",
       "baseline_monitor": {
         "command": [
-          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
-          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/run_initialized_cuda_api.py",
-          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/examples/data/sub-01_T1w.nii.gz",
-          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1",
+          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/run_initialized_cuda_api.py",
+          "/data/workspaces/freesurfer_synth/examples/data/sub-01_T1w.nii.gz",
+          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1",
           "--weights-dir",
-          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/weights",
+          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/weights",
           "--assets-dir",
-          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets",
+          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets",
           "--device",
           "cuda:0",
           "--threads",
@@ -617,21 +617,21 @@
       },
       "candidate_monitor": {
         "command": [
-          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
-          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/validation/recon_all/python_gpu_port/run_initialized_cuda_api.py",
-          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/examples/data/sub-01_T1w.nii.gz",
-          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1",
+          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/validation/recon_all/python_gpu_port/run_initialized_cuda_api.py",
+          "/data/workspaces/freesurfer_synth/examples/data/sub-01_T1w.nii.gz",
+          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1",
           "--weights-dir",
-          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/weights",
+          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/weights",
           "--assets-dir",
-          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets",
+          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets",
           "--device",
           "cuda:0",
           "--threads",
           "4",
           "--profile-stages",
           "--native-bin-dir",
-          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin",
+          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin",
           "--cuda-allocator-cache",
           "disabled"
         ],
@@ -729,7 +729,7 @@
         },
         "EntoWM_actual_forwards": [
           {
-            "model": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/weights/entowm.fsm31.t1.nstd00-30.nstd21-108.h5",
+            "model": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/weights/entowm.fsm31.t1.nstd00-30.nstd21-108.h5",
             "device": "cuda:0",
             "input_dtype": "torch.float32",
             "model_devices": [
@@ -784,7 +784,7 @@
           "cuda_initialized_before_api": true,
           "device": "cuda:0",
           "threads": 4,
-          "native_bin_dir": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin",
+          "native_bin_dir": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin",
           "thread_budget_set_before_cuda": true,
           "allocator_before_initialization": {
             "requested": "disabled",
@@ -3371,17 +3371,17 @@
           "remesh_seconds": 120.54232823196799,
           "intersection_seconds": 1.0233220420777798,
           "white_preaparc": {
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.white.preaparc",
-            "stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/autodet.gw.stats.lh.dat",
-            "outvol": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/mri/mrisps.wpa.mgz",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.white.preaparc",
+            "stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/autodet.gw.stats.lh.dat",
+            "outvol": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/mri/mrisps.wpa.mgz",
             "stats_seconds": 3.918580902274698,
             "place_seconds": 204.9168152990751,
             "smoothwm_seconds": 5.393525973893702
           },
           "standard_sphere": {
-            "inflated": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.inflated",
-            "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.smoothwm",
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.sphere",
+            "inflated": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.inflated",
+            "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.smoothwm",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.sphere",
             "finish_device": "cpu",
             "averaging_device": "cuda:0",
             "initial_negative_area_pct": 0.021216599380217624,
@@ -5028,11 +5028,11 @@
             "total_seconds_including_io": 156.8535203160718
           },
           "sphere_registration": {
-            "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.sphere",
-            "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.smoothwm",
-            "sulc": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.sulc",
-            "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.sphere.reg",
+            "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.sphere",
+            "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.smoothwm",
+            "sulc": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.sulc",
+            "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.sphere.reg",
             "overlap_device": "cpu",
             "averaging_device": "cuda:0",
             "input_sha256": {
@@ -5044,10 +5044,10 @@
             "sulc_seed_sha256": "3bff24dd87e0efeb1acc6d67de2b29d5665e495520f4f1bda879952381492cef",
             "output_sha256": "648fae8628d683954352cb59bfcc96babd71b571f213f8011d836557df724ce1",
             "sulc_pass": {
-              "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.sphere",
-              "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.smoothwm",
-              "sulc": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.sulc",
-              "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+              "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.sphere",
+              "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.smoothwm",
+              "sulc": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.sulc",
+              "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
               "output": "(temporary sulc seed)",
               "rigid_angles": [
                 0.16580627858638763,
@@ -5816,11 +5816,11 @@
               "total_seconds_including_io": 71.49418437015265
             },
             "smoothwm_pass": {
-              "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.sphere",
-              "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.smoothwm",
+              "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.sphere",
+              "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.smoothwm",
               "sulc_seed": "(temporary sulc seed)",
-              "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
-              "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.sphere.reg",
+              "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+              "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.sphere.reg",
               "seed_iteration": 55,
               "overlap_device": "cpu",
               "setup_seconds_including_raw_fit": 10.16569028608501,
@@ -6568,14 +6568,14 @@
             "total_seconds_including_io": 135.378631841857
           },
           "final_white": {
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.white",
-            "outvol": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/mri/mrisps.white.mgz",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.white",
+            "outvol": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/mri/mrisps.white.mgz",
             "seconds": 198.5877102552913
           },
           "pial": {
             "implementation": "conda-source-cpp",
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.pial.T1",
-            "log": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/scripts/lh.pial.log",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/lh.pial.T1",
+            "log": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/scripts/lh.pial.log",
             "vertices": 105598,
             "faces": 211192,
             "seconds": 191.9445211100392
@@ -6594,17 +6594,17 @@
           "remesh_seconds": 111.59036280680448,
           "intersection_seconds": 0.8383086672984064,
           "white_preaparc": {
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.white.preaparc",
-            "stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/autodet.gw.stats.rh.dat",
-            "outvol": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/mri/mrisps.wpa.mgz",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.white.preaparc",
+            "stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/autodet.gw.stats.rh.dat",
+            "outvol": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/mri/mrisps.wpa.mgz",
             "stats_seconds": 2.6974170580506325,
             "place_seconds": 187.88681349204853,
             "smoothwm_seconds": 4.86668436229229
           },
           "standard_sphere": {
-            "inflated": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.inflated",
-            "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.smoothwm",
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.sphere",
+            "inflated": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.inflated",
+            "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.smoothwm",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.sphere",
             "finish_device": "cpu",
             "averaging_device": "cuda:0",
             "initial_negative_area_pct": 0.004248015820229741,
@@ -7812,11 +7812,11 @@
             "total_seconds_including_io": 105.34950595302507
           },
           "sphere_registration": {
-            "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.sphere",
-            "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.smoothwm",
-            "sulc": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.sulc",
-            "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.sphere.reg",
+            "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.sphere",
+            "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.smoothwm",
+            "sulc": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.sulc",
+            "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.sphere.reg",
             "overlap_device": "cpu",
             "averaging_device": "cuda:0",
             "input_sha256": {
@@ -7828,10 +7828,10 @@
             "sulc_seed_sha256": "4c650cb44f38edf89e444bd10e0007ba89784943f17b571d3dceb5a54afdc92c",
             "output_sha256": "f14aa1e30a42606aca2a966d45dfa1614818f256287520f320c27c9d79385d7b",
             "sulc_pass": {
-              "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.sphere",
-              "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.smoothwm",
-              "sulc": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.sulc",
-              "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+              "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.sphere",
+              "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.smoothwm",
+              "sulc": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.sulc",
+              "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
               "output": "(temporary sulc seed)",
               "rigid_angles": [
                 0.3228859007358551,
@@ -8600,11 +8600,11 @@
               "total_seconds_including_io": 65.68568584416062
             },
             "smoothwm_pass": {
-              "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.sphere",
-              "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.smoothwm",
+              "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.sphere",
+              "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.smoothwm",
               "sulc_seed": "(temporary sulc seed)",
-              "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
-              "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.sphere.reg",
+              "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+              "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.sphere.reg",
               "seed_iteration": 55,
               "overlap_device": "cpu",
               "setup_seconds_including_raw_fit": 5.546009966172278,
@@ -9286,14 +9286,14 @@
             "total_seconds_including_io": 110.69675245927647
           },
           "final_white": {
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.white",
-            "outvol": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/mri/mrisps.white.mgz",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.white",
+            "outvol": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/mri/mrisps.white.mgz",
             "seconds": 170.69091926375404
           },
           "pial": {
             "implementation": "conda-source-cpp",
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.pial.T1",
-            "log": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/scripts/rh.pial.log",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/surf/rh.pial.T1",
+            "log": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1/scripts/rh.pial.log",
             "vertices": 104619,
             "faces": 209234,
             "seconds": 182.16401613177732
@@ -9314,17 +9314,17 @@
           "remesh_seconds": 107.146990026813,
           "intersection_seconds": 0.958862217143178,
           "white_preaparc": {
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.white.preaparc",
-            "stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/autodet.gw.stats.lh.dat",
-            "outvol": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/mri/mrisps.wpa.mgz",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.white.preaparc",
+            "stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/autodet.gw.stats.lh.dat",
+            "outvol": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/mri/mrisps.wpa.mgz",
             "stats_seconds": 3.7052137637510896,
             "place_seconds": 195.22318636719137,
             "smoothwm_seconds": 4.869404261931777
           },
           "standard_sphere": {
-            "inflated": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.inflated",
-            "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.smoothwm",
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.sphere",
+            "inflated": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.inflated",
+            "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.smoothwm",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.sphere",
             "finish_device": "cpu",
             "initial_negative_area_pct": 0.021216798130250222,
             "projection_seconds": 0.39101219503208995,
@@ -11044,11 +11044,11 @@
             "total_seconds_including_io": 241.72253653826192
           },
           "sphere_registration": {
-            "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.sphere",
-            "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.smoothwm",
-            "sulc": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.sulc",
-            "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.sphere.reg",
+            "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.sphere",
+            "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.smoothwm",
+            "sulc": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.sulc",
+            "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.sphere.reg",
             "overlap_device": "cpu",
             "averaging_device": "cuda:0",
             "input_sha256": {
@@ -11060,10 +11060,10 @@
             "sulc_seed_sha256": "95328f5b778aee2b1ad21b9363691a0c856542f309321b24bfe2e0c2d3b57cdb",
             "output_sha256": "b11bb8d82412d6fc4c4cf023e8f87da195de732e913bd8523127e90bb5c88118",
             "sulc_pass": {
-              "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.sphere",
-              "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.smoothwm",
-              "sulc": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.sulc",
-              "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+              "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.sphere",
+              "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.smoothwm",
+              "sulc": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.sulc",
+              "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
               "output": "(temporary sulc seed)",
               "rigid_angles": [
                 0.16580627858638763,
@@ -11818,11 +11818,11 @@
               "total_seconds_including_io": 72.79175394773483
             },
             "smoothwm_pass": {
-              "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.sphere",
-              "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.smoothwm",
+              "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.sphere",
+              "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.smoothwm",
               "sulc_seed": "(temporary sulc seed)",
-              "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
-              "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.sphere.reg",
+              "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+              "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.sphere.reg",
               "seed_iteration": 54,
               "overlap_device": "cpu",
               "setup_seconds_including_raw_fit": 10.460833166260272,
@@ -12552,14 +12552,14 @@
             "total_seconds_including_io": 133.65258684614673
           },
           "final_white": {
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.white",
-            "outvol": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/mri/mrisps.white.mgz",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.white",
+            "outvol": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/mri/mrisps.white.mgz",
             "seconds": 184.71311892010272
           },
           "pial": {
             "implementation": "conda-source-cpp",
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.pial.T1",
-            "log": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/scripts/lh.pial.log",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/lh.pial.T1",
+            "log": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/scripts/lh.pial.log",
             "vertices": 105598,
             "faces": 211192,
             "seconds": 175.69672127626836
@@ -12578,17 +12578,17 @@
           "remesh_seconds": 108.48865330778062,
           "intersection_seconds": 0.899259015917778,
           "white_preaparc": {
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.white.preaparc",
-            "stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/autodet.gw.stats.rh.dat",
-            "outvol": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/mri/mrisps.wpa.mgz",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.white.preaparc",
+            "stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/autodet.gw.stats.rh.dat",
+            "outvol": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/mri/mrisps.wpa.mgz",
             "stats_seconds": 2.513132215011865,
             "place_seconds": 201.3003319860436,
             "smoothwm_seconds": 4.893842265941203
           },
           "standard_sphere": {
-            "inflated": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.inflated",
-            "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.smoothwm",
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.sphere",
+            "inflated": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.inflated",
+            "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.smoothwm",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.sphere",
             "finish_device": "cpu",
             "initial_negative_area_pct": 0.004205577750861519,
             "projection_seconds": 0.029933837242424488,
@@ -14106,11 +14106,11 @@
             "total_seconds_including_io": 175.20151415700093
           },
           "sphere_registration": {
-            "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.sphere",
-            "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.smoothwm",
-            "sulc": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.sulc",
-            "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.sphere.reg",
+            "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.sphere",
+            "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.smoothwm",
+            "sulc": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.sulc",
+            "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.sphere.reg",
             "overlap_device": "cpu",
             "averaging_device": "cuda:0",
             "input_sha256": {
@@ -14122,10 +14122,10 @@
             "sulc_seed_sha256": "0d9a6aa3cab6ad1c07f9f01463e904f91b5902e94d4466efd5001c2c3f59042f",
             "output_sha256": "791328deae624d9fc2a554d950ced4afccc274dc7084f46fcc44bd01427635be",
             "sulc_pass": {
-              "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.sphere",
-              "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.smoothwm",
-              "sulc": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.sulc",
-              "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+              "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.sphere",
+              "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.smoothwm",
+              "sulc": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.sulc",
+              "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
               "output": "(temporary sulc seed)",
               "rigid_angles": [
                 0.3228859007358551,
@@ -14894,11 +14894,11 @@
               "total_seconds_including_io": 61.43239524401724
             },
             "smoothwm_pass": {
-              "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.sphere",
-              "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.smoothwm",
+              "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.sphere",
+              "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.smoothwm",
               "sulc_seed": "(temporary sulc seed)",
-              "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
-              "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.sphere.reg",
+              "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+              "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.sphere.reg",
               "seed_iteration": 55,
               "overlap_device": "cpu",
               "setup_seconds_including_raw_fit": 5.747879368253052,
@@ -15723,14 +15723,14 @@
             "total_seconds_including_io": 113.82463973714039
           },
           "final_white": {
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.white",
-            "outvol": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/mri/mrisps.white.mgz",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.white",
+            "outvol": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/mri/mrisps.white.mgz",
             "seconds": 163.08325461577624
           },
           "pial": {
             "implementation": "conda-source-cpp",
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.pial.T1",
-            "log": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/scripts/rh.pial.log",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/surf/rh.pial.T1",
+            "log": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1/scripts/rh.pial.log",
             "vertices": 104619,
             "faces": 209234,
             "seconds": 172.50959326606244
@@ -15777,8 +15777,8 @@
           "execution_status": "complete"
         },
         "strict_vs_baseline": {
-          "reference": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1",
-          "candidate": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1",
+          "reference": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1",
+          "candidate": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1",
           "comparator_sha256": "ea8e7faf842c8f4039a50bc3097eb2bd77752b84355f1f76134a6bccdd3a31ba",
           "checked": 138,
           "passed": 23,
@@ -18573,8 +18573,8 @@
         },
         "region_vs_baseline": {
           "code_commit": "61926c7dceae2f9097fa296e306cf1efa0a09191",
-          "reference": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1",
-          "candidate": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1",
+          "reference": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1",
+          "candidate": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1",
           "comparator_sha256": "ff5778ea6f515af70d8dc4ec7343b2eb75fb3826c94b217725d147601fd7d770",
           "input_sha256": {
             "stats/lh.aparc.stats": {
@@ -21171,8 +21171,8 @@
         },
         "dice_vs_baseline": {
           "code_commit": "61926c7dceae2f9097fa296e306cf1efa0a09191",
-          "reference": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1",
-          "candidate": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1",
+          "reference": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1",
+          "candidate": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1",
           "files": {
             "aseg.mgz": {
               "different_voxels": 4923,
@@ -25542,8 +25542,8 @@
           "equivalence_status": "not_assessed; no prospective ROI gates supplied"
         },
         "surface_vs_baseline": {
-          "reference": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1",
-          "candidate": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1",
+          "reference": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1",
+          "candidate": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1",
           "unit": "surface RAS mm",
           "stages": {
             "lh": {
@@ -25995,8 +25995,8 @@
           "comparator_sha256": "fc29bbdb8f236c9c0b5bfcc7dfcb04359047d31e9317cdb63f186795c7e96a16"
         },
         "strict_vs_official": {
-          "reference": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official",
-          "candidate": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1",
+          "reference": "/data/workspaces/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official",
+          "candidate": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1",
           "comparator_sha256": "ea8e7faf842c8f4039a50bc3097eb2bd77752b84355f1f76134a6bccdd3a31ba",
           "checked": 138,
           "passed": 4,
@@ -28754,8 +28754,8 @@
         },
         "region_vs_official": {
           "code_commit": "61926c7dceae2f9097fa296e306cf1efa0a09191",
-          "reference": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official",
-          "candidate": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1",
+          "reference": "/data/workspaces/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official",
+          "candidate": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1",
           "comparator_sha256": "ff5778ea6f515af70d8dc4ec7343b2eb75fb3826c94b217725d147601fd7d770",
           "input_sha256": {
             "stats/lh.aparc.stats": {
@@ -31352,8 +31352,8 @@
         },
         "dice_vs_official": {
           "code_commit": "61926c7dceae2f9097fa296e306cf1efa0a09191",
-          "reference": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official",
-          "candidate": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1",
+          "reference": "/data/workspaces/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official",
+          "candidate": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1",
           "files": {
             "aseg.mgz": {
               "different_voxels": 22055,
@@ -35723,8 +35723,8 @@
           "equivalence_status": "not_assessed; no prospective ROI gates supplied"
         },
         "surface_vs_official": {
-          "reference": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official",
-          "candidate": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1",
+          "reference": "/data/workspaces/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official",
+          "candidate": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1",
           "unit": "surface RAS mm",
           "stages": {
             "lh": {
@@ -36290,9 +36290,9 @@
       },
       "quality": {
         "quality": {
-          "subject": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1",
+          "subject": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_candidate_retry1",
           "code_version": "61926c7dceae2f9097fa296e306cf1efa0a09191",
-          "host": "gpucw1",
+          "host": "accelerator-a-1",
           "threads": 4,
           "device": "cpu",
           "cuda_initialized": false,
@@ -36317,9 +36317,9 @@
             "nibabel": "5.4.2"
           },
           "source_paths": {
-            "fnit.recon_all.compare_subject": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/compare_subject.py",
-            "fnit.recon_all.mris_register_nonlinear": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/mris_register_nonlinear.py",
-            "fnit.recon_all.place_surface_collision": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/place_surface_collision.py"
+            "fnit.recon_all.compare_subject": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/compare_subject.py",
+            "fnit.recon_all.mris_register_nonlinear": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/mris_register_nonlinear.py",
+            "fnit.recon_all.place_surface_collision": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/place_surface_collision.py"
           },
           "source_sha256": {
             "fnit.recon_all.compare_subject": "7381d28a46b5c07efbb4630cdcd26245c02aa24ea613fbac25e3b69dab2e7921",
@@ -51051,9 +51051,9 @@
           "cuda_initialized_after": false
         },
         "quality_baseline": {
-          "subject": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1",
+          "subject": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/hotspots_20261001/full_sub01_hotspots_c248520_retry1",
           "code_version": "c24852054f3321c1142b1ae88fa3d2bf68329bb3",
-          "host": "gpucw1",
+          "host": "accelerator-a-1",
           "threads": 4,
           "device": "cpu",
           "cuda_initialized": false,
@@ -51078,9 +51078,9 @@
             "nibabel": "5.4.2"
           },
           "source_paths": {
-            "fnit.recon_all.compare_subject": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/compare_subject.py",
-            "fnit.recon_all.mris_register_nonlinear": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/mris_register_nonlinear.py",
-            "fnit.recon_all.place_surface_collision": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/place_surface_collision.py"
+            "fnit.recon_all.compare_subject": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/compare_subject.py",
+            "fnit.recon_all.mris_register_nonlinear": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/mris_register_nonlinear.py",
+            "fnit.recon_all.place_surface_collision": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/place_surface_collision.py"
           },
           "source_sha256": {
             "fnit.recon_all.compare_subject": "7381d28a46b5c07efbb4630cdcd26245c02aa24ea613fbac25e3b69dab2e7921",
@@ -64667,9 +64667,9 @@
           "cuda_initialized_after": false
         },
         "quality_official": {
-          "subject": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official",
+          "subject": "/data/workspaces/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official",
           "code_version": "FreeSurfer 8.2.0 archived full reference",
-          "host": "gpucw1",
+          "host": "accelerator-a-1",
           "threads": 4,
           "device": "cpu",
           "cuda_initialized": false,
@@ -64694,9 +64694,9 @@
             "nibabel": "5.4.2"
           },
           "source_paths": {
-            "fnit.recon_all.compare_subject": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/compare_subject.py",
-            "fnit.recon_all.mris_register_nonlinear": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/mris_register_nonlinear.py",
-            "fnit.recon_all.place_surface_collision": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/place_surface_collision.py"
+            "fnit.recon_all.compare_subject": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/compare_subject.py",
+            "fnit.recon_all.mris_register_nonlinear": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/mris_register_nonlinear.py",
+            "fnit.recon_all.place_surface_collision": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/place_surface_collision.py"
           },
           "source_sha256": {
             "fnit.recon_all.compare_subject": "7381d28a46b5c07efbb4630cdcd26245c02aa24ea613fbac25e3b69dab2e7921",
@@ -90259,8 +90259,8 @@
       },
       "candidate_commit": "61926c7dceae2f9097fa296e306cf1efa0a09191",
       "candidate_archive_sha256": "6d231caff2f394b5f40eaf4119bcbc1a45e42a7387c90436c6ef8114ba9fc705",
-      "input": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/examples/data/sub-02_T1w.nii.gz",
-      "host": "gpucw1",
+      "input": "/data/workspaces/freesurfer_synth/examples/data/sub-02_T1w.nii.gz",
+      "host": "accelerator-a-1",
       "gpu_uuid": "GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba",
       "invocation": "cli",
       "baseline_reused": false,
@@ -90276,22 +90276,22 @@
       "timing_scope": "same monitor command boundary; imports, validation, models, transfer and IO included; single observation, not stable throughput",
       "baseline_monitor": {
         "command": [
-          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
           "-m",
           "fnit.recon_all.native_free",
-          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/examples/data/sub-02_T1w.nii.gz",
-          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1",
+          "/data/workspaces/freesurfer_synth/examples/data/sub-02_T1w.nii.gz",
+          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1",
           "--weights-dir",
-          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/weights",
+          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/weights",
           "--assets-dir",
-          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets",
+          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets",
           "--device",
           "cuda:0",
           "--threads",
           "4",
           "--profile-stages",
           "--native-bin-dir",
-          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin",
+          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin",
           "--cuda-allocator-cache",
           "disabled"
         ],
@@ -90311,22 +90311,22 @@
       },
       "candidate_monitor": {
         "command": [
-          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
           "-m",
           "fnit.recon_all.native_free",
-          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/examples/data/sub-02_T1w.nii.gz",
-          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2",
+          "/data/workspaces/freesurfer_synth/examples/data/sub-02_T1w.nii.gz",
+          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2",
           "--weights-dir",
-          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/weights",
+          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/weights",
           "--assets-dir",
-          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets",
+          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets",
           "--device",
           "cuda:0",
           "--threads",
           "4",
           "--profile-stages",
           "--native-bin-dir",
-          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin",
+          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin",
           "--cuda-allocator-cache",
           "disabled"
         ],
@@ -90424,7 +90424,7 @@
         },
         "EntoWM_actual_forwards": [
           {
-            "model": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/weights/entowm.fsm31.t1.nstd00-30.nstd21-108.h5",
+            "model": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/weights/entowm.fsm31.t1.nstd00-30.nstd21-108.h5",
             "device": "cuda:0",
             "input_dtype": "torch.float32",
             "model_devices": [
@@ -93020,17 +93020,17 @@
           "remesh_seconds": 146.05907422397286,
           "intersection_seconds": 1.2559149810113013,
           "white_preaparc": {
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.white.preaparc",
-            "stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/autodet.gw.stats.lh.dat",
-            "outvol": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/mri/mrisps.wpa.mgz",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.white.preaparc",
+            "stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/autodet.gw.stats.lh.dat",
+            "outvol": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/mri/mrisps.wpa.mgz",
             "stats_seconds": 3.9555696342140436,
             "place_seconds": 249.20359393022954,
             "smoothwm_seconds": 5.700617420021445
           },
           "standard_sphere": {
-            "inflated": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.inflated",
-            "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.smoothwm",
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.sphere",
+            "inflated": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.inflated",
+            "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.smoothwm",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.sphere",
             "finish_device": "cpu",
             "averaging_device": "cuda:0",
             "initial_negative_area_pct": 0.00014194248940855805,
@@ -94196,11 +94196,11 @@
             "total_seconds_including_io": 143.33727758424357
           },
           "sphere_registration": {
-            "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.sphere",
-            "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.smoothwm",
-            "sulc": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.sulc",
-            "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.sphere.reg",
+            "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.sphere",
+            "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.smoothwm",
+            "sulc": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.sulc",
+            "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.sphere.reg",
             "overlap_device": "cpu",
             "averaging_device": "cuda:0",
             "input_sha256": {
@@ -94212,10 +94212,10 @@
             "sulc_seed_sha256": "94eeb8601ec63653dafd622dfbcb6a440adac1acafeb2273c42e8afeafeb66cc",
             "output_sha256": "3667243be944b91f9f9e601a390bf305926f64485b95e3e1cea14844dc84d922",
             "sulc_pass": {
-              "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.sphere",
-              "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.smoothwm",
-              "sulc": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.sulc",
-              "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+              "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.sphere",
+              "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.smoothwm",
+              "sulc": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.sulc",
+              "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
               "output": "(temporary sulc seed)",
               "rigid_angles": [
                 0.05235987901687622,
@@ -94984,11 +94984,11 @@
               "total_seconds_including_io": 80.11465229373425
             },
             "smoothwm_pass": {
-              "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.sphere",
-              "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.smoothwm",
+              "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.sphere",
+              "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.smoothwm",
               "sulc_seed": "(temporary sulc seed)",
-              "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
-              "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.sphere.reg",
+              "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+              "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.sphere.reg",
               "seed_iteration": 55,
               "overlap_device": "cpu",
               "setup_seconds_including_raw_fit": 11.932056467980146,
@@ -95686,14 +95686,14 @@
             "total_seconds_including_io": 145.22682284098119
           },
           "final_white": {
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.white",
-            "outvol": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/mri/mrisps.white.mgz",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.white",
+            "outvol": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/mri/mrisps.white.mgz",
             "seconds": 203.6418695678003
           },
           "pial": {
             "implementation": "conda-source-cpp",
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.pial.T1",
-            "log": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/scripts/lh.pial.log",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/lh.pial.T1",
+            "log": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/scripts/lh.pial.log",
             "vertices": 119363,
             "faces": 238722,
             "seconds": 229.2360532968305
@@ -95712,17 +95712,17 @@
           "remesh_seconds": 141.71471773600206,
           "intersection_seconds": 1.2656024848110974,
           "white_preaparc": {
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.white.preaparc",
-            "stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/autodet.gw.stats.rh.dat",
-            "outvol": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/mri/mrisps.wpa.mgz",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.white.preaparc",
+            "stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/autodet.gw.stats.rh.dat",
+            "outvol": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/mri/mrisps.wpa.mgz",
             "stats_seconds": 2.6096303649246693,
             "place_seconds": 223.59024883294478,
             "smoothwm_seconds": 5.582260485272855
           },
           "standard_sphere": {
-            "inflated": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.inflated",
-            "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.smoothwm",
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.sphere",
+            "inflated": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.inflated",
+            "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.smoothwm",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.sphere",
             "finish_device": "cpu",
             "averaging_device": "cuda:0",
             "initial_negative_area_pct": 1.3134597308857364e-05,
@@ -96706,11 +96706,11 @@
             "total_seconds_including_io": 122.07309379708022
           },
           "sphere_registration": {
-            "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.sphere",
-            "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.smoothwm",
-            "sulc": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.sulc",
-            "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.sphere.reg",
+            "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.sphere",
+            "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.smoothwm",
+            "sulc": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.sulc",
+            "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.sphere.reg",
             "overlap_device": "cpu",
             "averaging_device": "cuda:0",
             "input_sha256": {
@@ -96722,10 +96722,10 @@
             "sulc_seed_sha256": "0e2ab5f322b05958a7fd1babcc89ab4ff0a2a50853bf3b158a7adeba6c778243",
             "output_sha256": "5be7cca5ac5c2024f5c8e5487c3bfc9246c4f37bcdf1b86b7a86a258d0d27707",
             "sulc_pass": {
-              "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.sphere",
-              "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.smoothwm",
-              "sulc": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.sulc",
-              "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+              "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.sphere",
+              "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.smoothwm",
+              "sulc": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.sulc",
+              "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
               "output": "(temporary sulc seed)",
               "rigid_angles": [
                 0.16580627858638763,
@@ -97452,11 +97452,11 @@
               "total_seconds_including_io": 73.32795326085761
             },
             "smoothwm_pass": {
-              "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.sphere",
-              "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.smoothwm",
+              "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.sphere",
+              "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.smoothwm",
               "sulc_seed": "(temporary sulc seed)",
-              "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
-              "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.sphere.reg",
+              "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+              "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.sphere.reg",
               "seed_iteration": 52,
               "overlap_device": "cpu",
               "setup_seconds_including_raw_fit": 6.894220223184675,
@@ -98173,14 +98173,14 @@
             "total_seconds_including_io": 133.90354062383994
           },
           "final_white": {
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.white",
-            "outvol": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/mri/mrisps.white.mgz",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.white",
+            "outvol": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/mri/mrisps.white.mgz",
             "seconds": 231.4812862770632
           },
           "pial": {
             "implementation": "conda-source-cpp",
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.pial.T1",
-            "log": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/scripts/rh.pial.log",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/surf/rh.pial.T1",
+            "log": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2/scripts/rh.pial.log",
             "vertices": 118303,
             "faces": 236602,
             "seconds": 197.83903519576415
@@ -98201,17 +98201,17 @@
           "remesh_seconds": 135.36240968108177,
           "intersection_seconds": 1.2647021529264748,
           "white_preaparc": {
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.white.preaparc",
-            "stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/autodet.gw.stats.lh.dat",
-            "outvol": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/mri/mrisps.wpa.mgz",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.white.preaparc",
+            "stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/autodet.gw.stats.lh.dat",
+            "outvol": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/mri/mrisps.wpa.mgz",
             "stats_seconds": 3.9704848187975585,
             "place_seconds": 288.72962499409914,
             "smoothwm_seconds": 6.015543236862868
           },
           "standard_sphere": {
-            "inflated": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.inflated",
-            "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.smoothwm",
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.sphere",
+            "inflated": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.inflated",
+            "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.smoothwm",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.sphere",
             "finish_device": "cpu",
             "initial_negative_area_pct": 0.00014194248940855805,
             "projection_seconds": 0.46730537386611104,
@@ -99375,11 +99375,11 @@
             "total_seconds_including_io": 183.73536185687408
           },
           "sphere_registration": {
-            "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.sphere",
-            "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.smoothwm",
-            "sulc": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.sulc",
-            "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.sphere.reg",
+            "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.sphere",
+            "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.smoothwm",
+            "sulc": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.sulc",
+            "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.sphere.reg",
             "overlap_device": "cpu",
             "averaging_device": "cuda:0",
             "input_sha256": {
@@ -99391,10 +99391,10 @@
             "sulc_seed_sha256": "3e37f3bd881b6dd60c98b6b4458ff75662d5529329eac8a3e81cc3c73c5da2ea",
             "output_sha256": "e8c05e1ecc436cc0893da3b8f017c4682abe841cd301f210e645b3317252e07c",
             "sulc_pass": {
-              "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.sphere",
-              "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.smoothwm",
-              "sulc": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.sulc",
-              "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+              "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.sphere",
+              "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.smoothwm",
+              "sulc": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.sulc",
+              "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
               "output": "(temporary sulc seed)",
               "rigid_angles": [
                 0.05235987901687622,
@@ -100163,11 +100163,11 @@
               "total_seconds_including_io": 78.34310982422903
             },
             "smoothwm_pass": {
-              "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.sphere",
-              "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.smoothwm",
+              "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.sphere",
+              "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.smoothwm",
               "sulc_seed": "(temporary sulc seed)",
-              "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
-              "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.sphere.reg",
+              "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+              "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.sphere.reg",
               "seed_iteration": 55,
               "overlap_device": "cpu",
               "setup_seconds_including_raw_fit": 12.349709414876997,
@@ -100865,14 +100865,14 @@
             "total_seconds_including_io": 144.3631403162144
           },
           "final_white": {
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.white",
-            "outvol": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/mri/mrisps.white.mgz",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.white",
+            "outvol": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/mri/mrisps.white.mgz",
             "seconds": 211.28404324688017
           },
           "pial": {
             "implementation": "conda-source-cpp",
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.pial.T1",
-            "log": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/scripts/lh.pial.log",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/lh.pial.T1",
+            "log": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/scripts/lh.pial.log",
             "vertices": 119363,
             "faces": 238722,
             "seconds": 218.58159174304456
@@ -100891,17 +100891,17 @@
           "remesh_seconds": 138.78426333563402,
           "intersection_seconds": 1.3286952120251954,
           "white_preaparc": {
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.white.preaparc",
-            "stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/autodet.gw.stats.rh.dat",
-            "outvol": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/mri/mrisps.wpa.mgz",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.white.preaparc",
+            "stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/autodet.gw.stats.rh.dat",
+            "outvol": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/mri/mrisps.wpa.mgz",
             "stats_seconds": 2.5933533278293908,
             "place_seconds": 222.31225369730964,
             "smoothwm_seconds": 5.886018828023225
           },
           "standard_sphere": {
-            "inflated": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.inflated",
-            "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.smoothwm",
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.sphere",
+            "inflated": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.inflated",
+            "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.smoothwm",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.sphere",
             "finish_device": "cpu",
             "initial_negative_area_pct": 1.3134597308857364e-05,
             "projection_seconds": 0.052999611012637615,
@@ -101883,11 +101883,11 @@
             "total_seconds_including_io": 162.54078460205346
           },
           "sphere_registration": {
-            "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.sphere",
-            "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.smoothwm",
-            "sulc": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.sulc",
-            "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.sphere.reg",
+            "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.sphere",
+            "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.smoothwm",
+            "sulc": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.sulc",
+            "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.sphere.reg",
             "overlap_device": "cpu",
             "averaging_device": "cuda:0",
             "input_sha256": {
@@ -101899,10 +101899,10 @@
             "sulc_seed_sha256": "bac2b48ec71af49d63a23b4a66d572e1fd24d4be5bb07f28ab52a675f4b470c2",
             "output_sha256": "1b93230ce891b3818e93b84b2aefd8f4eb1cf40532728ec1578214c4506039c0",
             "sulc_pass": {
-              "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.sphere",
-              "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.smoothwm",
-              "sulc": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.sulc",
-              "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+              "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.sphere",
+              "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.smoothwm",
+              "sulc": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.sulc",
+              "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
               "output": "(temporary sulc seed)",
               "rigid_angles": [
                 0.16580627858638763,
@@ -102629,11 +102629,11 @@
               "total_seconds_including_io": 71.40826664213091
             },
             "smoothwm_pass": {
-              "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.sphere",
-              "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.smoothwm",
+              "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.sphere",
+              "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.smoothwm",
               "sulc_seed": "(temporary sulc seed)",
-              "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
-              "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.sphere.reg",
+              "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+              "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.sphere.reg",
               "seed_iteration": 52,
               "overlap_device": "cpu",
               "setup_seconds_including_raw_fit": 7.740272758062929,
@@ -103350,14 +103350,14 @@
             "total_seconds_including_io": 134.00906436610967
           },
           "final_white": {
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.white",
-            "outvol": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/mri/mrisps.white.mgz",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.white",
+            "outvol": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/mri/mrisps.white.mgz",
             "seconds": 219.74229827383533
           },
           "pial": {
             "implementation": "conda-source-cpp",
-            "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.pial.T1",
-            "log": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/scripts/rh.pial.log",
+            "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/surf/rh.pial.T1",
+            "log": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1/scripts/rh.pial.log",
             "vertices": 118303,
             "faces": 236602,
             "seconds": 206.89721732819453
@@ -103404,8 +103404,8 @@
           "execution_status": "complete"
         },
         "strict_vs_baseline": {
-          "reference": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1",
-          "candidate": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2",
+          "reference": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1",
+          "candidate": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2",
           "comparator_sha256": "ea8e7faf842c8f4039a50bc3097eb2bd77752b84355f1f76134a6bccdd3a31ba",
           "checked": 138,
           "passed": 84,
@@ -106061,8 +106061,8 @@
         },
         "region_vs_baseline": {
           "code_commit": "61926c7dceae2f9097fa296e306cf1efa0a09191",
-          "reference": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1",
-          "candidate": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2",
+          "reference": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1",
+          "candidate": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2",
           "comparator_sha256": "ff5778ea6f515af70d8dc4ec7343b2eb75fb3826c94b217725d147601fd7d770",
           "input_sha256": {
             "stats/lh.aparc.stats": {
@@ -108658,8 +108658,8 @@
         },
         "dice_vs_baseline": {
           "code_commit": "61926c7dceae2f9097fa296e306cf1efa0a09191",
-          "reference": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1",
-          "candidate": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2",
+          "reference": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1",
+          "candidate": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2",
           "files": {
             "aseg.mgz": {
               "different_voxels": 1493,
@@ -113057,8 +113057,8 @@
           "equivalence_status": "not_assessed; no prospective ROI gates supplied"
         },
         "surface_vs_baseline": {
-          "reference": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1",
-          "candidate": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2",
+          "reference": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1",
+          "candidate": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2",
           "unit": "surface RAS mm",
           "stages": {
             "lh": {
@@ -113510,8 +113510,8 @@
           "comparator_sha256": "fc29bbdb8f236c9c0b5bfcc7dfcb04359047d31e9317cdb63f186795c7e96a16"
         },
         "strict_vs_official": {
-          "reference": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official",
-          "candidate": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2",
+          "reference": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official",
+          "candidate": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2",
           "comparator_sha256": "ea8e7faf842c8f4039a50bc3097eb2bd77752b84355f1f76134a6bccdd3a31ba",
           "checked": 138,
           "passed": 2,
@@ -116277,8 +116277,8 @@
         },
         "region_vs_official": {
           "code_commit": "61926c7dceae2f9097fa296e306cf1efa0a09191",
-          "reference": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official",
-          "candidate": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2",
+          "reference": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official",
+          "candidate": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2",
           "comparator_sha256": "ff5778ea6f515af70d8dc4ec7343b2eb75fb3826c94b217725d147601fd7d770",
           "input_sha256": {
             "stats/lh.aparc.stats": {
@@ -118874,8 +118874,8 @@
         },
         "dice_vs_official": {
           "code_commit": "61926c7dceae2f9097fa296e306cf1efa0a09191",
-          "reference": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official",
-          "candidate": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2",
+          "reference": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official",
+          "candidate": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2",
           "files": {
             "aseg.mgz": {
               "different_voxels": 14507,
@@ -123273,8 +123273,8 @@
           "equivalence_status": "not_assessed; no prospective ROI gates supplied"
         },
         "surface_vs_official": {
-          "reference": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official",
-          "candidate": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2",
+          "reference": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official",
+          "candidate": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2",
           "unit": "surface RAS mm",
           "stages": {
             "lh": {
@@ -123840,9 +123840,9 @@
       },
       "quality": {
         "quality": {
-          "subject": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2",
+          "subject": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_candidate_retry2",
           "code_version": "61926c7dceae2f9097fa296e306cf1efa0a09191",
-          "host": "gpucw1",
+          "host": "accelerator-a-1",
           "threads": 4,
           "device": "cpu",
           "cuda_initialized": false,
@@ -123867,9 +123867,9 @@
             "nibabel": "5.4.2"
           },
           "source_paths": {
-            "fnit.recon_all.compare_subject": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/compare_subject.py",
-            "fnit.recon_all.mris_register_nonlinear": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/mris_register_nonlinear.py",
-            "fnit.recon_all.place_surface_collision": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/place_surface_collision.py"
+            "fnit.recon_all.compare_subject": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/compare_subject.py",
+            "fnit.recon_all.mris_register_nonlinear": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/mris_register_nonlinear.py",
+            "fnit.recon_all.place_surface_collision": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/place_surface_collision.py"
           },
           "source_sha256": {
             "fnit.recon_all.compare_subject": "7381d28a46b5c07efbb4630cdcd26245c02aa24ea613fbac25e3b69dab2e7921",
@@ -130095,9 +130095,9 @@
           "cuda_initialized_after": false
         },
         "quality_baseline": {
-          "subject": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1",
+          "subject": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub02_baseline_retry1",
           "code_version": "0c8ab327c1a4d10eaf6c8066a16d050e09e30c90",
-          "host": "gpucw1",
+          "host": "accelerator-a-1",
           "threads": 4,
           "device": "cpu",
           "cuda_initialized": false,
@@ -130122,9 +130122,9 @@
             "nibabel": "5.4.2"
           },
           "source_paths": {
-            "fnit.recon_all.compare_subject": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/compare_subject.py",
-            "fnit.recon_all.mris_register_nonlinear": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/mris_register_nonlinear.py",
-            "fnit.recon_all.place_surface_collision": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/place_surface_collision.py"
+            "fnit.recon_all.compare_subject": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/compare_subject.py",
+            "fnit.recon_all.mris_register_nonlinear": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/mris_register_nonlinear.py",
+            "fnit.recon_all.place_surface_collision": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/place_surface_collision.py"
           },
           "source_sha256": {
             "fnit.recon_all.compare_subject": "7381d28a46b5c07efbb4630cdcd26245c02aa24ea613fbac25e3b69dab2e7921",
@@ -138897,9 +138897,9 @@
           "cuda_initialized_after": false
         },
         "quality_official": {
-          "subject": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official",
+          "subject": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official",
           "code_version": "FreeSurfer 8.2.0 archived full reference",
-          "host": "gpucw1",
+          "host": "accelerator-a-1",
           "threads": 4,
           "device": "cpu",
           "cuda_initialized": false,
@@ -138924,9 +138924,9 @@
             "nibabel": "5.4.2"
           },
           "source_paths": {
-            "fnit.recon_all.compare_subject": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/compare_subject.py",
-            "fnit.recon_all.mris_register_nonlinear": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/mris_register_nonlinear.py",
-            "fnit.recon_all.place_surface_collision": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/place_surface_collision.py"
+            "fnit.recon_all.compare_subject": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/compare_subject.py",
+            "fnit.recon_all.mris_register_nonlinear": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/mris_register_nonlinear.py",
+            "fnit.recon_all.place_surface_collision": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate5b/src/fnit/recon_all/place_surface_collision.py"
           },
           "source_sha256": {
             "fnit.recon_all.compare_subject": "7381d28a46b5c07efbb4630cdcd26245c02aa24ea613fbac25e3b69dab2e7921",

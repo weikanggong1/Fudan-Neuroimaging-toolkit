@@ -64,7 +64,7 @@ for file in LICENSE.txt CMakeLists.txt utils/CMakeLists.txt mri_em_register/CMak
 done
 itk_config=$(find "$CONDA_PREFIX/lib/cmake" -maxdepth 3 -name ITKConfig.cmake -print -quit)
 test -n "$itk_config" || { echo "Conda ITKConfig.cmake not found" >&2; exit 2; }
-# gpucw1 runs glibc 2.17; a 2.28 Conda sysroot links binaries that cannot start there.
+# accelerator-a-1 runs glibc 2.17; a 2.28 Conda sysroot links binaries that cannot start there.
 if [[ "$(getconf GNU_LIBC_VERSION)" == "glibc 2.17" ]]; then
   sysroot_libc="$CONDA_PREFIX/x86_64-conda-linux-gnu/sysroot/lib64/libc.so.6"
   if [[ ! -L "$sysroot_libc" || "$(readlink "$sysroot_libc")" != "libc-2.17.so" ]]; then
@@ -154,7 +154,7 @@ for target in "${targets[@]}"; do
   test -n "$binary" || { echo "missing built binary: $target" >&2; exit 1; }
   install -m 755 "$binary" "$output_dir/bin/$target"
   ldd "$output_dir/bin/$target" > "$output_dir/$target.ldd"
-  if grep -E '/public/software/apps/Freesurfer|/tmp/fs_itk_build' "$output_dir/$target.ldd"; then
+  if grep -E '/opt/reference/Freesurfer|/tmp/fs_itk_build' "$output_dir/$target.ldd"; then
     echo "$target links an external FreeSurfer/ITK installation" >&2
     exit 1
   fi
@@ -213,7 +213,7 @@ PYTHON
 install -m 755 "$output_dir/placement-white-fast-build/mris_place_surface_fnit_hotspot" \
   "$output_dir/bin/mris_place_surface_white_fast"
 ldd "$output_dir/bin/mris_place_surface_white_fast" > "$output_dir/mris_place_surface_white_fast.ldd"
-if grep -E 'not found|/public/software/apps/Freesurfer|/tmp/fs_itk_build' "$output_dir/mris_place_surface_white_fast.ldd"; then
+if grep -E 'not found|/opt/reference/Freesurfer|/tmp/fs_itk_build' "$output_dir/mris_place_surface_white_fast.ldd"; then
   echo "white placement variant has an unavailable or external dependency" >&2
   exit 1
 fi
@@ -226,7 +226,7 @@ fi
 install -m 755 "$output_dir/topology-fnit-build/mris_fix_topology_fnit" \
   "$output_dir/bin/mris_fix_topology_fnit"
 ldd "$output_dir/bin/mris_fix_topology_fnit" > "$output_dir/mris_fix_topology_fnit.ldd"
-if grep -E '/public/software/apps/Freesurfer|/tmp/fs_itk_build' "$output_dir/mris_fix_topology_fnit.ldd"; then
+if grep -E '/opt/reference/Freesurfer|/tmp/fs_itk_build' "$output_dir/mris_fix_topology_fnit.ldd"; then
   echo "patched topology binary links an external FreeSurfer/ITK installation" >&2
   exit 1
 fi

@@ -15,8 +15,8 @@
 ## 可复现 CPU 命令
 
 ```bash
-FNIT_ROOT=/cwStorage/home/gongwk/Notebook_code/FNIT
-FNIT_PYTHON=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
+FNIT_ROOT=/data/fnit
+FNIT_PYTHON=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
 CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 \
   "$FNIT_PYTHON" "$FNIT_ROOT/workspaces/recon_accuracy_20261003/precision_candidate_3a_ten_case_queue_v1/build_precision_ten_case_queue_v2.py" \
   --output "$FNIT_ROOT/runs/recon_accuracy_20261003/precision_candidate_3a_ten_case_queue_v1"

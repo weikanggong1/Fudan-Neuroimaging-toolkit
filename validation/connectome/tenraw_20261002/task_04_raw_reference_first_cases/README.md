@@ -17,7 +17,7 @@
 
 各例均 198 条命令全部 exit0，[八例组件汇总](eight_case_component_summary.json) 保存原审计与完成 manifest 的 SHA。时间仅为官方五轮 tracking/downstream，CPU EDDY、FS、建模等分别记录；不是全 raw 冷调用 pipeline 总时间。
 
-新的[八例来源快照](eight_case_source_handoff_snapshot.json) 在 nodecw10 只读验证八例各 372 个实际文件，4.069 s；原六例 manifest SHA 未变。此前[六例快照](explicit_case_source_handoff_snapshot.json) 原样保留。来源表直接指向旧九例的真实原 producer/产物；CON11 仅 `pending_configuration`。14 项本地和 14 项实际 node CPU 来源协议测试通过，测试不作为科学 benchmark。工具与冻结配置详见 [逐病例交接说明](../../../../tools/reference/benchmark_connectome_raw_official.md#逐病例新来源交接)。所有 cross 与 FNIT 自身重复仍为 `not_assessed`，等待总控交付最新正式 FNIT 输出。
+新的[八例来源快照](eight_case_source_handoff_snapshot.json) 在 compute-a-10 只读验证八例各 372 个实际文件，4.069 s；原六例 manifest SHA 未变。此前[六例快照](explicit_case_source_handoff_snapshot.json) 原样保留。来源表直接指向旧九例的真实原 producer/产物；CON11 仅 `pending_configuration`。14 项本地和 14 项实际 node CPU 来源协议测试通过，测试不作为科学 benchmark。工具与冻结配置详见 [逐病例交接说明](../../../../tools/reference/benchmark_connectome_raw_official.md#逐病例新来源交接)。所有 cross 与 FNIT 自身重复仍为 `not_assessed`，等待总控交付最新正式 FNIT 输出。
 
 新增实物：[CON08 原样审计](sub-CON08_official_repeat_audit.json)、[CON09 原样审计](sub-CON09_official_repeat_audit.json)。CON09 的 `aparc.a2009s+tian-s1` 有 166 个节点，CON08 为 164；按各例实际 `nodes.tsv`，不跨病例套用同一维度。
 
@@ -36,7 +36,7 @@
 | CON01 | 14554 / 14350 / 14434 / 14559 / 14573 | 65.40–66.27 | 11.99–12.04 | 427.83 | 2550.45 |
 | CON03 | 11997 / 12038 / 11937 / 12274 / 12099 | 62.87–63.88 | 10.59–10.68 | 406.84 | 2550.93 |
 
-追踪在 nodecw10 固定 `-nthreads 0`，下游 8 线程。两组同时运行，时间包含这次实际服务器负载。worker wall 是五轮追踪至矩阵、读回和输出校验的组件时间；EDDY 是此前 gpucw1 上官方 `eddy_cpu` 的单独命令时间。recon-all、TOPUP、解剖与 FOD 时间在各自 producer 报告中，不能把这里的组件时间当作全 raw pipeline 时间。
+追踪在 compute-a-10 固定 `-nthreads 0`，下游 8 线程。两组同时运行，时间包含这次实际服务器负载。worker wall 是五轮追踪至矩阵、读回和输出校验的组件时间；EDDY 是此前 accelerator-a-1 上官方 `eddy_cpu` 的单独命令时间。recon-all、TOPUP、解剖与 FOD 时间在各自 producer 报告中，不能把这里的组件时间当作全 raw pipeline 时间。
 
 ## 2. 已验证什么
 

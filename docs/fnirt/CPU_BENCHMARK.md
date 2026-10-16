@@ -8,7 +8,7 @@
 每例保存 `cout` 系数、`iout` 重采样图和 `jout` 非线性 Jacobian；可另存包含 affine 的完整 pull Jacobian。
 影像与输出保持 float32，既有优化器系数与法方程保持 float64。
 
-历史配对测试在 nodecw10 使用相同 CPU 亲和性和 1/8 线程预算。新采样与 SCG 候选 v27 改在 nodecw8 做完整输出检查及新的官方配对；两节点的时间分别记录，不能合并成同一配对。最新功能覆盖各记录一次完整观察，明确标 `single_observation`；旧源码重复协议及已完成 clock 保留版本来源，不用作最新源码的重复统计。
+历史配对测试在 compute-a-10 使用相同 CPU 亲和性和 1/8 线程预算。新采样与 SCG 候选 v27 改在 compute-a-8 做完整输出检查及新的官方配对；两节点的时间分别记录，不能合并成同一配对。最新功能覆盖各记录一次完整观察，明确标 `single_observation`；旧源码重复协议及已完成 clock 保留版本来源，不用作最新源码的重复统计。
 端到端包含导入、读取、完整优化和全部声明输出的保存；已导入 API 的读取、计算、保存另列。
 官方程序的实际 CPU 时间和线程利用率须实测，设置 8 线程上限不等于程序实际使用 8 线程。
 不得缩小网格、降低 `miter`、删掉采样级别或减少输出以满足速度目标。
@@ -183,7 +183,7 @@ v20 法方程 1,755 次调用累计 36.624 s；50 个线性化算子的布局准
 
 ### 历史 normal SIMD v2 的 default 与六层 T1 完整配对
 
-严格 FP64 SIMD v2 源分别完成 default 和六层 T1 的 CPU1/8 官方配对；每项完整读取、求解和保存三图/四图，计时范围没有删减。[历史正式无路径报告](assets/cpu-default-t1-normal-simd-v2-20261004.public.json)保存源码、工具、输入和输出 SHA，逐图误差、脑区指标、CPU 利用率及 RSS。该表在 nodecw10 运行，不能与下面 nodecw8 候选时钟构成旧/新速度比。
+严格 FP64 SIMD v2 源分别完成 default 和六层 T1 的 CPU1/8 官方配对；每项完整读取、求解和保存三图/四图，计时范围没有删减。[历史正式无路径报告](assets/cpu-default-t1-normal-simd-v2-20261004.public.json)保存源码、工具、输入和输出 SHA，逐图误差、脑区指标、CPU 利用率及 RSS。该表在 compute-a-10 运行，不能与下面 compute-a-8 候选时钟构成旧/新速度比。
 
 | 完整预设 | 线程上限 | 原版完整进程 | FNIT 完整进程 | FNIT 已导入 API（含读写） |
 |---|---:|---:|---:|---:|
@@ -197,7 +197,7 @@ v20 法方程 1,755 次调用累计 36.624 s；50 个线性化算子的布局准
 本轮真实 CPU 官方精度、端到端/分步骤耗时和 GPU 回归见[统一报告](../../validation/multimodal_cpu_20261004/README.md)；局部测试与完整真实 benchmark 分别记录。
 先前真实 FSL 差异见[历史验证页](../../validation/fnirt/README.md)，仍须单列，不能归为本次 CPU 缓冲优化。
 
-### 最新 v27：nodecw8 的八项主要完整配对
+### 最新 v27：compute-a-8 的八项主要完整配对
 
 [主要配对报告](assets/cpu-primary-v27-node8-20261004.public.json)保存冻结 v27 的八项新完整官方配对及对应完整输出检查。default 为已核验的公开 CC0 T1；其余真实病例只公开聚合数值。每项两方同一 CPU 预算和亲和性，完整网格、层数、迭代预算和三张/四张声明图像均保留。GM 末层 SCG 包含两方完整的进程边界交接。[完整功能报告](assets/cpu-functional-v27-node8-20261004.public.json)另收齐 13 项预设/参数分支的 26 项完整候选输出检查；八项主要功能有新官方时钟，其余分支保留原精度参照，不将旧时钟算作新配对。
 
@@ -237,7 +237,7 @@ v20 法方程 1,755 次调用累计 36.624 s；50 个线性化算子的布局准
 
 ### T1 单线程的同节点旧/新诊断
 
-为判断 T1 单线程差距是否来自新采样器，在 nodecw8 CPU32 使用同一完整 T1、原六级预算和四图输出，分别执行冻结 v26 与 v27 各一次完整已导入 API。[独立聚合报告](assets/cpu-t1-sampler-diagnostic32-node8-v27-20261004.public.json)记录了实际采样命中与编译缓存；这次没有运行原版，不替代上表官方时钟。
+为判断 T1 单线程差距是否来自新采样器，在 compute-a-8 CPU32 使用同一完整 T1、原六级预算和四图输出，分别执行冻结 v26 与 v27 各一次完整已导入 API。[独立聚合报告](assets/cpu-t1-sampler-diagnostic32-node8-v27-20261004.public.json)记录了实际采样命中与编译缓存；这次没有运行原版，不替代上表官方时钟。
 
 | 完整 T1 诊断范围 | v26 | v27 |
 |---|---:|---:|
@@ -251,7 +251,7 @@ v27 的 201 次采样均命中融合 helper，回退为 0；唯一已用 Numba s
 
 ### v27 的完整 SCG 阶段检查
 
-[nodecw8 聚合报告](assets/cpu-scg-cost-skip-stage3-node8-20261004.public.json)使用同一真实 TBSS 原版第二阶段 checkpoint，执行完整 `182×218×182` 网格及原定 25 次末阶段 SCG 预算。两方都使用已逐位核验的 CPU 采样 helper，参数按生产 `_pack/_unpack` 的 FSL x-fastest 顺序排列；只比较保留或跳过被梯度调用方丢弃的代价计算。该诊断包含最终评估和保存，不是整个六级 TBSS 流程，也没有新的官方速度比。
+[compute-a-8 聚合报告](assets/cpu-scg-cost-skip-stage3-node8-20261004.public.json)使用同一真实 TBSS 原版第二阶段 checkpoint，执行完整 `182×218×182` 网格及原定 25 次末阶段 SCG 预算。两方都使用已逐位核验的 CPU 采样 helper，参数按生产 `_pack/_unpack` 的 FSL x-fastest 顺序排列；只比较保留或跳过被梯度调用方丢弃的代价计算。该诊断包含最终评估和保存，不是整个六级 TBSS 流程，也没有新的官方速度比。
 
 | 完整阶段诊断 | 保留梯度中未使用的代价 | 跳过该代价 |
 |---|---:|---:|
@@ -261,7 +261,7 @@ v27 的 201 次采样均命中融合 helper，回退为 0；唯一已用 Numba s
 | gradient / normal 调用数 | 51 / 51 | 51 / 51 |
 | 峰值 RSS | 1,900,724 KiB | 1,898,356 KiB |
 
-全部八组完整张量 SHA、25 次接受迭代、停止状态、cost 历史、每次 cost 的 SSD、每次 gradient 的 SSD 与有效 lambda 相同。inclusive 时间互相包含，不能相加。早期诊断曾误用 C-order flatten/reshape，参数与 gradient 的顺序不对应；该版本已保留为无效诊断，不计入这里的轨迹或性能结论。v27 的整个 TBSS、其他预设和参数功能以完整输出检查及 nodecw8 新官方配对验收。
+全部八组完整张量 SHA、25 次接受迭代、停止状态、cost 历史、每次 cost 的 SSD、每次 gradient 的 SSD 与有效 lambda 相同。inclusive 时间互相包含，不能相加。早期诊断曾误用 C-order flatten/reshape，参数与 gradient 的顺序不对应；该版本已保留为无效诊断，不计入这里的轨迹或性能结论。v27 的整个 TBSS、其他预设和参数功能以完整输出检查及 compute-a-8 新官方配对验收。
 
 ## 公开 CC0 T1 补充与脑图
 

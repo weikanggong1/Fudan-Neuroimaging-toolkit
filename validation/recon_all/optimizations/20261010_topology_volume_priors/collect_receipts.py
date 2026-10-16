@@ -94,7 +94,7 @@ def collect(*,fnit_root:Path,output:Path):
         public=sanitize(original)
         if numeric_leaves(original)!=numeric_leaves(public):raise ValueError('export altered numeric/bool/null values, types or locations')
         data=(json.dumps(public,indent=2,allow_nan=False)+'\n').encode()
-        if re.search(rb'(?:/cpfs|/cwStorage|/(?:home|mnt)/|(?:\d{1,3}\.){3}\d{1,3})',data):raise ValueError('private-string scan failed')
+        if re.search(rb'(?:/cpfs|/data/shared|/(?:home|mnt)/|(?:\d{1,3}\.){3}\d{1,3})',data):raise ValueError('private-string scan failed')
         (output/name).write_bytes(data)
         entries.append(dict(path=name,original_sha256=sha(raw),published_sha256=sha(data),size=len(data),numeric_bool_null_preserved=True,numeric_bool_null_leaves=len(numeric_leaves(original))))
     raw=(run/'candidate/local_priors.png').read_bytes()

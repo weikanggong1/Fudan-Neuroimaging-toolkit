@@ -4,9 +4,9 @@
 
 本页保留 v2 首次恢复 CON01 报告时的实际快照。CON03 随后触发可选基线计时状态问题，控制器已由 [v3](../cpu_matrix_deployment_v3/README.md) 替代；下面的 PID 和运行状态均属于 v2 记录。
 
-2026-10-03，nodecw10 的 v1 只读报告控制器使用 FNIT GPU Python；CON01 在绘图处报 `ModuleNotFoundError: No module named 'matplotlib'`。本次将**分析进程**切换到已安装完整报告依赖的 Anaconda Python，另建 `root_matrix_analysis_v2`。生产 GPU 进程、科学比较工具、冻结配置和包环境未修改。
+2026-10-03，compute-a-10 的 v1 只读报告控制器使用 FNIT GPU Python；CON01 在绘图处报 `ModuleNotFoundError: No module named 'matplotlib'`。本次将**分析进程**切换到已安装完整报告依赖的 Anaconda Python，另建 `root_matrix_analysis_v2`。生产 GPU 进程、科学比较工具、冻结配置和包环境未修改。
 
-v1 PID 163744 的实际命令和属主核对后，仅对此控制器发送 SIGTERM；其脚本、状态、失败报告与日志保留。v2 在 nodecw10 后台运行，启动 PID 为 **3130**。
+v1 PID 163744 的实际命令和属主核对后，仅对此控制器发送 SIGTERM；其脚本、状态、失败报告与日志保留。v2 在 compute-a-10 后台运行，启动 PID 为 **3130**。
 
 ```mermaid
 flowchart TD
@@ -27,8 +27,8 @@ flowchart TD
 ```python
 import subprocess
 
-analysis_python = "/cwStorage/home/gongwk/anaconda3/bin/python3.11"  # 现有报告环境
-controller_script = "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/run_cpu_matrix_analysis_v2.py"  # 固定本轮控制器
+analysis_python = "/data/user/anaconda3/bin/python3.11"  # 现有报告环境
+controller_script = "/data/workspaces/fnit_connectome_accuracy_20261003_v1/run_cpu_matrix_analysis_v2.py"  # 固定本轮控制器
 subprocess.run([analysis_python, controller_script], check=True)  # 等待真实病例并生成报告
 ```
 
@@ -43,8 +43,8 @@ subprocess.run([analysis_python, controller_script], check=True)  # 等待真实
 实际控制器命令如下，启动收据见 [v2 launch receipt](cpu_matrix_controller_v2_launch_receipt.json)。
 
 ```bash
-CUDA_VISIBLE_DEVICES='' /cwStorage/home/gongwk/anaconda3/bin/python3.11 \
-  /cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/run_cpu_matrix_analysis_v2.py
+CUDA_VISIBLE_DEVICES='' /data/user/anaconda3/bin/python3.11 \
+  /data/workspaces/fnit_connectome_accuracy_20261003_v1/run_cpu_matrix_analysis_v2.py
 ```
 
 CON01 实际分析命令的完整 argv 保留在 [status 快照](status.json) 中。科学工具参数仍为 `--configuration`（原冻结配置）、`--output-dir`（新的单例输出目录）、`--case-id sub-CON01`（真实完成病例）。未修改配置中的 `gpu_python`。

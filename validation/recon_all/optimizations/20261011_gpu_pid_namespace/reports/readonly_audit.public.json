@@ -30,7 +30,7 @@
     "tests/recon_all/test_process_memory_namespace.py": {
       "sha256": "f1cf3b14b37a7e6b04147ec34a860b86129c55009b708ca4eafec168e2e899f8",
       "bytes": 2561,
-      "test_scope": "mocked PID aliases and visibility; no actual CFFF host-to-container mapping test"
+      "test_scope": "mocked PID aliases and visibility; no actual accelerator-b host-to-container mapping test"
     },
     "tests/recon_all/test_nvml_process_memory.py": {
       "sha256": "1c22402e90869c49f1c4f422aec9e8e269652f7f66ea70ac99188ad153cd8c18",
@@ -127,7 +127,7 @@
   "findings": [
     {
       "kind": "confirmed_mapping_gap",
-      "summary": "Current CFFF proc metadata has no NSpid or readable complete host proc view. Existing code therefore has only local numeric PID aliases while GPU queries expose an unmatched driver PID.",
+      "summary": "Current accelerator-b proc metadata has no NSpid or readable complete host proc view. Existing code therefore has only local numeric PID aliases while GPU queries expose an unmatched driver PID.",
       "existing_reliable_host_to_container_mapping_found": false,
       "fnit_peak_should_remain_null": true
     },
@@ -156,7 +156,7 @@
     "Record kernel, PID namespace evidence, NSpid availability and mapping-unavailable reason without altering historical results.",
     "Treat numeric PID identity as unverified when driver/proc namespace equality is not established; do not use local /proc visibility alone as host PID ownership proof.",
     "If future infrastructure supplies a trusted host PID map or authorized host proc view, bind host/local PID, namespace, same UID and starttime to prevent PID reuse; otherwise retain null ownership.",
-    "Add meaningful namespace-collision, missing-NSpid and PID-reuse contracts if implementing the mapping change; existing mock alias tests alone do not establish a real CFFF mapping."
+    "Add meaningful namespace-collision, missing-NSpid and PID-reuse contracts if implementing the mapping change; existing mock alias tests alone do not establish a real accelerator-b mapping."
   ],
   "read_cmdline": false,
   "read_private_logs": false,

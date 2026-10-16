@@ -6,7 +6,7 @@ REMOTE_PROGRAM=r"""import base64,hashlib,json,socket,platform
 from pathlib import Path
 from datetime import datetime,timezone
 E=json.loads(__EXPECTED_JSON__)
-R=Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02')
+R=Path('/data/workspaces/fnit_connectome_tenraw_20261002/task_02')
 def sha(p):
  h=hashlib.sha256()
  with Path(p).open('rb') as f:
@@ -60,7 +60,7 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--local-root',type=Path,required=True)
     parser.add_argument('--control-path',type=Path,required=True)
-    parser.add_argument('--host',default='gongwk@10.190.248.228')
+    parser.add_argument('--host',default='user@compute.example.org')
     parser.add_argument('--port',type=int,default=39516)
     parser.add_argument('--output',type=Path,required=True,help='New local proof; refuses replacement')
     args=parser.parse_args()

@@ -11,7 +11,7 @@
 
 ## 真实阶段回归
 
-环境为已授权 `gpucw1` 的 H100 PCIe 80 GB、PyTorch 2.5.1/CUDA 11.8、FNIT Conda 环境、单阶段新进程。输入是公开 ds000114 `sub-07` 的 FNIT 自产 recon-all 中间目录；GPU 和 CPU 分别在独立复制目录中执行，未读取官方参考目录。
+环境为已授权 `accelerator-a-1` 的 H100 PCIe 80 GB、PyTorch 2.5.1/CUDA 11.8、FNIT Conda 环境、单阶段新进程。输入是公开 ds000114 `sub-07` 的 FNIT 自产 recon-all 中间目录；GPU 和 CPU 分别在独立复制目录中执行，未读取官方参考目录。
 
 | 阶段 | CPU wall (s) | CUDA wall (s) | 差异 | 结果 |
 |---|---:|---:|---:|---|

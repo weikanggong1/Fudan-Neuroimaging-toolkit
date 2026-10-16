@@ -8,8 +8,8 @@ import sys
 import time
 
 sys.dont_write_bytecode=True
-ROOT=Path('/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1')
-PYTHON='/home1/gongwk/anaconda3/bin/python3.11'
+ROOT=Path('/data/fnit/runs/connectome-accuracy-memory-recovery-20261003-v1')
+PYTHON='/home1/benchmark-user/anaconda3/bin/python3.11'
 environment=dict(os.environ,CUDA_VISIBLE_DEVICES='',PYTHONDONTWRITEBYTECODE='1',OMP_NUM_THREADS='4',MKL_NUM_THREADS='4',OPENBLAS_NUM_THREADS='4')
 def save(value):
     temp=ROOT/'.CPU_status.tmp';temp.write_text(json.dumps(value,indent=2)+'\n');temp.replace(ROOT/'CPU_status.json')

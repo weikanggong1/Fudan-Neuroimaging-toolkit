@@ -44,8 +44,8 @@
 
 ## 计算与连接
 
-- 已认证长连接：`/tmp/fnit-recon-five-20261002/coordination/ssh_gpucw1.sh` / `scp_gpucw1.sh`。
-- 当前实测主机/账号：gpucw1 / gongwk。
+- 已认证长连接：`/tmp/fnit-recon-five-20261002/coordination/ssh_accelerator-a-1.sh` / `scp_accelerator-a-1.sh`。
+- 当前实测主机/账号：accelerator-a-1 / benchmark-user。
 - 指定GPU0：H100 PCIe，UUID `GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e`。
 - 同机計时/GPU任务共用 `/tmp/fnit-shared-benchmark.lock`，总线程4、左右各2。
 - 生产Synth保持FNIT PyTorch GPU、默认TF32及已验证FP32例外；不启用半精度，显存目标20,000,000,000字节。

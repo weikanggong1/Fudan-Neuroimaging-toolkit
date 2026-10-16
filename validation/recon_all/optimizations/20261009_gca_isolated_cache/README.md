@@ -5,14 +5,14 @@
 不读取官方图像生成候选；旧Torch/独立Conda原生仅用于事后诊断。
 不是原始T1整例或整体指标等效验收。无影像、许可证内容或凭据。
 
-- `gca_cached_cfff_20261009_v2/sub06-*/report.json`、`sub07-*/report.json`：
+- `gca_cached_accelerator-b_20261009_v2/sub06-*/report.json`、`sub07-*/report.json`：
   未初始化和已初始化CUDA父API，共四次完整LTA优化回归精确；完整墙钟、
   子阶段、实际precision、输入/源码哈希、父状态、同期显存样本。
 - `gca_cached_v2/sub07-reference.json`：旧64块/CPU求逆完整API和两次独立
   Conda原生，输入完全相同，原生重复精确；sub-07新旧/原生矩阵精确。
 - `gca_complete_v4/sub06.json`：缓存关闭，原生/旧Torch/批量求逆的六次完整
   配对；原生和新旧各自重复精确。sub-06旧新对原生仍有既有矩阵差异。
-- `gca_cached_cfff_20261009_v1`：保留初版比较器混比API原矩阵与舍入LTA的
+- `gca_cached_accelerator-b_20261009_v1`：保留初版比较器混比API原矩阵与舍入LTA的
   诊断记录。v2比较实际写出LTA，没有改变算法或放宽阈值。
 - `PUBLIC_EXPORT_MANIFEST.json`：原私有JSON SHA与公开副本SHA对应；全部数值/
   布尔/null叶子保持，私有路径和主机名替换为角色名。原始收据私下保留。

@@ -18,13 +18,13 @@ import sys
 import time
 
 sys.dont_write_bytecode = True
-HUB = Path('/cwStorage/home/gongwk/Notebook_code/FNIT')
-NEW = Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1')
+HUB = Path('/data/fnit')
+NEW = Path('/data/workspaces/fnit_connectome_accuracy_20261003_v1')
 ROOT = HUB/'runs/connectome-accuracy-memory-recovery-20261003-v1'
 CONFIG = NEW/'formal_frozen_v1/accuracy_configuration.json'
 CONFIG_SHA = 'f8eba1cbf3eab2baa549172b32be2c9d3b1014ad478f6e3702d7987378f52f8c'
-MONITOR_PYTHON = '/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/nvml_monitor_runtime_v1/venv/bin/python'
-ORIGINAL_PYTHON = '/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/bin/python'
+MONITOR_PYTHON = '/data/workspaces/fnit_connectome_tenraw_20261002/nvml_monitor_runtime_v1/venv/bin/python'
+ORIGINAL_PYTHON = '/data/workspaces/fnit_conda_env_956b1a9/bin/python'
 SCIENCE = 'a27fe1ad0aca34c23b62017dc0bacb6b7a4c44d3423bf855a840509ffc1b6e82'
 PREFLIGHT_SHA = '627b26ef0a9abc47d0d5bcf626487b5e239cee783c22a14f9529d973437506bc'
 LIMIT = 20_000_000_000

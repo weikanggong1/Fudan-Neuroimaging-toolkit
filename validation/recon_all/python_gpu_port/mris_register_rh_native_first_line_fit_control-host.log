@@ -1,0 +1,84 @@
+Breakpoint 1 at 0x47edb7
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib64/libthread_db.so.1".
+using smoothwm curvature for final alignment
+using niterations = 1
+not removing negative triangles with iterative smoothing
+using write iterations = 1
+
+cwd /data/workspaces/freesurfer_synth/work/reconall_python_gpu_20260925/mris_register_first_search/native_rh
+cmdline /data/workspaces/freesurfer_synth/work/reconall_main_20260924/bundle/bin/mris_register -curv -threads 4 -N 1 -remove_negative 0 -W 1 rh.sphere /data/workspaces/freesurfer_synth/work/reconall_main_20260924/bundle/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif rh.sphere.reg.debug
+
+0 inflated.H
+1 sulc
+2 smoothwm (computed)
+8.2.0
+  8.2.0
+reading surface from rh.sphere...
+[New Thread 0x7fffe250f700 (LWP 3563409)]
+[New Thread 0x7fffe1d0e700 (LWP 3563410)]
+[New Thread 0x7fffe150d700 (LWP 3563411)]
+reading template parameterization from /data/workspaces/freesurfer_synth/work/reconall_main_20260924/bundle/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif...
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+MRISregister() -------
+max_passes = 4
+min_degrees = 0.500000
+max_degrees = 64.000000
+nangles = 8
+tol=5.0e-01, sigma=0.0, host=x86_6, nav=1024, nbrs=1, l_extern=10000.000, l_parea=0.200, l_nlarea=1.000, l_corr=1.000, l_dist=5.000
+using quadratic fit line minimization
+complete_dist_mat 0
+rms 0
+smooth_averages 0
+remove_neg 0
+ico_order 0
+which_surface 0
+target_radius 0.000000
+nfields 0
+scale 0.000000
+desired_rms_height -1.000000
+momentum 0.950000
+nbhd_size -10
+max_nbrs 10
+niterations 1
+nsurfaces 0
+SURFACES 3
+flags 16 (10)
+use curv 16
+no sulc 0
+no rigid align 0
+mris->nsize 1
+mris->hemisphere 1
+randomSeed 0
+
+tol=5.0e-01, sigma=0.0, host=x86_6, nav=1024, nbrs=1, l_extern=10000.000, l_parea=0.200, l_nlarea=1.000, l_corr=1.000, l_dist=5.000
+using quadratic fit line minimization
+--------------------
+1 Reading rh.sulc
+curvature mean = -0.000, std = 5.528
+reading precomputed curvature from rh.sulc
+
+blurring surfaces with sigma=4.00...
+curvature mean = 0.044, std = 0.874
+writing curvature file ./rh.sphere.reg.debug.target1 type -1
+done.
+curvature mean = 0.045, std = 0.811
+writing curvature file ./rh.sphere.reg.debug.sno1_target_blur4.00 type -1
+curvature mean = 0.003, std = 0.889
+writing curvature file ./rh.sphere.reg.debug.sno1_blur4.00 type -1
+finding optimal rigid alignment
+Starting MRISrigidBodyAlignGlobal()
+000: dt: 0.000, sse: 1247690.1 (0.343, 21.6, 0.480, 1.929), neg: 0 (%0.00:%0.00), avgs: 1024
+tol=5.0e-01, sigma=4.0, host=x86_6, nav=1024, nbrs=1, l_extern=10000.000, l_parea=0.200, l_nlarea=1.000, l_corr=1.000, l_dist=5.000
+using quadratic fit line minimization
+
+Thread 1 "mris_register" hit Breakpoint 1, 0x000000000047edb7 in ?? ()
+FIRST_LINE_FIT {"dt_in": [61.592637516460925, 123.18527503292185, 184.7779125493828], "sse_out": [1382744.4134491235, 1510373.5812041517, 1984037.5588062783], "normal_matrix": [[1410396928.0, 16823598.0, 53111.14453125], [16823598.0, 212444.5625, 739.1116333007812], [53111.14453125, 739.1116333007812, 3.0]], "normal_inverse": [[1.0421047846875808e-07, -1.2837189387937542e-05, 0.0013177937362343073], [-1.2837189387937542e-05, 0.0016142987878993154, -0.1704496443271637], [0.0013177937362343073, -0.1704496443271637, 18.997234344482422]], "right_hand_side": [[95905742848.0], [1275657984.0], [4877155.5]], "a": 45.60546875, "b": -3176.4375, "c": 1600992.0, "predicted_float32_dt": 69.6503677368164}

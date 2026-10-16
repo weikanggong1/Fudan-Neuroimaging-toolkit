@@ -17,7 +17,7 @@
 - FLIRT：同目录 `gm_affine.mat`；转换使用实际 NIfTI header zoom，未用 affine 列范数替代。
 - 模板：`FNIT/legacy/freesurfer_synth/work/ukb_vbm_gpu/assets/template_GM_v1.nii.gz`。
 - mask：FSL 6.0.7.4 `MNI152_T1_2mm_brain_mask_dil.nii.gz`；完整 recipe 中前三阶段不启用它。
-- nodecw7，同组 CPU `32,36,40,44,48,52,56,60`，8 Torch/OMP/BLAS threads，`nodecw7.gems.cpu8.lock`。
+- compute-a-7，同组 CPU `32,36,40,44,48,52,56,60`，8 Torch/OMP/BLAS threads，`compute-a-7.gems.cpu8.lock`。
 - 独立官方程序为已安装 FSL 6.0.7.4 `fnirt`（2203.0）。额外 C++ oracle 只用于 benchmark，编译、链接和原软件调用均不进入 FNIT 生产。
 - 首级 grid `24×28×24`、voxel `8 mm`、knot `5 voxel`、control `7×8×7`。不能截短 schedule：`FullResKsp` 依赖该 process 最后一个 subsampling。
 
@@ -75,7 +75,7 @@ fnirt --in="$OFFICIAL_GM" --ref="$GM_TEMPLATE" --aff="$OFFICIAL_FLIRT" \
   --logout="$NEW_RUN/official.log" --verbose
 ```
 
-[official_probe.cpp](official_probe.cpp) 调用已安装的 FNIRT cost、image derivative、Hessian 和 optimizer；[official_zoom.cpp](official_zoom.cpp) 仅调用官方 `splinefield::ZoomField`。headcw 使用 `g++ -std=c++17 -O0`，installed include/source/libs，显式链接 `lapack/blas/pthread`，两个最终程序退出 0。最大迭代停止是有意设置，不代表优化收敛。此次不报告速度收益。
+[official_probe.cpp](official_probe.cpp) 调用已安装的 FNIRT cost、image derivative、Hessian 和 optimizer；[official_zoom.cpp](official_zoom.cpp) 仅调用官方 `splinefield::ZoomField`。control-host 使用 `g++ -std=c++17 -O0`，installed include/source/libs，显式链接 `lapack/blas/pthread`，两个最终程序退出 0。最大迭代停止是有意设置，不代表优化收敛。此次不报告速度收益。
 
 ## 6. 失败与后续
 

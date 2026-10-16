@@ -1,7 +1,7 @@
 """对首次较慢的真实sub-04前段补AB/BA重复；锁每对释放。"""
 import fcntl,hashlib,json,os,subprocess,sys
 from pathlib import Path
-BASE=Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929')
+BASE=Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929')
 ROOT=Path('/tmp/fnit-recon-accuracy-20261003/task_02/diagnostic')
 OUTPUT=BASE/'accuracy_20261003/task_02/prefix_repeat_sub04'
 UUID='GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e'

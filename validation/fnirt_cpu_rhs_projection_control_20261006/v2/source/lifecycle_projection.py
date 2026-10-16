@@ -16,7 +16,7 @@ import time
 
 from projection_io import bound, check_bindings, check_freeze, write_json
 
-ROOT = Path("/cwStorage/home/gongwk/Notebook_code/FNIT")
+ROOT = Path("/data/fnit")
 KEY = "fnirt_rhs_projection_control_v2_20261006"
 LEAF = "smri_cpu_20261004/remaining_20261006/fnirt-rhs-projection-control-v2"
 LOCKS = [".INDEX.codex.lock", ".index.lock", "INDEX.json.lock", "INDEX.md.lock",
@@ -123,9 +123,9 @@ def main():
             run.mkdir(parents=True, exist_ok=False, mode=0o700)
             entry = {"workspace": str(workspace), "run_path": str(run), "status": "projection_prepared_no_worker",
                      "freeze_sha256": args.freeze_sha256, "production_change": False, "gpu_enabled": False,
-                     "scope": expected["scope"], "cpu_host": "nodecw7", "cpu_threads": 8,
+                     "scope": expected["scope"], "cpu_host": "compute-a-7", "cpu_threads": 8,
                      "cpu_affinity": [32,36,40,44,48,52,56,60],
-                     "outer_lock": str(ROOT / "runs/smri_cpu_20261004/nodecw7.gems.cpu8.lock"),
+                     "outer_lock": str(ROOT / "runs/smri_cpu_20261004/compute-a-7.gems.cpu8.lock"),
                      "outer_lock_wait_seconds": 120, "controller_timeout_seconds": 360,
                      "metadata_index_lock_timeout_seconds": 25, "metadata_index_lock_mode": "LOCK_EX|LOCK_NB",
                      "child_timeout_seconds": 180, "address_space_cap_bytes": 20000000000,

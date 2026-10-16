@@ -16,7 +16,7 @@ voxel payload bytes match the fresh official output. The trailing MGH color
 table/history differs, so the complete decompressed file is not byte
 identical. A focused synthetic rule test passed.
 
-One same-input headcw CLI pair took **3.28 s native and 4.69 s Python**. Both
+One same-input control-host CLI pair took **3.28 s native and 4.69 s Python**. Both
 times include process startup and I/O; this short stage is currently slower.
 
 ```bash

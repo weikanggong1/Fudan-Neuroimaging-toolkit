@@ -1,4 +1,6 @@
-# FastVBM：单被试 T1w 到调制灰质图
+# FNIT_fslvbm
+
+> 统一 Python 入口：[`FNIT_fslvbm`](../API_REFERENCE.md)，从 `fnit` 导入。下文配置、结果类型和细分算子保留高级兼容接口。
 
 [返回首页](../../README.md) · [完整旧文档与更早证据](../../validation/fast_vbm/readme_archive_20261005.md)
 
@@ -38,9 +40,9 @@ flowchart LR
 ## 2. Python 调用
 
 ```python
-from fnit import FastVBM
+from fnit import FNIT_fslvbm
 
-vbm_pipeline = FastVBM(
+vbm_pipeline = FNIT_fslvbm(
     device="cuda:0",  # PyTorch计算设备
     threads=4,  # CPU线程预算
     registration_backend="fnirt",  # 使用TorchFNIRT GM配置

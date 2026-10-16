@@ -71,9 +71,9 @@ topology parity. Saved annotation colors compress segment identities, so exact
 annotation does not by itself establish that every internal edge assignment
 matches native.
 
-The machine-readable [report](independent_segments_headcw_report.json) and
+The machine-readable [report](independent_segments_control-host_report.json) and
 [validator](validate_topology_independent_segments.py) reproduce these checks.
-The earlier [preflight](../topology_preflight_headcw_report.json),
+The earlier [preflight](../topology_preflight_control-host_report.json),
 [edge-score probe](TOPOLOGY_EDGE_SCORE.md), and
 [first-candidate patch probe](TOPOLOGY_FIRST_PATCH.md) describe adjacent
 bounded steps. The same Python-generated sorted candidate table has now also

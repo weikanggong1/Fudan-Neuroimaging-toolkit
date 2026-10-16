@@ -202,7 +202,7 @@ def main() -> None:
             "minimum_network_dice": float(min(dice.values())),
         },
         "timing": {
-            "hardware": "headcw, Intel Xeon Gold 6418H, 8 BLAS/MATLAB threads",
+            "hardware": "control-host, Intel Xeon Gold 6418H, 8 BLAS/MATLAB threads",
             "fnit_raw_timeseries_to_labels": _time_record(args.fnit_full_time),
             "fnit_saved_profiles_to_labels": _time_record(args.fnit_matched_time),
             "cbig_saved_profiles_to_labels": _time_record(args.cbig_matched_time),

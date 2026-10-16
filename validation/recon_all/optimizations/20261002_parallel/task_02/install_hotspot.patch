@@ -16,7 +16,7 @@
 +install -m 755 "$output_dir/placement-hotspot-build/candidate/mris_place_surface_fnit_hotspot" \
 +  "$output_dir/bin/mris_place_surface_fnit_hotspot"
 +ldd "$output_dir/bin/mris_place_surface_fnit_hotspot" > "$output_dir/mris_place_surface_fnit_hotspot.ldd"
-+if grep -E '/public/software/apps/Freesurfer|/tmp/fs_itk_build' "$output_dir/mris_place_surface_fnit_hotspot.ldd"; then
++if grep -E '/opt/reference/Freesurfer|/tmp/fs_itk_build' "$output_dir/mris_place_surface_fnit_hotspot.ldd"; then
 +  echo "placement hotspot links an external FS/ITK installation" >&2
 +  exit 1
 +fi

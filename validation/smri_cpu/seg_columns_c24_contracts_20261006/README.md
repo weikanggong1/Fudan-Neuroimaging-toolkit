@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 # 只展示独立短尺寸合同调用，不是MRI benchmark；不应重派本轮已完成队列。
-fnit_server_root = Path("/cwStorage/home/gongwk/Notebook_code/FNIT")
+fnit_server_root = Path("/data/fnit")
 columns_workspace_path = fnit_server_root / "workspaces/smri_cpu_20261004/remaining_20261006/seg-columns-c24-contract-v1"
 columns_run_path = fnit_server_root / "runs/smri_cpu_20261004/remaining_20261006/seg-columns-c24-contract-v1"
 columns_plan = json.loads((columns_workspace_path / "PLAN.json").read_text())
@@ -60,7 +60,7 @@ with torch.no_grad(), torch.backends.mkldnn.flags(enabled=False):
 原派发命令对应 [冻结队列](../seg_columns_c24_prepare_20261006/run_prepared.py)：
 
 ```bash
-python run_prepared.py   --root /cwStorage/home/gongwk/Notebook_code/FNIT   --workspace /cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/smri_cpu_20261004/remaining_20261006/seg-columns-c24-contract-v1   --run /cwStorage/home/gongwk/Notebook_code/FNIT/runs/smri_cpu_20261004/remaining_20261006/seg-columns-c24-contract-v1   --approved-contracts
+python run_prepared.py   --root /data/fnit   --workspace /data/fnit/workspaces/smri_cpu_20261004/remaining_20261006/seg-columns-c24-contract-v1   --run /data/fnit/runs/smri_cpu_20261004/remaining_20261006/seg-columns-c24-contract-v1   --approved-contracts
 ```
 
 这是已执行记录；相同 `run` 已存在，队列拒绝重复派发。源码目录是本阶段冻结准备文件，输出目录保存原 QUEUE/COMPILE/CONTRACTS/log；`approved-contracts` 是本次短合同授权开关。恢复后核对了已存在的 13 个文件并全部复用，新增上传为 0。生产 17 源、旧 C72 四项、当前 compiler/provider/headers/模型哈希现场匹配。六个 INDEX 锁共同 25 秒上限，队列使用共用 CPU8 锁；完成后锁已释放。

@@ -5,7 +5,7 @@ import sys
 import time
 import pynvml
 
-root=Path('/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1')
+root=Path('/data/fnit/runs/connectome-accuracy-memory-recovery-20261003-v1')
 controller_pids=[json.loads((root/name).read_bytes())['pid'] for name in ('launch_receipt.json','launch_receipt_v2.json') if (root/name).is_file()]
 def own(pid):
     seen=set()

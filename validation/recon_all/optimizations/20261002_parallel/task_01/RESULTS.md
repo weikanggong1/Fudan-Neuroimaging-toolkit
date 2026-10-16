@@ -4,7 +4,7 @@
 
 ## 真实配对结果
 
-在gpucw1固定GPU UUID上，从冻结自产MRI前缀重新生成surface、registration、三套annotation、最终white/pial与指标；启动前清空surf/label/stats。总线程预算4；基线串行4，双侧各2。输出准备复制在计时前完成，组内复制、exec、同步、发布、清理计入。
+在accelerator-a-1固定GPU UUID上，从冻结自产MRI前缀重新生成surface、registration、三套annotation、最终white/pial与指标；启动前清空surf/label/stats。总线程预算4；基线串行4，双侧各2。输出准备复制在计时前完成，组内复制、exec、同步、发布、清理计入。
 
 | 阶段 | 串行秒 | 双半球秒 | 串行/双半球 |
 | --- | ---: | ---: | ---: |
@@ -48,7 +48,7 @@ CPU旁路记录仅覆盖启动后的一段3408.2秒，6066次样本，最大间�
 export CUDA_VISIBLE_DEVICES="$GPU_UUID"
 export OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4 NUMBA_NUM_THREADS=4
 export PYTHONPATH="$SOURCE_DIRECTORY/src:$SOURCE_DIRECTORY/validation/recon_all/optimizations/20261002_parallel/task_01"
-flock -x /tmp/fnit-recon-five-20261002-gongwk.gpu.lock \
+flock -x /tmp/fnit-recon-five-20261002-benchmark-user.gpu.lock \
   "$CONDA_PYTHON" validation/recon_all/optimizations/20261002_parallel/task_01/benchmark_hemi.py \
   --checkpoint "$FROZEN_MRI_SUBJECT" --output "$EMPTY_PAIR_OUTPUT" \
   --assets "$VERIFIED_ASSETS" --binaries "$VERIFIED_NATIVE_BIN" \

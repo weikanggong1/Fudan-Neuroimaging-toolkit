@@ -12,3 +12,7 @@ __all__ = ["MSMSulcInputs", "MSMSulcConfig", "prepare_msmsulc_inputs", "run_msms
            "MSMAllInputs", "MSMAllConfig", "run_msmall", "MSMAllRegressionResult",
            "compute_msmall_variance_normalization", "prepare_msmall_inputs",
            "run_msmall_regression"]
+
+from .api import FNIT_newmsm
+
+__all__.append("FNIT_newmsm")

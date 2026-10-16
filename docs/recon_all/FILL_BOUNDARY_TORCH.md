@@ -165,7 +165,7 @@ uint8、网格、标签及范围，无坐标变换。
 
 GPU allocated均72,811,008字节；首个GPU进程reserved为96,468,992/109,051,904字节。目标整卡上界包括其他任务，不作为FNIT占用；原NVML父进程采样匹配失败记为None，不能写0或据此宣称整例显存达标。共享CPU/GPU负载有记录，本表只支持本时段配对观测。起止cgroup累计failcnt未增加，没有本轮CPU限额失败证据；历史中断原因保持未确定。
 
-[GPU完整JSON、显式设备/输入/程序版本与资源记录](../../validation/recon_all/optimizations/20261009_fill_boundary_torch/cfff_a100)。新原生命令参考仍未在迁移环境获得，不把旧FNIT frozen-filled比较冒称新的同机原生比较。原始T1整例提速、整体指标等效与隔离安装尚待整例验收。
+[GPU完整JSON、显式设备/输入/程序版本与资源记录](../../validation/recon_all/optimizations/20261009_fill_boundary_torch/accelerator-b_a100)。新原生命令参考仍未在迁移环境获得，不把旧FNIT frozen-filled比较冒称新的同机原生比较。原始T1整例提速、整体指标等效与隔离安装尚待整例验收。
 
 ## 6. 更新与 benchmark 记录
 

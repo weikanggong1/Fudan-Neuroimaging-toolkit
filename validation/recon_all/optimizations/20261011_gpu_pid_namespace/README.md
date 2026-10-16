@@ -36,7 +36,7 @@ memory_report = memory_sampler.report()
 | `source` | 非空字符串，获授权的可信宿主映射来源；不写凭据 |
 | `nspid_chain` | 可选正整数列表，由可信来源绑定的完整可见链 |
 
-来源证明由调用者提供。采样器逐次核对本地 starttime、namespace 和提供的链；失效记录在 `rejected_mappings`，不静默换用同编号的新进程。`NSpid` 从当前 proc 挂载所对应的 PID 命名空间开始，随后列出逐层嵌套的内部编号；容器自身挂载的 proc 可能不包含宿主层。它能提供这个可见层级中的编号，不能独自确定 GPU driver 使用哪个命名空间或证明 host PID。缺失、单值和没有可信 driver 锚点的多级链都保持未知。现代系统已有可信映射时可以显式传入并持续核对；本轮 CFFF 没有提供此映射。[Linux man-pages](https://kernel.googlesource.com/pub/scm/docs/man-pages/man-pages/%2B/refs/tags/man-pages-6.11/man/man5/proc_pid_status.5)
+来源证明由调用者提供。采样器逐次核对本地 starttime、namespace 和提供的链；失效记录在 `rejected_mappings`，不静默换用同编号的新进程。`NSpid` 从当前 proc 挂载所对应的 PID 命名空间开始，随后列出逐层嵌套的内部编号；容器自身挂载的 proc 可能不包含宿主层。它能提供这个可见层级中的编号，不能独自确定 GPU driver 使用哪个命名空间或证明 host PID。缺失、单值和没有可信 driver 锚点的多级链都保持未知。现代系统已有可信映射时可以显式传入并持续核对；本轮 accelerator-b 没有提供此映射。[Linux man-pages](https://kernel.googlesource.com/pub/scm/docs/man-pages/man-pages/%2B/refs/tags/man-pages-6.11/man/man5/proc_pid_status.5)
 
 存在 `NSpid` 时，链须非空、各项为正整数，第一项与该 proc 视图的 `Pid` 及路径 PID 相同。矛盾元数据按身份不可用拒绝，缺字段本身仍是合法旧内核情况。可信参数中的可选链同样须从 `local_pid` 开始，非法参数在查询前报错；可信 driver PID 可以不出现在此可见链中，其关联仍须由获授权的宿主来源建立。
 

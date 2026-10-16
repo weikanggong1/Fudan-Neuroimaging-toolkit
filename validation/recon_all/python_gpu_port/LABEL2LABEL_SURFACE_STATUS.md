@@ -6,9 +6,9 @@
 
 | 旧版同输入计时 | 官方 | FNIT |
 | --- | ---: | ---: |
-| 左侧 FG1，headcw 单次调用 | 3.17 s | 0.53 s |
-| 右侧 BA1，headcw 单次调用 | 2.94 s | 0.61 s |
-| 72 张标签 | gpucw1 旧日志合计 236.24 s | headcw FNIT 旧观察 7.90 s |
+| 左侧 FG1，control-host 单次调用 | 3.17 s | 0.53 s |
+| 右侧 BA1，control-host 单次调用 | 2.94 s | 0.61 s |
+| 72 张标签 | accelerator-a-1 旧日志合计 236.24 s | control-host FNIT 旧观察 7.90 s |
 
 最后一行不是同机配对，不能用于速度比。映射器建立双侧缓存分别观察到 0.264 s 和 0.287 s。所用 fsaverage 资产是两个球面和 72 张标签，合计 21,196,583 字节；FNIT 运行时不需要系统 FreeSurfer 程序。
 

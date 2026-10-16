@@ -14,7 +14,7 @@ flowchart LR
   Q --> W[发布 / white.preaparc / sphere.reg / white / pial]
 ```
 
-已有冻结单半球运行完成九缺陷与最终 `orig`，与旧自有基线的404项数组相同。后续 cbaffa 合并配方的[两例原始 T1 整例及 v2 事后评估](../../validation/recon_all/optimizations/20261016_gpucw1_cbaffa_two_case/README.md)均退出 0、输出 138/138，生产网格门通过；两例分区、表面距离和脑区统计评估已完成，严格逐文件复现分别为 14/138、23/138，整体指标等效仍未判定。冻结阶段的同输入结论与这次整例分别记录。
+已有冻结单半球运行完成九缺陷与最终 `orig`，与旧自有基线的404项数组相同。后续 cbaffa 合并配方的[两例原始 T1 整例及 v2 事后评估](../../validation/recon_all/optimizations/20261016_accelerator-a-1_cbaffa_two_case/README.md)均退出 0、输出 138/138，生产网格门通过；两例分区、表面距离和脑区统计评估已完成，严格逐文件复现分别为 14/138、23/138，整体指标等效仍未判定。冻结阶段的同输入结论与这次整例分别记录。
 
 ## 2. Python 调用、输入与输出
 
@@ -134,7 +134,7 @@ mris_remove_intersection subject/surf/lh.orig subject/surf/lh.orig
 | 冻结单半球九缺陷与最终 orig | 九缺陷CLI15196.729秒，后续orig CLI183.192秒；404项数组与旧自有基线相同；最终网格Euler2、单连通、相交0 | 对应旧Python扫描/面缓存冻结版本；与原生网格顶点数不同，不能逐索引比较，非当前配方整例提速 |
 | 后续合并源码离线安装 | Git `342aa4dd`，24模块source/wheel/installed SHA相同；构建2.401、安装0.766、入口10.242秒 | 完整EM和可选GPU距离接口导入通过；不初始化CUDA、不运行影像 |
 | 隔离worker守卫后的离线安装 | Git `9292a0a7`，29模块source/wheel/installed SHA相同；构建2.294、安装0.849、入口17.429秒 | GCA、WM、Talairach、Torch N4的fresh CLI继承生产禁令；36项合同通过，不运行MRI |
-| cbaffa 配方原始 T1 整例 | 两例退出 0、各 138/138 输出、生产网格门通过；完整外层墙钟 19,448.046／12,094.283 秒，详见[两例报告](../../validation/recon_all/optimizations/20261016_gpucw1_cbaffa_two_case/README.md) | 严格逐文件诊断 14/138、23/138；十分钟目标未达到。整体指标等效、FNIT 自身 20 GB 峰值和同环境提速未判定 |
+| cbaffa 配方原始 T1 整例 | 两例退出 0、各 138/138 输出、生产网格门通过；完整外层墙钟 19,448.046／12,094.283 秒，详见[两例报告](../../validation/recon_all/optimizations/20261016_accelerator-a-1_cbaffa_two_case/README.md) | 严格逐文件诊断 14/138、23/138；十分钟目标未达到。整体指标等效、FNIT 自身 20 GB 峰值和同环境提速未判定 |
 
 真实脑图与全部 496 项比较见[首缺陷完整报告](../../validation/recon_all/optimizations/20261011_topology_genetic_face_cache/README.md)，阶段 ABBA 见[保留面索引报告](../../validation/recon_all/optimizations/20261011_topology_face_detection_cache/README.md)，原生重复见[参考重复报告](../../validation/recon_all/optimizations/20261011_topology_native_repeat/README.md)。首缺陷脑图显示自产几何及索引误差，不能称官方整例误差图。既有数字拓扑整例的局部形状/球面失败保留在[旧版完整报告](../../validation/recon_all/optimizations/20261010_python_profile/README.md)，不改标为本次 GA 配方结果。
 

@@ -242,7 +242,7 @@ def parser():
     p.add_argument("--threads", type=int, default=4)
     p.add_argument("--gpu-lock", type=Path)
     p.add_argument("--expected-reference-sha256", default=REFERENCE_SHA)
-    p.add_argument("--singularity", default="/public/software/apps/singularity/4.2.2/bin/singularity")
+    p.add_argument("--singularity", default="/opt/reference/singularity/4.2.2/bin/singularity")
     return p
 
 

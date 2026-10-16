@@ -136,7 +136,7 @@ def collect(*, fnit_root: Path, output: Path):
         public=sanitize(original)
         if numeric_leaves(original)!=numeric_leaves(public): raise ValueError('numeric/bool/null locations/types changed')
         data=(json.dumps(public,indent=2,allow_nan=False)+'\n').encode()
-        if re.search(rb'(?:/cpfs|/cwStorage|/(?:home|mnt)/|(?:\d{1,3}\.){3}\d{1,3})',data): raise ValueError('private-string scan failed')
+        if re.search(rb'(?:/cpfs|/data/shared|/(?:home|mnt)/|(?:\d{1,3}\.){3}\d{1,3})',data): raise ValueError('private-string scan failed')
         (output/name).write_bytes(data)
         entry=dict(path=name,published_sha256=sha(data),size=len(data),numeric_bool_null_preserved=True,numeric_bool_null_leaves=len(numeric_leaves(original)))
         if raw is not None: entry['original_sha256']=sha(raw)

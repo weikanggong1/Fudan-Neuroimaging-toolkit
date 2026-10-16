@@ -155,7 +155,7 @@ FNIT时间来自**连续API内参考阶段**，不是独立候选重跑。`Timin
 | CON01 | 0.996667 | 0.057172 | 27.132923 | 28.437770 | 28.458448 | 0.297455 |
 | CON06 | 0.993396 | 0.049456 | 26.358559 | 27.655894 | 27.676001 | 0.303326 |
 
-官方新调用在gpucw1隔离官方SIF、隐藏CUDA、CPU4串行完成，依次运行ValidateImage→NSS→AFNI RobustAverage。历史节点在nodecw10，原线程数未指定。以下保留两个时钟边界，不能混成同硬件通用速度倍数。
+官方新调用在accelerator-a-1隔离官方SIF、隐藏CUDA、CPU4串行完成，依次运行ValidateImage→NSS→AFNI RobustAverage。历史节点在compute-a-10，原线程数未指定。以下保留两个时钟边界，不能混成同硬件通用速度倍数。
 
 | 病例 | 历史gen_avg节点(s) | 新ValidateImage(s) | 新NSS(s) | 新RobustAverage(s) | 新容器启动→退出(s) |
 |---|---:|---:|---:|---:|---:|

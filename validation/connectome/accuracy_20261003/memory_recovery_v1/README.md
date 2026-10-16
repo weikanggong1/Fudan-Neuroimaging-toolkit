@@ -18,7 +18,7 @@ flowchart LR
 
 这是独立验证工具，生产 FNIT 源码没有修改。`recovery_controller.py` 通过实际冻结的 `benchmark_connectome_raw_cohort.worker` 执行。输入来自原 `accuracy_configuration.json`（SHA `f8eba1cbf3eab2baa549172b32be2c9d3b1014ad478f6e3702d7987378f52f8c`）、原 raw manifest、逐例 completed FS 绑定和终态 12 行报告。候选源码指纹为 `a27fe1ad0aca34c23b62017dc0bacb6b7a4c44d3423bf855a840509ffc1b6e82`，科学提交为 `1fe86ab8347b29d9c47be8109627736576222912`。
 
-输出位于 `/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1`：
+输出位于 `/data/fnit/runs/connectome-accuracy-memory-recovery-20261003-v1`：
 
 - `frozen_recovery_plan.json`：原实际终态、原监控问题、两例选择及解释器身份。
 - `candidate/sub-CON09`、`candidate/sub-CON10`：全新 connectome、原冻结 wall/GPU 报告、同次结果导出。
@@ -33,8 +33,8 @@ import os
 import subprocess
 
 # 先核对原正式12行实际完成；控制器会再次核对源码、输入及原显存问题。
-original_conda_python = "/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/bin/python"
-memory_recovery_directory = "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1"
+original_conda_python = "/data/workspaces/fnit_conda_env_956b1a9/bin/python"
+memory_recovery_directory = "/data/fnit/runs/connectome-accuracy-memory-recovery-20261003-v1"
 controller_path = memory_recovery_directory + "/recovery_controller.py"
 controller_environment = dict(os.environ, CUDA_VISIBLE_DEVICES="", PYTHONDONTWRITEBYTECODE="1")
 subprocess.run([original_conda_python, controller_path, "--execute-after-formal"],
@@ -46,14 +46,14 @@ subprocess.run([original_conda_python, controller_path, "--execute-after-formal"
 `--prepare` 仅新建唯一目录并追加 FNIT 索引；默认仅检查实际正式状态；`--execute-after-formal` 仅在本次已完成的正式 12 行后执行两例补测；本次没有提前启动等待 GPU 的进程。已存在的补测 namespace、计划或输出不会被覆盖。
 
 ```bash
-original_conda_python=/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/bin/python
-memory_recovery_directory=/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1
+original_conda_python=/data/workspaces/fnit_conda_env_956b1a9/bin/python
+memory_recovery_directory=/data/fnit/runs/connectome-accuracy-memory-recovery-20261003-v1
 # 本次启动前已有真实 execution_completed + 12 completed 的终态收据。
 CUDA_VISIBLE_DEVICES= PYTHONDONTWRITEBYTECODE=1 "$original_conda_python" \
   "$memory_recovery_directory/recovery_controller.py" --execute-after-formal
 
-# GPU运行实际完成后，在nodecw10只读比较保存产物。
-cpu_analysis_python=/home1/gongwk/anaconda3/bin/python3.11
+# GPU运行实际完成后，在compute-a-10只读比较保存产物。
+cpu_analysis_python=/home1/benchmark-user/anaconda3/bin/python3.11
 CUDA_VISIBLE_DEVICES= PYTHONDONTWRITEBYTECODE=1 "$cpu_analysis_python" \
   "$memory_recovery_directory/compare_original_recovery.py"
 ```
@@ -106,7 +106,7 @@ CUDA_VISIBLE_DEVICES= PYTHONDONTWRITEBYTECODE=1 "$cpu_analysis_python" \
 - 私有 v1 验证工具在 C09 科学运行结束后误拒绝：wrapper 的 `inputs` 还包括每次自产的 `prepared/dwi`、`prepared/bvecs`，两个路径必须随新输出目录改变，其字节 SHA 实际全等。v1 source SHA `333dc44f5bc8adbec2299f3e8fbf945f410a60bbb1cf19082bd3ab7a5c02a331`、失败 JSON、CPU 停机记录及原状态快照保留。独立 v2 SHA `632cc053f7985740d0084d813ae39e96504918e955ecc32e128694054cfb7d0a` 仅允许这两项绑定各自 job 中的确切自产路径，并要求 size/SHA 及两边 GPU producer `outputs` 记录全同；其余 61 个 external 输入仍要求路径和字节全同。8 项 CPU 协议检查通过，拒绝 raw 路径/size/SHA、prepared 旧路径/size/SHA 和 producer SHA 替换。已完成 C09 不重跑，v2 只续跑当时未派发的 C10。生产源码、冻结 worker/wall/config 没有更改。
 - CPU 守卫核验：严格拒绝峰值 `>=20e9`、无效/缺失三峰、以及宣称终态但存在未完成行；running 状态不会调度 GPU。新 run 已在中央 INDEX 同锁追加登记，保留并发其他条目。
 - 提前启动未来调度控制器曾被自动审批拒绝；该命令未执行，之后读取实际原终态再启动。冻结生产代码、正式 config/helper、原 C09/C10 报告均未修改。
-- 最终 CPU launcher 的一次 shell 引号错误发生在解析阶段，未执行数组比较；`CPU_final.log` 和初次 launch 收据保留。随后使用保存的 `CPU_final_controller_v2.py` 在 nodecw10 实际完成严格审计与图输出，见 `CPU_final_status.json`。这项私有调度修复未修改科学代码、指标或产物。
+- 最终 CPU launcher 的一次 shell 引号错误发生在解析阶段，未执行数组比较；`CPU_final.log` 和初次 launch 收据保留。随后使用保存的 `CPU_final_controller_v2.py` 在 compute-a-10 实际完成严格审计与图输出，见 `CPU_final_status.json`。这项私有调度修复未修改科学代码、指标或产物。
 - 独立共享负载快照中，`12:11:16 UTC` 那条仍按 v1 PID 识别进程，没有识别 v2 子进程；原记录保留，不用于外部负载汇总。后续快照记录两份真实 controller PID，冻结 wall 的独立 process-tree NVML 门槛不受此快照工具影响。
 - 新归档为 `FNIT/archive/transfers/connectome-accuracy-memory-recovery-20261003-v1-evidence.tar`，SHA `d26ba7a19b3992cc995130742fd14d44ed0565df8f9d480cca13864e03529685`；42 个 manifest 文件逐字节校验，见 [传输收据](final_transfer_receipt.json)。中央 INDEX 的原条目保留并追加本次独立观察状态。
 

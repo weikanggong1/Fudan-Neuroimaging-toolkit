@@ -12,10 +12,10 @@
 flowchart TD
     A[新下载公开原始 BIDS<br/>不同受试者的 DWI + T1w] --> B[校验 dataset snapshot 许可<br/>原始输入 SHA-256 和配对]
     B --> C[冻结 baseline 和 candidate 源码<br/>创建新的整例命名空间]
-    C --> D[CPU nodecw10<br/>官方 recon-all -i 原始T1w -all -openmp 8]
+    C --> D[CPU compute-a-10<br/>官方 recon-all -i 原始T1w -all -openmp 8]
     D --> E[检查 7 个解剖文件和 recon-all.done<br/>记录真实 CPU 阶段时间]
     E --> F[GPU 队列<br/>共享 flock 等待时间单列]
-    F --> G[GPU gpucw1<br/>raw BIDS TOPUP EDDY 和 connectome 下游]
+    F --> G[GPU accelerator-a-1<br/>raw BIDS TOPUP EDDY 和 connectome 下游]
     G --> H[检查每个 atlas 的 4 个矩阵<br/>nodes 标签图和预处理完整输出]
     H --> I[记录实际整例墙钟 队列 显存 源码与产物指纹<br/>另行进行数值一致性和官方重复性分析]
 ```
@@ -90,7 +90,7 @@ exit_code = main([
     "--baseline-source", str(baseline_source_directory),
     "--candidate-source", str(candidate_source_directory),
     "--candidate-ready",  # 总控制在候选完成和审查后显式放开正式运行。
-    "--cpu-host", "nodecw10", "--gpu-host", "gpucw1",
+    "--cpu-host", "compute-a-10", "--gpu-host", "accelerator-a-1",
     "--cpu-python", cpu_python_executable, "--gpu-python", gpu_python_executable,
     "--worker-script", cohort_worker_script, "--wall-script", raw_bids_wall_script,
     "--freesurfer-home", official_freesurfer_directory,
@@ -156,9 +156,9 @@ python tools/benchmark_connectome_raw_cohort.py run \
   --report-dir /shared/ten-new-raw/driver-reports-001 \
   --baseline-source /shared/fnit-sources/baseline \
   --candidate-source /shared/fnit-sources/candidate --candidate-ready \
-  --cpu-host nodecw10 --gpu-host gpucw1 \
-  --cpu-control-path /tmp/authorized-nodecw10.sock \
-  --gpu-control-path /tmp/authorized-gpucw1.sock \
+  --cpu-host compute-a-10 --gpu-host accelerator-a-1 \
+  --cpu-control-path /tmp/authorized-compute-a-10.sock \
+  --gpu-control-path /tmp/authorized-accelerator-a-1.sock \
   --cpu-python /usr/bin/python3 --gpu-python /shared/fnit-conda/bin/python \
   --worker-script /shared/fnit-harness/benchmark_connectome_raw_cohort.py \
   --wall-script /shared/fnit-harness/benchmark_connectome_raw_bids.py \
@@ -188,7 +188,7 @@ python tools/benchmark_connectome_raw_cohort.py status \
 | `--candidate-ready` | 默认关闭；启动 candidate 的总控制门禁，候选实现期间不能误跑正式候选 |
 | `--cases` | 可选正式子集，仍需至少 10 个不同受试者 |
 | `--pilot` | 可选诊断例号，与 `--cases` 互斥；即使执行成功也标为 `diagnostic_subset` |
-| `--cpu-host / --gpu-host` | 默认 `nodecw10 / gpucw1`；可写 `user@host` |
+| `--cpu-host / --gpu-host` | 默认 `compute-a-10 / accelerator-a-1`；可写 `user@host` |
 | `--cpu-control-path / --gpu-control-path` | 可选持久 SSH socket；不硬编码凭据或另建交互密码流程 |
 | `--cpu-port / --gpu-port` | 可选各主机 SSH 端口；未给则使用 SSH 配置默认值 |
 | `--cpu-python / --gpu-python` | 必填远端绝对 Python 路径；GPU Python 须含已核对的 FNIT Conda 依赖 |
@@ -199,7 +199,7 @@ python tools/benchmark_connectome_raw_cohort.py status \
 | `--cpu-jobs` | 默认 2，允许 1–4；CPU 同时运行的整例 recon 数 |
 | `--cpu-threads` | 默认 8；recon-all `-openmp` 和相关 CPU 线程环境 |
 | `--gpu-cpu-threads` | 默认 8；GPU 阶段的 CPU/BLAS 线程环境 |
-| `--gpu-lock` | 默认 `/tmp/fnit-recon-five-20261002-gongwk.gpu.lock`；与已有评测共享远端 GPU 锁 |
+| `--gpu-lock` | 默认 `/tmp/fnit-recon-five-20261002-benchmark-user.gpu.lock`；与已有评测共享远端 GPU 锁 |
 | `--gpu-uuid` | 可选实际物理 GPU UUID；建议填写本轮核对值，供进程树显存监测 |
 | `--cuda-visible-devices` | 可选 GPU 可见设备映射；记录实际传入值 |
 | `--gpu-path-prefix` | 可重复指定绝对目录，在 GPU worker 的 PATH 前加入；Glasser 所需 `wb_command` 目录须明确传入。记录实际 PATH 和 executable SHA-256 |

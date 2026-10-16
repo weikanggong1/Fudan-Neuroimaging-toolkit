@@ -13,7 +13,7 @@ import time
 import zipfile
 
 
-REPO = Path('/mnt/c/users/admin/documents/codex/2026-09-29/new-chat/work/fnit-dmri-perf')
+REPO = Path('/data/local_workspaces/2026-09-29/new-chat/work/fnit-dmri-perf')
 EVIDENCE = REPO / 'validation/subregions/speed_v14'
 SOURCE_FILES = ('pyproject.toml', 'MANIFEST.in', 'setup.py', 'tests/test_public_api.py',
                 'src/fnit/gems/nuclei.py', 'src/fnit/gems/pipeline.py',

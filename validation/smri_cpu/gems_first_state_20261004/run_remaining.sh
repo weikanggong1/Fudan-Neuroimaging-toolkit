@@ -1,13 +1,13 @@
 #!/bin/bash
 set -e
-B=/cwStorage/home/gongwk/Notebook_code/FNIT
+B=/data/fnit
 W=$B/workspaces/smri_cpu_20261004/remaining_20261004/gems/first-state-v3
 R=$B/runs/smri_cpu_20261004/remaining_20261004/gems/first-state-v2
 Q=$B/runs/smri_cpu_20261004/remaining_20261004/gems/first-state-queue-v3
-F=/public/software/apps/Freesurfer/8.2.0-1
+F=/opt/reference/Freesurfer/8.2.0-1
 trap 'rc=$?; printf "{\"exit_code\":%s}\n" "$rc" > "$Q/exit.public.json"' EXIT
 (
-  exec 9>"$B/runs/smri_cpu_20261004/nodecw7.gems.cpu8.lock"
+  exec 9>"$B/runs/smri_cpu_20261004/compute-a-7.gems.cpu8.lock"
   flock 9
   export OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 MKL_NUM_THREADS=8 ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=8
   export PYTHONPATH=$B/workspaces/smri_cpu_20261004/remaining_20261004/gems/baseline-f1cbdab/src

@@ -49,7 +49,7 @@ captured native entry state remains a separate conditional check.
 
 ## Timing and limits
 
-| Measurement on headcw CPU | LH | RH |
+| Measurement on control-host CPU | LH | RH |
 | --- | ---: | ---: |
 | Python isolated `-in 0 -N 1` quick optimizer | about 71.79 s | about 71.89 s |
 | Python default optimizer only, given captured native entry state | 82.44 s | Not measured |
@@ -58,7 +58,7 @@ captured native entry state remains a separate conditional check.
 
 The native diagnostic includes input/output I/O and 365 snapshot writes; the
 Python optimizer-only number excludes inflation and I/O. They are not a
-controlled speed ratio. A later [sequential same-input LH file-level pair](inflate_qsphere_paired_lh_headcw.json)
+controlled speed ratio. A later [sequential same-input LH file-level pair](inflate_qsphere_paired_lh_control-host.json)
 ran the clean native `mris_sphere -q -p 6 -a 128 -seed 1234` and the Python CLI
 on the **same native-generated inflated input**: **41.866 s native versus
 135.866 s Python CPU**, both including startup and I/O. Their 102,764 ordered
@@ -70,7 +70,7 @@ Source-order neighbor averaging, normal scatter, and spring accumulation now
 use Numba. The updated connected inflation and quick-sphere CLI outputs still
 match **every ordered vertex, face, and volume geometry field** on both
 hemispheres. The [optimized bilateral report](inflate_qsphere_numba_optimized_report.json)
-records matching input/output and source hashes. Separate headcw CLI calls
+records matching input/output and source hashes. Separate control-host CLI calls
 of the updated quick sphere took **56.75 s LH** and **62.27 s RH**. Those calls
 were not paired with a fresh native execution or the old Python source under
 controlled load; the 41.866/135.866 s LH pair above remains the only clean
@@ -88,7 +88,7 @@ INPUT_INFLATED NATIVE_FINAL --output REPORT.json` with `PYTHONPATH=src` to run
 the independent chain. `experimental/probe_sphere_inflation_gradient.py`,
 `experimental/probe_sphere_inflation_momentum.py`, and
 `experimental/trace_sphere_quick_steps.py` isolate the force, carried state,
-and ordered optimizer updates. The fixed headcw outputs are under
-`/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_python_gpu_20260925/tessellate/sphere/quick_full_lh_a128/first_capture/`;
+and ordered optimizer updates. The fixed control-host outputs are under
+`/data/workspaces/freesurfer_synth/work/reconall_python_gpu_20260925/tessellate/sphere/quick_full_lh_a128/first_capture/`;
 `full_chain_python_vs_native_corrected.json` and
 `full_chain_python_vs_native_rh.json` are the LH/RH isolated full-chain reports. The connected bilateral file-output comparison is [`inflate_to_qsphere_chain_exact_report.json`](inflate_to_qsphere_chain_exact_report.json). The longer bilateral six-stage reports ([LH](six_stage_surface_chain_lh_report.json), [RH](six_stage_surface_chain_rh_report.json)) begin at frozen `filled.mgz` and `norm.mgz` and feed every Python stage output to the next.

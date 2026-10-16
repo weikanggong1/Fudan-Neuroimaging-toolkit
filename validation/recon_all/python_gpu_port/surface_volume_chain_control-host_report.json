@@ -1,0 +1,27 @@
+{
+  "subject": "fs_sub01",
+  "host": "control-host",
+  "date": "2026-09-25",
+  "input": "Python-generated aseg.presurf.hypos.mgz",
+  "chain": [
+    "surf2volseg_fix_python.fix_presurf_volume",
+    "surf2volseg_cortex_python.label_cortex_volume"
+  ],
+  "resident_python_stage_seconds": {
+    "fix_presurf": 4.104028787463903,
+    "label_cortex": 3.310524046421051
+  },
+  "comparisons_to_official": {
+    "aseg.mgz": {
+      "mismatch_voxels": 0,
+      "total_voxels": 16777216,
+      "decompressed_mgh_bytes_equal": false
+    },
+    "aparc+aseg.mgz": {
+      "mismatch_voxels": 0,
+      "total_voxels": 16777216,
+      "decompressed_mgh_bytes_equal": false
+    }
+  },
+  "note": "The downstream Python stages consumed upstream Python outputs. MGH trailing metadata differs; the numerical volume arrays match."
+}

@@ -56,9 +56,9 @@ def main():
     torch.backends.cudnn.allow_tf32 = True
     root = args.root.resolve()
     raw_path = root.parent.parent / "examples/data/sub-01_T1w.nii.gz"
-    mri = root.parent / "reconall_reference_gpucw1/fs_sub01/mri"
+    mri = root.parent / "reconall_reference_accelerator-a-1/fs_sub01/mri"
     reference = (root.parent / "fnit_subregions_plus_20260928" /
-                 "official_thalamus_gpucw1_full_sub01_20260929/ThalamicNuclei.FSvoxelSpace.mgz")
+                 "official_thalamus_accelerator-a-1_full_sub01_20260929/ThalamicNuclei.FSvoxelSpace.mgz")
     original = nib.load(raw_path)
     raw = np.asarray(original.dataobj, dtype=np.float32)
     setup_started = monotonic()

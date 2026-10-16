@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-TR=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929
+TR=/data/workspaces/freesurfer_synth/work/recon_standard_20260929
 D=$TR/volume_parity_20260930
 CODE=$D/fixes_20261001/stage1code
 OUT=$D/fixes_20261001/diagnostics
@@ -11,7 +11,7 @@ export PYTHONPATH=$CODE/src
 export CUDA_VISIBLE_DEVICES=$GPU
 export PYTORCH_NO_CUDA_MEMORY_CACHING=1
 export FREESURFER_HOME=$TR/assets
-export FS_LICENSE=/cwStorage/home/gongwk/.config/freesurfer-codex/license.txt
+export FS_LICENSE=/data/user/.config/freesurfer-codex/license.txt
 mkdir -p "$OUT"
 for hemi in lh rh; do
  "$PY" "$CODE/validation/recon_all/python_gpu_port/run_monitored.py" --gpu-uuid "$GPU" --output "$OUT/thickness_${hemi}_monitor" -- \

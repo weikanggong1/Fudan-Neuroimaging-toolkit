@@ -25,7 +25,7 @@
 
 最多 coordinates1、sampler1、current projection1、candidate projection1、state scalar prefix1、FSL-order prefix2、bending.normal1、cached bending reads2。0 evaluate/linearize/LM prefix/H/diag/normal cache/PCG/SCG/native/raw MRI/GPU/blur/normalization/完整配准。
 
-nodecw7 八物理核 `32,36,40,44,48,52,56,60`，四个线程环境变量均8，实际 canonical Conda。共用 CPU8 锁等待120s，module 锁等待20s，science child180s/kill-after5s，controller360s，20,000,000,000 bytes AS 上限。共锁未得只留0科学调用 receipt，并自然非0结束，不自动 retry。 prepared/queued/completed 的六个索引锁按统一排序，以 `LOCK_EX|LOCK_NB` 在共同25秒获取截止内等待；未全部取得即释放全部已开/已得锁并停止，该元数据阶段科学调用0、INDEX读取/覆盖0，不自动重试或再次enqueue。科学失败后仍做 after preflight，并保留原 science exitcode。输出目录700、文件600；只返回 scalar/hash/schema，不下载或公开数组。
+compute-a-7 八物理核 `32,36,40,44,48,52,56,60`，四个线程环境变量均8，实际 canonical Conda。共用 CPU8 锁等待120s，module 锁等待20s，science child180s/kill-after5s，controller360s，20,000,000,000 bytes AS 上限。共锁未得只留0科学调用 receipt，并自然非0结束，不自动 retry。 prepared/queued/completed 的六个索引锁按统一排序，以 `LOCK_EX|LOCK_NB` 在共同25秒获取截止内等待；未全部取得即释放全部已开/已得锁并停止，该元数据阶段科学调用0、INDEX读取/覆盖0，不自动重试或再次enqueue。科学失败后仍做 after preflight，并保留原 science exitcode。输出目录700、文件600；只返回 scalar/hash/schema，不下载或公开数组。
 
 ## 4. 解释边界
 

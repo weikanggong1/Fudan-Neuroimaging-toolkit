@@ -41,7 +41,7 @@ def export(*,fnit_root,output):
         if isinstance(value,list):return [clean(item) for item in value]
         if isinstance(value,str):
             value=value.replace(str(fnit_root),'<FNIT>')
-            value=re.sub(r'/cwStorage/home/[^\s"\']+', '<REFERENCE_PATH>', value)
+            value=re.sub(r'/data/shared/home/[^\s"\']+', '<REFERENCE_PATH>', value)
             value=re.sub(r'/mnt/c/[^\s"\']+', '<LOCAL_PATH>', value)
             value=re.sub(r'/home/[^\s"\']+', '<ENV_PATH>', value)
             return value
@@ -52,7 +52,7 @@ def export(*,fnit_root,output):
         if dict(numeric_leaves(original))!=dict(numeric_leaves(public)):
             raise ValueError('numeric/bool/null changed: '+name)
         payload=(json.dumps(public,indent=2,allow_nan=False)+'\n').encode()
-        if any(marker in payload for marker in (b'/cpfs01/',b'/cwStorage/',b'/mnt/c/',b'PRIVATE KEY')):
+        if any(marker in payload for marker in (b'/data/shared/',b'/data/shared/',b'/mnt/c/',b'PRIVATE KEY')):
             raise ValueError('private string in public export: '+name)
         if re.search(rb'\b(?:\d{1,3}\.){3}\d{1,3}\b|\bgwk_\d+\b',payload):
             raise ValueError('private network/account string: '+name)

@@ -2,7 +2,8 @@
 
 本模块的右侧真实初始对齐案例通过原20配准门及源定义空间/网格门。CPU
 候选仍依赖完整 FNIT checkout 的 validation 适配器；不是 wheel 生产 API，
-不更改 GEMSRecipe.run 或 GPU 路径。
+不更改 GEMSRecipe.run 或 GPU 路径。当前生产 API 已移除两项准备 helper；
+重放 CPU 实验必须显式提供下述 SHA 校验的历史 preparation.py。
 """
 from __future__ import annotations
 
@@ -19,7 +20,35 @@ class InitialAlignmentResult:
     registration_result: dict | None = None
 
 
-def context_label_image(context, *, coarse_reference=None):
+_PREPARATION_SHA256 = "a94a6e3fa9b0aa6c53ff8a9d66fa6298096adc25b25a83918f08402785b648d7"
+
+
+def _load_preparation_source(source):
+    """Load only an explicitly selected, checksum-bound historical snapshot."""
+    import hashlib
+    import importlib.util
+    import sys
+    if source is None:
+        raise ValueError("preparation_source is required for the archived CPU experiment")
+    source = Path(source).resolve()
+    if not source.is_file():
+        raise FileNotFoundError("archived preparation_source must be an existing file")
+    digest = hashlib.sha256(source.read_bytes()).hexdigest()
+    if digest != _PREPARATION_SHA256:
+        raise ValueError("archived preparation_source checksum mismatch")
+    name = "fnit.robust_register._archived_preparation_" + digest[:12]
+    specification = importlib.util.spec_from_file_location(name, source)
+    module = importlib.util.module_from_spec(specification)
+    sys.modules[name] = module
+    try:
+        specification.loader.exec_module(module)
+    except BaseException:
+        sys.modules.pop(name, None)
+        raise
+    return module
+
+
+def context_label_image(context, *, coarse_reference=None, preparation_source=None):
     """给 ndarray 标签恢复 context.image 几何，或核验原标签影像。
 
     context.image 是当前拟合处理网格；context.native_image 可以是预处理前的
@@ -28,7 +57,8 @@ def context_label_image(context, *, coarse_reference=None):
     import nibabel as nib
     import numpy as np
     from fnit._nib import load_image
-    from fnit.robust_register.preparation import _geometry, _mgh_image
+    preparation = _load_preparation_source(preparation_source)
+    _geometry, _mgh_image = preparation._geometry, preparation._mgh_image
 
     image = context.image
     values = np.asarray(context.coarse_segmentation)
@@ -60,7 +90,7 @@ def context_label_image(context, *, coarse_reference=None):
 def initialize_recipe_alignment(recipe, context, *, method="soft-dice",
                                 device="cpu", cpu_candidate=None,
                                 output_directory=None, coarse_reference=None,
-                                registration_parameters=None):
+                                registration_parameters=None, preparation_source=None):
     """只生成初始变换，不执行 GEMS mesh / intensity / postprocess。
 
     soft-dice 直接委托现有函数，可接收原 CPU/GPU 设备。cpu-robust-experiment
@@ -102,12 +132,14 @@ def initialize_recipe_alignment(recipe, context, *, method="soft-dice",
     import numpy as np
     import nibabel as nib
     from fnit._nib import load_image
-    from fnit.robust_register import (
-        prepare_subregion_alignment_target, reflect_atlas_header)
-    from fnit.robust_register.preparation import _geometry
+    preparation = _load_preparation_source(preparation_source)
+    prepare_subregion_alignment_target = preparation.prepare_subregion_alignment_target
+    reflect_atlas_header = preparation.reflect_atlas_header
+    _geometry = preparation._geometry
 
     started = monotonic()
-    labels_image = context_label_image(context, coarse_reference=coarse_reference)
+    labels_image = context_label_image(
+        context, coarse_reference=coarse_reference, preparation_source=preparation_source)
     atlas = load_image(Path(recipe.directory) / "AtlasDump.mgz", "atlas_dump")
     if not isinstance(atlas, nib.freesurfer.mghformat.MGHImage) or atlas.ndim != 3:
         raise TypeError("atlas dump must be one MGH/MGZ 3D image")

@@ -6,7 +6,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import nibabel as nib
 import numpy as np
-ROOT=Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_02/cohort_prefix')
+ROOT=Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_02/cohort_prefix')
 OUT=Path('/tmp/fnit-recon-accuracy-20261003/task_02/diagnostic')
 fig,axes=plt.subplots(2,4,figsize=(12,6),facecolor='white')
 records=[]

@@ -1,4 +1,6 @@
-# TorchMMORF：多标量与扩散张量联合配准
+# FNIT_mmorf
+
+> 统一 Python 入口：[`FNIT_mmorf`](../API_REFERENCE.md)，从 `fnit` 导入。下文配置、结果类型和细分算子保留高级兼容接口。
 
 | 项目 | 内容 |
 |---|---|
@@ -17,14 +19,14 @@ CUDA 路径使用 float32 并默认允许 TF32，不使用 float16 或 bfloat16�
 ## 2. Python 调用
 
 ```python
-from fnit.mmorf import run_mmorf
+from fnit import FNIT_mmorf
 
 moving_scalar_path = "/data/dti_FA.nii.gz"  # 个体3D FA
 reference_scalar_path = "/data/template_FA.nii.gz"  # 参考FA，定义输出空间
 moving_tensor_path = "/data/dti_tensor.nii.gz"  # 个体六通道tensor
 reference_tensor_path = "/data/template_tensor.nii.gz"  # 参考六通道tensor
 registration_output_directory = "/data/mmorf"  # 所有结果的目录
-multimodal_result = run_mmorf(
+multimodal_result = FNIT_mmorf(
     moving_scalar=moving_scalar_path, reference_scalar=reference_scalar_path,
     moving_tensor=moving_tensor_path, reference_tensor=reference_tensor_path,
     output_dir=registration_output_directory, device="cuda:0",

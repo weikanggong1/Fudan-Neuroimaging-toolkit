@@ -1,0 +1,203 @@
+{
+  "version": "0.17.0",
+  "primary_apis": {
+    "FNIT_fslmaths": {
+      "module": "fnit.fslmaths",
+      "attribute": "FNIT_fslmaths",
+      "kind": "function",
+      "signature": "(input_path, operations, output_path, *, device='cpu', input_dtype=None, output_dtype=None)"
+    },
+    "FNIT_flirt": {
+      "module": "fnit.flirt",
+      "attribute": "FNIT_flirt",
+      "kind": "function",
+      "signature": "(input, reference, *, output=None, omat=None, init=None, inweight=None, refweight=None, dof=12, cost='corratio', applyxfm=False, usesqform=False, device=None, execution='auto', candidate_batch_size=128, memory_budget_gb=20.0, overwrite=False)"
+    },
+    "FNIT_fnirt": {
+      "module": "fnit.fnirt",
+      "attribute": "FNIT_fnirt",
+      "kind": "function",
+      "signature": "(input, reference, affine=None, *, cout=None, iout=None, jout=None, refmask=None, config=None, device=None, execution='optimized', overwrite=False)"
+    },
+    "FNIT_applywarp": {
+      "module": "fnit.applywarp",
+      "attribute": "FNIT_applywarp",
+      "kind": "function",
+      "signature": "(input, reference, **kwargs)"
+    },
+    "FNIT_convertwarp": {
+      "module": "fnit.convertwarp",
+      "attribute": "FNIT_convertwarp",
+      "kind": "function",
+      "signature": "(reference, warp1, **kwargs)"
+    },
+    "FNIT_invwarp": {
+      "module": "fnit.invwarp",
+      "attribute": "FNIT_invwarp",
+      "kind": "function",
+      "signature": "(reference, warp, **kwargs)"
+    },
+    "FNIT_convert_space": {
+      "module": "fnit.space_conversion",
+      "attribute": "FNIT_convert_space",
+      "kind": "function",
+      "signature": "(source: 'str | Path | tuple[str | Path, str | Path]', source_space: 'str', target_space: 'str', output_dir: 'str | Path', assets_dir: 'str | Path', *, source_density: 'str | None' = None, target_density: 'str | None' = None, reference: 'str | Path | None' = None, device: 'str' = 'cpu', label: 'bool' = False, wb_command: 'str' = 'wb_command') -> 'Path | tuple[Path, Path]'"
+    },
+    "FNIT_mmorf": {
+      "module": "fnit.mmorf",
+      "attribute": "FNIT_mmorf",
+      "kind": "function",
+      "signature": "(moving_scalar, reference_scalar, moving_tensor, reference_tensor, *, output_dir, moving_scalar_affine=None, reference_scalar_affine=None, moving_tensor_affine=None, reference_tensor_affine=None, scalar_weights=None, auto_linear=True, device=None, config=None, overwrite=False) -> 'MMORFResult'"
+    },
+    "FNIT_SynthStrip": {
+      "module": "fnit.synthstrip",
+      "attribute": "FNIT_SynthStrip",
+      "kind": "class",
+      "signature": "(weights=None, device='cpu', no_csf=False, threads=None, *, configure_precision=True)"
+    },
+    "FNIT_SynthMorph": {
+      "module": "fnit.synthmorph",
+      "attribute": "FNIT_SynthMorph",
+      "kind": "class",
+      "signature": "(weights=None, device='cpu', model='joint', extent=256, hyper=0.5, steps=7, configure_precision=True)"
+    },
+    "FNIT_SynthSeg": {
+      "module": "fnit.synthseg_parc",
+      "attribute": "FNIT_SynthSeg",
+      "kind": "class",
+      "signature": "(weights: 'str | Path | None' = None, device: 'str' = 'cpu', threads: 'int | None' = None, *, cudnn_tf32: 'bool | None' = True)"
+    },
+    "FNIT_SynthSegPlus": {
+      "module": "fnit.synthseg_parc",
+      "attribute": "FNIT_SynthSegPlus",
+      "kind": "class",
+      "signature": "(weights: 'str | Path | None' = None, parc_weights: 'str | Path | None' = None, device: 'str | torch.device' = 'cpu', *, cudnn_tf32: 'bool | None' = True)"
+    },
+    "FNIT_SynthSR": {
+      "module": "fnit.synthsr",
+      "attribute": "FNIT_SynthSR",
+      "kind": "class",
+      "signature": "(weights=None, device='cpu', lowfield=False, v1=False, threads=None)"
+    },
+    "FNIT_WMHSynthSeg": {
+      "module": "fnit.wmh_synthseg",
+      "attribute": "FNIT_WMHSynthSeg",
+      "kind": "class",
+      "signature": "(weights=None, device='cpu', threads=None)"
+    },
+    "FNIT_fslfast": {
+      "module": "fnit.fast",
+      "attribute": "FNIT_fslfast",
+      "kind": "class",
+      "signature": "(device='cpu', threads=None, *, init_iterations=15, bias_iterations=4, fixed_iterations=4, bias_fwhm_mm=20.0, init_mrf=0.02, mrf=0.1, mixel_mrf=0.3, pve_steps=100, mean_field_iterations=5, pve_chunk_size=8, execution='tensor')"
+    },
+    "FNIT_fs_segment_subregions": {
+      "module": "fnit.gems",
+      "attribute": "FNIT_fs_segment_subregions",
+      "kind": "function",
+      "signature": "(t1: 'str | Path | nib.spatialimages.SpatialImage', atlas_root: 'str | Path | None' = None, *, structures: 'str | list[str] | tuple[str, ...]' = 'all', coarse_segmentation: 'str | Path | nib.spatialimages.SpatialImage | np.ndarray | None' = None, cortical_parcellation: 'str | Path | nib.spatialimages.SpatialImage | np.ndarray | None' = None, wmparc: 'str | Path | nib.spatialimages.SpatialImage | np.ndarray | None' = None, synthseg_weights: 'str | Path | None' = None, synthseg_parc_weights: 'str | Path | None' = None, device: 'str | torch.device' = 'cuda:0', threads: 'int' = 4, optimization: 'str' = 'fast', parallel_regions: 'bool' = False, max_parallel_regions: 'int' = 2, output_dir: 'str | Path | None' = None, save_highres: 'bool' = True, save_posteriors: 'bool' = False) -> 'SubregionResult'"
+    },
+    "FNIT_mri_robust_register": {
+      "module": "fnit.robust_register",
+      "attribute": "FNIT_mri_robust_register",
+      "kind": "function",
+      "signature": "(source, target, *, mode='rigid', stage_directory=None, device='cpu', saturation=50.0, iterations_per_level=5, stop_distance=0.01, initialize_translation=True, pyramid_min_size=16, pyramid_max_size=-1, highres_iterations=-1, spatial_chunk_size=131072, memory_budget_gb=20.0, tf32=True)"
+    },
+    "FNIT_recon_all": {
+      "module": "fnit.recon_all",
+      "attribute": "FNIT_recon_all",
+      "kind": "function",
+      "signature": "(t1: 'str | Path', subject_dir: 'str | Path', weights_dir: 'str | Path', assets_dir: 'str | Path', *, device: 'str' = 'cuda:0', threads: 'int' = 4, native_bin_dir: 'str | Path | None' = None, profile_stages: 'bool' = False, cuda_allocator_cache: 'str' = 'auto', hemisphere_workers: 'int' = 1, hemisphere_execution: 'str' = 'groups', native_optimizations: 'str' = 'auto', n4_backend: 'str' = 'native', n4_execution: 'str' = 'in-process', input_execution: 'str' = 'serial', normalization_controls_backend: 'str' = 'cpu', normalization_initial_bias_backend: 'str' = 'cpu', wm_backend: 'str' = 'native', wm_execution: 'str' = 'in-process', wm_edit_backend: 'str' = 'native', defects_backend: 'str' = 'native', sphere_normals_backend: 'str' = 'numba', inflate_backend: 'str' = 'native', sphere_finish_backend: 'str' = 'cpu', surface_placement_backend: 'str' = 'native', topology_backend: 'str' = 'native', topology_distance_backend: 'str' = 'serial', topology_state_backend: 'str' = 'legacy', annotation_gibbs_backend: 'str' = 'python', remesh_scalar_storage: 'str' = 'numpy', mni_execution: 'str' = 'in-process', gca_inverse_backend: 'str' = 'cpu', gca_candidate_chunk: 'int' = 64, gca_execution: 'str' = 'in-process', gca_reuse_atlas_context: 'bool' = False, fill_backend: 'str' = 'python', backend: 'str' = 'native') -> 'dict'"
+    },
+    "FNIT_fslvbm": {
+      "module": "fnit.fast_vbm",
+      "attribute": "FNIT_fslvbm",
+      "kind": "class",
+      "signature": "(*, device='cpu', threads=None, synthstrip_weights=None, synthmorph_weights=None, bias_correction=True, fast_execution='tensor', synthmorph_extent=256, synthmorph_hyper=0.5, synthmorph_steps=7, registration_backend='synthmorph', fnirt_strides=(4, 2, 1, 1), fnirt_steps=(5, 5, 10, 5), fnirt_input_fwhm_mm=(6.0, 4.0, 2.0, 2.0), fnirt_reference_fwhm_mm=(4.0, 2.0, 0.0, 0.0), fnirt_warp_resolution_mm=10.0, fnirt_regularization=(150.0, 75.0, 50.0, 30.0))"
+    },
+    "FNIT_mcflirt": {
+      "module": "fnit.mcflirt",
+      "attribute": "FNIT_mcflirt",
+      "kind": "class",
+      "signature": "(device=None)"
+    },
+    "FNIT_fMRIVolume_pipeline": {
+      "module": "fnit.fmri",
+      "attribute": "FNIT_fMRIVolume_pipeline",
+      "kind": "function",
+      "signature": "(bids_root, derivatives_root, *, subject, mni_template, session=None, task='rest', run=None, acquisition=None, direction=None, reconstruction=None, echo=None, t1w_image=None, mni_brain_mask=None, registration_backend='synthmorph', fnirt_config=None, synthstrip_weights=None, synthmorph_weights=None, ica_n_components=None, aroma_mode='nonaggr', regress_wm=False, regress_csf=False, regress_motion=False, motion_model=24, bandpass=None, confound_projection='orthogonal', global_signal=False, highpass_cutoff_seconds=100.0, slice_timing=False, slice_time_reference=0.5, device=None, batch_size=8, motion_iterations=(1, 1, 1), bold_reference_strategy='robust', ica_max_iter=500, n_splits=1000, random_state=0, overwrite=False, reuse_anatomical=True, bbr_execution='batched', fnirt_execution='optimized')"
+    },
+    "FNIT_fMRISurface_pipeline": {
+      "module": "fnit.fmri",
+      "attribute": "FNIT_fMRISurface_pipeline",
+      "kind": "function",
+      "signature": "(bids_root: str | pathlib.Path, derivatives_root: str | pathlib.Path, *, subject: str, hcp_assets_dir: str | pathlib.Path, recon_all: str | pathlib.Path | None = None, session: str | None = None, task: str = 'rest', run: str | None = None, acquisition: str | None = None, direction: str | None = None, reconstruction: str | None = None, echo: str | None = None, wb_command: str | pathlib.Path = 'wb_command', device: str = 'cuda:0', overwrite: bool = False, registered_spheres: tuple[str | pathlib.Path, str | pathlib.Path] | None = None, msm_config: fnit.msm.config.MSMSulcConfig | str | pathlib.Path | None = None, msm_execution: str = 'optimized', msmsulc_qc_policy: str = 'report', msmall_inputs: dict[str, fnit.msm.msmall.MSMAllInputs] | str | pathlib.Path | None = None, msmall_config: fnit.msm.config_msmall.MSMAllConfig | str | pathlib.Path | None = None, msmall_qc_policy: str = 'report', goodvoxels: str | pathlib.Path | None = None, signal: str = 'preproc', fsnative_to_t1w: str | pathlib.Path | numpy.ndarray | None = None, parallel: bool = True, cpu_threads: int | None = None, recon_all_backend: str | None = None, recon_all_output_dir: str | pathlib.Path | None = None, recon_all_options: dict | None = None, t1w_image: str | pathlib.Path | None = None, auto_volume: bool = True, volume_options: dict | None = None) -> fnit.fmri.surface_pipeline.FMRISurfaceResult"
+    },
+    "FNIT_newmsm": {
+      "module": "fnit.msm",
+      "attribute": "FNIT_newmsm",
+      "kind": "function",
+      "signature": "(inputs, output_dir, *, method='msmsulc', device='cuda:0', config=None, execution='optimized', parallel=True, cpu_threads=None, qc_policy='report')"
+    },
+    "FNIT_melodic": {
+      "module": "fnit.melodic",
+      "attribute": "FNIT_melodic",
+      "kind": "function",
+      "signature": "(input_bold: 'str | Path', brain_mask: 'str | Path', output_dir: 'str | Path', *, n_components: 'int | None' = None, device: 'str | torch.device | None' = None, voxel_batch_size: 'int' = 8192, max_iter: 'int' = 500, tolerance: 'float' = 0.001, random_state: 'int' = 0, mm_threshold: 'float' = 0.5) -> 'ICAResult'"
+    },
+    "FNIT_mshbm": {
+      "module": "fnit.mshbm",
+      "attribute": "FNIT_mshbm",
+      "kind": "function",
+      "signature": "(data, assets=None, *, input_kind='profiles', w=200.0, c=50.0, max_outer=50, max_em=101, max_m=300, max_lambda=101, censor=None, left_surface=None, right_surface=None, cortical_mask=None, output_dir=None, device='cuda:0', frame_chunk=8, max_distance_mm=3.0)"
+    },
+    "FNIT_topup": {
+      "module": "fnit.topup",
+      "attribute": "FNIT_topup",
+      "kind": "class",
+      "signature": "(device=None, *, config=None)"
+    },
+    "FNIT_eddy": {
+      "module": "fnit.eddy",
+      "attribute": "FNIT_eddy",
+      "kind": "class",
+      "signature": "(device='cuda:0', config: 'FSL2111Config | None' = None)"
+    },
+    "FNIT_dtifit": {
+      "module": "fnit.dtifit",
+      "attribute": "FNIT_dtifit",
+      "kind": "class",
+      "signature": "(device=None, *, weighted=False, chunk_size=131072)"
+    },
+    "FNIT_noddi": {
+      "module": "fnit.amico_noddi",
+      "attribute": "FNIT_noddi",
+      "kind": "class",
+      "signature": "(device=None, *, method=None, config=None, fit_method=None)"
+    },
+    "FNIT_bedpostx": {
+      "module": "fnit.bedpostx",
+      "attribute": "FNIT_bedpostx",
+      "kind": "class",
+      "signature": "(device='cpu', threads=None, *, nfibres=3, model=2, burnin=1000, njumps=1250, sample_every=25, ard_weight=1.0, chunk_size=16384, seed=8665904)"
+    },
+    "FNIT_probtrackx2": {
+      "module": "fnit.probtrackx",
+      "attribute": "FNIT_probtrackx2",
+      "kind": "class",
+      "signature": "(device='cpu', *, nsamples=5000, nsteps=2000, steplength=0.5, cthr=0.2, fibthresh=0.01, batch_size=16384, seed=12345, distthresh=0.0, sampvox=0.0, fibst=None, usef=False, randfib=0, pathdist=False, mean_path_length=False)"
+    },
+    "FNIT_dMRIPipeline": {
+      "module": "fnit.dmri_pipeline",
+      "attribute": "FNIT_dMRIPipeline",
+      "kind": "class",
+      "signature": "(device=None, *, registration_backend='tbss', fnirt_config=None, synthstrip_weights=None, dti_shell=1000, dti_tolerance=100, bvec_source='rotated', noddi_fit_method='amico', eddy_gp_seed=None)"
+    },
+    "FNIT_UKBconnectomePipeline": {
+      "module": "fnit.connectome",
+      "attribute": "FNIT_UKBconnectomePipeline",
+      "kind": "class",
+      "signature": "(device: 'str' = 'cuda:0')"
+    }
+  }
+}

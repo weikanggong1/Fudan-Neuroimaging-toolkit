@@ -129,9 +129,9 @@ def worker(args):
     torch.backends.cuda.matmul.allow_tf32 = True
     torch.backends.cudnn.allow_tf32 = True
     torch.cuda.reset_peak_memory_stats(device)
-    mri = args.root.parent / "reconall_reference_gpucw1/fs_sub01/mri"
+    mri = args.root.parent / "reconall_reference_accelerator-a-1/fs_sub01/mri"
     paths = {name: mri / (name + ".mgz") for name in ("norm", "aseg", "wmparc")}
-    reference = args.root.parent / "fnit_subregions_plus_20260928/official_thalamus_gpucw1_full_sub01_20260929/ThalamicNuclei.FSvoxelSpace.mgz"
+    reference = args.root.parent / "fnit_subregions_plus_20260928/official_thalamus_accelerator-a-1_full_sub01_20260929/ThalamicNuclei.FSvoxelSpace.mgz"
     atlas_dir = args.root / "atlases/thalamus"
     source_root = Path(fnit.__file__).resolve().parent
     source_facts = {str(path.relative_to(source_root)): digest(path)

@@ -1,6 +1,6 @@
 # 私有安装验证：最终 wheel 和部分原生 bundle 已通过
 
-最终算法 `8d750e2` 的实际 wheel/target 安装和私有原生 bundle 已在 gpucw1 通过。原生 bundle 于 UTC 2026-10-02 16:21:18 完成，状态为 `passed`，attempt 为 `reuse_white_bundle_v2`。本轮重编 GCA；white 复用已通过真实阶段回归的 FNIT 独立源码构建；其余 13 个程序复用原独立 Conda 构建，SHA 不变。
+最终算法 `8d750e2` 的实际 wheel/target 安装和私有原生 bundle 已在 accelerator-a-1 通过。原生 bundle 于 UTC 2026-10-02 16:21:18 完成，状态为 `passed`，attempt 为 `reuse_white_bundle_v2`。本轮重编 GCA；white 复用已通过真实阶段回归的 FNIT 独立源码构建；其余 13 个程序复用原独立 Conda 构建，SHA 不变。
 
 ## 1. 最终 wheel
 
@@ -14,7 +14,7 @@
 
 ## 2. 原生输入与实际操作
 
-最初 supervisor `45414` 分阶段持共用锁 `/tmp/fnit-recon-five-20261002-gongwk.gpu.lock`，CPU 线程预算 4，禁用 CUDA。source、旧 `1dd6df8` wheel 和 GCA 阶段实际通过；旧 wheel 单独绑定 `1dd6df8fc10d8446491fea11bdf3dadb507428f9`，没有改标成最终 wheel。GCA 有限重编及能力查询于 UTC 15:41:47 完成。见 [阶段状态](native_partial_v2/status.json)、[GCA 构建报告](native_partial_v2/gca_build/build.json)、[旧 wheel 报告](native_partial_v2/wheel_install/report.json)。
+最初 supervisor `45414` 分阶段持共用锁 `/tmp/fnit-recon-five-20261002-benchmark-user.gpu.lock`，CPU 线程预算 4，禁用 CUDA。source、旧 `1dd6df8` wheel 和 GCA 阶段实际通过；旧 wheel 单独绑定 `1dd6df8fc10d8446491fea11bdf3dadb507428f9`，没有改标成最终 wheel。GCA 有限重编及能力查询于 UTC 15:41:47 完成。见 [阶段状态](native_partial_v2/status.json)、[GCA 构建报告](native_partial_v2/gca_build/build.json)、[旧 wheel 报告](native_partial_v2/wheel_install/report.json)。
 
 原始固定 FreeSurfer 包实测 SHA 为 `2e76f40415f3e334b6fcd2ce548b451e9219bc9ffaecc46e752d4853e13aff0a`，全量原始源码 tree 在锁内重新核验，SHA 为 `313afb62ea5b5c7d5aa9d78659403b126c63e7cdd91465391ce6a2138c93693c`。见 [实际来源](source_validation_1dd6/source-provenance.json)。GCA 的共享 Conda source/build 只作只读输入，修改后的源码、对象和程序写入私有 `gca_build/`。
 
@@ -26,7 +26,7 @@ white 实际复用 `task_02/native_build_v3/candidate/mris_place_surface_fnit_ho
 
 ## 3. 安装产物
 
-实际 bin：`/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/native_bundle/bin`。
+实际 bin：`/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/native_bundle/bin`。
 
 | 程序 | 本轮操作 | RPATH 前 SHA | 安装后 SHA |
 | --- | --- | --- | --- |
@@ -42,8 +42,8 @@ white 实际复用 `task_02/native_build_v3/candidate/mris_place_surface_fnit_ho
 
 这是实际通过的私有部分安装。完整新 Conda 创建、完整 `tools/setup_recon_all_native_conda.sh` 正向安装、当前全部 15 个生产程序从头构建和无预装软件的物理隔离尚未执行；只实测 setup 缺 Conda 工具链的失败门禁。普通 wheel 和 sdist 当前都不能代替含 shell/N4 CMake/C++ 的完整 checkout。
 
-安装成功、171 个 Python SHA 精确和能力查询不等于完整 MRI 对照通过。阶段性能继续绑定既有真实 GCA/white/pial 报告，完整两例候选须在 gpucw1 同硬件、共用锁和四线程预算下另行运行，不能相加阶段收益。
+安装成功、171 个 Python SHA 精确和能力查询不等于完整 MRI 对照通过。阶段性能继续绑定既有真实 GCA/white/pial 报告，完整两例候选须在 accelerator-a-1 同硬件、共用锁和四线程预算下另行运行，不能相加阶段收益。
 
 最初完整源码归档上传被自动审批拒绝，未执行；旧私有路径改用服务器内既有 `1dd6df8` 部署，没有绕过拒绝上传。最终必要 `8d750e2` 源码归档是协调者另外审批和部署的独立路径，来源见第 1 节。
 
-CPU 替代尝试只读复用 gpucw1 和已认证 headcw ControlMaster；两条路径对 `nodecw10`、`nodecw12` 新 BatchMode exec 均拒绝认证（退出 255）。未进入 CPU 节点，环境兼容性未测，没有申请新密码、读取凭据或增加登录节点计算负载；按协调者指令停止扩展登录检查。见 [CPU 替代记录](cpu_host_alternative.json)。
+CPU 替代尝试只读复用 accelerator-a-1 和已认证 control-host ControlMaster；两条路径对 `compute-a-10`、`compute-a-12` 新 BatchMode exec 均拒绝认证（退出 255）。未进入 CPU 节点，环境兼容性未测，没有申请新密码、读取凭据或增加登录节点计算负载；按协调者指令停止扩展登录检查。见 [CPU 替代记录](cpu_host_alternative.json)。

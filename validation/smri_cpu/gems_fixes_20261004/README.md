@@ -42,7 +42,7 @@ print(gaussian_parameters.means.shape)  # (3, 2)：三类、两模态
 
 候选只在一次 CPU TorchGEMS 调用内保存固定图像的有限、非零样本及保留索引。责任权重选择、类别归约和协方差累计顺序保留，FP64 梯度、目标值和 solver 状态保留，完整后验仍导出；CUDA 不进入缓存。候选补丁见 [cpu_cache_v1_candidate.patch](cpu_cache_v1_candidate.patch)，测试见 [cpu_cache_v1_candidate_checks.py](cpu_cache_v1_candidate_checks.py)。这些文件供隔离复现，不由 FNIT 导入。
 
-nodecw7、8 个固定物理核 `32,36,40,44,48,52,56,60`，锁为 `nodecw7.gems.cpu8.lock`；独立冷进程顺序运行 baseline/cache，计时覆盖加载、拟合、保存和验收所需的参数导出。
+compute-a-7、8 个固定物理核 `32,36,40,44,48,52,56,60`，锁为 `compute-a-7.gems.cpu8.lock`；独立冷进程顺序运行 baseline/cache，计时覆盖加载、拟合、保存和验收所需的参数导出。
 
 | 同阶段完整脑干 | baseline | cache-v1 |
 |---|---:|---:|
@@ -50,7 +50,7 @@ nodecw7、8 个固定物理核 `32,36,40,44,48,52,56,60`，锁为 `nodecw7.gems.
 | API（秒） | 632.479 | 635.445 |
 | 采样进程树峰值 RSS（GB，十进制） | 3.711 | 3.821 |
 
-原网格/高分辨率标签、全部 21 通道后验、最终顶点、Gaussian 均值/协方差、全部 objective、solver 状态和最小 Jacobian、几何、体积表完全相同，[完整 CPU 状态比较](cpu_cache_nodecw7_comparison.public.json)通过。墙钟增加 0.40%，RSS 增加约 3.0%；没有端到端速度或内存收益证据，因此生产入口已恢复无该缓存的实现。过载 nodecw10 的早期运行不与 nodecw7 时间混合；其队列在当前 arm 完成后停止。
+原网格/高分辨率标签、全部 21 通道后验、最终顶点、Gaussian 均值/协方差、全部 objective、solver 状态和最小 Jacobian、几何、体积表完全相同，[完整 CPU 状态比较](cpu_cache_compute-a-7_comparison.public.json)通过。墙钟增加 0.40%，RSS 增加约 3.0%；没有端到端速度或内存收益证据，因此生产入口已恢复无该缓存的实现。过载 compute-a-10 的早期运行不与 compute-a-7 时间混合；其队列在当前 arm 完成后停止。
 
 GPU0 为同一 H100 UUID `26e41f63-1a65-6b3e-5370-fa9a2934ca8e`、TF32 默认策略。缓存两臂的完整脑干状态也完全相同，[GPU 比较](gpu_cache_comparison.public.json)通过；峰值 allocated 2.641 GB、reserved 3.941 GB 均相同。49.137/46.104 秒的进程时间发生在外部任务占用约 66 GB、GPU 95–100% 利用率期间，只作为观测，不作为稳定速度保证。
 
@@ -121,7 +121,7 @@ HR 的未改丘脑指标完全相同；native 合并受其他结构重叠竞争�
 
 ![公开 sub-02 的 HA-only v4；下排红色为标签不一致](hippo_amygdala_v4_candidate.png)
 
-已无用途的 nodecw7 baseline all 在写入 stop_file 后只对自有进程组发送 SIGTERM，[主动终止事件](nodecw7_recipe_active_termination.public.json)明确记录；该 arm 返回 −15，3151.131 秒，属于主动终止的未完成运行，不作完整 benchmark。过载 nodecw10 的早期脑干 baseline 已完成，4811.045 秒；它与 nodecw7 时间不混合，cache 新臂按预先 stop_file 不启动。
+已无用途的 compute-a-7 baseline all 在写入 stop_file 后只对自有进程组发送 SIGTERM，[主动终止事件](compute-a-7_recipe_active_termination.public.json)明确记录；该 arm 返回 −15，3151.131 秒，属于主动终止的未完成运行，不作完整 benchmark。过载 compute-a-10 的早期脑干 baseline 已完成，4811.045 秒；它与 compute-a-7 时间不混合，cache 新臂按预先 stop_file 不启动。
 
 ## 6. 复现与版本记录
 
@@ -165,8 +165,8 @@ python report_encoding.py verify /absolute/path/gems_fixes_20261004
 |---|---|
 | 唯一生产修复 | `src/fnit/gems/gaussian.py`、`tests/gems/test_gaussian_class_mass.py`、`docs/subregions/README.md`；仅 no-hyper class-mass 轴修复 |
 | recipe 全部科学结果 | 本 README、三份 `gpu_*_official_score.public.json`、`regional_delta_summary.public.json`、`gems_shared.public.json`、`report_encoding.py` 与其核验 manifest；逐区失败和退步均保留 |
-| 实际源码与运行/失败身份 | 三份 `*_source.public.json`、`run_manifest.public.json`、`recipe_final_run_manifest.public.json`、`nodecw7_recipe_active_termination.public.json`；共用 source SHA 基表不可单独丢弃 |
-| 缓存不采纳证据 | `cpu_cache_nodecw7_comparison.public.json`、`gpu_cache_comparison.public.json`；整例完整状态一致，但 CPU 时间/RSS 无收益 |
+| 实际源码与运行/失败身份 | 三份 `*_source.public.json`、`run_manifest.public.json`、`recipe_final_run_manifest.public.json`、`compute-a-7_recipe_active_termination.public.json`；共用 source SHA 基表不可单独丢弃 |
+| 缓存不采纳证据 | `cpu_cache_compute-a-7_comparison.public.json`、`gpu_cache_comparison.public.json`；整例完整状态一致，但 CPU 时间/RSS 无收益 |
 | 初次分歧及脑图 | 各预处理/二值 mask/cubic 探针与 JSON，v3/v4 两份 PNG及对应 JSON；失败 recipe patch/checks 保留为诊断附件，不启用为生产路径 |
 | 额外只读 FNIRT 定位 | [FNIRT_READONLY.md](FNIRT_READONLY.md)、`fnirt_posthoc_probe.py`、两份 `fnirt_posthoc_*.public.json`；无 FNIRT 运行时修改 |
 

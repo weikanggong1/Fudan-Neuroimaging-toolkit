@@ -83,7 +83,7 @@ segment_subregions hippo-amygdala --cross fs_sub01 --sd /absolute/path/subjects 
 
 ### 5.1 已接受的完整流程基线
 
-这里引用本轮精度优化开始前的回溯修复版，作为基线。候选试验的结果放在后续小节。GPU 试验在 gpucw1 的共享 H100 上进行，使用 PyTorch 2.5.1、CUDA 11.8 和 4 个 CPU 线程；各组保存 GPU 负载与本进程显存日志，耗时为本例的实际观测值。
+这里引用本轮精度优化开始前的回溯修复版，作为基线。候选试验的结果放在后续小节。GPU 试验在 accelerator-a-1 的共享 H100 上进行，使用 PyTorch 2.5.1、CUDA 11.8 和 4 个 CPU 线程；各组保存 GPU 负载与本进程显存日志，耗时为本例的实际观测值。
 
 | 输入 | 四结构 compute | API 含保存 | 进程 wall | PyTorch 峰值 / 进程峰值 | 丘脑 mean / weighted | 严格通过 / 标签数 | 官方丘脑体素数 |
 |---|---:|---:|---:|---:|---:|---:|---:|

@@ -40,7 +40,7 @@ PYTHONPATH=src python validation/recon_all/accuracy_20261003/task_03/tail_probe.
 
 ## 当前实测与历史
 
-`audit.json` 为 2026-10-03 gpucw1 实时重读冻结真实文件生成，并非把旧报告改日期。两例 orig 数值/affine 一致。sub01 nu/brainmask 各 2 体素差异，LTA max 0.0005735158920288086，norm 490692（max 8/P99 1），brain 705288（max 21/P99 2），filled 4844；sub02 nu 29、brainmask 17，LTA max 7.450580603862722e-9，norm 41（max 3/P99 0），brain 4502，filled 112。仅凭此不能把放大归因于 GCA 缓存或某个算子。
+`audit.json` 为 2026-10-03 accelerator-a-1 实时重读冻结真实文件生成，并非把旧报告改日期。两例 orig 数值/affine 一致。sub01 nu/brainmask 各 2 体素差异，LTA max 0.0005735158920288086，norm 490692（max 8/P99 1），brain 705288（max 21/P99 2），filled 4844；sub02 nu 29、brainmask 17，LTA max 7.450580603862722e-9，norm 41（max 3/P99 0），brain 4502，filled 112。仅凭此不能把放大归因于 GCA 缓存或某个算子。
 
 冻结同输入 normalize、tail 和四组合完整 EM 已排队，完成结果另存，不将排队视为实测完成。当前无生产修复或速度收益声明；整体等效 `not_assessed`。十例新数据所有受影响链和整例指标仍须完成。
 
@@ -82,8 +82,8 @@ sub01 完整 EM 四组合已完成，详见 `cross_progress.json`、`contributio
 
 ```bash
 python collect_results.py \
-  --receipts /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1 \
-  --output /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/collected
+  --receipts /data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1 \
+  --output /data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/collected
 ```
 
 `--receipts` 为四种诊断的结果根，`--output` 为独占报告目录。输出各模式完成标记、四组合 CSV、尾段 CSV 和父 PID 显存采样摘要；缺报告记 `receipt_absent`，没有 `complete:true` 记 `running_or_waiting`。缺少父子进程树快照记 `not_available`。真实十例全链和整例仍由协调者统一调度，本文不替代它们。
@@ -107,7 +107,7 @@ python collect_results.py \
 
 两例 FP32 坐标诊断的 norm 与六帧 ctrl_pts 都为零差，网格/dtype相同。sub02 原 11 个 norm 体素（max 1）和 6 个 ctrl 元素残差消除，sub01 保持零差。sub02 八组诊断中，官方 nu 的两组均 norm11/ctrl6，FNIT nu 的两组均 norm41/ctrl6，mask 不增加差异；两例完整缓存 EM 在官方同输入都复现官方 LTA。六项 tail 回放全部零差，sub02 filled 本次完成耗时 54.12秒。
 
-成熟子函数修复已落在 `ca_normalize_python.atlas_samples`，内部新增 `prior_to_source_coordinates`，复用 VNL affine inverse并按原生逐项 FP32 运算；不缩放平移，nint 前提升已形成的 float 坐标。核对完整原生链发现：`GCAfindAllSamples` 初始 x/y/z 是 prior×spacing 的 atlas 坐标；`GCAcomputeSampleCoords` 仅在浮点 source 坐标位于闭区间 `[0,size-1]` 时覆盖它，越界应保留初始坐标。生产 helper 同时保留这条规则，没有体素特例或边缘 clip。三项 standalone 契约测试已在 gpucw1通过，涵盖负半整数、FP32 half-add、spacing/平移和255/255.1浮点边界；它们不代替真实 T1 benchmark。
+成熟子函数修复已落在 `ca_normalize_python.atlas_samples`，内部新增 `prior_to_source_coordinates`，复用 VNL affine inverse并按原生逐项 FP32 运算；不缩放平移，nint 前提升已形成的 float 坐标。核对完整原生链发现：`GCAfindAllSamples` 初始 x/y/z 是 prior×spacing 的 atlas 坐标；`GCAcomputeSampleCoords` 仅在浮点 source 坐标位于闭区间 `[0,size-1]` 时覆盖它，越界应保留初始坐标。生产 helper 同时保留这条规则，没有体素特例或边缘 clip。三项 standalone 契约测试已在 accelerator-a-1通过，涵盖负半整数、FP32 half-add、spacing/平移和255/255.1浮点边界；它们不代替真实 T1 benchmark。
 
 完整生产接口、所有参数/异常、原软件命令和版本记录见 [CA_NORMALIZATION.md](../../../../docs/recon_all/CA_NORMALIZATION.md)。无新依赖，不改变现有 GPU/TF32 设置，其他控制点/偏置场算子保留。
 
@@ -116,7 +116,7 @@ python collect_results.py \
 安全恢复命令（只读）：
 
 ```bash
-cat /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/production_fix_abba_v1/report.json
+cat /data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/production_fix_abba_v1/report.json
 ```
 
 不要重新执行原ABBA脚本覆盖/重复已有队列。生产修复当前source SHA为 `167be9d72496b7279b98e52b8f0d6c0808d2c09d02df24af1fed0fd331100b9b`；基线仍为公开816的冻结模块，SHA `abb436826e600101c2c5087e2367e8a36a7c038c99eda10bc4f5be1e7486661a`。十例新T1连续链及最终指标仍由协调者完成，整体等效 `not_assessed`。

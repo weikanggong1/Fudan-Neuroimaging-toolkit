@@ -42,7 +42,7 @@ python stage1_linearize.py --root "$fnit_root" \
   --workspace "$stage1_workspace" --output "$stage1_output" --approved-stage1
 ```
 
-`--approved-stage1` 是防误调用参数，不能替代任务授权。原任务已执行一次，无需重跑。nodecw7 使用八个 physical 核（32,36,…,60），线程8、interop1，共用 CPU outer lock 后取本模块锁；child180s、controller19600s、20,000,000,000 字节 address-space cap。调度器明确等待已排 Seg126298 原身份结束才进入共锁。Seg 自身合同失败不改变本任务参数；本任务只等待它释放资源。实际 enqueue、调度和最终索引见 [launch](run/launch.public.json)、[scheduler](source/SCHEDULER.public.json)、[completed INDEX](run/index_completed.public.json)。
+`--approved-stage1` 是防误调用参数，不能替代任务授权。原任务已执行一次，无需重跑。compute-a-7 使用八个 physical 核（32,36,…,60），线程8、interop1，共用 CPU outer lock 后取本模块锁；child180s、controller19600s、20,000,000,000 字节 address-space cap。调度器明确等待已排 Seg126298 原身份结束才进入共锁。Seg 自身合同失败不改变本任务参数；本任务只等待它释放资源。实际 enqueue、调度和最终索引见 [launch](run/launch.public.json)、[scheduler](source/SCHEDULER.public.json)、[completed INDEX](run/index_completed.public.json)。
 
 ## 4. 对应原软件
 

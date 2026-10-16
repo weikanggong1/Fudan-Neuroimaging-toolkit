@@ -4,7 +4,7 @@
 报告记录实际输入、源码、资产、程序SHA、线程、GPU及硬件。
 这是控制臂，候选臂尚未启动。已保存42个完成阶段记录，原调度状态仍为running。
 
-headcw已认证连接可用，但gpucw1新SSH先Connection refused、后No route to host；
+control-host已认证连接可用，但accelerator-a-1新SSH先Connection refused、后No route to host；
 原验证tmux会话不再存在，没有CLI返回码/最终报告。原因没有确认，不归因OOM。
 不能把现有138文件存在性、阶段相加或手动补跑称为整例完成。
 

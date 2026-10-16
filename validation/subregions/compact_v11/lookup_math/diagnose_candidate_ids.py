@@ -9,10 +9,10 @@ import nibabel as nib
 import numpy as np
 import torch
 
-ROOT = Path("/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930")
+ROOT = Path("/data/workspaces/freesurfer_synth/work/fnit_subregions_unified_20260930")
 WORK = ROOT / "lookup_math_diag_v11_20261001"
 FROZEN = ROOT / "source_v11"
-PREPARED = Path("/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_thalamus_debug")
+PREPARED = Path("/data/workspaces/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929/port_thalamus_debug")
 sys.path.insert(0, str(FROZEN / "src"))
 from fnit.gems.atlas import GEMSAtlas
 from fnit.gems.rasterize import build_block_index

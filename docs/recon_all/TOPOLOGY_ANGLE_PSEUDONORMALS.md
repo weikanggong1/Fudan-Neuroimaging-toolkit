@@ -73,7 +73,7 @@ python tools/benchmark_recon_topology_pseudonormals.py \
 mris_fix_topology -ga -seed 1234 -threads 4 reference_subject lh
 ```
 
-隔离观察器在首个实际候选距离步骤捕获并停止，不是完整 GA。原参考只用于 benchmark。类型探针在参考构建主机使用实际头文件、Conda 编译器与 Ninja target 参数，两次结果一致；CFFF 接收的只是去敏标量及哈希，原完整编译收据留在原机器。类型探针与 CFFF 算子计时分开，不声称跨机器性能比较。
+隔离观察器在首个实际候选距离步骤捕获并停止，不是完整 GA。原参考只用于 benchmark。类型探针在参考构建主机使用实际头文件、Conda 编译器与 Ninja target 参数，两次结果一致；accelerator-b 接收的只是去敏标量及哈希，原完整编译收据留在原机器。类型探针与 accelerator-b 算子计时分开，不声称跨机器性能比较。
 
 ## 5．当前真实精度、时间与示例
 
@@ -85,9 +85,9 @@ mris_fix_topology -ga -seed 1234 -threads 4 reference_subject lh
 | 最大 / P99 分量误差 | 9.536743e−7 / 4.768372e−7 | 0 / 0 |
 | 相邻面不同元素 / 4,884 | 0 | 0 |
 | 自产重复不同位数 | 0 | 0 |
-| 本地 / CFFF 边界契约 | 8 / 8 | 9 / 9 |
+| 本地 / accelerator-b 边界契约 | 8 / 8 | 9 / 9 |
 
-修复后在 CFFF Xeon Platinum 8369B、CPU affinity 120–123、四线程，完整伪法向 API 首次/重复为 **0.003581 / 0.003122 秒**，相邻面 **0.001369 / 0.001259 秒**。这些首次 API 在契约测试后运行，不是冷 JIT。九个契约耗时 0.802316 秒；driver 从导入后计，包括契约、输入读取、计算、NPZ/PNG/报告写入的已测段为 1.678432 秒，排除解释器启动、导入和末尾 COMPLETE 写入。没有单独测原参考的这两个子步骤，因此不计算加速比。
+修复后在 accelerator-b Xeon Platinum 8369B、CPU affinity 120–123、四线程，完整伪法向 API 首次/重复为 **0.003581 / 0.003122 秒**，相邻面 **0.001369 / 0.001259 秒**。这些首次 API 在契约测试后运行，不是冷 JIT。九个契约耗时 0.802316 秒；driver 从导入后计，包括契约、输入读取、计算、NPZ/PNG/报告写入的已测段为 1.678432 秒，排除解释器启动、导入和末尾 COMPLETE 写入。没有单独测原参考的这两个子步骤，因此不计算加速比。
 
 源码 SHA `562d7f5f617048b19d133fc74ebd4ed1800a4932f168a010a1c74ce54d76ddd0`。测试绑定 `ae868024…` 的实际脏树快照，580 个上传 payload 的大小和 SHA 全部校验；没有追标为后续干净提交。报告确认 CUDA 前后未初始化、线程预算恢复、TF32 标志未改；没有测进程树 GPU 占用，显存数值为 null，不是 0。
 

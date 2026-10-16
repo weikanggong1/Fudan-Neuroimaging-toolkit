@@ -33,7 +33,7 @@ FSL 6.0.7.4 对官方 FNIRT 系数的 `convertwarp → invwarp → applywarp` �
 
 ## 数据与配对设计
 
-在 gpucw1 使用 FSL 6.0.7.22 `probtrackx2` / `probtrackx2_gpu`，对同一例真实 UK Biobank DWI 的原版 FSL BEDPOSTX 三纤维后验比较 FNIT。五个预先定义的 ROI 由 JHU 标签图和被试 FA、追踪 mask 生成，选点不依赖两套追踪结果。
+在 accelerator-a-1 使用 FSL 6.0.7.22 `probtrackx2` / `probtrackx2_gpu`，对同一例真实 UK Biobank DWI 的原版 FSL BEDPOSTX 三纤维后验比较 FNIT。五个预先定义的 ROI 由 JHU 标签图和被试 FA、追踪 mask 生成，选点不依赖两套追踪结果。
 
 双方统一总步数 400、步长 0.5 mm、`cthr=0.2`、`fibthresh=0.01`、`rseed=20260927`。单 seed 每体素 200 条，五区网络每体素 2000 条；FNIT 批大小 16384，CPU 8 线程。分别配对默认计数 `--opd` 和长度加权 `--opd --pd --ompl`，每种模式运行 FSL CPU/FNIT CPU、FSL GPU/FNIT GPU 的单 seed 与五区网络。FNIT 当前源码于 2026-09-29 在已被占用的 H100 GPU 1 上复跑，PyTorch 显存限制为总量 20%，并记录测试前后占用；FSL 同输入同参数输出来自既有运行。墙钟包含进程启动、后验载入、追踪与写盘。五个 ProbTrackX 源码文件的 SHA-256 保存在六份公开摘要中。真实影像、后验、seed、逐体素结果和完整文本矩阵留在授权服务器；仓库保存六份配对汇总 JSON、一份性能分段 JSON 和一张去标识连接矩阵图。
 
@@ -95,7 +95,7 @@ CUDA_VISIBLE_DEVICES=1 "$PYTHON" validation/probtrackx/measure_gpu_current.py \
 
 ## 三类连接矩阵的真实 DWI 复现
 
-同一份五区 ROI 列表以 [prepare_connectome_masks.py](prepare_connectome_masks.py) 制作并集 seed、整数标签图和 ROI 元数据。稀疏矩阵使用同一并集 seed、每体素 500 条、400 总步、0.5 mm、rseed=20260927；区域矩阵使用原 ROI 列表。这样 matrix1/2/3 不混入 --network 的跨 ROI 轨迹筛选。原版与 FNIT 各模式分别启动，墙钟时间包括读取、追踪和写盘。真实 DWI、每条边的原始明细和逐边连接图保留在 gpucw1；仓库的摘要不含原始体素或边矩阵。
+同一份五区 ROI 列表以 [prepare_connectome_masks.py](prepare_connectome_masks.py) 制作并集 seed、整数标签图和 ROI 元数据。稀疏矩阵使用同一并集 seed、每体素 500 条、400 总步、0.5 mm、rseed=20260927；区域矩阵使用原 ROI 列表。这样 matrix1/2/3 不混入 --network 的跨 ROI 轨迹筛选。原版与 FNIT 各模式分别启动，墙钟时间包括读取、追踪和写盘。真实 DWI、每条边的原始明细和逐边连接图保留在 accelerator-a-1；仓库的摘要不含原始体素或边矩阵。
 
 ~~~bash
 export BED=/absolute/path/subject.bedpostX
@@ -177,7 +177,7 @@ export PRIVATE_WAYPOINT_OUT=/absolute/path/new-private-waypoint-run
   --nsamples 2000
 ~~~
 
-该真实 DWI 配对已在 gpucw1 完成，FSL 完成日志和双方文件均通过检查。逐体素输出、比较数值和 `report.private.json` 保留在授权服务器；公开前不据此声称数值等价。该运行只测试单 waypoint，未覆盖 `wtstop` 或其他约束组合。
+该真实 DWI 配对已在 accelerator-a-1 完成，FSL 完成日志和双方文件均通过检查。逐体素输出、比较数值和 `report.private.json` 保留在授权服务器；公开前不据此声称数值等价。该运行只测试单 waypoint，未覆盖 `wtstop` 或其他约束组合。
 
 ## NbM→Cingulum 单 waypoint 加 avoid 的 GPU 复现
 
@@ -193,4 +193,4 @@ FNIT 对该常用约束组合增加 Numba 计数路径。优化前后 455000 条
 
 密度图相关在双方非零体素并集计算；前 10% Dice 用相同的 FSL 非零体素数十分之一作为双方 top-*k*。平均路径长度图的相关和 MAE 在双方都非零的体素上计算，并另报支持 Dice 与并集（含单侧缺失体素）误差。完整 ROI×ROI 原始矩阵只保存在授权服务器；公开报告仅含汇总误差。网络连接稀疏，个位数命中不宜单独解释。
 
-9×5×5 合成直线场用于计数规则回归，不列为正式 benchmark：`--pd --ompl` 的单 seed 和双 ROI 网络输出，以及单独 `--ompl` 的网络输出，均与 FSL 逐元素相同；matrix1/2/3 的 2×2 稀疏矩阵、坐标表、matrix2 lookup 和路径密度也与 FSL 逐项相同。新增 waypoint/`wtstop` 的 9 组合成场配对与 FSL 6.0.7.22 的 `waytotal` 和 `fdt_paths` 逐项相同，AND 条件下的 matrix2 `.dot` 亦逐项相同。此前 `tests/probtrackx/` 的 42 项 CPU/CUDA 回归测试在 gpucw1 全部通过；本次新增单 waypoint 加 avoid 的针对性规则测试与上面的真实数据验证。合成数据只验证计数规则，不用于正式精度或耗时结论。公开真实 DWI benchmark 覆盖默认追踪、matrix1/2/3、seed-to-target、五区 network，以及本次单 waypoint 加 avoid；`wtstop` 的当前证据限于合成规则配对。
+9×5×5 合成直线场用于计数规则回归，不列为正式 benchmark：`--pd --ompl` 的单 seed 和双 ROI 网络输出，以及单独 `--ompl` 的网络输出，均与 FSL 逐元素相同；matrix1/2/3 的 2×2 稀疏矩阵、坐标表、matrix2 lookup 和路径密度也与 FSL 逐项相同。新增 waypoint/`wtstop` 的 9 组合成场配对与 FSL 6.0.7.22 的 `waytotal` 和 `fdt_paths` 逐项相同，AND 条件下的 matrix2 `.dot` 亦逐项相同。此前 `tests/probtrackx/` 的 42 项 CPU/CUDA 回归测试在 accelerator-a-1 全部通过；本次新增单 waypoint 加 avoid 的针对性规则测试与上面的真实数据验证。合成数据只验证计数规则，不用于正式精度或耗时结论。公开真实 DWI benchmark 覆盖默认追踪、matrix1/2/3、seed-to-target、五区 network，以及本次单 waypoint 加 avoid；`wtstop` 的当前证据限于合成规则配对。

@@ -2,7 +2,7 @@
 
 [返回组件报告](../components/README.md) · [机器汇总](summary.json) · [归档清单](archive_manifest.json)
 
-本页记录 `v16_c4` 的有效体素布局（compact）和 `v16_c5_driverfix` 的完整网格布局（dense）。输入为同一真实 `sub-01` T1 的保存工作图像、对齐图像、四面体网格及标签表；运行时不调用官方软件。服务器为 gpucw1，共享物理 GPU 0，4 个 CPU 线程，FP32/TF32，CUDA allocator 比例为 0.10。
+本页记录 `v16_c4` 的有效体素布局（compact）和 `v16_c5_driverfix` 的完整网格布局（dense）。输入为同一真实 `sub-01` T1 的保存工作图像、对齐图像、四面体网格及标签表；运行时不调用官方软件。服务器为 accelerator-a-1，共享物理 GPU 0，4 个 CPU 线程，FP32/TF32，CUDA allocator 比例为 0.10。
 
 旧路径逐批传坐标、候选索引和行索引，并在 GPU 上生成小型候选掩膜。新路径先在 CPU 打包同类缓冲区，每类一次传到 GPU，随后创建分批视图；dense 的浮点采样坐标和整数写入坐标分别打包。候选顺序、padding、分组、行重排和实际坐标保持原布局。包围盒索引、有效体素归类及坐标生成仍在 CPU。
 

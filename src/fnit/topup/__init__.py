@@ -27,3 +27,7 @@ __all__ = [
     "make_topup_jacobian_image",
     "run_ukb_topup",
 ]
+
+# 统一公开名称；保留成熟实现对象及其构造、调用和运行方法。
+FNIT_topup = TorchTOPUP
+__all__.append("FNIT_topup")

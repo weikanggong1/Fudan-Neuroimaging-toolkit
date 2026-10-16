@@ -19,7 +19,7 @@ flowchart TD
 
 总计时从 `torch`/FNIT CLI 导入前开始，到真实 CLI 结束和必要包装退出为止，包含加载、实际计算与正常输出写盘。报告生成、输入/源码/输出 SHA-256、检查点哈希、输出检查、采样线程退出及外部 GPU 排队不计入。工具自己的 Python/标准库启动在计时前；完整进程启动成本由外层 cohort 编排另计。
 
-如果传入本轮在 nodecw10 新生成的 `--freesurfer-subject-dir`，工具记录 `recon_all=supplied`。此工具的 wall 此时不包含官方 recon-all，外层编排必须记录官方阶段、调度等待和实际跨节点总墙钟。不要将这些阶段中位数相加冒充实测完整整例耗时。
+如果传入本轮在 compute-a-10 新生成的 `--freesurfer-subject-dir`，工具记录 `recon_all=supplied`。此工具的 wall 此时不包含官方 recon-all，外层编排必须记录官方阶段、调度等待和实际跨节点总墙钟。不要将这些阶段中位数相加冒充实测完整整例耗时。
 
 ## 2. Python 调用、输入和输出
 

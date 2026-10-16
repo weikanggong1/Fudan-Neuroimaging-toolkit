@@ -22,7 +22,7 @@ count、SSD、bending energy、覆写前 lambda/cost 准确匹配，再检查 2g
 
 ## 6. 调度与计时
 
-nodecw7 八个 physical 核，共用 outer CPU lock 后取自身 inner lock；排既有 GEMS 与 Seg 任务后，child180s、20GB address-space cap。尚未启动。等待、外层 preflight、导入/哈希、恢复/几何、evaluate、linearize、桥接和 private checkpoint 写出分别记录；evaluate 包含于 linearize，不重复相加。
+compute-a-7 八个 physical 核，共用 outer CPU lock 后取自身 inner lock；排既有 GEMS 与 Seg 任务后，child180s、20GB address-space cap。尚未启动。等待、外层 preflight、导入/哈希、恢复/几何、evaluate、linearize、桥接和 private checkpoint 写出分别记录；evaluate 包含于 linearize，不重复相加。
 
 ## 7. 当前状态
 

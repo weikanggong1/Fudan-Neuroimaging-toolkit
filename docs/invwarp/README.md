@@ -1,4 +1,6 @@
-# TorchInvWarp：在指定网格反转FSL位移场
+# FNIT_invwarp
+
+> 统一 Python 入口：[`FNIT_invwarp`](../API_REFERENCE.md)，从 `fnit` 导入。下文配置、结果类型和细分算子保留高级兼容接口。
 
 | 项目 | 内容 |
 |---|---|

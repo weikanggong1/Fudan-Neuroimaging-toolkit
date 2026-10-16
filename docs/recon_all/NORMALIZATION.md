@@ -49,7 +49,7 @@ print(report["total_seconds"], report["steps"])
 
 精确 CPU 路径以 Numba 按源码顺序累加高斯值。生产函数没有 subprocess 调用或 FreeSurfer 程序查找；官方程序只用于单独生成对照输出和计时。
 
-相同 `fs_sub01` T1、同主机且不写诊断文件的 CLI 配对观察：headcw CPU 官方 **76.94 秒**、Python **60.55 秒**；gpucw1 H100 GPU1 官方 **116.31 秒**、Python **75.60 秒**。两次 Python 输出各有 **0/16,777,216** 个差异体素。H100 一次 68.87 秒的常驻 Python 运行中，两轮 CPU 控制点搜索耗时 20.24 和 32.60 秒，是目前主要时间开销。分步命令、哈希和跨被试待验收项见[验证报告](../../validation/recon_all/python_gpu_port/experimental/NORMALIZE_FIRST_PASS.md)。
+相同 `fs_sub01` T1、同主机且不写诊断文件的 CLI 配对观察：control-host CPU 官方 **76.94 秒**、Python **60.55 秒**；accelerator-a-1 H100 GPU1 官方 **116.31 秒**、Python **75.60 秒**。两次 Python 输出各有 **0/16,777,216** 个差异体素。H100 一次 68.87 秒的常驻 Python 运行中，两轮 CPU 控制点搜索耗时 20.24 和 32.60 秒，是目前主要时间开销。分步命令、哈希和跨被试待验收项见[验证报告](../../validation/recon_all/python_gpu_port/experimental/NORMALIZE_FIRST_PASS.md)。
 
 ## 带 aseg 与 brainmask 的第二轮归一化
 
@@ -82,7 +82,7 @@ report = normalize_t1_aseg(
 
 在冻结的 `fs_sub01` 输入上，独立 Python ridge、过滤后的控制点掩膜、离群图和初始 float32 偏置场均与官方诊断图一致。默认两轮的完整 `brain.mgz` 为 **0/16,777,216** 个差异体素，MGH 头前 284 字节和体素负载一致。新运行的官方文件在末尾多 996 字节元数据，旧存档输出多 451 字节，因此完整文件哈希不同。这只是单例阶段验证，整例数值一致性仍需检验。[第二轮报告](../../validation/recon_all/python_gpu_port/NORMALIZE_SECOND_PASS.md)列出原始证据。
 
-2026-09-30 在两例新生成的 FNIT 连续链输入上，CPU/CUDA 的 `brain.mgz` 各有 **0/16,777,216** 个差异体素，仿射矩阵一致。`sub-01` 同在 gpucw1 上 CPU 阶段 85.17 秒、CUDA 阶段 59.15 秒；`sub-02` 的 CPU 在 nodecw10 为 85.96 秒，CUDA 在 gpucw1 为 71.09 秒，跨主机时间不能算配对加速。两次 CUDA 父子进程显存每 2 秒采样峰值均为 1,247,805,440 字节；这不是整例显存。输入、源码、计时与采样见[本轮性能记录](../../validation/recon_all/python_gpu_port/performance_20260930/README.md)。
+2026-09-30 在两例新生成的 FNIT 连续链输入上，CPU/CUDA 的 `brain.mgz` 各有 **0/16,777,216** 个差异体素，仿射矩阵一致。`sub-01` 同在 accelerator-a-1 上 CPU 阶段 85.17 秒、CUDA 阶段 59.15 秒；`sub-02` 的 CPU 在 compute-a-10 为 85.96 秒，CUDA 在 accelerator-a-1 为 71.09 秒，跨主机时间不能算配对加速。两次 CUDA 父子进程显存每 2 秒采样峰值均为 1,247,805,440 字节；这不是整例显存。输入、源码、计时与采样见[本轮性能记录](../../validation/recon_all/python_gpu_port/performance_20260930/README.md)。
 
 ## 控制点的有序离群清理
 
@@ -170,7 +170,7 @@ python validation/recon_all/python_gpu_port/benchmark_normalize_ordered_outliers
 
 ## 2026-10-02：有序CUDA内核与缓冲复用
 
-两例自产固定输入、gpucw1/H100、4线程，优化前0c8ab32与候选198c309的阶段配对：
+两例自产固定输入、accelerator-a-1/H100、4线程，优化前0c8ab32与候选198c309的阶段配对：
 
 | 输入 | 第一轮旧/新秒 | 第二轮旧/新秒 | 输出与旧版 |
 | --- | ---: | ---: | --- |
@@ -223,4 +223,4 @@ bias_tensor, smoothing_report = smooth_bias_torch(voronoi=voronoi_tensor, source
 
 ### 此前c248520的CPU阶段配对（2026-10-01）
 
-同一 sub-01 自产输入、gpucw1 CPU、4 线程，仅替换两处有序清理算子：第一轮归一化 84.645→80.945 s，第二轮 94.228→90.358 s。各计时含输入读取、运算和结果写出；诊断图另一次运行，未混入性能计时。最终影像和全部诊断控制图的体素、dtype、shape、仿射完全相同。基线源码为 1b8c36d，两处候选源码分别以 CPU 快照中的 SHA 绑定；[完整报告](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/normalize_sub01_pair.json)。sub-02 同输入 CPU 第一轮 84.114→80.687 s，第二轮 105.981→100.384 s；最终影像、全部诊断控制图、dtype、shape 和仿射同样一致，见 [sub-02 报告](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/normalize_sub02_pair.json)。候选生产代码已固定为 c24852054f3321c1142b1ae88fa3d2bf68329bb3；两例原始T1整例已完成，见[完整结果](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/WHOLE_RESULTS.md)。GPU整例第一轮185.426→219.296 s、第二轮174.512→181.624 s，均变慢；该结果与上述CPU同输入配对分开报告，该版本的GPU变慢已在后续198c309的同输入测试中定位到频繁分配与小kernel启动，见本页当前CUDA节；此前CPU算子收益仍不能改写为GPU提速。
+同一 sub-01 自产输入、accelerator-a-1 CPU、4 线程，仅替换两处有序清理算子：第一轮归一化 84.645→80.945 s，第二轮 94.228→90.358 s。各计时含输入读取、运算和结果写出；诊断图另一次运行，未混入性能计时。最终影像和全部诊断控制图的体素、dtype、shape、仿射完全相同。基线源码为 1b8c36d，两处候选源码分别以 CPU 快照中的 SHA 绑定；[完整报告](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/normalize_sub01_pair.json)。sub-02 同输入 CPU 第一轮 84.114→80.687 s，第二轮 105.981→100.384 s；最终影像、全部诊断控制图、dtype、shape 和仿射同样一致，见 [sub-02 报告](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/normalize_sub02_pair.json)。候选生产代码已固定为 c24852054f3321c1142b1ae88fa3d2bf68329bb3；两例原始T1整例已完成，见[完整结果](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/WHOLE_RESULTS.md)。GPU整例第一轮185.426→219.296 s、第二轮174.512→181.624 s，均变慢；该结果与上述CPU同输入配对分开报告，该版本的GPU变慢已在后续198c309的同输入测试中定位到频繁分配与小kernel启动，见本页当前CUDA节；此前CPU算子收益仍不能改写为GPU提速。

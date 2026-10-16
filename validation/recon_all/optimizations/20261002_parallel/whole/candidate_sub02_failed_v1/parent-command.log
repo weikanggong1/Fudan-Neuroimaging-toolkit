@@ -1,10 +1,10 @@
 setting unknown_nbr_spacing = 3
 using MR volume brainmask.mgz to mask input volume...
 
-== Number of threads available to /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/native_bundle/bin/mri_em_register for OpenMP = 4 == 
+== Number of threads available to /data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/native_bundle/bin/mri_em_register for OpenMP = 4 ==
 reading 1 input volumes...
 logging results to talairach.log
-reading '/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/RB_all_2020-01-02.gca'...
+reading '/data/workspaces/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/RB_all_2020-01-02.gca'...
 GCAread took 0 minutes and 1 seconds.
 average std = 7.2   using min determinant for regularization = 5.2
 0 singular and 884 ill-conditioned covariance matrices regularized
@@ -16,7 +16,7 @@ MRImask(): AllowDiffGeom = 1
 MRImask(): AllowDiffGeom = 1
 freeing gibbs priors...done.
 accounting for voxel sizes in initial transform
-bounding unknown intensity as < 5.9 or > 519.0 
+bounding unknown intensity as < 5.9 or > 519.0
 total sample mean = 79.1 (1017 zeros)
 ************************************************
 spacing=8, using 2841 sample points, tol=1.00e-05...
@@ -156,7 +156,7 @@ transform before final EM align:
 
 **************************************************
  EM alignment process ...
- Computing final MAP estimate using 315638 samples. 
+ Computing final MAP estimate using 315638 samples.
 **************************************************
 dt = 5.00e-06, momentum=0.80, tol=1.00e-07
 l_intensity = 1.0000
@@ -192,7 +192,7 @@ final transform:
 -0.02693  -0.01742   1.05816  -21.82441;
  0.00000   0.00000   0.00000   1.00000;
 
-writing output transformation to /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/whole_sub02_candidate_8d750e2/mri/transforms/.fnit-cached-em-5dtz79s5/talairach.lta...
+writing output transformation to /data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/whole_sub02_candidate_8d750e2/mri/transforms/.fnit-cached-em-5dtz79s5/talairach.lta...
 #VMPC# mri_em_register VmPeak  1120080
 FSRUNTIME@ mri_em_register  0.0431 hours 4 threads
 registration took 2 minutes and 35 seconds.
@@ -205,7 +205,7 @@ wm low:   79
 wm hi:    125
 gray low: 30
 gray hi:  99
-Doing initial trinary intensity segmentation 
+Doing initial trinary intensity segmentation
 MRIintensitySegmentation() wm_low=79, wm_hi=125, gray_hi=99
 white = 323243, nonwhite = 16242749, ambig = 211224, nmask = 0
 Using local statistics to label ambiguous voxels
@@ -274,7 +274,7 @@ MRIfindBrightNonWM(): 518 bright non-wm voxels segmented.
 MRIfilterMorphology() WM_MIN_VAL=5, DIAGONAL_FILL=230
 white matter segmentation took 0.8 minutes
 writing output to wm.seg.mgz...
-/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/native_bundle/bin/mri_edit_wm_with_aseg -keep-in -fix-ento-wm entowm.mgz 3 255 255 -fix-acj aseg.presurf.mgz 255 255 -fill-seg-wm -fix-scm-ha 1 wm.seg.mgz brain.mgz aseg.presurf.mgz wm.asegedit.mgz 
+/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/native_bundle/bin/mri_edit_wm_with_aseg -keep-in -fix-ento-wm entowm.mgz 3 255 255 -fix-acj aseg.presurf.mgz 255 255 -fill-seg-wm -fix-scm-ha 1 wm.seg.mgz brain.mgz aseg.presurf.mgz wm.asegedit.mgz
 preserving editing changes in input volume...
 mri_edit_wm_wit supposed to be reproducible but seed not set
 auto filling took 0.44 minutes
@@ -295,7 +295,7 @@ MRIfixEntoWM(): 255 255 Level=3
 MRIfixEntoWM(): nchanged = 671
 writing edited volume to wm.asegedit.mgz....
 Traceback (most recent call last):
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/candidate_runtime_8d750e2/src/fnit/recon_all/hemisphere_parallel.py", line 190, in run_hemisphere_group
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/candidate_runtime_8d750e2/src/fnit/recon_all/hemisphere_parallel.py", line 190, in run_hemisphere_group
     raise RuntimeError('hemisphere worker failed; sibling cancelled')
 RuntimeError: hemisphere worker failed; sibling cancelled
 
@@ -304,23 +304,23 @@ The above exception was the direct cause of the following exception:
 Traceback (most recent call last):
   File "<frozen runpy>", line 198, in _run_module_as_main
   File "<frozen runpy>", line 88, in _run_code
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/candidate_runtime_8d750e2/src/fnit/recon_all/native_free.py", line 1274, in <module>
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/candidate_runtime_8d750e2/src/fnit/recon_all/native_free.py", line 1274, in <module>
     main()
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/candidate_runtime_8d750e2/src/fnit/recon_all/native_free.py", line 1262, in main
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/candidate_runtime_8d750e2/src/fnit/recon_all/native_free.py", line 1262, in main
     report = run_recon_all_python(args.t1, args.subject_dir, args.weights_dir,
              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/candidate_runtime_8d750e2/src/fnit/recon_all/native_free.py", line 1205, in run_recon_all_python
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/candidate_runtime_8d750e2/src/fnit/recon_all/native_free.py", line 1205, in run_recon_all_python
     report = _run_recon_all_python(
              ^^^^^^^^^^^^^^^^^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/candidate_runtime_8d750e2/src/fnit/recon_all/native_free.py", line 986, in _run_recon_all_python
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/candidate_runtime_8d750e2/src/fnit/recon_all/native_free.py", line 986, in _run_recon_all_python
     group = stage(f'{operation}_hemisphere_group', run_hemisphere_group,
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/candidate_runtime_8d750e2/src/fnit/recon_all/native_free.py", line 840, in stage
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/candidate_runtime_8d750e2/src/fnit/recon_all/native_free.py", line 840, in stage
     value = profiler.run(name, function, *args, **kwargs)
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/candidate_runtime_8d750e2/src/fnit/recon_all/profiling.py", line 134, in run
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/candidate_runtime_8d750e2/src/fnit/recon_all/profiling.py", line 134, in run
     value = function(*args, **kwargs)
             ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/candidate_runtime_8d750e2/src/fnit/recon_all/hemisphere_parallel.py", line 244, in run_hemisphere_group
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/candidate_runtime_8d750e2/src/fnit/recon_all/hemisphere_parallel.py", line 244, in run_hemisphere_group
     raise failure from error
 fnit.recon_all.hemisphere_parallel.HemisphereGroupError: surface hemisphere group failed: hemisphere worker failed; sibling cancelled

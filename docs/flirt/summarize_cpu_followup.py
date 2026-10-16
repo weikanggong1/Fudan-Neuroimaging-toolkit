@@ -107,7 +107,7 @@ def main():
         "summary_script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
     }
     serialized = json.dumps(report, indent=2, allow_nan=False) + "\n"
-    assert all(value not in serialized for value in ("/cwStorage/", "/mnt/c/Users/", ".sock"))
+    assert all(value not in serialized for value in ("/data/shared/", "/mnt/c/Users/", ".sock"))
     args.output.write_text(serialized)
     if args.tables:
         args.tables.write_text("\n\n".join("## " + name + "\n\n" + helper.table(group["records"], False)

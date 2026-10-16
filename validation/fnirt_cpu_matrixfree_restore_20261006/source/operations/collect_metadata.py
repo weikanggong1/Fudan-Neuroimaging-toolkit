@@ -13,10 +13,10 @@ HELPER = BASE.parent / "remote_tty.py"
 
 def main():
     script = r'''set -euo pipefail
-/cwStorage/home/gongwk/Notebook_code/FNIT/envs/default/bin/python - <<'PY'
+/data/fnit/envs/default/bin/python - <<'PY'
 from pathlib import Path
 import base64,hashlib,json,stat,zlib
-r=Path('/cwStorage/home/gongwk/Notebook_code/FNIT')
+r=Path('/data/fnit')
 leaf=Path('smri_cpu_20261004/remaining_20261006/fnirt-matrixfree-restored-v1')
 w,out=r/'workspaces'/leaf,r/'runs'/leaf
 freeze=json.loads((w/'freeze.public.json').read_text())

@@ -36,9 +36,9 @@ import subprocess
 from pathlib import Path
 
 # 在可访问已有结果的服务器运行；变量均指向实际冻结结果。
-remote_task_directory = Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01')
+remote_task_directory = Path('/data/workspaces/fnit_connectome_tenraw_20261002/task_01')
 collection_script_path = remote_task_directory / 'con11_origin_CPU_tools_v1/collect_routed_ten_cpu.py'
-existing_plot_python_path = '/home1/gongwk/anaconda3/bin/python'
+existing_plot_python_path = '/home1/benchmark-user/anaconda3/bin/python'
 new_delivery_directory = remote_task_directory / 'new_actual_ten_delivery'
 subprocess.run([
     'python3', str(collection_script_path),
@@ -65,30 +65,30 @@ subprocess.run([
 |`curation_receipt.json`|采用文件、复用 source、删除的重复本地快照及 SHA/大小。|
 |`SOURCE_delivery_SHA256.json`|Task1 原55文件索引，用于辨别采用与省略的来源；不是本地当前目录的完整索引。|
 |`CURATED_payload_SHA256.json`|本地当前精简目录文件的 SHA 索引，索引自身除外。|
-|`curation_readonly_verification.json`|独立 headcw CPU/stdlib 对原报告、投影、实际合同、最终索引与 CON11 输入的只读复核。|
+|`curation_readonly_verification.json`|独立 control-host CPU/stdlib 对原报告、投影、实际合同、最终索引与 CON11 输入的只读复核。|
 
 ## 3. 命令行
 
 ```bash
 # 服务器上仅收集已有实际结果，output_directory 必须是新目录。
-remote_task_directory="/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01"
+remote_task_directory="/data/workspaces/fnit_connectome_tenraw_20261002/task_01"
 output_directory="${remote_task_directory}/new_actual_ten_delivery"
 python3 "${remote_task_directory}/con11_origin_CPU_tools_v1/collect_routed_ten_cpu.py" \
   --routes "${remote_task_directory}/explicit_actual_CPU_case_routes_v1.json" \
   --prefix-delivery "${remote_task_directory}/CPU_reference_prefix9_delivery_v1" \
   --con11-comparison "${remote_task_directory}/CON11_fresh_origin_verified_comparison_v1/CON11_comparison.json" \
   --output-root "${output_directory}" \
-  --plot-python /home1/gongwk/anaconda3/bin/python
+  --plot-python /home1/benchmark-user/anaconda3/bin/python
 ```
 
-本地独立只读核验通过已有 headcw SSH session 读取实际文件，使用标准库，不启动 GPU/MRI 求解：
+本地独立只读核验通过已有 control-host SSH session 读取实际文件，使用标准库，不启动 GPU/MRI 求解：
 
 ```bash
 delivery_directory="validation/connectome/tenraw_20261002/task_01/official_rawprep_v1/CPU_reference_actual10_delivery_v1"
 python3 "${delivery_directory}/audit_remote_readonly.py" \
   --delivery-root "${delivery_directory}" \
-  --control-path /tmp/fnit-bwas-headcw.sock \
-  --host gongwk@10.190.248.228 --port 39516 \
+  --control-path /tmp/fnit-bwas-control-host.sock \
+  --host user@compute.example.org --port 39516 \
   --output /tmp/new_actual_ten_readonly_proof.json
 ```
 
@@ -102,23 +102,23 @@ python3 "${delivery_directory}/audit_remote_readonly.py" \
 
 ```bash
 # CPU reference 外部 benchmark；运行结果保存在已冻结的真实目录。
-official_reference_case_directory="/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_CON11_CPU_fresh_origin_v1/sub-CON11"
-export FSLDIR=/public/software/apps/FSL/6.0.7.4
-export FREESURFER_HOME=/public/software/apps/Freesurfer/8.2.0-1
+official_reference_case_directory="/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_CON11_CPU_fresh_origin_v1/sub-CON11"
+export FSLDIR=/opt/reference/FSL/6.0.7.4
+export FREESURFER_HOME=/opt/reference/Freesurfer/8.2.0-1
 export FSLOUTPUTTYPE=NIFTI_GZ OMP_NUM_THREADS=8 MKL_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8
 export CUDA_VISIBLE_DEVICES=""
 
 # official_topup
-/public/software/apps/FSL/6.0.7.4/bin/topup \
+/opt/reference/FSL/6.0.7.4/bin/topup \
  --imain=${official_reference_case_directory}/topup/B0_AP_PA.nii.gz \
  --datain=${official_reference_case_directory}/topup/acqparams.txt \
- --config=/public/software/apps/FSL/6.0.7.4/etc/flirtsch/b02b0.cnf \
+ --config=/opt/reference/FSL/6.0.7.4/etc/flirtsch/b02b0.cnf \
  --out=${official_reference_case_directory}/topup/fieldmap_out \
  --fout=${official_reference_case_directory}/topup/fieldmap_fout \
  --iout=${official_reference_case_directory}/topup/fieldmap_iout
 
 # official_synthstrip_CPU
-/public/software/apps/Freesurfer/8.2.0-1/bin/mri_synthstrip \
+/opt/reference/Freesurfer/8.2.0-1/bin/mri_synthstrip \
  -i \
  ${official_reference_case_directory}/mask/b0_mean.nii.gz \
  -m \
@@ -126,14 +126,14 @@ export CUDA_VISIBLE_DEVICES=""
  -o \
  ${official_reference_case_directory}/mask/nodif_brain.nii.gz \
  --model \
- /public/software/apps/Freesurfer/8.2.0-1/models/synthstrip.1.pt \
+ /opt/reference/Freesurfer/8.2.0-1/models/synthstrip.1.pt \
  -b \
  1 \
  -t \
  8
 
 # official_EDDY_CPU
-/public/software/apps/FSL/6.0.7.4/bin/eddy_cpu \
+/opt/reference/FSL/6.0.7.4/bin/eddy_cpu \
  --imain=${official_reference_case_directory}/raw/AP.nii.gz \
  --mask=${official_reference_case_directory}/mask/nodif_brain_mask.nii.gz \
  --acqp=${official_reference_case_directory}/topup/acqparams.txt \

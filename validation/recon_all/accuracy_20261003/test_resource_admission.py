@@ -149,7 +149,7 @@ class ProcessTreeTests(unittest.TestCase):
                         result=subprocess.run([sys.executable,'-c',command],capture_output=True)
                         checks.append(result.returncode)
                         self.assertNotEqual(result.returncode,0)
-                    # Exercise gpucw1's legacy-kernel path without pidfd.
+                    # Exercise accelerator-a-1's legacy-kernel path without pidfd.
                     with patch.object(module.os,'pidfd_open',None):
                         module.cleanup_owned_tree(child,owned,report,checkpoint,term_seconds=.2)
                     self.assertEqual(module.active_owned(owned),[])

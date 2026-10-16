@@ -290,7 +290,7 @@ CPU算子和有序首试步单元回归7/7通过，包含阈值两侧、共面�
 时间，见[中断记录](../../validation/recon_all/optimizations/20261009_placement_torch/collision_sub07_lh_v3_interrupted.json)。
 完整pial、第二例双侧、整例显存和整例提速尚未由该碰撞选项验证。
 
-保留实际面对后，在headcw的Xeon Gold6418H、同一Conda环境、四线程、
+保留实际面对后，在control-host的Xeon Gold6418H、同一Conda环境、四线程、
 CUDA未初始化的条件下完成固定面对CPU回放。候选代码 `85b85837`，实际
 Torch谓词源码SHA为 `adac1598f162d5c0fb27afeac6d8625c8da7d66ae781205c1153b00403ba799a`。
 两块共131,108对、源相交864对，逐对bool和SHA全部一致；源边界复核0对，

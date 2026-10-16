@@ -198,7 +198,7 @@ CON03 真实脑图直接读取同次校正 DWI/FA 的原保存网格，显示 `k
 
 ## 6. 本轮记录
 
-- 2026-10-03：冻结 `7af34e6d` 基线，建立五个独立子任务和整合分支，核对 gpucw1/nodecw10 认证、真实输入和现有 GPU 负载。
+- 2026-10-03：冻结 `7af34e6d` 基线，建立五个独立子任务和整合分支，核对 accelerator-a-1/compute-a-10 认证、真实输入和现有 GPU 负载。
 - 活跃轨迹校准实验：真实 CON03 100k 的路径、端点、长度与接受种子逐位一致；本次 tracking wall 为 762.751→773.253 秒，未展示速度收益。最终候选恢复原校准循环，只保留独立 oracle 支持的 ACT chord 精度修正；实验原报告及其实际源码 SHA 保留不改。
 - 正式科学源码冻结后，CPU 回归 752 passed、63 skipped；CUDA 回归 717 passed、7 skipped，两次均有 362 项子测试通过。CPU 范围为 connectome、EDDY、TOPUP，CUDA 范围为 connectome。额外 CPU 比较器 17 项通过；这些协议测试不代替真实 MRI 比较。[源码与测试来源核验](../../validation/connectome/accuracy_20261003/final_source_acceptance_v1/README.md) 记录原日志、现存测试目录与冻结版本的字节一致性；测试当时未保存源码前后清单，正式 raw 调用的清单另行逐次核对。
 - 测试部署曾缺少仓库内下载脚本和 Tian S1 asset，导致 collection / fixture 失败；补齐实际测试资源后通过。两次失败的原日志保留，科学源码未改变，失败状态没有改写为成功。

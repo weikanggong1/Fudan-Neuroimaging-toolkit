@@ -205,7 +205,7 @@ FS `mri_surf2surf`、Workbench `-label-resample BARYCENTRIC` 和原UKB投影脚�
 | CON03、05、07、09 | 同上 | 同上 | `task_04/official_raw10_cpu_group_B_v3` |
 | CON11 | `task_02/official_modeling_CON11_selected_recovery_v1` | `official_anatomy_CON11_selected_CPU_v1` | `task_04/official_raw_CON11_selected_CPU_v1` |
 
-表中路径均相对于实际根目录`/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002`。只读核验绑定最终逐例map的真实SHA `a12765a9dd1257ec1ba6281c61ebdebd6f654c12f173dfc597c025527d1446aa`，重新核对十例报告/合同SHA、同例原始T1、fresh FS官方exit0、各级消费路径和固定科学worker，见[十例实际完成与CON10核验](../../validation/connectome/raw10_official_anatomy_DWI_20261003/actual10_completion.public.json)。旧两例、四例和八例快照保留各自观察时刻，不能作为当前覆盖例数。
+表中路径均相对于实际根目录`/data/workspaces/fnit_connectome_tenraw_20261002`。只读核验绑定最终逐例map的真实SHA `a12765a9dd1257ec1ba6281c61ebdebd6f654c12f173dfc597c025527d1446aa`，重新核对十例报告/合同SHA、同例原始T1、fresh FS官方exit0、各级消费路径和固定科学worker，见[十例实际完成与CON10核验](../../validation/connectome/raw10_official_anatomy_DWI_20261003/actual10_completion.public.json)。旧两例、四例和八例快照保留各自观察时刻，不能作为当前覆盖例数。
 
 ### 分阶段计时
 

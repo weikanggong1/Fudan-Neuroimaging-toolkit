@@ -13,7 +13,7 @@
 
 这里的“原始 T1 输入”指公开 snapshot 的 T1，未追加本轮图像处理。[数据论文](https://pmc.ncbi.nlm.nih.gov/articles/PMC3641991/)说明公开 T1 已经通过 `mri_deface` 去脸。因此不能将这些文件称为未去脸扫描。原始影像只保留在服务器；Git 仅包含脚本、数值指标、清单和裁切后的脑区图。
 
-10 例共 92,390,227 字节，已于 2026-10-02 05:56:21 UTC 完成下载校验。随后在 `gpucw1` 从共享目录独立重读全部影像，再次核对文件 MD5/SHA-256、体素数组哈希、shape 与 affine，全部通过；10 个文件哈希和 10 个体素数组哈希均互不相同。结果见 [data_independent_audit.json](data_independent_audit.json)，逐例摘要见 [data_summary.tsv](data_summary.tsv)。
+10 例共 92,390,227 字节，已于 2026-10-02 05:56:21 UTC 完成下载校验。随后在 `accelerator-a-1` 从共享目录独立重读全部影像，再次核对文件 MD5/SHA-256、体素数组哈希、shape 与 affine，全部通过；10 个文件哈希和 10 个体素数组哈希均互不相同。结果见 [data_independent_audit.json](data_independent_audit.json)，逐例摘要见 [data_summary.tsv](data_summary.tsv)。
 
 最终 [data_manifest.json](data_manifest.json) 的 SHA-256 为 `9e79b962537ec7ada6d3e817765d0cc41b03cce84e791e9668cecfd4693fffc0`。本机只取回清单等文本，传输后的大小与 SHA-256 逐项校验，见 [data_metadata_fetch.json](data_metadata_fetch.json)。
 
@@ -37,7 +37,7 @@ python download_public_t1.py \
 
 如目标文件已存在，只有其大小和 MD5 与固定 snapshot 完全一致才复用；不覆盖来源不明的旧影像。不同受试者的轴顺序可能不同，调用方须使用各自 NIfTI affine，不以固定数组轴代替物理空间。
 
-首次下载在读取 GitHub 的两份 Git-annex 文本元数据时网络超时。为完成同一固定列表，第二次使用 [public_metadata_cache.json](public_metadata_cache.json)：它只含同一提交的 12 份公开 Git 文本及来源 URL、大小、哈希，不含影像。影像仍由 headcw 直接从 S3 获取。可在上述命令追加 `--metadata-cache public_metadata_cache.json`；[data_download_history.json](data_download_history.json)保留两次状态。最终运行的脚本 SHA-256 为 `8c6954efb9a006ed6ae101bb2a720d94f80ed58683447030fe34267b7e09e864`。
+首次下载在读取 GitHub 的两份 Git-annex 文本元数据时网络超时。为完成同一固定列表，第二次使用 [public_metadata_cache.json](public_metadata_cache.json)：它只含同一提交的 12 份公开 Git 文本及来源 URL、大小、哈希，不含影像。影像仍由 control-host 直接从 S3 获取。可在上述命令追加 `--metadata-cache public_metadata_cache.json`；[data_download_history.json](data_download_history.json)保留两次状态。最终运行的脚本 SHA-256 为 `8c6954efb9a006ed6ae101bb2a720d94f80ed58683447030fe34267b7e09e864`。
 
 ## 参考文献
 

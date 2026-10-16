@@ -105,13 +105,13 @@ mri_synthseg --parc --i case02_T1w.nii.gz --o reference/case02_parc.nii.gz \
 # --fast对应快速体积分区。
 ```
 
-本次复用此前同输入、nodecw7相同八物理核/八线程的正式官方结果，不重跑官方。原软件源码、五资源SHA及每个输出SHA绑定于[正式官方记录](../seg_memory_20261005/OFFICIAL_NODE7_FAST_BA_REPEAT.public.json)，本次重新核对参考map/CSV SHA相同；该报告SHA为 `37a0d5fed95cbd6a3aaae097ea6e7dab5c6473f2f0f54613f813223aa8bc3e55`。原软件只用于对照，不进入FNIT生产路径。
+本次复用此前同输入、compute-a-7相同八物理核/八线程的正式官方结果，不重跑官方。原软件源码、五资源SHA及每个输出SHA绑定于[正式官方记录](../seg_memory_20261005/OFFICIAL_NODE7_FAST_BA_REPEAT.public.json)，本次重新核对参考map/CSV SHA相同；该报告SHA为 `37a0d5fed95cbd6a3aaae097ea6e7dab5c6473f2f0f54613f813223aa8bc3e55`。原软件只用于对照，不进入FNIT生产路径。
 
 ## 5. 最新精度、时间和内存
 
 ### 完整原始T1输出门
 
-公开CC0 OpenNeuro ds003138 case02，同一原始T1 SHA `73e3866d…`，真实网络网格192×224×256。CPU为nodecw7八物理核32,36,40,44,48,52,56,60；H100显式目标UUID `e25cac06-0ce8-a833-abf9-09ab18c9c9ba`，内部cuda:0，八CPU线程。各arm独立进程、依次取得原共用锁。
+公开CC0 OpenNeuro ds003138 case02，同一原始T1 SHA `73e3866d…`，真实网络网格192×224×256。CPU为compute-a-7八物理核32,36,40,44,48,52,56,60；H100显式目标UUID `e25cac06-0ce8-a833-abf9-09ab18c9c9ba`，内部cuda:0，八CPU线程。各arm独立进程、依次取得原共用锁。
 
 | 门 | CPU | H100 |
 |---|---|---|

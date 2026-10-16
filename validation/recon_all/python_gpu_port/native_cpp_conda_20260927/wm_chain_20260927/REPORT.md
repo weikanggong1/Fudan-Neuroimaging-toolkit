@@ -4,7 +4,7 @@
 
 ## 调度与结果
 
-新默认 Conda runner 在 `mri_cc` 后依次调用以下步骤；官方命令均以被试的 `mri` 目录为当前目录。表中时间为 gpucw1 上单次墙钟，受共享负载和 NFS 缓存影响。C++ 两步来自固定 FreeSurfer 8.2 提交 `d932c45b7941662ea380a05efef580568b98d41a`，由项目脚本仅用 Conda 编译并链接；其余步骤调用已实现的 Python 函数，无需安装 FreeSurfer 运行包。
+新默认 Conda runner 在 `mri_cc` 后依次调用以下步骤；官方命令均以被试的 `mri` 目录为当前目录。表中时间为 accelerator-a-1 上单次墙钟，受共享负载和 NFS 缓存影响。C++ 两步来自固定 FreeSurfer 8.2 提交 `d932c45b7941662ea380a05efef580568b98d41a`，由项目脚本仅用 Conda 编译并链接；其余步骤调用已实现的 Python 函数，无需安装 FreeSurfer 运行包。
 
 | 功能与当前用法 | 官方等价命令 | 对官方不同体素 / 16,777,216 | 当前耗时 |
 |---|---|---:|---:|
@@ -24,6 +24,6 @@
 
 ## 构建、依赖与时间边界
 
-`build_recon_all_fs_cpp_conda.sh` 在 gpucw1 对固定源码的八目标构建退出 0、185.01 秒；[来源](fs_cpp_eight/build-provenance.txt)和[八个二进制 SHA-256](fs_cpp_eight/bin.sha256)留档。新增 `mri_edit_wm_with_aseg` 对冻结官方输入也独立产生 0 体素差，单次 45.99 秒。官方原整例日志中相同命令为 28.42 秒，但两次负载/日期不同，不能视为稳定速度比较。Python `mri_fill` 的早期冻结同输入验收及 headcw 原生耗时见[既有报告](../../experimental/FILL_ASEG.md)；本次 gpucw1 时间较长，不推断加速。
+`build_recon_all_fs_cpp_conda.sh` 在 accelerator-a-1 对固定源码的八目标构建退出 0、185.01 秒；[来源](fs_cpp_eight/build-provenance.txt)和[八个二进制 SHA-256](fs_cpp_eight/bin.sha256)留档。新增 `mri_edit_wm_with_aseg` 对冻结官方输入也独立产生 0 体素差，单次 45.99 秒。官方原整例日志中相同命令为 28.42 秒，但两次负载/日期不同，不能视为稳定速度比较。Python `mri_fill` 的早期冻结同输入验收及 control-host 原生耗时见[既有报告](../../experimental/FILL_ASEG.md)；本次 accelerator-a-1 时间较长，不推断加速。
 
-目标节点 glibc 2.17 曾使 pip 版 `statsmodels 0.15.0`、`scikit-learn` 无法导入；将 `statsmodels 0.14.5`、`pandas 2.2.3`、`scikit-learn 1.5.2` 放进 Conda 依赖后，gpucw1 `import ants` 成功。更新的 [YAML 求解日志](yaml_eight_dryrun.log)在 `CONDA_OVERRIDE_GLIBC=2.17` 下退出 0；没有重复完整创建 YAML 环境。默认权重组新增 EntoWM 模型和 ctab（3,297,222 字节）；默认资产组新增原已校验但未列入默认下载的 `SubCorticalMassLUT.txt`（281 字节）。首次填充因该文件缺失而失败，加入默认资产并校验 SHA-256 后重跑成功。
+目标节点 glibc 2.17 曾使 pip 版 `statsmodels 0.15.0`、`scikit-learn` 无法导入；将 `statsmodels 0.14.5`、`pandas 2.2.3`、`scikit-learn 1.5.2` 放进 Conda 依赖后，accelerator-a-1 `import ants` 成功。更新的 [YAML 求解日志](yaml_eight_dryrun.log)在 `CONDA_OVERRIDE_GLIBC=2.17` 下退出 0；没有重复完整创建 YAML 环境。默认权重组新增 EntoWM 模型和 ctab（3,297,222 字节）；默认资产组新增原已校验但未列入默认下载的 `SubCorticalMassLUT.txt`（281 字节）。首次填充因该文件缺失而失败，加入默认资产并校验 SHA-256 后重跑成功。

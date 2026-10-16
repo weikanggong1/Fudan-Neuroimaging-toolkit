@@ -4,7 +4,7 @@
 
 这项控制在正式 FNIT 候选所在的共享 H100 主机上，用 **CPU** 完整运行一次官方 fMRIPrep 25.2.4，帮助解释十例主对照中的主机差异。输入是同一公开 CON01 的原始 T1w 和完整 180 帧静息态 BOLD，TR 为 2.1 s；从新的 work、derivatives、home 和 FreeSurfer subject 启动，只复用容器及非被试模板。
 
-正式十例 FNIT 在 gpucw1 运行，十例主参考在 CPU10 运行。本控制单列，不并入十例中位数或精度配对，也不替代任何主参考。它是独立原软件 benchmark，不是 FNIT 生产运行入口。
+正式十例 FNIT 在 accelerator-a-1 运行，十例主参考在 CPU10 运行。本控制单列，不并入十例中位数或精度配对，也不替代任何主参考。它是独立原软件 benchmark，不是 FNIT 生产运行入口。
 
 ```mermaid
 flowchart TD
@@ -60,11 +60,11 @@ print(reference_process.returncode)
 | `--image` | Path，必填 | 固定 fMRIPrep 25.2.4 SIF；SHA 不符即失败，版本探针还核对容器内 FreeSurfer 7.3.2。 |
 | `--template-cache` | Path，必填 | 已核验的非被试 TemplateFlow 缓存；复制到新 attempt，不复用解剖结果。 |
 | `--license` | Path，必填 | 已有合法、可读的个人 FreeSurfer 许可证，只读挂载；采集脚本只核对文件可读，不散列或发布内容。 |
-| `--singularity` | Path，默认系统 Singularity 4.2.2 路径 | 本控制显式传入 [CPU shim](singularity_cpu.py)，底层程序为 `/public/software/apps/singularity/4.2.2/bin/singularity`。 |
+| `--singularity` | Path，默认系统 Singularity 4.2.2 路径 | 本控制显式传入 [CPU shim](singularity_cpu.py)，底层程序为 `/opt/reference/singularity/4.2.2/bin/singularity`。 |
 | `--subjects` | 字符串列表，默认 CON01、CON03–CON11 | 公开队列选择；不允许重复。`--worker` 下只接受一个被试。 |
 | `--worker` | bool，默认 false | true 在当前主机运行单例；false 启动 SSH dispatcher。 |
-| `--node` | 字符串，默认 `nodecw10` | dispatcher 目标主机；本机 worker 不使用。 |
-| `--control-socket` | Path，默认 `/tmp/common30-nodecw10-20260909.sock` | dispatcher 使用的已认证 SSH socket；本机 worker 不使用。 |
+| `--node` | 字符串，默认 `compute-a-10` | dispatcher 目标主机；本机 worker 不使用。 |
+| `--control-socket` | Path，默认 `/tmp/common30-compute-a-10-20260909.sock` | dispatcher 使用的已认证 SSH socket；本机 worker 不使用。 |
 | `--concurrency` | int，默认 4 | dispatcher 并发数，实际限制为 1–4；不改变本机单例线程设置。 |
 | `--attempt` | int，默认 1 | 输出 attempt 编号。复跑使用新的独立根或编号，不能替换已绑定的报告。 |
 

@@ -6,7 +6,7 @@ and curvature functions into the ten-column table lines written by
 formatting as FreeSurfer 8.2.0. Inputs are existing white/pial surfaces,
 thickness and area maps, annotations and cortex labels.
 
-On the frozen `fs_sub01` reconstruction, a fresh headcw CPU replay compared
+On the frozen `fs_sub01` reconstruction, a fresh control-host CPU replay compared
 the **entire text of every data line** in bilateral aparc, aparc.a2009s and
 aparc.DKTatlas white tables and bilateral aparc pial tables. All **346/346**
 lines matched exactly, including ROI order, names, whitespace and all ten

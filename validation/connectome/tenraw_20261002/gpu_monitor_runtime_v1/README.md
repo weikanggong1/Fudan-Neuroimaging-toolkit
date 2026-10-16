@@ -2,7 +2,7 @@
 
 ## 1. 功能与流程
 
-这里保存 2026-10-02 gpucw1 的实际监测环境记录。原 wall 工具已经支持 `pynvml`，但旧 Python 环境没有这个包，因此调用 `nvidia-smi`。baseline CON05 出现两次查询超时；candidate CON04 出现八次超时，最大采样间隔 13.793 秒。两例计算成功，显存测量不满足验收，原结果和失败状态保留。
+这里保存 2026-10-02 accelerator-a-1 的实际监测环境记录。原 wall 工具已经支持 `pynvml`，但旧 Python 环境没有这个包，因此调用 `nvidia-smi`。baseline CON05 出现两次查询超时；candidate CON04 出现八次超时，最大采样间隔 13.793 秒。两例计算成功，显存测量不满足验收，原结果和失败状态保留。
 
 ```mermaid
 flowchart LR

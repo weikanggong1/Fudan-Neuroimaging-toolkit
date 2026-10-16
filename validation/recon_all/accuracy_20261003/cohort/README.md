@@ -30,7 +30,7 @@ case_configs = prepare(
     manifest_path=Path("cohort_verified.json"),  # 含10例固定输入SHA的公开manifest
     bindings_path=Path("runtime_bindings.private.json"),  # 私有运行环境，不提交许可证配置
     output_dir=Path("configs"),  # 必须为新目录，避免覆盖旧报告
-    server_root=Path("/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003"),
+    server_root=Path("/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003"),
 )
 ```
 
@@ -63,8 +63,8 @@ bindings中的baseline/candidate字段均沿用`execute_whole_case.py`：`python
 以下命令在服务器cohort目录执行，解释器示例需由协调者确认实际Conda环境。
 
 ```bash
-FNIT_COHORT_ROOT=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003
-FNIT_PYTHON=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
+FNIT_COHORT_ROOT=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003
+FNIT_PYTHON=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
 # 再次校验已存在10例，不发起下载。
 "$FNIT_PYTHON" verify_cohort.py --manifest cohort_verified.json --output read_only_verification_new.json
 # 如需独立复现下载，使用已冻结SHA的manifest；匹配的已有文件直接复用。

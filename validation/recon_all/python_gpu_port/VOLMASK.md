@@ -22,7 +22,7 @@ the verified external lookup table with its supplied absolute filename; the
 filename is part of the MGH metadata. The measured surface rays had no odd
 crossing counts or buffer overflow (maximum 18 crossings).
 
-| Same-input headcw CLI | Time |
+| Same-input control-host CLI | Time |
 | --- | ---: |
 | FreeSurfer 8.2 native, four threads | 72.36 s |
 | Python/Numba CPU, four surfaces and three MGZ outputs, including color tables | 3.46 s |

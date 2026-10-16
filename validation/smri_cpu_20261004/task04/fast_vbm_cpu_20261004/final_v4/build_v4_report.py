@@ -383,8 +383,8 @@ def ensure_public_report(serialized: str) -> None:
 
     只检查文本，不改写数值或处理 MRI，也不执行原软件命令。
     """
-    forbidden = ('/cwStorage/', '/public/', '/home/', '/mnt/', '/tmp/', 'FS_LICENSE',
-                 'gongwk@', 'BEGIN PRIVATE KEY', 'PYTHONPATH',
+    forbidden = ('/data/shared/', '/public/', '/home/', '/mnt/', '/tmp/', 'FS_LICENSE',
+                 'user@', 'BEGIN PRIVATE KEY', 'PYTHONPATH',
                  'job_command_basenames_only')
     if any(token in serialized for token in forbidden):
         raise ValueError('private location, environment or command escaped redaction')

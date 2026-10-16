@@ -26,7 +26,7 @@ def main():
     base = Path(args.root) / 'runs/smri_cpu_20261004/remaining_20261004/morph'
     matrices, sources = [], []
     for extent in (192, 256):
-        path = base / 'nodecw7_fit_v14' / ('extent' + str(extent)) / 'artifacts/stages.npz'
+        path = base / 'compute-a-7_fit_v14' / ('extent' + str(extent)) / 'artifacts/stages.npz'
         with np.load(path) as values:
             for name in ('fit_0', 'fit_1', 'average', 'inverse'):
                 matrices.append(values[name])

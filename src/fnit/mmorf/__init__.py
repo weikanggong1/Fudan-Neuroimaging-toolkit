@@ -12,3 +12,7 @@ __all__ = [
     "prepare_mmorf_warp",
     "run_mmorf",
 ]
+
+# Unified public name; the mature implementation and defaults are unchanged.
+FNIT_mmorf = run_mmorf
+__all__.append("FNIT_mmorf")

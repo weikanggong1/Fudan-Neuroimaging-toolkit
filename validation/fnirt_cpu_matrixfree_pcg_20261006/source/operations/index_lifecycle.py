@@ -9,7 +9,7 @@ from pathlib import Path
 import stat
 import tempfile
 
-ROOT = Path("/cwStorage/home/gongwk/Notebook_code/FNIT")
+ROOT = Path("/data/fnit")
 KEY = "fnirt_cpu_matrixfree_pcg_20261006"
 LEAF = "smri_cpu_20261004/remaining_20261006/fnirt-matrixfree-pcg-v1"
 FREEZE = "7ee1eb753514693ff7f00c64cdea43c12fcfb2d83293b717c8db3deeef9166fd"
@@ -62,8 +62,8 @@ def main():
             entry = {"workspace": str(workspace), "run_path": str(run), "status": "stage3_prepared_no_worker",
                      "freeze_sha256": FREEZE, "production_change": False, "gpu_enabled": False,
                      "scope": "accepted checkpoint only; independent current optimized callbacks; old/current Torch and owned division-reduction PCG complete algorithm comparison; controlled tau .001, tol1e-3/max500; no evaluate/linearize/assembly/CSC/native/full registration",
-                     "cpu_host": "nodecw7", "cpu_affinity": [32,36,40,44,48,52,56,60], "cpu_threads": 8,
-                     "outer_lock": str(ROOT / "runs/smri_cpu_20261004/nodecw7.gems.cpu8.lock"),
+                     "cpu_host": "compute-a-7", "cpu_affinity": [32,36,40,44,48,52,56,60], "cpu_threads": 8,
+                     "outer_lock": str(ROOT / "runs/smri_cpu_20261004/compute-a-7.gems.cpu8.lock"),
                      "outer_lock_wait_seconds": 19000, "controller_timeout_seconds": 19600,
                      "child_timeout_seconds": 180, "address_space_cap_bytes": 20000000000,
                      "maximum_calls": {"optimized_callback_per_arm": 502, "optimized_callback_total": 1004, "PCG": 2, "CSC_action": 0},
@@ -75,7 +75,7 @@ def main():
                 "`workspaces/" + LEAF + "` and matching `runs/` leaf. Restores the accepted FNIRT stage1 arrays/recorded strides into independent optimized caches; current Torch PCG versus complete owned division/reduction candidate. "
                 "Each arm unit0 restore gate then at most500 natural PCG iterations and one true-residual callback: at most502 each/1004 total; first unit mismatch stops before either solve. Tau.001 is controlled, not historical LM. "
                 "Exactly two finite PCG calls; no new evaluation, linearization, H assembly, CSC action, native executable, MRI or GPU. "
-                "Shared nodecw7 CPU8 lock;19000s wait/19600s controller/180s child. "
+                "Shared compute-a-7 CPU8 lock;19000s wait/19600s controller/180s child. "
                 "This is a finite matrix-free PCG comparison with no native same-system oracle, runtime integration or whole-registration equivalence.\n")
         else:
             entry = tasks[KEY]

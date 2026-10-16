@@ -104,7 +104,7 @@ def main():
     t1_reference = output / 'T1w_native_bold_reference.nii.gz'
     source = Path(__file__).resolve().parent
     started = time.perf_counter()
-    run('sampling_reference', [singularity, 'exec', '--cleanenv', '--bind', '/cwStorage,/home1,/public',
+    run('sampling_reference', [singularity, 'exec', '--cleanenv', '--bind', '/data/shared,/home1,/public',
         container, 'python', source / 'make_original_sampling_reference.py',
         '--fixed', root / 'anat/T1_brain.nii.gz', '--moving', case['sbref'],
         '--mask', root / 'anat/T1_mask.nii.gz', '--work', output / 'sampling_reference_work',

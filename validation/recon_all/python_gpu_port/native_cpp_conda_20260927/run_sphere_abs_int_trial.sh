@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-root=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_cpp_conda_20260927
+root=/data/workspaces/freesurfer_synth/work/reconall_cpp_conda_20260927
 trial="$root/sphere_abs_int_trial_20260927"
 pair="$root/sphere_registration_pair_20260927/sphere/official"
-e2e=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_conda_cpp_cc_e2e_20260927
+e2e=/data/workspaces/freesurfer_synth/work/reconall_conda_cpp_cc_e2e_20260927
 
 test "$(cat "$e2e/reports/e2e.status")" = 'exit=0'
 test ! -e "$trial/run/subjects/sub01"

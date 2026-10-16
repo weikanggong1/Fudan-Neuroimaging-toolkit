@@ -6,14 +6,14 @@ from pathlib import Path
 import subprocess
 import time
 
-root = Path("/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/root_integrated_tests_v3")
+root = Path("/data/workspaces/fnit_connectome_accuracy_20261003_v1/root_integrated_tests_v3")
 job = root / "cpu_tests_retry2"
 job.mkdir(exist_ok=False)
 environment = os.environ.copy()
 environment.update(CUDA_VISIBLE_DEVICES="", PYTHONPATH=str(root / "src"))
 for key in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS", "NUMEXPR_NUM_THREADS"):
     environment[key] = "8"
-command = ["/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/bin/python", "-m", "pytest", "-q",
+command = ["/data/workspaces/fnit_conda_env_956b1a9/bin/python", "-m", "pytest", "-q",
            "tests/connectome", "tests/eddy", "tests/topup"]
 started = time.perf_counter()
 with (job / "pytest.log").open("xb") as log:

@@ -24,14 +24,14 @@
 
 ```bash
 # 保持原实际Conda prefix，不切换生产环境。
-FNIT_CUDA_PYTHON=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
+FNIT_CUDA_PYTHON=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
 # 原冻结源码；不修改它，只调用其worker。
-FNIT_CUDA_SOURCE=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610
+FNIT_CUDA_SOURCE=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610
 # 新工具与新产物；不存在时才启动。
-FNIT_CUDA_TOOLS=/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/cuda_bootstrap_tools_v2
+FNIT_CUDA_TOOLS=/data/fnit/workspaces/recon_accuracy_20261003/cuda_bootstrap_tools_v2
 "$FNIT_CUDA_PYTHON" "$FNIT_CUDA_TOOLS/cuda_bootstrap_probe.py" \
   --source "$FNIT_CUDA_SOURCE" \
-  --output /cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/cuda_bootstrap_probe_v2 \
+  --output /data/fnit/runs/recon_accuracy_20261003/cuda_bootstrap_probe_v2 \
   --lock /tmp/fnit-shared-benchmark.lock \
   --rounds 4 \
   --minimum-free-bytes 2000000000 \
@@ -40,7 +40,7 @@ FNIT_CUDA_TOOLS=/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accur
 
 ## 已知实测及失败行为
 
-2026-10-04在gpucw1完成v2独立矩阵，实际工具提交`865aec34ce30dee816ef67e203f35a2266ce8a5b`，生产对照冻结于`816e5610417a4c587caf321049438a9554139016`。共32个fresh-exec子进程，22成功、10失败；结果见[完整机器报告](runtime/cuda_bootstrap_probe_v2_20261004.json)。原 worker、显式 `torch.cuda.init()` 后的首次 empty、缓存开启及单进程路径都曾失败；拆分实验中的 init 调用本身通过。失败集中在前6个trial，之后22个子进程成功，因此存在时间混杂，不能声称某个设置修复了OOM。
+2026-10-04在accelerator-a-1完成v2独立矩阵，实际工具提交`865aec34ce30dee816ef67e203f35a2266ce8a5b`，生产对照冻结于`816e5610417a4c587caf321049438a9554139016`。共32个fresh-exec子进程，22成功、10失败；结果见[完整机器报告](runtime/cuda_bootstrap_probe_v2_20261004.json)。原 worker、显式 `torch.cuda.init()` 后的首次 empty、缓存开启及单进程路径都曾失败；拆分实验中的 init 调用本身通过。失败集中在前6个trial，之后22个子进程成功，因此存在时间混杂，不能声称某个设置修复了OOM。
 
 所有失败C++栈落在`CUDAStream.cpp::initGlobalStreamState()`，固定PyTorch 2.5.1该位置的受检CUDA调用是`cudaDeviceGetStreamPriorityRange`；分配器尚未调用`cudaMalloc`，也未创建非默认stream池。拆分路径的PyTorch初始化成功，首次empty才失败。矩阵边界的整卡采样一直为69,392,662,528字节使用、15,549,333,504字节空闲；此处为轮次前后采样，不能排除采样间瞬间变化。这个结果证明无需真实影像即可复现，但尚未确定上下文建立失败的底层原因，不宣称已修复。此前真实sub06两个新annotation worker在首标量分配时报OOM，故障窗口整卡采样2.804GB；详见[sub06回执](runtime/sub06_retry_annotation_bootstrap_audit_20261004.json)。CUDA内部错误需C++栈进一步区分。资源/锁超时、冻结源码变化和子进程失败写入报告；矩阵结束与全部子进程成功分别记录。取消只清理本次有PID/starttime身份绑定的进程，不重置GPU或终止其他用户任务。
 
@@ -69,12 +69,12 @@ v3保留原worker对照，每轮将其与四个runtime边界模式按固定种�
 
 ```bash
 # 使用既有实际环境；不安装另一套CUDA。
-FNIT_BOUNDARY_PYTHON=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
+FNIT_BOUNDARY_PYTHON=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
 # 新的只读冻结源码对照与独立工具目录。
-FNIT_BOUNDARY_TOOLS=/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/cuda_bootstrap_tools_v3
+FNIT_BOUNDARY_TOOLS=/data/fnit/workspaces/recon_accuracy_20261003/cuda_bootstrap_tools_v3
 "$FNIT_BOUNDARY_PYTHON" "$FNIT_BOUNDARY_TOOLS/cuda_bootstrap_probe.py" \
-  --source /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610 \
-  --output /cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/cuda_runtime_matrix_v3 \
+  --source /data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610 \
+  --output /data/fnit/runs/recon_accuracy_20261003/cuda_runtime_matrix_v3 \
   --boundary-script "$FNIT_BOUNDARY_TOOLS/cuda_runtime_boundary.py" \
   --rounds 4 \
   --seed 20261004 \
@@ -85,7 +85,7 @@ FNIT_BOUNDARY_TOOLS=/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_a
 
 ## v3实测与带系统调用跟踪的配对
 
-v3于2026-10-04 08:25:58–08:27:17 UTC在同一gpucw1/GPU0完成40个新进程，38成功、2失败。提前同步模式在同一轮双进程报OOM，原worker、直接priority、driver context及sticky诊断各8次通过。这组结果不能说明driver模式已修复，因为原始路径在本轮也全部通过；提前同步已显示失败，不能直接作为生产修复。完整回执见[runtime矩阵](runtime/cuda_runtime_matrix_v3_20261004.json)。
+v3于2026-10-04 08:25:58–08:27:17 UTC在同一accelerator-a-1/GPU0完成40个新进程，38成功、2失败。提前同步模式在同一轮双进程报OOM，原worker、直接priority、driver context及sticky诊断各8次通过。这组结果不能说明driver模式已修复，因为原始路径在本轮也全部通过；提前同步已显示失败，不能直接作为生产修复。完整回执见[runtime矩阵](runtime/cuda_runtime_matrix_v3_20261004.json)。
 
 新增`cuda_paired_context_probe.py`对原worker/driver、直接priority/driver两类交替配对。`--source`、`--output`、`--lock`、`--boundary-script`语义同上；`--pairs`默认8，允许8或12；`--seed`默认20261004；`--strace`仅跟踪自己新创建进程的ioctl/mmap/munmap/mlock/munlock/brk，无完整环境或文件IO；`--child-timeout-seconds`默认90。返回0表示实验矩阵执行完毕，子进程成功率单列；返回1表示包装器超时、取消或自身失败。每对保存NUMA buddyinfo、节点meminfo、少量zone字段、proc库绑定、调用返回码和strace文件SHA。跟踪计时包含ptrace开销，不能作为整例性能数据。
 
@@ -93,12 +93,12 @@ v3于2026-10-04 08:25:58–08:27:17 UTC在同一gpucw1/GPU0完成40个新进程�
 
 ```bash
 # 既有Conda解释器；物理GPU和总4线程由工具固定并记录。
-FNIT_PAIRED_PYTHON=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
+FNIT_PAIRED_PYTHON=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
 # 使用独立工具目录；不修改冻结生产源码。
-FNIT_PAIRED_TOOLS=/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/cuda_bootstrap_tools_v4
+FNIT_PAIRED_TOOLS=/data/fnit/workspaces/recon_accuracy_20261003/cuda_bootstrap_tools_v4
 "$FNIT_PAIRED_PYTHON" "$FNIT_PAIRED_TOOLS/cuda_paired_context_probe.py" \
-  --source /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610 \
-  --output /cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/cuda_paired_context_v4 \
+  --source /data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610 \
+  --output /data/fnit/runs/recon_accuracy_20261003/cuda_paired_context_v4 \
   --pairs 8 \
   --seed 20261004 \
   --strace \
@@ -117,11 +117,11 @@ v4在2026-10-04 08:37:19–08:38:07 UTC完成8对、16个新进程，14成功、
 
 ```bash
 # NUMA仅诊断，不改变GPU精度或原生产函数。
-FNIT_NUMA_PYTHON=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
-FNIT_NUMA_TOOLS=/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/cuda_bootstrap_tools_v5
+FNIT_NUMA_PYTHON=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
+FNIT_NUMA_TOOLS=/data/fnit/workspaces/recon_accuracy_20261003/cuda_bootstrap_tools_v5
 "$FNIT_NUMA_PYTHON" "$FNIT_NUMA_TOOLS/cuda_paired_context_probe.py" \
-  --source /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610 \
-  --output /cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/cuda_numa_context_v5 \
+  --source /data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/baseline_runtime_816e5610 \
+  --output /data/fnit/runs/recon_accuracy_20261003/cuda_numa_context_v5 \
   --numa-wrapper "$FNIT_NUMA_TOOLS/cuda_numa_worker_probe.py" \
   --pairs 8 \
   --seed 20261004 \
@@ -132,7 +132,7 @@ FNIT_NUMA_TOOLS=/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accur
 
 ## v6固定RM返回状态与生产启动处理
 
-2026-10-04 09:10:54–09:11:34 UTC，gpucw1/GPU0完成16个新标量进程，全部成功。仅附着自有诊断进程的源码编译ioctl工具记录6,420个固定RM头，与strace白名单计数逐项匹配，header复制失败0。非零状态86出现64次，上游535源码定义为`NV_ERR_NOT_SUPPORTED`；它在每个成功进程均出现，不是OOM证据。成功syscall保留的errno17也不表示失败。没有在本轮捕获失败臂，未确认更多底层原因，详见[独立审计](runtime/CUDA_IOCTL_V6_STATUS_AUDIT_20261004.md)、[完整v6报告](runtime/cuda_ioctl_context_v6_20261004.json)。工具不进入生产、不升级驱动、不重置GPU。
+2026-10-04 09:10:54–09:11:34 UTC，accelerator-a-1/GPU0完成16个新标量进程，全部成功。仅附着自有诊断进程的源码编译ioctl工具记录6,420个固定RM头，与strace白名单计数逐项匹配，header复制失败0。非零状态86出现64次，上游535源码定义为`NV_ERR_NOT_SUPPORTED`；它在每个成功进程均出现，不是OOM证据。成功syscall保留的errno17也不表示失败。没有在本轮捕获失败臂，未确认更多底层原因，详见[独立审计](runtime/CUDA_IOCTL_V6_STATUS_AUDIT_20261004.md)、[完整v6报告](runtime/cuda_ioctl_context_v6_20261004.json)。工具不进入生产、不升级驱动、不重置GPU。
 
 已经验证的边界是NVIDIA主CUDA上下文建立可返回OOM，先于FNIT影像算法及cudaMalloc。NUMA页碎片、特定驱动内部资源仍待证明；既有整卡满载失败与这种首次上下文失败分别报告。
 

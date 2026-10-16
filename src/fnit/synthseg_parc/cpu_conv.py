@@ -1,6 +1,6 @@
 """Bounded CPU-only convolution slabs for SynthSeg inference.
 
-Large NCDHW convolutions have previously crashed in oneDNN on nodecw10;
+Large NCDHW convolutions have previously crashed in oneDNN on compute-a-10;
 disabling it for the entire U-Net uses a very large im2col workspace. Slabs
 retain each kernel's complete depth halo and the guarded original backend.
 CUDA and gradient-enabled/training forwards retain nn.Conv3d unchanged.
@@ -15,7 +15,7 @@ _ONEDNN_POINTWISE_BYTES = 2**31 - 1
 
 
 def _pointwise_blocked_bytes(image, output_channels):
-    """Conservatively include the AVX-512 channel padding observed on nodecw10."""
+    """Conservatively include the AVX-512 channel padding observed on compute-a-10."""
     channels = ((max(image.shape[1], output_channels) + 15) // 16) * 16
     return image.shape[0] * channels * image.shape[2] * image.shape[3] * image.shape[4] * image.element_size()
 
@@ -96,7 +96,7 @@ class CPUInferenceConv3d(nn.Conv3d):
     """Use safe CPU slabs inside the existing full-volume oneDNN guard.
 
     SynthSeg's ordinary entry point disables full-volume oneDNN after large
-    convolutions crashed on nodecw10. Only that guarded path needs slabs.
+    convolutions crashed on compute-a-10. Only that guarded path needs slabs.
     SynthSegPlus retains its established oneDNN backend. Large 1x1x1 output
     projections use bounded depth calls after that native path crashed on
     a real T1; smaller projections and all other oneDNN layers stay whole.

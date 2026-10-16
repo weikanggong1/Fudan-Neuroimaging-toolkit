@@ -90,7 +90,7 @@ mris_fix_topology -ga -seed 1234 -threads 4 reference_subject lh
 
 ## 5．当前精度、耗时与图
 
-2026-10-10 在 CFFF 使用公开 ds000114 `sub07` 左半球真实候选，冻结三次原始 `updateVertexStatistics` 调用的完整 before/after 状态。固定源码参考程序两次独立运行，三次调用的捕获字节都重现。FNIT 每次只读取 before、边状态、映射及当前反馈作为输入，after 仅用于比较。三次调用分别覆盖 RP 使用次数 `0→1`、`1→2`、`2→3`；每次更新 38 个缺陷条目。
+2026-10-10 在 accelerator-b 使用公开 ds000114 `sub07` 左半球真实候选，冻结三次原始 `updateVertexStatistics` 调用的完整 before/after 状态。固定源码参考程序两次独立运行，三次调用的捕获字节都重现。FNIT 每次只读取 before、边状态、映射及当前反馈作为输入，after 仅用于比较。三次调用分别覆盖 RP 使用次数 `0→1`、`1→2`、`2→3`；每次更新 38 个缺陷条目。
 
 | 真实调用 | 完整 marks／RP 次数／运行均值 | 首次 API | 重复 API | 含加载、NPZ、PNG，报告写出前 |
 | --- | --- | ---: | ---: | ---: |

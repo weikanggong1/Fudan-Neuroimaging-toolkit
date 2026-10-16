@@ -1,4 +1,6 @@
-# UKBConnectome_pipeline
+# FNIT_UKBconnectomePipeline
+
+> 统一 Python 入口：[`FNIT_UKBconnectomePipeline`](../API_REFERENCE.md)，从 `fnit` 导入。下文配置、结果类型和细分算子保留高级兼容接口。
 
 | 摘要 | 内容 |
 |---|---|
@@ -55,12 +57,12 @@ DWI准备见 [dMRI](../dmri_pipeline/README.md)、[TOPUP](../topup/README.md)、
 以下例子读取已有同源subject，原始DWI由入口准备：
 
 ```python
-from fnit import UKBConnectome_pipeline
+from fnit import FNIT_UKBconnectomePipeline
 
 bids_directory = "/data/bids"                          # 配对DWI与T1w的原始BIDS
 subject_directory = "/data/subjects/sub-01"           # 同源已有重建，保持只读
 output_directory = "/data/connectome/sub-01"          # 准备结果及checkpoint目录
-connectome_pipeline = UKBConnectome_pipeline(          # 指定 FNIT PyTorch 阶段的设备
+connectome_pipeline = FNIT_UKBconnectomePipeline(          # 指定 FNIT PyTorch 阶段的设备
     device="cuda:0",                                 # 原生追踪仍使用 CPU
 )
 connectome_result = connectome_pipeline.run_bids(      # 返回内存矩阵与轨迹结果
@@ -419,7 +421,7 @@ host时钟存在异步与嵌套，不求和替代总墙钟。
 30次核心恢复内容一致；该历史轮聚合验证不代替独立原软件轨迹分布与完整raw一致性。
 历史原软件比较按原版本保留在 [精度记录](ACCURACY_OPTIMIZATION_20261003.md)。
 
-历史 PyTorch SH/5TT 优化、同机官方参考及未采用候选保留在[旧版报告](../../validation/connectome/tracking_cfff_20261009/README.md)，不能当成本版耗时。
+历史 PyTorch SH/5TT 优化、同机官方参考及未采用候选保留在[旧版报告](../../validation/connectome/tracking_accelerator-b_20261009/README.md)，不能当成本版耗时。
 
 ![历史 PyTorch 版本真实病例保存的 labels、FA 和矩形 count 结果](../../validation/connectome/paired_pipeline_20261003/CON01_pair_outputs.png)
 
@@ -434,7 +436,7 @@ host时钟存在异步与嵌套，不求和替代总墙钟。
 | 日期 | commit/version | 变化 | benchmark |
 |---|---|---|---|
 | 2026-10-09 | 原生追踪 | 固定 MRtrix 源码独立构建、配置隔离；CPU iFOD2/ACT，其余 PyTorch 阶段保留；checkpoint 绑定程序/库/补丁。 | [274.17 s 两 atlas 整链、100k 追踪、官方与缓存核验](../../validation/connectome/native_tracking_20261009/README.md)。 |
-| 2026-10-09 | 历史 `6ae32945`，SH 源码 `76a6b293` | 旧 PyTorch eager 合并 SH 列；编译与梯度保留原运算。 | [原 A100 两模式 100k、119 项回归及官方参考](../../validation/connectome/tracking_cfff_20261009/README.md)。 |
+| 2026-10-09 | 历史 `6ae32945`，SH 源码 `76a6b293` | 旧 PyTorch eager 合并 SH 列；编译与梯度保留原运算。 | [原 A100 两模式 100k、119 项回归及官方参考](../../validation/connectome/tracking_accelerator-b_20261009/README.md)。 |
 | 2026-10-03～04 | `8bc337c4`冻结 / `7ba73de2`整合 | 两模板、checkpoint与输入保护。 | [10例40CLI及源码收据](../../validation/connectome/paired_pipeline_20261003/README.md)。 |
 | 2026-10-03 | accuracy_20261003 | 梯度、FA与ACT方向修正。 | [历史原软件比较](ACCURACY_OPTIMIZATION_20261003.md)。 |
 | 2026-10-02 | tenraw_20261002 | 数据流与矩阵构建优化。 | [历史完整矩阵判定](FINAL_RAW_MATRIX_RESULTS.md)。 |

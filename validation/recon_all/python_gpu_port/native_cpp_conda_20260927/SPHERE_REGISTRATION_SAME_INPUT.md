@@ -1,6 +1,6 @@
 # FreeSurfer 球面链：Conda 源码版与官方 8.2 同输入配对
 
-日期：2026-09-27；节点：gpucw1；单被试左半球。Conda 版从 FreeSurfer 8.2 源码提交 `d932c45b7941662ea380a05efef580568b98d41a` 编译，官方版来自 `/public/software/apps/Freesurfer/8.2.0-1/bin`（build-stamp `d932c45`）。这三个原生程序都在 **CPU** 上运行。冻结输入来自当前候选流程的 `sphere_registration_preflight/subjects/sub01`，其上游网格仍是近似流程的产物；本实验只隔离三个程序的同输入效果。
+日期：2026-09-27；节点：accelerator-a-1；单被试左半球。Conda 版从 FreeSurfer 8.2 源码提交 `d932c45b7941662ea380a05efef580568b98d41a` 编译，官方版来自 `/opt/reference/Freesurfer/8.2.0-1/bin`（build-stamp `d932c45`）。这三个原生程序都在 **CPU** 上运行。冻结输入来自当前候选流程的 `sphere_registration_preflight/subjects/sub01`，其上游网格仍是近似流程的产物；本实验只隔离三个程序的同输入效果。
 
 ## 功能、调用和官方对照
 
@@ -24,6 +24,6 @@
 
 为检验官方球面程序自身是否可重现，我们保存第一次官方输出，把**相同被试路径**恢复成首次运行前逐文件 SHA 完全相同的输入，继续用 `-seed 1234 -threads 4` 重跑。第二次耗时 368.66 s；两次官方 `lh.sphere` 的坐标和面逐元素完全相同，三维距离最大值 0。文件 SHA 因创建时间等字节不同。此单次重复排除了本实验中官方 `mris_sphere` 自身随机波动作为 2.435 mm 平均差异的解释；未测试 Conda 版或官方 `mris_register` 的自重复。
 
-`mris_register` 配对固定使用同一份预检 `lh.sphere`，因此 0.1616 mm 的同输入差异独立于上面两版 `mris_sphere` 的 2.435 mm 差异。整条链将球面差异继续送入注册，可能改变 atlas 边界；本配对没有重新生成 annotation，不能推断逐区厚度、面积和体积已经相同。其 T1 级差异应看整例比较报告。三项单次墙钟来自共享 gpucw1，未控制外部负载，不构成稳定提速结论。
+`mris_register` 配对固定使用同一份预检 `lh.sphere`，因此 0.1616 mm 的同输入差异独立于上面两版 `mris_sphere` 的 2.435 mm 差异。整条链将球面差异继续送入注册，可能改变 atlas 边界；本配对没有重新生成 annotation，不能推断逐区厚度、面积和体积已经相同。其 T1 级差异应看整例比较报告。三项单次墙钟来自共享 accelerator-a-1，未控制外部负载，不构成稳定提速结论。
 
-数据：[六条命令的输入哈希、二进制哈希、计时与逐点差异](sphere_registration_same_input.json)；[官方 sphere 自重复对照](sphere_official_repeat_same_input.json)。原始日志与完整复制的被试位于 `/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_cpp_conda_20260927/sphere_registration_pair_20260927/`，其中 `status=exit=0`、`sphere/repeat_official/status=exit=0`。
+数据：[六条命令的输入哈希、二进制哈希、计时与逐点差异](sphere_registration_same_input.json)；[官方 sphere 自重复对照](sphere_official_repeat_same_input.json)。原始日志与完整复制的被试位于 `/data/workspaces/freesurfer_synth/work/reconall_cpp_conda_20260927/sphere_registration_pair_20260927/`，其中 `status=exit=0`、`sphere/repeat_official/status=exit=0`。

@@ -1,17 +1,17 @@
 # recon-all 性能配对：真实 T1，2026-09-30
 
-本目录只记录本轮实际运行。两例去标识 T1、官方参考、权重和资产的 SHA-256 及机器来源见[前段清单](../volume_parity_20260930/provenance.json)。当前计算源码为 `e036f57b62b99d2af4cd8853ab2f1e6d2a9f8c68`，直接基线为 `279e09f0d2a166237871b3d683a6be75bd5e99b4`，最初基线为 `b8cd17bb441307d88dda78ba8f56e77695b595a8`；阶段报告另保存实际载入源码与脚本的 SHA-256。`sub-01` 的完整基线在 gpucw1，`sub-02` 在 nodecw10；GPU1 与其他任务共享，因此阶段秒数是观察值，不代表独占机器的稳定加速。官方结果只在独立比较路径读取，未参与 FNIT 阶段计算。
+本目录只记录本轮实际运行。两例去标识 T1、官方参考、权重和资产的 SHA-256 及机器来源见[前段清单](../volume_parity_20260930/provenance.json)。当前计算源码为 `e036f57b62b99d2af4cd8853ab2f1e6d2a9f8c68`，直接基线为 `279e09f0d2a166237871b3d683a6be75bd5e99b4`，最初基线为 `b8cd17bb441307d88dda78ba8f56e77695b595a8`；阶段报告另保存实际载入源码与脚本的 SHA-256。`sub-01` 的完整基线在 accelerator-a-1，`sub-02` 在 compute-a-10；GPU1 与其他任务共享，因此阶段秒数是观察值，不代表独占机器的稳定加速。官方结果只在独立比较路径读取，未参与 FNIT 阶段计算。
 
 | 同一 FNIT 真实输入的阶段 | CPU 基线 | 候选 | 输出回归 | 资源 |
 | --- | ---: | ---: | --- | --- |
-| `sub-01` 第二次归一化，gpucw1 | 85.17 s | CUDA 59.15 s | `brain.mgz` 0/16,777,216 个差异体素 | 进程采样峰值 1,247,805,440 字节 |
-| `sub-02` 第二次归一化，CPU nodecw10、CUDA gpucw1 | 85.96 s | CUDA 71.09 s | `brain.mgz` 0/16,777,216 个差异体素 | 同上；跨主机耗时不能作为配对提速 |
-| `sub-01` MNI 非线性链，gpucw1 CPU | 339.99 s | 只返回变换 343.26 s | 前向、逆向、检查图的 SHA-256 全相同 | 共享负载，单次未见加速 |
-| `sub-02` MNI 非线性链，headcw CPU | 282.33 s | 只返回变换 253.95 s | 前向、逆向、检查图的 SHA-256 全相同 | 同主机单次观察 |
+| `sub-01` 第二次归一化，accelerator-a-1 | 85.17 s | CUDA 59.15 s | `brain.mgz` 0/16,777,216 个差异体素 | 进程采样峰值 1,247,805,440 字节 |
+| `sub-02` 第二次归一化，CPU compute-a-10、CUDA accelerator-a-1 | 85.96 s | CUDA 71.09 s | `brain.mgz` 0/16,777,216 个差异体素 | 同上；跨主机耗时不能作为配对提速 |
+| `sub-01` MNI 非线性链，accelerator-a-1 CPU | 339.99 s | 只返回变换 343.26 s | 前向、逆向、检查图的 SHA-256 全相同 | 共享负载，单次未见加速 |
+| `sub-02` MNI 非线性链，control-host CPU | 282.33 s | 只返回变换 253.95 s | 前向、逆向、检查图的 SHA-256 全相同 | 同主机单次观察 |
 
 第二次归一化直接复用 `normalize_t1_aseg` 的现有 PyTorch CUDA 偏置场路径；控制点仍在 CPU。两次 GPU 运行均同步计时，包含加载、传输、写出；显存 CSV 每 2 秒采样一次父子进程同一时刻用量，不能当作连续峰值。[sub-01 报告](sub01/brain_second_gpu_report.json)、[sub-02 报告](sub02/brain_second_gpu_report.json)包含输入哈希、函数分步耗时及 PyTorch allocated/reserved。
 
-MNI 链复用现有 SynthMorph，不计算无人使用的 `moved`、`fixed_moved`。GPU recon-all 自 `279e09f` 起完整传递主设备并使用 FP32 CUDA；独立函数仍默认 CPU，调用结束恢复此前 TF32 设置。两例当前封装的同输入耗时为 [160.81 s](sub01/mni_gpu_final_gpucw1_report.json) / [156.04 s](sub02/mni_gpu_final_gpucw1_report.json)，四个子步骤计时包括模型加载、写出、warp 转换、求逆和检查图重采样。程序和函数源码哈希均保存在报告中；与先前 FP32 GPU 诊断的三个输出数组及仿射完全相同。
+MNI 链复用现有 SynthMorph，不计算无人使用的 `moved`、`fixed_moved`。GPU recon-all 自 `279e09f` 起完整传递主设备并使用 FP32 CUDA；独立函数仍默认 CPU，调用结束恢复此前 TF32 设置。两例当前封装的同输入耗时为 [160.81 s](sub01/mni_gpu_final_accelerator-a-1_report.json) / [156.04 s](sub02/mni_gpu_final_accelerator-a-1_report.json)，四个子步骤计时包括模型加载、写出、warp 转换、求逆和检查图重采样。程序和函数源码哈希均保存在报告中；与先前 FP32 GPU 诊断的三个输出数组及仿射完全相同。
 
 同一 `sub-01` 输入的 CPU 观察值为 339.99 s，TF32 CUDA 为 149.64 s。TF32 的前向/逆向 warp P99 差达 0.075/1.108 mm，检查图与 CPU 相差 220,314 体素，采样显存峰值 20,308,819,968 字节，未作为本阶段默认。FP32 两例相对 CPU 的前向/逆向 P99 差均约 0.000015/0.000031 mm；最大逆向差为 0.000473/0.000183 mm，最近邻检查图仍差 19/17 体素。这些尾差保留在[逐值诊断](sub01/mni_gpu_fp32_vs_cpu.json)和[sub-02 诊断](sub02/mni_gpu_fp32_vs_cpu.json)中。当前封装的父子进程采样峰值均为 12,996,050,944 字节，PyTorch allocated 约 9.27 GB、reserved 约 12.17 GB；未启用半精度。这里的阶段结果不代替完整重建的退化检查与总体指标评价。
 
@@ -34,8 +34,8 @@ GPU 流程的 white/pial 面积、white/pial 曲率和厚度改为已有的 `are
 
 | 原始 T1、空目录连续整例 | 直接基线 279e09f | 当前 e036f57 | 本次观察变化 | 当前外层命令时间 |
 | --- | ---: | ---: | ---: | ---: |
-| sub-01，gpucw1 GPU | 6303.79 s | 7422.34 s | 慢 17.74% | 7437.40 s |
-| sub-02，nodecw10 CPU | 6099.80 s | 5756.04 s | 快 5.64% | 5764.93 s |
+| sub-01，accelerator-a-1 GPU | 6303.79 s | 7422.34 s | 慢 17.74% | 7437.40 s |
+| sub-02，compute-a-10 CPU | 6099.80 s | 5756.04 s | 快 5.64% | 5764.93 s |
 
 两例均完成 66 阶段、138/138 项、双侧网格通过、退出码 0。函数时间包括加载、传输、计算和读写；外层时间另含导入、入口校验与初始化。GPU 使用已初始化 CUDA 的 Python API，CPU 使用 CLI；两者的 PyTorch/支持选项的原生程序为四线程，Numba 默认 128/192，没有全局限制 BLAS/OpenMP。固定源码归档 SHA-256 为 `3f3819aacac33ac63cd795628ef84260901a7e0ed247c3907c024ad272235d3b`，见[源码清单](source_e036f57_manifest.json)。共享硬件单次差值只表示本次观察。
 
@@ -61,7 +61,7 @@ CPU 整例缩短 343.76 s；GPU 双侧 surface 合计节省 484.83 s，但前段
 
 ### 同输入 WM 重放与启动诊断
 
-整例结束后，使用本次 FNIT 的 entowm、aseg.presurf、wm.seg、brain，在同一 gpucw1 独立重跑相同 Conda WM 编辑程序两次：[报告](sub01/wm_edit_repeat_e036f57_retry/report.json)为 31.68/31.94 s，子进程 user+system 为 31.66/31.93 s，输出 uint8、256³、体素与仿射全部一致。计时包含子进程启动、原生加载/写出和日志，未建立父进程 CUDA 上下文；不能据此认定整例的 666 s 来自哪一种等待。首次诊断在原生程序结束后的 NumPy shape JSON 序列化失败，没有完成报告；[原失败脚本](benchmark_wm_edit_repeat_e036f57_initial_failed.py)和[日志](wm_edit_repeat_e036f57.log)独立保留，修正为 Python int 后从新的隔离目录运行，未补写首轮秒数。
+整例结束后，使用本次 FNIT 的 entowm、aseg.presurf、wm.seg、brain，在同一 accelerator-a-1 独立重跑相同 Conda WM 编辑程序两次：[报告](sub01/wm_edit_repeat_e036f57_retry/report.json)为 31.68/31.94 s，子进程 user+system 为 31.66/31.93 s，输出 uint8、256³、体素与仿射全部一致。计时包含子进程启动、原生加载/写出和日志，未建立父进程 CUDA 上下文；不能据此认定整例的 666 s 来自哪一种等待。首次诊断在原生程序结束后的 NumPy shape JSON 序列化失败，没有完成报告；[原失败脚本](benchmark_wm_edit_repeat_e036f57_initial_failed.py)和[日志](wm_edit_repeat_e036f57.log)独立保留，修正为 Python int 后从新的隔离目录运行，未补写首轮秒数。
 
 再冻结本次 FNIT 的 orig、裁剪 T1、aff.lta，在相同 GPU UUID、四线程和缓存关闭策略下重放 MNI：[四子步骤报告](sub01/mni_e036f57_after_full_report.json)为 166.33 s，外层命令 170.90 s，退出码 0。模型与写出 26.66 s、warp 转换 20.69 s、变换求逆 110.46 s、检查图重采样 8.04 s；[三个输出回归](sub01/mni_e036f57_after_full_comparison.json)的数组、dtype、仿射和头均与本次整例一致，最大/P99 差为 0。该测试是新进程中的冻结阶段，没有复现原整例此前的 GPU 状态或共享负载，也没有另测进程显存；166 s 不能替代整例内的 1018 s。当前证据定位到异常耗时发生于连续整例，但尚不能确定同步、驱动、存储或调度中哪一项造成等待。
 
@@ -71,7 +71,7 @@ GPU 完成前的三个启动失败，以及线程、缓存和模块加载探针�
 
 当前 GPU 采样最大父子进程同时刻合计为 19,411,238,912 字节（19.41 GB、18.08 GiB），2611 行；采样循环睡眠 2 s，实际间隔中位数 2 s、最大 656 s，五个间隔超过 30 s。该诊断间隔计数不设显存门槛。采样空窗完整列于[整例摘要](../current_full_runs_20260930.json)，持续低于 20,000,000,000 字节未验证。默认关闭分配缓存，父进程 allocated/reserved 不可用；可得的 Talairach 子进程统计不代表整例峰值。缓存开启的完整 API 尚未验证。
 
-[实时指纹](runtime_fingerprints_e036f57.json)重新读取两幅原始 T1、11 项权重、102 项资产、14 个 Conda 程序及 6 个官方参考程序，变化数 0；个人许可证没有读取或散列。逐主机版本、CPU、GPU 与候选进程线程环境见[gpucw1](hardware_gpucw1_e036f57.json)、[nodecw10](hardware_nodecw10_e036f57.json)。原生程序没有改动或重新编译。
+[实时指纹](runtime_fingerprints_e036f57.json)重新读取两幅原始 T1、11 项权重、102 项资产、14 个 Conda 程序及 6 个官方参考程序，变化数 0；个人许可证没有读取或散列。逐主机版本、CPU、GPU 与候选进程线程环境见[accelerator-a-1](hardware_accelerator-a-1_e036f57.json)、[compute-a-10](hardware_compute-a-10_e036f57.json)。原生程序没有改动或重新编译。
 
 ### 严格复现、优化退化与最终指标
 
@@ -125,14 +125,14 @@ python validation/recon_all/python_gpu_port/benchmark_second_normalize.py \
 
 ## 下一项验证
 
-优先复测 GPU 连续整例的前段异常耗时，核对阶段调用与末尾 CUDA 同步各自的等待，并改善显存采样空窗。独立 WM/MNI 重放已经完成，重复它们不能代替连续整例状态。负载匹配后可在同一 gpucw1 用下列命令再次从原始 T1、新目录运行；本报告不含这次尚未执行的复测结果，不能用它代替本次 7422.34 s。
+优先复测 GPU 连续整例的前段异常耗时，核对阶段调用与末尾 CUDA 同步各自的等待，并改善显存采样空窗。独立 WM/MNI 重放已经完成，重复它们不能代替连续整例状态。负载匹配后可在同一 accelerator-a-1 用下列命令再次从原始 T1、新目录运行；本报告不含这次尚未执行的复测结果，不能用它代替本次 7422.34 s。
 
 ```bash
-task_root=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929 # 本轮主页 Conda 与资源根目录
+task_root=/data/workspaces/freesurfer_synth/work/recon_standard_20260929 # 本轮主页 Conda 与资源根目录
 diagnostic_root="$task_root/volume_parity_20260930" # 固定源码及既有报告位置
 python_bin="$task_root/fnit_main_env/bin/python"    # 相同 Conda Python
 code_root="$diagnostic_root/performance_e036f57_code/src" # 本次已测计算源码
-input_t1=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/examples/data/sub-01_T1w.nii.gz # 相同原始 T1
+input_t1=/data/workspaces/freesurfer_synth/examples/data/sub-01_T1w.nii.gz # 相同原始 T1
 subject="$diagnostic_root/full_sub01_e036f57_uuid_repeat" # 必须不存在的输出目录
 weights="$task_root/weights"                         # SHA-256 不变的权重
 assets="$task_root/assets"                           # SHA-256 不变的资产
@@ -140,7 +140,7 @@ gpu_index=1                                           # 固定到原 GPU UUID
 sample_csv="$diagnostic_root/full_sub01_e036f57_repeat_gpu.csv" # 新采样文件
 run_log="$diagnostic_root/full_sub01_e036f57_repeat.log" # 新日志
 run_summary="$diagnostic_root/full_sub01_e036f57_repeat_summary.txt" # 新退出状态与命令时间
-export FS_LICENSE=/cwStorage/home/gongwk/.config/freesurfer-codex/license.txt # 仅传已有授权许可证路径
+export FS_LICENSE=/data/user/.config/freesurfer-codex/license.txt # 仅传已有授权许可证路径
 bash validation/recon_all/python_gpu_port/performance_20260930/launch_api_gpu_e036f57_uuid.sh \
   "$python_bin" "$code_root" "$input_t1" "$subject" "$weights" "$assets" \
   "$gpu_index" "$sample_csv" "$run_log" "$run_summary"

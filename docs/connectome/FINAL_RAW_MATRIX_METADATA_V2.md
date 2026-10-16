@@ -2,7 +2,7 @@
 
 ## 1. 当前状态
 
-v2仅修复metadata wrapper，不改原raw `120a3e…` 数学、科学guard、641实际生产源或fixed5FNIT结论。旧nodecw10 PID52792经start_ticks、完整argv、实际pending观察核对后，于01:17:10 UTC停止。01:26:09 UTC实际hostname=nodecw10、PID不存在、无final_report/failure；旧launch、source/config/output/停止证据全部保留。
+v2仅修复metadata wrapper，不改原raw `120a3e…` 数学、科学guard、641实际生产源或fixed5FNIT结论。旧compute-a-10 PID52792经start_ticks、完整argv、实际pending观察核对后，于01:17:10 UTC停止。01:26:09 UTC实际hostname=compute-a-10、PID不存在、无final_report/failure；旧launch、source/config/output/停止证据全部保留。
 
 最终实际运行已完成，现无active waiter。完成map SHA a12765a9绑定旧九例与真实new-CON11；冻结工具与配置经逐版本修复后在项目外独立v7输出目录完成20组/4800判定及9099文件结束SHA复验。2782/4800被接受，20组整体均failed，详见[最终结果](FINAL_RAW_MATRIX_RESULTS.md)。
 
@@ -34,7 +34,7 @@ v2复用原mapper的`configuration/completed_case/verify_manifest_contract/refer
 
 v2初版源码SHA `bc2961583a544c7ad28a69c54bfc857be2f6bd288eb26abf8c97168c6e371f24`。六项stdlib metadata回归通过：raw父目录、selected actual job、resolved官方producer双向拒绝；缺explicit mapper拒绝；嵌套config/source及required-output mutation拒绝；curator统计stub中source变化在终结检查被拒绝且不生成final_report。它们不是科学benchmark。
 
-[旧两项缺口复现](../../validation/connectome/tenraw_20261002/task_04_final_raw_matrix_preparation_v2/fnit-task04-final-reader-review-tests-v1.json)与[旧冻结源码](../../validation/connectome/tenraw_20261002/task_04_final_raw_matrix_preparation_v2/frozen_v1_tool.py)保持原SHA绑定。实际[nodecw10 v9 import核验](../../validation/connectome/tenraw_20261002/task_04_final_raw_matrix_preparation_v2/actual_v9_imports.json)确认原helper SHA，未导入FNIT或torch，无GPU/MRI action。完整20链资格与official新map审计已实际完成，完整证据见最终结果。
+[旧两项缺口复现](../../validation/connectome/tenraw_20261002/task_04_final_raw_matrix_preparation_v2/fnit-task04-final-reader-review-tests-v1.json)与[旧冻结源码](../../validation/connectome/tenraw_20261002/task_04_final_raw_matrix_preparation_v2/frozen_v1_tool.py)保持原SHA绑定。实际[compute-a-10 v9 import核验](../../validation/connectome/tenraw_20261002/task_04_final_raw_matrix_preparation_v2/actual_v9_imports.json)确认原helper SHA，未导入FNIT或torch，无GPU/MRI action。完整20链资格与official新map审计已实际完成，完整证据见最终结果。
 
 ## 7. 版本与后续
 

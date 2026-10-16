@@ -7,7 +7,7 @@ recreates 300 inflation updates and their carried vertex momentum; the second
 performs the four-epoch nonlinear-area optimizer. For the fixed bilateral
 `fs_sub01/inflated.nofix` inputs, the independent NumPy CPU chain reproduces
 all 102,764 LH and 101,454 RH final `qsphere.nofix` vertex coordinates and
-205,560/202,936 ordered faces exactly. It takes 139.00/146.40 s on headcw
+205,560/202,936 ordered faces exactly. It takes 139.00/146.40 s on control-host
 in one run per hemisphere. See
 [`SPHERE_QUICK_STATUS.md`](SPHERE_QUICK_STATUS.md) for intermediate checks,
 source provenance, timing limits, and the RH status.

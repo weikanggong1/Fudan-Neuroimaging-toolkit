@@ -13,7 +13,7 @@ def digest(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 def main():
     p=argparse.ArgumentParser();p.add_argument('--output',type=Path,required=True);a=p.parse_args()
     a.output.mkdir(parents=True,exist_ok=False)
-    root=Path('/cwStorage/home/gongwk/Notebook_code/FNIT')
+    root=Path('/data/fnit')
     exe=root/'workspaces/smri_cpu_20261004/remaining_20261006/fnirt-shared-followup-v1/native_cli_build/arithmetic_cli'
     oracle=root/'runs/smri_cpu_20261004/remaining_20261004/synth/fnirt-pcg-shared-v2/oracle'
     if digest(exe)!='89aecc478a8212fad9590174dcec960f77d86b57cd448fad9fff5880d3f077a2':raise RuntimeError('arithmetic executable source binding changed')
@@ -24,7 +24,7 @@ def main():
     commands=a.output/'commands.private.gdb'
     commands.write_text('\n'.join([
         'set pagination off','set confirm off','set breakpoint pending on',
-        'set environment LD_LIBRARY_PATH /public/software/apps/FSL/6.0.7.4/lib',
+        'set environment LD_LIBRARY_PATH /opt/reference/FSL/6.0.7.4/lib',
         'break main','run --stdio < '+str(protocol),
         'rbreak ^ddot_k_.*','continue',
         'printf "FNIT_DISPATCH_PC %p\\n", $pc','info symbol $pc',

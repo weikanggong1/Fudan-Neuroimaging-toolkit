@@ -8,7 +8,7 @@ The implementation scales float voxels to `uint8` using FreeSurfer's 1,000-bin h
 
 Input: `fs_sub01/mri/rawavg.mgz`, SHA256 `2d9fb24d64cbcd9183489ad2ea1e4e93da9d3970e52e645c5280229b98a44e19`. Reference: fresh FreeSurfer 8.2.0 build `d932c45` on this input. The stored `orig.mgz` has the same first 284 MGH header bytes and all voxel bytes; recon-all subsequently adds a transform tag to its footer.
 
-| Comparison | CPU on headcw | H100 CUDA 1 on gpucw1 |
+| Comparison | CPU on control-host | H100 CUDA 1 on accelerator-a-1 |
 | --- | ---: | ---: |
 | Mismatched voxels, 256³ | 0 | 0 |
 | MGH header, 284 bytes | identical | identical |
@@ -21,10 +21,10 @@ The Python writer emits FreeSurfer's 20-byte scan-parameter footer. Native `mri_
 
 | Host and scope | Native median | Python/PyTorch median |
 | --- | ---: | ---: |
-| headcw CPU, 3 alternate-order fresh CLI pairs | 1.483 s | 3.064 s |
-| gpucw1 H100 CUDA 1, one same-host fresh CLI pair | 4.06 s | 5.73 s |
+| control-host CPU, 3 alternate-order fresh CLI pairs | 1.483 s | 3.064 s |
+| accelerator-a-1 H100 CUDA 1, one same-host fresh CLI pair | 4.06 s | 5.73 s |
 
-Timing includes process startup, image read, and MGZ write. The headcw pairs did not clear OS caches. The gpucw1 single pair is only a pilot. The goal of this stage is exact output parity; it has not shown a CLI speedup. Reports: [headcw CPU pairs](conform_cpu_headcw_report.json), [gpucw1 CUDA pair](conform_cuda1_gpucw1_report.json). `test_conform_gpu.py` passed 3 tests on headcw; the full subject comparison is recorded by the reports. This stage remains isolated from the published full recon-all entry point.
+Timing includes process startup, image read, and MGZ write. The control-host pairs did not clear OS caches. The accelerator-a-1 single pair is only a pilot. The goal of this stage is exact output parity; it has not shown a CLI speedup. Reports: [control-host CPU pairs](conform_cpu_control-host_report.json), [accelerator-a-1 CUDA pair](conform_cuda1_accelerator-a-1_report.json). `test_conform_gpu.py` passed 3 tests on control-host; the full subject comparison is recorded by the reports. This stage remains isolated from the published full recon-all entry point.
 
 ```bash
 python -m fnit.recon_all.conform_gpu rawavg.mgz orig.mgz --device cuda:0 \

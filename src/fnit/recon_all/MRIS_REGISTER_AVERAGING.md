@@ -91,7 +91,7 @@ mris_register -curv -threads 8 \
 
 ## 5. 真实数据精度与时间
 
-新版生产候选绑定与局部测试见[独立交付记录](../../../validation/smri_cpu/average_cpu_persistent_20261004/README.md)。以下为已读原报告中的真实原型证据：nodecw7 同八核，公开 ds000114 v1.0.2 完整左半球，119,451 顶点、238,898 面。原型 C++ SHA 为 `8fb858ea0caee073b3af01d6787a883a50b32c3b0d6678cdcd5c18b629e5e9d6`，与本页候选包含安全 guards 的正式源码不同。
+新版生产候选绑定与局部测试见[独立交付记录](../../../validation/smri_cpu/average_cpu_persistent_20261004/README.md)。以下为已读原报告中的真实原型证据：compute-a-7 同八核，公开 ds000114 v1.0.2 完整左半球，119,451 顶点、238,898 面。原型 C++ SHA 为 `8fb858ea0caee073b3af01d6787a883a50b32c3b0d6678cdcd5c18b629e5e9d6`，与本页候选包含安全 guards 的正式源码不同。
 
 | 验证范围 | 结果 |
 | --- | --- |

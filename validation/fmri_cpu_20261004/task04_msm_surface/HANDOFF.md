@@ -14,15 +14,15 @@
 
 - `adapter.py` 兼容 `tools/benchmark_multimodal_cpu.py`；公开适配器不含个体路径。
 - 自有服务器 `runs/fmri_cpu_20261004/task04_msm_surface/preparation/registration.manifest.private.json` 已包含默认四级 MSMSulc、WRN C 一级 MSMAll 与三级 MSMAll 三例；每例双侧完整顶点和原配置，候选不读取任何原版输出。
-- 同目录 `registration.input_metadata.private.json` 现场校验 29 个输入/配置/程序文件。原版 newMSM 在 nodecw8 `--help` 正常退出并包含 `inmesh/refmesh/conf`；原版依赖 `LD_LIBRARY_PATH` 已绑定其自己的环境。
+- 同目录 `registration.input_metadata.private.json` 现场校验 29 个输入/配置/程序文件。原版 newMSM 在 compute-a-8 `--help` 正常退出并包含 `inmesh/refmesh/conf`；原版依赖 `LD_LIBRARY_PATH` 已绑定其自己的环境。
 - 原版球面输出为 `L.sphere.reg.surf.gii` / `R.sphere.reg.surf.gii`。原版逐侧串行用当前总预算，候选按当前 API 双侧执行，双方限于同组物理核。
 - 基线与候选已独立构建 FastPD 扩展：`-O3 -std=c++17 -fno-fast-math -ffp-contract=off`；源码和构建产物 SHA、实际 import 路径保存在本轮私有构建清单。固定原 WLS 全包逐位通过。
 - 配对比较覆盖 sphere coords、有序 faces、source 顶点对应、radial signed determinant 的绝对/相对方向变化、角差和弦长差。metric GIFTI、node TSV、CIFTI 全值/axis/保存 dtype/完整时间轴亦可比较。两项小型控制只验证工具能识别不同顶点和正确 CIFTI 轴，不是 MRI benchmark。
 
 ## 接着准备的真实功能
 
-1. 全 490 帧 VN/DR/DR+VN/WRN 已使用固定 HCP v4.7 原 MATLAB 函数在 nodecw10 实际完成 CPU1/8 候选八项 maps/weights 对照。原生 nodes/spectra 六项完整输出也已写出；同 manifest 的完整 nodes 数值比较待根任务运行最新 collector。旧基线 WRN CPU8 的输入不变检查失败，不验收该行。
-2. 完整 490 帧固定 sphere 的投影/CIFTI 官方与旧/新 FNIT 已在 nodecw8 同锁排队。参照使用原 fMRIPrep 25.2.4 镜像，程序、脚本、TemplateFlow 和完整几何逐文件绑定。
+1. 全 490 帧 VN/DR/DR+VN/WRN 已使用固定 HCP v4.7 原 MATLAB 函数在 compute-a-10 实际完成 CPU1/8 候选八项 maps/weights 对照。原生 nodes/spectra 六项完整输出也已写出；同 manifest 的完整 nodes 数值比较待根任务运行最新 collector。旧基线 WRN CPU8 的输入不变检查失败，不验收该行。
+2. 完整 490 帧固定 sphere 的投影/CIFTI 官方与旧/新 FNIT 已在 compute-a-8 同锁排队。参照使用原 fMRIPrep 25.2.4 镜像，程序、脚本、TemplateFlow 和完整几何逐文件绑定。
 3. 公共 180 帧 whole surface 已在同锁排队：fresh surface 输出，以同一完整 volume 和 recon-all 为起点，包含准备、MSMSulc、投影、CIFTI 与 QC。不是新 raw→volume 或 recon-all 耗时。
 4. CA/CAT 仍缺可证明来源的真正个体 myelin 与每轮 bias。旧目录有 `MyelinMap` 名字的候选，但是否 T1/FLAIR proxy、是否仅模板投影不能从名字推断。先核对 lineage，不能当作实测分支通过。
 

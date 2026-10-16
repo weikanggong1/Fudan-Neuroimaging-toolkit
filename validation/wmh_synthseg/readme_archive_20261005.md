@@ -95,7 +95,7 @@ fnit wmh-synthseg --i case_FLAIR.nii.gz --o case_seg.nii.gz \
 
 GPU默认 `crop=False` 保留原decoder、forward和概率缓冲调度：20 GB优化原型产生1个硬标签及概率尾差，故未接入该默认模式。同实例full→crop→full完整输出均与旧GPU各自SHA相同，调用后状态恢复。原full峰值allocated37,997,219,328 B，**full仍未达到20 GB**；在20 GB环境显式使用 `crop=True`，裁剪可能移除边缘。直接使用观察hooks的原容器路径不承诺优化峰值。
 
-nodecw7同8核/8线程完整CPU官方/候选/候选/官方为172.064/77.134/83.876/107.942 s，标签、WMH概率、33列数值及完整header/affine逐值同；采样RSS官方约29.992 GB、候选约16.778 GB。无profiler完整GPUcrop ABBA的API旧4.842/5.364 s、新5.199/5.375 s，完整worker wall旧12.85/13.32 s、新13.21/13.18 s，构造/API/保存分别记录。CPUload99–136、共享GPU利用率43–100%，这些是观察时间，不能断言稳定性能保证。以下上一轮GroupNorm/初始化OOM为历史失败，新完整crop门已补足。[完整报告与复现](../smri_cpu/synth_fixes_20261004/README.md)含失败原型、小视野及最终模式切换记录。
+compute-a-7同8核/8线程完整CPU官方/候选/候选/官方为172.064/77.134/83.876/107.942 s，标签、WMH概率、33列数值及完整header/affine逐值同；采样RSS官方约29.992 GB、候选约16.778 GB。无profiler完整GPUcrop ABBA的API旧4.842/5.364 s、新5.199/5.375 s，完整worker wall旧12.85/13.32 s、新13.21/13.18 s，构造/API/保存分别记录。CPUload99–136、共享GPU利用率43–100%，这些是观察时间，不能断言稳定性能保证。以下上一轮GroupNorm/初始化OOM为历史失败，新完整crop门已补足。[完整报告与复现](../smri_cpu/synth_fixes_20261004/README.md)含失败原型、小视野及最终模式切换记录。
 
 
 ### 2026-10-04 CPU 对照

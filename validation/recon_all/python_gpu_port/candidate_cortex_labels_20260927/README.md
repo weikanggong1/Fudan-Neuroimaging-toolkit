@@ -4,8 +4,8 @@
 
 This is a saved-stage check on the same deidentified T1 as the
 [fully candidate LH surface prefix](../white_connected_prefix_20260927/README.md),
-not a fresh one-process `recon-all`. The candidate subject on gpucw1 is
-`/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_finalsurfs_stage_20260927/white_candidate_no_official_topology_fslicense`.
+not a fresh one-process `recon-all`. The candidate subject on accelerator-a-1 is
+`/data/workspaces/freesurfer_synth/work/reconall_finalsurfs_stage_20260927/white_candidate_no_official_topology_fslicense`.
 The tested reconstruction inputs are its FNIT/Conda-generated
 `surf/lh.white.preaparc`, v5-generated `mri/aseg.presurf.mgz`, and
 v5-generated `mri/entowm.mgz`. All resolved paths and SHA-256 hashes are
@@ -65,9 +65,9 @@ The first different data row is index 13 in both files. The raw report
 includes the candidate/reference label hashes, row counts, unique counts,
 first row difference, and timing.
 
-The candidate CPU wall times on gpucw1 were **6.14 s** for fixed GA
+The candidate CPU wall times on accelerator-a-1 were **6.14 s** for fixed GA
 cortex and **4.34 s** for the hippo/amygdala-preserving label. A separate
-frozen-official-input run on headcw measured 3.89/3.46 s for Python and
+frozen-official-input run on control-host measured 3.89/3.46 s for Python and
 10.73/7.72 s for native child programs; see the
 [isolated stage benchmark](../LABEL_CORTEX_FIX_GA_STATUS.md). Different
 inputs, hosts and load prevent a paired speed ratio. The label IDs are

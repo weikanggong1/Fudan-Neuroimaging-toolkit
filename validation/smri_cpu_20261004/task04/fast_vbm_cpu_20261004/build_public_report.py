@@ -76,7 +76,7 @@ def main():
         'scope': 'single real raw T1, thirteen maps, same CPU affinity and configured eight-thread budget; CPU observations on a shared node',
         'canonical_index_live_updated_utc': '2026-10-04T02:16:12.096774+00:00',
         'protocol': {
-            'host': 'nodecw10', 'cpu': 'Intel Xeon Gold 6418H',
+            'host': 'compute-a-10', 'cpu': 'Intel Xeon Gold 6418H',
             'baseline_commit': '1d31e7baaebbb644ab199471f7fe6282721455fd',
             'candidate_frozen_source_namespace': 'task5_candidate_cpu_v2/src',
             'root_final_integrated_source_full_vbm_retested': False,
@@ -158,7 +158,7 @@ def main():
     report['figure_sha256'] = {path.name: hashlib.sha256(path.read_bytes()).hexdigest()
                               for path in sorted(figures.glob('*.png'))}
     serialized = json.dumps(report, indent=2, allow_nan=False) + '\n'
-    forbidden = ('/cwStorage/', '/public/', '/home/', '/mnt/', 'FS_LICENSE', 'gongwk@')
+    forbidden = ('/data/shared/', '/public/', '/home/', '/mnt/', 'FS_LICENSE', 'user@')
     if any(token in serialized for token in forbidden):
         raise ValueError('private location or license environment escaped redaction')
     args.output.parent.mkdir(parents=True, exist_ok=True)

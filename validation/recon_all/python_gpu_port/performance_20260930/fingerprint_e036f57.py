@@ -1,4 +1,4 @@
-"""在 headcw 复核本轮固定输入、资源及程序；不读取许可证或参考结果影像。"""
+"""在 control-host 复核本轮固定输入、资源及程序；不读取许可证或参考结果影像。"""
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -17,7 +17,7 @@ def fingerprint(path: Path) -> dict:
 
 def main() -> None:
     """使用已声明的服务器路径；写出新的 runtime_fingerprints_e036f57.json。"""
-    root = Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929')
+    root = Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929')
     directory = root / 'volume_parity_20260930'
     expected_path = directory / 'provenance.json'
     expected = json.loads(expected_path.read_text())
@@ -29,7 +29,7 @@ def main() -> None:
               'build_manifest_sha256': fingerprint(build_path)['sha256'], 'mismatches': []}
     folders = {'weights': root / 'weights', 'assets': root / 'assets',
                'binaries': root / 'fnit_main_env/bin',
-               'reference_binaries': Path('/public/software/apps/Freesurfer/8.2.0-1/bin')}
+               'reference_binaries': Path('/opt/reference/Freesurfer/8.2.0-1/bin')}
     for group, folder in folders.items():
         entries = expected[group]
         if group == 'binaries':

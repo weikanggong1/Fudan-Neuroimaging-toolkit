@@ -9,7 +9,7 @@ from pathlib import Path
 import stat
 import tempfile
 
-ROOT = Path("/cwStorage/home/gongwk/Notebook_code/FNIT")
+ROOT = Path("/data/fnit")
 KEY = "fnirt_cpu_matrixfree_restore_20261006"
 LEAF = "smri_cpu_20261004/remaining_20261006/fnirt-matrixfree-restored-v1"
 FREEZE = "782927b4984cf53b62a487fd7dde79b8da72ad238878b2ab0a08e6b1ef789150"
@@ -62,8 +62,8 @@ def main():
             entry = {"workspace": str(workspace), "run_path": str(run), "status": "stage2_prepared_no_worker",
                      "freeze_sha256": FREEZE, "production_change": False, "gpu_enabled": False,
                      "scope": "accepted checkpoint only; independent current optimized/reference callbacks and existing CSC third comparison; no evaluate/linearize/assembly/PCG/native/full registration",
-                     "cpu_host": "nodecw7", "cpu_affinity": [32,36,40,44,48,52,56,60], "cpu_threads": 8,
-                     "outer_lock": str(ROOT / "runs/smri_cpu_20261004/nodecw7.gems.cpu8.lock"),
+                     "cpu_host": "compute-a-7", "cpu_affinity": [32,36,40,44,48,52,56,60], "cpu_threads": 8,
+                     "outer_lock": str(ROOT / "runs/smri_cpu_20261004/compute-a-7.gems.cpu8.lock"),
                      "outer_lock_wait_seconds": 19000, "controller_timeout_seconds": 19600,
                      "child_timeout_seconds": 180, "address_space_cap_bytes": 20000000000,
                      "maximum_calls": {"optimized_callback": 7, "reference_callback": 7, "CSC_action": 7},
@@ -74,7 +74,7 @@ def main():
                 "`workspaces/" + LEAF + "` and matching `runs/` leaf. Restores the accepted FNIRT stage1 arrays/recorded strides into independent optimized/reference caches. "
                 "At most14 callbacks plus7 existing CSC actions; first original unit-column mismatch stops. "
                 "No new evaluation, linearization, H assembly, PCG, native executable, MRI or GPU. "
-                "Shared nodecw7 CPU8 lock;19000s wait/19600s controller/180s child. "
+                "Shared compute-a-7 CPU8 lock;19000s wait/19600s controller/180s child. "
                 "This is a finite callback diagnosis, not runtime integration or whole-registration equivalence.\n")
         else:
             entry = tasks[KEY]

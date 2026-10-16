@@ -102,9 +102,9 @@ def main():
                 "mesh_steps_full_probe": [a["mesh_steps"], b["mesh_steps"]],
                 "mesh_evaluations_full_probe": [a["mesh_evaluations"], b["mesh_evaluations"]]})
     for family, folder, stem, support_ids in (
-            ("thalamus", "official_thalamus_gpucw1_full_sub01_20260929", "ThalamicNuclei", (10, 49)),
-            ("hippo-amygdala-left", "official_hippo_gpucw1_full_sub01_20260929", "lh.hippoAmygLabels", (17, 18)),
-            ("hippo-amygdala-right", "official_hippo_gpucw1_full_sub01_20260929", "rh.hippoAmygLabels", (53, 54))):
+            ("thalamus", "official_thalamus_accelerator-a-1_full_sub01_20260929", "ThalamicNuclei", (10, 49)),
+            ("hippo-amygdala-left", "official_hippo_accelerator-a-1_full_sub01_20260929", "lh.hippoAmygLabels", (17, 18)),
+            ("hippo-amygdala-right", "official_hippo_accelerator-a-1_full_sub01_20260929", "rh.hippoAmygLabels", (53, 54))):
         identifiers = sorted(int(k) for k, value in full_report["labels"].items() if value["source"] == family)
         fine_path = Path(full_report["files"]["highres/" + family])
         fine = nib.load(fine_path)

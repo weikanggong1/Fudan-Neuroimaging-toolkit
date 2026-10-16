@@ -54,7 +54,7 @@ def reference_resource_checks(queue):
     """Historical native timing remains an eight-core CPU reference or fails."""
     environment = queue.get("environment", {})
     return {
-        "same_actual_host": queue.get("hostname") == "nodecw7",
+        "same_actual_host": queue.get("hostname") == "compute-a-7",
         "queue_budget8": type(queue.get("max_cpu_threads")) is int and queue["max_cpu_threads"] == 8,
         "queue_exact_same_eight_cores": affinity(queue.get("cpu_affinity")) == AFFINITY,
         "completed_queue_thread_environment8": all(str(environment.get(key)) == "8" for key in THREAD_VARIABLES),
@@ -105,7 +105,7 @@ def identity_resource_checks(source_files, records, queued, jobs, baseline_sha, 
             "queue_budget8": type(queue.get("max_cpu_threads")) is int and queue["max_cpu_threads"] == 8,
             "recorded_exact_same_eight_cores": affinity(record.get("affinity")) == AFFINITY,
             "queue_exact_same_eight_cores": affinity(queue.get("cpu_affinity")) == AFFINITY,
-            "same_actual_host": record.get("hostname") == queue.get("hostname") == "nodecw7",
+            "same_actual_host": record.get("hostname") == queue.get("hostname") == "compute-a-7",
             "completed_CPU_process_hides_CUDA": queue.get("environment", {}).get("CUDA_VISIBLE_DEVICES") == "",
             "completed_PYTHONPATH_matches_original_job": bool(job.get("env", {}).get("PYTHONPATH"))
                 and queue.get("environment", {}).get("PYTHONPATH") == job.get("env", {}).get("PYTHONPATH"),

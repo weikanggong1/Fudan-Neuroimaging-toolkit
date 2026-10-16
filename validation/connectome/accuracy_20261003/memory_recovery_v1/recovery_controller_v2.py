@@ -11,7 +11,7 @@ from pathlib import Path
 import sys
 
 sys.dont_write_bytecode=True
-ROOT=Path('/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1')
+ROOT=Path('/data/fnit/runs/connectome-accuracy-memory-recovery-20261003-v1')
 spec=importlib.util.spec_from_file_location('immutable_recovery_v1',ROOT/'recovery_controller.py')
 v1=importlib.util.module_from_spec(spec);spec.loader.exec_module(v1)
 v1.bound(ROOT/'recovery_controller.py','333dc44f5bc8adbec2299f3e8fbf945f410a60bbb1cf19082bd3ab7a5c02a331')

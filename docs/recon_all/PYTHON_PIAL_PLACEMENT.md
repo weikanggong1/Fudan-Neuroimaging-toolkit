@@ -54,12 +54,12 @@ mris_place_surface --adgws-in ../surf/autodet.gw.stats.lh.dat \
 
 ## 冻结真实 T1 输入的同阶段对照
 
-参照被试是由真实 T1 完成的 FreeSurfer 8.2 `a_official`，其 `mri/orig.mgz` SHA-256 为 `c99c246200cc35479b6b8cd691457985b66f2062d4a37a0c3592ff1b678b985c`。原始被试文件保存在 headcw 的 `work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official`；Git 中没有存放患者影像。候选函数读取该被试保存的 white、brain.finalsurfs、WM、aseg、标签和阈值文件，**不读取官方 pial 几何、优化日志、决策或内存检查点**。输入哈希见[清单](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/place_geometry_pair/input_manifest.json)。这是一项冻结官方上游输入的阶段验证，不是当前候选上游的整例验证。
+参照被试是由真实 T1 完成的 FreeSurfer 8.2 `a_official`，其 `mri/orig.mgz` SHA-256 为 `c99c246200cc35479b6b8cd691457985b66f2062d4a37a0c3592ff1b678b985c`。原始被试文件保存在 control-host 的 `work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official`；Git 中没有存放患者影像。候选函数读取该被试保存的 white、brain.finalsurfs、WM、aseg、标签和阈值文件，**不读取官方 pial 几何、优化日志、决策或内存检查点**。输入哈希见[清单](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/place_geometry_pair/input_manifest.json)。这是一项冻结官方上游输入的阶段验证，不是当前候选上游的整例验证。
 
 | 同输入阶段 | Python 输出与官方对照 | 观察耗时 |
 | --- | --- | ---: |
-| LH pial.T1 | 独立接受 41 步；四轮结束于 26/32/36/41；有序顶点 106,622/106,622、float32 坐标 319,866/319,866、有序面 213,240/213,240 完全一致。保留源码写入方式后，体积几何字段与完整尾部字节一致。 | Python 在 headcw 耗时 1,240.8 s；另一次 headcw 官方 C++ pial 耗时 116.05 s。并发负载不同，未据此计算受控速度比。 |
-| RH pial.T1 | 独立接受 41 步；四轮结束于 26/31/35/41；有序顶点 105,541/105,541、float32 坐标 316,623/316,623、有序面 211,078/211,078 完全一致。体积几何字段与完整尾部字节一致。 | Python 耗时 1,154.2 s；另一次 headcw 官方 C++ RH 重放耗时 91.77 s，运行负载发生变化。 |
+| LH pial.T1 | 独立接受 41 步；四轮结束于 26/32/36/41；有序顶点 106,622/106,622、float32 坐标 319,866/319,866、有序面 213,240/213,240 完全一致。保留源码写入方式后，体积几何字段与完整尾部字节一致。 | Python 在 control-host 耗时 1,240.8 s；另一次 control-host 官方 C++ pial 耗时 116.05 s。并发负载不同，未据此计算受控速度比。 |
+| RH pial.T1 | 独立接受 41 步；四轮结束于 26/31/35/41；有序顶点 105,541/105,541、float32 坐标 316,623/316,623、有序面 211,078/211,078 完全一致。体积几何字段与完整尾部字节一致。 | Python 耗时 1,154.2 s；另一次 control-host 官方 C++ RH 重放耗时 91.77 s，运行负载发生变化。 |
 
 输出文件的 SHA-256 可能因首条表面注释记录生成来源而不同。[双侧几何、尾部与耗时报告](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/place_geometry_pair/python_pial/) 保存了逐项对照。以相同的官方 white 和 cortex 标签，将该阶段输出接入现有 Python 顶点指标函数后，相对归档官方图的 p99 绝对误差：厚度不超过 2.38e-7 mm、pial 面积不超过 2.38e-7 mm²、顶点体积不超过 4.77e-7 mm³；两侧相应最大误差分别不超过 4.77e-7 mm、9.54e-7 mm² 和 1.91e-6 mm³。曲率函数仍有小幅算法误差：LH/RH 的 p99 为 2.71e-5/2.15e-5，最大值为 4.54e-4/2.03e-4。双侧共八张图均没有超过既定容差的顶点（面积：0.001 + 0.001 × |reference|；其他图：0.005 + 0.001 × |reference|）。[指标图比较脚本](../../validation/recon_all/python_gpu_port/compare_pial_metric_maps.py)与 [LH/RH JSON 报告](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/place_geometry_pair/python_pial/)保留逐图计数。这些冻结输入结果尚不能代表当前默认 runner 的指标或吞吐。此项 CPU pial 优化在有限观测中明显较慢；待上游候选链匹配后，碰撞检测和 KDTree 是主要提速对象。
 

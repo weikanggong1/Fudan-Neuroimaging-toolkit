@@ -29,7 +29,7 @@ def main():
         "baseline_repository_commit": binding["baseline_repository_commit"],
         "candidate_repository_commit": binding["candidate_repository_commit"],
         "scope": "Original raw CC0 T1 complete API; default old/new lossless gate, new False/None policy effects separately scored; no reference injected.",
-        "official_reference_provenance": "Reuse prior same-input source-bound nodecw7 eight-core official maps/CSV; native inference was not rerun in this stage.",
+        "official_reference_provenance": "Reuse prior same-input source-bound compute-a-7 eight-core official maps/CSV; native inference was not rerun in this stage.",
         "jobs": {}, "default_pairs": {}, "inheritance_pairs": {}, "new_policy_effects": {}}
     for row in queue["jobs"]:
         worker = json.loads((args.run / row["name"] / "full.private.json").read_text())

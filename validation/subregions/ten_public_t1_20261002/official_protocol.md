@@ -4,9 +4,9 @@
 
 本验证使用清单预先固定的 `sub-01` 至 `sub-10`、`ses-test` 公开 T1。公开发布文件已含 `mri_deface` 处理；本轮未追加影像处理。每例执行前核验文件大小和 SHA-256。`sub-01` 单列为曾参与开发的连续性例子，其余九例用于未见受试者的汇总。
 
-2026-10-02 在 `gpucw1` 核实安装：`/public/software/apps/Freesurfer/8.2.0-1`，版本为 `freesurfer-linux-centos7_x86_64-8.2.0-20260314-d932c45`。实际官方 SAMSEG/GEMS Python、原生库、可执行文件和三套 atlas 的大小、SHA-256 随每例 `official_report.json` 保存。许可证只核验外置路径 `/public/software/apps/Freesurfer/8.0.0-1/license.txt` 存在、可读及大小；不读取、复制或发布内容。官方 atlas、权重及影像保留在服务器。
+2026-10-02 在 `accelerator-a-1` 核实安装：`/opt/reference/Freesurfer/8.2.0-1`，版本为 `freesurfer-linux-centos7_x86_64-8.2.0-20260314-d932c45`。实际官方 SAMSEG/GEMS Python、原生库、可执行文件和三套 atlas 的大小、SHA-256 随每例 `official_report.json` 保存。许可证只核验外置路径 `/opt/reference/Freesurfer/8.0.0-1/license.txt` 存在、可读及大小；不读取、复制或发布内容。官方 atlas、权重及影像保留在服务器。
 
-服务器有 128 个逻辑 CPU、64 个物理核、约 1 TiB 内存，无 swap。初次审计可用内存约 900 GiB，存在其他用户任务；后续调度前 CPU 实测约 65% idle。每例固定四线程，官方队列允许四例并行，共 16 线程；FNIT 使用独立 GPU 队列。CPU 负载、可用内存、进程 affinity 在每组件开始与结束时保存，因此耗时代表共享服务器上的实测。免密访问 `nodecw10` 和 `nodecw12` 未成功，本轮未在这些节点启动任务。
+服务器有 128 个逻辑 CPU、64 个物理核、约 1 TiB 内存，无 swap。初次审计可用内存约 900 GiB，存在其他用户任务；后续调度前 CPU 实测约 65% idle。每例固定四线程，官方队列允许四例并行，共 16 线程；FNIT 使用独立 GPU 队列。CPU 负载、可用内存、进程 affinity 在每组件开始与结束时保存，因此耗时代表共享服务器上的实测。免密访问 `compute-a-10` 和 `compute-a-12` 未成功，本轮未在这些节点启动任务。
 
 ## 调用和输出
 

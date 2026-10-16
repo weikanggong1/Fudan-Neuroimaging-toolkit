@@ -3,7 +3,8 @@
 The official arm compiles only the pinned installed recipe prefixes that
 finish at atlasAlignmentTarget assignment and targetMask save. It neither
 imports the native GEMS binding nor provides utils.run in its namespace.
-The production arm imports only the frozen independent FNIT preparation API.
+The historical FNIT arm explicitly loads the pinned preparation snapshot.
+The two preparation helpers are no longer part of the current FNIT API.
 The worker is prepared separately from authorizing or dispatching it.
 """
 
@@ -171,9 +172,26 @@ def fnit(plan, output):
     import nibabel as nib
     import torch
     import numpy as np
-    from fnit.robust_register import prepare_subregion_alignment_target, reflect_atlas_header
-    assert Path(sys.modules["fnit.robust_register.preparation"].__file__).resolve() == (
-        Path(plan["frozen_source"]) / "fnit/robust_register/preparation.py").resolve()
+    # This archived experiment requires its manifest-bound source tree;
+    # current production FNIT deliberately no longer exports these helpers.
+    import importlib.util
+    source = Path(plan["frozen_source"]) / "fnit/robust_register/preparation.py"
+    if not source.is_file():
+        raise FileNotFoundError("archived preparation source is required: use the frozen source tree")
+    expected = plan["runtime_sources"]["fnit/robust_register/preparation.py"]
+    if sha(source) != expected:
+        raise ValueError("archived preparation source checksum mismatch")
+    name = "fnit.robust_register._archived_preparation_" + expected[:12]
+    specification = importlib.util.spec_from_file_location(name, source)
+    preparation = importlib.util.module_from_spec(specification)
+    sys.modules[name] = preparation
+    try:
+        specification.loader.exec_module(preparation)
+    except BaseException:
+        sys.modules.pop(name, None)
+        raise
+    prepare_subregion_alignment_target = preparation.prepare_subregion_alignment_target
+    reflect_atlas_header = preparation.reflect_atlas_header
     torch.set_num_threads(plan["threads"])
     torch.set_num_interop_threads(1)
     flags_before = [torch.backends.cuda.matmul.allow_tf32, torch.backends.cudnn.allow_tf32]

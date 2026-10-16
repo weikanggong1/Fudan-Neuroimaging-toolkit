@@ -1,0 +1,555 @@
+using smoothwm curvature for final alignment
+using write iterations = 1
+
+cwd /data/workspaces/freesurfer_synth/work/reconall_python_gpu_20260925/mris_register_default/lh
+cmdline /opt/reference/Freesurfer/8.2.0-1/bin/mris_register -curv -threads 4 -W 1 lh.sphere /data/workspaces/freesurfer_synth/work/reconall_main_20260924/bundle/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif lh.sphere.reg.debug
+
+0 inflated.H
+1 sulc
+2 smoothwm (computed)
+8.2.0
+  8.2.0
+reading surface from lh.sphere...
+reading template parameterization from /data/workspaces/freesurfer_synth/work/reconall_main_20260924/bundle/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif...
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+MRISregister() -------
+max_passes = 4
+min_degrees = 0.500000
+max_degrees = 64.000000
+nangles = 8
+tol=5.0e-01, sigma=0.0, host=x86_6, nav=1024, nbrs=1, l_extern=10000.000, l_parea=0.200, l_nlarea=1.000, l_corr=1.000, l_dist=5.000
+using quadratic fit line minimization
+complete_dist_mat 0
+rms 0
+smooth_averages 0
+remove_neg 0
+ico_order 0
+which_surface 0
+target_radius 0.000000
+nfields 0
+scale 0.000000
+desired_rms_height -1.000000
+momentum 0.950000
+nbhd_size -10
+max_nbrs 10
+niterations 25
+nsurfaces 0
+SURFACES 3
+flags 16 (10)
+use curv 16
+no sulc 0
+no rigid align 0
+mris->nsize 1
+mris->hemisphere 0
+randomSeed 0
+
+tol=5.0e-01, sigma=0.0, host=x86_6, nav=1024, nbrs=1, l_extern=10000.000, l_parea=0.200, l_nlarea=1.000, l_corr=1.000, l_dist=5.000
+using quadratic fit line minimization
+--------------------
+1 Reading lh.sulc
+curvature mean = 0.000, std = 5.520
+reading precomputed curvature from lh.sulc
+
+blurring surfaces with sigma=4.00...
+curvature mean = 0.052, std = 0.885
+writing curvature file ./lh.sphere.reg.debug.target1 type -1
+done.
+curvature mean = 0.052, std = 0.820
+writing curvature file ./lh.sphere.reg.debug.sno1_target_blur4.00 type -1
+curvature mean = 0.002, std = 0.886
+writing curvature file ./lh.sphere.reg.debug.sno1_blur4.00 type -1
+finding optimal rigid alignment
+Starting MRISrigidBodyAlignGlobal()
+000: dt: 0.000, sse: 1234435.5 (0.340, 21.9, 0.481, 1.853), neg: 0 (%0.00:%0.00), avgs: 1024
+tol=5.0e-01, sigma=4.0, host=x86_6, nav=1024, nbrs=1, l_extern=10000.000, l_parea=0.200, l_nlarea=1.000, l_corr=1.000, l_dist=5.000
+using quadratic fit line minimization
+002: dt: 70.937, sse: 1315638.9 (0.344, 21.9, 0.479, 2.060), neg: 0 (%0.00:%0.00), avgs: 16384
+003: dt: 196.340, sse: 1188003.0 (0.356, 21.9, 0.474, 1.792), neg: 0 (%0.00:%0.00), avgs: 16384
+004: dt: 64.770, sse: 1150139.9 (0.357, 21.9, 0.475, 1.687), neg: 0 (%0.00:%0.00), avgs: 16384
+005: dt: 170.023, sse: 1140398.9 (0.358, 21.9, 0.474, 1.667), neg: 0 (%0.00:%0.00), avgs: 16384
+006: dt: 88.184, sse: 1094625.2 (0.364, 21.9, 0.473, 1.542), neg: 0 (%0.00:%0.00), avgs: 4096
+007: dt: 42.353, sse: 1075298.8 (0.364, 21.9, 0.472, 1.489), neg: 0 (%0.00:%0.00), avgs: 4096
+008: dt: 95.296, sse: 1061119.5 (0.367, 21.9, 0.473, 1.435), neg: 0 (%0.00:%0.00), avgs: 4096
+009: dt: 41.304, sse: 1052971.6 (0.367, 21.9, 0.473, 1.409), neg: 0 (%0.00:%0.00), avgs: 4096
+010: dt: 57.036, sse: 1015898.8 (0.373, 21.9, 0.475, 1.255), neg: 2 (%0.00:%0.00), avgs: 1024
+011: dt: 32.000, sse: 1009304.8 (0.372, 21.9, 0.476, 1.218), neg: 16 (%0.00:%0.00), avgs: 1024
+012: dt: 33.959, sse: 1005247.3 (0.373, 21.9, 0.477, 1.187), neg: 25 (%0.00:%0.00), avgs: 1024
+013: dt: 25.979, sse: 986959.5 (0.376, 21.9, 0.481, 1.055), neg: 39 (%0.01:%0.01), avgs: 256
+014: dt: 13.811, sse: 984437.9 (0.377, 21.9, 0.482, 1.014), neg: 32 (%0.01:%0.01), avgs: 256
+015: dt: 0.954, sse: 984432.6 (0.377, 22.0, 0.483, 1.011), neg: 32 (%0.01:%0.01), avgs: 256
+016: dt: 9.315, sse: 974926.4 (0.375, 22.0, 0.485, 0.920), neg: 28 (%0.00:%0.01), avgs: 64
+017: dt: 0.555, sse: 974836.2 (0.375, 22.1, 0.485, 0.917), neg: 28 (%0.00:%0.01), avgs: 64
+018: dt: 5.346, sse: 962575.1 (0.367, 22.1, 0.486, 0.845), neg: 10 (%0.00:%0.00), avgs: 16
+019: dt: 0.000, sse: 962575.1 (0.367, 22.2, 0.486, 0.845), neg: 10 (%0.00:%0.00), avgs: 16
+020: dt: 2.295, sse: 956297.4 (0.361, 22.4, 0.485, 0.816), neg: 15 (%0.00:%0.00), avgs: 4
+021: dt: 0.003, sse: 956291.5 (0.361, 22.5, 0.485, 0.816), neg: 15 (%0.00:%0.00), avgs: 4
+022: dt: 0.317, sse: 955908.2 (0.360, 22.7, 0.485, 0.813), neg: 21 (%0.00:%0.00), avgs: 1
+023: dt: 0.022, sse: 955907.9 (0.360, 22.9, 0.486, 0.812), neg: 22 (%0.00:%0.00), avgs: 1
+024: dt: 0.181, sse: 954742.9 (0.358, 23.3, 0.485, 0.809), neg: 20 (%0.00:%0.00), avgs: 0
+025: dt: 0.106, sse: 954589.0 (0.358, 23.6, 0.485, 0.808), neg: 21 (%0.00:%0.00), avgs: 0
+026: dt: 0.019, sse: 954578.9 (0.358, 23.8, 0.485, 0.807), neg: 21 (%0.00:%0.00), avgs: 0
+tol=5.0e-01, sigma=4.0, host=x86_6, nav=1024, nbrs=1, l_extern=10000.000, l_parea=0.200, l_nlarea=1.000, l_corr=1.000, l_dist=5.000
+using quadratic fit line minimization
+027: dt: 0.004, sse: 954564.5 (0.358, 23.8, 0.485, 0.807), neg: 21 (%0.00:%0.00), avgs: 1024
+028: dt: 0.000, sse: 954563.8 (0.358, 23.8, 0.485, 0.807), neg: 21 (%0.00:%0.00), avgs: 256
+029: dt: 0.000, sse: 954564.2 (0.358, 23.9, 0.485, 0.807), neg: 21 (%0.00:%0.00), avgs: 64
+030: dt: 0.000, sse: 954563.9 (0.358, 23.9, 0.485, 0.807), neg: 21 (%0.00:%0.00), avgs: 16
+031: dt: 0.000, sse: 954564.2 (0.358, 24.0, 0.485, 0.807), neg: 21 (%0.00:%0.00), avgs: 4
+032: dt: 0.000, sse: 954564.5 (0.358, 24.2, 0.485, 0.807), neg: 21 (%0.00:%0.00), avgs: 1
+033: dt: 0.000, sse: 954564.6 (0.358, 24.3, 0.485, 0.807), neg: 21 (%0.00:%0.00), avgs: 0
+writing ./lh.sphere.reg.debug0000done.
+Starting new MRISrigidBodyAlignGlobal_findMinSSE()
+  new MRISrigidBodyAlignGlobal_findMinSSE min @ (10.50, -10.50, -8.00) sse = 193495.3, elapsed since starting=0.0720 min
+rotating brain by (10.50, -10.50, -8.00), final sse: 193495.33
+MRISrigidBodyAlignGlobal() done   0.07 min
+writing rigid aligned surface to ./lh.sphere.reg.debug.sno1.rotated
+nlarea/corr = 1.000
+integrating with navgs=16384 and tol=2.000e+00
+writing ./lh.sphere.reg.debug0002done.
+writing ./lh.sphere.reg.debug0003done.
+writing ./lh.sphere.reg.debug0004done.
+writing ./lh.sphere.reg.debug0005done.
+integrating with navgs=4096 and tol=1.000e+00
+writing ./lh.sphere.reg.debug0006done.
+writing ./lh.sphere.reg.debug0007done.
+writing ./lh.sphere.reg.debug0008done.
+writing ./lh.sphere.reg.debug0009done.
+integrating with navgs=1024 and tol=5.002e-01
+writing ./lh.sphere.reg.debug0010done.
+writing ./lh.sphere.reg.debug0011done.
+writing ./lh.sphere.reg.debug0012done.
+integrating with navgs=256 and tol=2.505e-01
+writing ./lh.sphere.reg.debug0013done.
+writing ./lh.sphere.reg.debug0014done.
+writing ./lh.sphere.reg.debug0015done.
+integrating with navgs=64 and tol=1.260e-01
+writing ./lh.sphere.reg.debug0016done.
+writing ./lh.sphere.reg.debug0017done.
+integrating with navgs=16 and tol=6.442e-02
+writing ./lh.sphere.reg.debug0018done.
+writing ./lh.sphere.reg.debug0019done.
+integrating with navgs=4 and tol=3.494e-02
+writing ./lh.sphere.reg.debug0020done.
+writing ./lh.sphere.reg.debug0021done.
+integrating with navgs=1 and tol=2.210e-02
+writing ./lh.sphere.reg.debug0022done.
+writing ./lh.sphere.reg.debug0023done.
+integrating with navgs=0 and tol=1.562e-02
+writing ./lh.sphere.reg.debug0024done.
+writing ./lh.sphere.reg.debug0025done.
+writing ./lh.sphere.reg.debug0026done.
+nlarea/corr = 1.000
+integrating with navgs=1024 and tol=5.002e-01
+writing ./lh.sphere.reg.debug0027done.
+integrating with navgs=256 and tol=2.505e-01
+writing ./lh.sphere.reg.debug0028done.
+integrating with navgs=64 and tol=1.260e-01
+writing ./lh.sphere.reg.debug0029done.
+integrating with navgs=16 and tol=6.442e-02
+writing ./lh.sphere.reg.debug0030done.
+integrating with navgs=4 and tol=3.494e-02
+writing ./lh.sphere.reg.debug0031done.
+integrating with navgs=1 and tol=2.210e-02
+writing ./lh.sphere.reg.debug0032done.
+integrating with navgs=0 and tol=1.562e-02
+writing ./lh.sphere.reg.debug0033done.
+
+blurring surfaces with sigma=2.00...
+done.
+curvature mean = 0.038, std = 0.855
+writing curvature file ./lh.sphere.reg.debug.sno1_target_blur2.00 type -1
+curvature mean = 0.000, std = 0.959
+tol=5.0e-01, sigma=2.0, host=x86_6, nav=1024, nbrs=1, l_extern=10000.000, l_parea=0.200, l_nlarea=1.000, l_corr=1.000, l_dist=5.000
+using quadratic fit line minimization
+034: dt: 6.714, sse: 978887.5 (0.358, 24.3, 0.486, 0.935), neg: 22 (%0.00:%0.00), avgs: 1024
+035: dt: 0.004, sse: 978883.4 (0.358, 24.3, 0.486, 0.935), neg: 22 (%0.00:%0.00), avgs: 256
+036: dt: 0.000, sse: 978881.9 (0.358, 24.4, 0.486, 0.935), neg: 22 (%0.00:%0.00), avgs: 64
+037: dt: 0.000, sse: 978882.2 (0.358, 24.4, 0.486, 0.935), neg: 22 (%0.00:%0.00), avgs: 16
+038: dt: 0.000, sse: 978882.4 (0.358, 24.5, 0.486, 0.935), neg: 22 (%0.00:%0.00), avgs: 4
+039: dt: 0.251, sse: 978691.9 (0.358, 24.6, 0.486, 0.930), neg: 24 (%0.00:%0.00), avgs: 1
+040: dt: 0.140, sse: 978311.4 (0.358, 24.9, 0.486, 0.925), neg: 28 (%0.00:%0.00), avgs: 0
+041: dt: 0.023, sse: 978294.2 (0.357, 25.2, 0.486, 0.924), neg: 28 (%0.00:%0.00), avgs: 0
+writing curvature file ./lh.sphere.reg.debug.sno1_blur2.00 type -1
+nlarea/corr = 1.000
+integrating with navgs=1024 and tol=5.002e-01
+writing ./lh.sphere.reg.debug0034done.
+integrating with navgs=256 and tol=2.505e-01
+writing ./lh.sphere.reg.debug0035done.
+integrating with navgs=64 and tol=1.260e-01
+writing ./lh.sphere.reg.debug0036done.
+integrating with navgs=16 and tol=6.442e-02
+writing ./lh.sphere.reg.debug0037done.
+integrating with navgs=4 and tol=3.494e-02
+writing ./lh.sphere.reg.debug0038done.
+integrating with navgs=1 and tol=2.210e-02
+writing ./lh.sphere.reg.debug0039done.
+integrating with navgs=0 and tol=1.562e-02
+writing ./lh.sphere.reg.debug0040done.
+writing ./lh.sphere.reg.debug0041done.
+
+blurring surfaces with sigma=1.00...
+done.
+curvature mean = 0.037, std = 0.868
+writing curvature file ./lh.sphere.reg.debug.sno1_target_blur1.00 type -1
+curvature mean = 0.000, std = 0.985
+tol=5.0e-01, sigma=1.0, host=x86_6, nav=1024, nbrs=1, l_extern=10000.000, l_parea=0.200, l_nlarea=1.000, l_corr=1.000, l_dist=5.000
+using quadratic fit line minimization
+042: dt: 17.455, sse: 993538.3 (0.358, 25.2, 0.486, 0.992), neg: 29 (%0.00:%0.00), avgs: 1024
+043: dt: 0.003, sse: 993537.1 (0.358, 25.2, 0.486, 0.992), neg: 29 (%0.00:%0.00), avgs: 256
+044: dt: 0.000, sse: 993534.1 (0.358, 25.2, 0.486, 0.992), neg: 29 (%0.00:%0.00), avgs: 64
+045: dt: 0.000, sse: 993534.0 (0.358, 25.3, 0.486, 0.992), neg: 29 (%0.00:%0.00), avgs: 16
+046: dt: 0.000, sse: 993533.9 (0.358, 25.4, 0.486, 0.992), neg: 29 (%0.00:%0.00), avgs: 4
+047: dt: 0.151, sse: 993485.6 (0.358, 25.5, 0.487, 0.988), neg: 30 (%0.00:%0.00), avgs: 1
+048: dt: 0.020, sse: 993424.5 (0.358, 25.7, 0.487, 0.987), neg: 30 (%0.00:%0.00), avgs: 0
+writing curvature file ./lh.sphere.reg.debug.sno1_blur1.00 type -1
+nlarea/corr = 1.000
+integrating with navgs=1024 and tol=5.002e-01
+writing ./lh.sphere.reg.debug0042done.
+integrating with navgs=256 and tol=2.505e-01
+writing ./lh.sphere.reg.debug0043done.
+integrating with navgs=64 and tol=1.260e-01
+writing ./lh.sphere.reg.debug0044done.
+integrating with navgs=16 and tol=6.442e-02
+writing ./lh.sphere.reg.debug0045done.
+integrating with navgs=4 and tol=3.494e-02
+writing ./lh.sphere.reg.debug0046done.
+integrating with navgs=1 and tol=2.210e-02
+writing ./lh.sphere.reg.debug0047done.
+integrating with navgs=0 and tol=1.562e-02
+writing ./lh.sphere.reg.debug0048done.
+
+blurring surfaces with sigma=0.50...
+done.
+curvature mean = 0.036, std = 0.871
+writing curvature file ./lh.sphere.reg.debug.sno1_target_blur0.50 type -1
+curvature mean = -0.000, std = 0.994
+tol=5.0e-01, sigma=0.5, host=x86_6, nav=1024, nbrs=1, l_extern=10000.000, l_parea=0.200, l_nlarea=1.000, l_corr=1.000, l_dist=5.000
+using quadratic fit line minimization
+049: dt: 0.007, sse: 1000474.4 (0.358, 25.8, 0.487, 1.020), neg: 30 (%0.00:%0.00), avgs: 1024
+050: dt: 0.000, sse: 1000475.1 (0.358, 25.8, 0.487, 1.020), neg: 30 (%0.00:%0.00), avgs: 256
+051: dt: 0.000, sse: 1000475.7 (0.358, 25.8, 0.487, 1.020), neg: 30 (%0.00:%0.00), avgs: 64
+052: dt: 0.000, sse: 1000475.9 (0.358, 25.8, 0.487, 1.020), neg: 30 (%0.00:%0.00), avgs: 16
+053: dt: 0.000, sse: 1000475.9 (0.358, 25.9, 0.487, 1.020), neg: 30 (%0.00:%0.00), avgs: 4
+054: dt: 0.075, sse: 1000454.6 (0.358, 26.0, 0.487, 1.018), neg: 31 (%0.00:%0.00), avgs: 1
+055: dt: 0.105, sse: 1000294.6 (0.358, 26.3, 0.487, 1.014), neg: 29 (%0.00:%0.00), avgs: 0
+056: dt: 0.014, sse: 1000287.2 (0.358, 26.5, 0.487, 1.013), neg: 29 (%0.00:%0.00), avgs: 0
+tol=1.0e+00, sigma=0.5, host=x86_6, nav=1024, nbrs=1, l_extern=10000.000, l_parea=0.200, l_nlarea=1.000, l_corr=0.050, l_spring=0.500, l_dist=5.000
+using quadratic fit line minimization
+writing curvature file ./lh.sphere.reg.debug.sno1_blur0.50 type -1
+nlarea/corr = 1.000
+integrating with navgs=1024 and tol=5.002e-01
+writing ./lh.sphere.reg.debug0049done.
+integrating with navgs=256 and tol=2.505e-01
+writing ./lh.sphere.reg.debug0050done.
+integrating with navgs=64 and tol=1.260e-01
+writing ./lh.sphere.reg.debug0051done.
+integrating with navgs=16 and tol=6.442e-02
+writing ./lh.sphere.reg.debug0052done.
+integrating with navgs=4 and tol=3.494e-02
+writing ./lh.sphere.reg.debug0053done.
+integrating with navgs=1 and tol=2.210e-02
+writing ./lh.sphere.reg.debug0054done.
+integrating with navgs=0 and tol=1.562e-02
+writing ./lh.sphere.reg.debug0055done.
+writing ./lh.sphere.reg.debug0056done.
+2 Reading smoothwm
+curvature mean = -0.019, std = 0.261
+calculating curvature of smoothwm surface
+
+blurring surfaces with sigma=4.00...
+done.
+curvature mean = 0.049, std = 0.250
+writing curvature file ./lh.sphere.reg.debug.sno2_target_blur4.00 type -1
+curvature mean = 0.034, std = 0.427
+tol=1.0e+00, sigma=4.0, host=x86_6, nav=1024, nbrs=1, l_extern=10000.000, l_parea=0.200, l_nlarea=1.000, l_corr=0.050, l_spring=0.500, l_dist=5.000
+using quadratic fit line minimization
+057: dt: 2.722, sse: 1429704.5 (0.362, 26.7, 0.483, 1.381), neg: 44 (%0.00:%0.01), avgs: 1024
+058: dt: 3.448, sse: 1418705.2 (0.362, 26.9, 0.481, 1.385), neg: 66 (%0.00:%0.01), avgs: 1024
+059: dt: 2.597, sse: 1412847.0 (0.364, 27.1, 0.480, 1.387), neg: 75 (%0.00:%0.01), avgs: 256
+060: dt: 3.673, sse: 1404004.8 (0.362, 27.2, 0.478, 1.389), neg: 99 (%0.01:%0.01), avgs: 64
+061: dt: 2.293, sse: 1398234.2 (0.363, 27.4, 0.477, 1.390), neg: 98 (%0.01:%0.01), avgs: 64
+062: dt: 3.361, sse: 1391999.0 (0.362, 27.5, 0.476, 1.390), neg: 114 (%0.01:%0.01), avgs: 64
+063: dt: 1.681, sse: 1387891.9 (0.362, 27.7, 0.475, 1.391), neg: 97 (%0.00:%0.01), avgs: 64
+064: dt: 13.359, sse: 1376387.5 (0.363, 27.8, 0.473, 1.395), neg: 188 (%0.01:%0.02), avgs: 64
+065: dt: 1.315, sse: 1370459.6 (0.363, 28.0, 0.471, 1.395), neg: 119 (%0.00:%0.01), avgs: 64
+066: dt: 24.235, sse: 1356944.6 (0.364, 28.0, 0.468, 1.402), neg: 207 (%0.00:%0.02), avgs: 64
+067: dt: 1.541, sse: 1351170.8 (0.362, 28.2, 0.467, 1.402), neg: 179 (%0.00:%0.02), avgs: 64
+068: dt: 8.769, sse: 1349243.9 (0.363, 28.2, 0.467, 1.402), neg: 206 (%0.00:%0.02), avgs: 64
+069: dt: 3.371, sse: 1344075.8 (0.358, 28.4, 0.465, 1.400), neg: 213 (%0.00:%0.02), avgs: 16
+070: dt: 1.841, sse: 1340440.8 (0.357, 28.6, 0.464, 1.399), neg: 190 (%0.00:%0.02), avgs: 16
+071: dt: 4.793, sse: 1337180.1 (0.354, 28.7, 0.463, 1.396), neg: 199 (%0.00:%0.02), avgs: 16
+072: dt: 1.750, sse: 1335136.6 (0.353, 28.8, 0.463, 1.395), neg: 187 (%0.00:%0.02), avgs: 16
+073: dt: 6.062, sse: 1332991.0 (0.351, 28.8, 0.462, 1.393), neg: 210 (%0.00:%0.02), avgs: 16
+074: dt: 1.592, sse: 1331523.8 (0.351, 29.0, 0.462, 1.392), neg: 182 (%0.00:%0.02), avgs: 16
+075: dt: 5.137, sse: 1321629.4 (0.343, 29.1, 0.458, 1.387), neg: 180 (%0.00:%0.02), avgs: 4
+076: dt: 2.406, sse: 1320483.9 (0.343, 29.2, 0.458, 1.386), neg: 191 (%0.00:%0.02), avgs: 4
+077: dt: 1.727, sse: 1320099.0 (0.343, 29.3, 0.458, 1.385), neg: 180 (%0.00:%0.02), avgs: 4
+078: dt: 0.889, sse: 1319234.6 (0.342, 29.5, 0.458, 1.385), neg: 185 (%0.00:%0.02), avgs: 1
+079: dt: 1.174, sse: 1318981.9 (0.341, 29.6, 0.458, 1.384), neg: 196 (%0.00:%0.02), avgs: 1
+080: dt: 0.041, sse: 1318770.5 (0.341, 29.8, 0.458, 1.384), neg: 197 (%0.00:%0.02), avgs: 0
+writing curvature file ./lh.sphere.reg.debug.sno2_blur4.00 type -1
+nlarea/corr = 20.000
+integrating with navgs=1024 and tol=1.000e+00
+writing ./lh.sphere.reg.debug0057done.
+writing ./lh.sphere.reg.debug0058done.
+integrating with navgs=256 and tol=5.010e-01
+writing ./lh.sphere.reg.debug0059done.
+integrating with navgs=64 and tol=2.519e-01
+writing ./lh.sphere.reg.debug0060done.
+writing ./lh.sphere.reg.debug0061done.
+writing ./lh.sphere.reg.debug0062done.
+writing ./lh.sphere.reg.debug0063done.
+writing ./lh.sphere.reg.debug0064done.
+writing ./lh.sphere.reg.debug0065done.
+writing ./lh.sphere.reg.debug0066done.
+writing ./lh.sphere.reg.debug0067done.
+writing ./lh.sphere.reg.debug0068done.
+integrating with navgs=16 and tol=1.288e-01
+writing ./lh.sphere.reg.debug0069done.
+writing ./lh.sphere.reg.debug0070done.
+writing ./lh.sphere.reg.debug0071done.
+writing ./lh.sphere.reg.debug0072done.
+writing ./lh.sphere.reg.debug0073done.
+writing ./lh.sphere.reg.debug0074done.
+integrating with navgs=4 and tol=6.988e-02
+writing ./lh.sphere.reg.debug0075done.
+writing ./lh.sphere.reg.debug0076done.
+writing ./lh.sphere.reg.debug0077done.
+integrating with navgs=1 and tol=4.419e-02
+writing ./lh.sphere.reg.debug0078done.
+writing ./lh.sphere.reg.debug0079done.
+integrating with navgs=0 and tol=3.125e-02
+writing ./lh.sphere.reg.debug0080done.
+
+blurring surfaces with sigma=2.00...
+done.
+curvature mean = 0.041, std = 0.310
+writing curvature file ./lh.sphere.reg.debug.sno2_target_blur2.00 type -1
+curvature mean = 0.024, std = 0.623
+tol=1.0e+00, sigma=2.0, host=x86_6, nav=1024, nbrs=1, l_extern=10000.000, l_parea=0.200, l_nlarea=1.000, l_corr=0.050, l_spring=0.500, l_dist=5.000
+using quadratic fit line minimization
+081: dt: 0.946, sse: 1322671.5 (0.342, 29.9, 0.458, 1.658), neg: 192 (%0.00:%0.02), avgs: 1024
+082: dt: 0.102, sse: 1322656.4 (0.342, 30.0, 0.458, 1.659), neg: 192 (%0.00:%0.02), avgs: 256
+083: dt: 0.003, sse: 1322649.4 (0.342, 30.1, 0.458, 1.659), neg: 192 (%0.00:%0.02), avgs: 64
+084: dt: 0.000, sse: 1322647.5 (0.342, 30.2, 0.458, 1.659), neg: 192 (%0.00:%0.02), avgs: 16
+085: dt: 0.000, sse: 1322647.8 (0.342, 30.2, 0.458, 1.659), neg: 192 (%0.00:%0.02), avgs: 4
+086: dt: 0.631, sse: 1322518.0 (0.342, 30.3, 0.458, 1.656), neg: 193 (%0.00:%0.02), avgs: 1
+087: dt: 0.042, sse: 1322406.6 (0.342, 30.5, 0.457, 1.656), neg: 196 (%0.00:%0.02), avgs: 0
+writing curvature file ./lh.sphere.reg.debug.sno2_blur2.00 type -1
+nlarea/corr = 20.000
+integrating with navgs=1024 and tol=1.000e+00
+writing ./lh.sphere.reg.debug0081done.
+integrating with navgs=256 and tol=5.010e-01
+writing ./lh.sphere.reg.debug0082done.
+integrating with navgs=64 and tol=2.519e-01
+writing ./lh.sphere.reg.debug0083done.
+integrating with navgs=16 and tol=1.288e-01
+writing ./lh.sphere.reg.debug0084done.
+integrating with navgs=4 and tol=6.988e-02
+writing ./lh.sphere.reg.debug0085done.
+integrating with navgs=1 and tol=4.419e-02
+writing ./lh.sphere.reg.debug0086done.
+integrating with navgs=0 and tol=3.125e-02
+writing ./lh.sphere.reg.debug0087done.
+
+blurring surfaces with sigma=1.00...
+done.
+curvature mean = 0.040, std = 0.336
+writing curvature file ./lh.sphere.reg.debug.sno2_target_blur1.00 type -1
+curvature mean = 0.013, std = 0.752
+tol=1.0e+00, sigma=1.0, host=x86_6, nav=1024, nbrs=1, l_extern=10000.000, l_parea=0.200, l_nlarea=1.000, l_corr=0.050, l_spring=0.500, l_dist=5.000
+using quadratic fit line minimization
+088: dt: 0.663, sse: 1324990.5 (0.342, 30.6, 0.458, 1.805), neg: 193 (%0.00:%0.02), avgs: 1024
+089: dt: 0.034, sse: 1324982.2 (0.342, 30.7, 0.458, 1.805), neg: 193 (%0.00:%0.02), avgs: 256
+090: dt: 0.003, sse: 1324980.4 (0.342, 30.8, 0.458, 1.805), neg: 193 (%0.00:%0.02), avgs: 64
+091: dt: 0.004, sse: 1324979.9 (0.342, 30.8, 0.458, 1.805), neg: 193 (%0.00:%0.02), avgs: 16
+092: dt: 0.000, sse: 1324979.8 (0.342, 30.9, 0.458, 1.805), neg: 193 (%0.00:%0.02), avgs: 4
+093: dt: 0.364, sse: 1324905.9 (0.342, 31.0, 0.457, 1.802), neg: 194 (%0.00:%0.02), avgs: 1
+094: dt: 0.041, sse: 1324825.6 (0.342, 31.1, 0.457, 1.802), neg: 196 (%0.00:%0.02), avgs: 0
+writing curvature file ./lh.sphere.reg.debug.sno2_blur1.00 type -1
+nlarea/corr = 20.000
+integrating with navgs=1024 and tol=1.000e+00
+writing ./lh.sphere.reg.debug0088done.
+integrating with navgs=256 and tol=5.010e-01
+writing ./lh.sphere.reg.debug0089done.
+integrating with navgs=64 and tol=2.519e-01
+writing ./lh.sphere.reg.debug0090done.
+integrating with navgs=16 and tol=1.288e-01
+writing ./lh.sphere.reg.debug0091done.
+integrating with navgs=4 and tol=6.988e-02
+writing ./lh.sphere.reg.debug0092done.
+integrating with navgs=1 and tol=4.419e-02
+writing ./lh.sphere.reg.debug0093done.
+integrating with navgs=0 and tol=3.125e-02
+writing ./lh.sphere.reg.debug0094done.
+
+blurring surfaces with sigma=0.50...
+done.
+curvature mean = 0.040, std = 0.348
+writing curvature file ./lh.sphere.reg.debug.sno2_target_blur0.50 type -1
+curvature mean = 0.004, std = 0.842
+tol=1.0e+00, sigma=0.5, host=x86_6, nav=1024, nbrs=1, l_extern=10000.000, l_parea=0.200, l_nlarea=1.000, l_corr=0.050, l_spring=0.500, l_dist=5.000
+using quadratic fit line minimization
+095: dt: 0.339, sse: 1326915.8 (0.342, 31.2, 0.458, 1.910), neg: 193 (%0.00:%0.02), avgs: 1024
+096: dt: 0.002, sse: 1326902.2 (0.342, 31.3, 0.458, 1.910), neg: 193 (%0.00:%0.02), avgs: 256
+097: dt: 0.000, sse: 1326898.5 (0.342, 31.3, 0.458, 1.910), neg: 193 (%0.00:%0.02), avgs: 64
+098: dt: 0.000, sse: 1326898.4 (0.342, 31.4, 0.458, 1.910), neg: 193 (%0.00:%0.02), avgs: 16
+099: dt: 0.000, sse: 1326898.1 (0.342, 31.5, 0.458, 1.910), neg: 193 (%0.00:%0.02), avgs: 4
+100: dt: 0.000, sse: 1326898.2 (0.342, 31.6, 0.458, 1.910), neg: 193 (%0.00:%0.02), avgs: 1
+101: dt: 0.041, sse: 1326866.1 (0.342, 31.8, 0.457, 1.910), neg: 193 (%0.00:%0.02), avgs: 0
+tol=1.0e-01, sigma=0.5, host=x86_6, nav=64, nbrs=1, l_extern=10000.000, l_parea=0.002, l_nlarea=100.000, l_corr=0.001, l_spring=0.005, l_dist=0.050
+using quadratic fit line minimization
+102: dt: 5.583, sse: 47806.5 (0.343, 31.8, 0.457, 1.907), neg: 151 (%0.00:%0.01), avgs: 64
+103: dt: 0.000, sse: 47806.5 (0.343, 31.8, 0.457, 1.907), neg: 151 (%0.00:%0.01), avgs: 64
+104: dt: 0.222, sse: 47801.4 (0.343, 31.9, 0.457, 1.907), neg: 137 (%0.00:%0.01), avgs: 16
+105: dt: 0.000, sse: 47801.4 (0.343, 32.0, 0.457, 1.907), neg: 137 (%0.00:%0.01), avgs: 4
+106: dt: 0.000, sse: 47801.4 (0.343, 32.2, 0.457, 1.907), neg: 137 (%0.00:%0.01), avgs: 1
+107: dt: 0.000, sse: 47801.4 (0.343, 32.4, 0.457, 1.907), neg: 137 (%0.00:%0.01), avgs: 0
+writing curvature file ./lh.sphere.reg.debug.sno2_blur0.50 type -1
+nlarea/corr = 20.000
+integrating with navgs=1024 and tol=1.000e+00
+writing ./lh.sphere.reg.debug0095done.
+integrating with navgs=256 and tol=5.010e-01
+writing ./lh.sphere.reg.debug0096done.
+integrating with navgs=64 and tol=2.519e-01
+writing ./lh.sphere.reg.debug0097done.
+integrating with navgs=16 and tol=1.288e-01
+writing ./lh.sphere.reg.debug0098done.
+integrating with navgs=4 and tol=6.988e-02
+writing ./lh.sphere.reg.debug0099done.
+integrating with navgs=1 and tol=4.419e-02
+writing ./lh.sphere.reg.debug0100done.
+integrating with navgs=0 and tol=3.125e-02
+writing ./lh.sphere.reg.debug0101done.
+
+Removing remaining folds...
+nlarea/corr = 199999.984
+integrating with navgs=64 and tol=2.519e-02
+writing ./lh.sphere.reg.debug0102done.
+writing ./lh.sphere.reg.debug0103done.
+integrating with navgs=16 and tol=1.288e-02
+writing ./lh.sphere.reg.debug0104done.
+integrating with navgs=4 and tol=6.988e-03
+writing ./lh.sphere.reg.debug0105done.
+integrating with navgs=1 and tol=4.419e-03
+writing ./lh.sphere.reg.debug0106done.
+integrating with navgs=0 and tol=3.125e-03
+writing ./lh.sphere.reg.debug0107done.
+registration took 0.04 hours
+MRISregister() return, current seed 0
+-01: dt=0.0000, 137 negative triangles  VmPeak 1035640
+107: dt=0.9900, 137 negative triangles
+expanding nbhd size to 1
+108: dt=0.9900, 147 negative triangles
+109: dt=0.9900, 131 negative triangles
+110: dt=0.9900, 129 negative triangles
+111: dt=0.9900, 125 negative triangles
+112: dt=0.9900, 126 negative triangles
+113: dt=0.9900, 127 negative triangles
+114: dt=0.9900, 124 negative triangles
+115: dt=0.9900, 123 negative triangles
+116: dt=0.9900, 124 negative triangles
+117: dt=0.9900, 132 negative triangles
+118: dt=0.9900, 130 negative triangles
+119: dt=0.9900, 128 negative triangles
+120: dt=0.9900, 128 negative triangles
+121: dt=0.9900, 129 negative triangles
+122: dt=0.9900, 123 negative triangles
+123: dt=0.9900, 123 negative triangles
+124: dt=0.9900, 119 negative triangles
+125: dt=0.9900, 120 negative triangles
+126: dt=0.9900, 117 negative triangles
+127: dt=0.9900, 120 negative triangles
+128: dt=0.9900, 119 negative triangles
+129: dt=0.9900, 112 negative triangles
+130: dt=0.9900, 106 negative triangles
+131: dt=0.9900, 100 negative triangles
+132: dt=0.9900,  97 negative triangles
+133: dt=0.9900,  95 negative triangles
+134: dt=0.9900,  93 negative triangles
+135: dt=0.9900,  93 negative triangles
+136: dt=0.9900,  94 negative triangles
+137: dt=0.9900,  90 negative triangles
+138: dt=0.9900,  87 negative triangles
+139: dt=0.9900,  80 negative triangles
+140: dt=0.9900,  80 negative triangles
+141: dt=0.9900,  79 negative triangles
+142: dt=0.9900,  78 negative triangles
+143: dt=0.9900,  71 negative triangles
+144: dt=0.9900,  70 negative triangles
+145: dt=0.9900,  72 negative triangles
+146: dt=0.9900,  65 negative triangles
+147: dt=0.9900,  66 negative triangles
+148: dt=0.9900,  63 negative triangles
+149: dt=0.9900,  57 negative triangles
+150: dt=0.9900,  56 negative triangles
+151: dt=0.9900,  53 negative triangles
+152: dt=0.9900,  59 negative triangles
+153: dt=0.9900,  53 negative triangles
+154: dt=0.9900,  50 negative triangles
+155: dt=0.9900,  50 negative triangles
+156: dt=0.9900,  46 negative triangles
+157: dt=0.9900,  43 negative triangles
+158: dt=0.9900,  42 negative triangles
+159: dt=0.9900,  39 negative triangles
+160: dt=0.9900,  41 negative triangles
+161: dt=0.9900,  34 negative triangles
+162: dt=0.9900,  33 negative triangles
+163: dt=0.9900,  33 negative triangles
+164: dt=0.9900,  33 negative triangles
+165: dt=0.9900,  32 negative triangles
+166: dt=0.9900,  32 negative triangles
+167: dt=0.9900,  30 negative triangles
+168: dt=0.9900,  30 negative triangles
+169: dt=0.9900,  28 negative triangles
+170: dt=0.9900,  27 negative triangles
+171: dt=0.9900,  26 negative triangles
+172: dt=0.9900,  28 negative triangles
+173: dt=0.9900,  24 negative triangles
+174: dt=0.9900,  23 negative triangles
+175: dt=0.9900,  18 negative triangles
+176: dt=0.9900,  17 negative triangles
+177: dt=0.9900,  17 negative triangles
+178: dt=0.9900,  18 negative triangles
+179: dt=0.9900,  17 negative triangles
+180: dt=0.9900,  15 negative triangles
+181: dt=0.9900,  12 negative triangles
+182: dt=0.9900,  12 negative triangles
+183: dt=0.9900,  13 negative triangles
+184: dt=0.9900,  10 negative triangles
+185: dt=0.9900,  10 negative triangles
+186: dt=0.9900,  10 negative triangles
+187: dt=0.9900,  10 negative triangles
+188: dt=0.9900,   8 negative triangles
+189: dt=0.9900,   7 negative triangles
+190: dt=0.9900,   5 negative triangles
+191: dt=0.9900,   5 negative triangles
+192: dt=0.9900,   5 negative triangles
+193: dt=0.9900,   5 negative triangles
+194: dt=0.9900,   6 negative triangles
+195: dt=0.9900,   4 negative triangles
+196: dt=0.9900,   4 negative triangles
+197: dt=0.9900,   4 negative triangles
+198: dt=0.9900,   3 negative triangles
+199: dt=0.9900,   3 negative triangles
+200: dt=0.9900,   2 negative triangles
+201: dt=0.9900,   1 negative triangles
+202: dt=0.9900,   1 negative triangles
+203: dt=0.9900,   1 negative triangles
+204: dt=0.9900,   1 negative triangles
+205: dt=0.9900,   1 negative triangles
+206: dt=0.9900,   1 negative triangles
+207: dt=0.9900,   1 negative triangles
+208: dt=0.9900,   1 negative triangles
+writing registered surface to lh.sphere.reg.debug...
+registration took 0.04 hours
+#VMPC# mris_register VmPeak  1035640
+FSRUNTIME@ mris_register  0.0428 hours 4 threads

@@ -23,7 +23,7 @@ def main():
                         help="Existing server registration file; never copied into evidence")
     parser.add_argument("--repeat", type=int, required=True, choices=(1, 2, 3))
     args = parser.parse_args()
-    subject_root = args.root.parent / "reconall_reference_gpucw1"
+    subject_root = args.root.parent / "reconall_reference_accelerator-a-1"
     out = args.root / "reproducibility_20261002" / f"official_r{args.repeat}"
     out.mkdir(parents=True, exist_ok=False)
     status_path = out / "queue.json"

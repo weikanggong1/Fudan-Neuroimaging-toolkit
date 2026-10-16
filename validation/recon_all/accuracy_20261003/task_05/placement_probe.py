@@ -26,7 +26,7 @@ for path in paths:
 report={'scope':'isolated_same_complete_input; old_frozen_FNIT_subject_for_diagnosis_only','kind':a.kind,'backend':a.backend,
  'hemi':h,'host':platform.node(),'threads':2,'target_gpu_uuid':os.environ.get('CUDA_VISIBLE_DEVICES'),'coordinate_space':'surface RAS','coordinate_unit':'mm',
  'overall_equivalence':'not_assessed','input_sha256':{path:sha(subject/path) for path in paths},
- 'script_sha256':sha(__file__),'resource_manifest_sha256':sha(Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/resources_verified_816e5610.json')) if (Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/resources_verified_816e5610.json')).is_file() else None,'runtime_sources_sha256':{str(path.name):sha(path) for path in Path(__import__('fnit.recon_all.place_pial_python',fromlist=['']).__file__).parent.glob('place*.py')},
+ 'script_sha256':sha(__file__),'resource_manifest_sha256':sha(Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/resources_verified_816e5610.json')) if (Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/resources_verified_816e5610.json')).is_file() else None,'runtime_sources_sha256':{str(path.name):sha(path) for path in Path(__import__('fnit.recon_all.place_pial_python',fromlist=['']).__file__).parent.glob('place*.py')},
  'complete_python_white':'unavailable; first-pass prefix intentionally excluded'}
 output=subject/f'surf/{h}.probe'; started=time.perf_counter()
 if a.backend=='python':

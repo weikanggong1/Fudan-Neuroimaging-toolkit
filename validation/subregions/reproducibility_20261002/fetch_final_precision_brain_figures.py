@@ -36,7 +36,7 @@ for name in ('final_figures_raw_launch.json','final_figures_stage_launch.json','
  if path.exists():files.append((name,path.read_bytes()))
 print(json.dumps({'files':[{'path':name,'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest(),'content':base64.b64encode(zlib.compress(data)).decode()} for name,data in files]}))
 '''.replace('REMOTE_FOLDER',repr(args.remote_folder)).replace('PREFIX',repr(args.prefix))
-    remote='/home1/gongwk/anaconda3/bin/python -c '+shlex.quote(code)
+    remote='/home1/benchmark-user/anaconda3/bin/python -c '+shlex.quote(code)
     response=subprocess.run(['python3','/tmp/fnit_subregions_remote.py',remote],check=True,capture_output=True,text=True)
     payload=json.loads(response.stdout)
     result={'scope':'derived final figures and metadata only; no imaging volumes, posterior arrays, weights, atlas or licenses transferred','files':[]}

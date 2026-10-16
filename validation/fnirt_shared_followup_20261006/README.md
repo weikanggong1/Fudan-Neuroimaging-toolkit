@@ -58,7 +58,7 @@ python source/assembly_shared_v2.py \
   --output "$FNIT_NEW_SHARED_ASSEMBLY_OUTPUT"
 ```
 
-实际运行在 nodecw7，affinity `32,36,40,44,48,52,56,60`，8 Torch/OMP/BLAS/Numba threads。先取得 `nodecw7.gems.cpu8.lock`，再取得本模块 inner lock。调度为 detached，总硬时限 900 s；算术 180 s、组装 600 s。算术 CPP 子进程继承相同 CPU affinity；生产 FNIT 和 GPU 均未运行。
+实际运行在 compute-a-7，affinity `32,36,40,44,48,52,56,60`，8 Torch/OMP/BLAS/Numba threads。先取得 `compute-a-7.gems.cpu8.lock`，再取得本模块 inner lock。调度为 detached，总硬时限 900 s；算术 180 s、组装 600 s。算术 CPP 子进程继承相同 CPU affinity；生产 FNIT 和 GPU 均未运行。
 
 PCG 保留零初值、FP64、未预条件 `norm(r)/norm(b) <= 1e−3`、上限 500。没有预设 69 轮、改变容差、用 Cholesky 替代或应用求出的配准 step。
 

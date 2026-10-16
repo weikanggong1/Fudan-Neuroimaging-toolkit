@@ -54,7 +54,7 @@ class PublicReportPrivacyTests(unittest.TestCase):
         self.assertIsNone(REPORT.ensure_public_report(json.dumps({'version': '1.2.3.4.5'})))
 
     def test_existing_path_license_and_command_guards_are_preserved(self):
-        for value in ('/cwStorage/example/file', '/public/example/file', '/home/example/file',
+        for value in ('/data/shared/example/file', '/public/example/file', '/home/example/file',
                       '/mnt/example/file', '/tmp/example/file', 'FS_LICENSE',
                       'BEGIN PRIVATE KEY', 'PYTHONPATH', 'job_command_basenames_only'):
             with self.assertRaises(ValueError):

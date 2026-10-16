@@ -54,7 +54,7 @@ mris_place_surface --curv-map surf/lh.white 2 10 surf/lh.curv
 
 ## 同输入曲率的重复性（2026-10-01）
 
-本次冻结 sub-01 候选 `1b8c36d25a68e253a1e59b6d02114890afa467de` 的右半球最终 pial：104,619 个顶点、209,234 个有序面，surface RAS/mm。用现有三方脚本分别在两个独立进程中运行官方 FreeSurfer 8.2.0-1、FNIT Conda 源码构建程序和 PyTorch。两轮固定同一 gpucw1、物理 GPU UUID `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba`、四线程及 BLAS/Numba 预算、TF32 和 float32；`PYTORCH_NO_CUDA_MEMORY_CACHING=1`，未使用半精度。
+本次冻结 sub-01 候选 `1b8c36d25a68e253a1e59b6d02114890afa467de` 的右半球最终 pial：104,619 个顶点、209,234 个有序面，surface RAS/mm。用现有三方脚本分别在两个独立进程中运行官方 FreeSurfer 8.2.0-1、FNIT Conda 源码构建程序和 PyTorch。两轮固定同一 accelerator-a-1、物理 GPU UUID `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba`、四线程及 BLAS/Numba 预算、TF32 和 float32；`PYTORCH_NO_CUDA_MEMORY_CACHING=1`，未使用半精度。
 
 曲率验收仍为既有算子门槛：`abs(candidate-reference) <= 0.005 + 0.001 × abs(reference)`，单位 mm⁻¹。未建立或调整整例指标等效阈值。保存的受控 `e036f57b62b99d2af4cd8853ab2f1e6d2a9f8c68` 与候选 `1b8c36d` 整例 white/pial 坐标及有序面逐值相同，因此下面的整例图配对也可按顶点索引比较。
 

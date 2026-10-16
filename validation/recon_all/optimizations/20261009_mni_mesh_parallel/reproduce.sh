@@ -16,8 +16,8 @@ mkdir -p "$TASK_OUTPUT"
 export NUMBA_NUM_THREADS=4 OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 NUMEXPR_NUM_THREADS=4
 export PYTORCH_NO_CUDA_MEMORY_CACHING=1
 for TASK_CASE in 06 07; do
- if [[ "$TASK_CASE" == 06 ]]; then TASK_SUBJECT="$FNIT_ROOT/runs/recon_e2e_803aec50_cfff_20261009/sub06-candidate/subject";
- else TASK_SUBJECT="$FNIT_ROOT/runs/recon_e2e_803aec50_cfff_20261009/sub07-control/subject"; fi
+ if [[ "$TASK_CASE" == 06 ]]; then TASK_SUBJECT="$FNIT_ROOT/runs/recon_e2e_803aec50_accelerator-b_20261009/sub06-candidate/subject";
+ else TASK_SUBJECT="$FNIT_ROOT/runs/recon_e2e_803aec50_accelerator-b_20261009/sub07-control/subject"; fi
  for TASK_TAG in A1 B1 B2 A2; do
   TASK_MODE=serial
   if [[ "$TASK_TAG" == B* ]]; then TASK_MODE=parallel; fi

@@ -132,7 +132,9 @@ def test_removed_batch_api_is_absent():
     assert removed.returncode != 0
 
     apply_transform = package.apply_transform
-    assert "device" not in inspect.signature(apply_transform).parameters
+    parameters = inspect.signature(apply_transform).parameters
+    assert parameters["device"].default == "cpu"
+    assert "frame_chunk_size" in parameters
 
 
 def test_top_level_import_stays_lightweight():

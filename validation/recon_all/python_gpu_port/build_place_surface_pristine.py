@@ -26,7 +26,7 @@ def main() -> None:
         for line in (target / "flags.make").read_text().splitlines()
         if " = " in line
     )
-    compiler = "/home1/gongwk/anaconda3/bin/x86_64-conda-linux-gnu-g++"
+    compiler = "/home1/benchmark-user/anaconda3/bin/x86_64-conda-linux-gnu-g++"
     source = args.source / "mris_make_surfaces/mris_place_surface.cpp"
     compiled = args.out / "mris_place_surface.cpp.o"
     command = [compiler]

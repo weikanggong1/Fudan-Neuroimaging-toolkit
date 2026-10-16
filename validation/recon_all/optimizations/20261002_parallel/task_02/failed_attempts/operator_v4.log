@@ -28,27 +28,27 @@ NameError('coordinates is not defined')
 The above exception was the direct cause of the following exception:
 
 Traceback (most recent call last):
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_02/source/validation/recon_all/optimizations/20261002_parallel/task_02/benchmark_sampling.py", line 34, in <module>
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_02/source/validation/recon_all/optimizations/20261002_parallel/task_02/benchmark_sampling.py", line 34, in <module>
     cpu,cold_cpu=measure(cpu_samples,placement,current,affine);gpu,cold_gpu=measure(context.sample,current)
                                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_02/source/validation/recon_all/optimizations/20261002_parallel/task_02/benchmark_sampling.py", line 17, in measure
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_02/source/validation/recon_all/optimizations/20261002_parallel/task_02/benchmark_sampling.py", line 17, in measure
     torch.cuda.synchronize(a.device);t=time.perf_counter();r=fn(*args,**kwargs);torch.cuda.synchronize(a.device);return r,time.perf_counter()-t
                                                              ^^^^^^^^^^^^^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
     return func(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_02/source/src/fnit/recon_all/place_surface_sampling.py", line 86, in sample
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_02/source/src/fnit/recon_all/place_surface_sampling.py", line 86, in sample
     sample_kernel[((len(xyz)+127)//128,)](self.volume, self.affine, points, result,
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/triton/runtime/jit.py", line 345, in <lambda>
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/triton/runtime/jit.py", line 345, in <lambda>
     return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/triton/runtime/jit.py", line 662, in run
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/triton/runtime/jit.py", line 662, in run
     kernel = self.compile(
              ^^^^^^^^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/triton/compiler/compiler.py", line 276, in compile
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/triton/compiler/compiler.py", line 276, in compile
     module = src.make_ir(options, codegen_fns, context)
              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/triton/compiler/compiler.py", line 113, in make_ir
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/site-packages/triton/compiler/compiler.py", line 113, in make_ir
     return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 triton.compiler.errors.CompilationError: at 6:11:

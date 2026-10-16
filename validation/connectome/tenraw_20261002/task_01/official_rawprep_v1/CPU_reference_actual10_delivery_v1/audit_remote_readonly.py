@@ -10,7 +10,7 @@ REMOTE_PROGRAM = r"""import hashlib,json,socket,platform
 from pathlib import Path
 from datetime import datetime,timezone
 E=json.loads(__EXPECTED_JSON__)
-R=Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01')
+R=Path('/data/workspaces/fnit_connectome_tenraw_20261002/task_01')
 def sha(p):
  h=hashlib.sha256()
  with Path(p).open('rb') as f:
@@ -73,7 +73,7 @@ def main() -> None:
                         help="Local curated CPU_reference_actual10_delivery_v1 directory")
     parser.add_argument("--diagnostic-root", type=Path, default=None,
                         help="Local CON11 raw-binding evidence; defaults to the delivery sibling")
-    parser.add_argument("--host", default="gongwk@10.190.248.228",
+    parser.add_argument("--host", default="user@compute.example.org",
                         help="Authenticated head host; all remote operations are metadata reads")
     parser.add_argument("--port", type=int, default=39516)
     parser.add_argument("--control-path", type=Path, required=True,

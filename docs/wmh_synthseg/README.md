@@ -1,4 +1,6 @@
-# WMH-SynthSeg：脑结构与白质高信号分割
+# FNIT_WMHSynthSeg
+
+> 统一 Python 入口：[`FNIT_WMHSynthSeg`](../API_REFERENCE.md)，从 `fnit` 导入。下文配置、结果类型和细分算子保留高级兼容接口。
 
 [返回首页](../../README.md) · [完整旧文档与更早证据](../../validation/wmh_synthseg/readme_archive_20261005.md)
 
@@ -21,9 +23,9 @@ WMH-SynthSeg 同时分割脑结构和白质高信号（WMH，FreeSurfer 标签 *
 ## 2. Python 调用
 
 ```python
-from fnit import WMHSynthSeg
+from fnit import FNIT_WMHSynthSeg
 
-wmh_segmentation_model = WMHSynthSeg(
+wmh_segmentation_model = FNIT_WMHSynthSeg(
     weights=None,  # 权重：按 FNIT 配置顺序查找官方 checkpoint
     device="cuda:0",  # 设备：第一张可见 CUDA GPU
     threads=4,  # CPU 线程：用于预处理和后处理

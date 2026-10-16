@@ -58,7 +58,7 @@ exit_code = main([
 | `--selected-cases` | 可选非空、无重复的 canonical `case_id` 列表。原始 manifest 仍保留完整十例；只在本次新命名空间运行所列 subject。 |
 | `--avoid-preparations PREP_CONFIG DRIVER_DIR` | 可重复；绑定之前准备配置及其 driver 的原字节 STOP 标记。子集必须在该旧准备目录完全没有开始，且原十例输入 SHA、官方身份和未来参数相同；不能与旧目录嵌套。 |
 | `--cpu-threads` | 每例线程数，固定 8 |
-| `--cpu-transport` | 默认 `ssh`。`local` 仅允许实际在冻结 `cpu_host=nodecw10` 上运行控制器和 worker，直接使用参数列表启动本地子进程；不调用 `ssh localhost`。 |
+| `--cpu-transport` | 默认 `ssh`。`local` 要求配置的 `cpu_host` 与当前机器的实际 hostname 一致，控制器和 worker 在该机器执行，直接使用参数列表启动本地子进程；不调用 `ssh localhost`。 |
 | `--parent-connection-record` | 可选，仅用于 CPU-local 控制器；传入 head 在真实 SSH 开始前写出的不可变 JSON，原字节 SHA 在配置中冻结，后续单独记录 head 连接结束和整个子集的 monotonic 时间。 |
 | `--poll-seconds` | head 检查完成任务与停止标记的间隔，1–60 秒，默认 5 秒 |
 
@@ -119,12 +119,12 @@ CPU 并发数不同会改变整个 cohort 的排队与吞吐；不能将两例�
 
 ### SSH 会话数量与 CPU-local 控制器
 
-实际运行时，B 批 CON04–07 成功启动，CON08–11 在既有 nodecw10 ControlMaster 上被 `Session open refused by peer` 拒绝，并没有开始官方命令或创建 FS job。原失败保留。独立 master 的 BatchMode 认证也被拒绝，因此没有用未经认证的新连接代替。
+实际运行时，B 批 CON04–07 成功启动，CON08–11 在既有 compute-a-10 ControlMaster 上被 `Session open refused by peer` 拒绝，并没有开始官方命令或创建 FS job。原失败保留。独立 master 的 BatchMode 认证也被拒绝，因此没有用未经认证的新连接代替。
 
-C 批改为 head 的持久 tmux 包装**一个已有认证的 nodecw10 SSH 会话**，在 nodecw10 本地运行四个 worker。只对仍从未开始的 CON08–11 使用第三个全新准备目录：
+C 批改为 head 的持久 tmux 包装**一个已有认证的 compute-a-10 SSH 会话**，在 compute-a-10 本地运行四个 worker。只对仍从未开始的 CON08–11 使用第三个全新准备目录：
 
 ```bash
-# 在 nodecw10 实际执行；head 外层 SSH 的原始开始记录已经保存。
+# 在 compute-a-10 实际执行；head 外层 SSH 的原始开始记录已经保存。
 python /shared/harness_v3/benchmark_connectome_anatomy_prep.py \
   --origin-driver-report-dir /shared/tenraw/original_driver \
   --run-root /shared/tenraw/candidate_anatomy_v3 \
@@ -137,7 +137,7 @@ python /shared/harness_v3/benchmark_connectome_anatomy_prep.py \
   --parent-connection-record /shared/harness_v3/head_connection_start.json
 ```
 
-C 每例 `preparation_coordinator_case_wall_seconds` 是 nodecw10 控制器的真实 monotonic 时间，不能标为 head 的计时；其 `coordinator_identity`、`coordinator_transport` 明确保留。head wrapper 从实际连接前开始到 node 控制器退出的整个 C4 batch 时间另存 `head_connection_end.json`。node/head 的 UTC 差只作为原始观察值，不能重建同一进程的 monotonic wall。最终来源是 A2+B4+C4，各自官方 raw-T1 结果与配置保留。
+C 每例 `preparation_coordinator_case_wall_seconds` 是 compute-a-10 控制器的真实 monotonic 时间，不能标为 head 的计时；其 `coordinator_identity`、`coordinator_transport` 明确保留。head wrapper 从实际连接前开始到 node 控制器退出的整个 C4 batch 时间另存 `head_connection_end.json`。node/head 的 UTC 差只作为原始观察值，不能重建同一进程的 monotonic wall。最终来源是 A2+B4+C4，各自官方 raw-T1 结果与配置保留。
 
 ## 4. 对应官方调用
 
@@ -158,13 +158,13 @@ recon-all \
 
 真实重建结果由部署运行后的 `status.json`、各例官方报告和实际 MGZ/表面产物确定。本次计划的全部新官方命令均成功、真实 nibabel 数据读取通过、输入和输出字节绑定完整，才标记该准备计划完成。候选 GPU pipeline 以后还需显式冻结实际源码并重新执行全部原始 DWI 阶段；本工具不建立该后续绑定。
 
-2026-10-03：相关 stdlib 协议测试 147 项通过，本工具含 23 项。新十例官方准备已在 nodecw10 开始，CON01、CON03 各使用全新目录和原始 T1w 执行 `recon-all -i ... -all -openmp 8`；实际官方版本为 `freesurfer-linux-centos7_x86_64-8.2.0-20260314-d932c45`。启动核查为两例运行、八例排队，候选 source 未知、GPU 未启动。该记录不是重建完成或完整 pipeline 精度/耗时结果，见[匿名化启动记录](../../validation/connectome/tenraw_20261002/anatomy_prep_protocol.json)。
+2026-10-03：相关 stdlib 协议测试 147 项通过，本工具含 23 项。新十例官方准备已在 compute-a-10 开始，CON01、CON03 各使用全新目录和原始 T1w 执行 `recon-all -i ... -all -openmp 8`；实际官方版本为 `freesurfer-linux-centos7_x86_64-8.2.0-20260314-d932c45`。启动核查为两例运行、八例排队，候选 source 未知、GPU 未启动。该记录不是重建完成或完整 pipeline 精度/耗时结果，见[匿名化启动记录](../../validation/connectome/tenraw_20261002/anatomy_prep_protocol.json)。
 
 ## 6. 更新记录
 
 - 2026-10-03：新增独立官方解剖准备；候选源码未知时可先运行十例新 recon-all。使用最多两个活动 Future，保留已启动任务，禁止复用既有结果。
 - 同日 v2：新增显式子集和最多八个 CPU 任务；检查旧准备 STOP/配置/输入 SHA 及完全未开始目录，保留两批各自的计时和官方结果。
-- 同日 v3：保留 B 四例 SSH 失败，通过一个已有认证会话在 nodecw10 本地启动最后四例；实际八个 B/C 官方进程及其新 raw-T1 命令已核对，GPU 未启动。此为运行中状态，不是完成结果。
+- 同日 v3：保留 B 四例 SSH 失败，通过一个已有认证会话在 compute-a-10 本地启动最后四例；实际八个 B/C 官方进程及其新 raw-T1 命令已核对，GPU 未启动。此为运行中状态，不是完成结果。
 - 协议测试和真实 benchmark 分开记录；部署后的真实墙钟、产物验证与脑图应引用本轮实际文件，不能以本工具的测试用时替代。
 
 ## 7. 原实现与参考

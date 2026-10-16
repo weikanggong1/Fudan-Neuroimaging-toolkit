@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 umask 077
-FNIT_ROOT=/cwStorage/home/gongwk/Notebook_code/FNIT
+FNIT_ROOT=/data/fnit
 FNIT_W="$FNIT_ROOT/workspaces/smri_cpu_20261004/remaining_20261006/fnirt-current-pcg-replay-v1"
 FNIT_R="$FNIT_ROOT/runs/smri_cpu_20261004/remaining_20261006/fnirt-current-pcg-replay-v1"
 FNIT_CURRENT="$FNIT_ROOT/runs/smri_cpu_20261004/remaining_20261006/fnirt-shared-followup-v2/assembly"
@@ -13,7 +13,7 @@ unset LD_LIBRARY_PATH LD_PRELOAD PYTHONPATH OPENBLAS_CORETYPE
 mkdir -p "$FNIT_R"
 trap 'FNIT_RC=$?; printf "%s\n" "$FNIT_RC" > "$FNIT_R/replay.exitcode"' EXIT
 printf 'Waiting for shared CPU lock; maximum 1800 seconds.\n'
-exec 9>"$FNIT_ROOT/runs/smri_cpu_20261004/nodecw7.gems.cpu8.lock"
+exec 9>"$FNIT_ROOT/runs/smri_cpu_20261004/compute-a-7.gems.cpu8.lock"
 flock -w 1800 9
 exec 8>"$FNIT_R/module.cpu8.lock"
 flock -w 20 8

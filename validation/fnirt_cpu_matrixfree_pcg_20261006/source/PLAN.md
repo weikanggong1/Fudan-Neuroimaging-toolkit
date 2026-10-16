@@ -69,7 +69,7 @@ workspaces/smri_cpu_20261004/remaining_20261006/fnirt-matrixfree-pcg-v1
 runs/smri_cpu_20261004/remaining_20261006/fnirt-matrixfree-pcg-v1
 ```
 
-同 nodecw7 八个 physical cores `32,36,40,44,48,52,56,60`，OMP/OpenBLAS/MKL/Numba8、Torch8 / interop1。先公共 CPU lock、再 leaf 内锁；outer wait19000s / child180s / controller19600s，20,000,000,000B address-space cap。保持环境 prefix，清除 loader overrides，GPU invisible；不更改全局 TF32 flag。x86_64 / FMA 只限定本次有证据的候选使用范围，不依据地址、被试或维数选择算法。
+同 compute-a-7 八个 physical cores `32,36,40,44,48,52,56,60`，OMP/OpenBLAS/MKL/Numba8、Torch8 / interop1。先公共 CPU lock、再 leaf 内锁；outer wait19000s / child180s / controller19600s，20,000,000,000B address-space cap。保持环境 prefix，清除 loader overrides，GPU invisible；不更改全局 TF32 flag。x86_64 / FMA 只限定本次有证据的候选使用范围，不依据地址、被试或维数选择算法。
 
 worker 入口 `umask(077)`，输出目录700、文件600；禁止已有输出目录后重新运行。runner 无论 science 成功或失败都做 after preflight，并保留原 science RC。worker finally 记录所有已经恢复的 immutable operand / derived system 后哈希、flags / CUDA / DSO snapshots；失败不标 accepted。
 

@@ -18,7 +18,7 @@ def sanitize(value, root, host):
     if isinstance(value,list): return [sanitize(item,root,host) for item in value]
     if isinstance(value,str):
         value=value.replace(str(root),'<FNIT_ROOT>').replace(host,'<validation-host>')
-        return re.sub(r'/cwStorage/home/[^/]+/Notebook_code','<REFERENCE_ROOT>',value)
+        return re.sub(r'/data/shared/home/[^/]+/Notebook_code','<REFERENCE_ROOT>',value)
     return value
 
 

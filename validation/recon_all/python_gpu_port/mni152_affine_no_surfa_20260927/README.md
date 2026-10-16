@@ -6,7 +6,7 @@
 
 被试 `mri/orig.mgz` 来自去标识 OpenNeuro ds000114 sub-01 真实 T1，SHA-256 为 `7ac9286da6923e127e746249ca40137f5cff3d5914bfddf11dc1a92aab4353c9`。外置 cropped/full MNI152 模板的 SHA-256 分别是 `ef89b7aa615dcb4a68a1cad725a9b99314227f9777ed86f42aae61e4e89da19a` 和 `e4e1a25b66fef6b2cde8e4916d4a03d4369de6f24b0d3d4736baffc3d4a8c575`；affine 权重为 `1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6`。程序输出 `invol.crop.nii.gz`、type 1 `aff.lta` 和 type 0 `reg.targ_to_invol.lta`，最后一项将完整 MNI152 体素映射到被试 `orig.mgz` 体素；函数返回最后一项路径。[函数参数和官方命令](../../../../docs/recon_all/MNI_AUX_CHAIN.md)逐项说明输入与输出。
 
-在 gpucw1 的同一 H100 GPU0、同一 Conda 环境和四个 CPU 线程下，旧 Surfa 与新 NiBabel 路径成对运行。实际 cropped T1 及 MNI152 模板的图像数据、voxel-to-world 矩阵、方向、中心和 256³ 网络坐标矩阵与 Surfa 相同，见 [`mni_geometry_probe.json`](mni_geometry_probe.json)。首次生成的 `aff.lta` 仅在 NIfTI 第三轴体素大小的最后一位小数不同；将 NIfTI voxel size 直接读取 header zoom 后，三份输出均逐字节相同：
+在 accelerator-a-1 的同一 H100 GPU0、同一 Conda 环境和四个 CPU 线程下，旧 Surfa 与新 NiBabel 路径成对运行。实际 cropped T1 及 MNI152 模板的图像数据、voxel-to-world 矩阵、方向、中心和 256³ 网络坐标矩阵与 Surfa 相同，见 [`mni_geometry_probe.json`](mni_geometry_probe.json)。首次生成的 `aff.lta` 仅在 NIfTI 第三轴体素大小的最后一位小数不同；将 NIfTI voxel size 直接读取 header zoom 后，三份输出均逐字节相同：
 
 | 输出 | 新旧 SHA-256 | 新旧矩阵最大元素差 |
 | --- | --- | ---: |

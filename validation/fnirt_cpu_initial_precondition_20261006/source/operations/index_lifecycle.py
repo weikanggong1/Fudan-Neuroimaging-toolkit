@@ -9,7 +9,7 @@ from pathlib import Path
 import stat
 import tempfile
 
-ROOT = Path("/cwStorage/home/gongwk/Notebook_code/FNIT")
+ROOT = Path("/data/fnit")
 KEY = "fnirt_cpu_initial_precondition_20261006"
 LEAF = "smri_cpu_20261004/remaining_20261006/fnirt-initial-precondition-v1"
 FREEZE = "7f5cdc7572aac6b27752d4ca47bffc1be3bd2087f4c751ce1b1e02fcbcc130e5"
@@ -62,8 +62,8 @@ def main():
             entry = {"workspace": str(workspace), "run_path": str(run), "status": "initial_prepared_no_worker",
                      "freeze_sha256": FREEZE, "production_change": False, "gpu_enabled": False,
                      "scope": "two saved half g/diag arrays only; source pre-loop initial z/rho/norm control; controlled tau.001; 4dot/2norm, no callback/PCG/evaluate/linearize/assembly/native/image/GPU",
-                     "cpu_host": "nodecw7", "cpu_affinity": [32,36,40,44,48,52,56,60], "cpu_threads": 8,
-                     "outer_lock": str(ROOT / "runs/smri_cpu_20261004/nodecw7.gems.cpu8.lock"),
+                     "cpu_host": "compute-a-7", "cpu_affinity": [32,36,40,44,48,52,56,60], "cpu_threads": 8,
+                     "outer_lock": str(ROOT / "runs/smri_cpu_20261004/compute-a-7.gems.cpu8.lock"),
                      "outer_lock_wait_seconds": 19000, "controller_timeout_seconds": 19600,
                      "child_timeout_seconds": 180, "address_space_cap_bytes": 20000000000,
                      "maximum_calls": {"prefixes": 2, "dot": 4, "norm": 2, "callback": 0, "PCG": 0},
@@ -75,7 +75,7 @@ def main():
                 "`workspaces/" + LEAF + "` and matching `runs/` leaf. Only accepted gradient_half/diagonal_half payloads are materialized; original source pre-loop initialization prefixes compare z/rho/norm. "
                 "Two initial direction SHA gates stop before crossed reductions on first mismatch; total4dot/2norm. Tau.001 is controlled, not historical LM. "
                 "No callback, PCG, evaluation, linearization, H assembly, native executable, MRI or GPU. "
-                "Shared nodecw7 CPU8 lock;19000s wait/19600s controller/180s child. "
+                "Shared compute-a-7 CPU8 lock;19000s wait/19600s controller/180s child. "
                 "This is an initial precondition/reduction control, not a final step-error attribution or runtime integration.\n")
         else:
             entry = tasks[KEY]

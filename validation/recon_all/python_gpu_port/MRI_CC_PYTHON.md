@@ -6,7 +6,7 @@ commit `d932c45b7941662ea380a05efef580568b98d41a`. It consumes
 `transforms/cc_up.lta`. It calls NumPy, SciPy, and nibabel; no FreeSurfer binary
 is used by the Python stage.
 
-The native reference was rerun twice on headcw using the same frozen inputs,
+The native reference was rerun twice on control-host using the same frozen inputs,
 without recon-all. A normal run took 89.67 s; a diagnostic run took 92.93 s and
 provided `m.mgz`, `asegx.mgz`, and `s1`–`s4` intermediate images. Both native
 `aseg.auto.mgz` outputs matched the archived output by compressed-file SHA-256.
@@ -57,11 +57,11 @@ subject test used the current candidate `synthseg.rca.mgz` and `norm.mgz` as
 inputs. Official `mri_cc` and the Python port each changed 2,263 voxels; their
 `aseg.auto.mgz` outputs were identical at all 16,777,216 voxels, with matching
 MGH header and payload bytes. They also matched the archived official
-`aseg.auto.mgz` voxelwise. On headcw, the official command took 99.16 s; the
+`aseg.auto.mgz` voxelwise. On control-host, the official command took 99.16 s; the
 Python function took 17.34 s (whole validator process 18.96 s). The connected
 runner helper reduced the prior candidate `aseg.auto` difference from 2,263 to
 0 voxels, while the later official final `aseg` still differs by 104,986 voxels.
-The focused integration test passed 1/1 on gpucw1. The full recon-all subject
+The focused integration test passed 1/1 on accelerator-a-1. The full recon-all subject
 has not yet been rerun after this connection. See the
 [current-input report](native_cpp_conda_20260927/MRI_CC_FEASIBILITY.md) and its
 machine-readable paired and integrated-stage results.

@@ -28,7 +28,7 @@ def summarize_results(*, reports_directory: Path, previous_reports_directory: Pa
         return json.loads(content)
     for case in ("06", "07"):
         new = reports_directory / "runs/recon_e2e_normalization_0cd9cbd5_20261009_v1" / f"sub{case}-candidate"
-        old = previous_reports_directory / "runs/recon_e2e_803aec50_cfff_20261009" / f"sub{case}-candidate"
+        old = previous_reports_directory / "runs/recon_e2e_803aec50_accelerator-b_20261009" / f"sub{case}-candidate"
         benchmark = read(new / "benchmark.json")
         previous = read(old / "benchmark.json")
         runtime = read(new / "subject/fnit-native-free-run.json")

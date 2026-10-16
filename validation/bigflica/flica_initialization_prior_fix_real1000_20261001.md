@@ -62,7 +62,7 @@ PYTHONPATH=src python -m pytest -q \
 
 仅改W先验时，旧初始化与修正初始化的H相对变化分别为8.60%和25.14%，有效秩仍为17和7。这是先验干预的结果，须与同初态CPU/GPU的 `2.26e-9` 数值差分开；潜在变量尺度变化也不等于脑图发生同等幅度的变化。
 
-以上是gpucw1共享H100的单次观测。CPU计算每轮自由能、GPU未计算，外部GPU负载持续存在；小字典GPU本次仍慢于CPU，表格不构成受控加速比。CPU阶段时间、F历史、初态和源码校验值见[聚合结果](flica_initialization_prior_fix_real1000_20261001.json)。
+以上是accelerator-a-1共享H100的单次观测。CPU计算每轮自由能、GPU未计算，外部GPU负载持续存在；小字典GPU本次仍慢于CPU，表格不构成受控加速比。CPU阶段时间、F历史、初态和源码校验值见[聚合结果](flica_initialization_prior_fix_real1000_20261001.json)。
 
 ## 原始体素与投影的 W 单因素控制
 

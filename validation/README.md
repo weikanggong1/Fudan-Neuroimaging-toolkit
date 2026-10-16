@@ -1,8 +1,10 @@
 # 验证索引
 
+> 当前调用名称以[统一 Python API](../docs/API_REFERENCE.md)为准。子目录保留实际测量时的入口、源码及输入身份；2026-10-16 的接口统一和隐私整理没有重跑这些 MRI benchmark。脱敏副本的原始与发布文件身份见[整理记录](documentation/public_api_20261016/README.md)。
+
 ## 多模态 CPU 与最新 GPU 对照（2026-10-04）
 
-本轮在 nodecw10/nodecw8 完成同 1/8 线程预算的官方功能与速度检查，并汇总与生产源码匹配的最新 H100 完整调用。输入、输出精度、完整进程及分步骤耗时、GPU allocation 和尚未达速度目标的配置见[本轮汇总](multimodal_cpu_20261004/README.md)。CPU 进程、GPU API 和共享负载观察分别记录；下方既有报告保留各自的测量源码和历史范围。
+本轮在 compute-a-10/compute-a-8 完成同 1/8 线程预算的官方功能与速度检查，并汇总与生产源码匹配的最新 H100 完整调用。输入、输出精度、完整进程及分步骤耗时、GPU allocation 和尚未达速度目标的配置见[本轮汇总](multimodal_cpu_20261004/README.md)。CPU 进程、GPU API 和共享负载观察分别记录；下方既有报告保留各自的测量源码和历史范围。
 
 ## fMRI CPU 官方对照与 GPU 回归（2026-10-04—06）
 

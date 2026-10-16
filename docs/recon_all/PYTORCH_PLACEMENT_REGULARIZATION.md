@@ -183,14 +183,14 @@ mris_place_surface --adgws-in surf/autodet.gw.stats.lh.dat \
 
 ## 5. 本轮验证
 
-2026-10-09 在 gpucw1 现有 FNIT 环境完成三项 CPU 算法回归：批量 5×5 QR
+2026-10-09 在 accelerator-a-1 现有 FNIT 环境完成三项 CPU 算法回归：批量 5×5 QR
 与原 Numba 每元素一致；含 ripped 顶点和 white `after_average` 顺序的完整
 regularizer 与原 CPU 梯度每元素一致；非法设备/分块配置被拒绝。
 这些人工小网格仅是单元测试，不是性能或脑区等效 benchmark。
 本地 FNIT 环境随后完成 15 项针对性回归（10.74 s），覆盖新 regularizer、
 原 pial 终止拒绝规则、静态索引及统计缓存；默认 CPU 控制流未退化。
 
-真实 ds000114 sub-07 固定输入正则梯度在 gpucw1 H100、四线程、CUDA0
+真实 ds000114 sub-07 固定输入正则梯度在 accelerator-a-1 H100、四线程、CUDA0
 完成 ABBA；每次计时包括当前坐标/法线上传、计算和完整梯度回传，边界
 同步明确目标 GPU。32768 分块的结果如下。
 

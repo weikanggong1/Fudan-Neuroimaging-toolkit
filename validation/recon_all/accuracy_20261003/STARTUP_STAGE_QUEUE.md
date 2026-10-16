@@ -15,11 +15,11 @@
 
 ```bash
 # 保持原来安装的Conda解释器，完整路径由已核对的服务器INDEX给出。
-FNIT_STAGE_PYTHON=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
+FNIT_STAGE_PYTHON=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
 # 只读的新验证工具目录。
-FNIT_STAGE_TOOLS=/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/startup_stage_tools_v1
+FNIT_STAGE_TOOLS=/data/fnit/workspaces/recon_accuracy_20261003/startup_stage_tools_v1
 # 事先冻结的8个标量启动组和4个真实annotation阶段配置。
-FNIT_STAGE_PLAN=/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_stage_regression_v1/plan.json
+FNIT_STAGE_PLAN=/data/fnit/runs/recon_accuracy_20261003/startup_stage_regression_v1/plan.json
 "$FNIT_STAGE_PYTHON" "$FNIT_STAGE_TOOLS/run_startup_stage_queue.py" \
   --plan "$FNIT_STAGE_PLAN"
 ```

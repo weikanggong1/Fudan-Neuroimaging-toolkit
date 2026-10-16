@@ -40,7 +40,7 @@ print(json.dumps({'remote_root':str(r),'files':rows,'progress_sha256':hashlib.sh
             raise ValueError('unsafe relative report path')
         target = args.output.joinpath(*relative.parts)
         target.parent.mkdir(parents=True, exist_ok=True)
-        subprocess.run([str(args.scp_wrapper), 'gpucw1:' + args.remote_root.rstrip('/') + '/' + row['path'], str(target)], check=True)
+        subprocess.run([str(args.scp_wrapper), 'accelerator-a-1:' + args.remote_root.rstrip('/') + '/' + row['path'], str(target)], check=True)
         if target.stat().st_size != row['size_bytes'] or digest(target) != row['sha256']:
             raise RuntimeError('collected bytes differ: ' + row['path'])
     after = scan()

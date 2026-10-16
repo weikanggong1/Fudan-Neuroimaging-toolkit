@@ -15,7 +15,7 @@ flowchart TD
     A[原 driver 持续调度 2例 × 8线程<br/>raw T1w 官方 recon-all] --> B{原 report exit 0<br/>精确 int32 JSON 序列化错误?}
     B -->|其他错误| X[保留失败 不执行 GPU]
     B -->|是| C[核对本轮命令 namespace<br/>原报告 输入和解剖文件哈希]
-    C --> D[新工具在 nodecw10<br/>完整读取 MGZ 表面 annotation]
+    C --> D[新工具在 compute-a-10<br/>完整读取 MGZ 表面 annotation]
     D --> E[独立 revalidated report<br/>原失败记录不变]
     E --> F{GPU 输出仍不存在?}
     F -->|否| X
@@ -107,7 +107,7 @@ recon-all -sd THIS_ROUND_CASE/freesurfer -s SUBJECT_NAME \
 
 协议测试覆盖精确错误门槛、命令与 namespace、原始字节哈希、已有下游拒绝、报告不可覆盖、普通 cohort 默认拒绝 failed、修复绑定与时间计算。小文件 fixture 只验证协议和 IO，不作为 MRI benchmark。
 
-本次 29 项原 cohort 测试和 36 项恢复测试均通过。ds001226 CON03 在 nodecw10 完整重读 3 个 `256×256×256` MGZ、6 个表面、4 个 annotation 和 done，共 14 个文件；实际读取和 JSON 校验耗时 2.272 秒，原报告与解剖文件 SHA-256 全部保持一致。这是验证工具修复的真实读取证据，不是 pipeline 耗时或精度对照；记录见[实际检查 JSON](../../validation/connectome/tenraw_20261002/cohort_recovery_protocol.json)。
+本次 29 项原 cohort 测试和 36 项恢复测试均通过。ds001226 CON03 在 compute-a-10 完整重读 3 个 `256×256×256` MGZ、6 个表面、4 个 annotation 和 done，共 14 个文件；实际读取和 JSON 校验耗时 2.272 秒，原报告与解剖文件 SHA-256 全部保持一致。这是验证工具修复的真实读取证据，不是 pipeline 耗时或精度对照；记录见[实际检查 JSON](../../validation/connectome/tenraw_20261002/cohort_recovery_protocol.json)。
 
 ```bash
 python3 -m unittest discover -s tests/connectome -p 'test_raw_cohort*tool.py' -v

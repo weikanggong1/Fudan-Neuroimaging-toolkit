@@ -11,11 +11,11 @@ nearest-voxel values shifted by alternating ±3 because the native per-vertex
 CBV targets are not saved in the surface file. It tests the math and execution cost,
 not equality to the official whole-surface output.
 
-Generate and compile on `headcw` (GCC 8.5), then run the shared binary on gpucw1:
+Generate and compile on `control-host` (GCC 8.5), then run the shared binary on accelerator-a-1:
 
 ```sh
 python make_case.py /path/to/fs_sub01 case.bin
-/public/software/apps/CUDA/cuda-12.1/bin/nvcc -O2 -arch=sm_90 \
+/opt/reference/CUDA/cuda-12.1/bin/nvcc -O2 -arch=sm_90 \
   -std=c++17 --fmad=false --prec-div=true -Xcompiler=-fopenmp -lgomp \
   -o intensity_term intensity_term.cu
 ./intensity_term case.bin 0

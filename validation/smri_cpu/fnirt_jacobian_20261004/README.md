@@ -101,7 +101,7 @@ GM、模板、mask、prior affine report 及完整捕获输出的 SHA 在 [captu
 实际拟合使用冻结 `task5_candidate_cpu_v4`，head `6f1e2b38925a481df3fa622f925af076df5436a9`、归档 SHA `ffda47a74376fbaec07c3e8aedaacdc30f2a60398b919c0d5feae38e3beba0d9`。
 候选为该冻结源码仅替换 FastVBM registration 文件；FNIRT registration/spline/topology/optimizer/io、ApplyWarp、变换和 NIfTI 模块 SHA 完全相同。
 
-CPU nodecw7，8核 `32,36,40,44,48,52,56,60`，共同锁 `nodecw7.gems.cpu8.lock`。仅拟合一次并完整保存 coefficients、pull、解析图、full-pull Jacobian、estimator warped image 和 solver QC；旧/新后处理用同一捕获状态。
+CPU compute-a-7，8核 `32,36,40,44,48,52,56,60`，共同锁 `compute-a-7.gems.cpu8.lock`。仅拟合一次并完整保存 coefficients、pull、解析图、full-pull Jacobian、estimator warped image 和 solver QC；旧/新后处理用同一捕获状态。
 这次 stage 从已保存 report 重建初始 world affine，旧 tail 的数值不被标作历史 v4 完整链的重新逐位复现。
 
 ### CPU 同状态旧/新
@@ -127,7 +127,7 @@ warped GM 位模式相同；三图 header、affine 完全相同；新 CPU Jacobi
 ### GPU 既有后处理保持
 
 同一真实完整 GM 与 CPU 拟合的完整 pull，仅重放受影响的旧/新 GPU 后处理；**没有再次运行 GPU estimator 或完整 pipeline**。
-H100 PCIe GPU0，UUID `GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e`，共同锁 `gpucw1.gpu.lock`，PyTorch allocator 预算 `20e9 B`，TF32保持既有策略，无 float16。
+H100 PCIe GPU0，UUID `GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e`，共同锁 `accelerator-a-1.gpu.lock`，PyTorch allocator 预算 `20e9 B`，TF32保持既有策略，无 float16。
 
 三图全部数组、header、affine和**所有 QC 逐值相同**。两臂所在同一进程的合计峰值 allocated/reserved 为 **256,508,928 / 457,179,136 B**；这是 allocator 记录，不是驱动占用或分臂峰值。
 没有 CPU↔GPU 等价或稳定速度结论；[完整 GPU 报告](gpu.public.json)保留实际跨设备与官方差异。

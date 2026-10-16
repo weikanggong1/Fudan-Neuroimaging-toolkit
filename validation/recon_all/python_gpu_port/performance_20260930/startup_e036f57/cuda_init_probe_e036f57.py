@@ -6,7 +6,7 @@ from pathlib import Path
 import subprocess
 import time
 
-root = Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929')
+root = Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929')
 directory = root / 'volume_parity_20260930'
 env = dict(os.environ, CUDA_VISIBLE_DEVICES='1', PYTORCH_NO_CUDA_MEMORY_CACHING='1',
            PYTHONPATH=str(directory / 'performance_e036f57_code/src'))

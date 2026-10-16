@@ -69,7 +69,7 @@ def main():
     args = parser.parse_args()
     if args.output.exists():
         raise FileExistsError(args.output)
-    lock = open("/tmp/fnit-recon-five-20261002-gongwk.gpu.lock", "a+")
+    lock = open("/tmp/fnit-recon-five-20261002-benchmark-user.gpu.lock", "a+")
     started = time.perf_counter()
     fcntl.flock(lock, fcntl.LOCK_EX)
     lock_wait = time.perf_counter()-started

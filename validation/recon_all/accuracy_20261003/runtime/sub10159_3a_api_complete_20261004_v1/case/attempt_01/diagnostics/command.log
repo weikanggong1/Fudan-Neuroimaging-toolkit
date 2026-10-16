@@ -1,10 +1,10 @@
 setting unknown_nbr_spacing = 3
 using MR volume brainmask.mgz to mask input volume...
 
-== Number of threads available to /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/native_bundle/bin/mri_em_register for OpenMP = 4 == 
+== Number of threads available to /data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/native_bundle/bin/mri_em_register for OpenMP = 4 ==
 reading 1 input volumes...
 logging results to talairach.log
-reading '/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/RB_all_2020-01-02.gca'...
+reading '/data/workspaces/freesurfer_synth/work/reconall_wm_agent_20260927/v3_assets/average/RB_all_2020-01-02.gca'...
 GCAread took 0 minutes and 1 seconds.
 average std = 7.2   using min determinant for regularization = 5.2
 0 singular and 884 ill-conditioned covariance matrices regularized
@@ -16,7 +16,7 @@ MRImask(): AllowDiffGeom = 1
 MRImask(): AllowDiffGeom = 1
 freeing gibbs priors...done.
 accounting for voxel sizes in initial transform
-bounding unknown intensity as < 5.9 or > 519.0 
+bounding unknown intensity as < 5.9 or > 519.0
 total sample mean = 79.1 (1017 zeros)
 ************************************************
 spacing=8, using 2841 sample points, tol=1.00e-05...
@@ -138,7 +138,7 @@ transform before final EM align:
 
 **************************************************
  EM alignment process ...
- Computing final MAP estimate using 315638 samples. 
+ Computing final MAP estimate using 315638 samples.
 **************************************************
 dt = 5.00e-06, momentum=0.80, tol=1.00e-07
 l_intensity = 1.0000
@@ -170,7 +170,7 @@ final transform:
  0.09717  -0.19791   0.99581  -14.54024;
  0.00000   0.00000   0.00000   1.00000;
 
-writing output transformation to /cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/precision_candidate_3a_remaining_plan_v2/cases/ds000030_sub-10159/attempt_01/subject/mri/transforms/.fnit-cached-em-0r6bukwk/talairach.lta...
+writing output transformation to /data/fnit/runs/recon_accuracy_20261003/precision_candidate_3a_remaining_plan_v2/cases/ds000030_sub-10159/attempt_01/subject/mri/transforms/.fnit-cached-em-0r6bukwk/talairach.lta...
 #VMPC# mri_em_register VmPeak  1120080
 FSRUNTIME@ mri_em_register  0.0440 hours 4 threads
 registration took 2 minutes and 38 seconds.
@@ -183,7 +183,7 @@ wm low:   79
 wm hi:    125
 gray low: 30
 gray hi:  99
-Doing initial trinary intensity segmentation 
+Doing initial trinary intensity segmentation
 MRIintensitySegmentation() wm_low=79, wm_hi=125, gray_hi=99
 white = 209147, nonwhite = 16238716, ambig = 329353, nmask = 0
 Using local statistics to label ambiguous voxels
@@ -252,7 +252,7 @@ MRIfindBrightNonWM(): 2 bright non-wm voxels segmented.
 MRIfilterMorphology() WM_MIN_VAL=5, DIAGONAL_FILL=230
 white matter segmentation took 1.0 minutes
 writing output to wm.seg.mgz...
-/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/native_bundle/bin/mri_edit_wm_with_aseg -keep-in -fix-ento-wm entowm.mgz 3 255 255 -fix-acj aseg.presurf.mgz 255 255 -fill-seg-wm -fix-scm-ha 1 wm.seg.mgz brain.mgz aseg.presurf.mgz wm.asegedit.mgz 
+/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/native_bundle/bin/mri_edit_wm_with_aseg -keep-in -fix-ento-wm entowm.mgz 3 255 255 -fix-acj aseg.presurf.mgz 255 255 -fill-seg-wm -fix-scm-ha 1 wm.seg.mgz brain.mgz aseg.presurf.mgz wm.asegedit.mgz
 preserving editing changes in input volume...
 mri_edit_wm_wit supposed to be reproducible but seed not set
 auto filling took 0.43 minutes
@@ -273,16 +273,16 @@ MRIfixEntoWM(): 255 255 Level=3
 MRIfixEntoWM(): nchanged = 664
 writing edited volume to wm.asegedit.mgz....
 mri_label2vol supposed to be reproducible but seed not set
-Contraining to label /cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/precision_candidate_3a_remaining_plan_v2/cases/ds000030_sub-10159/attempt_01/subject/label/lh.nofix.cortex.label
+Contraining to label /data/fnit/runs/recon_accuracy_20261003/precision_candidate_3a_remaining_plan_v2/cases/ds000030_sub-10159/attempt_01/subject/label/lh.nofix.cortex.label
 Changing input type 0 to MRI_INT
 Converting defects to volume: offset=1000, merge=0
-Writing to /cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/precision_candidate_3a_remaining_plan_v2/cases/ds000030_sub-10159/attempt_01/subject/mri/surface.defects.mgz
+Writing to /data/fnit/runs/recon_accuracy_20261003/precision_candidate_3a_remaining_plan_v2/cases/ds000030_sub-10159/attempt_01/subject/mri/surface.defects.mgz
 mri_label2vol supposed to be reproducible but seed not set
-Contraining to label /cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/precision_candidate_3a_remaining_plan_v2/cases/ds000030_sub-10159/attempt_01/subject/label/rh.nofix.cortex.label
+Contraining to label /data/fnit/runs/recon_accuracy_20261003/precision_candidate_3a_remaining_plan_v2/cases/ds000030_sub-10159/attempt_01/subject/label/rh.nofix.cortex.label
 Converting defects to volume: offset=2000, merge=1
-Writing to /cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/precision_candidate_3a_remaining_plan_v2/cases/ds000030_sub-10159/attempt_01/subject/mri/surface.defects.mgz
+Writing to /data/fnit/runs/recon_accuracy_20261003/precision_candidate_3a_remaining_plan_v2/cases/ds000030_sub-10159/attempt_01/subject/mri/surface.defects.mgz
              Toggling save flag on curvature files                       [ ok ]
-                 Outputting results using filestem [ /cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/precision_candidate_3a_remaining_plan_v2/cases/ds000030_sub-10159/attempt_01/subject/stats/lh.curv.stats ]
+                 Outputting results using filestem [ /data/fnit/runs/recon_accuracy_20261003/precision_candidate_3a_remaining_plan_v2/cases/ds000030_sub-10159/attempt_01/subject/stats/lh.curv.stats ]
              Toggling save flag on curvature files                       [ ok ]
                                    Setting surface      [ subject/lh.smoothwm ]
                                 Reading surface...                       [ ok ]
@@ -301,7 +301,7 @@ Gb_filter = 0
 WARN:    S lookup   min:                          -0.181656
 WARN:    S explicit min:                          0.000000	vertex = 90
              Toggling save flag on curvature files                       [ ok ]
-                 Outputting results using filestem [ /cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/precision_candidate_3a_remaining_plan_v2/cases/ds000030_sub-10159/attempt_01/subject/stats/rh.curv.stats ]
+                 Outputting results using filestem [ /data/fnit/runs/recon_accuracy_20261003/precision_candidate_3a_remaining_plan_v2/cases/ds000030_sub-10159/attempt_01/subject/stats/rh.curv.stats ]
              Toggling save flag on curvature files                       [ ok ]
                                    Setting surface      [ subject/rh.smoothwm ]
                                 Reading surface...                       [ ok ]

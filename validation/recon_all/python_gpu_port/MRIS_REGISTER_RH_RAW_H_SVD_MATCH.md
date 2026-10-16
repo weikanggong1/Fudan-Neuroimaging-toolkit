@@ -10,9 +10,9 @@ The `-N 1` GDB run was stopped inside the raw H fit, before any smoothwm
 registration update. Its 65.78 s wall time includes setup and the diagnostic
 sulc prefix and is not a per-stage native benchmark.
 
-The [installed RAM capture](mris_register_rh_smoothwm_fit_native_headcw.json)
+The [installed RAM capture](mris_register_rh_smoothwm_fit_native_control-host.json)
 at vertices 0 and 57,378 and the
-[paired comparison](mris_register_rh_smoothwm_fit_comparison_headcw.json)
+[paired comparison](mris_register_rh_smoothwm_fit_comparison_control-host.json)
 show where the old implementation first differed:
 
 | Ordered stage | Vertex 0 | Vertex 57,378 |
@@ -27,15 +27,15 @@ The first differing operator was therefore the 3×3 SVD inverse, not the
 mesh, neighborhood, normal, tangent basis or Gram/RHS accumulation. Reusing
 the repository's source-order VNL inverse (`topology_vnl_svd.svd_inverse_3`)
 matched the installed inverse **9/9** and fitted coefficients **3/3** at
-both vertices; see the [one-operation report](mris_register_rh_smoothwm_vnl_inverse_headcw.json).
+both vertices; see the [one-operation report](mris_register_rh_smoothwm_vnl_inverse_control-host.json).
 After that one change, directly summing coefficients matched 76,241/105,541
 raw H values, maximum error 4.77e-7; see the
-[trace-only report](mris_register_rh_smoothwm_vnl_trace_headcw.json).
+[trace-only report](mris_register_rh_smoothwm_vnl_trace_control-host.json).
 The installed code instead builds a float32 2×2 Hessian, solves its
 eigensystem, then stores `(k1+k2)/2`. Reproducing that order matched
 **105,541/105,541 raw H values bitwise**, with zero maximum error and the
 same raw-array SHA-256; see the
-[all-vertex eigen report](mris_register_rh_smoothwm_vnl_eigen_headcw.json).
+[all-vertex eigen report](mris_register_rh_smoothwm_vnl_eigen_control-host.json).
 
 The corrected production
 [`mris_register_smoothwm.py`](../../../src/fnit/recon_all/mris_register_smoothwm.py)
@@ -44,7 +44,7 @@ Its unchanged dependencies are `mris_register_nonlinear.py`
 (`4b9f8faff6da19abb6fb6e1c687ad7d631d38630b47cf34018b9dc583967b9e9`)
 and `topology_vnl_svd.py`
 (`54474eab97ec17c450a9d51f85c46936e905eeb873e0e1631afad520cef60ff5`).
-The production [raw H retest](mris_register_rh_smoothwm_production_raw_headcw.json)
+The production [raw H retest](mris_register_rh_smoothwm_production_raw_control-host.json)
 independently matched **105,541/105,541**, with the same native array hash
 and 10.66 s observed CPU time including the Numba JIT startup. The current
 fit transfers each Gram/RHS batch to CPU and runs the source-order inverse
@@ -53,7 +53,7 @@ is already a declared dependency in the old worktree and in the clean
 worktree's `recon-all-python-stages` extra.
 
 The first default smoothwm update was then replayed from the independently
-matched RH `debug0055` sulc seed. The [fixed epoch report](mris_register_rh_default_epoch0056_independent_fixed_headcw.json)
+matched RH `debug0055` sulc seed. The [fixed epoch report](mris_register_rh_default_epoch0056_independent_fixed_control-host.json)
 records identical source/seed/atlas/raw-H/native-output hashes to the earlier
 native-raw conditional trial. The selected `dt` is
 `2.542891502380371`, and the saved RH `debug0056` surface matches **all
@@ -74,9 +74,9 @@ passed; see the [LH continuation report](MRIS_REGISTER_LH_SMOOTHWM_BOUNDARY.md).
 The later RH `debug0058` line-search divergence was traced to the spring
 SSE area-ratio precision. The corrected probe matches `debug0056`–`debug0097`
 at all 105,541 ordered vertices per update; see the
-[native RH58 fit](mris_register_rh_default_epoch0058_native_line_fit_gpucw1.json),
-[RH83 fit](mris_register_rh_default_epoch0083_native_line_fit_gpucw1.json)
-and [corrected continuation](mris_register_rh_default_epoch0083_0097_lcorr_f32_gpucw1.json).
+[native RH58 fit](mris_register_rh_default_epoch0058_native_line_fit_accelerator-a-1.json),
+[RH83 fit](mris_register_rh_default_epoch0083_native_line_fit_accelerator-a-1.json)
+and [corrected continuation](mris_register_rh_default_epoch0083_0097_lcorr_f32_accelerator-a-1.json).
 The bounded RH path reaches the official final sphere geometry. End-to-end
 reconstruction, vertex/ROI metrics and a full GPU timing comparison remain open.
 

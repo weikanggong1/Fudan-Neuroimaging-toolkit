@@ -10,7 +10,7 @@
 - GM 模板：`91×109×91`，SHA-256 `ab933db7455d7c4b88624d54f41a3065be4ba4289d00b9230daec0cdb1597a77`。
 - 显式 FSL dilated mask：SHA-256 `342d41e1c445d87a812ca288786a116306e96a5595a198e46ba7e7515d4f221c`。模板和权重留在既有服务器目录，不随报告发布。
 - 实际导入冻结 `task5_candidate_cpu_v4`，head `6f1e2b38925a481df3fa622f925af076df5436a9`；源码归档 SHA-256 `ffda47a74376fbaec07c3e8aedaacdc30f2a60398b919c0d5feae38e3beba0d9`。
-- 只读探针 v3：nodecw7，8 核 `32,36,40,44,48,52,56,60`，`nodecw7.gems.cpu8.lock`，CUDA 不可见。没有输出新影像或计时结论。
+- 只读探针 v3：compute-a-7，8 核 `32,36,40,44,48,52,56,60`，`compute-a-7.gems.cpu8.lock`，CUDA 不可见。没有输出新影像或计时结论。
 
 本轮 root 随后修复的 FAST 默认八图逐位一致属于另一冻结版本。此处仍分析既有 v4 的27个 GM 差体素，没有把旧结果标为已修复链的实测。
 

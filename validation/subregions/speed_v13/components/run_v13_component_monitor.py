@@ -7,10 +7,10 @@ import subprocess
 import time
 
 
-ROOT = Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930')
-PYTHON = '/home1/gongwk/anaconda3/bin/python'
+ROOT = Path('/data/workspaces/freesurfer_synth/work/fnit_subregions_unified_20260930')
+PYTHON = '/home1/benchmark-user/anaconda3/bin/python'
 COMMIT = '3ea8163966ef922c9cee67018095ab39d1f6bfa4'
-PREPARED = Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929')
+PREPARED = Path('/data/workspaces/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929')
 STAGES = {'thalamus': 'port_thalamus_debug', 'hippo-amygdala-left': 'port_hippo_integrated_fullfix_left_tmp'}
 
 

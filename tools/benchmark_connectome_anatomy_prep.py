@@ -56,6 +56,11 @@ def reject_source_fields(value):
 
 
 def validate_config(config):
+    """Validate declarations only; local execution identity is checked at launch.
+
+    Frozen runtime files may be verified by a coordinator on another host.
+    This function neither authorizes nor starts official CPU computation.
+    """
     reject_source_fields(config)
     if config.get("scope") != SCOPE or config.get("candidate_source") != "unknown":
         raise ValueError("official preparation must declare its staged scope and unknown candidate")
@@ -79,8 +84,11 @@ def validate_config(config):
     if transport not in ("ssh", "local"):
         raise ValueError("unknown official preparation CPU transport")
     if transport == "local":
-        if config["cpu_host"] != "nodecw10":
-            raise ValueError("local CPU transport requires the frozen nodecw10 host")
+        # A passive coordinator can inspect this declaration on another host.
+        # worker() and remote() independently require the actual execution host.
+        host = config["cpu_host"]
+        if not isinstance(host, str) or host.startswith("-") or any(character.isspace() for character in host):
+            raise ValueError("local CPU transport requires a valid declared hostname")
     else:
         cohort.ssh_command(config["cpu_host"], config.get("cpu_port"), config.get("cpu_control_path"), [config["cpu_python"]])
 
@@ -256,7 +264,7 @@ def derive_config(options):
 def worker(payload):
     config, action = payload["config"], payload["action"]
     if config.get("cpu_transport") == "local" and cohort.socket.gethostname().split(".")[0] != config["cpu_host"]:
-        raise ValueError("local official CPU execution requires the actual frozen nodecw10 hostname")
+        raise ValueError("local official CPU execution requires the configured hostname to match the current host")
     verify_runtime_files(config)
     if action == "preflight":
         case = payload["case"]
@@ -364,7 +372,7 @@ def remote(config, action, case, log_path):
     if config.get("cpu_transport") == "local":
         validate_config(config)
         if cohort.socket.gethostname().split(".")[0] != config["cpu_host"]:
-            raise ValueError("local official CPU execution requires the actual frozen nodecw10 hostname")
+            raise ValueError("local official CPU execution requires the configured hostname to match the current host")
         payload = {"action": action, "config": config, "case": case, "version": VERSION}
         result = subprocess.run([config["cpu_python"], config["anatomy_prep_script"], "_worker"],
                                 input=json.dumps(payload), capture_output=True, text=True)
@@ -540,7 +548,7 @@ def main(argv=None):
                         help="prior original preparation config plus its driver STOP_DISPATCH; selected subjects must never have started there")
     parser.add_argument("--cpu-threads", type=int, choices=(8,), default=8)
     parser.add_argument("--cpu-transport", choices=("ssh", "local"), default="ssh",
-                        help="local only on the actual frozen nodecw10 coordinator; does not use ssh localhost")
+                        help="local only when the configured CPU host matches the current coordinator; does not use ssh localhost")
     parser.add_argument("--parent-connection-record", type=Path, help="immutable actual head SSH-start record for a CPU-local coordinator")
     parser.add_argument("--poll-seconds", type=float, default=5.)
     options = parser.parse_args(argv)

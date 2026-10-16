@@ -3,7 +3,7 @@ import csv,datetime,hashlib,json
 from pathlib import Path
 import nibabel as nib
 import numpy as np
-BASE=Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_02')
+BASE=Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_02')
 ROOT=Path('/tmp/fnit-recon-accuracy-20261003/task_02/diagnostic')
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def volume(a,b):

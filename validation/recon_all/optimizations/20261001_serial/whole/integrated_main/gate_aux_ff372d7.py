@@ -1,5 +1,5 @@
 import hashlib,json,pathlib,nibabel as nib,numpy as np
-root=pathlib.Path("/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001"); reports={}
+root=pathlib.Path("/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001"); reports={}
 for sub in ["01","02"]:
  tag="aux_policy_ff372d7_sub"+sub
  run=json.loads((root/(tag+".json")).read_text())

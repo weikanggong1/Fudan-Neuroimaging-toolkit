@@ -45,7 +45,7 @@ def main():
         "schema_version": 1, "date": "2026-10-04", "status": "complete",
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "dataset": "OpenNeuro ds000114 v1.0.2; FNIT defaced public T1w examples",
-        "dataset_license": "CC0", "host": "nodecw10",
+        "dataset_license": "CC0", "host": "compute-a-10",
         "scope": "Complete fixed-input CPU candidate-batch trajectories: ordered counts/sums/sums2 and float64 joint histogram replace Tensor volume sorting/scatter; original batch packing, compact_sum, float32 cost/entropy, chunks and search retained",
         "reference": "Source22 Tensor batch statistics plus frozen v16 fixed-input same-budget complete saved outputs",
         "production_source_sha256": source,
@@ -65,7 +65,7 @@ def main():
         "summary_script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
     }
     serialized = json.dumps(report, indent=2, allow_nan=False) + "\n"
-    assert all(value not in serialized for value in ("/cwStorage/", "/mnt/c/Users/", ".sock"))
+    assert all(value not in serialized for value in ("/data/shared/", "/mnt/c/Users/", ".sock"))
     args.output.write_text(serialized)
     print(json.dumps({"status": report["status"], "complete_cases": len(records)}))
 

@@ -51,7 +51,7 @@ inference. A generic Surfa world→voxel→world roundtrip differed by
 `2.670e-5`; the FreeSurfer-style float32 product order is closer.
 
 Next, the same frozen images and weight were fed to the PyTorch affine model
-on headcw CPU. The source hashes of `synthmorph/pipeline.py`, `models.py`, and
+on control-host CPU. The source hashes of `synthmorph/pipeline.py`, `models.py`, and
 `spatial.py` exactly match the published hybrid checkout. Against the archived
 GPU hybrid result, the newly computed LTA differed by at most `1.898e-5` per
 matrix element. The final XFM differed by at most `3.052e-5` per element.
@@ -65,14 +65,14 @@ new XFM and wrote an LTA successfully; its isolated readback log has SHA-256
 `454cf4cf5a05425b55806eadd5f4603e63992b037541485cc61afd3e62917d6d`.
 
 The isolated Python process took 16.27 s with four CPU threads and peaked at
-5,210,460 KiB RSS. The archived hybrid wrapper reported 10.65 s on gpucw1
+5,210,460 KiB RSS. The archived hybrid wrapper reported 10.65 s on accelerator-a-1
 with an H100 neural call. These are different hosts and devices, so they do
 not establish a stage speed ratio. The focused conversion/API tests passed
 (`2 passed`) in the archived Python environment.
 
 ## CUDA precision and current implementation
 
-A later same-input gpucw1 experiment fixed the saved candidate SynthStrip
+A later same-input accelerator-a-1 experiment fixed the saved candidate SynthStrip
 image, MNI305 template, affine weight, and preceding cuDNN state. The archived
 report separates TF32 effects in matmul and cuDNN. The candidate's default
 GPU affine inference had a maximum voxel-LTA element error of 0.047333 and

@@ -73,7 +73,7 @@ writer replay and compressed hash match.
 
 ## Timing
 
-An isolated sequential pair on headcw used the same input and no diagnostic
+An isolated sequential pair on control-host used the same input and no diagnostic
 checkpoint writing. `/usr/bin/time -p` measured **84.68 s native** and
 **204.82 s Python** (Python/native 2.42×). Both commands used approximately
 one CPU core. Their compressed NIfTI outputs passed `cmp` and had SHA-256
@@ -104,7 +104,7 @@ native diagnostics from `WARP` into `OUTPUT_DIR`. `benchmark_ca_register_complet
 compares the three final fields, final displacement, and, when passed
 `--inverse-out OUTPUT_NII_GZ`, the full written file to those diagnostics.
 `run_ca_register_inverse_python.py WARP OUTPUT_NII_GZ --timing-json TIMING_JSON`
-runs the Python stage without native checkpoint reads. On headcw,
+runs the Python stage without native checkpoint reads. On control-host,
 `benchmark_ca_register_pair.sh WARP OUTPUT_DIR PYTHON_BIN SOURCE_DIR FS_LICENSE`
 runs the native and Python stages sequentially and requires compressed-byte
 equality.

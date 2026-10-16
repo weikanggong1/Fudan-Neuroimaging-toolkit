@@ -33,10 +33,10 @@ def request(script, phase):
 
 def main():
     script = '''set -euo pipefail
-/cwStorage/home/gongwk/Notebook_code/FNIT/envs/default/bin/python - <<'PY'
+/data/fnit/envs/default/bin/python - <<'PY'
 from pathlib import Path
 import hashlib,json,stat
-r=Path('/cwStorage/home/gongwk/Notebook_code/FNIT')
+r=Path('/data/fnit')
 leaf=Path(LEAF_PLACEHOLDER)
 w,out=r/'workspaces'/leaf,r/'runs'/leaf
 freeze=json.loads((w/'freeze.public.json').read_text())
@@ -75,10 +75,10 @@ PY
     content = {name: bytearray(record["bytes"]) for name, record in manifest["files"].items()}
     for number, batch in enumerate(batches):
         chunk_script = '''set -euo pipefail
-/cwStorage/home/gongwk/Notebook_code/FNIT/envs/default/bin/python - <<'PY'
+/data/fnit/envs/default/bin/python - <<'PY'
 from pathlib import Path
 import base64,hashlib,json,zlib
-r=Path('/cwStorage/home/gongwk/Notebook_code/FNIT')
+r=Path('/data/fnit')
 leaf=Path(LEAF_PLACEHOLDER)
 items=[]
 for name,offset,size in BATCH_PLACEHOLDER:

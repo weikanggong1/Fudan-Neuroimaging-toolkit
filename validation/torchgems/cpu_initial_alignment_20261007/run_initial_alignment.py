@@ -15,6 +15,8 @@ def parser():
     command.add_argument("--side", choices=("left", "right"), required=True)
     command.add_argument("--output-directory", required=True, type=Path, help="new directory")
     command.add_argument("--repository-root", type=Path)
+    command.add_argument("--preparation-source", type=Path, required=True,
+                         help="explicit checksum-bound historical preparation.py; no production helper")
     command.add_argument("--device", choices=("cpu",), default="cpu")
     command.add_argument("--threads", type=int, help="optional CLI-only Torch intra-op setting")
     return command
@@ -57,7 +59,8 @@ def main(argv=None):
         result = bridge.initialize_recipe_alignment(
             recipe, context, method="cpu-robust-experiment", device="cpu",
             cpu_candidate=cpu_candidate, output_directory=options.output_directory,
-            coarse_reference=options.coarse_segmentation)
+            coarse_reference=options.coarse_segmentation,
+            preparation_source=options.preparation_source)
     summary = dict(result.report, atlas_to_context_voxel=result.atlas_to_context_voxel.tolist(),
                    status="completed_experimental_initial_alignment_equivalence_not_assessed")
     with (options.output_directory / "alignment.report.json").open("x", encoding="utf-8") as stream:

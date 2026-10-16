@@ -24,7 +24,7 @@
 
 ## 本地验证边界
 
-当前工作站没有 FNIT Conda 运行时：`/usr/bin/python3` 无 `torch`，且没有 `pytest`。因此本轮未执行数值回归或 CUDA benchmark；不能把静态审查写成运行通过。应在 gpucw1 的冻结环境中另行完成：
+当前工作站没有 FNIT Conda 运行时：`/usr/bin/python3` 无 `torch`，且没有 `pytest`。因此本轮未执行数值回归或 CUDA benchmark；不能把静态审查写成运行通过。应在 accelerator-a-1 的冻结环境中另行完成：
 
 1. 同一 sphere/smoothwm/sulc/atlas 输入，CPU 与显式 CUDA 的 register 全阶段输出 hash、角度、SSE 轨迹和顶点差异；
 2. `sphere_standard_metric` 完整 7-ring 候选表、VNL 随机状态和 reciprocal 距离逐元素比较；

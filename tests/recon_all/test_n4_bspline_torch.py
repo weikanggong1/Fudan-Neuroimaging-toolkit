@@ -28,7 +28,7 @@ def test_cardinal_kernel_expression_and_support():
 @pytest.mark.parametrize("device", ["cpu", "cuda:0"])
 def test_single_level_linear_sign_and_repeatability(device):
     if device.startswith("cuda") and not torch.cuda.is_available():
-        pytest.skip("CUDA not available; real GPU gate runs on gpucw1")
+        pytest.skip("CUDA not available; real GPU gate runs on accelerator-a-1")
     fit = N4DenseBSplineFit(field_shape=(6, 7, 8), control_shape=(4, 5, 6),
                           spacing=(2, 3, 4), origin=(1.5, -2, 7), device=device)
     values = torch.arange(6 * 7 * 8, dtype=torch.float32, device=device).reshape(6, 7, 8) / 1000

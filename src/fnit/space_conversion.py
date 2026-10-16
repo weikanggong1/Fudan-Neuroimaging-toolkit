@@ -399,5 +399,9 @@ def main(argv: list[str] | None = None) -> None:
         print(path)
 
 
+# Keep the user-specified public spelling while preserving the original callable.
+FNIT_convert_space = convert_space
+
+
 if __name__ == "__main__":
     main()

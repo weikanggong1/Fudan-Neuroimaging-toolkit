@@ -3,3 +3,7 @@
 from .core import AMICONODDIConfig, AMICONODDIResult, TorchAMICONODDI
 
 __all__ = ["AMICONODDIConfig", "AMICONODDIResult", "TorchAMICONODDI"]
+
+from .api import FNIT_noddi
+
+__all__.append("FNIT_noddi")

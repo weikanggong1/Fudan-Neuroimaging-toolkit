@@ -1,6 +1,6 @@
 # v6 固定 RM 状态只读审计
 
-服务器产物：`/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/cuda_ioctl_context_v6`。执行时间 2026-10-04 09:10:54–09:11:34 UTC。本审计只读既有结果，没有启动 GPU 或修改生产程序。
+服务器产物：`/data/fnit/runs/recon_accuracy_20261003/cuda_ioctl_context_v6`。执行时间 2026-10-04 09:10:54–09:11:34 UTC。本审计只读既有结果，没有启动 GPU 或修改生产程序。
 
 ## 实际结果与覆盖
 

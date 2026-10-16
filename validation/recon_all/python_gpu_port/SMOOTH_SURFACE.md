@@ -14,7 +14,7 @@ without H100 output comparison.
 | Right | 101,454 | 202,936 | 1.864 s | 3.568 s |
 
 The [three-trial paired report](smooth_surface_cpu_report.json) uses freshly
-replayed `orig.nofix` triangles as identical input on `headcw`. In every
+replayed `orig.nofix` triangles as identical input on `control-host`. In every
 trial, the complete ordered vertex and face bytes match native exactly.
 Native process startup is included, while Python imports are excluded.
 FreeSurfer `mris_info` reads both Python outputs. The differing footer contains

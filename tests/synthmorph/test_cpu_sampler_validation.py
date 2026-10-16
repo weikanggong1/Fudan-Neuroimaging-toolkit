@@ -22,7 +22,7 @@ def complete_record(tmp_path):
     folder = tmp_path / 'complete-arm'
     folder.mkdir()
     job = {'id': folder.name, 'argv': ['python', 'worker.py'], 'scope': 'contract fixture'}
-    record = {'status': 'complete', 'returncode': 0, 'hostname': 'nodecw7',
+    record = {'status': 'complete', 'returncode': 0, 'hostname': 'compute-a-7',
         'max_cpu_threads': 8, 'cpu_affinity': '2,6,10,14,18,22,26,30',
         'job': job, 'job_sha256': hashlib.sha256(json.dumps(job, sort_keys=True).encode()).hexdigest(),
         'environment': {**{name: '8' for name in ('OMP_NUM_THREADS', 'MKL_NUM_THREADS',

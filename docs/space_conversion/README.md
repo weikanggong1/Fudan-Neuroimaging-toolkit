@@ -1,4 +1,6 @@
-# MNI152、fsaverage与fsLR皮层图转换
+# FNIT_convert_space
+
+> 统一 Python 入口：[`FNIT_convert_space`](../API_REFERENCE.md)，从 `fnit` 导入。下文配置、结果类型和细分算子保留高级兼容接口。
 
 | 项目 | 内容 |
 |---|---|
@@ -17,12 +19,12 @@
 ## 2. Python 调用
 
 ```python
-from fnit import convert_space
+from fnit import FNIT_convert_space
 
 mni_image_path = "/data/atlas_MNI152_1mm.nii.gz"  # 已配准到FSL MNI坐标的皮层图
 conversion_assets_directory = "/data/fnit_space_assets"  # 已校验CBIG/HCP映射
 surface_output_directory = "/data/out/fsLR32k"  # 左右GIFTI结果目录
-left_surface_path, right_surface_path = convert_space(
+left_surface_path, right_surface_path = FNIT_convert_space(
     source=mni_image_path, source_space="MNI152", target_space="fsLR",
     target_density="32k", assets_dir=conversion_assets_directory,
     output_dir=surface_output_directory, device="cuda:0", label=False,

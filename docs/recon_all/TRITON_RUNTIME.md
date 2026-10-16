@@ -59,7 +59,7 @@ FreeSurfer `recon-all -all` 没有 Triton 编译器设置步骤。本组件只�
 
 2026-10-15 在已授权的 H100 环境完成只读预检：PyTorch 2.5.1 / CUDA 11.8、Triton 3.1.0，当前 Conda `ptxas` 为 CUDA 11.8，SHA-256 为 `6fefc19360e1075dd7407102a69aca9a956c131fc574a440615d398dd9558dda`。预检没有初始化 CUDA 或编译 SM90a 内核，`gpu_execution_verified=false`。因此默认 11.8 工具链在该设备上的实际 JIT 仍待验证；旧整例使用过显式 12.2 编译器，不能据此推断当前源码已经通过。
 
-现有[真实拓扑距离实验](TOPOLOGY_GPU_DISTANCE_FITNESS.md)给出当时冻结 CUDA 核与 CPU 完整第一缺陷配对的阶段精度、CLI 耗时和真实局部差图；它验证的是该阶段算法，**没有单独量出本组件的加速量**。本次文档对应的当前编译器选择、版本 SHA、JIT 失败与否须以新运行的 `triton_runtime` 报告核对。[旧 f016 整例](../../validation/recon_all/optimizations/20261014_gpucw1_f016_partial/README.md)一例完成、一例失败，也不是随后补丁的编译器或整例验收。当前两例空目录完整耗时、目标 GPU 上 FNIT 自身峰值及整体指标等效尚未评估；不会把预检成功或旧阶段秒数写成当前整例结果。
+现有[真实拓扑距离实验](TOPOLOGY_GPU_DISTANCE_FITNESS.md)给出当时冻结 CUDA 核与 CPU 完整第一缺陷配对的阶段精度、CLI 耗时和真实局部差图；它验证的是该阶段算法，**没有单独量出本组件的加速量**。本次文档对应的当前编译器选择、版本 SHA、JIT 失败与否须以新运行的 `triton_runtime` 报告核对。[旧 f016 整例](../../validation/recon_all/optimizations/20261014_accelerator-a-1_f016_partial/README.md)一例完成、一例失败，也不是随后补丁的编译器或整例验收。当前两例空目录完整耗时、目标 GPU 上 FNIT 自身峰值及整体指标等效尚未评估；不会把预检成功或旧阶段秒数写成当前整例结果。
 
 ## 6. 更新与参考
 

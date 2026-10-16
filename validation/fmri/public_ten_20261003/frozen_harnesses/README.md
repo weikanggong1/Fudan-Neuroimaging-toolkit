@@ -3,7 +3,7 @@
 [清单](manifest.public.json) 保存本轮真实旧 harness 和后验检查的字节数、SHA 与使用范围。新的默认入口位于上一级；这些文件用于核对历史报告的实际源码，不能因默认入口升级而改写旧报告。这里仅保存 FNIT 自有 benchmark helper，不发布原 MRI 软件代码。
 
 - `run_reference_cohort_v1.py`：CON01 成功的 attempt-02 原完整 MRI harness。
-- `run_reference_cohort_v2.py`：CON03–07 和单独 gpucw1 控制的原 harness。
+- `run_reference_cohort_v2.py`：CON03–07 和单独 accelerator-a-1 控制的原 harness。
 - `recover_reference_saved_v1.py`：前四例 corrected 的实际补检源码；v2 为此前未产出修正结果的等待版本，v3 是 CON06–11 两种原 QC 状态的实际补检源码。十例现均已保存，原冻结字节不变。
 - 两个 `normalize_reference_report*` 是不同字节的未用原型，不是 corrected 报告的生成程序。
 - `collect_reference_stages_v1.py`：此前四例参考与单例硬件控制汇总的实际源码。它的状态固定为 `partial_cohort`；实际完成数量和全部时间值保留原记录。新的默认入口显式核对预期病例集合。

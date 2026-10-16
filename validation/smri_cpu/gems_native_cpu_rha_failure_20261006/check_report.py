@@ -18,7 +18,7 @@ for a,b in zip(rows,s['regions']):
 summary_keys=[];numericlists={};forbidden_strings=[]
 def walk(x,path):
  if isinstance(x,str):
-  if re.search(r'/cwStorage/|/mnt/c/|gongwk@|nodecw[0-9]|gpucw[0-9]|10\.190\.|FS_LICENSE|password=|token=',x):forbidden_strings.append(path)
+  if re.search(r'/data/shared/|/mnt/c/|user@|compute-a[0-9]|accelerator-a[0-9]|10\.190\.|FS_LICENSE|password=|token=',x):forbidden_strings.append(path)
  elif isinstance(x,float):assert math.isfinite(x)
  elif isinstance(x,dict):
   for k,v in x.items():walk(v,path+'.'+k)

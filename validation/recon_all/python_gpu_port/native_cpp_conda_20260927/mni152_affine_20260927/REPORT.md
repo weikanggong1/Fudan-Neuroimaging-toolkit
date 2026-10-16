@@ -31,14 +31,14 @@ The affine matrix is not pointwise identical to official. The crop decision is r
 
 | Operation | Wall time | Execution context |
 | --- | ---: | --- |
-| Official `mri_mask -bb 3` isolated crop | 1.86 s | gpucw1 CPU |
-| Python crop | 0.47 s | headcw CPU |
-| Official `mri_synthmorph -m affine` archived log | 107.57 s | gpucw1 CPU, four threads, earlier run |
-| Python SynthMorph model initialization | 4.32 s | gpucw1 H100 GPU1 |
-| Python affine inference, frozen official crop | 1.29 s | gpucw1 H100 GPU1, first call |
-| Python affine inference, Python crop | 0.57 s | gpucw1 H100 GPU1, warm second call |
-| Python process with both inference calls, composition and serialization | 12.05 s | gpucw1; peak CUDA allocated 4.66 GB, reserved 5.50 GB |
-| CPU auxiliary check, six prior resamples | 12.03 s | headcw CPU, four threads |
+| Official `mri_mask -bb 3` isolated crop | 1.86 s | accelerator-a-1 CPU |
+| Python crop | 0.47 s | control-host CPU |
+| Official `mri_synthmorph -m affine` archived log | 107.57 s | accelerator-a-1 CPU, four threads, earlier run |
+| Python SynthMorph model initialization | 4.32 s | accelerator-a-1 H100 GPU1 |
+| Python affine inference, frozen official crop | 1.29 s | accelerator-a-1 H100 GPU1, first call |
+| Python affine inference, Python crop | 0.57 s | accelerator-a-1 H100 GPU1, warm second call |
+| Python process with both inference calls, composition and serialization | 12.05 s | accelerator-a-1; peak CUDA allocated 4.66 GB, reserved 5.50 GB |
+| CPU auxiliary check, six prior resamples | 12.03 s | control-host CPU, four threads |
 
 The runs differ in date, node, warm state and numerical output, so these times do not establish equivalent reconstruction acceleration. They show the affine network is a plausible low-memory GPU replacement whose downstream crop choices survived this measured error on one real T1.
 

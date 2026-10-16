@@ -2,7 +2,7 @@
 
 ## 1. 功能简介
 
-从正式 `raw12` 中读取实际 baseline CON01/03，对各自已完成的官方五 seed 参考，复用冻结分析器的矩阵与轨迹验收。生产代码、配置、官方来源、指标和门槛不变；只在 nodecw10 CPU 读取已经保存的输出。CON01/03 均已完成本轮实际 baseline 分析，原 controller 的终态为 `analysis_completed`。两个病例的矩阵与轨迹整体科学状态均为 `failed`。
+从正式 `raw12` 中读取实际 baseline CON01/03，对各自已完成的官方五 seed 参考，复用冻结分析器的矩阵与轨迹验收。生产代码、配置、官方来源、指标和门槛不变；只在 compute-a-10 CPU 读取已经保存的输出。CON01/03 均已完成本轮实际 baseline 分析，原 controller 的终态为 `analysis_completed`。两个病例的矩阵与轨迹整体科学状态均为 `failed`。
 
 ```mermaid
 flowchart TD
@@ -21,7 +21,7 @@ flowchart TD
 
 ## 2. Python 调用、输入与输出
 
-这是私有 CPU 控制器，没有新增公共库接口。实际解释器为 nodecw10 已有 Anaconda Python 3.11.7，NumPy 1.26.4、nibabel 5.4.0、SciPy 1.11.4、Matplotlib 3.8.0；没有安装新包。
+这是私有 CPU 控制器，没有新增公共库接口。实际解释器为 compute-a-10 已有 Anaconda Python 3.11.7，NumPy 1.26.4、nibabel 5.4.0、SciPy 1.11.4、Matplotlib 3.8.0；没有安装新包。
 
 ```python
 import os
@@ -29,7 +29,7 @@ import subprocess
 
 analysis_environment = dict(os.environ, CUDA_VISIBLE_DEVICES="")  # 显式隐藏GPU
 analysis_command = [
-    "/home1/gongwk/anaconda3/bin/python3.11",
+    "/home1/benchmark-user/anaconda3/bin/python3.11",
     "/data/private_cpu_tools/analyze_actual_baselines.py",        # 本记录的控制器
     "--configuration", "/data/formal_frozen/accuracy_configuration.json",  # 原冻结配置
     "--frozen-tools", "/data/formal_frozen/tools_source/tools",   # 读取原科学工具
@@ -42,7 +42,7 @@ subprocess.run(analysis_command, env=analysis_environment, check=True)
 
 输入分别为：原 configuration；本轮 `formal_accuracy_raw_v1/baseline/CASE/gpu_report.json` 与 wall；同次 `connectome` 四矩阵、atlas/nodes；同次导出的 `tracks.tck`、WM FOD 网格和 `track_metrics.npz`；逐例原官方 manifest 与五份 TCK。数据由原 `completed_run(config, case, 'baseline', actualFSdir)`、`verified_export`、`matrix.compare`、`population.compare` 和 `decisions` 验证。TCK 回读端点与返回对象保存的端点 dtype/数值逐位一致，weights/lengths/mean_fa/endpoints 数量必须与轨迹数相同。
 
-服务器新输出为 `newroot/root_baseline_matrix_analysis_v1`，其中 `newroot=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1`。目录包含逐例原 `matrix_envelope.json`、`population_envelope.json`、PNG、`case_report.json`、`eight_atlas_summary.csv` 和 `five_comparisons_by_field.json`。控制器 `report.json` 包含真实 argv、配置/辅助源码/TCK 的前后 SHA、原输入来源、两例状态与实际 CPU 时间。本目录按原字节保存两例 baseline 的原报告与 PNG；[初次 CON03 等待快照](evidence/first_controller_report.json) 保留当时的 `not_assessed`，另附 [实际完成终态](evidence/completed_controller_report.json)，不覆盖历史快照。原体积与 TCK 不复制进仓库。
+服务器新输出为 `newroot/root_baseline_matrix_analysis_v1`，其中 `newroot=/data/workspaces/fnit_connectome_accuracy_20261003_v1`。目录包含逐例原 `matrix_envelope.json`、`population_envelope.json`、PNG、`case_report.json`、`eight_atlas_summary.csv` 和 `five_comparisons_by_field.json`。控制器 `report.json` 包含真实 argv、配置/辅助源码/TCK 的前后 SHA、原输入来源、两例状态与实际 CPU 时间。本目录按原字节保存两例 baseline 的原报告与 PNG；[初次 CON03 等待快照](evidence/first_controller_report.json) 保留当时的 `not_assessed`，另附 [实际完成终态](evidence/completed_controller_report.json)，不覆盖历史快照。原体积与 TCK 不复制进仓库。
 
 ## 3. 命令行调用及参数
 
@@ -50,7 +50,7 @@ subprocess.run(analysis_command, env=analysis_environment, check=True)
 
 ```bash
 CUDA_VISIBLE_DEVICES='' PYTHONDONTWRITEBYTECODE=1 \
-/home1/gongwk/anaconda3/bin/python3.11 \
+/home1/benchmark-user/anaconda3/bin/python3.11 \
   /data/private_cpu_tools/analyze_actual_baselines.py \
   --configuration /data/formal_frozen/accuracy_configuration.json \
   --frozen-tools /data/formal_frozen/tools_source/tools \
@@ -64,8 +64,8 @@ CUDA_VISIBLE_DEVICES='' PYTHONDONTWRITEBYTECODE=1 \
 
 ```bash
 CUDA_VISIBLE_DEVICES='' PYTHONDONTWRITEBYTECODE=1 \
-/home1/gongwk/anaconda3/bin/python3.11 \
-  /cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/root_baseline_matrix_analysis_v1_controller/verify_CON03_same_phase_receipts.py
+/home1/benchmark-user/anaconda3/bin/python3.11 \
+  /data/workspaces/fnit_connectome_accuracy_20261003_v1/root_baseline_matrix_analysis_v1_controller/verify_CON03_same_phase_receipts.py
 ```
 
 [原复核收据](candidate_CON03_binding_receipt.json) 保存实际 argv、脚本 SHA、B/C report/export 前后 SHA、源 fingerprint、五份官方 TCK SHA、两臂实际 TCK 端点逐位回读、track_metrics 数量和配置前后 SHA。它复用 `completed_run`/`verified_export`，未重算矩阵、FA、追踪、SIFT2或任何验收门槛；禁止覆盖现有收据。 最终采集命令、SSH helper前后SHA及冻结config/helper/report复核见 [采集收据](CON03_evidence_collection_receipt.json)；本目录文件的大小与SHA见 [原文件清单](artifact_manifest.json)。
@@ -80,7 +80,7 @@ MRTRIX_RNG_SEED=0 tckgen wm_fod_norm.nii.gz tracks.tck \
   -seeds 100000 -select 0 -maxlength 250 -cutoff 0.1 -samples 3 -power 0.5
 ```
 
-原五次使用各自已记录的 seed。实际参考目录是 `oldroot/task_04/official_raw10_cpu_group_A_v3/sub-CON01`，其中 `oldroot=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002`；manifest SHA 为 `64b9066e465ddc1ae8e688c1fec48b2a5611a6312b8637a302fb5404e7d7ca5a`。CON03 对应 `oldroot/task_04/official_raw10_cpu_group_B_v3/sub-CON03`，manifest SHA 为 `60b4e0a48c194e0e7a0b9e764af153415b699b487c019632b325cb4937e6d85a`。正式 B/C 使用相同的已完成 candidate FS；独立 official 链使用其先前 baseline FS，本目录不宣称两边 FS 文件 SHA 相同。所有比较先检查 canonical raw 及官方 producer/实际执行来源；不以固定 FNIT 中间输入的 operator 参考替换官方 wholechain 来源。
+原五次使用各自已记录的 seed。实际参考目录是 `oldroot/task_04/official_raw10_cpu_group_A_v3/sub-CON01`，其中 `oldroot=/data/workspaces/fnit_connectome_tenraw_20261002`；manifest SHA 为 `64b9066e465ddc1ae8e688c1fec48b2a5611a6312b8637a302fb5404e7d7ca5a`。CON03 对应 `oldroot/task_04/official_raw10_cpu_group_B_v3/sub-CON03`，manifest SHA 为 `60b4e0a48c194e0e7a0b9e764af153415b699b487c019632b325cb4937e6d85a`。正式 B/C 使用相同的已完成 candidate FS；独立 official 链使用其先前 baseline FS，本目录不宣称两边 FS 文件 SHA 相同。所有比较先检查 canonical raw 及官方 producer/实际执行来源；不以固定 FNIT 中间输入的 operator 参考替换官方 wholechain 来源。
 
 ## 5. 最新真实结果、耗时与图
 

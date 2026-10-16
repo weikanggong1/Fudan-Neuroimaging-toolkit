@@ -481,7 +481,7 @@ def main():
     parser.add_argument("--input-mode", choices=("corrected", "raw"), default="corrected")
     parser.add_argument("--gpu-uuid")
     parser.add_argument("--memory-sample-interval", type=float, default=.5)
-    parser.add_argument("--gpu-lock", default="/tmp/fnit-recon-five-20261002-gongwk.gpu.lock")
+    parser.add_argument("--gpu-lock", default="/tmp/fnit-recon-five-20261002-benchmark-user.gpu.lock")
     options = parser.parse_args()
     if options.mode == "preflight":
         if options.bindings is None or options.report is None:

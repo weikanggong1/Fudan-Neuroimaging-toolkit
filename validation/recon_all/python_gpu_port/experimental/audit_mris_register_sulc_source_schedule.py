@@ -17,7 +17,7 @@ def audit(reports_dir: Path, hemisphere: str) -> dict:
     reports = []
     rows = []
     for path in sorted(reports_dir.glob(
-            f"mris_register_{hemisphere}_default_epoch*_headcw.json")):
+            f"mris_register_{hemisphere}_default_epoch*_control-host.json")):
         report = json.loads(path.read_text())
         if "epochs" not in report:
             continue

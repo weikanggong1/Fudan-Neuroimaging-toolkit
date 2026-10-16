@@ -4,7 +4,7 @@ from pathlib import Path
 from datetime import datetime,timezone
 import nibabel as nib
 import numpy as np
-R=Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01')
+R=Path('/data/workspaces/fnit_connectome_tenraw_20261002/task_01')
 O=R/'CPU_final10_independent_audit_v1';O.mkdir(exist_ok=False)
 def sha(p):
  h=hashlib.sha256()

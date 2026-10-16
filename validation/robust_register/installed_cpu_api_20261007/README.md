@@ -179,4 +179,4 @@ mri_robust_register --mov outputs/official/rigid.header.mgz --dst inputs/target.
 - Reuter M, Rosas HD, Fischl B. Highly accurate inverse consistent registration: A robust approach. *NeuroImage* (2010). [DOI](https://doi.org/10.1016/j.neuroimage.2010.07.020)。
 - [FreeSurfer `mri_robust_register` 源码](https://github.com/freesurfer/freesurfer/tree/d932c45/mri_robust_register)。
 - [ITK/VNL 源码](https://github.com/InsightSoftwareConsortium/ITK/tree/v5.4.0/Modules/ThirdParty/VNL)及其 LINPACK/BLAS 代码。FNIT 的算法改编与许可归属见仓库 `THIRD_PARTY_NOTICES.md` 和 `licenses/FreeSurfer.txt`。
-- [仓库准备函数说明](../../../docs/robust_register/PREPARATION.md)、[之前的完整 CPU 算术验收](../full_cpu_arithmetic_20261007/README.md)、[正式 API 前的冷/热实验适配器](../full_cpu_arithmetic_20261007/README.md)。
+- [仓库准备函数说明](../target_preparation_20261006/README.md)、[之前的完整 CPU 算术验收](../full_cpu_arithmetic_20261007/README.md)、[正式 API 前的冷/热实验适配器](../full_cpu_arithmetic_20261007/README.md)。

@@ -1,4 +1,6 @@
-# TorchAMICONODDI：NODDI微结构拟合
+# FNIT_noddi
+
+> 统一 Python 入口：[`FNIT_noddi`](../API_REFERENCE.md)，从 `fnit` 导入。下文配置、结果类型和细分算子保留高级兼容接口。
 
 | 项目 | 内容 |
 |---|---|
@@ -10,22 +12,22 @@
 
 ## 1. 功能简介
 
-`TorchAMICONODDI` 从单被试扩散信号估计神经突密度、方向离散和自由水分数。默认 `fit_method="amico"` 使用离散响应字典；`classic` 使用AMICO起点后进行连续Watson模型的非线性拟合，两者模型输出含义相同但数值不会相同。
+`FNIT_noddi` 从单被试扩散信号估计神经突密度、方向离散和自由水分数。默认 `method="amico"` 使用离散响应字典；`classic` 使用AMICO起点后进行连续Watson模型的非线性拟合，两者模型输出含义相同但数值不会相同。
 
 FNIT使用PyTorch生成响应核并拟合，用nibabel读写；运行时不调用AMICO、NODDI Toolbox或DIPY。500方向LUT和145原子字典索引随包提供。信号/核为float32，活动集及classic求解使用float64；CUDA允许TF32，不使用FP16/BF16。
 
 ## 2. Python 调用
 
 ```python
-from fnit.amico_noddi import AMICONODDIConfig, TorchAMICONODDI
+from fnit import AMICONODDIConfig, FNIT_noddi
 
 noddi_configuration = AMICONODDIConfig(
     lut_batch_size=400,  # 同时处理的LUT方向数，显存不足时可调小
 )
-noddi_model = TorchAMICONODDI(
+noddi_model = FNIT_noddi(
     device="cuda:0",  # 计算设备
     config=noddi_configuration,  # 使用公开的AMICO配置
-    fit_method="amico",  # classic时改用连续Watson拟合
+    method="amico",  # classic时改用连续Watson拟合
 )
 noddi_result = noddi_model.run(
     data="/data/eddy/data.nii.gz",  # 完整多shell校正DWI
@@ -50,15 +52,16 @@ AMICO入口按uint8转换后值等于1选择mask体素，最好明确提供0/1ma
 
 `noddi_model(data, mask, bvecs, bvals)` 返回内存对象，`run()`再保存五张图。自定义配置不会自动变成CLI参数。改变扩散率、字典网格或正则化会改变模型，不能直接沿用默认benchmark。
 
-**`TorchAMICONODDI.__init__` 参数**
+**`FNIT_noddi.__init__` 参数**
 
 | 参数 | 必需 | 类型 | 默认值 | 含义 |
 |---|---|---|---|---|
 | `device` | 否 | `str/torch.device/None` | `None` | PyTorch 设备；None 自动选择可用 CUDA，否则 CPU。 |
 | `config` | 否 | `配置对象或None` | `None` | 对应配置对象；None 使用默认配置。 |
-| `fit_method` | 否 | `str` | `'amico'` | amico 为离散字典拟合；classic 为连续 Watson 非线性拟合。 |
+| `method` | 否 | `str/None` | `None`（有效默认 amico） | amico 为离散字典拟合；classic 为连续 Watson 非线性拟合。 |
+| `fit_method` | 否 | `str/None` | `None` | 原参数的兼容写法；与 method 同时提供时必须一致。 |
 
-**`TorchAMICONODDI.run` 参数**
+**`FNIT_noddi.run` 参数**
 
 | 参数 | 必需 | 类型 | 默认值 | 含义 |
 |---|---|---|---|---|

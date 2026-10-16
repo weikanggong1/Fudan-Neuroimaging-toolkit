@@ -19,7 +19,7 @@ NRMSE=RMSE/箭头右端参考RMS，不拟合幅度或偏置。完整180帧、固
 
 DeepPrep volume对参考的一致性高于本轮旧FNIT，CIFTI则旧FNIT更高；这不能单凭汇总指标归因于某一个步骤。DeepPrep25.1.0内部使用作者fMRIPrep24开发版fork，参考是官方25.2.4。
 
-时间为各自实际硬件和范围下的观测：参考为nodecw10 Xeon Gold6418H CPU（8进程、OMP4，内部额外MNI2009c配准），两候选为gpucw1 H100与CPU，共享GPU活动记录。FNIT额外计算ICA/AROMA clean分支。GPU等待、资源准备、后QC、比较与绘图不并入容器时间；不同硬件、范围和边界不能解释为通用加速倍数。仍包含CPU、FreeSurfer或其原生节点、Workbench步骤，未建立整体数值等价。
+时间为各自实际硬件和范围下的观测：参考为compute-a-10 Xeon Gold6418H CPU（8进程、OMP4，内部额外MNI2009c配准），两候选为accelerator-a-1 H100与CPU，共享GPU活动记录。FNIT额外计算ICA/AROMA clean分支。GPU等待、资源准备、后QC、比较与绘图不并入容器时间；不同硬件、范围和边界不能解释为通用加速倍数。仍包含CPU、FreeSurfer或其原生节点、Workbench步骤，未建立整体数值等价。
 
 前六例参考容器exit0但初次wrapper文件名QC失败，原容器时钟与后续独立QC分别保留；CON09参考NSS首帧标记保留，不截掉该帧。新旧失败分析、冻结MRI成品及原报告均未覆盖。
 

@@ -17,9 +17,9 @@ def main():
     import numpy as np
 
     root = args.run_root
-    cli = root / "nodecw7/fast_cli_v1"
+    cli = root / "compute-a-7/fast_cli_v1"
     records = []
-    for path in sorted((root / "nodecw7/fast_cli_queue_v1").glob("*/record.json")):
+    for path in sorted((root / "compute-a-7/fast_cli_queue_v1").glob("*/record.json")):
         data = json.loads(path.read_text())
         if data["status"] != "complete" or data["returncode"] != 0:
             raise RuntimeError("CLI job has not completed successfully: " + path.parent.name)
@@ -63,7 +63,7 @@ def main():
             for name in ("baseline_cold", "baseline_cache_warm"))
     diagnostic = {}
     for variant in ("stock", "libm"):
-        diagnostic[variant] = json.loads((root / ("nodecw7/math_" + variant + "_v1/record.public.json")).read_text())
+        diagnostic[variant] = json.loads((root / ("compute-a-7/math_" + variant + "_v1/record.public.json")).read_text())
     traces = [diagnostic[variant].pop("trace") for variant in ("stock", "libm")]
     first_difference = next((i for i, pair in enumerate(zip(*traces)) if pair[0] != pair[1]), None)
     report = {"scope": "same_node_real_complete_brain_CPU_CLI_and_separate_GPU64cube_regression",

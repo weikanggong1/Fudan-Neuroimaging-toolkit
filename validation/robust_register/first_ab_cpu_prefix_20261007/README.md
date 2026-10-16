@@ -117,7 +117,7 @@ figure.tight_layout()
 
 ## 3. 命令行调用
 
-此观察器是内部验证 API，没有生产 CLI。相关准备功能的输入、参数和输出说明见[准备说明](../../../docs/robust_register/PREPARATION.md)。本次私密控制入口只允许一组 SDK 与候选调用，采用 120 秒单子进程、300 秒工作和 350 秒外层 OS 期限，持有同一 CPU 锁直到所有已观察后代退出。
+此观察器是内部验证 API，没有生产 CLI。相关准备功能的输入、参数和输出说明见[准备说明](../target_preparation_20261006/README.md)。本次私密控制入口只允许一组 SDK 与候选调用，采用 120 秒单子进程、300 秒工作和 350 秒外层 OS 期限，持有同一 CPU 锁直到所有已观察后代退出。
 
 ## 4. 原软件调用
 
@@ -172,5 +172,5 @@ mri_robust_register --mov moving.mgz --dst fixed.mgz \
 
 - Reuter M, Rosas HD, Fischl B. Highly accurate inverse consistent registration: a robust approach. *NeuroImage* 53, 1181–1196 (2010). [DOI](https://doi.org/10.1016/j.neuroimage.2010.07.020)。
 - [FreeSurfer mri_robust_register](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a/mri_robust_register)：固定原源码、准备、回归与刚体/仿射注册相关函数。
-- [FNIT 准备说明](../../../docs/robust_register/PREPARATION.md)，[首次 A/b 验证函数](boundary_probe.py)，[机器可读汇总](benchmark_summary.json)。
+- [FNIT 准备说明](../target_preparation_20261006/README.md)，[首次 A/b 验证函数](boundary_probe.py)，[机器可读汇总](benchmark_summary.json)。
 - [PyTorch torch.linalg.qr](https://docs.pytorch.org/docs/stable/generated/torch.linalg.qr.html)，[Numba 编译接口](https://numba.readthedocs.io/en/stable/reference/jit-compilation.html)。

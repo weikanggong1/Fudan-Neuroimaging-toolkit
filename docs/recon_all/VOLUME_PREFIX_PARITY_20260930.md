@@ -57,7 +57,7 @@ conform_volume(
 
 ## 耗时、精度和验收边界
 
-单次前段连续运行：sub-01 在 gpucw1 的 H100 GPU 与 4 CPU 线程上用时 1,227.80 秒；sub-02 在 nodecw10 的 CPU 与 4 线程上用时 993.28 秒。[阶段耗时](../../validation/recon_all/python_gpu_port/volume_parity_20260930/sub01/connected_prefix_run.json)分别列出 N4、SynthSeg、EM 等。GPU 使用进程父子树在**同一时刻**每 2 秒采样，最大为 19,411,238,912 字节，低于 20,000,000,000 字节；该值是采样最大值，不保证捕获连续峰值。测试期间 GPU 与其他作业共享，不据此声称加速。默认 TF32；SynthStrip、SynthSeg 和 Talairach affine 保留 FP32 例外，没有使用 FP16/BF16。
+单次前段连续运行：sub-01 在 accelerator-a-1 的 H100 GPU 与 4 CPU 线程上用时 1,227.80 秒；sub-02 在 compute-a-10 的 CPU 与 4 线程上用时 993.28 秒。[阶段耗时](../../validation/recon_all/python_gpu_port/volume_parity_20260930/sub01/connected_prefix_run.json)分别列出 N4、SynthSeg、EM 等。GPU 使用进程父子树在**同一时刻**每 2 秒采样，最大为 19,411,238,912 字节，低于 20,000,000,000 字节；该值是采样最大值，不保证捕获连续峰值。测试期间 GPU 与其他作业共享，不据此声称加速。默认 TF32；SynthStrip、SynthSeg 和 Talairach affine 保留 FP32 例外，没有使用 FP16/BF16。
 
 本页仅确认前段连续运行。整例输出完整性、网格质量、严格 138 项数值比较和最终脑区指标须独立报告；在当前提交的新整例完成前，旧版完整整例结果不能充当现版验收。物理隔离、无预装脑影像软件的环境尚未验证。
 

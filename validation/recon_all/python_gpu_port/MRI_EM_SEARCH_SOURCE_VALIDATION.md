@@ -48,7 +48,7 @@ The final pre-EM matrix is:
  0                    0                      0                    1
 ```
 
-## Search timing on headcw
+## Search timing on control-host
 
 | Search implementation | Translation | Nine linear iterations | Native pre-EM matrix |
 | --- | ---: | ---: | --- |
@@ -69,7 +69,7 @@ Run `validate_mri_em_translation_source.py ATLAS NU MASK` for the exact
 translated matrix and `validate_mri_em_search_jit.py ATLAS NU MASK
 --source-order --first-iteration` for the exact first iteration. The same
 search validator without `--first-iteration` checks the final pre-EM matrix
-against the native float32 fixture. All three gates exited 0 on headcw.
+against the native float32 fixture. All three gates exited 0 on control-host.
 
 The full Python stage command and independent native LTA comparison passed:
 maximum matrix error `7.45e-9`, equal metadata and geometry, and zero source

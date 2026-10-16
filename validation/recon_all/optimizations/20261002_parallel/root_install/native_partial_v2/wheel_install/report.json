@@ -1,7 +1,7 @@
 {
   "code_commit": "1dd6df8fc10d8446491fea11bdf3dadb507428f9",
   "status": "passed",
-  "host": "gpucw1",
+  "host": "accelerator-a-1",
   "python": "3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]",
   "started_utc": "2026-10-02T15:28:51.582717+00:00",
   "script_sha256": "7434a70cb596643e3fa40ba6b6e5b37bf52c23a4e731a006412cffd12df20980",
@@ -9,15 +9,15 @@
   "steps": {
     "wheel": {
       "command": [
-        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+        "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
         "-m",
         "pip",
         "wheel",
         "--no-deps",
         "--no-build-isolation",
-        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/source",
+        "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/source",
         "-w",
-        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/wheel_install/wheels"
+        "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/wheel_install/wheels"
       ],
       "exit_code": 0,
       "seconds": 21.43072240613401,
@@ -25,14 +25,14 @@
     },
     "install": {
       "command": [
-        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+        "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
         "-m",
         "pip",
         "install",
         "--no-deps",
         "--target",
-        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/wheel_install/installed",
-        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/wheel_install/wheels/fudan_neuroimaging_toolkit-0.16.0-cp311-cp311-linux_x86_64.whl"
+        "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/wheel_install/installed",
+        "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/wheel_install/wheels/fudan_neuroimaging_toolkit-0.16.0-cp311-cp311-linux_x86_64.whl"
       ],
       "exit_code": 0,
       "seconds": 6.7152682999148965,
@@ -40,7 +40,7 @@
     },
     "recon_cli": {
       "command": [
-        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+        "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
         "-m",
         "fnit.recon_all.native_free",
         "--help"
@@ -51,7 +51,7 @@
     },
     "api_import": {
       "command": [
-        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+        "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
         "-c",
         "import importlib,json,pathlib; names=json.loads('[\"fnit\", \"fnit.recon_all.native_free\", \"fnit.recon_all.mri_em_register_native_build\", \"fnit.recon_all.mri_em_register_cached_conda\", \"fnit.recon_all.native_runtime_selection\"]'); result={n:str(pathlib.Path(importlib.import_module(n).__file__).resolve()) for n in names}; print(json.dumps(result))"
       ],
@@ -64,16 +64,16 @@
   "scope": "existing homepage Conda; wheel build and target install only",
   "source_archive_sha256": "9ff96aff07a36f5877350945653c10601bacfa0be69cc7622772a5aa41efff53",
   "compiler_paths": {
-    "CC": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/x86_64-conda-linux-gnu-cc",
-    "CXX": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/x86_64-conda-linux-gnu-c++"
+    "CC": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/x86_64-conda-linux-gnu-cc",
+    "CXX": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/x86_64-conda-linux-gnu-c++"
   },
   "wheel_sha256": "be3e7eca6fa46c87a46f357f60a1df3773020840eb871a861e1c098f32a5b5ae",
   "imported_modules": {
-    "fnit": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/wheel_install/installed/fnit/__init__.py",
-    "fnit.recon_all.native_free": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/wheel_install/installed/fnit/recon_all/native_free.py",
-    "fnit.recon_all.mri_em_register_native_build": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/wheel_install/installed/fnit/recon_all/mri_em_register_native_build.py",
-    "fnit.recon_all.mri_em_register_cached_conda": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/wheel_install/installed/fnit/recon_all/mri_em_register_cached_conda.py",
-    "fnit.recon_all.native_runtime_selection": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/wheel_install/installed/fnit/recon_all/native_runtime_selection.py"
+    "fnit": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/wheel_install/installed/fnit/__init__.py",
+    "fnit.recon_all.native_free": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/wheel_install/installed/fnit/recon_all/native_free.py",
+    "fnit.recon_all.mri_em_register_native_build": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/wheel_install/installed/fnit/recon_all/mri_em_register_native_build.py",
+    "fnit.recon_all.mri_em_register_cached_conda": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/wheel_install/installed/fnit/recon_all/mri_em_register_cached_conda.py",
+    "fnit.recon_all.native_runtime_selection": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/wheel_install/installed/fnit/recon_all/native_runtime_selection.py"
   },
   "total_seconds": 32.562752367928624,
   "finished_utc": "2026-10-02T15:29:24.145865+00:00"

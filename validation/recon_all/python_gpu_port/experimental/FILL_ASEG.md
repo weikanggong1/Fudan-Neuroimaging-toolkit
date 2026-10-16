@@ -8,7 +8,7 @@ The actual `recon-all` command is `mri_fill -a scripts/ponscc.cut.log -xform tra
 
 ## Fixed inputs and references
 
-All paths below are under `/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work`. The official subject is `reconall_main_20260924/single_subjects/fs_sub01/mri`; isolated outputs are in `reconall_python_gpu_20260925/fill_ref`.
+All paths below are under `/data/workspaces/freesurfer_synth/work`. The official subject is `reconall_main_20260924/single_subjects/fs_sub01/mri`; isolated outputs are in `reconall_python_gpu_20260925/fill_ref`.
 
 | File | SHA-256 |
 | --- | --- |
@@ -23,19 +23,19 @@ The original segmentation has 2,263 CC voxels. The native cutting mask intersect
 
 ## Numerical gates
 
-| Comparison | Mismatched voxels | Algorithm time on headcw |
+| Comparison | Mismatched voxels | Algorithm time on control-host |
 | --- | ---: | ---: |
 | Python, experimental preclassified aseg and its matching native cutting mask, versus native on those same inputs | **0 / 16,777,216** | 4.69 s |
 | Python, original aseg and original native cutting mask, versus original native output | **0 / 16,777,216** | 32.48 s |
 
 The zero-difference original-input output has Fortran-order voxel SHA-256 `1ac2c3c86d90080b7f7c7b90dad491f8e97eba2634d97dc932993088c7de2bed`. The experimental preclassified-aseg output has voxel SHA-256 `b8739d9363486baf9b85ecd274a692aecc1b3f6a790ef17960758e386309ac74`. Ordinary Euclidean CC distance left 111 differences; the source-guided fast-marching initialization and float32 update eliminated them. Both comparisons still supply a native cutting mask.
 
-The official `mri_fill` reference took 41.25 s on headcw with diagnostic intermediate writing enabled and 40.04 s without diagnostics. Both native reruns matched the existing `filled.mgz` at all 16,777,216 voxels. The 4.69 s figure is only the segmentation fill after CC classification and the cutting mask are supplied; the 32.48 s figure includes Python CC fast marching but still takes the native cutting mask as input. A second Python run took 32.86 s. These are not end-to-end recon-all timings or an equivalent speed comparison.
+The official `mri_fill` reference took 41.25 s on control-host with diagnostic intermediate writing enabled and 40.04 s without diagnostics. Both native reruns matched the existing `filled.mgz` at all 16,777,216 voxels. The 4.69 s figure is only the segmentation fill after CC classification and the cutting mask are supplied; the 32.48 s figure includes Python CC fast marching but still takes the native cutting mask as input. A second Python run took 32.86 s. These are not end-to-end recon-all timings or an equivalent speed comparison.
 
 To rerun the exact-core gate from a machine with the NFS paths and project Python dependencies, set `PYTHONPATH` to the repository `src` directory and run:
 
 ```bash
-BASE=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work
+BASE=/data/workspaces/freesurfer_synth/work
 SUBJ=$BASE/reconall_main_20260924/single_subjects/fs_sub01/mri
 REF=$BASE/reconall_python_gpu_20260925/fill_ref
 python validation/recon_all/python_gpu_port/experimental/check_fill_aseg.py \
@@ -62,12 +62,12 @@ Additional fixed input SHA-256 values: `transforms/talairach.lta` is `d5996cbdb5
 
 The complete Python output voxel SHA-256 in FreeSurfer Fortran order is `1ac2c3c86d90080b7f7c7b90dad491f8e97eba2634d97dc932993088c7de2bed`. MGH 284-byte header, 20-byte scan parameters, affine, data type, all non-command footer tags (including the 255-byte embedded color-table tag), and the 207-byte `ponscc.cut.log` are exact against the original official reference. Both outputs have eight command-history tags; the new final tag names the Python stage instead of the native executable. The compressed Python MGZ file SHA-256 is `3efcf1f06cb6b6cc9565fed52d858f32a960f7fa6fb1bb91b1e681cae66802c2`; the native compressed file has a different hash because the final command provenance and compression bytes differ. This is a voxel and non-command metadata match, not a compressed-file byte match. `check_fill_full.py` prints each gate.
 
-On headcw, full Python CLI runs took **37.30 s** and **35.67 s** including input/output and imports with a warm Numba cache. The earlier isolated native no-diagnostics run took **40.04 s** on the same host; its output was voxel-identical to the original official output. These are individual timings, not a robust speed benchmark. All computations in this stage run on CPU. The runtime requirements are Python, NumPy, SciPy, Numba, nibabel, the input `wm.mgz`, `aseg.presurf.mgz`, type-0 `talairach.lta`, and the small color table. No FreeSurfer binary or runtime bundle is needed for the Python command.
+On control-host, full Python CLI runs took **37.30 s** and **35.67 s** including input/output and imports with a warm Numba cache. The earlier isolated native no-diagnostics run took **40.04 s** on the same host; its output was voxel-identical to the original official output. These are individual timings, not a robust speed benchmark. All computations in this stage run on CPU. The runtime requirements are Python, NumPy, SciPy, Numba, nibabel, the input `wm.mgz`, `aseg.presurf.mgz`, type-0 `talairach.lta`, and the small color table. No FreeSurfer binary or runtime bundle is needed for the Python command.
 
 To rerun the complete stage and validation with the fixed shared-NFS reference:
 
 ```bash
-BASE=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work
+BASE=/data/workspaces/freesurfer_synth/work
 SUBJ=$BASE/reconall_main_20260924/single_subjects/fs_sub01/mri
 REF=$BASE/reconall_python_gpu_20260925/fill_ref
 LUT=$BASE/reconall_main_20260924/bundle/SubCorticalMassLUT.txt

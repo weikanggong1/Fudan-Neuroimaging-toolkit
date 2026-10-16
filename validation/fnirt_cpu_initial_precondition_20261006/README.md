@@ -36,7 +36,7 @@ preconditioner = (1 + lm_tau) * damping_diagonal
 
 ## 3. 调用与资源
 
-Root 与 peer 审查冻结后授权唯一派发；controller189857 / start_ticks534431758，enqueue1791242617.6349792。19000s common CPU lock 等待、19600s controller、180s child，20,000,000,000B address-space cap。nodecw7 同8个物理核 `32,36,40,44,48,52,56,60`，OMP/OpenBLAS/MKL/Numba8、Torch8/interop1；GPU invisible，CUDA 未初始化。
+Root 与 peer 审查冻结后授权唯一派发；controller189857 / start_ticks534431758，enqueue1791242617.6349792。19000s common CPU lock 等待、19600s controller、180s child，20,000,000,000B address-space cap。compute-a-7 同8个物理核 `32,36,40,44,48,52,56,60`，OMP/OpenBLAS/MKL/Numba8、Torch8/interop1；GPU invisible，CUDA 未初始化。
 
 cuDNN TF32=True、matmul TF32=False、grad、默认 dtype 前后不变；22 source/input 绑定和保存/派生逻辑值前后精确。原始科学目录拒绝覆盖，输出700/600。六锁 INDEX 原 prepared/queued/completed 收据保留，completed JSON SHA `4c63be5eb3e8daf5494880d1b496a415e34ce22dab29ce86a1145dbe623905f8`，MD SHA `4b7dd816a480ce036c620930b8cf32f575cc69782115c88613d4f870c786a01f` 是该次更新身份，后续任务可再更新全局索引。
 

@@ -37,7 +37,7 @@ correction across the other defects, and writes `orig.premesh`. Neither that
 search nor the output surface has a Python parity result. Do not use this
 probe to claim end-to-end topology or recon-all agreement.
 
-The frozen reports are [`lh.edge_score_probe_headcw.json`](lh.edge_score_probe_headcw.json)
-and [`rh.edge_score_probe_headcw.json`](rh.edge_score_probe_headcw.json).
+The frozen reports are [`lh.edge_score_probe_control-host.json`](lh.edge_score_probe_control-host.json)
+and [`rh.edge_score_probe_control-host.json`](rh.edge_score_probe_control-host.json).
 The native capture command and SHA-256 values are recorded in
-[`topology_edge_table_headcw_report.json`](../topology_edge_table_headcw_report.json).
+[`topology_edge_table_control-host_report.json`](../topology_edge_table_control-host_report.json).

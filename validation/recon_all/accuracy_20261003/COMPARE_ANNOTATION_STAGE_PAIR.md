@@ -37,7 +37,7 @@ print(comparison_report['exact_regression_pass'])
 ## 命令行调用与参数
 
 ```bash
-FNIT_COMPARE_PYTHON=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
+FNIT_COMPARE_PYTHON=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
 "${FNIT_COMPARE_PYTHON}" compare_annotation_stage_pair.py \
   --baseline-stage /absolute/baseline/annotation.stage.json \
   --candidate-stage /absolute/candidate/annotation.stage.json \

@@ -1,5 +1,5 @@
 import hashlib,json,pathlib
-r=pathlib.Path("/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001")
+r=pathlib.Path("/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001")
 assert (r/"integrated_ff372d7_stage_regressions.finished").exists()
 inputs={}
 for sub in ["01","02"]:

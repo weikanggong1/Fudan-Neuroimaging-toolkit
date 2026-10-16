@@ -18,9 +18,9 @@
 
 `frozen.json`为旧两例产物重新读取：orig/SynthStrip值与官方一致，SynthStrip旧保存float32而官方uint8，nu差2和29体素；不冒充十例。`synthstrip_writer.json`为真实冻结图像AB/BA保存回归。`n4_diagnostic.json`、`n4_environment.json`与`refinement.json`分别记录同输入ITK版本、工具链/官方当前float、小矩阵算子排除。`prepare_n4_diagnostic.py`从本项目公开816的`tools/n4_itk/n4_itk.cpp`校验SHA生成字段导出诊断；不复制原软件生产源码/二进制。
 
-`cohort_prefix.py`、`repeat_prefix_timing.py`运行前段并释放每case共享锁；`collect_prefix_results.py`、`collect_completion.py`只读取产物。`inspect_frozen.py`、`verify_synthstrip_writer.py`、`run_n4_diagnostic.py`、`run_n4_environment.py`、`run_n4_cross.py`固定使用授权gongwk@gpucw1既有真实数据。隔离官方程序只用于benchmark，不进入FNIT生产链。影像、raw导出、权重、license均留服务器。
+`cohort_prefix.py`、`repeat_prefix_timing.py`运行前段并释放每case共享锁；`collect_prefix_results.py`、`collect_completion.py`只读取产物。`inspect_frozen.py`、`verify_synthstrip_writer.py`、`run_n4_diagnostic.py`、`run_n4_environment.py`、`run_n4_cross.py`固定使用授权benchmark-user@accelerator-a-1既有真实数据。隔离官方程序只用于benchmark，不进入FNIT生产链。影像、raw导出、权重、license均留服务器。
 
-服务器诊断目录：`/tmp/fnit-recon-accuracy-20261003/task_02/diagnostic`；完整前段：`/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_02/cohort_prefix`。
+服务器诊断目录：`/tmp/fnit-recon-accuracy-20261003/task_02/diagnostic`；完整前段：`/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_02/cohort_prefix`。
 
 ## 历史交接快照
 

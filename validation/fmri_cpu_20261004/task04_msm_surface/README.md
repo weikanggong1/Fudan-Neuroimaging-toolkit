@@ -77,7 +77,7 @@ surface 参照使用用户指定 fMRIPrep 25.2.4 镜像内的原工作流与 NiW
 
 ### 完整 CPU1 配准基线
 
-下表是 nodecw8 的 fresh process 墙钟，包含读入、计算、所有输出和进程启动。每项各一次，不能推断稳定中位数。
+下表是 compute-a-8 的 fresh process 墙钟，包含读入、计算、所有输出和进程启动。每项各一次，不能推断稳定中位数。
 
 | 完整双侧功能 | 原版 / s | 冻结 FNIT / s | 本轮精度 |
 | --- | ---: | ---: | --- |
@@ -91,7 +91,7 @@ MSMSulc 的 CPU 不一致已定位到 Point 运算中向量除法的末位舍入
 
 ### 最新完整 CPU1/8 配准
 
-以下在 nodecw8 完成，每项各一次。fresh process 包含程序启动、读入、计算和全部保存；API 是 FNIT 函数的完整读写调用。所有 CPU1 候选双侧坐标与有序 faces 都和原版严格单线程逐位相同；候选 CPU8 与 CPU1 的全部球面文件 SHA 也相同。
+以下在 compute-a-8 完成，每项各一次。fresh process 包含程序启动、读入、计算和全部保存；API 是 FNIT 函数的完整读写调用。所有 CPU1 候选双侧坐标与有序 faces 都和原版严格单线程逐位相同；候选 CPU8 与 CPU1 的全部球面文件 SHA 也相同。
 
 | 功能 | CPU 预算 | 原版 fresh / s | FNIT fresh / s | FNIT API / s |
 | --- | ---: | ---: | ---: | ---: |
@@ -110,7 +110,7 @@ MSMSulc 的 CPU 不一致已定位到 Point 运算中向量除法的末位舍入
 
 ### 完整 490 帧 HCP CPU1 基线
 
-以下在 nodecw10 同一 CPU1 预算完成。该节点共享负载约 2,450–2,510，列出的时间为实测观测。原函数与 fresh process 分列：MATLAB 启动/退出开销不是算法时间。
+以下在 compute-a-10 同一 CPU1 预算完成。该节点共享负载约 2,450–2,510，列出的时间为实测观测。原函数与 fresh process 分列：MATLAB 启动/退出开销不是算法时间。
 
 | 功能 | 原函数 / s | 原 fresh process / s | FNIT 完整 API / s | FNIT fresh process / s | maps 最大误差 / RMSE |
 | --- | ---: | ---: | ---: | ---: | --- |
@@ -121,7 +121,7 @@ MSMSulc 的 CPU 不一致已定位到 Point 运算中向量除法的末位舍入
 
 原 DR+VN 还包含 31.704 s 的 Workbench 归一化准备，原 wrapper 合计 69.928 s。所有表项均核对完整数组、有限性、保存 float32 与 BrainModelAxis；DR/WRN maps 的全部轴一致，40 组件 weights 逐位相同。VN 的 ScalarAxis 标签名称不同，类型、形状、BrainModelAxis 和全部数值均单独记录。此表未将主参照没有写出的 nodes 标为通过。
 
-已保存的 CPU8 基线使用 nodecw10 同一组八个物理核。旧基线 WRN CPU8 的完整 API 已保存，原队列在后续候选阶段没有追加第八条记录。现已独立核对实际输入、全源码、原输出 SHA 与 CPU 预算，恢复该已完成结果；只变化的参考 launcher 在 FNIT 调用之外，默认原命令不变。原队列和旧尝试保留原字节，详见下方完整节点报告。最新候选完成全部八项。
+已保存的 CPU8 基线使用 compute-a-10 同一组八个物理核。旧基线 WRN CPU8 的完整 API 已保存，原队列在后续候选阶段没有追加第八条记录。现已独立核对实际输入、全源码、原输出 SHA 与 CPU 预算，恢复该已完成结果；只变化的参考 launcher 在 FNIT 调用之外，默认原命令不变。原队列和旧尝试保留原字节，详见下方完整节点报告。最新候选完成全部八项。
 
 | CPU8 功能 | 原函数 / s | 原 fresh process / s | FNIT 完整 API / s | FNIT fresh process / s | maps 最大误差 / RMSE |
 | --- | ---: | ---: | ---: | ---: | --- |
@@ -133,7 +133,7 @@ CPU8 原 DR+VN 的 Workbench 准备为 33.662 s，原 wrapper 合计 64.867 s。
 
 ### 最新完整 490 帧 HCP CPU1/8
 
-最新候选已在 nodecw10 完成全部 maps/weights 配对。以下原版与 FNIT fresh 是同轮进程墙钟；原版 MATLAB 函数和 Workbench 准备的分项仍需导出。不能用 MATLAB 启动差异证明 VN/DR 计算已经快于原函数。
+最新候选已在 compute-a-10 完成全部 maps/weights 配对。以下原版与 FNIT fresh 是同轮进程墙钟；原版 MATLAB 函数和 Workbench 准备的分项仍需导出。不能用 MATLAB 启动差异证明 VN/DR 计算已经快于原函数。
 
 | 功能 | CPU 预算 | 原版 fresh / s | FNIT fresh / s | FNIT API / s | maps 最大误差 / RMSE |
 | --- | ---: | ---: | ---: | ---: | --- |

@@ -65,7 +65,7 @@ wm_sh, csf_map = fit_mrtrix_two_tissue_csd(
 
 ## 实数据精度、时间与显存
 
-FNIT 的时间从图像已载入后的函数调用开始，包含同步的 GPU 计算；MRtrix 墙钟含命令启动和读写。设备与范围不同，不能当作等硬件加速比。表中两组织和完整响应是**当前源码在 nodecw10 CPU 的新运行**；H100 运行时公开两组织脚本在数据装载阶段异常 CUDA OOM，没有产生可用的当前版 GPU 计时。三组织全脑 GPU 运行成功。
+FNIT 的时间从图像已载入后的函数调用开始，包含同步的 GPU 计算；MRtrix 墙钟含命令启动和读写。设备与范围不同，不能当作等硬件加速比。表中两组织和完整响应是**当前源码在 compute-a-10 CPU 的新运行**；H100 运行时公开两组织脚本在数据装载阶段异常 CUDA OOM，没有产生可用的当前版 GPU 计时。三组织全脑 GPU 运行成功。
 
 | 阶段 | 同输入数值结果 | FNIT 当前版时间 / 显存 | MRtrix 墙钟 |
 |---|---|---:|---:|
@@ -80,7 +80,7 @@ FNIT 的时间从图像已载入后的函数调用开始，包含同步的 GPU �
 | 全脑 FA | 208,522 掩膜体素中 85 个全非正信号体素双方为 NaN；其余有限体素存在一个病态低信号离群点；[GPU 记录](response_fod_full_fa.public.json) | GPU 0.702–1.081 s / 0.724 GiB | `dwi2tensor` 0.74 s + `tensor2metric` 0.05 s |
 | 全脑固定响应原始 MSMT-CSD | 208,522 体素、9,383,490 个 WM SH 值，MAE `1.976e−12`、最大 `1.205e−6`；GM 最大 `1.49e−8`，CSF 最大 `2.33e−10`，全部值误差 `≤1e−5`；[当前版记录](response_fod_full.public.json) | H100 GPU 267.419 s / 1.253 GiB；`batch_size=4096` | 185.51 s |
 
-公开脑图展示同一校正 DWI 上的 b0、官方及 FNIT 的 WM `c00`、绝对差，以及 FA 图。缓存仅调整设计相关计算的位置，已在同 CPU 原版/当前版比较中确认响应和掩膜逐值一致。当前版 FOD 切片图在 nodecw10 CPU 重新生成：4,767 个体素的 `c00` MAE `3.92e−15`、最大 `1.46e−11`，函数调用 `79.221 s`；见[图像数值](response_fod_example.public.json)。图像取自公开 DWI，与全脑 H100 计时范围不同。
+公开脑图展示同一校正 DWI 上的 b0、官方及 FNIT 的 WM `c00`、绝对差，以及 FA 图。缓存仅调整设计相关计算的位置，已在同 CPU 原版/当前版比较中确认响应和掩膜逐值一致。当前版 FOD 切片图在 compute-a-10 CPU 重新生成：4,767 个体素的 `c00` MAE `3.92e−15`、最大 `1.46e−11`，函数调用 `79.221 s`；见[图像数值](response_fod_example.public.json)。图像取自公开 DWI，与全脑 H100 计时范围不同。
 
 ![公开 DWI 的 FOD 对照切片](response_fod_example.png)
 

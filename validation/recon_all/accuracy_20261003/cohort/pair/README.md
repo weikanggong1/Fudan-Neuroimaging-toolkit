@@ -26,15 +26,15 @@ main()
 
 ```bash
 # 在服务器task_01/pair_tools目录；只读取已完成整例，不重新启动重建。
-FNIT_PAIR_PYTHON=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
+FNIT_PAIR_PYTHON=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
 "$FNIT_PAIR_PYTHON" evaluate_pair.py --config ds000030_sub-10159.json
 ```
 
-服务器gpucw1没有tmux，首次启动用nohup持续执行，PID存于`pair.pid`，stdout/stderr在`pair-launch.log`；不要重复启动已运行PID。检查点路径为`accuracy_20261003/task_01/pair_baseline_official_v1/ds000030_sub-10159/checkpoint.json`。
+服务器accelerator-a-1没有tmux，首次启动用nohup持续执行，PID存于`pair.pid`，stdout/stderr在`pair-launch.log`；不要重复启动已运行PID。检查点路径为`accuracy_20261003/task_01/pair_baseline_official_v1/ds000030_sub-10159/checkpoint.json`。
 
 ## 当前真实回执及更新记录
 
-2026-10-03首例两套完整回执核对：baseline输出138/138完整，入口2565.5213555628434秒，实际源码包SHA `0107e059153ff46ace5ab477539c232810f3309db0d569c861a02b6c69b460e7`；official完成，入口5811.068942066282秒，程序清单SHA `bb5725f4ce71fd4edf06f0890a42e0b6a5924a520e7bba6f53dd86c7e382e0a2`，done/log哈希保留在官方回执。两配置同输入SHA `0cb8a28928917b452b516e4e4694b3b79eb96b4c558f47ac63603035d0072e8b`、launch host=gpucw1、总线程4及GPU0 UUID一致。后台入口PID32848已运行，首次检查等待共享锁，数值结果尚未产出；运行后verify_binding阶段进一步重算影像、源码包、官方程序/资产及基线资源哈希。
+2026-10-03首例两套完整回执核对：baseline输出138/138完整，入口2565.5213555628434秒，实际源码包SHA `0107e059153ff46ace5ab477539c232810f3309db0d569c861a02b6c69b460e7`；official完成，入口5811.068942066282秒，程序清单SHA `bb5725f4ce71fd4edf06f0890a42e0b6a5924a520e7bba6f53dd86c7e382e0a2`，done/log哈希保留在官方回执。两配置同输入SHA `0cb8a28928917b452b516e4e4694b3b79eb96b4c558f47ac63603035d0072e8b`、launch host=accelerator-a-1、总线程4及GPU0 UUID一致。后台入口PID32848已运行，首次检查等待共享锁，数值结果尚未产出；运行后verify_binding阶段进一步重算影像、源码包、官方程序/资产及基线资源哈希。
 
 这是第一版单对入口，继承完整三方工具的算子定义与138诊断，后续新病例可使用同schema分别比较baseline与official、候选与official及候选与baseline；必须真实冻结候选版本后再生成候选评估。当前没有新精度结论或脑图结果。
 

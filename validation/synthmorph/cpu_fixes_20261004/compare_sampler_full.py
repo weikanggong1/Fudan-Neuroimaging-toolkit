@@ -27,7 +27,7 @@ def selected_run(folder):
         raise RuntimeError('complete CPU run is unavailable: ' + folder.name)
     expected_threads = ('OMP_NUM_THREADS', 'MKL_NUM_THREADS', 'OPENBLAS_NUM_THREADS',
                         'NUMBA_NUM_THREADS')
-    if (record['hostname'] != 'nodecw7' or record['max_cpu_threads'] != 8
+    if (record['hostname'] != 'compute-a-7' or record['max_cpu_threads'] != 8
             or record['cpu_affinity'] != '2,6,10,14,18,22,26,30'
             or any(record['environment'][name] != '8' for name in expected_threads)
             or record['environment']['CUDA_VISIBLE_DEVICES'] != ''):
@@ -96,7 +96,7 @@ def main():
                    for name in ('forward', 'inverse', 'moved', 'fixed_moved')}
         same = all(all(value for key, value in row.items() if key.endswith('_equal'))
                    for row in outputs.values())
-        comparison = load(reference / 'nodecw7_reference_comparison.private.json')
+        comparison = load(reference / 'compute-a-7_reference_comparison.private.json')
         for category in ('images', 'transforms'):
             for name, row in comparison[category].items():
                 if digest(reference / (name + '.nii.gz')) != row['candidate_sha256']:
@@ -118,7 +118,7 @@ def main():
         all_passed &= passed
         report['arms'][arm] = {'run': run, 'GNU_time_resources': resources, 'role': role,
             'outputs': outputs, 'exact_accepted_outputs_preserved': same,
-            'actual_sampler': route, 'reference_comparison_sha256': digest(reference / 'nodecw7_reference_comparison.private.json'),
+            'actual_sampler': route, 'reference_comparison_sha256': digest(reference / 'compute-a-7_reference_comparison.private.json'),
             'accepted_official_comparison': comparison, 'fixed_official_gate_transferred': official if same else None,
             'all_gates_passed': passed}
     api = args.runs_root / 'joint_object_api'

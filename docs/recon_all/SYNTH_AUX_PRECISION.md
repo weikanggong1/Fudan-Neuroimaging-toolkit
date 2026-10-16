@@ -59,7 +59,7 @@ with torch.backends.cudnn.flags(allow_tf32=True):  # 默认GPU策略；诊断可
 
 ### 冻结真实T1的三种精度策略
 
-同gpucw1/H100、4线程、显式cuda:0、分配缓存开启；c757cc8源码。默认TF32与修复前GPU逐体素相同；以下不同体素数相对此前同输入CPU结果，顺序为EntoWM/MCA-dura/vsinus。实际前向均float32、autocast关闭。
+同accelerator-a-1/H100、4线程、显式cuda:0、分配缓存开启；c757cc8源码。默认TF32与修复前GPU逐体素相同；以下不同体素数相对此前同输入CPU结果，顺序为EntoWM/MCA-dura/vsinus。实际前向均float32、autocast关闭。
 
 | 设置 | sub-01不同体素 | sub-02不同体素 | sub-01阶段秒 | sub-02阶段秒 |
 | --- | --- | --- | ---: | ---: |

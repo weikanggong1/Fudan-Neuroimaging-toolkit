@@ -282,4 +282,4 @@ if weighted_error is None:
 - 同版本 [`sdot.c`](https://github.com/InsightSoftwareConsortium/ITK/blob/v5.4.0/Modules/ThirdParty/VNL/src/vxl/v3p/netlib/blas/sdot.c)、[`snrm2.c`](https://github.com/InsightSoftwareConsortium/ITK/blob/v5.4.0/Modules/ThirdParty/VNL/src/vxl/v3p/netlib/blas/snrm2.c)、[`saxpy.c`](https://github.com/InsightSoftwareConsortium/ITK/blob/v5.4.0/Modules/ThirdParty/VNL/src/vxl/v3p/netlib/blas/saxpy.c)、[`sscal.c`](https://github.com/InsightSoftwareConsortium/ITK/blob/v5.4.0/Modules/ThirdParty/VNL/src/vxl/v3p/netlib/blas/sscal.c)：标量边界及向量操作。
 - Reuter M, Rosas HD, Fischl B. *Highly accurate inverse consistent registration: a robust approach*. NeuroImage, 2010;53:1181–1196. [DOI](https://doi.org/10.1016/j.neuroimage.2010.07.020)。
 - Dongarra JJ, Moler CB, Bunch JR, Stewart GW. *LINPACK Users' Guide*. SIAM, 1979. [DOI](https://doi.org/10.1137/1.9781611971811)。
-- 项目 [robust registration 准备态说明](../../../docs/robust_register/PREPARATION.md)。
+- 项目 [robust registration 准备态说明](../target_preparation_20261006/README.md)。

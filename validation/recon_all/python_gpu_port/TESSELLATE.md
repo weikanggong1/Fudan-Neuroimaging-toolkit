@@ -23,7 +23,7 @@ and all paired trial times are in
 | Right | 101,454 | 101,468 | 0.806 s | 0.241 s |
 
 Each hemisphere had three alternating paired file-to-file trials on
-`headcw`, using the same `filled-pretess` input. Native times include process
+`control-host`, using the same `filled-pretess` input. Native times include process
 startup; Python timing uses an already loaded process. The complete vertex
 float32 bytes, quad vertex-index bytes, and volume geometry tags matched
 the native file **byte for byte** in all trials. The command-history tag has
@@ -33,7 +33,7 @@ component in each. A single-voxel synthetic case also matched a fresh native
 surface exactly and is retained as
 [`test_tessellate_gpu.py`](test_tessellate_gpu.py).
 
-The CUDA path was then replayed in three paired trials on `gpucw1` H100 GPU 1
+The CUDA path was then replayed in three paired trials on `accelerator-a-1` H100 GPU 1
 (`CUDA_VISIBLE_DEVICES=1`, logical `cuda:0`). Both hemispheres again had
 byte-identical vertex/quad cores and volume geometry tags to fresh native
 outputs. Left native/CUDA medians were **1.398/0.255 s**; right medians were

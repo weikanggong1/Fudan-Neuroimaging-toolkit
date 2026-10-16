@@ -261,7 +261,7 @@ def main():
         late_validator_sha256=before['late_validator'], original_private_filemap_saved=False,
         scope='Additional CON08 FS8.2 CPU cold reconstruction and saved complete surface products. Original failed driver and source are preserved. Full API clock and returned total are unavailable, not reconstructed. No MRI rerun; late validation clock is separate. This does not replace the ten-case baseline.')
     public = json.dumps(report, indent=2, allow_nan=False) + '\n'
-    if any(token in public for token in ('/cwStorage/', '/home/', 'license.txt')):
+    if any(token in public for token in ('/data/shared/', '/home/', 'license.txt')):
         raise ValueError('public late report contains a private path')
     (args.output_root / 'report.public.json').write_text(public)
     print('CON08_SAVED_OUTPUTS_VERIFIED_LATE', seconds, sha256(args.output_root / 'report.public.json'))

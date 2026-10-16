@@ -15,7 +15,7 @@ flowchart TD
     B -->|是| C[绑定原命令 原始输入 SHA<br/>原新目录与实际解剖 SHA]
     D[新共同兼容 baseline<br/>独立冻结 source identity] --> E[调度前资源预检<br/>SS SM atlas fsaverage WB Python]
     E --> C
-    C --> F[nodecw10 实际重读<br/>MGZ 表面 annotation done]
+    C --> F[compute-a-10 实际重读<br/>MGZ 表面 annotation done]
     F --> G[新目录 anatomy_origin.json<br/>原始失败报告未改]
     G --> H[同一共享 GPU 锁<br/>新目录 full raw DWI TOPUP EDDY]
     H --> I[FOD ACT iFOD2 SIFT2<br/>全部所选 atlas 四矩阵]
@@ -28,7 +28,7 @@ flowchart TD
 from pathlib import Path
 from tools.benchmark_connectome_raw_rerun import main
 
-# 这些目录在 headcw、CPU 节点和 GPU 节点共同可读。
+# 这些目录在 control-host、CPU 节点和 GPU 节点共同可读。
 original_driver_report_directory = Path("/shared/tenraw/original_driver")
 controlled_report_directory = Path("/shared/tenraw/controlled_driver_v2")
 fresh_gpu_output_directory = Path("/shared/tenraw/controlled_outputs_v2")
@@ -136,7 +136,7 @@ python benchmark_connectome_raw_rerun.py export-csv \
 
 2026-10-02 已核对初次 CON01/CON03 wall 报告：均在 TOPUP/EDDY 前因 `synthstrip.1.pt` 未解析而退出，`preprocessing=[]`。旧 recovery controller 已暂停后续派发。另发现跨主机起点比较让计时错误覆盖了真实 GPU 失败；本版本改用同节点验证，并独立保留执行和计时状态。这些是已定位的编排问题，不是完成的十例 benchmark。
 
-2026-10-03：完整共同基线 v3 的 source/resource 预检通过，共核对 26 个文件及 Workbench 2.0.0 实际 `-version`。CON03 在 nodecw10 重读 14 个官方解剖文件并前后核对 11 个 raw 输入，耗时 2.570 秒，原失败报告与解剖哈希保持不变。新十例 raw DWI controller 已启动并等待共享 GPU 锁；尚无完整十例或速度/精度结论。旧控制器的最终状态另存快照后终止，仅撤回其经独立核实仍阻塞在 `flock`、无子进程的旧 worker，原始 CPU 和实际 GPU 计算均继续。
+2026-10-03：完整共同基线 v3 的 source/resource 预检通过，共核对 26 个文件及 Workbench 2.0.0 实际 `-version`。CON03 在 compute-a-10 重读 14 个官方解剖文件并前后核对 11 个 raw 输入，耗时 2.570 秒，原失败报告与解剖哈希保持不变。新十例 raw DWI controller 已启动并等待共享 GPU 锁；尚无完整十例或速度/精度结论。旧控制器的最终状态另存快照后终止，仅撤回其经独立核实仍阻塞在 `flock`、无子进程的旧 worker，原始 CPU 和实际 GPU 计算均继续。
 
 共同评测器的本轮更新包括独立 mode 的诊断原子导出、reserved 显存门槛和 allocator 环境记录。正式 wall mode 不安装诊断 hooks；新工具整体 SHA 固定并写入每例报告，不将此更新描述成纯文本修改。
 

@@ -87,7 +87,7 @@ def main():
             "basis": "nonoverlapping named phases; observed process wall includes posthoc work and is not a new paired speed comparison"}
         result["features"][feature] = report
     encoded = json.dumps(result, indent=2, allow_nan=False)
-    prohibited = ("/cwStorage/", "/home/", "/mnt/", "10.190.", "gongwk@", "private_paths", '"argv"', '"pid"')
+    prohibited = ("/data/shared/", "/home/", "/mnt/", "10.190.", "user@", "private_paths", '"argv"', '"pid"')
     if any(token in encoded for token in prohibited):
         raise ValueError("public report failed path/identity allowlist check")
     print(encoded)

@@ -1,13 +1,13 @@
 {
   "status": "not_run",
-  "reason": "BatchMode new exec to nodecw10/nodecw12 rejected from gpucw1 and existing authenticated headcw ControlMaster",
+  "reason": "BatchMode new exec to compute-a-10/compute-a-12 rejected from accelerator-a-1 and existing authenticated control-host ControlMaster",
   "routes_verified": [
-    "gpucw1 existing wrapper",
-    "headcw ControlMaster PID297987, hostname=headcw account=gongwk cwd=/cwStorage/home/gongwk"
+    "accelerator-a-1 existing wrapper",
+    "control-host ControlMaster PID297987, hostname=control-host account=benchmark-user cwd=/data/user"
   ],
   "targets": {
-    "nodecw10": "Permission denied(publickey,gssapi-keyex,gssapi-with-mic,password)",
-    "nodecw12": "Permission denied(publickey,gssapi-keyex,gssapi-with-mic,password)"
+    "compute-a-10": "Permission denied(publickey,gssapi-keyex,gssapi-with-mic,password)",
+    "compute-a-12": "Permission denied(publickey,gssapi-keyex,gssapi-with-mic,password)"
   },
   "exit_code": 255,
   "cpu_compiler_arch_flags_compatibility": "not_verified: node session not entered",
@@ -15,5 +15,5 @@
   "credential_contents_read": false,
   "shared_env_changed": false,
   "existing_native_queue_stopped": false,
-  "fallback": "continue existing gpucw1 private native queue under common lock; stop further auth-route inspection"
+  "fallback": "continue existing accelerator-a-1 private native queue under common lock; stop further auth-route inspection"
 }

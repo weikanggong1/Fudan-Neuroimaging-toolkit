@@ -31,11 +31,11 @@
 | 范围 | 实测与边界 | 记录 |
 | --- | --- | --- |
 | N4 与 EM 输入敏感性 | 自产 `nu` 相对官方仅差 2 个体素；对冻结官方 `nu`、`brainmask` 重跑 Conda `mri_em_register` 时 LTA 16/16 元素一致。两处差异在连续链中放大，不能据此断言 N4 是唯一原因 | [N4 源码构建对照](n4_source_probe_20260929.json)、[EM 配对](em_register_input_sensitivity_20260929.json) |
-| N4 同主机参考重放 | 在 gpucw1 上官方程序的 `nu` 与归档官方逐体素一致，FNIT 仍差 2 个体素；官方程序换到 headcw 后差 34 个体素 | [同主机与跨主机配对](n4_same_host_replay_20260930.json) |
+| N4 同主机参考重放 | 在 accelerator-a-1 上官方程序的 `nu` 与归档官方逐体素一致，FNIT 仍差 2 个体素；官方程序换到 control-host 后差 34 个体素 | [同主机与跨主机配对](n4_same_host_replay_20260930.json) |
 | 缺陷体积映射 | 真实 T1 冻结输入，16,777,216 个体素全部一致；新 Conda 自编译 `mri_label2vol` | [精度、时间和输入](defects_volume_20260929.json)、[函数说明](../../../docs/recon_all/DEFECTS_VOLUME.md) |
 | Talairach affine 子进程 | 冻结真实 SynthStrip 输入，XFM、LTA 与直接路径逐字节一致；需整例显存复核 | [记录](talairach_child_20260929.json) |
 | SynthSeg 显存 | 同一 T1、同一 GPU 的候选分割与旧路径逐体素一致，体积 CSV 逐字节一致；独立阶段进程采样 18,450 MiB | [记录](synthseg_memory_20260929.json)、[资源说明](../../../docs/recon_all/GPU_MEMORY.md) |
-| SynthSeg CPU 后端 | nodecw10 上 PyTorch 2.5.1 的 MKLDNN 路径段错误；关闭该后端后独立真实 T1 推理及本轮完整 CPU runner 均通过 | [阶段与测试记录](synthseg_cpu_backend_20260930.json) |
+| SynthSeg CPU 后端 | compute-a-10 上 PyTorch 2.5.1 的 MKLDNN 路径段错误；关闭该后端后独立真实 T1 推理及本轮完整 CPU runner 均通过 | [阶段与测试记录](synthseg_cpu_backend_20260930.json) |
 | BA/VPnl 注释 | 修正相同统计值时的标签顺序后，六张注释的双侧顶点编码全部与冻结参考一致 | [记录](exvivo_wiring_20260929.json)、[注释说明](LABEL2ANNOT.md) |
 | 图谱曲率 | 冻结球面上的 `avg_curv` 相关性超过 0.999999999999；四张曲率附图超过 0.999999999999999 | [函数说明及计时](../../../docs/recon_all/CURVATURE_OUTPUTS.md) |
 | Jacobian、灰白对比、SNR | 双侧 Jacobian 相关性超过 0.9999999999999；百分比图逐顶点一致；70 行 SNR 数据行一致 | [记录](surface_metrics_wiring_20260929.json)、[函数说明](../../../docs/recon_all/SURFACE_EXTRA_METRICS.md) |

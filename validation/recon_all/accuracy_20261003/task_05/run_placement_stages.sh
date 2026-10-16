@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
-stage_root=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003
-stage_subject=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/whole_sub01_candidate_8d750e2
-stage_python=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
-stage_native=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/native_bundle/bin
+stage_root=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003
+stage_subject=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/whole_sub01_candidate_8d750e2
+stage_python=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
+stage_native=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/native_bundle/bin
 export CUDA_VISIBLE_DEVICES=GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e
 export OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 NUMEXPR_NUM_THREADS=2 NUMBA_NUM_THREADS=2
-export FS_LICENSE=/cwStorage/home/gongwk/.config/freesurfer-codex/license.txt
+export FS_LICENSE=/data/user/.config/freesurfer-codex/license.txt
 export PYTHONPATH="$stage_root/task_05/source/src"
 export NUMBA_CACHE_DIR="$stage_root/task_05/numba_cache"
 mkdir -p "$NUMBA_CACHE_DIR" "$stage_root/task_05/placement_v1"
@@ -22,12 +22,12 @@ for hemisphere in lh rh; do
       flock 9
       printf '{"status":"running","stage":"%s","overall_equivalence":"not_assessed"}\n' "$stage_name" > "$stage_root/task_05/placement_receipt.json"
       if [[ "$backend" == official ]]; then
-        stage_binary=/public/software/apps/Freesurfer/8.2.0-1/bin/mris_place_surface
-        stage_assets=/public/software/apps/Freesurfer/8.2.0-1
+        stage_binary=/opt/reference/Freesurfer/8.2.0-1/bin/mris_place_surface
+        stage_assets=/opt/reference/Freesurfer/8.2.0-1
       else
         stage_binary="$stage_native/mris_place_surface"
         if [[ "$kind" != pial ]]; then stage_binary="$stage_native/mris_place_surface_white_fast"; fi
-        stage_assets=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets
+        stage_assets=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets
       fi
       set +e
       "$stage_python" "$stage_root/task_05/source/validation/recon_all/accuracy_20261003/task_05/placement_probe.py" \

@@ -35,7 +35,7 @@ MGH 头。现从 `nu.mgz` 复制头部、将数据写成 float32；两张图各
 与官方均一致。MGZ 压缩文件哈希不同，不能视为文件逐字节相同。
 [输入/输出哈希和逐项结果](aux_seg_same_input_20260927.json)。
 
-headcw CPU 4 线程独立 Python 调用耗时 MCA/dura 4.65 秒、静脉窦
+control-host CPU 4 线程独立 Python 调用耗时 MCA/dura 4.65 秒、静脉窦
 7.01 秒；归档的官方 recon-all 日志分别记录 118 秒、55 秒。
 两者不是同时间、同负载的配对速度试验，不据此宣称稳定加速。
 修复后 `test_aux_seg.py` **4/4 通过**。接入整例前仍须生成并验收

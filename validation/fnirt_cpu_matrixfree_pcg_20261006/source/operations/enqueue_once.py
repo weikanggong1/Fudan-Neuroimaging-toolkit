@@ -7,7 +7,7 @@ import subprocess
 import sys
 import time
 
-ROOT = Path("/cwStorage/home/gongwk/Notebook_code/FNIT")
+ROOT = Path("/data/fnit")
 LEAF = "smri_cpu_20261004/remaining_20261006/fnirt-matrixfree-pcg-v1"
 FREEZE = "7ee1eb753514693ff7f00c64cdea43c12fcfb2d83293b717c8db3deeef9166fd"
 

@@ -197,6 +197,6 @@ raw 失败记 `skipped_algorithm_not_complete`；等待超时记 `skipped_raw_wa
 
 `runtime/evaluation_only_recovery_20261005/existing_config_plan.template.json` 仅基于耐久归档中实际存在的 sub10159/sub07 配置提供结构模板，保留 canonical 服务器路径与归档 SHA；它并未证明服务器当前状态。独立评估工具和新配置路径是待填写项，模板不用于直接启动。协调者先现场核验每个 actual 路径与 SHA，删去尚未生成的 case，再填写新冻结工具/config 的路径及 SHA。已有部分比较 output 不复用。原 22 项测试证据保留为 `receipt.json`/`tests.log`；本轮审查后的源码与回归另存，避免旧证据改标。
 
-2026-10-05实际部署使用冻结ed16工具，queue脚本SHA为 `42f34188719a8e3fbe65d86f03ff7daf2e568b7a467de075c4b87958fc8c5ecf`。先为已核验的sub-10159安装全新单例plan并通过原gpucw1完整预检，再读取现场已存在的10171、10189、10193实际配置，为这三例另建独立plan、配置和输出。四例全部预检通过，两条队列已启动，每个比较阶段使用同一个共享锁及4线程预算；没有启动admission或raw进程，没有修改原始结果、旧失败checkpoint或正在运行的plan。启动记录与数值完成状态分别保存，数值结果仍须由完整18阶段checkpoint确认。
+2026-10-05实际部署使用冻结ed16工具，queue脚本SHA为 `42f34188719a8e3fbe65d86f03ff7daf2e568b7a467de075c4b87958fc8c5ecf`。先为已核验的sub-10159安装全新单例plan并通过原accelerator-a-1完整预检，再读取现场已存在的10171、10189、10193实际配置，为这三例另建独立plan、配置和输出。四例全部预检通过，两条队列已启动，每个比较阶段使用同一个共享锁及4线程预算；没有启动admission或raw进程，没有修改原始结果、旧失败checkpoint或正在运行的plan。启动记录与数值完成状态分别保存，数值结果仍须由完整18阶段checkpoint确认。
 
 取消对队列 PID 发送 `SIGTERM` 即可；不要向 raw PID 或 admission PID 发信号。等待阶段事件即时唤醒；评估阶段只处理队列创建的自有进程组，TERM 后最多等待 5 秒再 KILL。一次取消/超时只执行一次清理，避免重复等待后代退出。

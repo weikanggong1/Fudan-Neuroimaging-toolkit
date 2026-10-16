@@ -4,7 +4,7 @@ This is a **connected replay from saved candidate stages**, not a fresh
 single-process T1-to-recon-all run. The deidentified input is
 `examples/data/sub-01_T1w.nii.gz` (SHA-256
 `f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a`);
-the comparison subject is completed FreeSurfer 8.2 `a_official` on gpucw1.
+the comparison subject is completed FreeSurfer 8.2 `a_official` on accelerator-a-1.
 The new **fully candidate-input LH replay** passes no official image,
 label, or surface into reconstruction operators. The official subject is
 read by the probes only for paired comparison. The older mixed-input

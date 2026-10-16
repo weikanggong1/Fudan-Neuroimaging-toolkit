@@ -283,13 +283,13 @@ def official_call(args, config, out, repeat):
         if direction.endswith('-'):timings=timings[::-1]
         np.savetxt(out/'timings.1D',timings[None],fmt='%.15g')
         target=float(np.round(timings.min()+args.slice_time_reference*np.ptp(timings),3))
-        command=[config['singularity'],'exec','--cleanenv','--bind','/cwStorage,/home1,/public','--env',f'OMP_NUM_THREADS={args.threads},MKL_NUM_THREADS={args.threads},OPENBLAS_NUM_THREADS=1,NUMEXPR_NUM_THREADS={args.threads}',config['fmriprep_image'],config['afni_tshift'],
+        command=[config['singularity'],'exec','--cleanenv','--bind','/data/shared,/home1,/public','--env',f'OMP_NUM_THREADS={args.threads},MKL_NUM_THREADS={args.threads},OPENBLAS_NUM_THREADS=1,NUMEXPR_NUM_THREADS={args.threads}',config['fmriprep_image'],config['afni_tshift'],
                  '-Fourier','-TR',str(meta['RepetitionTime'])+'s','-tzero',str(target),'-ignore',str(args.ignore),
                  '-tpattern','@'+str(out/'timings.1D'),'-prefix',str(out/'stc.nii.gz'),p['bold']]
         return dict(original(command,out),complete_frames=p['bold_shape'][3],StartTime=target)
     if args.function == 'sampling_reference':
         script=Path(config['reference_tools_root'])/'e2e_latest/make_original_sampling_reference.py'
-        command=[config['singularity'],'exec','--cleanenv','--bind','/cwStorage,/home1,/public','--env',f'OMP_NUM_THREADS={args.threads},MKL_NUM_THREADS={args.threads},OPENBLAS_NUM_THREADS=1,NUMEXPR_NUM_THREADS={args.threads}',config['fmriprep_image'],'/app/.pixi/envs/fmriprep/bin/python',str(script),
+        command=[config['singularity'],'exec','--cleanenv','--bind','/data/shared,/home1,/public','--env',f'OMP_NUM_THREADS={args.threads},MKL_NUM_THREADS={args.threads},OPENBLAS_NUM_THREADS=1,NUMEXPR_NUM_THREADS={args.threads}',config['fmriprep_image'],'/app/.pixi/envs/fmriprep/bin/python',str(script),
             '--fixed',config['sampling_t1'],'--moving',config['sampling_moving'],'--mask',config['sampling_t1_mask'],
             '--work',str(out/'sampling_work'),'--output',str(out/'sampling_reference.nii.gz'),'--report',str(out/'sampling_reference.safe.json')]
         with (out/'native.private.log').open('wb') as log:
@@ -303,7 +303,7 @@ def official_call(args, config, out, repeat):
         cache=Path(config['official_templateflow_cache'])
         work=args.output/'work';work.mkdir(exist_ok=True)
         home=args.output/'runtime_home';home.mkdir(exist_ok=True)
-        command=[config['singularity'],'exec','--cleanenv','--bind',f'/cwStorage,/home1,/public,{cache}:/reference-templateflow','--home',f'{home}:/home/reference','--env',f'TEMPLATEFLOW_HOME=/reference-templateflow,OMP_NUM_THREADS={args.threads},MKL_NUM_THREADS={args.threads},OPENBLAS_NUM_THREADS=1,NUMEXPR_NUM_THREADS={args.threads},ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={args.threads}',config['fmriprep_image'],
+        command=[config['singularity'],'exec','--cleanenv','--bind',f'/data/shared,/home1,/public,{cache}:/reference-templateflow','--home',f'{home}:/home/reference','--env',f'TEMPLATEFLOW_HOME=/reference-templateflow,OMP_NUM_THREADS={args.threads},MKL_NUM_THREADS={args.threads},OPENBLAS_NUM_THREADS=1,NUMEXPR_NUM_THREADS={args.threads},ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={args.threads}',config['fmriprep_image'],
             '/app/.pixi/envs/fmriprep/bin/fmriprep',p['pipeline']['bids_root'],str(args.output/'derivatives'),
             'participant','--participant-label',p['pipeline']['subject'],'--fs-no-reconall',
             '--fs-license-file',license_path,

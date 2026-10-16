@@ -1,6 +1,6 @@
 # 原生 MRtrix iFOD2/ACT 追踪
 
-[完整 pipeline](README.md) · [最新版端到端验证](../../validation/connectome/native_tracking_20261009/README.md) · [历史 PyTorch 追踪结果](../../validation/connectome/tracking_cfff_20261009/README.md)
+[完整 pipeline](README.md) · [最新版端到端验证](../../validation/connectome/native_tracking_20261009/README.md) · [历史 PyTorch 追踪结果](../../validation/connectome/tracking_accelerator-b_20261009/README.md)
 
 ## 1. 功能与流程
 
@@ -273,14 +273,14 @@ FNIT 下游的对应命令为 `tcksift2`、`tcksample -precise -stat_tck mean` �
 | 版本/日期 | 变化与证据 |
 | --- | --- |
 | 原生追踪 / 2026-10-09 | 用 FNIT 独立源码构建的固定 `tckgen` 替换 PyTorch iFOD2/ACT；增加 `tracking_threads`，保留双精度几何、精准 FA 和未知种子语义；缓存绑定 native 程序、库与补丁。[本版报告](../../validation/connectome/native_tracking_20261009/README.md)。 |
-| [`6ae32945`](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/commit/6ae3294513be8cd9d9df8b92846f3235913c1955) / 2026-10-09，历史 PyTorch | eager SH 数据流优化；此前 A100 的 [10k](../../validation/connectome/tracking_cfff_20261009/sh_preserved_10k.public.json)、[100k eager](../../validation/connectome/tracking_cfff_20261009/sh_preserved_default_100k.public.json)、[100k compiled](../../validation/connectome/tracking_cfff_20261009/sh_preserved_compiled_100k.public.json) 与[独立 MRtrix](../../validation/connectome/tracking_cfff_20261009/mrtrix_100k.public.json)均保留原源码和计时边界。它们不验证本版。 |
+| [`6ae32945`](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/commit/6ae3294513be8cd9d9df8b92846f3235913c1955) / 2026-10-09，历史 PyTorch | eager SH 数据流优化；此前 A100 的 [10k](../../validation/connectome/tracking_accelerator-b_20261009/sh_preserved_10k.public.json)、[100k eager](../../validation/connectome/tracking_accelerator-b_20261009/sh_preserved_default_100k.public.json)、[100k compiled](../../validation/connectome/tracking_accelerator-b_20261009/sh_preserved_compiled_100k.public.json) 与[独立 MRtrix](../../validation/connectome/tracking_accelerator-b_20261009/mrtrix_100k.public.json)均保留原源码和计时边界。它们不验证本版。 |
 | 2026-10-03，历史精度轮 | SGM 截断的局部精度修正与十例完整结果，见[精度汇总](ACCURACY_OPTIMIZATION_20261003.md)及[原始结果](../../validation/connectome/accuracy_20261003/final_cohort_summary_v1/README.md)。旧 PyTorch 全流程的未匹配项保留，不归入本版验收。 |
 
 历史真实脑图仅作为前版记录：
 
-![历史 6ae32945 的 FNIT PyTorch 与官方 MRtrix 真实流线投影；不是本版原生追踪结果](../../validation/connectome/tracking_cfff_20261009/real100k_qc.png)
+![历史 6ae32945 的 FNIT PyTorch 与官方 MRtrix 真实流线投影；不是本版原生追踪结果](../../validation/connectome/tracking_accelerator-b_20261009/real100k_qc.png)
 
-图的真实输入、流线 SHA 与显示范围见[历史 QC JSON](../../validation/connectome/tracking_cfff_20261009/real100k_qc.public.json)。最新版图与验收结果见第 5 节。
+图的真实输入、流线 SHA 与显示范围见[历史 QC JSON](../../validation/connectome/tracking_accelerator-b_20261009/real100k_qc.public.json)。最新版图与验收结果见第 5 节。
 
 ## 7. 原实现与参考文献
 

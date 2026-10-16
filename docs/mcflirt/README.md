@@ -1,4 +1,6 @@
-# MCFLIRT：BOLD运动校正
+# FNIT_mcflirt
+
+> 统一 Python 入口：[`FNIT_mcflirt`](../API_REFERENCE.md)，从 `fnit` 导入。下文配置、结果类型和细分算子保留高级兼容接口。
 
 | 项目 | 内容 |
 |---|---|
@@ -19,12 +21,12 @@ CPU 使用独立的有序 Numba 采样与 cost 内核，保持 float32 坐标、
 ## 2. Python 调用
 
 ```python
-from fnit.mcflirt import TorchMCFLIRT
+from fnit import FNIT_mcflirt
 
 input_bold_path = "/data/sub-01_task-rest_bold.nii.gz"  # 完整4D原始BOLD
 reference_image_path = "/data/sub-01_task-rest_sbref.nii.gz"  # 同网格3D SBRef
 corrected_output_prefix = "/data/motion/prefiltered_func_data_mcf"  # 输出文件前缀
-motion_result = TorchMCFLIRT(device="cuda:0").run(
+motion_result = FNIT_mcflirt(device="cuda:0").run(
     input_bold=input_bold_path, reference=reference_image_path,
     output=corrected_output_prefix, mats=True, plots=True,
     interpolation="spline",  # 连续BOLD的最终三阶样条
@@ -82,11 +84,11 @@ reference网格和输入时间轴/TR保留；矩阵为每帧input→reference sc
 ### 只取得运动矩阵
 
 ```python
-from fnit.mcflirt import TorchMCFLIRT
+from fnit import FNIT_mcflirt
 
 input_bold_path = "/data/sub-01_task-rest_bold.nii.gz"  # 待估计的全部帧
 reference_image_path = "/data/sub-01_task-rest_sbref.nii.gz"  # 同网格参考
-motion_estimate = TorchMCFLIRT(device="cuda:0").run(
+motion_estimate = FNIT_mcflirt(device="cuda:0").run(
     input_bold=input_bold_path, reference=reference_image_path,
     resample=False, output=None,  # 返回矩阵，保留原始影像供后续一次重采样
 )

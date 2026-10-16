@@ -1,6 +1,6 @@
 # recon-all 十分钟目标：超过 100 秒阶段与优化任务
 
-本页绑定当前工作树的真实阶段记录，不把历史报告当作新整例结果。记录来自冻结 `3a0c9aba6321b4981fd8174b4b191515459aa38b` 的九例 FNIT 运行；每例使用同一台 gpucw1、四线程和 `cuda:0`。当前九例 FNIT 中位数为 2669.520 秒，尚未达到 600 秒目标。
+本页绑定当前工作树的真实阶段记录，不把历史报告当作新整例结果。记录来自冻结 `3a0c9aba6321b4981fd8174b4b191515459aa38b` 的九例 FNIT 运行；每例使用同一台 accelerator-a-1、四线程和 `cuda:0`。当前九例 FNIT 中位数为 2669.520 秒，尚未达到 600 秒目标。
 
 ## 实测热点
 
@@ -19,13 +19,13 @@
 
 ### 本轮低风险候选：白质当前网格桶索引
 
-`place_surface_self_repulsion.vertex_buckets_current` 在 `resolution != 1` 的目标函数路径中原先每次用 Python `dict/list` 重建 MHT 桶。候选实现先按原规则用 float32 缩放坐标，再复用已有 `OriginalVertexBuckets` 的 Numba CSR 查询；桶成员仍按顶点编号升序，偏移和候选顺序保持不变。回归测试见 `tests/recon_all/test_white_repulsion_buckets.py`，覆盖负坐标、边界坐标、多个 spacing 和 rip mask。headcw 的 FNIT Conda 环境中，16 万顶点、3% ripped、0.7 mm spacing 的 7 次微基准中位数由 0.2821 s 降至 0.0462 s（6.10 倍），CSR 候选逐元素一致；完整收据见 `validation/recon_all/optimizations/20261007/white_bucket_microbenchmark.json`。这只是内核微基准，真实白/pial 和端到端尚未重跑，不能把 6.10 倍外推为整例提速。
+`place_surface_self_repulsion.vertex_buckets_current` 在 `resolution != 1` 的目标函数路径中原先每次用 Python `dict/list` 重建 MHT 桶。候选实现先按原规则用 float32 缩放坐标，再复用已有 `OriginalVertexBuckets` 的 Numba CSR 查询；桶成员仍按顶点编号升序，偏移和候选顺序保持不变。回归测试见 `tests/recon_all/test_white_repulsion_buckets.py`，覆盖负坐标、边界坐标、多个 spacing 和 rip mask。control-host 的 FNIT Conda 环境中，16 万顶点、3% ripped、0.7 mm spacing 的 7 次微基准中位数由 0.2821 s 降至 0.0462 s（6.10 倍），CSR 候选逐元素一致；完整收据见 `validation/recon_all/optimizations/20261007/white_bucket_microbenchmark.json`。这只是内核微基准，真实白/pial 和端到端尚未重跑，不能把 6.10 倍外推为整例提速。
 
 1. **white/pial 碰撞内核（已提交候选，待同输入回归）**
    - 文件：`src/fnit/recon_all/place_surface_self_repulsion.py`。
    - 方法：用 Numba 标记数组执行一/二环邻域 membership，保留候选顺序、累加顺序和 float32 运算；避免每个空间桶候选再次线性扫描邻域。
    - 依据：冻结真实白质 placement 记录中 collision 约 473.8 秒，明显高于 gradient 约 63.4 秒和 objective 约 51.2 秒。
-   - 当前验证：gpucw1 合成网格逐元素回归通过（新旧 force 差异 0，energy 有限）；真实 white/pial 未重跑，不能宣称几何等效或达到 600 秒。合成回归机器报告见 [kernel_regression_20261007.json](../../validation/recon_all/accuracy_20261003/runtime/kernel_regression_20261007.json)。
+   - 当前验证：accelerator-a-1 合成网格逐元素回归通过（新旧 force 差异 0，energy 有限）；真实 white/pial 未重跑，不能宣称几何等效或达到 600 秒。合成回归机器报告见 [kernel_regression_20261007.json](../../validation/recon_all/accuracy_20261003/runtime/kernel_regression_20261007.json)。
 
 2. **拓扑/remesh/standard sphere**
    - 先保持动态 collapse、实时邻接和面接受顺序；不能机械并行或改成半精度。
@@ -56,10 +56,10 @@
 
 ## 当前提交的原始 T1 端到端测评（2026-10-07）
 
-本次以当前提交 `84713e749b38c34858a78e1cdbc1e0dd69108840` 在 gpucw1 的 H100 PCIe 上，从空输出目录启动真实 `sub-01_T1w.nii.gz`。配置为 `cuda:0`、四线程、双半球 worker、默认 TF32 策略，未启用 FP16/BF16。生产进程只读取原始 T1、FNIT 权重/资产和 FNIT 独立编译的 native bundle；没有读取官方参考输出。
+本次以当前提交 `84713e749b38c34858a78e1cdbc1e0dd69108840` 在 accelerator-a-1 的 H100 PCIe 上，从空输出目录启动真实 `sub-01_T1w.nii.gz`。配置为 `cuda:0`、四线程、双半球 worker、默认 TF32 策略，未启用 FP16/BF16。生产进程只读取原始 T1、FNIT 权重/资产和 FNIT 独立编译的 native bundle；没有读取官方参考输出。
 
 首个启动使用主页默认环境，在依赖检查阶段 6.567 秒因缺少 `tifffile` 退出。这不是算法计时。随后切换到仓库已有、包含该依赖的 FNIT 环境重新从原始 T1 启动。该运行至少完成 27 个阶段，已观测的阶段时间包括：`input_talairach` 34.2 s、`n4` 122.5 s、`SynthSeg` 15.4 s、`mri_em_register` 179.1 s、`mri_segment` 48.6 s、`mri_fill` 50.0 s、`mni_nonlinear` 63.1 s、`surface_hemisphere_group` 678.4 s、`register_hemisphere_group` 213.8 s、`annotation_hemisphere_group` 144.0 s；其余已完成阶段见同目录的机器可读收据。27 个阶段计时的嵌套和为 1778.4 s，不能当作墙钟总时间。
 
-在完成 annotation 阶段后，gpucw1 的 SSH 控制链停止返回摘要文件，因此最终 white/pial、统计、输出完整性、网格质量、同期显存和真实端到端 `total_seconds` 尚未取回。此次运行收据明确标记为 `end_to_end_status=not_retrieved`，不是成功 benchmark；600 秒目标在最终表面和统计尚未执行前已经不可能达到。本次部分结果不改变之前九例的 2669.520 s 中位数基线，也不替代严格复现和整体指标等效评估。
+在完成 annotation 阶段后，accelerator-a-1 的 SSH 控制链停止返回摘要文件，因此最终 white/pial、统计、输出完整性、网格质量、同期显存和真实端到端 `total_seconds` 尚未取回。此次运行收据明确标记为 `end_to_end_status=not_retrieved`，不是成功 benchmark；600 秒目标在最终表面和统计尚未执行前已经不可能达到。本次部分结果不改变之前九例的 2669.520 s 中位数基线，也不替代严格复现和整体指标等效评估。
 
 机器可读记录：`validation/recon_all/optimizations/20261007/e2e_sub01_current_main_partial.json`。后续应在控制链恢复后只读取同一输出目录的 `e2e_summary.json` 和 `fnit-native-free-run.json`，不重复启动或覆盖本次 run。

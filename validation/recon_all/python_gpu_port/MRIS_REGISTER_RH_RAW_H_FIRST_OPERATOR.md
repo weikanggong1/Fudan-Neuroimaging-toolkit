@@ -10,12 +10,12 @@ registration schedule. The captured native raw H hash is
 identical to the previous raw H reference used for default RH `debug0056`.
 It does not validate a `-N 1` final surface as the default result.
 
-The [native capture](mris_register_rh_smoothwm_native_capture_headcw.json) and
-[full-array comparison](mris_register_rh_smoothwm_first_operator_headcw.json)
+The [native capture](mris_register_rh_smoothwm_native_capture_control-host.json) and
+[full-array comparison](mris_register_rh_smoothwm_first_operator_control-host.json)
 are produced by the [read-only GDB capture](capture_mris_register_rh_smoothwm_normal.gdb)
 and [Python probe](probe_mris_register_rh_smoothwm_first_operator.py). The
 remote arrays remain in
-`/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_python_gpu_20260925/mris_register_rh_raw_vertex_probe_20260926`.
+`/data/workspaces/freesurfer_synth/work/reconall_python_gpu_20260925/mris_register_rh_raw_vertex_probe_20260926`.
 The capture and comparison source hashes are respectively
 `14f93050b112a67329eee9bcdd0797ee4e7ced7147b3a09fa928bfde8fef7f27`
 and `6acb5bb3bd60d9f48731cc04cd28a3d375e718e5fee01dc1e03f119265923a2b`.

@@ -1,6 +1,6 @@
 # fMRI volume 修复与真实数据复测
 
-2026-10-01，在 gpucw1 上用 `3b9b0f8128f10da77d3fbb6c395e9127353c3e46` 完整处理一例真实 UKB 的 490 帧 BOLD，使用该提交的 FLIRT、SynthMorph、ICA-AROMA、WM/CSF/24 项运动回归。运行时没有调用 FSL、FreeSurfer、AFNI 或封装软件；原 FSL 仅用于独立参照。
+2026-10-01，在 accelerator-a-1 上用 `3b9b0f8128f10da77d3fbb6c395e9127353c3e46` 完整处理一例真实 UKB 的 490 帧 BOLD，使用该提交的 FLIRT、SynthMorph、ICA-AROMA、WM/CSF/24 项运动回归。运行时没有调用 FSL、FreeSurfer、AFNI 或封装软件；原 FSL 仅用于独立参照。
 
 本页记录的是组织预滤波修复前的 SynthMorph 分支。修复后当前 FNIRT 分支与原软件的完整同步骤结果见[最新对照](matched_native.md)。
 

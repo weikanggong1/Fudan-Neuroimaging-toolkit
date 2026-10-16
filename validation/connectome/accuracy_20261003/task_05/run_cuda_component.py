@@ -24,7 +24,7 @@ def main():
     source=root/'current/src/fnit/connectome/assignment.py'
     reference=root/'common_matrix_reference_cpu_v1/report.json'
     files={str(path):sha(path) for path in [worker,helper,source,reference]}
-    command=['flock','/tmp/fnit-recon-five-20261002-gongwk.gpu.lock','env',
+    command=['flock','/tmp/fnit-recon-five-20261002-benchmark-user.gpu.lock','env',
         'CUDA_VISIBLE_DEVICES=GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba',
         'PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True','OMP_NUM_THREADS=8','MKL_NUM_THREADS=8','OPENBLAS_NUM_THREADS=8',
         args.python,str(worker),'--source',str(source),'--reference',str(reference),'--device','cuda:0',

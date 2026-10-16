@@ -95,15 +95,15 @@ def main():
     setup_started = monotonic()
     root = args.root.resolve()
     raw_path = root.parent.parent / "examples/data/sub-01_T1w.nii.gz"
-    mri = root.parent / "reconall_reference_gpucw1/fs_sub01/mri"
+    mri = root.parent / "reconall_reference_accelerator-a-1/fs_sub01/mri"
     references_root = root.parent / "fnit_subregions_plus_20260928"
     if args.structure == "thalamus":
-        reference = references_root / "official_thalamus_gpucw1_full_sub01_20260929/ThalamicNuclei.FSvoxelSpace.mgz"
+        reference = references_root / "official_thalamus_accelerator-a-1_full_sub01_20260929/ThalamicNuclei.FSvoxelSpace.mgz"
         recipe_class = ThalamusRecipe
         offset = 0
     else:
         side = "lh" if args.structure.endswith("left") else "rh"
-        reference = references_root / "official_hippo_gpucw1_full_sub01_20260929" / (side + ".hippoAmygLabels.FSvoxelSpace.mgz")
+        reference = references_root / "official_hippo_accelerator-a-1_full_sub01_20260929" / (side + ".hippoAmygLabels.FSvoxelSpace.mgz")
         recipe_class = HippoAmygdalaRecipe
         offset = 10000 if side == "rh" else 0
     original = nib.load(raw_path)

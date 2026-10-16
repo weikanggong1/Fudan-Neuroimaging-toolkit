@@ -65,7 +65,7 @@ FSL 6.0.7.4 不接受 FNIT 的 `--niter`；它使用不同的求逆算法及约�
 
 ## 5. 完整真实输入的精度与时间
 
-nodecw10 上使用同一完整病例及相同物理 CPU 亲和性，保持 30 次最大修正、0.01 mm 阈值和完整读写。每项各一次 instrumented API 观察；入口模块导入排除，调用内部的惰性 Numba 导入及 JIT 包含。步骤时间已包含于完整 API，不能重复相加。
+compute-a-10 上使用同一完整病例及相同物理 CPU 亲和性，保持 30 次最大修正、0.01 mm 阈值和完整读写。每项各一次 instrumented API 观察；入口模块导入排除，调用内部的惰性 Numba 导入及 JIT 包含。步骤时间已包含于完整 API，不能重复相加。
 
 | CPU 上限 | 优化前完整 API | FP64 融合完整 API | 优化前 32 次归一化 | 融合 32 次归一化 | RSS 峰值 KiB，前 → 后 |
 |---|---:|---:|---:|---:|---:|
@@ -128,7 +128,7 @@ nodecw10 上使用同一完整病例及相同物理 CPU 亲和性，保持 30 �
 
 ### 最新 H100 source28 门槛
 
-最新 [GPU28 完整报告](../../validation/multimodal_cpu_20261004/gpu_cpu_final_v28_ready_retry_20261004.public.json)绑定当前 Inv/Convert/Apply 与 normalizer 的实际 SHA。完整系数反场 16 次保存的 18,808,200 值、header、extensions、affine 均与起始 FNIT `1d31e7b` 逐位一致，各调用 peak allocation 均为 1,275,725,824 B。两组完整 API 中位数为基线 4.298/4.094 s、v28 3.870/3.993 s；包含全部读取、求逆与保存，排除进程启动和入口导入，函数内惰性导入计入。同期完整六层三阶段 TBSS 的四张输出和对应显存峰值也相同，两例共 32 次完整保存。GPU 使用同 UUID、TF32、20 GB 上限，输入和源码前后 SHA 通过；共享时钟不作稳定速度结论。最新 nodecw8 CPU1/8 官方完整进程中位数为 35.878/50.899 s、36.679/21.661 s（FSL/FNIT），单核仍慢；[源 v28 专页](../invwarp/CPU_ALLOCATION_20261004.md)保留协议、精度及分步骤记录。
+最新 [GPU28 完整报告](../../validation/multimodal_cpu_20261004/gpu_cpu_final_v28_ready_retry_20261004.public.json)绑定当前 Inv/Convert/Apply 与 normalizer 的实际 SHA。完整系数反场 16 次保存的 18,808,200 值、header、extensions、affine 均与起始 FNIT `1d31e7b` 逐位一致，各调用 peak allocation 均为 1,275,725,824 B。两组完整 API 中位数为基线 4.298/4.094 s、v28 3.870/3.993 s；包含全部读取、求逆与保存，排除进程启动和入口导入，函数内惰性导入计入。同期完整六层三阶段 TBSS 的四张输出和对应显存峰值也相同，两例共 32 次完整保存。GPU 使用同 UUID、TF32、20 GB 上限，输入和源码前后 SHA 通过；共享时钟不作稳定速度结论。最新 compute-a-8 CPU1/8 官方完整进程中位数为 35.878/50.899 s、36.679/21.661 s（FSL/FNIT），单核仍慢；[源 v28 专页](../invwarp/CPU_ALLOCATION_20261004.md)保留协议、精度及分步骤记录。
 
 ### 历史 H100 source26 门槛
 

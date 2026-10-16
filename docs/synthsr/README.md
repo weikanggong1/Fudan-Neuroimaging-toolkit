@@ -1,4 +1,6 @@
-# SynthSR：从单幅扫描合成 1 mm T1w
+# FNIT_SynthSR
+
+> 统一 Python 入口：[`FNIT_SynthSR`](../API_REFERENCE.md)，从 `fnit` 导入。下文配置、结果类型和细分算子保留高级兼容接口。
 
 [返回首页](../../README.md) · [完整旧文档与更早证据](../../validation/synthsr/readme_archive_20261005.md)
 
@@ -29,9 +31,9 @@ flowchart LR
 ## 2. Python 调用
 
 ```python
-from fnit import SynthSR
+from fnit import FNIT_SynthSR
 
-super_resolution_model = SynthSR(
+super_resolution_model = FNIT_SynthSR(
     weights=None,  # None 按 FNIT 配置查找权重；也可指定 HDF5 文件或目录
     device="cuda:0",  # 指定计算设备；"cpu" 使用 CPU
     lowfield=False,  # False 使用通用模型；True 选择低场单输入模型
@@ -152,7 +154,7 @@ mri_synthsr --i case_FLAIR.nii.gz --o reference/case_synthsr.nii.gz --threads 4
 
 ## 5. 最新精度和运行时间
 
-本轮冻结生产源码 `source_sr_v2`，同一 CC0 OpenNeuro ds003138 v1.0.1 原始 T1、相同官方通用权重。nodecw7 使用核 `0,4,8,12,16,20,24,28`、Torch/OMP/MKL/NumBa 8 线程及专属锁；原版为 FreeSurfer 8.2.0-1 / TensorFlow 2.13.1。原完整图参考与最终输出 SHA 保持，未关闭其融合。源码、输入、权重、原程序 SHA 和完整数值报告见[验证页](../../validation/smri_cpu/synth_fixes_20261004/sr_cpu_followup/README.md)。
+本轮冻结生产源码 `source_sr_v2`，同一 CC0 OpenNeuro ds003138 v1.0.1 原始 T1、相同官方通用权重。compute-a-7 使用核 `0,4,8,12,16,20,24,28`、Torch/OMP/MKL/NumBa 8 线程及专属锁；原版为 FreeSurfer 8.2.0-1 / TensorFlow 2.13.1。原完整图参考与最终输出 SHA 保持，未关闭其融合。源码、输入、权重、原程序 SHA 和完整数值报告见[验证页](../../validation/smri_cpu/synth_fixes_20261004/sr_cpu_followup/README.md)。
 
 ### 完整数值门
 
@@ -193,7 +195,7 @@ API 采样 RSS 从旧约 10.219 GB 降至候选约 7.485 GB；其中都包含 17
 
 ### CUDA 保存原行为
 
-gpucw1 H100 GPU0 的公共锁下，同一完整原始 T1 执行旧/新/新/旧；预算为 20,000,000,000 B。候选及旧重复与首个旧 GPU 参考：两 CNN、最终浮点、uint8、affine、header、NIfTI/NPZ 文件 SHA 全同，CPU helper 均未导入，卷积参数 stride 保持。allocated 峰值均为 **10,006,443,008 B**，reserved 均为 **13,845,397,504 B**。
+accelerator-a-1 H100 GPU0 的公共锁下，同一完整原始 T1 执行旧/新/新/旧；预算为 20,000,000,000 B。候选及旧重复与首个旧 GPU 参考：两 CNN、最终浮点、uint8、affine、header、NIfTI/NPZ 文件 SHA 全同，CPU helper 均未导入，卷积参数 stride 保持。allocated 峰值均为 **10,006,443,008 B**，reserved 均为 **13,845,397,504 B**。
 
 完整诊断 API 旧 7.001/7.256 s、新 6.234/6.463 s，两 CNN 旧 0.549+0.401 / 0.550+0.331 s、新 0.550+0.405 / 0.533+0.403 s。GNU wall 旧 19.43/17.79 s、新 16.05/15.59 s；包含 CUDA bootstrap、CNN 追踪复制、额外私有数组保存和评分。GPU 外部利用率 97–100%，这些污染时钟只作观察，不宣称稳定 GPU 加速。另行正常CLI仅保存NIfTI，包含20GB设置和12元素CUDA probe的冷bootstrap：旧12.14/11.25 s、新11.36/11.29 s；输出及显存仍全同。[正常GPU CLI报告](../../validation/smri_cpu/synth_fixes_20261004/sr_cpu_followup/reports/sr_normal_gpu_cli_v1.public.json)的评分在所有CLI之后执行。
 
@@ -211,7 +213,7 @@ gpucw1 H100 GPU0 的公共锁下，同一完整原始 T1 执行旧/新/新/旧�
 | 2026-10-04，独立 Eigen ELU/BN 诊断 | 首层阶段全同；完整浮点仍有 172 点失败、量化192点差1，未接入。实际原整图 profiler 揭示18个融合 Conv+Bias+ELU，隔离 raw+ELU equality 不替代整图门。 |
 | 2026-10-04，较早逐 Torch ELU 原型 | API66.815 s、浮点1,935点失败、量化457点差1；更慢且未通过，未接入。[原记录](../../validation/smri_cpu/synth_fixes_20261004/README.md)保留。 |
 | 2026-10-04，`task5_candidate_cpu_v5` | 完全物化 SpatialImage API 与旧 FNIT NIfTI/NPZ 逐值及文件 SHA 同；旧官方浮点门仍失败。API29.987 s，含评分进程41.545 s。[物化入口报告](../../validation/smri_cpu/strip_sr_20261004/in_memory_20261004/README.md)。 |
-| 2026-10-04，原 `1d31e7baa` 网络 | nodecw10 的9个参数/7个域格式场景量化容差通过，默认 T1 浮点3,522点失败。正常默认两例官方/FNIT中位62.810/42.800、80.869/45.947 s；低场/EPI部分较慢。[原 CPU 记录](../../validation/smri_cpu/strip_sr_20261004/README.md)，不与本轮 nodecw7 时间除比。 |
+| 2026-10-04，原 `1d31e7baa` 网络 | compute-a-10 的9个参数/7个域格式场景量化容差通过，默认 T1 浮点3,522点失败。正常默认两例官方/FNIT中位62.810/42.800、80.869/45.947 s；低场/EPI部分较慢。[原 CPU 记录](../../validation/smri_cpu/strip_sr_20261004/README.md)，不与本轮 compute-a-7 时间除比。 |
 | 2026-09-27，源码树 `7b5bc19e…` | 12例临床 TF32 GPU 历史对照，平均 MAE0.02314、最大差9，GPU命令中位14.45 s、allocated13,780 MiB；非逐值等价且不同运行时段。[历史验证](../../validation/synthsr/README.md)。 |
 
 历史公开 FLAIR 示例沿用当时默认 TF32，来自公开扫描，与12例临床统计分开；shape、uint8和affine一致，exact97.8558%、MAE0.02145、max2。

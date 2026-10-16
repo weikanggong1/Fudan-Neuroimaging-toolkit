@@ -36,7 +36,7 @@ python tools/benchmark_recon_topology_pseudonormals.py \
 
 先验证两次参考原序几何、CSR、伪法向和最终距离稳定，再测四组数学类型。旧 Python 强制 double 的 sqrt/acos，产生 656 个分量尾差；double/float 四组不同数依次为 656、566、201、0。实际固定 C++17 编译单元独立探针确认 sqrt、acos、点积、范数及两次除法均 4 字节；含 0.0/1.0 的 MIN/MAX 表达式为 8 字节，再写回 float32 alpha。故修复类型边界，不按已知顶点、被试或数据加例外。
 
-类型探针在参考构建主机执行，两次标准输出相同，CFFF 只接收白名单类型/位模式/源码、编译器、程序与原收据 SHA。原收据 SHA 为 `21e0f1ccf16d939858fa246d856b875af4c93d9a942201e4d3c4fb53f292f241`；去敏选定字段精确声明及 SHA 留在 `reports/workspaces/topology_numeric_type_public_20261010_v2/types.json`。这是类型证据，不是跨环境性能对比。
+类型探针在参考构建主机执行，两次标准输出相同，accelerator-b 只接收白名单类型/位模式/源码、编译器、程序与原收据 SHA。原收据 SHA 为 `21e0f1ccf16d939858fa246d856b875af4c93d9a942201e4d3c4fb53f292f241`；去敏选定字段精确声明及 SHA 留在 `reports/workspaces/topology_numeric_type_public_20261010_v2/types.json`。这是类型证据，不是跨环境性能对比。
 
 ## 5．真实精度、耗时和图
 
@@ -49,7 +49,7 @@ python tools/benchmark_recon_topology_pseudonormals.py \
 | 实际边界契约 | 8 通过 | 9 通过 |
 | driver 最终退出码 | 1：严格比较失败 | 0 |
 
-CFFF Xeon Platinum 8369B，四线程、affinity 120–123。修复后完整 API 在契约后首次/热调用：伪法向 **0.003581132 / 0.003121958 秒**，相邻面 **0.001368764 / 0.001258845 秒**。契约 **0.802316 秒**；含捕获读取、计算和自产 NPZ/PNG 写出的工具段 **0.874600 秒**；driver 导入后包括契约及回归报告写出的已测段 **1.678432 秒**，排除解释器启动、导入及最终 COMPLETE 写入。首次 API 不代表冷 JIT。无单独原参考子步骤计时，不给出加速比或整例收益。
+accelerator-b Xeon Platinum 8369B，四线程、affinity 120–123。修复后完整 API 在契约后首次/热调用：伪法向 **0.003581132 / 0.003121958 秒**，相邻面 **0.001368764 / 0.001258845 秒**。契约 **0.802316 秒**；含捕获读取、计算和自产 NPZ/PNG 写出的工具段 **0.874600 秒**；driver 导入后包括契约及回归报告写出的已测段 **1.678432 秒**，排除解释器启动、导入及最终 COMPLETE 写入。首次 API 不代表冷 JIT。无单独原参考子步骤计时，不给出加速比或整例收益。
 
 CUDA 前后均未初始化，原调用方 TF32 标志与线程设置保持；未采集进程树 GPU 显存，报告值为 null。运行不启用 FP16/BF16，没有新增依赖；NumPy、Numba、matplotlib 已在主页 Conda 环境和包依赖内。
 

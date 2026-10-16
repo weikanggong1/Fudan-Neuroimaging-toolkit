@@ -22,11 +22,11 @@
 
 ### 2026-10-05：实际 Conda 缓存能力问题已修复
 
-新的 v33 缓存保护在 nodecw7 的 Python 中遇到 `NotImplementedError: chmod: follow_symlinks unavailable on this platform`，验证在构建前退出，原失败记录保留。v34 使用 `O_DIRECTORY | O_NOFOLLOW` 打开目录；在同一文件描述符上检查类型和当前用户所有权、执行 `fchmod` 并确认权限确为 `0700`，退出时关闭描述符。继续拒绝链接、错误所有者及不落实权限的文件系统，没有退回跟随路径修改权限。
+新的 v33 缓存保护在 compute-a-7 的 Python 中遇到 `NotImplementedError: chmod: follow_symlinks unavailable on this platform`，验证在构建前退出，原失败记录保留。v34 使用 `O_DIRECTORY | O_NOFOLLOW` 打开目录；在同一文件描述符上检查类型和当前用户所有权、执行 `fchmod` 并确认权限确为 `0700`，退出时关闭描述符。继续拒绝链接、错误所有者及不落实权限的文件系统，没有退回跟随路径修改权限。
 
 最终源码 SHA `ff7936cf2d89c740e09ba164a7c6a76fcebd22e889fd33f8c1a419a25c71a426`，与新冻结的全部 1,231 个文件逐一核对。实际独立 Conda Eigen `3.4.0` / GCC `11.4.0` 构建完成，529 份头文件、compiler、argv/flags 和 binary 指纹见 [eigen_loader_v34.public.json](eigen_loader_v34.public.json)。两种 extent 保存的 fit₀、fit₁、average、inverse 共 **8 个真实矩阵**全部旧/新输出字节相同，重复 cached 调用也相同；目录 `0700`、文件 `0600`。CPU 数值正文和 CUDA 路线没有改变。
 
-首次构建与调用 `19.581485 s`、重复调用 `0.000058 s`，整个新进程验证 `22.288850 s`、sampled process-tree RSS `1.517 GB`；同 nodecw7 八物理核与任务锁，load 51–56。不是完整配准速度比较。最终缓存合同 9 项通过，包括不支持 no-follow chmod 的 Python，以及权限未落实时的明确拒绝。这次独立构建验证没有替代全仓全新 Conda 环境安装验收。
+首次构建与调用 `19.581485 s`、重复调用 `0.000058 s`，整个新进程验证 `22.288850 s`、sampled process-tree RSS `1.517 GB`；同 compute-a-7 八物理核与任务锁，load 51–56。不是完整配准速度比较。最终缓存合同 9 项通过，包括不支持 no-follow chmod 的 Python，以及权限未落实时的明确拒绝。这次独立构建验证没有替代全仓全新 Conda 环境安装验收。
 
 最新 v29 在相同原始 T1、既定参数和原误差门下通过完整配准：extent256 `hyper=0.5, steps=7` 与 extent192 `hyper=0.75, steps=5` 的两向影像、场及严格零边界均通过。完整记录见[最新公共 JSON](joint_precision_v29.public.json)。最终源码另加 inference policy 保护，标准 CLI 的 eval/float32 分支与 v29 数学相同；保存的两种 extent 真实网络输入再次验证 features 和仿射矩阵逐值相同。完整 CNN/CLI、物化 API、GPU pair 的实际 v29 SHA 与最终保护源码 SHA 分别记录。
 
@@ -46,7 +46,7 @@
 
 两向场最大误差≤`0.001 mm`、RMSE≤`0.0001 mm`，影像全 FOV/独立脑 mask/坐标上边界 NRMSE≤`0.001`；参考区域零动态范围要求严格零误差。没有修改阈值、补零或改变 fill。保存的原版 observer 最终两图两场与正式原版 CLI 的解压后完整 NIfTI 字节相同，有限层诊断的最终 features 也与这条真实路线相同。
 
-当前相邻计时按 **A1(v7) → C1(v29) → 原版 → C2(v29) → A2(v7)**，同 nodecw7 八物理核、同锁、新进程、完整双向输出。v7 为 `182.312 / 170.276 s`，v29 为 `194.054 / 176.282 s`；两对分别慢约 `6.4% / 3.5%`，中位数 `185.168 / 176.294 s`，约慢 `5.0%`。当前原版完整 CLI `691.550 s`；节点有大量内存任务及共享存储等待，不能用该单次值声称稳定倍数。GNU time 的 user/sys、CPU占比、缺页、上下文切换和 I/O 与时序、负载、源码分别保存在 JSON。
+当前相邻计时按 **A1(v7) → C1(v29) → 原版 → C2(v29) → A2(v7)**，同 compute-a-7 八物理核、同锁、新进程、完整双向输出。v7 为 `182.312 / 170.276 s`，v29 为 `194.054 / 176.282 s`；两对分别慢约 `6.4% / 3.5%`，中位数 `185.168 / 176.294 s`，约慢 `5.0%`。当前原版完整 CLI `691.550 s`；节点有大量内存任务及共享存储等待，不能用该单次值声称稳定倍数。GNU time 的 user/sys、CPU占比、缺页、上下文切换和 I/O 与时序、负载、源码分别保存在 JSON。
 
 完全物化 joint API 与 CLI 两图、两场、完整 header/extensions/affine 全同，输入未修改：输入读取/物化 `1.003 s`，模型加载 `4.039 s`，API `146.031 s`，保存 `23.837 s`；含 observer、npy 保存及进程启动的 worker `194.019 s`。嵌套 affine 的两个 detector 为 `2.651 / 2.433 s`，affine inclusive 为 `5.353 s`；两个 deform 为 `56.609 / 60.436 s`，顶层网络 `129.981 s`。这些边界有嵌套，不能相加为 CLI。有限真实输入的 A-B-B-A 采样控制中，extent256 两图旧 grid_sample 每次 `1.18–2.03 s`，有序八角 `2.92–3.95 s`，两图平均额外约 `4.08 s`；extent192 分别 `0.50–0.60 / 1.06–1.42 s`，两图平均额外 `1.38 s`。新八角的全部 normalized 值仍逐值匹配实际原版。barycenter/weights/LU 各为毫秒级，cached binary 首次进程加载约 `0.10 s`，同进程后续 sqrt 约 `0.00014 s`。有限成本与全 CLI 分开记录，不把全部网络/I/O 负载差归为新增插值成本。
 
@@ -68,7 +68,7 @@ H100 **GPU1 UUID `e25cac06-0ce8-a833-abf9-09ab18c9c9ba`** 上同公共锁的 v7/
 
 已发布 main `eea929d4` 保持下文通过默认 extent256 的修复版。独立候选 v10、v12、v15、v17、v23 均未通过完整旧门槛，未替换生产实现；各次真实输入、冻结源码、完整 CLI、RSS 及失败项见[拒绝候选记录](joint_precision_rejected.public.json)。
 
-| 同 nodecw7 八核的新进程候选 | extent256 CLI（秒） | extent192 CLI（秒） | 完整门的失败项 |
+| 同 compute-a-7 八核的新进程候选 | extent256 CLI（秒） | extent192 CLI（秒） | 完整门的失败项 |
 |---|---:|---:|---|
 | v10：显式置信、moment、denominator 和权重归约顺序 | 146.11 | 92.83 | 256 inverse 上边界 NRMSE `0.00134324`；192 forward 严格零边界失败 |
 | v12：加小矩阵 LU/solve 与转置布局 | 141.36 | 83.07 | 256 forward 零边界 1 点；192 forward 零边界 3 点 |
@@ -104,7 +104,7 @@ rigid/affine 的 `result.moved`、`result.fixed_moved` 与应用对应返回 Aff
 
 沿用[提前固定的门槛](../cpu_20261004/acceptance.json)：仿射在完整 source 网格的最大世界位移误差不超过 `0.001 mm`；dense 场分量最大误差不超过 `0.001 mm`、RMSE 不超过 `0.0001 mm`；连续图像全 FOV、独立原版脑 mask 和坐标上边界分别用参考 `P99−P1` 归一化，NRMSE 不超过 `0.001`。零动态范围区域要求误差严格为零，nearest 要求逐体素相同。没有修改容差。
 
-本轮新正式进程在 **nodecw7**，线程配置 8，绑定 `2,6,10,14,18,22,26,30` 八个物理核，采用同组文件锁。各 CLI 为新进程，包含加载、解压、双向计算及全部保存；页面缓存未清空，节点有其他任务，单次观测不等于稳定提速。本轮原版和基线也在 nodecw7 重跑；nodecw10 记录只作诊断，不能用于本轮时间比。
+本轮新正式进程在 **compute-a-7**，线程配置 8，绑定 `2,6,10,14,18,22,26,30` 八个物理核，采用同组文件锁。各 CLI 为新进程，包含加载、解压、双向计算及全部保存；页面缓存未清空，节点有其他任务，单次观测不等于稳定提速。本轮原版和基线也在 compute-a-7 重跑；compute-a-10 记录只作诊断，不能用于本轮时间比。
 
 ## 3. 已归档默认 v7 的真实验证
 
@@ -115,7 +115,7 @@ rigid/affine 的 `result.moved`、`result.fixed_moved` 与应用对应返回 Aff
 | deform | 155.53 | 168.80 | 143.15 | 场 RMSE `1.02277e−5 / 1.01477e−5 mm`；两向场及全部影像区域通过 |
 | joint | 148.24 | 174.97 | 148.17 | 场 RMSE `6.47982e−5 / 4.37923e−5 mm`；inverse 上边界 NRMSE `0.000389440`，全部通过 |
 
-rigid 实测源码为 `final_rigid_v4`；affine/deform 为 `final_affine_v2`；joint、joint extent192 及最新 GPU affine 为最终默认源码 `final_joint_v7`。各 mode 单独记录实际源码和转移包哈希。最终源码的 CPU rigid/affine 保存 LTA 无 CNN 回放再次核对两向数组和完整 header；未受 joint 专属分支影响的 CNN、采样与积分逐函数 AST/文件哈希核对。上述记录为一次基线、一次原版、一次候选；没有将先前 nodecw10 的 R-C-C-R 计时改名为本轮实验。
+rigid 实测源码为 `final_rigid_v4`；affine/deform 为 `final_affine_v2`；joint、joint extent192 及最新 GPU affine 为最终默认源码 `final_joint_v7`。各 mode 单独记录实际源码和转移包哈希。最终源码的 CPU rigid/affine 保存 LTA 无 CNN 回放再次核对两向数组和完整 header；未受 joint 专属分支影响的 CNN、采样与积分逐函数 AST/文件哈希核对。上述记录为一次基线、一次原版、一次候选；没有将先前 compute-a-10 的 R-C-C-R 计时改名为本轮实验。
 
 所有默认 CPU 门均通过，逐项数值和实际 SHA-256 见[公共 JSON](report.public.json)。分量级误差不为零；通过提前固定的本例误差门不能推广为任意输入逐位等价。
 
@@ -126,7 +126,7 @@ rigid 实测源码为 `final_rigid_v4`；affine/deform 为 `final_affine_v2`；j
 | deform | 11.674 | 19.670 | 11.678 |
 | joint | 11.737 | 19.843 | 11.716 |
 
-附加参数 `joint extent=192, hyper=0.75, steps=5` 在 nodecw7 同八核重跑：FNIT/原版完整 CLI `97.35 / 169.15 s`，FNIT RSS `5.440 GB`；两向场 RMSE `5.11062e−5 / 7.64936e−5 mm`，逆向上边界 NRMSE `0.000767640`，全 FOV/脑内/场通过。**正向参考全零的上边界有 2 个非零值，最大 `0.00159934`、RMSE `1.02073e−5`，严格零误差门失败**。这是已发布 v7 的未过项，已由上节 v29 在原门下修复；不将 NRMSE 为 null 解释为通过。
+附加参数 `joint extent=192, hyper=0.75, steps=5` 在 compute-a-7 同八核重跑：FNIT/原版完整 CLI `97.35 / 169.15 s`，FNIT RSS `5.440 GB`；两向场 RMSE `5.11062e−5 / 7.64936e−5 mm`，逆向上边界 NRMSE `0.000767640`，全 FOV/脑内/场通过。**正向参考全零的上边界有 2 个非零值，最大 `0.00159934`、RMSE `1.02073e−5`，严格零误差门失败**。这是已发布 v7 的未过项，已由上节 v29 在原门下修复；不将 NRMSE 为 null 解释为通过。
 
 完整物化对象 API：affine 模型加载 `0.345 s`、调用 `13.983 s`；rigid 加载和调用分别记录，其中调用 `10.684 s`。两向输出与对应 CLI 的数组、完整 header、返回 Affine 重采样数组和 header 全部一致，LTA 重读后的世界矩阵差不超过 `1e−12`；输入未被修改。joint 的实际物化对象与最终 CLI 两图、两场、完整 header/extensions/affine 逐值相同；模型加载 `3.471 s`、API `104.507 s`、NIfTI 保存 `20.674 s`，输入载入及物化 `0.972 s` 单列。observer、保存 npy 和进程启动包含在 worker 的 `148.885 s` 内，不并入已加载 API。
 
@@ -217,7 +217,7 @@ joint 的 full channels-last 候选产生一个新的 forward 零边界差异点
 
 | 本轮版本 | 内容与验收 |
 |---|---|
-| decode v1 | CPU 默认解码对齐；记录 nodecw10 外部高负载及 timeout，不用于 nodecw7 时间比 |
+| decode v1 | CPU 默认解码对齐；记录 compute-a-10 外部高负载及 timeout，不用于 compute-a-7 时间比 |
 | affine v2 | affine 返回变换与最终 sampler 一致，affine/deform 全部门通过；当时 rigid 的 12 点及 joint inverse 边界失败保留 |
 | rigid v4 | 采用实际各方向 pull 的精确逆，rigid 原版和公共返回 Affine 契约同时通过 |
 | joint v5 / layout v3 | 隔离归约布局或全网络布局诊断未通过严格边界，未进入生产 |

@@ -17,7 +17,7 @@ import numpy as np
 brain = nib.load(sys.argv[1])
 nib.save(nib.Nifti1Image(np.asarray(brain.dataobj, dtype=np.float32), brain.affine), sys.argv[2])
 PY
-FSLDIR=/public/software/apps/FSL/6.0.7.4
+FSLDIR=/opt/reference/FSL/6.0.7.4
 . "$FSLDIR/etc/fslconf/fsl.sh"
 export FSLDIR FSLOUTPUTTYPE=NIFTI_GZ
 export PATH="$FSLDIR/bin:$PATH"

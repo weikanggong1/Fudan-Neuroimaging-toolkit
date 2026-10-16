@@ -17,7 +17,7 @@ metric commands on frozen surfaces, not the reconstructed surfaces themselves.
 ## Inputs and command order
 
 The source of the official commands is the unchanged FreeSurfer 8.2 log at
-`/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/scripts/recon-all.log`.
+`/data/workspaces/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/scripts/recon-all.log`.
 Lines 3369/3771 place `lh/rh.white.preaparc` from `orig` with `--white
 --nsmooth 5`; lines 5530/5849 place final `white` from `white.preaparc` with
 `--white --nsmooth 0 --rip-label cortex.label --aparc aparc.annot`; lines
@@ -38,7 +38,7 @@ historical shared-node wall times, not a current paired benchmark.
 | MCA/dura, venous sinus, EntoWM models and priors | Not in this run's six weights and 15 data assets | `aux_seg.py` and `sclimbic.py` provide Python inference wrappers, but the external model/prior inputs and the separate SynthMorph prior voxel LTA are not in this candidate. Their connected outputs require validation before use as official-equivalent inputs. |
 
 The candidate inspected here is
-`/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_cpp_conda_20260927/sphere_registration_preflight/subjects/sub01`.
+`/data/workspaces/freesurfer_synth/work/reconall_cpp_conda_20260927/sphere_registration_preflight/subjects/sub01`.
 The asset/weight inventory is from the adjacent `assets/` and `weights/`
 directories; the source-built binary is in the adjacent `fs_cpp/bin/`.
 
@@ -64,4 +64,4 @@ and annotate; place `white` and `pial.T1`; then recompute pial cleanup,
 vertex maps and ROI statistics. Compare each stage with the installed binary
 on **identical upstream files** before testing end-to-end parity. No white or
 pial placement experiment was run during this audit because the connected
-inputs above are missing and the full candidate run was occupying gpucw1.
+inputs above are missing and the full candidate run was occupying accelerator-a-1.

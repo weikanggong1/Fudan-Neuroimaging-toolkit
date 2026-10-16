@@ -1,4 +1,6 @@
-# TorchDTIFIT：扩散张量拟合
+# FNIT_dtifit
+
+> 统一 Python 入口：[`FNIT_dtifit`](../API_REFERENCE.md)，从 `fnit` 导入。下文配置、结果类型和细分算子保留高级兼容接口。
 
 | 项目 | 内容 |
 |---|---|
@@ -17,9 +19,9 @@
 ## 2. Python 调用
 
 ```python
-from fnit.dtifit import TorchDTIFIT
+from fnit import FNIT_dtifit
 
-tensor_model = TorchDTIFIT(
+tensor_model = FNIT_dtifit(
     device="cuda:0",  # 指定计算设备，可改为cpu
     chunk_size=131072,  # 每批拟合的脑内体素数
 )

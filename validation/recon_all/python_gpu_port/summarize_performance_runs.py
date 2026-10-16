@@ -54,7 +54,7 @@ def main() -> None:
         raise ValueError("fingerprint and source versions differ")
     if fingerprints["mismatches"]:
         raise ValueError("input, resource or program fingerprints changed")
-    for sid, host in (("01", "gpucw1"), ("02", "nodecw10")):
+    for sid, host in (("01", "accelerator-a-1"), ("02", "compute-a-10")):
         run = read(f"sub{sid}/full_{run_tag}_run.json")
         baseline = read(f"sub{sid}/full_{baseline_tag}_run.json")
         initial = read(f"sub{sid}/full_b8cd_run.json")

@@ -1,0 +1,23 @@
+{
+  "scope": "connected Python orig.mgz -> 33-class SynthSeg CPU diagnostic on control-host; no successful segmentation result",
+  "reference_subject": "fs_sub01",
+  "input": "Python-generated orig.mgz from input_chain_fs_sub01_report.json",
+  "first_attempt": {
+    "mkldnn_enabled": true,
+    "exit_code": 139,
+    "fault": "segmentation fault in torch.nn.modules.conv.Conv3d _conv_forward; no output"
+  },
+  "second_attempt": {
+    "mkldnn_enabled": false,
+    "elapsed_before_termination_seconds_at_least": 130,
+    "rss_kib_observed": 142340328,
+    "exit_code": 143,
+    "reason": "terminated the optional CPU diagnostic after excessive memory use; no output"
+  },
+  "external_lut": {
+    "downloaded_by": "fnit.recon_all.assets --asset FreeSurferColorLUT.txt",
+    "sha256": "da55c6a47d316ee16d2609afd5c93cb8078e08e7e3afec5bb6283027d7c33e7b",
+    "matches_official_reference": true
+  },
+  "conclusion": "CPU connected SynthSeg parity remains untested. The independently validated CUDA SynthSeg path is unaffected by this CPU-only diagnostic."
+}

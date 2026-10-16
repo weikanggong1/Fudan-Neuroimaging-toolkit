@@ -11,7 +11,7 @@
 - 输入为 OpenNeuro ds000114 snapshot 1.0.2 的公开去脸 T1，许可 CC0；匿名记为 case01。[固定来源与许可](../../../subregions/ten_public_t1_20261002/data_selection.md)保留上游快照与字节校验。原文件 SHA-256：`eb2bc2ff1f30441b0aff54685cfdd7f196bd02dccad4698100a8bad40421de22`。没有将官方中间分割作为 FNIT 重建输入。
 - 候选为 `task5_candidate_cpu_v3`，源码 head `e91dd25ffc72852c8f1f5217e847198fb5e2a49e`，实际归档 SHA-256：`aa78c9547f2941d16308c686d4b2f1e8cb00ddf224b5b7b1e166df9f9d8ae357`。事后比较前 **1240 个归档文件**逐个 SHA 核验；版本身份以归档为准，不能把本次测量重标为后续 main 或 v4。
 - 官方为 FreeSurfer 8.2.0-1，`FS_V8_XOPTS=1`、`recon-all -all -openmp 8`；独立官方安装只参与参考计算。FNIT 不调用该安装的调度脚本或命令，而使用已核验的 Conda 辅助程序。
-- nodecw10，两端均绑定同一组 8 个物理核 `64,68,72,76,80,84,88,92`，线程环境预算 8，CUDA 不可见。候选 `hemisphere_workers=1`，Torch/Numba 有效线程均为 8，调用后恢复；CPU float32，无 autocast、FP16 或 BF16。
+- compute-a-10，两端均绑定同一组 8 个物理核 `64,68,72,76,80,84,88,92`，线程环境预算 8，CUDA 不可见。候选 `hemisphere_workers=1`，Torch/Numba 有效线程均为 8，调用后恢复；CPU float32，无 autocast、FP16 或 BF16。
 - 节点有其他工作负载，两端正式运行各一次，之间有其他工作，不是邻接 AB-BA。OS 线程池数量和八核计算预算分别记录。没有清空文件缓存，也没有修改活跃 Conda prefix。
 - v3 使用独立的 `tifffile 2024.9.20` 纯 Python 依赖目录。先前 v2 因部署 prefix 缺少该包失败；原失败保留，本次采用新空目录重跑。此记录不构成全新 Conda 环境安装验收。
 - [运行身份](runtime.public.json)、[源码与产物 manifest](manifest.public.json)和[比较器源 SHA](status.json)绑定实际实现。权重、模板、原始影像及许可证不随报告发布；资源下载规则见功能页。
@@ -150,7 +150,7 @@ recon-all -i "$t1_input" -s "$reference_subject" \
   -sd "$reference_subjects" -all -openmp 8
 ```
 
-`publish_report.py` 只读现有比较目录与 `recon_timing_report.py` 导出的计时 JSON，验证两端 complete/rc0、138 项及 68 区，写匿名 JSON 和 CSV。`plot_brains.py` 复用既有绘图逻辑，以两端保存的非零 aseg 并集裁剪显示；指标和 benchmark 输入保持原值。绘图使用已有原软件分析 Python 的 Matplotlib/Nibabel，**没有运行原软件算法**；headcw CPU4 环境的独立绘图墙钟为 **70.839 秒**，不加入重建或比较时间。三张 PNG、输入与脚本 SHA、绘图收据见[图 manifest](figures/manifest.public.json)，均已人工查看。
+`publish_report.py` 只读现有比较目录与 `recon_timing_report.py` 导出的计时 JSON，验证两端 complete/rc0、138 项及 68 区，写匿名 JSON 和 CSV。`plot_brains.py` 复用既有绘图逻辑，以两端保存的非零 aseg 并集裁剪显示；指标和 benchmark 输入保持原值。绘图使用已有原软件分析 Python 的 Matplotlib/Nibabel，**没有运行原软件算法**；control-host CPU4 环境的独立绘图墙钟为 **70.839 秒**，不加入重建或比较时间。三张 PNG、输入与脚本 SHA、绘图收据见[图 manifest](figures/manifest.public.json)，均已人工查看。
 
 原始私密 JSON、许可证、原始 MRI、完整表面文件和命令路径未发布；匿名导出保留它们的 SHA 与统计。目录内代码仅负责事后导出和绘图，没有改变冻结重建源码、比较阈值或旧结果。
 

@@ -40,8 +40,8 @@ def main() -> None:
     command[command.index("--o") + 1] = str(surf / "lh.pial.objective")
     command[command.index("--target") + 1] = str(surf / "lh.pial.target")
     env = os.environ.copy()
-    env["FREESURFER_HOME"] = "/public/software/apps/Freesurfer/8.2.0-1"
-    env["SUBJECTS_DIR"] = "/public/software/apps/Freesurfer/8.2.0-1/subjects"
+    env["FREESURFER_HOME"] = "/opt/reference/Freesurfer/8.2.0-1"
+    env["SUBJECTS_DIR"] = "/opt/reference/Freesurfer/8.2.0-1/subjects"
     env["FS_LICENSE"] = str(args.license)
     if args.gradient_prefix is not None:
         env["PLACE_GRAD_PREFIX"] = str(args.gradient_prefix)

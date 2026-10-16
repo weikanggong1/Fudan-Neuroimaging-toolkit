@@ -1,6 +1,6 @@
 {
   "date": "2026-09-30",
-  "host": "nodecw10",
+  "host": "compute-a-10",
   "environment": "homepage Conda environment, PyTorch 2.5.1, CPU",
   "input": "real examples/data/sub-02_T1w.nii.gz conformed to subject_02_v11_cpu/mri/orig.mgz",
   "default_mkldnn": {
@@ -34,7 +34,7 @@
     "note": "Different device and reconstruction snapshots; this is a diagnostic comparison, not an isolated MKLDNN effect."
   },
   "same_host_official_synthseg_comparison": {
-    "reference": "FreeSurfer 8.2 mri_synthseg --cpu --keepgeom --threads 4 on nodecw10, separate reference subject",
+    "reference": "FreeSurfer 8.2 mri_synthseg --cpu --keepgeom --threads 4 on compute-a-10, separate reference subject",
     "reference_wall_seconds": 295.58,
     "candidate_wall_seconds": 368.14299101382494,
     "shape": [256, 256, 256],
@@ -57,7 +57,7 @@
     "skipped": 4,
     "failed": 0,
     "wall_seconds": 15.55,
-    "host": "headcw"
+    "host": "control-host"
   },
   "limit": "The full CPU runner has passed SynthSeg but must complete remaining stages and output checks before end-to-end acceptance."
 }

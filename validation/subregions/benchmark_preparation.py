@@ -94,7 +94,7 @@ def main():
     old_hippo = load_old(args.old_hippo, "fnit.gems.recipes._benchmark_old_hippo")
     root = args.root
     prepared = root.parent / "fnit_subregions_plus_20260928/samseg_native_build_20260929"
-    mri = root.parent / "reconall_reference_gpucw1/fs_sub01/mri"
+    mri = root.parent / "reconall_reference_accelerator-a-1/fs_sub01/mri"
     context = SubregionContext.prepare(mri / "norm.mgz", need_coarse=True, need_parc=True,
                                        coarse_segmentation=mri / "aseg.mgz", wmparc=mri / "wmparc.mgz")
     result = {"kind": "real_saved_mesh_preparation_comparison", "host": socket.gethostname(),

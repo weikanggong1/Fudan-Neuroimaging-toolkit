@@ -9,7 +9,7 @@ import socket
 import subprocess
 import tarfile
 
-ACTUAL = Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_final_raw_task04_20261003_v7')
+ACTUAL = Path('/data/workspaces/fnit_connectome_final_raw_task04_20261003_v7')
 TOOL_SHA = '9be317df1bc38fdaf993ccb16b29e52f902c681ecbf80a3d85c08521ef4ee235'
 RAW_SHA = '120a3e1a431ad23177bc9a4a7c17291e52e374085e0fe7314115b656de8db676'
 TASK4_COMMIT = '177db9d0db52d0663f50d37fa5509cca57a3cbbf'

@@ -66,7 +66,7 @@ reconstruction_report = run_recon_all_python(
 
 配方修订 v4 还复用已有 GPU controls/initial-bias、标准 sphere 完整收尾、MNI 后置并行，以及 GCA 隔离 exec、1024 候选分块和同公式 GPU 求逆。仅隔离子阶段启用缓存，不改变父进程低显存策略；算法候选和顺序反馈保留。这些成熟后端此前在 `79a41cdd` 原始整例使用，本轮相同输入回归和修订整例另报，不能把历史耗时当作 v4 实测。v3 漏用这些选项的问题保留在原收据中。
 
-后续调度将 Python 最终放置分为 `final_white` 和 `pial_surface` 两个双侧 exec 组，仍依次复用完整自有函数。仅 final white 新子进程启用缓存；pial 继续继承低显存策略，指标仍在双侧 pial 发布后串行。父 CUDA 和存活张量保持，`mrisps.white.mgz` 仍按右侧最后发布；没有给尚未完成缓存验证的 pial 全局开缓存。实际缓存配对与范围见 [表面分配器验证](SURFACE_CUDA_ALLOCATOR.md)；该拆分当时没有原始 T1 整例结果，后续 cbaffa 两例整例及完成的 v2 事后评估见[两例报告](../../validation/recon_all/optimizations/20261016_gpucw1_cbaffa_two_case/README.md)。
+后续调度将 Python 最终放置分为 `final_white` 和 `pial_surface` 两个双侧 exec 组，仍依次复用完整自有函数。仅 final white 新子进程启用缓存；pial 继续继承低显存策略，指标仍在双侧 pial 发布后串行。父 CUDA 和存活张量保持，`mrisps.white.mgz` 仍按右侧最后发布；没有给尚未完成缓存验证的 pial 全局开缓存。实际缓存配对与范围见 [表面分配器验证](SURFACE_CUDA_ALLOCATOR.md)；该拆分当时没有原始 T1 整例结果，后续 cbaffa 两例整例及完成的 v2 事后评估见[两例报告](../../validation/recon_all/optimizations/20261016_accelerator-a-1_cbaffa_two_case/README.md)。
 
 数字拓扑输出 `mri/filled-topology-H.mgz`、`surf/H.orig.premesh` 及原 `orig.nofix` 同顶点序的真实删除区 `H.defect_labels`。标签是新算法切断区域，不声称与 GA 缺陷编号一致；原 `filled`、`orig.nofix` 和 nofix 链保留，继续完整 remesh、严格相交清理、自产 cortex/gyrus ambiens 标签和所有下游阶段。双侧新 MRI 仅发布本侧文件，共享缺陷体积仍按 lh/rh 顺序累计。
 
@@ -204,7 +204,7 @@ N4/SynthSeg并行已完成两例冻结同输入的完整组ABBA，输出无新�
 
 ## 6. 最近更新和 benchmark
 
-原拓扑算法的独立 Python 迁移已补齐 [MRI 似然及零面积诊断](TOPOLOGY_MRI_LIKELIHOOD.md)、[角度伪法向](TOPOLOGY_ANGLE_PSEUDONORMALS.md)、[完整有向距离及体积反馈](TOPOLOGY_SIGNED_DISTANCE.md)、[源精度 fitness 组合](TOPOLOGY_PATCH_FITNESS.md)，以及主曲率、局部 MRI/PDF、完整搜索和写回。早期参考候选冻结测试与后续自产搜索分别保留证据；完整首缺陷已由 FNIT 自产上游连续完成。安装包内[完整GA文件接口](TOPOLOGY_GENETIC_FILES.md)已通过文件和编号域合同，`topology_backend="python-ga"` 的[API/CLI/batch接线](PYTHON_GENETIC_PROFILE.md)保留显式选择、实际半球线程和质量检查。该段阶段记录写成时，全九缺陷及最终 orig 的真实验证仍在运行；后续 cbaffa [两例原始 T1 整例](../../validation/recon_all/optimizations/20261016_gpucw1_cbaffa_two_case/README.md)已退出 0，138 项输出与生产网格门通过。两类验证分别绑定原版本；参考几何和中间卷未接入生产，早期失败的数字拓扑整例仍保留原判定。
+原拓扑算法的独立 Python 迁移已补齐 [MRI 似然及零面积诊断](TOPOLOGY_MRI_LIKELIHOOD.md)、[角度伪法向](TOPOLOGY_ANGLE_PSEUDONORMALS.md)、[完整有向距离及体积反馈](TOPOLOGY_SIGNED_DISTANCE.md)、[源精度 fitness 组合](TOPOLOGY_PATCH_FITNESS.md)，以及主曲率、局部 MRI/PDF、完整搜索和写回。早期参考候选冻结测试与后续自产搜索分别保留证据；完整首缺陷已由 FNIT 自产上游连续完成。安装包内[完整GA文件接口](TOPOLOGY_GENETIC_FILES.md)已通过文件和编号域合同，`topology_backend="python-ga"` 的[API/CLI/batch接线](PYTHON_GENETIC_PROFILE.md)保留显式选择、实际半球线程和质量检查。该段阶段记录写成时，全九缺陷及最终 orig 的真实验证仍在运行；后续 cbaffa [两例原始 T1 整例](../../validation/recon_all/optimizations/20261016_accelerator-a-1_cbaffa_two_case/README.md)已退出 0，138 项输出与生产网格门通过。两类验证分别绑定原版本；参考几何和中间卷未接入生产，早期失败的数字拓扑整例仍保留原判定。
 
 - `3644f50c`：修复 float32 步长范数开方后提升顺序，完整 pial 冻结四侧几何一致。
 - `6de797b4`：修复最终 white 标签分支的 midline 状态，冻结四侧与重复原版参考一致。

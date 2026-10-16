@@ -6,7 +6,7 @@ from pathlib import Path
 import subprocess
 import time
 
-root = Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929')
+root = Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929')
 directory = root / 'volume_parity_20260930'
 inventory = subprocess.check_output(['nvidia-smi',
     '--query-gpu=index,uuid,pci.bus_id,memory.free', '--format=csv,noheader,nounits'], text=True)

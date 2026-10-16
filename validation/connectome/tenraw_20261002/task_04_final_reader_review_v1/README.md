@@ -13,14 +13,14 @@
 
 ## 证据和复核
 
-[actual_metadata_review.json](actual_metadata_review.json) 记录实际 headcw 只读检查、实际配置/ready/snapshot/final-report 的路径和 SHA、七份历史绑定与 controller 前后状态；[delivery_exact_bytes_review.json](delivery_exact_bytes_review.json) 记录最终 commit、归档与 122 个 payload 的逐字节 SHA 校验。归档另含一份自身索引，索引字节也核对相同。没有复制大 snapshot 或 20 份矩阵报告。
+[actual_metadata_review.json](actual_metadata_review.json) 记录实际 control-host 只读检查、实际配置/ready/snapshot/final-report 的路径和 SHA、七份历史绑定与 controller 前后状态；[delivery_exact_bytes_review.json](delivery_exact_bytes_review.json) 记录最终 commit、归档与 122 个 payload 的逐字节 SHA 校验。归档另含一份自身索引，索引字节也核对相同。没有复制大 snapshot 或 20 份矩阵报告。
 
 独立检查核对了 raw/output **ledger 的完整覆盖**，未再次读取全部大型 MRI 输出内容；实际 reader 已在结束前执行两处完整 snapshot SHA 校验。这个证据层级在 JSON 中明确区分。本地针对两个缺口、历史记录及 mutable controller 的九个 stdlib 元数据测试通过；fixture 不进行影像或数值 benchmark。
 
 ```bash
-# 已认证的 headcw 连接；只读元数据和科学源码字节，不启动科学求解。
-ssh -S /tmp/fnit-bwas-headcw.sock -o ControlMaster=no -o BatchMode=yes \
-    -p 39516 gongwk@10.190.248.228 'python3 -B -' \
+# 已认证的 control-host 连接；只读元数据和科学源码字节，不启动科学求解。
+ssh -S /tmp/fnit-bwas-control-host.sock -o ControlMaster=no -o BatchMode=yes \
+    -p 39516 user@compute.example.org 'python3 -B -' \
     < review_final_raw_reader.py > actual_metadata_review.json
 
 # 本地核对 Task4 最终提交和已经交付的压缩证据成员。

@@ -1,8 +1,23 @@
 """Fudan Neuroimaging Toolkit."""
-__version__ = "0.16.0"
+__version__ = "0.17.0"
+
+
+from ._public_api import PUBLIC_APIS as _PUBLIC_APIS
+
+__all__ = tuple(_PUBLIC_APIS)
+
+
+def __dir__():
+    return sorted(set(globals()) | set(__all__))
 
 
 def __getattr__(name):
+    if name in _PUBLIC_APIS:
+        from importlib import import_module
+        module_name, attribute = _PUBLIC_APIS[name]
+        value = getattr(import_module('.' + module_name, __name__), attribute)
+        globals()[name] = value
+        return value
     if name in ('fit_dictionary_learning', 'fit_dictionary_learning_streaming'):
         from . import dictionary_learning
         return getattr(dictionary_learning, name)

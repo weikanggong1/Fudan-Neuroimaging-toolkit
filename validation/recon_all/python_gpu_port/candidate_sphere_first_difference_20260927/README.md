@@ -26,7 +26,7 @@ target_mm, reciprocal_count, averaging_seconds = average_standard_metric(
 
 ## 首差与原因
 
-GDB 在原生第一次 `logSSE` 后、优化更新前抓取目标距离、当前距离、邻居 ID、行偏移和球面坐标。[抓取清单](native_full_matrix_capture.json)包含数组 SHA-256；原始二进制留在 gpucw1 私有 scratch，未放入 Git。原生球面坐标 319,866/319,866 个 `float32` 分量与保存的 `sphere0000` 一致；CSR 各行长度全相同。抓取耗时 24.15 s，其中数组写出 2.90 s。原生日志与四份早期快照见[日志](native_first4_sse.log.gz)和[快照清单](snapshot_probe.json)。
+GDB 在原生第一次 `logSSE` 后、优化更新前抓取目标距离、当前距离、邻居 ID、行偏移和球面坐标。[抓取清单](native_full_matrix_capture.json)包含数组 SHA-256；原始二进制留在 accelerator-a-1 私有 scratch，未放入 Git。原生球面坐标 319,866/319,866 个 `float32` 分量与保存的 `sphere0000` 一致；CSR 各行长度全相同。抓取耗时 24.15 s，其中数组写出 2.90 s。原生日志与四份早期快照见[日志](native_first4_sse.log.gz)和[快照清单](snapshot_probe.json)。
 
 [修复前全矩阵核对](comparison_corrected.json)显示目标距离 8,202,754/8,268,920 项逐位相同，第一个差异在顶点 37,432、行内第 73 项，邻居 ID 42,584：原生 5.4933853149 mm，Python 5.4882822037 mm。这里**不是原始距离计算的首差**：Python 该项对称化前后均为 5.4882822037 mm，因其第 42,584 行没有反向采样；原生第 42,584 行第 77 项有反向采样，并将两项平均为 5.4933853149 mm。真正首个邻居 ID 差异较晚，位于顶点 42,548、行内第 73 项，原生选 45,660，Python 选 46,382。
 
@@ -46,7 +46,7 @@ GDB 在原生第一次 `logSSE` 后、优化更新前抓取目标距离、当前
 
 [修复后全矩阵 JSON](comparison_angle64.json)的 `source_sha256.metric` 为 `dde4f42db3f8f526c2ccb1c1379db4edc5369b0f41cbb72ed8b84dc14030ca92`，与提交的生产源完全相同。使用同一输入及原生 `sphere0000`–`sphere0004` 快照再跑保存的前四步，[逐步结果](angle64_first4_report.json)显示四次更新后各 **319,866/319,866** 个有序坐标分量与原生逐位相同；初始 SSE 与线搜索所选步长也恢复一致。四步 Python 诊断总耗时 **61.25 s**（含拓扑、目标矩阵、Numba JIT、梯度和比较），原生 `-w 1` 快照探针在写出 `sphere0004` 后 SIGTERM，墙钟 **30.03 s**。两种探针的初始化、诊断 I/O 和停止方式不同，不能据此计算完整球面的加速比。修复后的候选输入已完成[完整 LH `sphere` 单阶段验收](full_stage/README.md)：106,622 个有序顶点及 213,240 个有序面与同候选输入官方完全一致。`sphere.reg`、`aparc.annot` 和后续皮层统计尚未通过这条候选链验收。
 
-聚焦回归测试 `tests/recon_all/test_sphere_standard_metric.py` 使用上述三个真实顶点的坐标核对阈值位模式；在 gpucw1 环境与现有对称化测试一起为 **2 passed**。原生全矩阵与前四步仅用于离线对照，没有成为 FNIT 的运行依赖。
+聚焦回归测试 `tests/recon_all/test_sphere_standard_metric.py` 使用上述三个真实顶点的坐标核对阈值位模式；在 accelerator-a-1 环境与现有对称化测试一起为 **2 passed**。原生全矩阵与前四步仅用于离线对照，没有成为 FNIT 的运行依赖。
 
 ## 复核文件
 

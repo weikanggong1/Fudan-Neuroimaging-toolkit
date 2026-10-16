@@ -50,7 +50,7 @@ python lifecycle_smoothing.py --phase enqueue   --freeze-sha256 6efcc5d57568e264
 python verify_report.py
 ```
 
-nodecw7，CPU `32,36,40,44,48,52,56,60`；common CPU8锁后module锁，Torch/OMP/BLAS/Numba8、interop1；child180s、AS20,000,000,000B，controller19600s/锁等待19000s。CUDA_VISIBLE_DEVICES为空，CUDA未初始化；flags前后相同。source payload600、W/R700，worker也umask077/output700。[现场上传验证](source/UPLOAD_SERVER_VERIFY.public.json)。
+compute-a-7，CPU `32,36,40,44,48,52,56,60`；common CPU8锁后module锁，Torch/OMP/BLAS/Numba8、interop1；child180s、AS20,000,000,000B，controller19600s/锁等待19000s。CUDA_VISIBLE_DEVICES为空，CUDA未初始化；flags前后相同。source payload600、W/R700，worker也umask077/output700。[现场上传验证](source/UPLOAD_SERVER_VERIFY.public.json)。
 
 单次controller PID51502/startticks535257672；prepared/queued/completed通过sorted六INDEX锁登记、重读保留其它字段、atomic replace保留permissions。三个exit原文件为[overall](run/smoothing.exitcode)、[science](run/smoothing.science.exitcode)、[postflight](run/preflight_after.exitcode)。canonical main前后均`db61cebc…`。
 
@@ -88,7 +88,7 @@ self peak RSS943660KiB；AS cap20GB。单次cold→warm顺序没有速度倍率�
 - 2026-10-06：moving-only RHS控制总LMg误差下降71.8%，主要由mixed scale主导，三个系数块仅约21–30%；[独立RHS报告](../fnirt_cpu_rhs_moving_control_20261006/README.md)。本次未重复它。
 - 本次：先源/保存图/header/Conda门，再唯一2-arm平滑来源桥通过，producer不改production。12payload prepared文件仍保留当时0worker状态；后续launch/summary单独记真实执行，未改旧JSON SHA。
 
-原log包含OMP弃用信息，science/post均exit0；没有科学失败或重试。[状态历史](STATUS_FAILURES.public.json)、[metadata传输](METADATA_TRANSPORT_RECEIPTS.public.json)。已有v27/nodecw8其它真实验收保留自身范围。一般radius Float/Double字面量边界和mean threshold promotion未在本例改动，也未据此解释剩余RHS或完整注册差异。
+原log包含OMP弃用信息，science/post均exit0；没有科学失败或重试。[状态历史](STATUS_FAILURES.public.json)、[metadata传输](METADATA_TRANSPORT_RECEIPTS.public.json)。已有v27/compute-a-8其它真实验收保留自身范围。一般radius Float/Double字面量边界和mean threshold promotion未在本例改动，也未据此解释剩余RHS或完整注册差异。
 
 ## 7. 参考与许可
 

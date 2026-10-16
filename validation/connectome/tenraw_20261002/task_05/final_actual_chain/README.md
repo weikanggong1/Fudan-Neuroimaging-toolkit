@@ -6,7 +6,7 @@
 
 ## 2. 输入与输出、冻结来源
 
-以下服务器路径前缀均为 `/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/`。
+以下服务器路径前缀均为 `/data/workspaces/fnit_connectome_tenraw_20261002/`。
 
 | 对象 | 路径或指纹 | SHA-256 |
 |---|---|---|
@@ -50,12 +50,12 @@ run_path(str(audit_script), run_name="__main__")  # 固定本轮实际远端根�
 
 ## 3. 命令行复核
 
-在已有 headcw 会话中，将 `inspect_completed_chain_compact.py` 通过标准输入交给 CPU Python 执行即可。脚本对未完成链返回 finalized=false；对完成链严格验证冻结元数据、唯一覆盖、来源报告哈希、显存记录、失败历史与 PNG 完整性。数组精度结论来自原冻结科学 reader 报告。
+在已有 control-host 会话中，将 `inspect_completed_chain_compact.py` 通过标准输入交给 CPU Python 执行即可。脚本对未完成链返回 finalized=false；对完成链严格验证冻结元数据、唯一覆盖、来源报告哈希、显存记录、失败历史与 PNG 完整性。数组精度结论来自原冻结科学 reader 报告。
 
 
 
 ```bash
-audit_python=/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/bin/python
+audit_python=/data/workspaces/fnit_conda_env_956b1a9/bin/python
 audit_script=/shared/Fudan-Neuroimaging-toolkit/validation/connectome/tenraw_20261002/task_05/final_actual_chain/inspect_completed_chain_compact.py
 audit_output_json=/tmp/fnit_new_final_metadata_audit.json  # 新文件，不覆盖原结果
 set -o noclobber

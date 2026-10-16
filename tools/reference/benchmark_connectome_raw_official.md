@@ -191,7 +191,7 @@ python tools/reference/bind_connectome_raw_reference_case_map.py \
 
 此前固定输入 CON03 的单次 FNIT seed0 对官方五份在八 atlas 主矩阵中 233/240 比较通过，7 个未通过；后续五份 FNIT 的全部交叉/自身重复结果见 [五种子实物报告](../../validation/connectome/tenraw_20261002/task_04_repeat_fivefnit_reference/README.md)。这些结果用于算子定位，与独立 raw 全链报告分开。已有 [真实点访问与人口分布图](../../validation/connectome/tenraw_20261002/task_04_repeat_reference/tractogram_population.png) 及 [矩阵图](../../validation/connectome/tenraw_20261002/task_04_repeat_reference/matrix_envelope.png)。
 
-此前只读依赖预检：nodecw10 的七个固定二进制版本调用均 exit0，101 个原始唯一文件 SHA/header 已核对；当时 producer 合同未齐，`required_dependency_ready=false`。随后首四例真实合同就绪，两 CPU 组已启动，首两例参考完成；来源和精确时间以阶段报告为准。gpucw1 的旧系统 C++ 加载器失败独立保留，未改原程序或运行库。详见 [实际预检记录](../../validation/connectome/tenraw_20261002/task_04_raw_reference_preflight/README.md)。这不是追踪耗时或科学一致性结果。
+此前只读依赖预检：compute-a-10 的七个固定二进制版本调用均 exit0，101 个原始唯一文件 SHA/header 已核对；当时 producer 合同未齐，`required_dependency_ready=false`。随后首四例真实合同就绪，两 CPU 组已启动，首两例参考完成；来源和精确时间以阶段报告为准。accelerator-a-1 的旧系统 C++ 加载器失败独立保留，未改原程序或运行库。详见 [实际预检记录](../../validation/connectome/tenraw_20261002/task_04_raw_reference_preflight/README.md)。这不是追踪耗时或科学一致性结果。
 
 ## 6. 版本与 benchmark 记录
 

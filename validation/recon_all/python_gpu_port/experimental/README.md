@@ -30,11 +30,11 @@ adaptive gentle/3D normalization passes.
 | `nu → T1` | 0.783 | 3.805 | 21.24% | 1,753,902 |
 | `norm → brain` | 7.458 | 3.263 | 18.99% | 1,028,737 |
 
-These results are from headcw CPU against frozen reference outputs, with no
+These results are from control-host CPU against frozen reference outputs, with no
 native rerun on that host. The wall times cannot establish speedup, and the
 large voxel errors reject both replacements. No H100 timing was run after the
 accuracy failure. Detailed counts, hashes, and error quantiles are in
 [`normalize_cpu_report.json`](normalize_cpu_report.json). The replay command
 is in [`benchmark_normalize.py`](benchmark_normalize.py); the three synthetic
-tests passed on headcw. Future work should translate and validate each native
+tests passed on control-host. Future work should translate and validate each native
 intermediate control map and bias field before attempting a full pass.

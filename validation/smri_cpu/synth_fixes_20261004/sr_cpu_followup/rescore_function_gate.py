@@ -16,7 +16,7 @@ def digest(path):
 
 
 def main():
-    root = Path('/cwStorage/home/gongwk/Notebook_code/FNIT')
+    root = Path('/data/fnit')
     workspace = root/'workspaces/smri_cpu_20261004'
     output = root/'runs/smri_cpu_20261004/remaining_20261004/synth/sr_functions_node7_v1'
     raw = output/'report.public.json'

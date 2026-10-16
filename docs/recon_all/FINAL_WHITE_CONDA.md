@@ -58,7 +58,7 @@ mris_place_surface --adgws-in ../surf/autodet.gw.stats.lh.dat \
 
 ## 真实 T1 同输入测试
 
-使用仓库中去标识的 `examples/data/sub-01_T1w.nii.gz`（SHA-256 `f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a`）。gpucw1 的隔离被试从保存的官方 FreeSurfer 8.2 被试软链接**全部七个阶段输入**，只检验 Conda 最终 white 命令与 wrapper，不检验自产 T1 到 white 的连续流程。可执行文件 SHA-256 为 `9a42f5d7b70a066daf12e67fb6a0924048b4778186ea772e8976722b226b35d5`；私有许可证由环境传入，没有复制。
+使用仓库中去标识的 `examples/data/sub-01_T1w.nii.gz`（SHA-256 `f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a`）。accelerator-a-1 的隔离被试从保存的官方 FreeSurfer 8.2 被试软链接**全部七个阶段输入**，只检验 Conda 最终 white 命令与 wrapper，不检验自产 T1 到 white 的连续流程。可执行文件 SHA-256 为 `9a42f5d7b70a066daf12e67fb6a0924048b4778186ea772e8976722b226b35d5`；私有许可证由环境传入，没有复制。
 
 | 左侧输出相对保存的官方结果 | 实测值 |
 | --- | ---: |

@@ -1,4 +1,6 @@
-# fslmaths：常用影像运算
+# FNIT_fslmaths
+
+> 统一 Python 入口：[`FNIT_fslmaths`](../API_REFERENCE.md)，从 `fnit` 导入。下文配置、结果类型和细分算子保留高级兼容接口。
 
 | 项目 | 内容 |
 |---|---|
@@ -15,7 +17,7 @@
 ## 2. Python 调用
 
 ```python
-from fnit.fslmaths import run_fslmaths
+from fnit import FNIT_fslmaths
 
 input_path = "/data/sub-01/T1w_brain.nii.gz"  # 输入：3D T1w 脑图
 operations = [
@@ -27,7 +29,7 @@ device = "cuda:0"  # 计算设备；无 GPU 时改为 "cpu"
 input_dtype = "float"  # 内部 float32 计算
 output_dtype = "char"  # 输出 uint8 掩膜
 
-saved_path = run_fslmaths(
+saved_path = FNIT_fslmaths(
     input_path=input_path,
     operations=operations,
     output_path=output_path,
@@ -68,7 +70,7 @@ saved_path = run_fslmaths(
 对已经同空间的参数图顺序应用脑mask、缩放和阈值：
 
 ```python
-from fnit.fslmaths import run_fslmaths
+from fnit import FNIT_fslmaths
 
 parameter_image_path = "/data/dti_FA.nii.gz"  # 同个体空间3D FA
 brain_mask_path = "/data/nodif_brain_mask.nii.gz"  # 同shape/affine的脑mask
@@ -78,7 +80,7 @@ ordered_operations = [
     "-mul", "1000",         # 再改变数值尺度
     "-thr", "200",          # 最后按缩放后数值阈值化
 ]
-saved_parameter_path = run_fslmaths(
+saved_parameter_path = FNIT_fslmaths(
     input_path=parameter_image_path, operations=ordered_operations,
     output_path=masked_parameter_output_path, device="cuda:0",
     input_dtype="float", output_dtype="float",

@@ -15,14 +15,14 @@ def main():
     parser.add_argument('--output', required=True)
     args = parser.parse_args()
     base = Path(args.root) / 'runs/smri_cpu_20261004/remaining_20261004/morph'
-    reference_folders = {'A1_v7': 'nodecw7_final_v7/joint',
-                         'A2_v7': 'nodecw7_final_v7/joint',
-                         'C1_v29': 'nodecw7_final_v29/joint',
-                         'C2_v29': 'nodecw7_final_v29/joint',
-                         'R_reference': 'nodecw7_paired_v2/joint_reference'}
+    reference_folders = {'A1_v7': 'compute-a-7_final_v7/joint',
+                         'A2_v7': 'compute-a-7_final_v7/joint',
+                         'C1_v29': 'compute-a-7_final_v29/joint',
+                         'C2_v29': 'compute-a-7_final_v29/joint',
+                         'R_reference': 'compute-a-7_paired_v2/joint_reference'}
     rows = {}
     for arm, preceding in reference_folders.items():
-        folder = base / 'nodecw7_accept_v29' / arm
+        folder = base / 'compute-a-7_accept_v29' / arm
         rows[arm] = {name: image_comparison(base / preceding / (name + '.nii.gz'), folder / (name + '.nii.gz'))
                      for name in ('forward', 'inverse', 'moved', 'fixed_moved')}
     report = {'scope': __doc__, 'rows': rows, 'worker_sha256': digest(__file__)}

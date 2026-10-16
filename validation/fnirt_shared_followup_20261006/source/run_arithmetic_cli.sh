@@ -3,20 +3,20 @@
 set -euo pipefail
 umask 077
 ulimit -c 0
-FNIT_BASE=/cwStorage/home/gongwk/Notebook_code/FNIT
+FNIT_BASE=/data/fnit
 FNIT_WORK=$FNIT_BASE/workspaces/smri_cpu_20261004/remaining_20261006/fnirt-shared-followup-v1
 FNIT_RUN=$FNIT_BASE/runs/smri_cpu_20261004/remaining_20261006/fnirt-shared-followup-v3
 FNIT_ORACLE=$FNIT_BASE/runs/smri_cpu_20261004/remaining_20261004/synth/fnirt-pcg-shared-v2/oracle
 mkdir -m 700 "$FNIT_RUN"
 trap 'arithmetic_status=$?; printf "{\"exit_code\":%s}\n" "$arithmetic_status" > "$FNIT_RUN/exit.public.json"' EXIT
-exec 9>"$FNIT_BASE/runs/smri_cpu_20261004/nodecw7.gems.cpu8.lock"
+exec 9>"$FNIT_BASE/runs/smri_cpu_20261004/compute-a-7.gems.cpu8.lock"
 flock -w 900 9
 exec 8>"$FNIT_BASE/runs/smri_cpu_20261004/remaining_20261006/fnirt-shared-followup-v1.cpu8.lock"
 flock -w 60 8
 export CUDA_VISIBLE_DEVICES= PYTHONDONTWRITEBYTECODE=1
 export OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 MKL_NUM_THREADS=8 NUMBA_NUM_THREADS=8
 export PYTHONPATH="$FNIT_WORK/source/src" NUMBA_CACHE_DIR="$FNIT_RUN/numba_cache"
-export FNIT_NATIVE_ARITH_LIBRARY_PATH=/public/software/apps/FSL/6.0.7.4/lib
+export FNIT_NATIVE_ARITH_LIBRARY_PATH=/opt/reference/FSL/6.0.7.4/lib
 date -Iseconds > "$FNIT_RUN/started.txt"
 cat /proc/loadavg > "$FNIT_RUN/load_before.txt"
 taskset -c 32,36,40,44,48,52,56,60 "$FNIT_BASE/envs/default/bin/python" "$FNIT_WORK/preflight.py" \

@@ -41,9 +41,9 @@ warped、derivative、全部 vector 指标及数组 SHA 在[完整比较](compar
 
 固定输入及 actual source/object/library/program SHA 在 [binding](binding.public.json)，各 Python 臂的输入、实际 registration SHA 和 affinity 在 [baseline](baseline.public.json)、[candidate](candidate.public.json)。源码基点 `b4a55d8ff2738d9cfd9744f9759f62dead9bc4fc`；候选独立 freeze 的 SHA 与上一份完整阶段报告一致。
 
-nodecw7、同一 `nodecw7.gems.cpu8.lock`、核 `32,36,40,44,48,52,56,60`、8 threads；三项探针顺序运行，exit 0。运行前后 loadavg 为 `20.79,21.20,22.08` / `23.43,21.78,22.22`，留存在文本记录。整个队列从 20:37:24 到 20:38:34；包含脚本、读取、落盘和有限探针，不是估计速度 benchmark。
+compute-a-7、同一 `compute-a-7.gems.cpu8.lock`、核 `32,36,40,44,48,52,56,60`、8 threads；三项探针顺序运行，exit 0。运行前后 loadavg 为 `20.79,21.20,22.08` / `23.43,21.78,22.22`，留存在文本记录。整个队列从 20:37:24 到 20:38:34；包含脚本、读取、落盘和有限探针，不是估计速度 benchmark。
 
-[official_nonzero.cpp](official_nonzero.cpp) 只在隔离官方 benchmark 环境调用已安装 FNIRT cost；不随 FNIT 生产加载。headcw 以 C++17/O0 编译，并复用此前已绑定、未改动的 installed-source objects；没有复制原软件源文件或 binary 到 FNIT 生产。[fnit_nonzero.py](fnit_nonzero.py) 初始化后只读共享参数，保存状态；[compare_nonzero.py](compare_nonzero.py) 计算原生/FNIT 差异和纯正则 action。
+[official_nonzero.cpp](official_nonzero.cpp) 只在隔离官方 benchmark 环境调用已安装 FNIRT cost；不随 FNIT 生产加载。control-host 以 C++17/O0 编译，并复用此前已绑定、未改动的 installed-source objects；没有复制原软件源文件或 binary 到 FNIT 生产。[fnit_nonzero.py](fnit_nonzero.py) 初始化后只读共享参数，保存状态；[compare_nonzero.py](compare_nonzero.py) 计算原生/FNIT 差异和纯正则 action。
 
 [run_nonzero.sh](run_nonzero.sh) 保存实际路径、锁和原生 command-line 输入。Python 参数 `--gm/--template/--mask/--affine` 对应已校验 NIfTI 和 FLIRT 矩阵；`--parameters` 为保存的真实 FP64 text；`--output` 必须为新目录。
 

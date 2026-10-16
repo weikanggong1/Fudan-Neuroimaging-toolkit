@@ -19,3 +19,9 @@ __all__ = [
     "fit_dicl_gpu_streaming",
     "GPU_ALGORITHM_VERSION",
 ]
+
+FNIT_dictionary_learning = fit_dictionary_learning
+__all__.append('FNIT_dictionary_learning')
+
+FNIT_dictionary_learning_streaming = fit_dictionary_learning_streaming
+__all__.append('FNIT_dictionary_learning_streaming')

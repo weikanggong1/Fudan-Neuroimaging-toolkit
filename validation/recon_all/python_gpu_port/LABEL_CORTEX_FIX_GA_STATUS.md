@@ -6,7 +6,7 @@ The pinned `scripts/label-cortex` sequence is: no-GA cortex label; `entowm` 3201
 
 ## Frozen-subject result
 
-Input: `/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01` on headcw. Outputs were written only to isolated scratch. The full recon-all was not rerun.
+Input: `/data/workspaces/freesurfer_synth/work/reconall_reference_accelerator-a-1/fs_sub01` on control-host. Outputs were written only to isolated scratch. The full recon-all was not rerun.
 
 | Output | No-GA rows | Appended GA rows | Final rows | Python vs frozen official |
 |---|---:|---:|---:|---|
@@ -17,7 +17,7 @@ Input: `/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_refe
 
 Fresh native replay of each child executable also matched the frozen official label rows. The native GA projection had identical values at every vertex to the Python nearest-neighbor sampling, and the combined GA masks were identical at every vertex bilaterally. The final official header has one space around the comma because the `tcsh` `mri_mergelabels` wrapper collapses the no-GA header's spaces; the Python writer reproduces that header exactly.
 
-## Headcw CPU wall time, seconds
+## control-host CPU wall time, seconds
 
 | Fixed operation | Native LH | Native RH | Python LH | Python RH |
 |---|---:|---:|---:|---:|
@@ -29,7 +29,7 @@ Fresh native replay of each child executable also matched the frozen official la
 | Final `cortex.label`, total | 10.73* | 10.92* | **3.89** | **3.67** |
 | Separate `cortex+hipamyg.label` | 7.72 | 6.77 | **3.46** | **2.93** |
 
-`*` Sum of timed native child programs. Headcw lacks `tcsh`, so the original wrapper could not run there. For native replay the binary-mask intersection used equivalent `mri_binarize` logic, and final concatenation used the pinned script's exact line ordering; wrapper startup and concatenation time are excluded. These timings compare the fixed stage on one CPU host, not full recon-all throughput. The Python port is NumPy/SciPy on CPU and is not yet wired into the main pipeline.
+`*` Sum of timed native child programs. control-host lacks `tcsh`, so the original wrapper could not run there. For native replay the binary-mask intersection used equivalent `mri_binarize` logic, and final concatenation used the pinned script's exact line ordering; wrapper startup and concatenation time are excluded. These timings compare the fixed stage on one CPU host, not full recon-all throughput. The Python port is NumPy/SciPy on CPU and is not yet wired into the main pipeline.
 
 ## Reproduce the output check
 
@@ -38,4 +38,4 @@ PYTHONPATH=src python validation/recon_all/python_gpu_port/benchmark_label_corte
   /path/to/fs_sub01 /path/to/scratch/labels
 ```
 
-The script raises an error unless all four Python labels equal the supplied subject's official labels byte for byte. The isolated synthetic merge test passed on headcw (`1 passed`).
+The script raises an error unless all four Python labels equal the supplied subject's official labels byte for byte. The isolated synthetic merge test passed on control-host (`1 passed`).

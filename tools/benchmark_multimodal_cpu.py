@@ -279,7 +279,7 @@ def run(args):
         raise ValueError("At least two paired repetitions are required")
     warmup_count = 0 if single_observation else 1
     # Lock covers this entire coordinated CPU suite; other research jobs remain running.
-    lock_path = Path(args.lock_file or destination.parent / "nodecw10-multimodal-cpu.lock")
+    lock_path = Path(args.lock_file or destination.parent / "compute-a-10-multimodal-cpu.lock")
     lock_path.parent.mkdir(parents=True, exist_ok=True)
     with lock_path.open("a") as lock:
         fcntl.flock(lock.fileno(), fcntl.LOCK_EX)

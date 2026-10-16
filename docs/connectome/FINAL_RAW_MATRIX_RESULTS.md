@@ -41,7 +41,7 @@ main(["--config", str(configuration_path),
 
 ```bash
 CUDA_VISIBLE_DEVICES= PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
-  /cwStorage/home/gongwk/anaconda3/bin/python3.11 \
+  /data/user/anaconda3/bin/python3.11 \
   /实际/final_raw_matrix_tools_v7/benchmark_connectome_final_raw_envelope.py \
   --config /实际/final_raw_matrix_tools_v7/configuration.json \
   --config-sha256 9598a0014fca9b35b64b718d030eec64392116273f2e769cff81081e6e338175 \

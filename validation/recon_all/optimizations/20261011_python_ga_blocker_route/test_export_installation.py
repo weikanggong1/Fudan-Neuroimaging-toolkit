@@ -26,14 +26,14 @@ class InstallationExportTest(unittest.TestCase):
     def setUpClass(cls):
         cls.module = load_source(DIRECTORY / "export_installation.py", "typed_installation_export")
         cls.v1 = load_source(DIRECTORY / "frozen/v1/export_installation.py", "frozen_installation_export_v1")
-        cls.public = json.loads((DIRECTORY / "frozen/v1/cfff_installation.json").read_bytes())
+        cls.public = json.loads((DIRECTORY / "frozen/v1/accelerator-b_installation.json").read_bytes())
         cls.expected = json.loads((DIRECTORY / "installation.json").read_bytes())
 
     def fixture(self):
         actual, expected = deepcopy(self.public["report"]), deepcopy(self.expected)
         # Restore the actual verifier's scope string; do not claim these
         # re-encoded test bytes are the original remote private report.
-        actual["scope"] = "CFFF existing dependencies; independent wheel target/import/fresh CLI only"
+        actual["scope"] = "accelerator-b existing dependencies; independent wheel target/import/fresh CLI only"
         return actual, expected
 
     def invoke(self, directory, actual, expected, *, raw=None, function=None, output_name="public.json"):

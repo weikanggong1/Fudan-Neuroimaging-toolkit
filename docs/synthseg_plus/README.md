@@ -1,4 +1,6 @@
-# SynthSeg+ 体积分区
+# FNIT_SynthSegPlus
+
+> 统一 Python 入口：[`FNIT_SynthSegPlus`](../API_REFERENCE.md)，从 `fnit` 导入。下文配置、结果类型和细分算子保留高级兼容接口。
 
 [返回首页](../../README.md) · [完整旧文档与更早证据](../../validation/synthseg_plus/readme_archive_20261005.md) · [CUDA精度声明](precision.md)
 
@@ -24,9 +26,9 @@ FNIT 的类名 `SynthSegPlus` 对应普通 SynthSeg 2.0 **加 `--parc`**。原�
 ## 2. Python 调用
 
 ```python
-from fnit import SynthSegPlus
+from fnit import FNIT_SynthSegPlus
 
-parcellation_model = SynthSegPlus(
+parcellation_model = FNIT_SynthSegPlus(
     weights="/absolute/path/weights",       # 主网络及三个主分割 npy 所在目录
     parc_weights="/absolute/path/weights",  # 皮层分区 H5 所在目录
     device="cuda:0",                         # 计算设备；CPU 可写 "cpu"
@@ -161,7 +163,7 @@ mri_synthseg --parc --i sub-01_T1w.nii.gz --o reference/sub-01_synthseg_plus.nii
 
 H100默认普通/fast旧/新API **10.068/9.732s**及 **7.097/6.937s**，allocated均12.568GB、reserved18.207/18.900GB旧新相同。本进程树driver采样最大18.772/19.464GB，小于20GB；最大采样间隔0.786s，不能称未采样绝对物理峰值。整GPU同时约66–67GB共享背景，墙钟不作稳定加速倍率。False/None普通/fast reserved15.162/15.590GB。此前CPU单缓冲拼接及大体积CPU末层投影防崩保留，[上一阶段验收](../../validation/smri_cpu/seg_memory_20261005/README.md)。
 
-前版大T1崩溃修复用公开ds000114完整真实T1，网络张量224×288×288，nodecw10同8物理核/8线程，CPUfloat32；原版FreeSurfer8.2.0-1。普通--parc的冷进程ABBA含加载、计算、CSV和合并图保存。源码SHA与逐区结果绑定[正式记录](../../validation/smri_cpu_20261004/t2_seg/large_pointwise.public.json)。
+前版大T1崩溃修复用公开ds000114完整真实T1，网络张量224×288×288，compute-a-10同8物理核/8线程，CPUfloat32；原版FreeSurfer8.2.0-1。普通--parc的冷进程ABBA含加载、计算、CSV和合并图保存。源码SHA与逐区结果绑定[正式记录](../../validation/smri_cpu_20261004/t2_seg/large_pointwise.public.json)。
 
 ### 端到端 benchmark
 

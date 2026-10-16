@@ -3,7 +3,7 @@ import argparse, fcntl, hashlib, importlib.util, json, os, platform, subprocess,
 from pathlib import Path
 import nibabel as nib
 import numpy as np
-BASE=Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929')
+BASE=Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929')
 ROOT=Path('/tmp/fnit-recon-accuracy-20261003/task_02/diagnostic')
 RUNTIME=BASE/'accuracy_20261003/baseline_runtime_816e5610'
 OUTPUT=BASE/'accuracy_20261003/task_02/cohort_prefix'

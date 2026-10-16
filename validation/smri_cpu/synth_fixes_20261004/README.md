@@ -6,7 +6,7 @@
 
 | 项目 | 真实完整输入的结果 | 接入状态 |
 |---|---|---|
-| WMH CPU、T1 `crop=True` | nodecw7 官方/候选/候选/官方：全部标签、WMH 概率、33 个 CSV 数值、完整 header/affine 逐值相同 | 接入生命周期优化 |
+| WMH CPU、T1 `crop=True` | compute-a-7 官方/候选/候选/官方：全部标签、WMH 概率、33 个 CSV 数值、完整 header/affine 逐值相同 | 接入生命周期优化 |
 | WMH CUDA `crop=True` | 硬限额 20,000,000,000 B；三个输出文件 SHA 与旧 GPU 完全相同；57 次实际 cuDNN 卷积 kernel 和三次 CNN 输入 SHA 相同 | 接入已验证的缓冲调度 |
 | WMH CUDA 默认 `crop=False` | 原调度完整输出与旧 GPU 文件 SHA 相同；同实例 full→crop→full 状态恢复 | 保留原 forward/decoder/概率调度，**仍未达到 20 GB** |
 | SynthSR CPU | 后续 `source_sr_v2` 两完整CNN及最终浮点/量化逐值同官方冻结整图参考；GPU旧新全同 | CPU受保护推理helper；原GPU forward正文不变，详见后续报告 |
@@ -18,8 +18,8 @@
 - 真实数据为 CC0 OpenNeuro **ds003138 v1.0.1** 原始 T1，匿名为 `case01`；原网格 224×288×288，间距约 0.8×0.777778×0.777778 mm。输入文件 SHA `afd1a20fe75fdea44313f0eda05020b916c87234e7a2045f7ccc6bb7c6e90b19`。影像、中间张量和模型只留在服务器。
 - WMH checkpoint 大小 **790,531,383 B**，SHA `0ece39dd651357aa95222fc4d45fa32d00f11e763d2583cae3f869989ce35988`；SynthSR general 大小 **106,163,752 B**，SHA `a472f776e7b33b5ea6e10c801f55fee488f1477a208b3e6998dc1aec1d9c5f8b`。现场核对 FNIT 固定 Release 资源清单；原作者来源资源复用已核验的私有文件，不随此提交分发。
 - 现场读取统一入口 `FNIT/README.md`、`INDEX.json`。源码、输出、日志与转移包分别放统一入口的 `workspaces`、`runs`、`logs`、`archive/transfers` 下的 `smri_cpu_20261004/remaining_20261004/synth`。既有 Conda prefix 和冻结源码保持实体位置。
-- CPU：nodecw7，Xeon Gold 6418H；8 物理核 `0,4,8,12,16,20,24,28`，OMP/MKL/Torch 8 线程；同组锁 `runs/smri_cpu_20261004/nodecw7.synth.cpu8.lock`。新完整作业没有继续使用 nodecw10。现场 AVX2、AVX512、FMA 能力用于诊断，硬件有 FMA 不等于 TensorFlow 当前 ELU 实际用了融合乘加。
-- GPU：gpucw1 H100、Torch 2.5.1、FP32 网络、原 TF32 策略，无 autocast；GPU0 UUID `GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e`，所有 worker 使用共享 `gpucw1.gpu.lock`。最终完整验证初始物理 free 约 59–62 GB。共享外部进程约 19,664 MiB，利用率波动，时间不能证明稳定性能保证。
+- CPU：compute-a-7，Xeon Gold 6418H；8 物理核 `0,4,8,12,16,20,24,28`，OMP/MKL/Torch 8 线程；同组锁 `runs/smri_cpu_20261004/compute-a-7.synth.cpu8.lock`。新完整作业没有继续使用 compute-a-10。现场 AVX2、AVX512、FMA 能力用于诊断，硬件有 FMA 不等于 TensorFlow 当前 ELU 实际用了融合乘加。
+- GPU：accelerator-a-1 H100、Torch 2.5.1、FP32 网络、原 TF32 策略，无 autocast；GPU0 UUID `GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e`，所有 worker 使用共享 `accelerator-a-1.gpu.lock`。最终完整验证初始物理 free 约 59–62 GB。共享外部进程约 19,664 MiB，利用率波动，时间不能证明稳定性能保证。
 
 ## WMH 修改与精度证据
 
@@ -42,7 +42,7 @@ v8 `crop=False` 在 20 GB 内跑完，但 8,981,504 个体素中有 **1 个标�
 
 ### 完整与阶段耗时
 
-CPU 官方/候选/候选/官方为 **172.064 / 77.134 / 83.876 / 107.942 s**；同核组、同输入、冷进程含读图、模型加载、计算与保存，官方采样 RSS 约29.992 GB、候选约16.778 GB。[nodecw7 完整对照](reports/wmh_cpu_node7_abba.public.json)包含精度、load 和全部实际资源设置。节点 load 99–136，故不推为普遍加速比。v5 的 CPU 算术路径与最终版本相同；v8/v10 后续改动是 GPU cache 或 GPU no-crop 分派，没有重复重跑官方 CPU。
+CPU 官方/候选/候选/官方为 **172.064 / 77.134 / 83.876 / 107.942 s**；同核组、同输入、冷进程含读图、模型加载、计算与保存，官方采样 RSS 约29.992 GB、候选约16.778 GB。[compute-a-7 完整对照](reports/wmh_cpu_node7_abba.public.json)包含精度、load 和全部实际资源设置。节点 load 99–136，故不推为普遍加速比。v5 的 CPU 算术路径与最终版本相同；v8/v10 后续改动是 GPU cache 或 GPU no-crop 分派，没有重复重跑官方 CPU。
 
 以下 crop ABBA 使用无 profiler、无 tensor hash 的冻结 v5 harness；v8 和最终 v10 的优化 crop 算术相同。完整 wall 是 worker 冷进程，含 import、CUDA probe、SHA 核验、报告生成、保存，**不是 CLI 专属时钟**。GNU time 在 flock 内启动，排队时间不计入。官方旧 GPU 两次参考超20 GB；不能称同预算速度比较。
 

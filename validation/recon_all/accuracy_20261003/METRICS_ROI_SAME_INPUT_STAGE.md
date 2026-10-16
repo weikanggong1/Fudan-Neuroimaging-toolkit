@@ -80,10 +80,10 @@ report记录输入/复制SHA、解释器/Torch/nibabel、FP32与TF32、loaded_so
 
 ```bash
 # 示例须由双锁控制器调用，不直接绕过资源准入运行GPU算法。
-checkpoint_directory=/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/precision_candidate_3a_whole_sub06_v1/attempt_01/subject
-input_manifest_path=/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/metrics_roi_sameinput_sub06_v2/inputs.json
-assets_directory=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets
-output_directory=/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/metrics_roi_example_new/output
+checkpoint_directory=/data/fnit/runs/recon_accuracy_20261003/precision_candidate_3a_whole_sub06_v1/attempt_01/subject
+input_manifest_path=/data/fnit/runs/recon_accuracy_20261003/metrics_roi_sameinput_sub06_v2/inputs.json
+assets_directory=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets
+output_directory=/data/fnit/runs/recon_accuracy_20261003/metrics_roi_example_new/output
 gpu_uuid=GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba
 # 下列argv放入已说明的controller config；source/PYTHONPATH由config绑定。
 # replay_metrics_roi_stage.py --checkpoint "$checkpoint_directory" \

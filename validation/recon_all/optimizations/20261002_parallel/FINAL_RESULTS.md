@@ -13,7 +13,7 @@
 
 两例成功整例耗时合计 7109.392→4571.212 秒，减少 35.702%；这是配对单次观察，不是重复测量的稳定吞吐。完整墙钟来自同一监控器，包含校验、导入、模型加载、传输、计算、私有复制/发布及读写，排除排队、失败尝试、诊断和事后比较。pipeline、入口与监控器时间分别保存，不互相替代。
 
-gpucw1、Xeon Gold 6430、同一 H100 80 GiB（UUID `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba`）、相同原始 T1/11项模型及标签资源/102项资产及运算线程预算4；候选显式 `hemisphere_workers=2`，各worker2线程、interop1。库的默认半球worker仍为1。sub01 API父进程保留调用者interop64，intraop和Numba mask为4；不宣称操作系统总线程数量只有4。两版本资源环境绑定检查通过。
+accelerator-a-1、Xeon Gold 6430、同一 H100 80 GiB（UUID `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba`）、相同原始 T1/11项模型及标签资源/102项资产及运算线程预算4；候选显式 `hemisphere_workers=2`，各worker2线程、interop1。库的默认半球worker仍为1。sub01 API父进程保留调用者interop64，intraop和Numba mask为4；不宣称操作系统总线程数量只有4。两版本资源环境绑定检查通过。
 
 CUDA默认TF32、没有FP16/BF16或autocast；SynthStrip/SynthSeg/辅助卷积、Talairach与MNI affine矩阵乘法、MNI deform矩阵乘法与cuDNN保留已验证的FP32例外。实际前向配置在原始报告中。MNI外层调用记录不能冒充两个内部前向的逐层hook；任务5另有同输入hook证据。
 
@@ -183,7 +183,7 @@ sub02首次候选在新RH worker的首次CUDA分配失败，LH取消且组未发
 
 ## 官方参考与复现
 
-官方仅在独立benchmark目录生成参考。归档sub01在gpucw1为6790秒，sub02在nodecw10为4143秒；官方Synth使用CPU，双侧 `-parallel -openmp 4` 可能总8线程。它们不是本轮同资源配对时间，不能据此宣称本轮相对官方的整例倍数。[官方版本、程序哈希和逐命令时间](whole/official_reference_hashes_and_archived_timing.json)单列。既有white/sphere/pial同输入重复几何精确的记录只支持那些阶段；本轮未补测官方整例重复性。
+官方仅在独立benchmark目录生成参考。归档sub01在accelerator-a-1为6790秒，sub02在compute-a-10为4143秒；官方Synth使用CPU，双侧 `-parallel -openmp 4` 可能总8线程。它们不是本轮同资源配对时间，不能据此宣称本轮相对官方的整例倍数。[官方版本、程序哈希和逐命令时间](whole/official_reference_hashes_and_archived_timing.json)单列。既有white/sphere/pial同输入重复几何精确的记录只支持那些阶段；本轮未补测官方整例重复性。
 
 [完整参数、坐标空间、失败行为和逐项中文注释示例](../../../../docs/recon_all/PERFORMANCE_INTEGRATION.md)及[复现脚本说明](RUN_VALIDATION.md)覆盖生产与诊断调用。输出MRI使用conform网格；表面使用surface RAS/mm，顶点图及annotation保持对应顶点顺序；面积mm²、体积mm³。原始T1网格不能与conform或surface RAS互换。
 

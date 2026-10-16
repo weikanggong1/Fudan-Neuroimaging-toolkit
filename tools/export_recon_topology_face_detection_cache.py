@@ -122,7 +122,7 @@ def run(*, run_directory, source_manifest, plot_directory, output):
         overall_metric_equivalence="not_assessed", production_default_changed=False,
         reference_after_used_to_generate=False)
     text = json.dumps(public, indent=2, ensure_ascii=False, allow_nan=False)+"\n"
-    if re.search(r"/cpfs01|/cwStorage|gongwk|gwk_44019|10\.193\.|10\.190\.|password=|token=|BEGIN PRIVATE", text):
+    if re.search(r"/data/shared|/data/shared|benchmark-user|benchmark-user|10\.193\.|10\.190\.|password=|token=|BEGIN PRIVATE", text):
         raise ValueError("public report contains a protected string")
     output.mkdir(mode=0o700, parents=True, exist_ok=False)
     (output / "report.json").write_text(text)

@@ -1,18 +1,18 @@
 {
   "observed_utc": "2026-10-03T10:16:51.669147+00:00",
-  "host": "gpucw1",
-  "root": "/cwStorage/home/gongwk/Notebook_code/FNIT",
+  "host": "accelerator-a-1",
+  "root": "/data/fnit",
   "documents": {
     "README.md": {
       "sha256": "7ec6e16d031e0fca50e232d382219cf1d124dec2eb9a9b01cd0814eeb29d6fa4",
       "bytes": 3792,
-      "content": "# FNIT 服务器统一目录\n\n统一入口：`/cwStorage/home/gongwk/Notebook_code/FNIT`。\n\n开始任务先读根目录 `INDEX.md` 和本说明，从索引查找已有代码、工作树、快照、运行目录和环境。新目录统一在此根目录下创建；旧路径保留兼容入口。\n\n## 目录用途\n\n| 目录 | 用途 |\n|---|---|\n| `repo/` | 正式 Git 仓库。整理时通过校验完整 Git bundle 导入，干净 `main` 为 `7af34e6d072e843fb2558c931bb2781f1d4b0be9`。 |\n| `workspaces/` | 各任务的工作目录，保留原内部结构；新任务使用独立目录。 |\n| `snapshots/` | 历史 Git 源码树，按记录的版本和哈希复用。 |\n| `legacy/freesurfer_synth/` | 旧 FNIT 0.13.0 树，不能当作新的正式 `main`。 |\n| `runs/` | 新运行的日志、检查点、输出和验证产物。 |\n| `envs/` | 链接至两个原 Conda prefix；`default` 指向 `956b1a9` 环境，`legacy-venv` 指向旧 `freesurfer_synth/.venv`。 |\n| `assets/weights/` | 指向原权重目录；下载和使用仍按许可、大小及 SHA-256 校验。 |\n| `tools/legacy/`、`logs/legacy/` | 旧辅助脚本及旧日志。 |\n| `archive/transfers/`、`archive/builds/` | 传输文件及旧构建产物。 |\n| `admin/` | 私有迁移计划与 manifest；实际迁移状态和数量以最终 manifest 为准。 |\n\n`repo/` 是源码仓库，不是 pip 安装环境。归并代码不会自动改变环境中已安装或 editable 安装的 `fnit`；运行前必须检查实际导入位置。上述 `main` 是整理时的状态，后续可随远端推进，不能假设它一直是最新提交。\n\n旧目录通过兼容软链接或原地保留加统一入口链接的方式登记。冻结运行任务继续使用原源码和环境；不在任务运行中切换链接或替换文件。独立 SuperBigFLICA 与外部数据集不纳入本次归并。\n\n## 新任务的起点\n\n先核对 `INDEX.md` 是否已有可复用目录，再检查正式仓库的分支、工作树状态和远端。以下命令是使用示例，不表示已经执行：\n\n```bash\nFNIT_SERVER_ROOT=/cwStorage/home/gongwk/Notebook_code/FNIT\ngit -C \"$FNIT_SERVER_ROOT/repo\" status --short\ngit -C \"$FNIT_SERVER_ROOT/repo\" branch --show-current\ngit -C \"$FNIT_SERVER_ROOT/repo\" rev-parse HEAD\ngit -C \"$FNIT_SERVER_ROOT/repo\" remote -v\n\n# example-task 替换为新的任务名；先确认索引和目标目录未被占用。\nFNIT_WORKSPACE=\"$FNIT_SERVER_ROOT/workspaces/example-task\"\ngit -C \"$FNIT_SERVER_ROOT/repo\" worktree add --detach \"$FNIT_WORKSPACE\" main\n\n# 明确选用本工作树源码，再检查实际解释器和 fnit 导入路径。\ncd \"$FNIT_WORKSPACE\"\n# 解析环境目录，再用原 prefix 的解释器运行，保持其 sys.prefix。\nFNIT_ENV_PREFIX=\"$(readlink -f \"$FNIT_SERVER_ROOT/envs/default\")\"\nPYTHONPATH=\"$FNIT_WORKSPACE/src\" \"$FNIT_ENV_PREFIX/bin/python\" \\\n  -c \"import sys, fnit; print(sys.executable); print(fnit.__file__)\"\n```\n\n为任务登记实际工作树、commit、环境、源码哈希及 `runs/` 输出目录。需要原生扩展或额外依赖时按项目安装说明处理，不把历史 build 当作新源码的构建结果。准备修改时可为工作树建立独立分支；不要让多个任务共用同一个可写源码目录。\n\n## 维护规则\n\n- 先查索引再创建目录，新增或变更后及时更新索引。\n- 快照、报告和结果绑定实际运行版本，不能改标为当前 `main`。\n- 原 Conda prefix、冻结源码及运行产物保留其实际身份；未经授权不删除旧记录或兼容入口。\n- 私有影像、被试信息、凭据和许可证内容不写入公开文档；迁移 manifest 留在私有 `admin/`。\n- 使用权重和模板前核查固定 Release 或原作者来源；未获明确再分发许可的资源仍只从原站获取。\n"
+      "content": "# FNIT 服务器统一目录\n\n统一入口：`/data/fnit`。\n\n开始任务先读根目录 `INDEX.md` 和本说明，从索引查找已有代码、工作树、快照、运行目录和环境。新目录统一在此根目录下创建；旧路径保留兼容入口。\n\n## 目录用途\n\n| 目录 | 用途 |\n|---|---|\n| `repo/` | 正式 Git 仓库。整理时通过校验完整 Git bundle 导入，干净 `main` 为 `7af34e6d072e843fb2558c931bb2781f1d4b0be9`。 |\n| `workspaces/` | 各任务的工作目录，保留原内部结构；新任务使用独立目录。 |\n| `snapshots/` | 历史 Git 源码树，按记录的版本和哈希复用。 |\n| `legacy/freesurfer_synth/` | 旧 FNIT 0.13.0 树，不能当作新的正式 `main`。 |\n| `runs/` | 新运行的日志、检查点、输出和验证产物。 |\n| `envs/` | 链接至两个原 Conda prefix；`default` 指向 `956b1a9` 环境，`legacy-venv` 指向旧 `freesurfer_synth/.venv`。 |\n| `assets/weights/` | 指向原权重目录；下载和使用仍按许可、大小及 SHA-256 校验。 |\n| `tools/legacy/`、`logs/legacy/` | 旧辅助脚本及旧日志。 |\n| `archive/transfers/`、`archive/builds/` | 传输文件及旧构建产物。 |\n| `admin/` | 私有迁移计划与 manifest；实际迁移状态和数量以最终 manifest 为准。 |\n\n`repo/` 是源码仓库，不是 pip 安装环境。归并代码不会自动改变环境中已安装或 editable 安装的 `fnit`；运行前必须检查实际导入位置。上述 `main` 是整理时的状态，后续可随远端推进，不能假设它一直是最新提交。\n\n旧目录通过兼容软链接或原地保留加统一入口链接的方式登记。冻结运行任务继续使用原源码和环境；不在任务运行中切换链接或替换文件。独立 SuperBigFLICA 与外部数据集不纳入本次归并。\n\n## 新任务的起点\n\n先核对 `INDEX.md` 是否已有可复用目录，再检查正式仓库的分支、工作树状态和远端。以下命令是使用示例，不表示已经执行：\n\n```bash\nFNIT_SERVER_ROOT=/data/fnit\ngit -C \"$FNIT_SERVER_ROOT/repo\" status --short\ngit -C \"$FNIT_SERVER_ROOT/repo\" branch --show-current\ngit -C \"$FNIT_SERVER_ROOT/repo\" rev-parse HEAD\ngit -C \"$FNIT_SERVER_ROOT/repo\" remote -v\n\n# example-task 替换为新的任务名；先确认索引和目标目录未被占用。\nFNIT_WORKSPACE=\"$FNIT_SERVER_ROOT/workspaces/example-task\"\ngit -C \"$FNIT_SERVER_ROOT/repo\" worktree add --detach \"$FNIT_WORKSPACE\" main\n\n# 明确选用本工作树源码，再检查实际解释器和 fnit 导入路径。\ncd \"$FNIT_WORKSPACE\"\n# 解析环境目录，再用原 prefix 的解释器运行，保持其 sys.prefix。\nFNIT_ENV_PREFIX=\"$(readlink -f \"$FNIT_SERVER_ROOT/envs/default\")\"\nPYTHONPATH=\"$FNIT_WORKSPACE/src\" \"$FNIT_ENV_PREFIX/bin/python\" \\\n  -c \"import sys, fnit; print(sys.executable); print(fnit.__file__)\"\n```\n\n为任务登记实际工作树、commit、环境、源码哈希及 `runs/` 输出目录。需要原生扩展或额外依赖时按项目安装说明处理，不把历史 build 当作新源码的构建结果。准备修改时可为工作树建立独立分支；不要让多个任务共用同一个可写源码目录。\n\n## 维护规则\n\n- 先查索引再创建目录，新增或变更后及时更新索引。\n- 快照、报告和结果绑定实际运行版本，不能改标为当前 `main`。\n- 原 Conda prefix、冻结源码及运行产物保留其实际身份；未经授权不删除旧记录或兼容入口。\n- 私有影像、被试信息、凭据和许可证内容不写入公开文档；迁移 manifest 留在私有 `admin/`。\n- 使用权重和模板前核查固定 Release 或原作者来源；未获明确再分发许可的资源仍只从原站获取。\n"
     },
     "INDEX.md": {
       "sha256": "11d70a172f08ea07616a6a7808291fc46e39b4b6a111399a42e901d486e9820a",
       "bytes": 41965,
       "relevant_lines": [
-        "固定入口：`/cwStorage/home/gongwk/Notebook_code/FNIT`。先读 [README.md](README.md)；机器可读索引见 [INDEX.json](INDEX.json)。",
+        "固定入口：`/data/fnit`。先读 [README.md](README.md)；机器可读索引见 [INDEX.json](INDEX.json)。",
         "正式源码：`repo/`，整理时 main 为 `7af34e6d072e843fb2558c931bb2781f1d4b0be9`。后续使用前现场核对 Git 与实际 Python 导入路径。",
         "| `repo/` | 正式 Git 主仓库 |",
         "| `workspaces/` | 既有任务与新增工作树 |",
@@ -43,48 +43,48 @@
   },
   "relevant_index_entries": [
     {
-      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/envs/default",
-      "target": "/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9",
+      "path": "/data/fnit/envs/default",
+      "target": "/data/workspaces/fnit_conda_env_956b1a9",
       "note": "既有共享 Conda 环境；保留实际 prefix；不代表已安装 repo 当前版本。"
     },
     {
-      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/assets/weights",
-      "target": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/weights",
+      "path": "/data/fnit/assets/weights",
+      "target": "/data/workspaces/freesurfer_synth/weights",
       "note": "既有权重目录索引；使用前核对文件许可、大小和 SHA-256。"
     },
     {
       "name": "freesurfer_synth",
       "group": "legacy",
       "kind": "directory",
-      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/legacy/freesurfer_synth",
-      "old_path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth",
+      "path": "/data/fnit/legacy/freesurfer_synth",
+      "old_path": "/data/workspaces/freesurfer_synth",
       "action": "register_link_keep_original"
     }
   ],
   "paths": {
     "repo": {
-      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/repo",
+      "path": "/data/fnit/repo",
       "exists": true,
       "is_symlink": false,
-      "resolved": "/cwStorage/home/gongwk/Notebook_code/FNIT/repo"
+      "resolved": "/data/fnit/repo"
     },
     "env_default": {
-      "path": "/cwStorage/home/gongwk/Notebook_code/FNIT/envs/default",
+      "path": "/data/fnit/envs/default",
       "exists": true,
       "is_symlink": true,
-      "resolved": "/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9"
+      "resolved": "/data/workspaces/fnit_conda_env_956b1a9"
     },
     "existing_accuracy": {
-      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003",
+      "path": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003",
       "exists": true,
       "is_symlink": false,
-      "resolved": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003"
+      "resolved": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003"
     },
     "existing_env": {
-      "path": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env",
+      "path": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env",
       "exists": true,
       "is_symlink": false,
-      "resolved": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env"
+      "resolved": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env"
     }
   },
   "git": {
@@ -117,11 +117,11 @@
   "proposed_aliases": {
     "workspaces/recon_accuracy_20261003": {
       "lexists": false,
-      "resolved": "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003"
+      "resolved": "/data/fnit/workspaces/recon_accuracy_20261003"
     },
     "runs/recon_accuracy_20261003": {
       "lexists": false,
-      "resolved": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003"
+      "resolved": "/data/fnit/runs/recon_accuracy_20261003"
     }
   },
   "index_top_level_types": {

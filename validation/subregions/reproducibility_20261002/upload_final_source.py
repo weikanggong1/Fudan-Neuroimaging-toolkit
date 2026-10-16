@@ -1,6 +1,6 @@
 """Transfer only the approved native-source archive and external validation code.
 
-Uses the existing persistent headcw/gpucw1 SSH route. The remote receiver verifies
+Uses the existing persistent control-host/accelerator-a-1 SSH route. The remote receiver verifies
 archive size/SHA, safe regular members, all manifest files and the public API.
 No image/weight/license is transmitted. Existing snapshots are checked, never
 replaced. Runner/observer scripts are staged externally; no GPU job is started.
@@ -74,7 +74,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--freeze-identity", required=True, type=Path)
     parser.add_argument("--remote-root", required=True)
-    parser.add_argument("--remote-python", default="/home1/gongwk/anaconda3/bin/python")
+    parser.add_argument("--remote-python", default="/home1/benchmark-user/anaconda3/bin/python")
     parser.add_argument("--remote-helper", type=Path, default=Path("/tmp/fnit_subregions_remote.py"))
     parser.add_argument("--external-script", type=Path, action="append", default=[])
     args = parser.parse_args()
@@ -97,7 +97,7 @@ def main():
     started = time.time()
     result = subprocess.run(command, input=payload, capture_output=True)
     local = {"started_unix": started, "finished_unix": time.time(), "returncode": result.returncode,
-             "archive": frozen["archive"], "transport": "existing persistent SSH via headcw to gpucw1",
+             "archive": frozen["archive"], "transport": "existing persistent SSH via control-host to accelerator-a-1",
              "receiver_sha256": hashlib.sha256(RECEIVER.encode()).hexdigest(),
              "helper_sha256": hashlib.sha256(args.remote_helper.read_bytes()).hexdigest(),
              "stderr": result.stderr.decode(errors="replace"), "remote_output": result.stdout.decode(errors="replace")}

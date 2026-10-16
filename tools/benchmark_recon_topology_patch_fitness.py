@@ -292,7 +292,7 @@ def run(*, statistics_capture, volume_capture, distance_capture, brain, fnit_joi
         seconds=dict(input_validation_load=loaded-started, first_complete_api=first["seconds"],
             repeated_complete_api=second["seconds"], candidate_npz_io=candidate_io_seconds,
             script_until_report_serialization=time.perf_counter()-_PROCESS_ENTRY),
-        threads=budget, cpu_affinity=sorted(os.sched_getaffinity(0)), host_role="CFFF_CPU_validation",
+        threads=budget, cpu_affinity=sorted(os.sched_getaffinity(0)), host_role="accelerator-b_CPU_validation",
         actual_hostname=platform.node(), python=platform.python_version(), numpy=np.__version__, numba=numba.__version__,
         torch=torch.__version__, cuda_initialization_unchanged=before_cuda == torch.cuda.is_initialized(),
         cuda_initialized_before=before_cuda, gpu_memory="not sampled; CUDA not used for this CPU stage",

@@ -6,8 +6,8 @@
 
 | 原始输入／调用 | 主机、设备、线程 | 优化前 | 优化后 | 墙钟减少 |
 | --- | --- | ---: | ---: | ---: |
-| sub-01，已初始化 CUDA 的 Python API | gpucw1，H100 GPU1，同一UUID，4线程 | 4972.667 s（82.878 min） | 4242.884 s（70.715 min） | 729.783 s，14.676%，1.172倍 |
-| sub-02，CPU CLI | nodecw10，Xeon Gold6418H，4线程 | 5295.422 s（88.257 min） | 5274.884 s（87.915 min） | 20.539 s，0.388%，1.0039倍 |
+| sub-01，已初始化 CUDA 的 Python API | accelerator-a-1，H100 GPU1，同一UUID，4线程 | 4972.667 s（82.878 min） | 4242.884 s（70.715 min） | 729.783 s，14.676%，1.172倍 |
+| sub-02，CPU CLI | compute-a-10，Xeon Gold6418H，4线程 | 5295.422 s（88.257 min） | 5274.884 s（87.915 min） | 20.539 s，0.388%，1.0039倍 |
 
 GPU比较相同 `run_monitored.py` 的 `command_wall_seconds`；CPU比较CLI子进程的墙钟。均包含解释器启动、校验、模型、传输及文件读写，不混用API计时或额外监控启动范围。两例是不同被试和硬件，不能计算二者的GPU/CPU比；共享硬件单次观察不代表稳定吞吐。详细66阶段与内部步骤见 [GPU](whole/sub01/timing_pair_summary.json)、[CPU](whole/sub02/timing_pair_summary.json)，对应CSV为各目录的table.csv。
 

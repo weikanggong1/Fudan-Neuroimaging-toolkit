@@ -20,12 +20,12 @@ for name in ("bindings", "source", "resource", "output"):
 args = parser.parse_args()
 args.output.mkdir(parents=True, exist_ok=False)
 torch.set_num_threads(8)
-native = Path("/public/software/apps/MRtrix3/3.0.3/bin")
-colors = Path("/public/software/apps/Freesurfer/8.2.0-1/FreeSurferColorLUT.txt")
-exact = Path("/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_03/oracle/mrtrix3-026e850d")
+native = Path("/opt/reference/MRtrix3/3.0.3/bin")
+colors = Path("/opt/reference/Freesurfer/8.2.0-1/FreeSurferColorLUT.txt")
+exact = Path("/data/workspaces/fnit_connectome_accuracy_20261003_v1/task_03/oracle/mrtrix3-026e850d")
 reference_lut = exact / "share/mrtrix3/_5ttgen/FreeSurfer2ACT_sgm_amyg_hipp.txt"
 environment = os.environ.copy()
-environment.update(LD_LIBRARY_PATH="/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/lib",
+environment.update(LD_LIBRARY_PATH="/data/workspaces/fnit_conda_env_956b1a9/lib",
                    OMP_NUM_THREADS="8", MKL_NUM_THREADS="8")
 
 

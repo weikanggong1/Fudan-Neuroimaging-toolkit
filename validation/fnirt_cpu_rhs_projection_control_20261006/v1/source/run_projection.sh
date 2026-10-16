@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 umask 077
-FNIT_ROOT=/cwStorage/home/gongwk/Notebook_code/FNIT
+FNIT_ROOT=/data/fnit
 FNIT_W="$FNIT_ROOT/workspaces/smri_cpu_20261004/remaining_20261006/fnirt-rhs-projection-control-v1"
 FNIT_R="$FNIT_ROOT/runs/smri_cpu_20261004/remaining_20261006/fnirt-rhs-projection-control-v1"
 FNIT_ENV=$(readlink -f "$FNIT_ROOT/envs/default")
@@ -13,7 +13,7 @@ test ! -e "$FNIT_R/projection"
 test ! -e "$FNIT_R/projection.exitcode"
 trap 'FNIT_RC=$?; printf "%s\n" "$FNIT_RC" > "$FNIT_R/projection.exitcode"' EXIT
 printf 'Waiting for shared CPU lock; no numerical import before lock.\n'
-exec 9>"$FNIT_ROOT/runs/smri_cpu_20261004/nodecw7.gems.cpu8.lock"
+exec 9>"$FNIT_ROOT/runs/smri_cpu_20261004/compute-a-7.gems.cpu8.lock"
 if flock -w 120 9; then
   :
 else

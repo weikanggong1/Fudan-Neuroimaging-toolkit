@@ -136,7 +136,7 @@ def build_jobs(server_root, *, reference_wrapper=None, source_path=None, scenari
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--server-root", default="/cwStorage/home/gongwk/Notebook_code/FNIT")
+    parser.add_argument("--server-root", default="/data/fnit")
     parser.add_argument("--reference-wrapper")
     parser.add_argument("--source-path")
     parser.add_argument("--source-revision", default="1d31e7baaebbb644ab199471f7fe6282721455fd")

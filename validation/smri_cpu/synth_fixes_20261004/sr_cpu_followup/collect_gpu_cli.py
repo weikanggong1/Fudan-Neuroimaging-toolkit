@@ -12,7 +12,7 @@ def digest(path):
 
 
 def main():
-    root=Path('/cwStorage/home/gongwk/Notebook_code/FNIT')
+    root=Path('/data/fnit')
     output=root/'runs/smri_cpu_20261004/remaining_20261004/synth'
     source=root/'workspaces/smri_cpu_20261004/remaining_20261004/synth'
     reference_path=output/'sr_normal_gpu_cli_v1_old1/image.nii.gz'

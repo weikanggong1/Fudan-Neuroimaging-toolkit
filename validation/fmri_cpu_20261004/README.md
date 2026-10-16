@@ -12,9 +12,9 @@
 | 4 | MSM/MSMSulc/MSMAll、双侧表面和 CIFTI | 固定 newMSM、Workbench、fMRIPrep 表面链 |
 | 5 | 体积管线、时间和空间处理、缓存及完整输出 | 固定 fMRIPrep 预处理与匹配原 FSL 阶段 |
 
-CPU 使用 nodecw8 的 Intel Xeon Gold 6418H。每项分配八个互不重叠的物理核心；1 线程测试仅绑定该组中的一个核心，8 线程测试绑定完整核心组。Torch、Numba、OpenMP 和 BLAS 统一预算，关闭动态增线程。同组计时串行并持有独占锁。共享节点的其它作业负载仍会记录。
+CPU 使用 compute-a-8 的 Intel Xeon Gold 6418H。每项分配八个互不重叠的物理核心；1 线程测试仅绑定该组中的一个核心，8 线程测试绑定完整核心组。Torch、Numba、OpenMP 和 BLAS 统一预算，关闭动态增线程。同组计时串行并持有独占锁。共享节点的其它作业负载仍会记录。
 
-nodecw8 的原 MATLAB R2018b 因许可证主机绑定失败，未进入 CBIG/HCP 计算。已验证 nodecw10 的合法 MATLAB 实际启动和正常退出；这两项 MATLAB 对照迁至 nodecw10，FNIT 也在同一节点重新运行。该节点负载约 2,500，因此另列函数时间、进程墙钟与 CPU 时间，不将 nodecw8 的 FNIT 耗时与 nodecw10 的原版耗时相除。
+compute-a-8 的原 MATLAB R2018b 因许可证主机绑定失败，未进入 CBIG/HCP 计算。已验证 compute-a-10 的合法 MATLAB 实际启动和正常退出；这两项 MATLAB 对照迁至 compute-a-10，FNIT 也在同一节点重新运行。该节点负载约 2,500，因此另列函数时间、进程墙钟与 CPU 时间，不将 compute-a-8 的 FNIT 耗时与 compute-a-10 的原版耗时相除。
 
 GPU 对照使用已验证 H100 的显式 UUID，先记录设备负载。同一设备中的本轮计时顺序执行。默认 TF32；保留既有功能的精度策略和 float32 输出，不启用 float16/bfloat16。PyTorch 显存目标为 20,000,000,000 字节。
 

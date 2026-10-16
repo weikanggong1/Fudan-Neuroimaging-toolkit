@@ -22,7 +22,7 @@ from fingerprint_e036f57 import fingerprint
 
 def main() -> None:
     """用两个新目录运行相同命令；仅此固定实验，没有未声明的输入选项。"""
-    root = Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929')
+    root = Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929')
     directory = root / 'volume_parity_20260930'
     source = directory / 'full_sub01_e036f57_uuid/mri'
     output = directory / 'sub01/wm_edit_repeat_e036f57'

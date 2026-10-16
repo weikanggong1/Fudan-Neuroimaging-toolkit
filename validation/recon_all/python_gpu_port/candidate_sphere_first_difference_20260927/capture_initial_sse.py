@@ -1,7 +1,7 @@
 """Capture the first native sphere SSE arrays and stop before optimization.
 
 Requires SPHERE_CAPTURE_DIR and the pinned FreeSurfer 8.2 mris_sphere binary.
-This GDB script supports the Python 2.7 embedded in gpucw1 GDB 7.6.1.
+This GDB script supports the Python 2.7 embedded in accelerator-a-1 GDB 7.6.1.
 """
 
 import hashlib

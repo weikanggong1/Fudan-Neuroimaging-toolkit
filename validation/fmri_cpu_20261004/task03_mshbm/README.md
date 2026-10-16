@@ -32,9 +32,9 @@ FNIT HCP_40 NPZ 为 1,497,800 字节，SHA `aece34ff3651a10e44c8905d5eac32a1e322
 
 官方代码 commit 为 `b69b822a15e2a94f1e439606552fc44b6858cf3c`。现有磁盘 `CBIG_MSHBM_generate_individual_parcellation.m` 添加了 `.npy` 兼容条件，磁盘 SHA 为 `ddfdb0420a8e6e8c283300880b3d131368a25a930f213bcd1821fd225c03b4ed`；原 Git 对象 SHA 为 `ce5c5a8596994c19c88e1a0ddb65dd28b4e3c31ded5887a89dacd667f4d0b3bb`。简化 wrapper、`CBIG_MSHBM_read_fmri` 和 `CBIG_ComputeCorrelationProfile` 的磁盘 SHA 也与原对象不同。`export_reference.py` 从固定 Git 对象导出干净函数和所需 MATLAB/mesh 资源，写入服务器此任务的私有 reference，并记录原磁盘与干净文件 SHA；不会修改原 CBIG checkout。旧报告绑定原脚本，不作为新测量。
 
-`nodecw8` 的 MATLAB 正式尝试因授权 hostid 不匹配退出，保留完整失败记录。`nodecw10` 的实际合法启动随后返回 0，版本 `9.5.0.944444 (R2018b)`，实际 `disp(version); exit(0)` 耗时 114.553 s，无许可证错误。官方 CBIG、冻结 FNIT 与优化 FNIT 均在 nodecw10 同一组物理核重跑；CPU1 `[2]`、CPU8 `[2,6,10,14,18,22,26,30]`，同 socket 且 core 均不同，实际 `flock` 串行。节点负载约 2,500，保留墙钟与 CPU time，不能作稳定速度结论或跨节点相除。
+`compute-a-8` 的 MATLAB 正式尝试因授权 hostid 不匹配退出，保留完整失败记录。`compute-a-10` 的实际合法启动随后返回 0，版本 `9.5.0.944444 (R2018b)`，实际 `disp(version); exit(0)` 耗时 114.553 s，无许可证错误。官方 CBIG、冻结 FNIT 与优化 FNIT 均在 compute-a-10 同一组物理核重跑；CPU1 `[2]`、CPU8 `[2,6,10,14,18,22,26,30]`，同 socket 且 core 均不同，实际 `flock` 串行。节点负载约 2,500，保留墙钟与 CPU time，不能作稳定速度结论或跨节点相除。
 
-nodecw8 的冻结/优化 FNIT 控制使用 CPU1 `[2]`、CPU8 `[2,14,18,22,26,30,34,38]` 与 task03 锁。528 个干净参考文件及 fsLR900 downsample seed 已部署到任务私有目录，完整输入预检和实际冻结源码导入通过。
+compute-a-8 的冻结/优化 FNIT 控制使用 CPU1 `[2]`、CPU8 `[2,14,18,22,26,30,34,38]` 与 task03 锁。528 个干净参考文件及 fsLR900 downsample seed 已部署到任务私有目录，完整输入预检和实际冻结源码导入通过。
 
 ## 复现接口
 

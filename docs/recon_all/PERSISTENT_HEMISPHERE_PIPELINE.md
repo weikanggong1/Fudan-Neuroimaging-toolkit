@@ -79,7 +79,7 @@ fnit-recon-all /data/public_T1w.nii.gz /data/new_subject \
 
 ## 5. 真实验证、耗时与显存
 
-目前没有绑定**当前持久调度源码**、相同真实 T1、同硬件和同线程预算的 `groups`/`persistent` 受控整例配对；因此本页不声明整例提速或最终指标无退化。已有[冻结 f016 的两例运行](../../validation/recon_all/optimizations/20261014_gpucw1_f016_partial/README.md)只完成 sub-07，sub-06 在拓扑质量门失败，且未建立可归属的 FNIT 整例显存峰值；它不能证明随后补丁或该调度选项通过。旧[半球进程缓存同输入阶段](HEMISPHERE_GPU_MEMORY.md)属于 `groups` 路径，也不能作为持久链收益。公开验证页记录旧病例最终 Dice、表面距离、脑区误差与私有脑图的边界；当前链须从空目录重新运行两例并完成这些检查。
+目前没有绑定**当前持久调度源码**、相同真实 T1、同硬件和同线程预算的 `groups`/`persistent` 受控整例配对；因此本页不声明整例提速或最终指标无退化。已有[冻结 f016 的两例运行](../../validation/recon_all/optimizations/20261014_accelerator-a-1_f016_partial/README.md)只完成 sub-07，sub-06 在拓扑质量门失败，且未建立可归属的 FNIT 整例显存峰值；它不能证明随后补丁或该调度选项通过。旧[半球进程缓存同输入阶段](HEMISPHERE_GPU_MEMORY.md)属于 `groups` 路径，也不能作为持久链收益。公开验证页记录旧病例最终 Dice、表面距离、脑区误差与私有脑图的边界；当前链须从空目录重新运行两例并完成这些检查。
 
 ## 6. 更新与参考
 

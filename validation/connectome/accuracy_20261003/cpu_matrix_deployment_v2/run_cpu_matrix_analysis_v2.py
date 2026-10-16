@@ -11,11 +11,11 @@ import sys
 import time
 
 
-ROOT = Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1')
+ROOT = Path('/data/workspaces/fnit_connectome_accuracy_20261003_v1')
 FROZEN = ROOT / 'formal_frozen_v1'
 CONFIGURATION = FROZEN / 'accuracy_configuration.json'
 TOOL = FROZEN / 'tools_source/tools/analyze_connectome_accuracy_cohort.py'
-ANALYSIS_PYTHON = '/cwStorage/home/gongwk/anaconda3/bin/python3.11'
+ANALYSIS_PYTHON = '/data/user/anaconda3/bin/python3.11'
 CONFIGURATION_SHA256 = 'f8eba1cbf3eab2baa549172b32be2c9d3b1014ad478f6e3702d7987378f52f8c'
 TOOL_SHA256 = '02f5e22f91f423f17d8d0ee429e0a702c0ac6a64baa8e76b06238e3c297cf446'
 JOB = ROOT / 'root_matrix_analysis_v2'

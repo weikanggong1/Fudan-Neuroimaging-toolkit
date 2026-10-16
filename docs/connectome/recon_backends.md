@@ -203,7 +203,7 @@ provided 的目录读取与文件/几何检查没有独立官方重建命令。
 
 ### 官方初始化适配器的真实缺陷与修复
 
-本轮 nodecw10、公开 CON01 原始 T1、FreeSurfer 8.2.0-1 的首次新目录调用立即失败：`FREESURFER: Undefined variable.` 当时的版本 `8bc337c4` 仅设置 `FREESURFER_HOME` 和 PATH，没有执行完整官方初始化。实际官方 `recon-all` 使用 `FREESURFER` 等变量，官方 `FreeSurferEnv.sh` 负责设置这些变量。这是来源适配器的环境缺陷；没有解剖数值求解结果，也没有写完成缓存。
+本轮 compute-a-10、公开 CON01 原始 T1、FreeSurfer 8.2.0-1 的首次新目录调用立即失败：`FREESURFER: Undefined variable.` 当时的版本 `8bc337c4` 仅设置 `FREESURFER_HOME` 和 PATH，没有执行完整官方初始化。实际官方 `recon-all` 使用 `FREESURFER` 等变量，官方 `FreeSurferEnv.sh` 负责设置这些变量。这是来源适配器的环境缺陷；没有解剖数值求解结果，也没有写完成缓存。
 
 修复为完整 source 官方 `SetUpFreeSurfer.sh` 后 exec 独立 argv；保留父环境、许可证环境、线程参数和 subject 输出路径，setup 失败时停止且不写完成状态。两个 setup 脚本的内容哈希纳入缓存身份。首次失败冻结源码和产物保留；修复版使用独立 `official_retry_v2`，不改运行中的十人 provided 源码。修复后的真实单例在CPU完成首次新目录调用：6069.7609秒；第二次1.02243秒返回 `skipped`，同一subject的349个文件内容不变，官方done及格式/几何检查通过。与既有同原始T1官方结果的只读CPU比较用时7.55368秒，brain/aparc+aseg/ribbon体素和bits逐值一致、分割/ribbon label XOR=0，双半球white/pial有序面与float32顶点坐标payload逐值一致，顶点距离全部0 mm。两边同为FreeSurfer8.2.0-d932c45；既有8线程、不启用parallel且亲和性未知，本次4线程、parallel、4CPU亲和性，不能以这两个运行时间判定加速。完整数值、范围、初次失败和冻结版本见 [单例接入记录](../../validation/connectome/paired_generated_official_20261003/README.md)。该单例只验证官方来源适配器，不能用来声明FNIT recon-all数值等价。
 

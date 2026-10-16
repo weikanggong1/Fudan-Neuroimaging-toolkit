@@ -158,7 +158,7 @@ def main():
         "affine_equal_reference": bool(np.array_equal(reference_image.affine, output_image.affine)),
         "different_voxels": int(np.count_nonzero(delta)), "max_abs": float(delta.max()),
         "p99_abs": float(np.percentile(delta, 99)), "label_dice": dice,
-        "scope_limit": "headcw diagnostic may differ from gpucw1 hardware/load; no direct speed comparison to 53.16s production measurement",
+        "scope_limit": "control-host diagnostic may differ from accelerator-a-1 hardware/load; no direct speed comparison to 53.16s production measurement",
     }
     if args.boundary_backend == "torch":
         from fnit.recon_all import fill_boundary_torch

@@ -54,7 +54,7 @@ def main():
     queue = json.loads((args.run_root / 'queue_status.public.json').read_text())
     expected = [('cbig', 1), ('fnit', 1), ('fnit_candidate', 1),
                 ('cbig', 8), ('fnit', 8), ('fnit_candidate', 8)]
-    if (queue.get('state') != 'complete' or queue.get('execution_hostname') != 'nodecw10'
+    if (queue.get('state') != 'complete' or queue.get('execution_hostname') != 'compute-a-10'
             or [(row['name'], row['threads']) for row in queue['jobs']] !=
             [(name + '_cpu' + str(threads), threads) for name, threads in expected]
             or any(row.get('state') != 'complete' or row.get('returncode') != 0
@@ -98,7 +98,7 @@ def main():
         report_path = args.run_root / name / 'report.public.json'
         report = json.loads(report_path.read_text())
         row = {'implementation': implementation, 'threads': job['threads'],
-               'affinity': job['affinity'], 'hostname': 'nodecw10',
+               'affinity': job['affinity'], 'hostname': 'compute-a-10',
                'load_before': job['load_before'], 'load_after': job['load_after'],
                'report_sha256': sha(report_path),
                **clock_values(args.run_root / (name + '.clock.private.txt'))}

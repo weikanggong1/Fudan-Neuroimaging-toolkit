@@ -117,7 +117,7 @@ def main():
             **{evaluated_role+'_resources_sha256':w.digest(Path(c[evaluation['resources_key']]))},
             official_program_manifest_sha256=w.digest(pm),
             comparison_driver_sha256=w.digest(Path(c['whole_driver'])), comparator_sha256={p.name:w.digest(p) for p in scripts.glob('*.py')},
-            same_host='gpucw1',total_threads=4,declared_gpu_uuid=c['gpu_uuid'],
+            same_host='accelerator-a-1',total_threads=4,declared_gpu_uuid=c['gpu_uuid'],
             hardware_scope='same launch host and declared GPU UUID; complete monitor receipts retained separately',
             **{evaluated_role+'_code_commit':b['code_commit']})
         w.write(out/'execution_binding.json',bindings)

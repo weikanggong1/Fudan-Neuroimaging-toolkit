@@ -39,7 +39,7 @@ class StagedFixture(fixture_module.PreparationFixture):
         self.config["future_gpu_parameters"].update(
             gpu_python=sys.executable, gpu_cpu_threads=8, seed=0, eddy_gp_seed=12345,
             device="cuda:0", gpu_uuid="GPU-protocol-fixture", cuda_visible_devices="1", gpu_path_prefix=[],
-            gpu_lock="/tmp/fnit-recon-five-20261002-gongwk.gpu.lock")
+            gpu_lock="/tmp/fnit-recon-five-20261002-benchmark-user.gpu.lock")
         self.config["frozen_runtime_files"] = prep.freeze_runtime_files(self.config)
         self.prep_config = copy.deepcopy(self.config)
         self.prep_config_path = self.prep_root / "anatomy_prep_config.json"

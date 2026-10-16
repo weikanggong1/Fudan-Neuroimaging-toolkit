@@ -6,7 +6,7 @@ native-free Python input chain (SHA-256
 Its 16,777,216 input voxels match the unmodified official subject's `orig.mgz`.
 The independently configured SynthSeg 2.0 weight SHA-256 was
 `f190bfd742f450ef3ca2c9df9ed4d2e0232b3a74471da5e51b7770bacdf80c3e`.
-The candidate ran on `gpucw1` H100 GPU 1 with four CPU threads. A fresh unmodified FreeSurfer 8.2 CPU replay on this exact `orig.mgz`
+The candidate ran on `accelerator-a-1` H100 GPU 1 with four CPU threads. A fresh unmodified FreeSurfer 8.2 CPU replay on this exact `orig.mgz`
 matched the archived official subject at every hard-label voxel and matched
 its volume CSV byte for byte; see the [official replay report](official_synthseg_replay_20260926.json).
 

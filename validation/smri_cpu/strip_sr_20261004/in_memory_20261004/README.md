@@ -1,6 +1,6 @@
 # SynthStrip / SynthSR：完全物化的 SpatialImage CPU API
 
-2026-10-04，在 nodecw10 上补齐默认 Python API 的真实内存输入验收。此前 `nib.load()` 返回的对象仍含 ArrayProxy；本轮先解码全部体素，复制为自有 ndarray，再调用公开 API。每项只执行一次默认 API，官方和已有 FNIT 路径结果均复用，不另行推理。
+2026-10-04，在 compute-a-10 上补齐默认 Python API 的真实内存输入验收。此前 `nib.load()` 返回的对象仍含 ArrayProxy；本轮先解码全部体素，复制为自有 ndarray，再调用公开 API。每项只执行一次默认 API，官方和已有 FNIT 路径结果均复用，不另行推理。
 
 ## 输入、冻结版本和资源
 
@@ -95,7 +95,7 @@ runner 采样的驻留进程树线程峰值分别为 17、51，包含运行库�
 - [worker.py](worker.py)：`--config` 为该 feature 的私密配置，`--output` 为必须尚不存在的产物目录；按独立阶段执行一次默认物化 API、保存同次全部输出、复用保存参考比较并检查前后来源。原始路径只写私密报告。
 - [collect_public.py](collect_public.py)：`--server-root` 与上述一致；仅汇出完成的两项 scalar/hash 白名单到 stdout，不读取影像数组或再推理。
 
-执行仍使用既有 `queue_runner_v3.py` 的共享 `nodecw10.cpu8.lock`、8 线程和相同 affinity。它排除等锁时间，记录 GNU time、进程树采样和输出存在性；保留已经完成的 receipt，不自动重复 API。新服务器工作区和产物的索引别名分别为 `W/task1_memory_v1`、`R/task1_memory_v1`。公共报告没有命令、绝对服务器路径、凭据、原被试 ID、影像或模型。
+执行仍使用既有 `queue_runner_v3.py` 的共享 `compute-a-10.cpu8.lock`、8 线程和相同 affinity。它排除等锁时间，记录 GNU time、进程树采样和输出存在性；保留已经完成的 receipt，不自动重复 API。新服务器工作区和产物的索引别名分别为 `W/task1_memory_v1`、`R/task1_memory_v1`。公共报告没有命令、绝对服务器路径、凭据、原被试 ID、影像或模型。
 
 ## 脑图、记录与来源
 

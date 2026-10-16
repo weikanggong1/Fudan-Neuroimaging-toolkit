@@ -85,7 +85,7 @@ def main():
     coarse = aligned_labels(cache / 'coarse.nii.gz', raw_image)
     cortical = aligned_labels(cache / 'cortical.nii.gz', raw_image)
     proxy = aligned_labels(cache / 'wmparc.nii.gz', raw_image)
-    mri = work / 'reconall_reference_gpucw1/fs_sub01/mri'
+    mri = work / 'reconall_reference_accelerator-a-1/fs_sub01/mri'
     oracle = aligned_labels(mri / 'aseg.mgz', raw_image)
     oracle_wm = aligned_labels(mri / 'wmparc.mgz', raw_image)
     cases = ('synthseg_raw', 'official_raw', 'official_wm110', 'official_norm_native')
@@ -171,9 +171,9 @@ def main():
     official = work / 'fnit_subregions_plus_20260928'
     supports = {}
     for family, source, ids, iterations in (
-        ('thalamus', official / 'official_thalamus_gpucw1_full_sub01_20260929/ThalamicNuclei.FSvoxelSpace.mgz', (10, 49), 5),
-        ('hippo-amygdala-left', official / 'official_hippo_gpucw1_full_sub01_20260929/lh.hippoAmygLabels.FSvoxelSpace.mgz', (17, 18), 2),
-        ('hippo-amygdala-right', official / 'official_hippo_gpucw1_full_sub01_20260929/rh.hippoAmygLabels.FSvoxelSpace.mgz', (53, 54), 2)):
+        ('thalamus', official / 'official_thalamus_accelerator-a-1_full_sub01_20260929/ThalamicNuclei.FSvoxelSpace.mgz', (10, 49), 5),
+        ('hippo-amygdala-left', official / 'official_hippo_accelerator-a-1_full_sub01_20260929/lh.hippoAmygLabels.FSvoxelSpace.mgz', (17, 18), 2),
+        ('hippo-amygdala-right', official / 'official_hippo_accelerator-a-1_full_sub01_20260929/rh.hippoAmygLabels.FSvoxelSpace.mgz', (53, 54), 2)):
         fine = aligned_labels(source, raw_image)
         groups = ({'thalamus': (fine >= 8100) & (fine < 8300) & ~np.isin(fine, (8125, 8225))}
                   if family == 'thalamus' else

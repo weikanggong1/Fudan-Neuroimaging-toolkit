@@ -83,7 +83,7 @@ Python 前处理所得 sphere 的坐标和有序面与官方诊断用居中 sphe
 
 最终 Conda C++ 阶段的观测耗时为 LH/RH 56.92/95.48 s；另一次调用的 Python 前处理耗时为 6.34/3.55 s。较早官方同输入运行耗时 60.98/82.10 s。共享节点负载有变化，这些数据不是受控速度比较。冻结配对输入包含官方 MRI/WM 和 FNIT 独立生成的 nofix 表面；由此尚不能验收当前连通流程的 white/pial 和 atlas 指标。
 
-连通的 Python remesh 还处理了新生成的双侧 `orig.premesh`，调用时没有提供官方表面。相对归档官方 `orig`，LH 顶点 106,622/106,622、float32 坐标 319,866/319,866、有序面 213,240/213,240 完全一致；RH 分别为 105,541/105,541、316,623/316,623、211,078/211,078。在共享的 headcw 节点耗时 100.05/119.32 s。[较早的独立 remesh benchmark](../../validation/recon_all/python_gpu_port/REMESH_VALIDATION.md)使用另一张冻结 premesh 比较 Python 与官方命令，其耗时不能与本次生成的 premesh 配对。
+连通的 Python remesh 还处理了新生成的双侧 `orig.premesh`，调用时没有提供官方表面。相对归档官方 `orig`，LH 顶点 106,622/106,622、float32 坐标 319,866/319,866、有序面 213,240/213,240 完全一致；RH 分别为 105,541/105,541、316,623/316,623、211,078/211,078。在共享的 control-host 节点耗时 100.05/119.32 s。[较早的独立 remesh benchmark](../../validation/recon_all/python_gpu_port/REMESH_VALIDATION.md)使用另一张冻结 premesh 比较 Python 与官方命令，其耗时不能与本次生成的 premesh 配对。
 
 两侧体积几何元数据字段在数值上相同；其中 `filename` 正确指向各自被试的 `mri/wm.mgz`，所以官方与临时被试的路径不同。候选 `orig` 缺少 425 字节的官方 FreeSurfer 构建/运行来源标签，完整尾部字节及文件 SHA-256 因而不同。[双侧 orig 几何记录](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/place_geometry_pair/accurate_filled_initial/curvature_trial/lh_fnit_sqrt_orig_vs_official.json)和[尾部及元数据报告](../../validation/recon_all/python_gpu_port/native_cpp_conda_20260927/place_geometry_pair/accurate_filled_initial/curvature_trial/orig_metadata_report.json)区分了这两类差异；RH 几何 JSON 位于 LH 文件旁。
 

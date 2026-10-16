@@ -1,8 +1,8 @@
 set -eu
-/cwStorage/home/gongwk/Notebook_code/FNIT/envs/default/bin/python - <<'PY'
+/data/fnit/envs/default/bin/python - <<'PY'
 from pathlib import Path
 import hashlib,json,os,subprocess
-r=Path('/cwStorage/home/gongwk/Notebook_code/FNIT');w=r/'workspaces/smri_cpu_20261004/remaining_20261006/seg-columns-integration-v1';run=r/'runs/smri_cpu_20261004/remaining_20261006/seg-columns-integration-v1';post=run/'posthoc_v2'
+r=Path('/data/fnit');w=r/'workspaces/smri_cpu_20261004/remaining_20261006/seg-columns-integration-v1';run=r/'runs/smri_cpu_20261004/remaining_20261006/seg-columns-integration-v1';post=run/'posthoc_v2'
 def ident(p):return {'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()}
 expected={'score_saved_whole_v2.py':'ecb4e08b0ef9d42cdd22c02797fc543f6dc1824476362cb470537777141c3ea6','png_encoder.py':'91923c06c85088c3ec162c0fff58590b029ce304b66928d98fb2abec1299cdd2'}
 for name,sha in expected.items():assert ident(w/name)['sha256']==sha
@@ -20,7 +20,7 @@ paths.extend(run/name for name in ('CPU_EXIT.json','GPU_EXIT.json'));paths.exten
 assert all(json.loads((run/name).read_text())['returncode']==0 for name in ('CPU_EXIT.json','GPU_EXIT.json'))
 assert not post.exists();os.umask(0o077);post.mkdir(mode=0o700)
 before={str(p.relative_to(r)):ident(p) for p in paths};(post/'PRESERVATION_BEFORE.json').write_text(json.dumps(before,indent=2)+'\n')
-command=['/usr/bin/flock','-w','23000',str(r/'runs/smri_cpu_20261004/nodecw7.gems.cpu8.lock'),'/usr/bin/taskset','-c','32,36,40,44,48,52,56,60','/usr/bin/timeout','--kill-after=30','180',str(r/'envs/default/bin/python'),str(w/'score_saved_whole_v2.py'),'--root',str(r),'--workspace',str(w),'--run',str(run),'--output',str(post/'POSTHOC.json')]
+command=['/usr/bin/flock','-w','23000',str(r/'runs/smri_cpu_20261004/compute-a-7.gems.cpu8.lock'),'/usr/bin/taskset','-c','32,36,40,44,48,52,56,60','/usr/bin/timeout','--kill-after=30','180',str(r/'envs/default/bin/python'),str(w/'score_saved_whole_v2.py'),'--root',str(r),'--workspace',str(w),'--run',str(run),'--output',str(post/'POSTHOC.json')]
 env={**os.environ,'CUDA_VISIBLE_DEVICES':'','PYTHONDONTWRITEBYTECODE':'1','OMP_NUM_THREADS':'8','MKL_NUM_THREADS':'8','OPENBLAS_NUM_THREADS':'8'}
 for name in ('PYTHONPATH','LD_PRELOAD','LD_LIBRARY_PATH','OPENBLAS_CORETYPE'):env.pop(name,None)
 supervisor="""import hashlib,json,subprocess,sys,time

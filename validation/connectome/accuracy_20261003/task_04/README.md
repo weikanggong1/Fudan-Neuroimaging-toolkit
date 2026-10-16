@@ -131,7 +131,7 @@ mrtransform aparc+aseg.mgz labels_dwi.nii.gz \
 
 ## 5. 真实数据精度、耗时与脑图
 
-输入绑定清单 SHA-256 为 `1ee5145471a76d345cf85a18750bed85bd53f967a410ac36ddad7bfd252bc940`。真实路径、source/target affine、变换值及其 SHA 以原始 [nearest report](evidence/nearest_reference_v1/report.json) 和 [tissue report](evidence/tissue_reference_v1/report.json) 为准。运行目录为 `/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_04`，CPU 主机 nodecw10，8 线程。算子没有随机数或播种。
+输入绑定清单 SHA-256 为 `1ee5145471a76d345cf85a18750bed85bd53f967a410ac36ddad7bfd252bc940`。真实路径、source/target affine、变换值及其 SHA 以原始 [nearest report](evidence/nearest_reference_v1/report.json) 和 [tissue report](evidence/tissue_reference_v1/report.json) 为准。运行目录为 `/data/workspaces/fnit_connectome_accuracy_20261003_v1/task_04`，CPU 主机 compute-a-10，8 线程。算子没有随机数或播种。
 
 | 实际输入/算子 | 比较范围 | 不一致/最大绝对差 | FNIT CPU 计算 s | native 进程墙钟 s |
 |---|---|---|---:|---:|

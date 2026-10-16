@@ -4,7 +4,7 @@
 
 `compare_raw_components.py` 读取本轮已经完成的 FNIT raw-DWI 运行，比较完整校正 DWI、全部旋转梯度及 FA。官方参考从每个病例实际使用的 `reference_manifest` 取得 DWI consumer、rawprep 和 modeling report，并核对实际路径、SHA 和成功命令。CON11 沿自己的 producer 目录读取，不套用另外九例的目录。
 
-服务器统一入口为 `/cwStorage/home/gongwk/Notebook_code/FNIT`。先读该目录的 `README.md` / `INDEX.md` / `INDEX.json`；本轮索引入口 `workspaces/fnit_connectome_accuracy_20261003_v1` 和上一轮 `workspaces/fnit_connectome_tenraw_20261002` 均以 `register_link_keep_original` 指向各自原实体。已现场核对两个链接；冻结任务继续使用原 configuration / receipt 中的绝对路径，没有移动运行、切换源码或修改中央索引。本次实际索引读取版本见 [`最终收集收据`](all10_component_collection_receipt.json)。
+服务器统一入口为 `/data/fnit`。先读该目录的 `README.md` / `INDEX.md` / `INDEX.json`；本轮索引入口 `workspaces/fnit_connectome_accuracy_20261003_v1` 和上一轮 `workspaces/fnit_connectome_tenraw_20261002` 均以 `register_link_keep_original` 指向各自原实体。已现场核对两个链接；冻结任务继续使用原 configuration / receipt 中的绝对路径，没有移动运行、切换源码或修改中央索引。本次实际索引读取版本见 [`最终收集收据`](all10_component_collection_receipt.json)。
 
 ```mermaid
 flowchart TD
@@ -151,11 +151,11 @@ tensor2metric tensor.nii.gz -fa fa.nii.gz -vector direction.nii.gz \
 |真实当前 all10 尚未完成的保护检查|真实冻结配置、controller source 和当前状态|按预期拒绝，输出目录未创建；`collector_all10_not_completed_guard_v1.json`。这是协议核验，不是十例收集结果。|
 |官方真实 producer 与文件核验 v1|十例 CON01/03/04/05/06/07/08/09/10/11|325 个实际文件 before/after SHA，6.71859 s。|
 |原 eeb 脚本的官方真实 producer 与文件核验 v2|同十例|325 个实际文件 before/after SHA，6.56676 s；`reference_gate_v2.json`。|
-|实际 baseline CON01 MRI 比较|全部 102 帧、全 552,960 体素、官方 mask 115,226 体素|1,319 个文件 before/after SHA；比较器内计时 20.22309 s，nodecw10 进程墙钟 20.34487 s。|
+|实际 baseline CON01 MRI 比较|全部 102 帧、全 552,960 体素、官方 mask 115,226 体素|1,319 个文件 before/after SHA；比较器内计时 20.22309 s，compute-a-10 进程墙钟 20.34487 s。|
 |实际 candidate CON01 MRI 比较|同一完整采集及同一实际官方参考|1,319 个文件 before/after SHA；比较器内计时 20.45769 s，CPU 控制器记录进程墙钟 20.62075 s。|
 |实际 baseline / candidate CON03 MRI 比较|全部 102 帧、全 552,960 体素、官方 mask 98,701 体素|后台控制器记录 CPU 进程墙钟分别 20.91344 / 21.37488 s；原成功报告均由原 receipt 绑定。|
-|CON03 真实完成配对的严格原 bytes 收集|仅 B03 / C03，原报告、summary、receipt 与全部绑定源文件|2,562 个原文件 before/after SHA；collector 内计时 24.79444 s，nodecw10 进程墙钟 24.87445 s，exit 0。|
-|最终真实十例原 bytes 收集|CON01/03/04/05/06/07/08/09/10/11；原 12 次 raw 均完成后启动|2,059 个原文件 before/after SHA，51 份原文件副本；collector 内计时 107.71187 s，nodecw10 进程墙钟 107.82284 s，exit 0。|
+|CON03 真实完成配对的严格原 bytes 收集|仅 B03 / C03，原报告、summary、receipt 与全部绑定源文件|2,562 个原文件 before/after SHA；collector 内计时 24.79444 s，compute-a-10 进程墙钟 24.87445 s，exit 0。|
+|最终真实十例原 bytes 收集|CON01/03/04/05/06/07/08/09/10/11；原 12 次 raw 均完成后启动|2,059 个原文件 before/after SHA，51 份原文件副本；collector 内计时 107.71187 s，compute-a-10 进程墙钟 107.82284 s，exit 0。|
 
 **当前 helper SHA**：`08015c11c2662cb2f8115843414ed9148c1dadc60c175b66dcf20f51381c18ce`。成功原报告 `baseline_CON01_components_v2.json` 的 SHA 为 `1fa40b59e1e7e4db893a62737e388b1873cc4058cfaffe705dc1fb29ce6b335b`，远端原目录为 `root_components_CON01_baseline_v2`，本地副本保留原字节。冻结配置 SHA 为 `f8eba1cbf3eab2baa549172b32be2c9d3b1014ad478f6e3702d7987378f52f8c`。
 
@@ -288,9 +288,9 @@ CON03 raw CLI 的真实单次墙钟为 baseline `2033.586431 s`、candidate `204
 - 实际 baseline 首次比较失败：冻结 source inventory 含合法零字节 `__init__.py`，原通用非空 producer guard 误拒绝。现仅科学源码 inventory / loaded-source 允许零字节，仍要求 exact SHA 和 before/after 文件不变；raw、MRI、contract 和输出继续要求非空。原 eeb 源码快照与 `baseline_CON01_initial_failure.json` 保留。
 - 修正后实际比较第二次失败：原官方 5TT header 的 channel spacing 为 NaN，严格 JSON 序列化拒绝。原中间 0f9 源码快照、真实 stderr 与 `baseline_CON01_serialization_failure.json` 保留；失败的空 `root_components_CON01_baseline_v1` 未覆盖。新 helper 只显式记录未定义元数据，并在创建输出目录前完成严格 JSON 序列化，不改 header、数组、网格判定或统计。
 - 最新 23 项 CPU 回归后，在全新 `root_components_CON01_baseline_v2` 完整重做来源及文件 before/after 核验，成功返回 exit 0。本地完整原报告、执行日志和摘要均保存实际 SHA；没有为失败目录补造完成记录。
-- CPU 后台控制器实际启动于 nodecw10，PID 185524，使用最终 helper/configuration SHA。bootstrap 时原 CON01 baseline 报告及全部 1,319 个绑定文件复核完成，4.98121 s；candidate CON01 当时仍在运行，其余 producer 未启动，`all10_summary=null`。`controller_v1_bootstrap_snapshot.json` 是该时刻的实际状态快照，不能当未来完成结果；运行中的实际状态以远端 `status.json` 为准。
+- CPU 后台控制器实际启动于 compute-a-10，PID 185524，使用最终 helper/configuration SHA。bootstrap 时原 CON01 baseline 报告及全部 1,319 个绑定文件复核完成，4.98121 s；candidate CON01 当时仍在运行，其余 producer 未启动，`all10_summary=null`。`controller_v1_bootstrap_snapshot.json` 是该时刻的实际状态快照，不能当未来完成结果；运行中的实际状态以远端 `status.json` 为准。
 - CON01 candidate 的实际 producer 完成后，后台控制器于 UTC `2026-10-03T07:29:09` 启动 CPU 比较，UTC `07:29:30` 完成。原报告、summary 与 receipt 复制保留原字节；公开示例仅包含原网格脑切片，没有复制发布完整 MRI 数组。控制器和科学冻结源码/配置没有改动，继续等待其它病例；此处覆盖仍为 CON01 baseline + candidate，不代表十例完成或整链匹配。
-- 准备原 bytes 收集器：独立 nodecw10 CPU 工具目录，复用相同 SHA 的 controller source gates；14 项 CPU 协议回归通过。真实全十例请求在 `all10_summary=null` 时明确拒绝，保留原 log/receipt 且没有创建集合目录。CON03 候选已完成的数据只作只读核验汇报；其配对 baseline 未完成时不在这里添加配对数字或重复复制大 JSON。完整配对与十例收集等待真实 producer 完成。
+- 准备原 bytes 收集器：独立 compute-a-10 CPU 工具目录，复用相同 SHA 的 controller source gates；14 项 CPU 协议回归通过。真实全十例请求在 `all10_summary=null` 时明确拒绝，保留原 log/receipt 且没有创建集合目录。CON03 候选已完成的数据只作只读核验汇报；其配对 baseline 未完成时不在这里添加配对数字或重复复制大 JSON。完整配对与十例收集等待真实 producer 完成。
 - CON03 baseline 与 candidate 均实际完成后，严格 subset collector 于 UTC `2026-10-03T09:11:11` 成功收集其原 bytes：2,562 个原文件 before/after SHA，CPU 24.87445 s。另作 CPU 原 FA 支持与真实 paired 脑图派生，完整复核同一批文件与两臂完成行；只保存小 summary/receipt/PNG 及原 summary/receipt 的完整字节，不重复复制大报告。CON03 有限对诊断 MAE/RMSE 小幅变差、尾部最大值不变，明确保留反证。收集时 `all10_summary=null`，本提交只覆盖已完成的 CON03 配对，不宣布十例或科学验收完成。
 - 原 12 次调用与 12 次组件分析全部完成后，readiness watcher 于 UTC `2026-10-03T11:51:14` 启动现有严格十例 collector，UTC `11:53:02` 实际完成，exit 0、CPU 107.82284 s。原 aggregate SHA `950d1cba…`、原 collection SHA `f5aed4ed…`；2,059 个原文件与 51 份副本均通过核验。首次启动 watcher 的 launcher 有一次字符串换行 SyntaxError，在编译前退出，未创建目录或启动进程；修复 launcher 后 watcher 正常执行至此，没有更改科学来源。本最终证据只复制原 aggregate 与紧凑收据/表/脑图，完整 before/after 与非有限值、primary-null、CON09/10 原监测资格均保留；原 17/21/23/30/14 项 CPU 协议测试与早期未完成保护记录没有改标为新的科学结果。
 - 最终本地证据核验第一次误假设 CON09 与 CON10 的 `monitor_issues` 完全相同，触发 AssertionError；实际 CON10 另有 `sampling_gap`。保留 [`失败记录`](all10_component_evidence_validation_failure_v1.json) 和原空 stdout，修正元数据检查后重新核验原 bytes、紧凑摘录、CSV 的原指标和 `null`、十例脑图 receipt 以及文档链接，成功日志见 [`v2`](all10_component_evidence_validation_v2.log)。原数据、原显存资格及来源门槛没有改变。

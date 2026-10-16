@@ -110,14 +110,14 @@ CUDA_VISIBLE_DEVICES='' python tools/reference/audit_connectome_repeats.py \
 
 ```bash
 fnit_repository_dir=/path/to/Fudan-Neuroimaging-toolkit  # 本轮实际代码检出/工具部署目录
-benchmark_root=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002
-benchmark_python=/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/bin/python
-mrtrix_binary_directory=/public/software/apps/MRtrix3/3.0.3/bin
+benchmark_root=/data/workspaces/fnit_connectome_tenraw_20261002
+benchmark_python=/data/workspaces/fnit_conda_env_956b1a9/bin/python
+mrtrix_binary_directory=/opt/reference/MRtrix3/3.0.3/bin
 checkpoint_directory="$benchmark_root/root_diagnostic_CON03_v2/checkpoints"
 fnit_output_directory="$benchmark_root/root_diagnostic_CON03_v2/connectome"
 official_output_directory="$benchmark_root/reference_CON03_five_repeats_v2"  # 必须是新目录
 
-# 在 nodecw10 使用独立官方软件；默认 dry-run 不运行命令、不创建输出。
+# 在 compute-a-10 使用独立官方软件；默认 dry-run 不运行命令、不创建输出。
 "$benchmark_python" "$fnit_repository_dir/tools/reference/benchmark_connectome_repeats_official.py" \
   --mrtrix-bin "$mrtrix_binary_directory" \
   --checkpoint-dir "$checkpoint_directory" \
@@ -137,7 +137,7 @@ official_output_directory="$benchmark_root/reference_CON03_five_repeats_v2"  # �
 
 ## 4. 对应官方命令和几何
 
-实际 nodecw10 参考程序为 MRtrix **`3.0.3-103-g026e850d`**；每次运行仍重新记录 `tckgen -version` 和程序 SHA。本轮 FOD 体素为 2.5 mm、默认步长 1.25 mm、ACT 默认最小长度 5 mm；脚本从实际 PT 仿射计算有效值，不把这些数值写死。
+实际 compute-a-10 参考程序为 MRtrix **`3.0.3-103-g026e850d`**；每次运行仍重新记录 `tckgen -version` 和程序 SHA。本轮 FOD 体素为 2.5 mm、默认步长 1.25 mm、ACT 默认最小长度 5 mm；脚本从实际 PT 仿射计算有效值，不把这些数值写死。
 
 ```bash
 MRTRIX_RNG_SEED=0 tckgen -algorithm iFOD2 \
@@ -172,9 +172,9 @@ ACT 5TT 保留原 header spacing；SIFT2 5TT 和 GMWMI 的可表示 sform 保留
 
 本次新增小数组测试只覆盖工具格式、错误处理、边集定义、单侧门槛、五次重复、几何导出和实际命令参数。它们不构成科学精度/耗时 benchmark。本轮十例整例和五次官方重复的真实结果由总控制在运行完成后写入 cohort 报告；本工具不预填通过结果，不沿用 ds004666 旧数值作为新数据结论。
 
-2026-10-02 在实际 nodecw10 只读执行 `tckgen -version/-help`，确认上述参考版本、步长、ACT 最小长度、samples/power/trials/downsample 和 `-nthreads 0` 参数语义。CPU 工具回归与原矩阵比较测试 **19 passed、1 skipped，3.17 秒**；跳过项是可选绘图，需要项目已声明的 matplotlib。本轮共享测试环境尚缺此依赖，不改动正在运行整例所用的环境。以上耗时是工具测试时间，不是追踪或 pipeline benchmark。
+2026-10-02 在实际 compute-a-10 只读执行 `tckgen -version/-help`，确认上述参考版本、步长、ACT 最小长度、samples/power/trials/downsample 和 `-nthreads 0` 参数语义。CPU 工具回归与原矩阵比较测试 **19 passed、1 skipped，3.17 秒**；跳过项是可选绘图，需要项目已声明的 matplotlib。本轮共享测试环境尚缺此依赖，不改动正在运行整例所用的环境。以上耗时是工具测试时间，不是追踪或 pipeline benchmark。
 
-2026-10-03 在 nodecw10 对本轮公开 CON03 的已有真实 FOD 和原生 recon-all segmentation 做 CPU header/readback 检查。这是读取算子检查，未运行 CON03_v2 追踪，也不是完整流程 benchmark。实测额外 `mrconvert → MIF` 将 FOD spacing 的细小浮点尾数写成 `2.5`，角点变化 `1.08258e-5 mm`；直接读 NIfTI-2 的 `mrinfo -json_all` 保留了原 spacing 尾数，FOD 角点差 `3.57538e-13 mm`，原生分割角点差 `6.56166e-13 mm`。已查对应 MIF writer：`vox` 使用普通流精度，transform 才使用 FullPrecision，因此去掉本工具中不必要的 MIF 中转；不修改 FNIT、FOD 数组或验收门槛。真实 CON03_v2 的读入几何和五次追踪结果仍由实际执行记录确认。
+2026-10-03 在 compute-a-10 对本轮公开 CON03 的已有真实 FOD 和原生 recon-all segmentation 做 CPU header/readback 检查。这是读取算子检查，未运行 CON03_v2 追踪，也不是完整流程 benchmark。实测额外 `mrconvert → MIF` 将 FOD spacing 的细小浮点尾数写成 `2.5`，角点变化 `1.08258e-5 mm`；直接读 NIfTI-2 的 `mrinfo -json_all` 保留了原 spacing 尾数，FOD 角点差 `3.57538e-13 mm`，原生分割角点差 `6.56166e-13 mm`。已查对应 MIF writer：`vox` 使用普通流精度，transform 才使用 FullPrecision，因此去掉本工具中不必要的 MIF 中转；不修改 FNIT、FOD 数组或验收门槛。真实 CON03_v2 的读入几何和五次追踪结果仍由实际执行记录确认。
 
 最新 CPU 工具回归与原矩阵比较测试 **22 passed、1 skipped，2.61 秒**；跳过原因仍为可选 matplotlib 绘图。同一官方版本的小输入命令契约回归确认 `-stat_edge mean` 的加权均值分母为 `Σw`，自连接保留；这是参数/命令语义测试，不作为真实数据 benchmark。
 
@@ -182,11 +182,11 @@ ACT 5TT 保留原 header spacing；SIFT2 5TT 和 GMWMI 的可表示 sform 保留
 
 ### CON03 v2 最新真实结果
 
-2026-10-03，官方 nodecw10 已完成种子 0..4 的 **198/198 条命令，全部 exit0**；输入合同审计通过（13/13 数据位及 sform 3×4 位、节点/atlas 来源与摘要一致，原 FA 的 1 个 NaN 保留）。FNIT 当前完整种子 0 的接受率为 **11.606%**，官方为 **11.475–11.843%**。但长度 KS、端点直方图和部分 point-visit 密度比较越界，`population_envelope_status=failed`。
+2026-10-03，官方 compute-a-10 已完成种子 0..4 的 **198/198 条命令，全部 exit0**；输入合同审计通过（13/13 数据位及 sform 3×4 位、节点/atlas 来源与摘要一致，原 FA 的 1 个 NaN 保留）。FNIT 当前完整种子 0 的接受率为 **11.606%**，官方为 **11.475–11.843%**。但长度 KS、端点直方图和部分 point-visit 密度比较越界，`population_envelope_status=failed`。
 
 八套模板的预先定义六指标共 240 个跨比较，**233 通过、7 越界**；fs-aparc、aparc+Tian S1、Glasser+Tian S1、Schaefer200+Tian S1 全部通过，其余四套有 count 相关性、支持 Dice 或 Glasser+Tian S4 平均 FA 误差越界，`matrix_envelope_status=failed`。只有一份 FNIT 完整结果，`fnit_reproducibility_status=not_assessed`。未按观察结果放宽门槛，也不能用此组件对照宣布十例 raw pipeline 已通过。
 
-完整逐项数值、真实脑图、CPU 只读复现命令和分阶段官方耗时见 [CON03 五次官方参考报告](../validation/connectome/tenraw_20261002/task_04_repeat_reference/README.md)。新工具回归与原矩阵比较测试 **29 passed、1 skipped，3.96 秒**（gpucw1 CPU、CUDA 不可见；唯一跳过项为专用环境中缺少可选 matplotlib）。绘图实际使用已有 base Python 的 matplotlib，不修改正在运行正式任务的 Conda 环境。
+完整逐项数值、真实脑图、CPU 只读复现命令和分阶段官方耗时见 [CON03 五次官方参考报告](../validation/connectome/tenraw_20261002/task_04_repeat_reference/README.md)。新工具回归与原矩阵比较测试 **29 passed、1 skipped，3.96 秒**（accelerator-a-1 CPU、CUDA 不可见；唯一跳过项为专用环境中缺少可选 matplotlib）。绘图实际使用已有 base Python 的 matplotlib，不修改正在运行正式任务的 Conda 环境。
 
 ## 6. 更新记录
 

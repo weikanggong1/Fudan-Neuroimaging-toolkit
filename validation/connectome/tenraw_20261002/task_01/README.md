@@ -100,7 +100,7 @@ GPU 参考只将二进制换成同安装的 `eddy_cuda10.2`，输入、mask、TO
 | CON01 | 11.042 | 3.058 | 298.363 | 313.197 | 13.300 | 3464.909 |
 | CON03 | 38.135 | 1.842 | 297.917 | 338.602 | 13.304 | 53.579 |
 
-前次 CON01 CUDA 初始化失败日志保留，不计入完成时间。第一次独立 TOPUP checkpoint 冷加载观测为 30.845 s；官方同输入 TOPUP 为 nodecw10 CPU 8线程 149.493 s。不同启动状态/设备记录分开，不将它们作为候选优化提速。
+前次 CON01 CUDA 初始化失败日志保留，不计入完成时间。第一次独立 TOPUP checkpoint 冷加载观测为 30.845 s；官方同输入 TOPUP 为 compute-a-10 CPU 8线程 149.493 s。不同启动状态/设备记录分开，不将它们作为候选优化提速。
 
 TOPUP 同输入差异：field 全网格 RMSE 0.101430 Hz、P99绝对差 0.410045 Hz、max 1.551040 Hz；校正 b0 RMSE 0.417327、max 38.218628。field/校正影像/coefficient 的 affine 均相同；全部 neq、范围、SHA 和 movement 参数差异见 `TOPUP_CON01_comparison.json`。
 

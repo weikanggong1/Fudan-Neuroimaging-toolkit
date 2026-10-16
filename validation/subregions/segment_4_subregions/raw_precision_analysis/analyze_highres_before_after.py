@@ -128,9 +128,9 @@ def main():
                                 "source_version": role.split("_", 1)[0]}
     reference_root = root.parent / "fnit_subregions_plus_20260928"
     for structure, folder, stem in (
-            ("thalamus", "official_thalamus_gpucw1_full_sub01_20260929", "ThalamicNuclei"),
-            ("hippo-amygdala-left", "official_hippo_gpucw1_full_sub01_20260929", "lh.hippoAmygLabels"),
-            ("hippo-amygdala-right", "official_hippo_gpucw1_full_sub01_20260929", "rh.hippoAmygLabels")):
+            ("thalamus", "official_thalamus_accelerator-a-1_full_sub01_20260929", "ThalamicNuclei"),
+            ("hippo-amygdala-left", "official_hippo_accelerator-a-1_full_sub01_20260929", "lh.hippoAmygLabels"),
+            ("hippo-amygdala-right", "official_hippo_accelerator-a-1_full_sub01_20260929", "rh.hippoAmygLabels")):
         official_path = reference_root / folder / (stem + ".mgz")
         official = nib.load(official_path)
         paths = {role: Path(report["files"]["highres/" + structure]) for role, report in reports.items()}

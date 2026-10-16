@@ -1,4 +1,6 @@
-# TorchProbtrackX：概率纤维追踪与连接计数
+# FNIT_probtrackx2
+
+> 统一 Python 入口：[`FNIT_probtrackx2`](../API_REFERENCE.md)，从 `fnit` 导入。下文配置、结果类型和细分算子保留高级兼容接口。
 
 | 项目 | 内容 |
 |---|---|
@@ -27,9 +29,9 @@ flowchart LR
 ## 2. Python 调用
 
 ```python
-from fnit.probtrackx import TorchProbtrackX
+from fnit import FNIT_probtrackx2
 
-tractography_model = TorchProbtrackX(
+tractography_model = FNIT_probtrackx2(
     device="cuda:0",  # Triton GPU步进
     nsamples=5000,  # 每seed体素的采样轨迹数
     nsteps=2000,  # 双向总步数，必须是偶数

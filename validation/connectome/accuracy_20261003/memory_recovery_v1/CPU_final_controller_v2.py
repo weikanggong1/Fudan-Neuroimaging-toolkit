@@ -8,7 +8,7 @@ import sys
 import time
 
 sys.dont_write_bytecode=True
-ROOT=Path('/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1')
+ROOT=Path('/data/fnit/runs/connectome-accuracy-memory-recovery-20261003-v1')
 assert os.environ.get('CUDA_VISIBLE_DEVICES')==''
 assert json.loads((ROOT/'status.json').read_bytes())['status']=='GPU_execution_completed_CPU_comparison_pending'
 environment=dict(os.environ,CUDA_VISIBLE_DEVICES='',PYTHONDONTWRITEBYTECODE='1',OMP_NUM_THREADS='4',MKL_NUM_THREADS='4',OPENBLAS_NUM_THREADS='4')

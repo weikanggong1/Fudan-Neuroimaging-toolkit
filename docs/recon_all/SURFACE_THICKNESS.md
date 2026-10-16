@@ -49,7 +49,7 @@ report = thickness_map(
 
 优化的预定义门槛为旧/新厚度 **绝对差 ≤ 0.000001 mm、相对项 0、无越界顶点**。官方同输入验证继续保留项目已有厚度门槛 **0.005 mm + 0.001 × |reference|**。两个门槛都由复现脚本固定，不能根据结果修改。整例指标等效另行评价，不由阶段测试推断。
 
-2026-10-01 在 gpucw1、物理 GPU1（UUID `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba`，逻辑 cuda:0）、四个 PyTorch 线程、默认 TF32、float32、分配缓存关闭的同一环境，对 FNIT 两例最终 white/pial 各执行两轮，交替新旧先后顺序。冻结源码标识为 `3d9856c+stage1tar0444db72`，计算候选 SHA-256 为 `fb3b665150a2c78c0a8a3a5813f29648e71b74efc7474f4b6c318489862e0136`。报告记录实际输入、旧/新源码和执行脚本 SHA-256，不把历史耗时当成本轮结果。
+2026-10-01 在 accelerator-a-1、物理 GPU1（UUID `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba`，逻辑 cuda:0）、四个 PyTorch 线程、默认 TF32、float32、分配缓存关闭的同一环境，对 FNIT 两例最终 white/pial 各执行两轮，交替新旧先后顺序。冻结源码标识为 `3d9856c+stage1tar0444db72`，计算候选 SHA-256 为 `fb3b665150a2c78c0a8a3a5813f29648e71b74efc7474f4b6c318489862e0136`。报告记录实际输入、旧/新源码和执行脚本 SHA-256，不把历史耗时当成本轮结果。
 
 | 冻结 FNIT 网格 | 顶点数 | 旧密集函数，两轮 | 完整空间候选，两轮 | 同序差异 |
 | --- | ---: | ---: | ---: | --- |
@@ -113,7 +113,7 @@ python validation/recon_all/python_gpu_port/benchmark_thickness_indexed.py \
 
 ## 与当前 Conda 厚度图的同输入诊断
 
-本轮独立诊断已经用同一 FNIT white/pial 和参数 `20 5` 生成当前 Conda `mris_place_surface` 厚度图。随后在 headcw 只读取既有新旧 Python 输出与这些 Conda 图，不再次执行 GPU 或原生计算。程序 SHA-256 为 `44ad3994f8b86809b447919094273d3aa591b49be935ac4e09139e66bdddfe65`；生成命令和日志见性能目录的 `fnit_gpu_fix_probes*.sh`、`diagnostics/*.cpp.thickness.log`。这不是新运行的官方参考。
+本轮独立诊断已经用同一 FNIT white/pial 和参数 `20 5` 生成当前 Conda `mris_place_surface` 厚度图。随后在 control-host 只读取既有新旧 Python 输出与这些 Conda 图，不再次执行 GPU 或原生计算。程序 SHA-256 为 `44ad3994f8b86809b447919094273d3aa591b49be935ac4e09139e66bdddfe65`；生成命令和日志见性能目录的 `fnit_gpu_fix_probes*.sh`、`diagnostics/*.cpp.thickness.log`。这不是新运行的官方参考。
 
 | 同输入 Conda 对照 | 新旧各两轮的最大绝对差 | P99 绝对差 | 越现有容差顶点 |
 | --- | ---: | ---: | ---: |
@@ -152,7 +152,7 @@ python validation/recon_all/python_gpu_port/summarize_thickness_indexed.py \
 # output 是新的机器摘要，不执行 GPU 或影像算法。
 ```
 
-2026-10-01 在 headcw 的主页 Conda 环境实际执行六项 CPU 单元检查，全部通过：[报告](../../validation/recon_all/python_gpu_port/thickness_indexed_20261001/unit_checks.json)。覆盖 20/21 跳边界、等距及不连通候选、工作数组复用、超过 256 候选、截断转换和 CPU 旧/新函数回归。报告绑定候选、冻结旧实现、测试和执行脚本的 SHA-256。它们是算法语义检查，不替代上面的真实数据 benchmark，尚未给出整例提速结论。
+2026-10-01 在 control-host 的主页 Conda 环境实际执行六项 CPU 单元检查，全部通过：[报告](../../validation/recon_all/python_gpu_port/thickness_indexed_20261001/unit_checks.json)。覆盖 20/21 跳边界、等距及不连通候选、工作数组复用、超过 256 候选、截断转换和 CPU 旧/新函数回归。报告绑定候选、冻结旧实现、测试和执行脚本的 SHA-256。它们是算法语义检查，不替代上面的真实数据 benchmark，尚未给出整例提速结论。
 
 线程预算修正后，同日同一 CPU 环境执行新增检查及原六项回归，七项全部通过：[新源码报告](../../validation/recon_all/python_gpu_port/thickness_indexed_20261001/unit_checks_workers.json)。真实 KDTree 的线程 1/4 双向候选数组逐值一致；该报告绑定 `ab019...` 源码，原 `c5d...` 六项报告保留版本归属。CPU 语义检查、上述单半球真实 GPU 复核与原始 T1 整例按各自范围报告。
 

@@ -10,7 +10,7 @@
 
 | 记录 | 实际代码与输入 | 可以支持的结论 |
 | --- | --- | --- |
-| 已完成的旧整例 | `1b8c36d25a68e253a1e59b6d02114890afa467de`；sub01 在 gpucw1 用 CUDA，sub02 在 nodecw10 用 CPU | 完整阶段及已有子段耗时；两例、两台主机之间不能计算 GPU/CPU 速度比 |
+| 已完成的旧整例 | `1b8c36d25a68e253a1e59b6d02114890afa467de`；sub01 在 accelerator-a-1 用 CUDA，sub02 在 compute-a-10 用 CPU | 完整阶段及已有子段耗时；两例、两台主机之间不能计算 GPU/CPU 速度比 |
 | 本轮阶段配对 | 旧 1b 与 `764607c` 工作树归档；冻结 FNIT 自产输入，同机、4 线程 | 已测阶段的精度和时间变化；不能相加成新版整例提速 |
 | 最终 CSR 回归 | [最终归档](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/final_candidate_source_snapshot.json) SHA `098ccb63a3931a4f749710fb76dd9beb4751f7b8b14c0f130fa922f9698b708e` | 四侧关联表/法向回归，以及另一次 LH 完整配准；不是第一次配对的同轮追加计时 |
 | 历史冻结阶段 | 各报告记录的旧程序、输入和环境 | 现有实现的能力和未解决差异；不是当前版本重新实测 |
@@ -42,7 +42,7 @@ sub01 LH 的同输入完整配准 cProfile 为 **524.378 s**。103 次有序梯�
 
 ### remesh：顺序计算、动态拓扑和 Python 调用
 
-四侧真实阶段配对都在 gpucw1、4 线程进行，各侧一次；时间包含输入输出及首次 JIT/缓存加载。候选复用顺序 Numba 平滑、缓存静态邻接并以 `heapify` 初始化队列，保留拆边/缩边规则及接受顺序。
+四侧真实阶段配对都在 accelerator-a-1、4 线程进行，各侧一次；时间包含输入输出及首次 JIT/缓存加载。候选复用顺序 Numba 平滑、缓存静态邻接并以 `heapify` 初始化队列，保留拆边/缩边规则及接受顺序。
 
 | 冻结真实输入 | 旧 remesh | 新 remesh | 墙钟减少 |
 | --- | ---: | ---: | ---: |
@@ -58,7 +58,7 @@ sub01 LH 的同输入完整配准 cProfile 为 **524.378 s**。103 次有序梯�
 
 ### 标准球面：本轮真实输入剖析
 
-本轮另在 headcw、4线程运行冻结 sub-01 LH 的完整标准球面，计时156.913 s，坐标和有序面与保存结果完全相同。记录含 cProfile 和首次 JIT 开销，不能与另一主机的历史秒数相除。原始 [JSON](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/standard_sphere_profile.json)和 [函数表](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/standard_sphere_profile.txt)绑定c248520源码。
+本轮另在 control-host、4线程运行冻结 sub-01 LH 的完整标准球面，计时156.913 s，坐标和有序面与保存结果完全相同。记录含 cProfile 和首次 JIT 开销，不能与另一主机的历史秒数相除。原始 [JSON](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/standard_sphere_profile.json)和 [函数表](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/standard_sphere_profile.txt)绑定c248520源码。
 
 | 当前热点 | 次数 | 剖析秒数 | 可验证的下一步 |
 | --- | ---: | ---: | --- |
@@ -73,7 +73,7 @@ sub01 LH 的同输入完整配准 cProfile 为 **524.378 s**。103 次有序梯�
 
 下表时间均为秒。除已明确标注“本轮配对”的行外，时间属于**旧 1b 整例**或指定的历史冻结阶段；未做新内部 profile 的项目只列源码候选开销。
 
-表内“GPU/CPU”表示对应整例的请求设备：sub01/gpucw1 与 sub02/nodecw10。white、pial、拓扑和 N4 的上述原生计算仍在 CPU，不能将这些标签解释为该原生算子已使用 GPU。
+表内“GPU/CPU”表示对应整例的请求设备：sub01/accelerator-a-1 与 sub02/compute-a-10。white、pial、拓扑和 N4 的上述原生计算仍在 CPU，不能将这些标签解释为该原生算子已使用 GPU。
 
 | 步骤与已测范围 | 当前具体实现 | 热点依据与候选开销 | 已有自有替代的成熟度 | 下一项可行优化与默认替换条件 |
 | --- | --- | --- | --- | --- |

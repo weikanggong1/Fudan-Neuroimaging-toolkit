@@ -6,7 +6,7 @@
 
 初始源码冻结为 `1d31e7baaebbb644ab199471f7fe6282721455fd`。默认模型在两例公开原始 T1 上分别按「原版、FNIT、FNIT、原版」运行；其余参数使用同输入的原版/FNIT 功能对照。默认 T1 来自 [OpenNeuro ds003138 v1.0.1](https://openneuro.org/datasets/ds003138/versions/1.0.1)，不以既有去面示例替代。既有公开 FLAIR 为衍生影像，单列其来源与范围。
 
-主机为 nodecw10。两臂使用 8 线程，并限制到相同 8 个物理核：`0,4,8,12,16,20,24,28`。所有真实计算由协调者的同一 CPU 锁串行调度；记录完整进程墙钟、GNU time、进程树 RSS/线程数/亲和性、节点负载、退出码和输出存在性。等待锁的时间不计入命令墙钟。计时包含解释器启动、导入、模型加载、推理及全部指定输出的写盘。
+主机为 compute-a-10。两臂使用 8 线程，并限制到相同 8 个物理核：`0,4,8,12,16,20,24,28`。所有真实计算由协调者的同一 CPU 锁串行调度；记录完整进程墙钟、GNU time、进程树 RSS/线程数/亲和性、节点负载、退出码和输出存在性。等待锁的时间不计入命令墙钟。计时包含解释器启动、导入、模型加载、推理及全部指定输出的写盘。
 
 `profile_inference.py` 另行记录模型构造、预处理、网络前向、重采样、连通域及写盘。它会增加函数包装和张量哈希的开销，其整个进程时间不用于计算 CLI 加速比。嵌套阶段已经包含在父阶段中，不能累加。`--cpu-channels-last` 是验证布局原型；SynthStrip 的生产 CPU 模块 `6b7aeafd` 已通过门槛并在 oneDNN 启用时使用此布局，SynthSR 原型没有通过候选门槛，生产网络保持 contiguous。CUDA 布局均未更改。
 
@@ -142,11 +142,11 @@ python validation/smri_cpu/strip_sr_20261004/compare_outputs.py \
 
 `capture_fnit_strip_preprocess.py` 和 `capture_original_strip.py` 保存实际解码、1 mm 数组及归一化输入，用 `compare_preprocessing.py` 比较。原软件观察驱动以 `runpy` 运行已核验哈希的未修改脚本；只在验证目录依赖原软件。`capture_original_sr.py` 在同次官方推理中分别保存量化图和额外浮点 NPZ，并在原写盘函数会原位乘 2 之前取副本，不重复网络前向。
 
-GPU 回归使用 gpucw1 的同一 H100 和统一 GPU 锁。首先对比修复前后输入；再在两臂均修复几何的条件下单独对比 CPU 后端策略修改，记录实际 TF32、cuDNN、FP32 类型、显存峰值与 `monitor_gpu.py` 采样的利用率。GPU observer 的进程时间与普通 CLI 分开报告。
+GPU 回归使用 accelerator-a-1 的同一 H100 和统一 GPU 锁。首先对比修复前后输入；再在两臂均修复几何的条件下单独对比 CPU 后端策略修改，记录实际 TF32、cuDNN、FP32 类型、显存峰值与 `monitor_gpu.py` 采样的利用率。GPU observer 的进程时间与普通 CLI 分开报告。
 
 `replay_sr_network_outputs.py` 接收 `--input`、`--reference-directory`、`--candidate-directory`、`--source-revision`、`--report`，比较两次实际 CNN 输入和原始预测，再将保存预测注入公开 `SynthSR` API。每次输入必须逐值同于捕获输入；不会构建网络、加载权重或执行 CNN，不能用于推理 benchmark。
 
-`collect_cli_results.py` 接收 `--plan`、`--runs-root`、`--feature`、`--output-directory`，并可用 `--comparison-driver` 指定比较脚本。它逐项核对完成状态、nodecw10、8 线程和固定 8 核亲和性，再导出匿名 timing/精度；未完成项明确列为 pending，不执行推理。目录必须全新，不覆盖原记录。
+`collect_cli_results.py` 接收 `--plan`、`--runs-root`、`--feature`、`--output-directory`，并可用 `--comparison-driver` 指定比较脚本。它逐项核对完成状态、compute-a-10、8 线程和固定 8 核亲和性，再导出匿名 timing/精度；未完成项明确列为 pending，不执行推理。目录必须全新，不覆盖原记录。
 
 ## 来源
 

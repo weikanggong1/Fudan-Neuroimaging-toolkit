@@ -91,13 +91,13 @@ SimpleITK为允许的通用Python库，实际2.5.6/ITK5.4；不是原FS阶段程
 
 本轮完整文件API已退出0，含影像读写和依赖预检的墙钟为 **187.9135132秒**。相对冻结旧输出，不同体素/max/P99均为 **0**，shape、uint8、affine和tkr完全一致，raw文件SHA也完全相同，输入before/afterSHA稳定。实际N4拟合/重建设置和线程恢复保持，CUDA未初始化；调用者TF32标志为 `[False, True]` 且前后不变。CPU100–103，总4线程，拟合1/重建4。共享节点有其他FNIT任务，这一单次阶段墙钟不是配对提速或整例时间。
 
-安装状态实测：旧prefix不附加PYTHONPATH时不可发现SimpleITK，新target可发现2.5.6；预检0.8253946秒、全局线程4→4、CUDA未初始化。15focused/既有adapter合同在本地pytest与CFFF标准库unittest通过，分别9.90秒和3.266308秒；合同人工小影像只测失败/量化/线程规则，不当benchmark。完整N4结果以 `reports/regression.json` 和 `reports/COMPLETE.json` 为完成门。原始报告SHA为 `16053046a3181a946aaa1cfb4fdf737e3e2e00acc4a29b31c137c10108dcab76`；服务器严格字段/值白名单验证后四份JSON按原字节导出，raw与published SHA相同、数字/bool/null类型不变，见 `reports/PUBLIC_EXPORT_MANIFEST.json`。影像和私有日志未下载。沿用原真实脑图，不复制影像或为依赖修复生成新的脑区性能主张。
+安装状态实测：旧prefix不附加PYTHONPATH时不可发现SimpleITK，新target可发现2.5.6；预检0.8253946秒、全局线程4→4、CUDA未初始化。15focused/既有adapter合同在本地pytest与accelerator-b标准库unittest通过，分别9.90秒和3.266308秒；合同人工小影像只测失败/量化/线程规则，不当benchmark。完整N4结果以 `reports/regression.json` 和 `reports/COMPLETE.json` 为完成门。原始报告SHA为 `16053046a3181a946aaa1cfb4fdf737e3e2e00acc4a29b31c137c10108dcab76`；服务器严格字段/值白名单验证后四份JSON按原字节导出，raw与published SHA相同、数字/bool/null类型不变，见 `reports/PUBLIC_EXPORT_MANIFEST.json`。影像和私有日志未下载。沿用原真实脑图，不复制影像或为依赖修复生成新的脑区性能主张。
 
 ## 6. 更新、失败与版本边界
 
 - 本轮源码freeze：Git `af1e782dd19a2e9473619f345dbf22c4fd8204a7` 加自有N4预检overlay。四个显式模块和两个tests逐SHA/size绑定 `reports/SOURCE_MANIFEST.json`；root新的整例预检接线不属于此独立阶段freeze。
 - `reports/numerical_body_audit.json` 核对旧源码与修复版：仅移除显式依赖import/预检语句后，`correct_array/correct_volume` 的函数AST完全相同。此静态核对与上述真实完整N4零差异分别记录，不能替代整例运行审计。
-- 首诊断v1使用CFFF未安装的pytest，EXIT1且N4输出目录未创建；新独立v2改用标准库unittest，原失败目录/退出码保持，不改科学源码。私有日志未读取或下载，判断根据新环境包发现和已冻结launcher导入顺序；见安全失败摘要。
+- 首诊断v1使用accelerator-b未安装的pytest，EXIT1且N4输出目录未创建；新独立v2改用标准库unittest，原失败目录/退出码保持，不改科学源码。私有日志未读取或下载，判断根据新环境包发现和已冻结launcher导入顺序；见安全失败摘要。
 - 原始整例v1因缺包失败保持失败。root另在新整例epoch接入前置预检并验证安装，不能把本页单N4完成当作整例成功。
 - 初始严格精度尾差、fit1/fit4确定性差异和下游传播仍保留各自旧版本，不把依赖恢复称为算法等效或提前切默认。
 

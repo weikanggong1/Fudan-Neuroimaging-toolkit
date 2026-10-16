@@ -32,28 +32,41 @@ class LocalTransportTests(PreparationFixture):
         self.config["cpu_transport"] = "local"
         return self.config
 
-    def test_unknown_transport_and_missing_or_wrong_declared_host_rejected(self):
+    def test_unknown_transport_and_missing_or_invalid_declared_host_rejected(self):
         for change in ({"cpu_transport":"other"}, {"cpu_transport":"local","cpu_host":None},
-                       {"cpu_transport":"local","cpu_host":"localhost"}, {"cpu_transport":"local","cpu_host":"gpucw1"}):
+                       {"cpu_transport":"local","cpu_host":""}, {"cpu_transport":"local","cpu_host":123},
+                       {"cpu_transport":"local","cpu_host":"-invalid"}, {"cpu_transport":"local","cpu_host":"host with space"}):
             config = {**self.config, **change}
             with self.subTest(change=change), self.assertRaises(ValueError):
                 prep.validate_config(config)
 
+    def test_passive_local_config_validation_accepts_a_different_declared_host_without_launch(self):
+        with patch.object(cohort.socket,"gethostname",return_value="control-host"), \
+                patch.object(prep.subprocess,"run") as launch, patch.object(cohort,"worker") as official:
+            for host in ("compute-a-10", "accelerator-a-1", "localhost"):
+                with self.subTest(host=host):
+                    prep.validate_config({**self.local(), "cpu_host":host})
+            launch.assert_not_called()
+            official.assert_not_called()
+
     def test_wrong_actual_host_cannot_launch_local_worker(self):
-        with patch.object(cohort.socket,"gethostname",return_value="gpucw1"), patch.object(prep.subprocess,"run") as launch:
+        with patch.object(cohort.socket,"gethostname",return_value="accelerator-a-1"), patch.object(prep.subprocess,"run") as launch:
             with self.assertRaises(ValueError):
                 prep.remote(self.local(),"recon",self.cases[0],self.root/"stderr.log")
             launch.assert_not_called()
 
     def test_worker_also_refuses_wrong_actual_host_before_execution(self):
-        with patch.object(cohort.socket,"gethostname",return_value="headcw"), patch.object(cohort,"worker") as official:
-            with self.assertRaises(ValueError):
-                prep.worker({"config":self.local(),"action":"recon","case":self.cases[0],"version":"candidate"})
+        with patch.object(cohort.socket,"gethostname",return_value="control-host"), \
+                patch.object(cohort,"worker") as official, patch.object(prep.subprocess,"run") as launch:
+            for action in ("preflight", "recon"):
+                with self.subTest(action=action), self.assertRaises(ValueError):
+                    prep.worker({"config":self.local(),"action":action,"case":self.cases[0],"version":"candidate"})
             official.assert_not_called()
+            launch.assert_not_called()
 
     def test_correct_local_host_uses_subprocess_list_and_json_not_ssh(self):
         result = SimpleNamespace(returncode=0,stdout='{"status":"protocol_only"}',stderr="diagnostic stderr")
-        with patch.object(cohort.socket,"gethostname",return_value="nodecw10.cluster"), patch.object(prep.subprocess,"run",return_value=result) as launch:
+        with patch.object(cohort.socket,"gethostname",return_value="compute-a-10.cluster"), patch.object(prep.subprocess,"run",return_value=result) as launch:
             reported = prep.remote(self.local(),"recon",self.cases[0],self.root/"stderr.log")
         self.assertEqual(reported["status"],"protocol_only")
         self.assertEqual(launch.call_args.args[0],[self.config["cpu_python"],self.config["anatomy_prep_script"],"_worker"])
@@ -63,16 +76,20 @@ class LocalTransportTests(PreparationFixture):
 
     def test_local_worker_failure_preserves_stderr(self):
         result = SimpleNamespace(returncode=5,stdout="",stderr="actual protocol failure")
-        with patch.object(cohort.socket,"gethostname",return_value="nodecw10"), patch.object(prep.subprocess,"run",return_value=result):
+        with patch.object(cohort.socket,"gethostname",return_value="compute-a-10"), patch.object(prep.subprocess,"run",return_value=result):
             with self.assertRaises(RuntimeError):
                 prep.remote(self.local(),"recon",self.cases[0],self.root/"stderr.log")
         self.assertEqual((self.root/"stderr.log").read_text(),"actual protocol failure")
 
     def test_passive_frozen_runtime_verification_does_not_execute_local_cpu(self):
         self.local()
-        with patch.object(cohort.socket,"gethostname",return_value="gpucw1"), patch.object(prep.subprocess,"run") as launch:
+        with patch.object(cohort.socket,"gethostname",return_value="accelerator-a-1"), \
+                patch.object(prep.subprocess,"run") as launch, patch.object(cohort,"worker") as official, \
+                patch.object(cohort,"remote") as remote:
             prep.verify_runtime_files(self.config)
             launch.assert_not_called()
+            official.assert_not_called()
+            remote.assert_not_called()
 
     def test_ordinary_ssh_transport_uses_existing_cohort_remote(self):
         with patch.object(cohort,"remote",return_value={"status":"ssh_protocol_only"}) as launch:
@@ -100,8 +117,8 @@ class LocalTransportTests(PreparationFixture):
 
     def local_staged_timing_fixture(self):
         path = self.root / "actual_head_start.json"
-        cohort.atomic_json(path,{"start_utc":"2026-10-03T00:00:00+00:00","coordinator_identity":{"hostname":"headcw"}})
-        prepared = {"coordinator_transport":"local", "coordinator_identity":{"hostname":"nodecw10"},
+        cohort.atomic_json(path,{"start_utc":"2026-10-03T00:00:00+00:00","coordinator_identity":{"hostname":"control-host"}})
+        prepared = {"coordinator_transport":"local", "coordinator_identity":{"hostname":"compute-a-10"},
             "parent_connection":{"path":str(path),"sha256":cohort.sha256(path)},
             "start_utc":"2026-10-03T00:00:10+00:00","end_utc":"2026-10-03T00:00:30+00:00",
             "preparation_report":{"recon_command_seconds":10.},"preparation_worker_wall_seconds":18.,
@@ -111,7 +128,7 @@ class LocalTransportTests(PreparationFixture):
 
     def test_local_staged_timer_never_uses_cross_host_clock_skew_as_wall(self):
         _,prepared,gpu = self.local_staged_timing_fixture()
-        with patch.object(cohort.socket,"gethostname",return_value="headcw"):
+        with patch.object(cohort.socket,"gethostname",return_value="control-host"):
             result = staged.staged_timing(prepared,gpu,"2026-10-03T00:00:20+00:00","2026-10-03T00:00:40+00:00",20.)
         self.assertEqual(result["cross_host_prep_to_gpu_utc_difference_seconds"],-10.)
         self.assertFalse(result["cross_host_utc_differences_are_wall_timers"])
@@ -125,7 +142,7 @@ class LocalTransportTests(PreparationFixture):
         with patch.object(cohort.socket,"gethostname",return_value="other-head"), self.assertRaises(ValueError):
             staged.staged_timing(prepared,gpu,"2026-10-03T00:00:20+00:00","2026-10-03T00:00:40+00:00",20.)
         path.write_bytes(path.read_bytes()+b"\n")
-        with patch.object(cohort.socket,"gethostname",return_value="headcw"), self.assertRaises(ValueError):
+        with patch.object(cohort.socket,"gethostname",return_value="control-host"), self.assertRaises(ValueError):
             staged.staged_timing(prepared,gpu,"2026-10-03T00:00:20+00:00","2026-10-03T00:00:40+00:00",20.)
         prepared["parent_connection"] = None
         with self.assertRaises(ValueError):

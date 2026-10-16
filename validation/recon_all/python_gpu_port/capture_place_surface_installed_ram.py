@@ -56,8 +56,8 @@ run
 """.replace("FIRST_NITER", str(args.first_pass_iterations)))
     env = os.environ.copy()
     env.update(
-        FREESURFER_HOME="/public/software/apps/Freesurfer/8.2.0-1",
-        SUBJECTS_DIR="/public/software/apps/Freesurfer/8.2.0-1/subjects",
+        FREESURFER_HOME="/opt/reference/Freesurfer/8.2.0-1",
+        SUBJECTS_DIR="/opt/reference/Freesurfer/8.2.0-1/subjects",
         FS_LICENSE=str(args.license),
     )
     with (args.out / "installed_ram.log").open("w") as log:

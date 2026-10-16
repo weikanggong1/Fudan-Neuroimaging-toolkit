@@ -10,7 +10,7 @@
 - 本次冻结源 `task5_candidate_cpu_v4`，head `6f1e2b38925a481df3fa622f925af076df5436a9`，实际归档 `ffda47a74376fbaec07c3e8aedaacdc30f2a60398b919c0d5feae38e3beba0d9`，旧归档工具保留 `includes_reviewed_uncommitted_changes=true` 标记；该标记当时由工具固定写入，不作为工作树未提交改动的证据，源码身份以实际归档和模块 SHA 为准。此次核对 9 个实际导入相关模块的 SHA；不称为重新核验全部归档文件。SynthMorph 模块字节与原任务 3 v4 相同。
 - 现场重读 FNIT 统一 README/INDEX，INDEX SHA 为 `303f8879915c47523b94144827ef69820181559c057299fe667eecd5e07eeda2`；正式主仓库当时为 `1d31e7b`，它与本次冻结候选分别记录。
 - affine 权重 `synthmorph.affine.2.h5` 为 51,455,312 字节，SHA `1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6`，与已有固定 Release 校验清单一致；没有新增下载、再发布权重或改变环境。
-- nodecw10，8 线程，同原任务 3 核组 `2,6,10,14,18,22,26,30` 和原共享锁串行执行。CUDA 不可见，无 autocast、FP16/BF16，CPU 构造和调用未改变已有 CUDA TF32 全局设置。默认 extent/hyper/steps 为 256/0.5/7，`compute_inverse=True`。
+- compute-a-10，8 线程，同原任务 3 核组 `2,6,10,14,18,22,26,30` 和原共享锁串行执行。CUDA 不可见，无 autocast、FP16/BF16，CPU 构造和调用未改变已有 CUDA TF32 全局设置。默认 extent/hyper/steps 为 256/0.5/7，`compute_inverse=True`。
 
 公开 `SynthMorph` 实例的 `__call__` 接受路径和 `nibabel.spatialimages.SpatialImage`。`load_image` 对路径调用 `nib.load`，对对象原样返回，随后共用 `_load → _tensor → network_space/transform/normalize → self.network → compose → 结果采样`。CLI 也直接调用同一个实例方法。裸 NumPy 数组或 Torch tensor 不是影像输入，需连同正确空间包装成 SpatialImage。没有公开的“注入保存的 network_transforms 后恢复整个 RegistrationResult”接口。
 

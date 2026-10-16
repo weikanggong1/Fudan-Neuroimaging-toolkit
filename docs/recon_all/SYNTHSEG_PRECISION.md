@@ -121,7 +121,7 @@ print(synthseg_result.precision)  # 保存实际前向开关、dtype 和 autocas
 
 ## 本次验证范围
 
-2026-10-01 在 headcw 的既有 Conda 环境执行八项 CPU/fake-model 回归，
+2026-10-01 在 control-host 的既有 Conda 环境执行八项 CPU/fake-model 回归，
 `CUDA_VISIBLE_DEVICES` 为空，未初始化或占用 GPU。测试总计 0.060 秒，全部
 通过，覆盖两个构造函数不重置精度、三种策略在两次前向中生效、异常恢复、
 默认设备选择兼容、无效参数及调用方主动 CPU autocast 的真实 dtype 记录。
@@ -141,7 +141,7 @@ CUDA_VISIBLE_DEVICES='' PYTHONPATH=src python -m unittest discover \
 
 ### 冻结真实 T1：精度修复与缓冲复用分别比较
 
-以下均为 sub-01 的相同 FNIT `orig.mgz`，在 gpucw1 的同一 GPU
+以下均为 sub-01 的相同 FNIT `orig.mgz`，在 accelerator-a-1 的同一 GPU
 `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba`、PyTorch 2.5.1、四线程运行。
 阶段墙钟包含模型加载、传输、前向、后处理、分割和体积 CSV 写出，并在
 目标 GPU 上同步；外层命令墙钟另包含进程启动和诊断报告等开销。
@@ -212,7 +212,7 @@ MGH 后实际存储 dtype 为 `>f4`（float32），所以两者表示不同。
 这不只是整数的字节序区别，不能把原 False 改写成通过。
 
 后续 CLI 探针改为重新加载已写出的候选 MGH，在相同文件表示上比较，
-得到 `same_dtype=True`。本次另在 headcw 只读核对三份既有文件，没有重新
+得到 `same_dtype=True`。本次另在 control-host 只读核对三份既有文件，没有重新
 运行模型：FP32 参考、buffer API 和 buffer CLI 都是 `>f4`，形状相同，
 affine 和标签值差为 0，且三份 MGH 的 SHA-256 完全相同。标签值仍为
 离散分割 ID；返回对象的 int32 类型不等同于此次 .mgz 存储类型。

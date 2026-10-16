@@ -29,7 +29,7 @@ def main():
     native_run = run / "seg_memory_official_node7_v1"
     source = json.loads((native_work / "source_binding.private.json").read_text())
     # Recheck the immutable original software/resources after all fits.
-    software = Path("/public/software/apps/Freesurfer/8.2.0-1")
+    software = Path("/opt/reference/Freesurfer/8.2.0-1")
     for relative, entry in source["sources"].items():
         assert sha(software / relative) == entry["sha256"]
     for name, entry in source["weights"].items():
@@ -41,7 +41,7 @@ def main():
     repeat = json.loads((repeat_run / "queue.private.json").read_text())
     assert first["status"] == repeat["status"] == "complete"
     assert first["affinity"] == repeat["affinity"] == source["cpu_affinity"]
-    assert first["hostname"] == repeat["hostname"] == source["hostname"] == "nodecw7"
+    assert first["hostname"] == repeat["hostname"] == source["hostname"] == "compute-a-7"
     old_manifest = json.loads((w / "t2_seg/corrected_case02_v1_jobs.private.json").read_text())
     old_refs = {}
     for row in old_manifest["jobs"]:

@@ -65,7 +65,7 @@ def collect(*, repository: Path, output: Path) -> None:
     source = {"schema_version": 1, "git_head_at_capture": head, "baseline_git_commit": BASELINE,
               "before_batch_sha256": sha(old), "source_files": sources,
               "local_interpreter_python": sys.version.split()[0], "local_package_versions": packages,
-              "runtime_version_scope": "local focused tests only; not the CFFF production environment",
+              "runtime_version_scope": "local focused tests only; not the accelerator-b production environment",
               "generic_libraries_permitted": ["Python", "NumPy", "Numba", "PyTorch", "SimpleITK", "SciPy"],
               "declared_versions": {"Conda_python": "3.11", "Conda_pytorch": "2.5.1",
                                     "Conda_triton": "3.1.0", "SimpleITK": "2.5.6"}}

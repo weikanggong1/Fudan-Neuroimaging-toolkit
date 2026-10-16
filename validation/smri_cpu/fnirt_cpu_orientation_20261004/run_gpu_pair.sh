@@ -1,13 +1,13 @@
 #!/bin/bash
 # Isolated same-input stage regression, after CPU acceptance. No raw-T1 chain.
 set -e
-B=/cwStorage/home/gongwk/Notebook_code/FNIT
+B=/data/fnit
 W=$B/workspaces/smri_cpu_20261004/remaining_20261004/gems/fnirt-cpu-orientation-v1
 R=$B/runs/smri_cpu_20261004/remaining_20261004/gems/fnirt-cpu-orientation-v1
 O=$B/runs/smri_cpu_20261004/task4_vbm_official_cpu_v2/official_synthstrip_fast_fnirt
-F=/public/software/apps/FSL/6.0.7.4
+F=/opt/reference/FSL/6.0.7.4
 trap 'rc=$?; printf "{\"exit_code\":%s}\n" "$rc" > "$R/gpu_exit.public.json"' EXIT
-exec 9>"$B/runs/smri_cpu_20261004/gpucw1.gpu.lock"
+exec 9>"$B/runs/smri_cpu_20261004/accelerator-a-1.gpu.lock"
 flock 9
 GPU_UUID=$(nvidia-smi --id=0 --query-gpu=uuid --format=csv,noheader)
 test "$GPU_UUID" = GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e

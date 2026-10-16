@@ -173,7 +173,7 @@ autocast、训练/梯度及各类hooks回退。这些不是真实速度 benchmar
 
 ### 完整原始T1的CPU对照
 
-同一nodecw7、相同八物理核与8线程，冷进程按33类、普通parc、fast逐对运行；
+同一compute-a-7、相同八物理核与8线程，冷进程按33类、普通parc、fast逐对运行；
 每个arm单独取得共享锁。完整API包含原始T1预处理、全部模型、后处理、体积
 统计；文件保存、导入/资源SHA核验及进程墙钟单列。
 
@@ -195,8 +195,8 @@ affine、pixdim、dtype及extensions旧新精确相同。33/101/101个numeric CS
 也相同。见 [CPU_FULL.public.json](CPU_FULL.public.json) 与
 [官方和fast补组记录](OFFICIAL_NODE7_FAST_BA_REPEAT.public.json)。
 
-同nodecw7新官方输出与原nodecw10参考的三模式硬标签均0个不同体素。
-新官方计时只与同nodecw7的FNIT记录并列，旧nodecw10时间不参与速度比较。
+同compute-a-7新官方输出与原compute-a-10参考的三模式硬标签均0个不同体素。
+新官方计时只与同compute-a-7的FNIT记录并列，旧compute-a-10时间不参与速度比较。
 本次新官方参考的剩余差异如下；它们均为旧版已有误差，没有新增或移除：
 
 | CPU功能 | 官方不同体素 | 最小前景Dice | CSV最大绝对差（mm³） |
@@ -211,7 +211,7 @@ affine、pixdim、dtype及extensions旧新精确相同。33/101/101个numeric CS
 
 ### 同节点官方CPU冷进程计时
 
-官方FreeSurfer 8.2隔离参考与FNIT均在nodecw7固定八物理核、相同8线程预算，
+官方FreeSurfer 8.2隔离参考与FNIT均在compute-a-7固定八物理核、相同8线程预算，
 隐藏CUDA，每个进程独立取得同一共享锁。官方launcher、实际embedded Python
 脚本、五项模型资源、环境脚本、原始T1与任务调度器均绑定实际SHA。资源监控
 约0.25秒一次；官方采样峰值39个进程树线程包含空闲线程池，实际affinity始终

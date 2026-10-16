@@ -1,9 +1,9 @@
 # recon-all 验证索引
 
-[2026-10-16 cbaffa 两例原始 T1 整例与完成的 v2 事后评估](optimizations/20261016_gpucw1_cbaffa_two_case/README.md)：
+[2026-10-16 cbaffa 两例原始 T1 整例与完成的 v2 事后评估](optimizations/20261016_accelerator-a-1_cbaffa_two_case/README.md)：
 两例均退出 0，138/138 项输出齐全，生产网格门通过；严格逐文件诊断为 14/138、23/138。分区 Dice、双向表面距离、脑区统计和局部异常已评估；扩展网格检查仍发现 white/pial 互穿。整体指标等效、受控退化和同环境提速均未判定。
 
-[2026-10-14 f016 两例部分运行与 sub-07 事后评估](optimizations/20261014_gpucw1_f016_partial/README.md)：
+[2026-10-14 f016 两例部分运行与 sub-07 事后评估](optimizations/20261014_accelerator-a-1_f016_partial/README.md)：
 sub-07 从原始 T1 完成且 138/138 输出，sub-06 在拓扑阶段失败；两例整体验收与整体指标等效均未判定。该记录绑定旧 f016 科学源码，不代表后续修复版结果。
 
 [2026-10-01 五阶段优化历史整例结果](optimizations/20261001_serial/FINAL_RESULTS.md)：
