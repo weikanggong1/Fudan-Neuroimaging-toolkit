@@ -8,7 +8,7 @@
 
 第二轮候选选项见[接线与验收边界](ROUND2_INTEGRATION.md)、[持久双半球调度](PERSISTENT_HEMISPHERE_PIPELINE.md)和[Triton 编译器选择](TRITON_RUNTIME.md)；[f016 两例部分整例记录](../../validation/recon_all/optimizations/20261014_accelerator-a-1_f016_partial/README.md)单列旧版结果。[cbaffa 两例原始 T1 整例与完成的 v2 事后评估](../../validation/recon_all/optimizations/20261016_accelerator-a-1_cbaffa_two_case/README.md)分别记录执行、138 项输出、网格质量和数值诊断，整体指标等效与同环境提速尚未判定。
 
-本轮按用户要求显式选用[Conda 独立编译表面加速配方](NATIVE_TOPOLOGY_FINISH.md)，切换拓扑 GA、preclean/remesh/postclean 及已有原生 white/pial 路径，同时保留自有 GPU 指标与其他已优化阶段。[阶段回归与整例测评](../../validation/recon_all/optimizations/20261016_native_surface_hotspots/README.md)绑定冻结科学源码 `93affde8`；两例原始 T1 整例正在运行，2,000 秒目标、最终误差和整例显存尚未判定。
+本轮按用户要求显式选用[Conda 独立编译表面加速配方](NATIVE_TOPOLOGY_FINISH.md)，切换拓扑 GA、preclean/remesh/postclean 及已有原生 white/pial 路径，同时保留自有 GPU 指标与其他已优化阶段。[阶段回归与整例测评](../../validation/recon_all/optimizations/20261016_native_surface_hotspots/README.md)绑定冻结科学源码 `93affde8`；两例原始 T1 空目录整例与事后评估均已完成，病例外层墙钟为 2,218.68／2,010.32 秒，138 项输出和生产基本网格门通过。严格复现为 14／138、23／138，局部误差及自有显存归属仍需单列，整体指标等效未判定。
 
 [返回首页](../../README.md) · [完整旧文档与更早证据](../../validation/recon_all/readme_archive_20261005.md)
 

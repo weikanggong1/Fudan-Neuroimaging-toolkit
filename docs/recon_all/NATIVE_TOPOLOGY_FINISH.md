@@ -137,13 +137,23 @@ mrisp_paint -a 5 ATLAS#6 SUBJECT/surf/lh.sphere.reg SUBJECT/surf/lh.avg_curv
 
 ## 5. 真实数据精度、耗时与脑图
 
-截至本页创建时，**新增的 preclean + 原生 remesh + postclean 配方尚未完成原始 T1 整例**，因此 2,000 秒目标、两例精度、显存和整体指标等效均为未评估。现有同环境上游诊断显示：纯 Python GA 的 sub-06 LH／sub-07 RH 为 17,145.582／9,671.259 秒；相同 FNIT 自产五项输入交给独立 Conda C++ 到 `orig.premesh` 为 146.488／318.226 秒。阶段范围不同，不能把比值当整例加速。仅将 GA 改为 C++、继续使用 Python remesh/清理的上一个混合配方，sub-06 完整墙钟 5,349.477 秒、138/138 项和网格门通过；sub-07 清理残留 11／11 面后停止。原生相交清理在该失败输入上同样残留 11／11 面，因此新的完整配方必须在真实数据重新验收。数值和误差原因见[版本绑定的运行诊断](../../validation/recon_all/optimizations/20261016_topology_ga_runtime_debug/README.md)。
+冻结科学提交 `93affde8d369ee6ade22f2c105701ed6577e89a4` 已在同一 H100 节点、总 4 CPU 线程的共享环境，从两份公开 ds000114 原始 T1 与各自空目录完成整例。两例退出 0、138/138 输出齐全、生产基本网格门通过；事后评估均退出 0。
 
-既有完整 T1 表面叠加[图示](../../validation/recon_all/python_gpu_port/performance_hotspots_20261001/whole/sub01/figures/t1_surface_overlay.png)属于旧版；不能当作本次原生收尾配方的结果。本轮验收后应另生成当前版本的表面、误差和局部异常图，并将新报告链接到此处。
+| 病例 | 病例外层完整墙钟 | CLI 墙钟 | 138 项严格逐文件通过 |
+| --- | ---: | ---: | ---: |
+| sub-06 | 2,218.682 s | 2,210.178 s | 14/138 |
+| sub-07 | 2,010.322 s | 2,001.400 s | 23/138 |
+
+病例外层包含解释器启动、校验、加载、传输、计算和读写；事后评估另计。本组接近约 2,000 秒目标，没有达到两例都不超过 2,000 秒。旧纯 Python 两例为 19,448.046／12,094.283 秒；共享负载与配方均有变化，不能称受控配对加速。
+
+实际生产收尾函数的两份冻结自产网格回归为 87.218／72.229 秒，结构和双谓词零相交检查通过，与候选命名修复前的坐标、有序面完全相同。完整整例的网格与官方不同，white/pial 使用双向点到三角面距离比较，不做无对应关系的同索引比较。分区 Dice、厚度/面积/体积、六套脑区覆盖、局部相交与翻折、图像 SHA 及实际阶段耗时见[完整版本绑定报告](../../validation/recon_all/optimizations/20261016_native_surface_hotspots/README.md)。
+
+严格逐文件复现未通过；部分指标改善、部分指标仍有局部偏差，不以平均相关性宣布无退化。整体指标等效和受控退化尚未判定。父子进程同时显存因归属未解析仍为 `null`，整卡峰值包含外部进程，不能据此判定 FNIT 的 20 GB 预算；干净环境隔离运行尚未验证。当前版本已生成两例各三张私有 QC 图，完整报告保留于验证环境。
 
 ## 6. 更新和 benchmark 记录
 
-- 2026-10-16：增加显式 `topology_finish_backend="conda-cpp"` 接线；preclean、remesh3、postclean 均使用私有候选，结构与双谓词零相交门通过后原子发布。新配方的真实同输入、整例、GPU 归属和主分支发布仍须按新冻结源码报告。
+- 2026-10-16：完成两例空目录整例及官方事后比较，最新结果见上节及实测报告。
+- 2026-10-16：增加显式 `topology_finish_backend="conda-cpp"` 接线；preclean、remesh3、postclean 均使用私有候选，结构与双谓词零相交门通过后原子发布。同输入与整例均绑定实际冻结源码；自有 GPU 归属仍未解析。
 - 2026-10-16 旧冻结配方：仅切换 C++ GA 的两例记录及 sub-07 失败重放见[拓扑运行诊断](../../validation/recon_all/optimizations/20261016_topology_ga_runtime_debug/README.md)。不能把失败前的 976.856 秒称为完整运行时间。
 - 更早 remesh、相交的同输入逐位和耗时记录见[remesh 说明](REMESH_SCALAR_STORAGE_20261010.md)与[相交清理说明](INTERSECTION_REPAIR.md)。
 

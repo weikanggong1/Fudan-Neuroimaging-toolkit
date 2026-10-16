@@ -2,8 +2,8 @@
   "schema_version": 1,
   "date": "2026-10-16",
   "host_alias": "accelerator-a-1",
-  "scope": "frozen_same_FNIT_premesh_production_function_stage; raw_T1_v2_failed_at_SynthSeg; successful_end_to_end_not_assessed",
-  "publication_status": "work_branch_only; main_not_pushed",
+  "scope": "frozen_same_FNIT_premesh_stage_and_two_complete_raw_T1_native_surface_runs",
+  "publication_status": "scientific_validation_complete; publication_revision_recorded_in_Git_history",
   "provenance": {
     "upstream_freesurfer_commit": "d932c45b7941662ea380a05efef580568b98d41a",
     "native_build": {
@@ -17,13 +17,16 @@
       "mris_remove_intersection": "4f0ccd8a0fcecccc2a7964bf4f6ee5d5c8d9a51b6a432080afe417cbb0ba6f38"
     },
     "stage_code_commit": "91b7035ece299f3eef7fbc5a5f8e7703a3efaa5b",
-    "end_to_end_code_commit": "efa85ef0eecdfcec2bff097fdd141b5997d97c53",
     "native_free_py_sha256_at_both_commits": "2d5393b12d1b34f9eda3f4afae6dfcb5f579fd969bb3cc4ce5a6de6555ee8b92",
-    "end_to_end_source_manifest_sha256": "39c5a30ce19573f726b1a4bdc76aa45978f3d5622ef5bf457315939a446c7c45",
     "reproduction_scripts_sha256": {
       "benchmark_same_input.py": "9f2df302b1ae7e70a34553794331182843c520022d1139b9d36b51c3ed40d413",
       "benchmark_pipeline_finish.py": "146b60eecdd1c0a71e70cda8b6138869ba5a0b59470ff7efce4be6c60109e76f"
-    }
+    },
+    "prior_v1_v2_end_to_end_code_commit": "efa85ef0eecdfcec2bff097fdd141b5997d97c53",
+    "prior_v1_v2_source_manifest_sha256": "39c5a30ce19573f726b1a4bdc76aa45978f3d5622ef5bf457315939a446c7c45",
+    "current_scientific_code_commit": "93affde8d369ee6ade22f2c105701ed6577e89a4",
+    "current_native_free_py_sha256": "64412e3a161a12cd5ddc85caec5faccb5300183c4758d9bc9341793f83ecfb88",
+    "current_source_manifest_sha256": "e8dca760536d19bc72a88f4bfe67a5768d4380902958f7cd1b82913e4072b30d"
   },
   "direct_remesh_then_cleanup": {
     "case": "ds000114_sub-07",
@@ -94,6 +97,16 @@
       "single_gpu_ownership_tests_passed": 15,
       "admission_and_ownership_suite_passed": 22,
       "suite_counts_not_additive": true
+    },
+    "final_validation": {
+      "actual_frozen_source_Conda_tests_passed": 46,
+      "local_focused_tests_passed": 42,
+      "suite_counts_overlap_not_additive": true,
+      "two_real_raw_T1_runs_and_posthoc_exit_codes": [
+        0,
+        0
+      ],
+      "public_json_figure_hashes_privacy_and_doc_links": "passed"
     }
   },
   "raw_T1_end_to_end": {
@@ -139,17 +152,44 @@
     },
     "v3": {
       "code_commit": "93affde8d369ee6ade22f2c105701ed6577e89a4",
-      "status": "running",
+      "status": "complete_two_cases_and_posthoc",
       "target_GPU_index": 1,
       "frozen_job_sha256": "1769b323ee9d003204952fae2044627535895febc004c6df9f5432abad4abb8d",
       "verified_files": 2264,
       "minimum_free_gpu_bytes": 22000000000,
       "measured_free_gpu_bytes_before_spawn": 27848081408,
       "native_program_manifest_sha256": "3cb9b290a76bb94ecd2be1d76ac7cc52ff0fb5d7929e181a915c85b4ae4b3b7e",
-      "full_wall_seconds": null,
-      "speed_target_2000_seconds": "not_assessed",
-      "strict_reproduction": "not_assessed",
-      "overall_metric_equivalence": "not_assessed"
+      "full_wall_seconds": [
+        2218.681563505088,
+        2010.3220660550287
+      ],
+      "speed_target_2000_seconds": "approximately_2000_seconds_observed; neither_case_below_or_equal_2000",
+      "strict_reproduction": "failed_both",
+      "overall_metric_equivalence": "not_assessed",
+      "cases": [
+        {
+          "case": "ds000114_sub-06",
+          "outer_case_wall_seconds": 2218.681563505088,
+          "cli_wall_seconds": 2210.178367861081,
+          "full_harness_seconds": 2216.2908630979946,
+          "exit_code": 0,
+          "output_count": 138,
+          "production_basic_mesh_gate": "passed",
+          "strict_files_passed": 14,
+          "evaluation_sha256": "ef0a98f3f40dd4ca2ae0ebc4ed6f2062c04eaf5e67213fb1c4333951e38f9381"
+        },
+        {
+          "case": "ds000114_sub-07",
+          "outer_case_wall_seconds": 2010.3220660550287,
+          "cli_wall_seconds": 2001.4001683460083,
+          "full_harness_seconds": 2007.9066577790072,
+          "exit_code": 0,
+          "output_count": 138,
+          "production_basic_mesh_gate": "passed",
+          "strict_files_passed": 23,
+          "evaluation_sha256": "0a6b3ae7c85be78321555cb3936b3e6940beb974e5d90f62d1b2fcb9d1e0d2fd"
+        }
+      ]
     }
   },
   "resources_and_precision": {
@@ -175,9 +215,9 @@
     "frozen_stage_execution": "complete_two_inputs",
     "frozen_stage_final_mesh_quality": "passed_two_inputs",
     "stage_identity_to_original_Python_or_official": "not_assessed",
-    "raw_T1_execution_and_138_outputs": "v2_failed_both_cases_at_SynthSeg; successful_end_to_end_not_assessed",
-    "strict_reproduction": "not_assessed_for_this_recipe",
-    "optimization_degradation": "not_assessed_for_this_recipe",
+    "raw_T1_execution_and_138_outputs": "complete_both; 138_of_138_each",
+    "strict_reproduction": "failed_14_of_138_and_23_of_138",
+    "optimization_degradation": "not_assessed_no_controlled_pair",
     "overall_metric_equivalence": "not_assessed"
   },
   "same_input_SynthSeg_GPU1_probe": {
@@ -217,5 +257,9 @@
         "basic_structure_and_zero_intersection_gates": "passed"
       }
     ]
+  },
+  "completed_reports": {
+    "metrics.public.json": "ea1d3de8d4b930536a842d4d3c374c8cac739db1dc6f54f33068fb83a7c1f93f",
+    "runtime.public.json": "601b6a727f7c7e5119c918d99fd8f7abaf57739bce386989252fd7e3a5b24ea1"
   }
 }
