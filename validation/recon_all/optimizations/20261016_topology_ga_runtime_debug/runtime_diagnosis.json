@@ -1,0 +1,577 @@
+{
+  "schema_version": "1.1",
+  "scope": "runtime_diagnosis; historical cross-host comparison, same-input Python candidate probe, same-upstream native topology stage, and new two-case raw-T1 hybrid attempt with only sub-06 complete",
+  "date": "2026-10-16",
+  "science_commit_current": "cbaffa990c7f1d9c0df418762025f6a1507f0092",
+  "historical_versions": [
+    "e34a1829",
+    "79a41cdd"
+  ],
+  "inputs_identical_across_versions": {
+    "ds000114_sub-06_t1_sha256": "7e33afb28f631fac31d81e2428a6144f61aba4102859c694eeb49ee584de04f7",
+    "ds000114_sub-07_t1_sha256": "59ef7bed60d4db64d56d947ebed2ef62a9257c26fe879848fe24d10a490f74fc",
+    "weights_count": 16,
+    "assets_count": 102,
+    "resource_mapping_sha256": "c01d77debbc11046db102990fdb954ca8df72560362d2f818262a5440689fb3b"
+  },
+  "comparison_design": {
+    "same_host_paired": false,
+    "hardware_and_backend_changed": true,
+    "old_host": "A100_BENCHMARK_HOST",
+    "old_cpu": "Intel Xeon Platinum 8369B",
+    "old_gpu": "A100",
+    "old_threads": 4,
+    "old_topology": "Conda independently compiled fixed FreeSurfer C++ mris_fix_topology_fnit",
+    "old_topology_program_sha256": "c3bb6b744f3d3ebcc0bbaf6a79b4266eb712ea51a113b06157456b560654fde6",
+    "current_host": "accelerator-a-1",
+    "current_cpu": "Intel Xeon Gold 6430",
+    "current_gpu": "NVIDIA H100 PCIe",
+    "current_threads": 4,
+    "current_backend": "python",
+    "current_topology": "python-ga; gpu_defect_signed_distance; packed state",
+    "current_native_program_count": 0,
+    "controlled_same_host_e2e_speedup": null
+  },
+  "cases": {
+    "ds000114_sub-06": {
+      "historical_e34_cli_seconds": 2122.9,
+      "historical_79a_cli_seconds": 2718.39,
+      "current_cli_seconds": 19413.989,
+      "current_outer_case_seconds": 19448.046,
+      "historical_e34_native_topology_seconds": {
+        "lh": 134.452,
+        "rh": 73.206
+      },
+      "current_persistent_hemisphere_pipeline_seconds": 18610.434,
+      "current_python_ga_seconds": {
+        "lh": 17145.582,
+        "rh": 12380.305
+      },
+      "critical_ga_fraction_of_cli": 0.883156,
+      "current_python_ga": {
+        "lh": {
+          "defects": 24,
+          "evaluations": 12330,
+          "search_seconds": 15668.267,
+          "file_api_seconds": 17139.249,
+          "mean_search_seconds_per_evaluation": 1.271,
+          "quality_seconds": 503.248,
+          "intersection_cleanup_seconds": 377.309
+        },
+        "rh": {
+          "defects": 20,
+          "evaluations": 8765,
+          "search_seconds": 10692.073,
+          "file_api_seconds": 12378.726,
+          "mean_search_seconds_per_evaluation": 1.22,
+          "quality_seconds": 629.906,
+          "intersection_cleanup_seconds": 649.229
+        }
+      },
+      "execution_exit_code": 0,
+      "output_count": 138,
+      "output_expected": 138,
+      "strict_official_reproduction": "14/138"
+    },
+    "ds000114_sub-07": {
+      "historical_e34_cli_seconds": 2056.372,
+      "historical_79a_cli_seconds": 2653.001,
+      "current_cli_seconds": 12082.773,
+      "current_outer_case_seconds": 12094.283,
+      "historical_e34_native_topology_seconds": {
+        "lh": 152.099,
+        "rh": 95.265
+      },
+      "current_persistent_hemisphere_pipeline_seconds": 11343.946,
+      "current_python_ga_seconds": {
+        "lh": 7632.393,
+        "rh": 9671.259
+      },
+      "critical_ga_fraction_of_cli": 0.800417,
+      "current_python_ga": {
+        "lh": {
+          "defects": 9,
+          "evaluations": 4721,
+          "search_seconds": 6743.36,
+          "file_api_seconds": 7631.294,
+          "mean_search_seconds_per_evaluation": 1.428,
+          "quality_seconds": 381.498,
+          "intersection_cleanup_seconds": 279.742
+        },
+        "rh": {
+          "defects": 5,
+          "evaluations": 4420,
+          "search_seconds": 9093.599,
+          "file_api_seconds": 9670.097,
+          "mean_search_seconds_per_evaluation": 2.057,
+          "quality_seconds": 114.999,
+          "intersection_cleanup_seconds": 263.21
+        }
+      },
+      "rh_worst_defect": {
+        "defect_number_zero_based": 2,
+        "edges": 39964,
+        "inside_vertices": 1853,
+        "evaluations": 1940,
+        "search_seconds": 6621.566
+      },
+      "execution_exit_code": 0,
+      "output_count": 138,
+      "output_expected": 138,
+      "strict_official_reproduction": "23/138"
+    }
+  },
+  "cpu_probe": {
+    "status": "complete",
+    "exit_code": 0,
+    "scope": "sub-07 RH defect 0, ordered-edge identity ordering, same FNIT-produced inputs; not the GA-selected first candidate and not the slowest defect",
+    "candidate_ordering": "np.arange(len(edge_vertices), dtype=int32)",
+    "defect_edges": 80,
+    "selected_vertices": 14,
+    "distance_backend": "serial CPU",
+    "threads": 2,
+    "profile_script_sha256_executed": "2323080ded888b7c846426334ff5040337c01380a165f7f6d9d6afaedd1b4fff",
+    "profile_json_sha256": "56136379f9f9868aefd6c781d3fa2e39cfd6816364f660fe3b69db77067508dd",
+    "input_sha256": {
+      "orig_nofix": "5a0effdec464cb3ebb39cc4d3a7c272954051fa7bd3ce1671df2e4219dde74ed",
+      "qsphere_nofix": "b2c77bef18116f914e03f6ffa900f6ec52ed09d711a07fc0d9c6327a95aa71e2",
+      "brain_mgz": "31a2628866057d35bc7a7c654f7aa506ca6b0e0e591782cccf85e183d54d6273"
+    },
+    "preparation_wall_seconds": 52.675,
+    "first_unprofiled_cycle_seconds": 14.906,
+    "second_profiled_cycle_seconds": 1.133,
+    "second_profiled_state_materialization_seconds": 0.6,
+    "second_profiled_candidate_seconds": 0.37,
+    "second_profiled_candidate_geometry_seconds": 0.311,
+    "second_profiled_candidate_fitness_seconds": 0.049,
+    "second_profiled_top_exclusive": {
+      "function": "_pack_storage_prefix",
+      "file": "topology_state_pack.py",
+      "seconds": 0.264
+    },
+    "same_score_face_and_coordinate_hash_both_runs": true,
+    "independent_unprofiled_capture": {
+      "status": "complete",
+      "exit_code": 0,
+      "script_sha256_executed": "5d5ae6e77dcbc781f79243d5ea5a9ffc96f0f248f30262e06ff411d6c0103345",
+      "profile_json_sha256": "2b41700acf23f2001c7ff10d1fd08faba38d41ccbf3b3486d380c15d713631b2",
+      "first_cycle_seconds": 3.66,
+      "second_unprofiled_cycle_seconds": 0.639,
+      "second_unprofiled_state_materialization_seconds": 0.27,
+      "second_unprofiled_candidate_seconds": 0.32,
+      "second_unprofiled_geometry_seconds": 0.264,
+      "second_unprofiled_cpu_distance_seconds": 0.043,
+      "candidate_fields_sha256_count": 32,
+      "state_fields_sha256_count": 40,
+      "all_candidate_state_and_control_fields_equal_between_runs": true
+    },
+    "cold_warm_and_cprofile_overhead_separated": false,
+    "cprofile_overhead_seconds": null,
+    "extrapolation_to_full_ga_valid": false
+  },
+  "gpu_ab": {
+    "status": "not_run",
+    "reason": "no exclusive, interleaved same-input GPU A/B; a shared-GPU raw-T1 hybrid attempt ran, but sub-07 failed and own GPU memory ownership remained unresolved",
+    "planned_design": "same accelerator-a-1, same FNIT-produced checkpoint, same threads, isolated GPU lease, independently compiled fixed-source C++ versus current Python GA, then empty-directory raw-T1 E2E"
+  },
+  "accuracy": {
+    "this_diagnostic_changes_production_source": false,
+    "strict_reproduction_current": "failed",
+    "metric_equivalence_current": "not_assessed",
+    "new_numerical_regression_test": "same-five-input premesh structural checks complete on two cases; hybrid raw-T1 sub-06 EXIT 0 with 138/138 and both production mesh gates passed; hybrid sub-07 failed strict intersection cleanup after remesh, so two-case full numerical regression not assessed"
+  },
+  "evidence_sha256": {
+    "old_e34_benchmarks": {
+      "sub-06": "4bd4fdcb50527fa4f27086b12c8e65bb360ad7a048f4a0b1e7048c0c38d52562",
+      "sub-07": "3cadfe94bd90d40fc3d0cc1df15eeb0de89c3f0a8b9e60a09a48504773d225ac"
+    },
+    "old_79a_benchmarks": {
+      "sub-06": "d75b206b00c1dd5ca7060b124f0e59d3f113987c23587a3ce77f0b6b40dcbdf7",
+      "sub-07": "397ec8851bb615d0b100aaa897bf99089d7d4c8649a2ec72c090c439179e690b"
+    },
+    "current_benchmarks": {
+      "sub-06": "efe9dd0bfd0f6224cb34068092aea23dee762e83b1c421aab5d2c38466a5ecca",
+      "sub-07": "c5cd0b0c5d7b492fef91edcab7b388dbbdf7de8a89df62df7cfa757522d2ec3b"
+    },
+    "current_ga_reports": {
+      "sub-06_lh": "8ebab20be1e9c35ca558a6f702aed8426f6eeb9da722a850f919312fe4f53814",
+      "sub-06_rh": "8a2dc565cba08e4bcf5e880c91e39e1bd5f5d324ed910825416554fe7e88512b",
+      "sub-07_lh": "3de60ed047ef96e6366e648191874d94b363c91deb3a3b69124a8def33c0ffa9",
+      "sub-07_rh": "5aac7549bf4ce7cb5fff8f4f73820f0a3cad5730eac0a9d9f857c8bcb6de8008"
+    }
+  },
+  "native_same_input_stage": {
+    "status": "complete_stage_only",
+    "host": "accelerator-a-1",
+    "science_commit": "cbaffa990c7f1d9c0df418762025f6a1507f0092",
+    "binary": "Conda independently built pinned-source mris_fix_topology_fnit",
+    "binary_sha256": "79175111afac50ca4a740a54d2e83a68ab1fbe78b857d8099052f3322301dce1",
+    "upstream_five_input_sha256_verified": true,
+    "launch_script_sha256": "b10a338d75a5f2e8e89b33cd1f24f9b0e4548b860d063e035ff70929441fac84",
+    "stage_script_sha256": "e39fda2e30309f303f44452b534f83c6c44ae5d8980213508aa1355ab1cb86d9",
+    "mesh_check_script_sha256": "241841624bfc17fd5b376d9e487bf91fa06a14174e80b6cafa8b4ce94f3f502d",
+    "launcher_exit_code": 0,
+    "threads": {
+      "native_internal": 1,
+      "taskset_cpu_affinity": [
+        0,
+        1
+      ],
+      "python_ga_whole_run": 4
+    },
+    "cases": {
+      "ds000114_sub-07_rh": {
+        "stage_exit_code": 0,
+        "native_seconds": 315.23733249504585,
+        "api_wall_seconds": 318.2257294799201,
+        "current_python_ga_whole_run_seconds": 9671.259,
+        "observed_python_to_native_stage_wall_ratio": 30.391191233360818,
+        "native_report_sha256": "cf02dc49c1de98a1ead6ef1a473d010f766fb380fe31038bcf544c74817fad35",
+        "native_output_sha256": "468a4a6a0fd8d43129dfc16a6f2c5c8f316b65169ec796033f9d156e2f5309e4",
+        "mesh_check_report_sha256": "86da654d31bd8007ca1f0f9acdb875a1ed1e62ecb55bfa73ff84842e21769022",
+        "native_vertices": 109539,
+        "native_faces": 219074,
+        "python_vertices": 109503,
+        "python_faces": 219002,
+        "both_mesh_structure_valid": true,
+        "both_wm_geometry_valid": true,
+        "indexed_correspondence": false,
+        "bidirectional_triangle_distance": {
+          "status": "complete_stage_only",
+          "report_sha256": "c9c8016a1a4b2bf0a0a7150f9132521e9ab06869a20e5b3a9147567fb7bfb9bf",
+          "method": "all_vertices_to_opposite_triangle_mesh",
+          "unit": "surface_RAS_mm",
+          "native_to_python": {
+            "mean_mm": 0.000965,
+            "p99_mm": 0.0,
+            "max_mm": 7.8712,
+            "vertices_over_0_1_mm": 246,
+            "vertices_over_1_mm": 6
+          },
+          "python_to_native": {
+            "mean_mm": 0.000572,
+            "p99_mm": 0.0,
+            "max_mm": 0.824361,
+            "vertices_over_0_1_mm": 202,
+            "vertices_over_1_mm": 0
+          },
+          "native_max_edge_mm": 17.725,
+          "python_max_edge_mm": 2.993,
+          "native_edges_over_5_mm": 16,
+          "python_edges_over_5_mm": 0,
+          "local_outlier_vertex": 99505,
+          "final_surface_status": "not_assessed"
+        }
+      },
+      "ds000114_sub-06_lh": {
+        "stage_exit_code": 0,
+        "native_seconds": 143.4260441371007,
+        "api_wall_seconds": 146.48757793498226,
+        "current_python_ga_whole_run_seconds": 17145.582,
+        "observed_python_to_native_stage_wall_ratio": 117.04461389627164,
+        "native_report_sha256": "7d9fea8faf0c2cfae7b47d55f29d1baa6928c1a7780da5f2171bb4a456cc3722",
+        "native_output_sha256": "5d0d2631d8d66661bffd8529beaab2568b44382ffdc88a8ce40f7aa690abd086",
+        "mesh_check_report_sha256": "c1b4f243e71c3fc4296f60f95d16bc0109d0254fe7119e707faea46af62448ea",
+        "native_vertices": 123863,
+        "native_faces": 247722,
+        "python_vertices": 123908,
+        "python_faces": 247812,
+        "both_mesh_structure_valid": true,
+        "both_wm_geometry_valid": true,
+        "indexed_correspondence": false,
+        "bidirectional_triangle_distance": "pending"
+      }
+    },
+    "comparison_limit": "Same host and identical five upstream file SHA for each case, but stage runs were not interleaved ABBA; native one thread and Python whole-run four threads plus GPU distance, different concurrent host load. Ratios are observed stage-time contrasts, not whole-run speedups. The Python whole GA file stage includes remesh and intersection cleanup, while this isolated C++ stage stops at premesh.",
+    "failed_initial_attempt": "v1 exited 1 before GA because the isolated test had no private FS_LICENSE; v2 used existing private license without copying its contents. Initial v1 evidence retained.",
+    "final_orig_quality": "hybrid raw-T1 sub-06 production mesh gate passed; hybrid sub-07 right orig not accepted after 11/11 residual intersections",
+    "whole_t1_hybrid_wall_seconds": null,
+    "overall_metric_equivalence": "not_assessed",
+    "stage_scope_match": false,
+    "stage_scope_note": "Python GA file stage includes remesh, final-orig quality and intersection cleanup; isolated C++ stage stops at orig.premesh. Python search-only time is separately recorded in current_python_ga.search_seconds. The per-case hybrid raw-T1 wall is recorded separately because one case failed."
+  },
+  "hybrid_raw_t1_attempt": {
+    "status": "one_complete_one_failed",
+    "scope": "new empty subject directories; frozen cbaffa source and identical public raw T1/resource mapping; only topology GA uses independently built fixed-source Conda C++; FNIT Python remesh, intersection, white and pial remain",
+    "science_commit": "cbaffa990c7f1d9c0df418762025f6a1507f0092",
+    "host": "accelerator-a-1",
+    "threads": 4,
+    "gpu_shared": true,
+    "native_program_sha256": {
+      "mris_fix_topology_fnit": "79175111afac50ca4a740a54d2e83a68ab1fbe78b857d8099052f3322301dce1"
+    },
+    "other_native_program_count": 0,
+    "baseline_hemisphere_execution": "persistent",
+    "hybrid_hemisphere_execution": "groups",
+    "interleaved_paired_timing": false,
+    "owned_simultaneous_gpu_memory_status": "ownership_unresolved",
+    "whole_card_peak_includes_other_users": true,
+    "memory_budget_20_billion_bytes": "not_assessed",
+    "strict_official_comparison": "sub-06: 14/138; sub-07: not_assessed_failed_case",
+    "optimization_regression": "not_assessed",
+    "overall_metric_equivalence": "not_assessed",
+    "outer_lease_receipt_status": "dispatch_or_exit_audit_failed",
+    "outer_lease_receipt_note": "an external UID GPU process could not be assigned to this science job; original receipt retained and not rewritten; per-case scientific exits are separate",
+    "cases": {
+      "ds000114_sub-06": {
+        "baseline_python_full_harness_seconds": 19428.59475753596,
+        "hybrid_full_harness_seconds": 5349.477064460982,
+        "hybrid_cli_wall_seconds": 5343.246574555989,
+        "hybrid_execution": "complete",
+        "hybrid_exit_code": 0,
+        "hybrid_output_count": 138,
+        "hybrid_expected_output_count": 138,
+        "hybrid_mesh_quality": "passed_both_hemispheres",
+        "hybrid_strict_official_comparison": "14/138",
+        "hybrid_benchmark_sha256": "18701bbd63ca11323aa84d92057cb1a2aa321b1a36a12f2d1ddec8312c63d3c9",
+        "stage_seconds": {
+          "n4": 141.668,
+          "surface_hemisphere_group": 839.969,
+          "register_hemisphere_group": 269.298,
+          "final_white_hemisphere_group": 367.847,
+          "pial_surface_hemisphere_group": 3119.63
+        },
+        "observed_baseline_to_hybrid_wall_ratio": 3.632,
+        "ratio_causal_speedup": false
+      },
+      "ds000114_sub-07": {
+        "baseline_python_full_harness_seconds": 12090.243,
+        "hybrid_elapsed_to_failure_seconds": 976.8562309009722,
+        "hybrid_cli_wall_seconds_to_failure": 968.6390504369047,
+        "hybrid_execution": "failed",
+        "hybrid_exit_code": 1,
+        "failure_stage": "surface_hemisphere_group/right/strict_intersection_repair_after_python_remesh",
+        "remaining_source_intersecting_faces": 11,
+        "remaining_geometric_intersecting_faces": 11,
+        "hybrid_output_count": null,
+        "hybrid_output_completeness": "not_assessed",
+        "hybrid_mesh_quality": "not_assessed",
+        "hybrid_benchmark_sha256": "de426f32a713935e414e66d453627987ba673d5b3c3ddaf689de155f29f02b16",
+        "stage_seconds_to_failure": {
+          "n4": 143.753,
+          "surface_hemisphere_group": 557.847
+        },
+        "elapsed_is_complete_case_runtime": false
+      }
+    },
+    "comparison_limit": "Same host, raw T1 and resources, but sequential unpaired runs under different shared load; topology output mesh, hemisphere execution and allocator policy differ. Only sub-06 completed. Do not compare sub-07 partial time as E2E performance."
+  },
+  "other_python_stage_slowdown_evidence": {
+    "remesh_frozen_same_input": {
+      "scope": "older frozen official premesh, one run per hemisphere on a different host, exact ordered coordinates and faces at nine checkpoints; not current whole-T1",
+      "python_seconds_lh_rh": [
+        100.87,
+        97.16
+      ],
+      "reference_seconds_lh_rh": [
+        14.46,
+        19.53
+      ]
+    },
+    "nonzero_intersection_frozen_same_input": {
+      "scope": "older FNIT-produced sub-07 LH premesh on A100 shared host, complete API including independent check; native reference repeated on same input; not current hybrid sub-07 RH",
+      "python_seconds": 474.618,
+      "reference_seconds_repeat": [
+        3.871,
+        3.846
+      ],
+      "output_residual_source_geometric": [
+        0,
+        0
+      ]
+    },
+    "pial_frozen_same_input": {
+      "scope": "older sub-07 LH frozen final white, one GPU candidate run and two independent Conda C++ CLI runs; not current whole-T1",
+      "python_numba_cpu_seconds": 1148.816,
+      "fnit_gpu_seconds": 266.084,
+      "native_cpp_seconds_repeat": [
+        141.031,
+        138.214
+      ]
+    },
+    "paint_atlas_frozen_same_input": {
+      "scope": "older two public T1, four hemispheres, byte-identical output; per-side only a few seconds",
+      "fnit_file_api_seconds_range": [
+        4.937,
+        5.865
+      ],
+      "native_cli_seconds_range": [
+        0.5,
+        0.64
+      ]
+    },
+    "white_preaparc_frozen_same_input_not_slowdown": {
+      "scope": "FNIT-produced sub-07 LH, shared-host stage API, not whole-T1",
+      "fnit_python_seconds": 374.65,
+      "independent_conda_cpp_seconds_repeat": [
+        500.977,
+        521.503
+      ]
+    },
+    "final_white_frozen_same_input_mixed_result": {
+      "scope": "two public T1, four hemispheres, paired fixed stage inputs; not whole-T1",
+      "case_hemi_order": [
+        "sub-07_lh",
+        "sub-07_rh",
+        "sub-06_lh",
+        "sub-06_rh"
+      ],
+      "fnit_python_seconds": [
+        173.577,
+        180.302,
+        220.791,
+        248.108
+      ],
+      "native_white_fast_seconds": [
+        200.892,
+        183.4,
+        235.019,
+        225.571
+      ],
+      "python_conversion_slowdown_conclusion": "not_established"
+    },
+    "hybrid_pial_current": {
+      "baseline_cbaffa_same_case_worker_seconds_lh_rh": [
+        352.16,
+        354.12
+      ],
+      "hybrid_group_seconds": 3119.63,
+      "hybrid_worker_seconds_lh_rh": [
+        3064.73,
+        3115.06
+      ],
+      "same_input": false,
+      "python_conversion_causality": "not_established",
+      "known_changed_factors": [
+        "topology_output_mesh",
+        "hemisphere_execution",
+        "cuda_allocator_cache_policy",
+        "shared_load"
+      ]
+    }
+  },
+  "hybrid_sub06_posthoc_evaluation": {
+    "status": "complete",
+    "evaluation_exit_code": 0,
+    "scope": "one completed raw-T1 hybrid candidate versus archived official reference; not a two-case regression or controlled timing pair",
+    "science_commit": "cbaffa990c7f1d9c0df418762025f6a1507f0092",
+    "candidate_profile": "mixed-topology-cpp",
+    "candidate_benchmark_sha256": "18701bbd63ca11323aa84d92057cb1a36a12f2d1ddec8312c63d3c9",
+    "candidate_runtime_report_sha256": "5812afc4bee1c0c2570ae6ab3bad853e0b59b3d61fd4dec6dec5fb3aad07f00f",
+    "source_manifest_sha256": "b99a84d953ccb5aedb6b3b6b69686c72918774f38c4240510f35ea3b3f49df3e",
+    "reference_plain_file_manifest_sha256": "e6aa553acfe943b4dd753804b7fbf57e6916c89d16f3c65003a677515be303be",
+    "evaluation_report_sha256": "32142c30bfb3c0caf6a28cab9465cd2beccdbac7a5d3cd7ea6639d282f4e42a3",
+    "evaluator_sha256": "c8247ccdc492bfd520331fc2673417ac92ef3c2f4fd33543ce46ca806204f83b",
+    "geometry_driver_sha256": "79dd2ec3237300ea0dcfb7de44f789ebe36791fc25d502d7187da7f51dea41b7",
+    "private_launcher_sha256": "987a3c3bd62d6983637ef66b830bf58f77003e22791356827482beb41f8eaa18",
+    "private_report_location": "$FNIT/runs/<private-run>/evaluation_hybrid_sub06_cpp_v1_20261016",
+    "coverage": {
+      "candidate_ordinary_output_files_rehashed": 138,
+      "official_ordinary_reference_files_verified": 700,
+      "strict_files_checked": 138,
+      "dice_volume_files": 7,
+      "bidirectional_triangle_surface_stages": 4,
+      "aparc_regions": 68,
+      "extended_quality_hemispheres": 2,
+      "brain_figures": 3
+    },
+    "strict_reproduction": {
+      "checked": 138,
+      "passed": 14,
+      "same_passed_file_set_as_pure_python_sub06": true,
+      "strict_reproduction_passed": false
+    },
+    "dice_against_official": {
+      "aseg.mgz": {"different_voxels": 18724, "minimum_dice": 0.0, "p05_dice": 0.9792864810785538, "median_dice": 1.0},
+      "aparc+aseg.mgz": {"different_voxels": 28661, "minimum_dice": 0.0, "p05_dice": 0.9073602544675987, "median_dice": 0.9635067843945655},
+      "aparc.a2009s+aseg.mgz": {"different_voxels": 40446, "minimum_dice": 0.0, "p05_dice": 0.8563854655214038, "median_dice": 0.9340379929011198},
+      "aparc.DKTatlas+aseg.mgz": {"different_voxels": 26300, "minimum_dice": 0.0, "p05_dice": 0.9267230299578639, "median_dice": 0.9684268352856626},
+      "wmparc.mgz": {"different_voxels": 40542, "minimum_dice": 0.8779284833538841, "p05_dice": 0.9096024718272488, "median_dice": 0.9626257786296119},
+      "ribbon.mgz": {"different_voxels": 23468, "minimum_dice": 0.9750932702432176, "p05_dice": 0.9751117536165851, "median_dice": 0.9839912513273223},
+      "filled.mgz": {"different_voxels": 13, "minimum_dice": 0.9999745860954663, "p05_dice": 0.9999750685108378, "median_dice": 0.999979410249182}
+    },
+    "minimum_dice_zero_explanation": "label 77 WM-hypointensities: official 0 voxels, candidate 1 voxel",
+    "surface_distance": {
+      "space": "surface RAS millimeters; source vertices to all target triangles in both directions; no same-index comparison across different vertex counts",
+      "lh_white": {"candidate_to_official_mean_mm": 0.04061136809204016, "candidate_to_official_p99_mm": 0.2951199669515571, "candidate_to_official_max_mm": 3.453662378395866, "official_to_candidate_mean_mm": 0.04099501314643407, "official_to_candidate_p99_mm": 0.2971042655570194, "official_to_candidate_max_mm": 3.984406064254235},
+      "lh_pial": {"candidate_to_official_mean_mm": 0.0721190915055925, "candidate_to_official_p99_mm": 0.5595476437927992, "candidate_to_official_max_mm": 4.623635123807861, "official_to_candidate_mean_mm": 0.0699859113766472, "official_to_candidate_p99_mm": 0.5293048454405452, "official_to_candidate_max_mm": 3.1956952752596455},
+      "rh_white": {"candidate_to_official_mean_mm": 0.04357727480458188, "candidate_to_official_p99_mm": 0.29652224784999026, "candidate_to_official_max_mm": 2.319991315158585, "official_to_candidate_mean_mm": 0.04279661419623031, "official_to_candidate_p99_mm": 0.293724956695474, "official_to_candidate_max_mm": 1.4942125668247919},
+      "rh_pial": {"candidate_to_official_mean_mm": 0.0677978341934258, "candidate_to_official_p99_mm": 0.4895262619861511, "candidate_to_official_max_mm": 2.3507197202758814, "official_to_candidate_mean_mm": 0.06835617127465686, "official_to_candidate_p99_mm": 0.4932069905000835, "official_to_candidate_max_mm": 2.171893941681561}
+    },
+    "aparc_68_absolute_relative_error_percent": {
+      "ThickAvg": {"median": 0.5063613949556642, "p90": 1.4288907864213187, "maximum_absolute_error_mm": 0.09499999999999975},
+      "SurfArea": {"median": 0.952064495043033, "p90": 3.7535396440129465, "maximum_absolute_error_mm2": 111.0},
+      "GrayVol": {"median": 1.0091219389344042, "p90": 4.682374464927169, "maximum_absolute_error_mm3": 232.0}
+    },
+    "local_quality": {
+      "candidate_closed_connected_manifold_both_hemispheres": true,
+      "candidate_sphere_and_sphere_reg_negative_faces_both_hemispheres": 0,
+      "white_pial_proper_transverse_crossing_pairs": {"candidate_lh": 524, "candidate_rh": 233, "official_lh": 441, "official_rh": 269},
+      "same_index_vertex_and_annotation_local_maps": "not_assessed_vertex_correspondence",
+      "assessment": "LH crossing count increased while RH decreased; neither all local error nor metric equivalence passed"
+    },
+    "timing_and_resources": {
+      "hybrid_full_harness_seconds": 5349.477064460982,
+      "pure_python_same_case_full_harness_seconds": 19428.59475753596,
+      "posthoc_comparison_wall_seconds": 1365.542074049008,
+      "interleaved_paired_timing": false,
+      "same_hardware_but_different_shared_load_scheduler_mesh_and_allocator": true,
+      "historical_official_wall_seconds": 5735.362919188105,
+      "official_wall_same_run_environment": false,
+      "owned_simultaneous_gpu_memory_status": "ownership_unresolved",
+      "memory_budget_20_billion_bytes": "not_assessed"
+    },
+    "overall_metric_equivalence": "not_assessed_no_confirmed_prospective_thresholds",
+    "optimization_regression": "not_assessed_waiting_same_case_control",
+    "private_figure_sha256": {
+      "t1_surface_overlay.png": "919b93af3dda5ca3513df810c94c9f6ec4c33e4896106ff6e56cc9f80607873b",
+      "region_errors.png": "c1788ab673981d33f09ba322a4d0380b89deb46e93b5f97abeed4a6dcc1fa941",
+      "local_region_boundary.png": "a11c52619c0eca6ab2f921d14d2484a76343e071bfbcb00b78dd9ec68f36f0e9"
+    }
+  },
+  "hybrid_sub07_rh_intersection_same_input_replay": {
+    "status": "complete_stage_replay_not_raw_t1_whole",
+    "science_commit": "cbaffa990c7f1d9c0df418762025f6a1507f0092",
+    "input": "same FNIT-produced native-topology orig.premesh from isolated stage; remeshed with FNIT 3 iterations",
+    "remesh_seconds": 87.25,
+    "remesh_source_intersecting_faces": 26,
+    "remesh_geometric_intersecting_faces": 26,
+    "python_cleanup_seconds": 73.97,
+    "native_cleanup_seconds": 26.41,
+    "native_program_independently_built_from_pinned_source": true,
+    "native_exit_code": 0,
+    "both_outputs_source_intersecting_faces": 11,
+    "both_outputs_geometric_intersecting_faces": 11,
+    "both_outputs_ordered_vertices_and_faces_identical": true,
+    "both_outputs_vertices": 115142,
+    "both_outputs_faces": 230280,
+    "both_outputs_euler": 2,
+    "both_outputs_components": 1,
+    "both_outputs_nonmanifold_edges": 0,
+    "native_premesh_intersection_count": "not_assessed_memory_guard",
+    "premesh_local_roi_onset": {
+      "status": "two_local_clusters_preexist_in_cpp_ga_premesh_and_expand_after_remesh",
+      "scope": "explicit local ROIs only; not a whole-brain count and not summable into one",
+      "whole_brain_premesh_count": "not_assessed_memory_guard",
+      "private_onset_report_sha256": "30d21c39389c9ec3cc06e4bb25254ea930605388ca8e2ccbca995093d9b37036",
+      "private_explicit_roi_recheck_sha256": "36a557166faf4c029be7b6e90c1a65eeddcc58de46210ba79b22d144e8dddc4f"
+    },
+    "old_pure_python_premesh_and_final_orig_intersection_counts": {
+      "source": 0,
+      "geometric": 0
+    },
+    "old_pure_python_premesh_vertices_faces": [
+      109503,
+      219002
+    ],
+    "new_native_premesh_vertices_faces": [
+      109539,
+      219074
+    ],
+    "same_index_old_to_new_premesh_comparison_allowed": false,
+    "private_conclusion_sha256": "96af604d81b54aca17a1c4f6c7ab5cbfd19c3a6aa40e9320240b94d3511d4b28",
+    "private_artifact_manifest_sha256": "eb31dba1ab91757f0528849048a5cffbed0bfcff9bffe5927fd7892962824996",
+    "quality_gate_unchanged": true,
+    "native_exit_zero_implies_zero_intersections": false
+  }
+}
