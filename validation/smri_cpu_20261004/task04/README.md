@@ -8,7 +8,7 @@
 
 真实输入来自公开 ds003138 的一例 T1w，224×288×288 网格。第一轮使用冻结的 SynthStrip brain 和 mask，给原 FAST 与 FNIT 相同 brain；显式 mask 与正输入取交集。该检查点来自修正输入网格前的 SynthStrip，只用于隔离 FAST。新的公开 CLI 和原始 T1 流程采用任务 1 修正后的 brain（SHA-256 `fd8c3253a6960777715c85844a38e760959b6bf80849bd28b7e5b906dee0dea4`）。两侧没有使用彼此的分割结果进行初始化。FAST stage 结果不能替代原始 T1 到 VBM 的完整对照。
 
-CPU 为 nodecw10 的 Intel Xeon Gold 6418H。同一组 8 个物理核心 `0,4,8,12,16,20,24,28`，线程环境和进程 affinity 均记录，所有受测进程使用共同排他锁串行运行。原 FAST 未提供线程参数，仍设置相同 8 线程环境和核心预算，并记录其实际线程。每次测量为新进程；完整墙钟含启动、输入读取和 gzip 输出。API 时间另列，不含 `save()`。首次 Numba JIT 与后续磁盘缓存加载分别报告；嵌套 stage 时间不能相加。
+CPU 为 compute-a-10 的 Intel Xeon Gold 6418H。同一组 8 个物理核心 `0,4,8,12,16,20,24,28`，线程环境和进程 affinity 均记录，所有受测进程使用共同排他锁串行运行。原 FAST 未提供线程参数，仍设置相同 8 线程环境和核心预算，并记录其实际线程。每次测量为新进程；完整墙钟含启动、输入读取和 gzip 输出。API 时间另列，不含 `save()`。首次 Numba JIT 与后续磁盘缓存加载分别报告；嵌套 stage 时间不能相加。
 
 这是共享节点，不是独占机器或独占物理核心：现场有其他计算进程使用全节点 affinity，第一轮负载约 32，后续组约 80–110。本组测量相互串行，原参考与候选均记录运行前后 load。第二轮默认 tensor 复测使用 NUMA 3 的 `3,7,11,15,19,23,27,31`，同组新旧串行；不跨组计算提速倍数。
 
@@ -92,7 +92,7 @@ CPU8 的实际次序为 R-R-C-C，之间穿插其他同锁 task4 作业；不是
 
 ## 4. 完整脑 CUDA 回归
 
-gpucw1 的 H100 PCIe 上，CUDA 设备和共同锁固定，CPU budget 为 8 核，PyTorch allocator budget 为 20 GB。`fsl` 与 `tensor` 各运行两次冻结 main / 候选对照，共 32 对保存的 gzip NIfTI；**全部 SHA-256 相同**。这项检查覆盖完整数据、几何和文件内容。
+accelerator-a-1 的 H100 PCIe 上，CUDA 设备和共同锁固定，CPU budget 为 8 核，PyTorch allocator budget 为 20 GB。`fsl` 与 `tensor` 各运行两次冻结 main / 候选对照，共 32 对保存的 gzip NIfTI；**全部 SHA-256 相同**。这项检查覆盖完整数据、几何和文件内容。
 
 | 路径与缓存轮次 | main 冷进程 | 候选冷进程 | main API | 候选 API |
 |---|---:|---:|---:|---:|

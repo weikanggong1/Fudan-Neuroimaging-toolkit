@@ -129,7 +129,7 @@ python validation/recon_all/optimizations/20261009_inflate_torch/summarize_remes
 mris_remesh --remesh --iters 3 "$INPUT" "$OFFICIAL_OUTPUT"
 ```
 
-本轮 CFFF 没有已声明的独立官方 `mris_remesh` 程序，未补测官方同输入
+本轮 accelerator-b 没有已声明的独立官方 `mris_remesh` 程序，未补测官方同输入
 运行。生产 native bundle 不能冒充官方安装程序。此处的实测对照是
 FNIT 已有实现与显式候选；历史官方阶段比较继续绑定其原版本。
 

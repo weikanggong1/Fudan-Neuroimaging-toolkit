@@ -11,7 +11,7 @@ python -m fnit.recon_all.input_talairach_chain T1.nii.gz /empty/sub01 \
 
 The external weight is `synthstrip.1.pt`. The FreeSurfer 8.2 stage being replaced is `mri_synthstrip --threads 4 -i orig.mgz -o synthstrip.mgz`. The following native masking operation is `mri_mask T1.mgz synthstrip.mgz brainmask.mgz`. This function changes only the cuDNN precision of the SynthStrip forward pass: its constructor enables TF32; the recon-all caller disables cuDNN TF32 for inference and restores the previous flag afterwards. Other GPU stages retain their own precision settings. It uses float32, with no float16 or bfloat16.
 
-## Same T1 validation on gpucw1
+## Same T1 validation on accelerator-a-1
 
 The fixed input T1 has SHA-256 `f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a`. The already completed candidate's `orig.mgz`, `T1.mgz`, and `nu.mgz` were voxel-exact against the archived official subject. The `orig.mgz` file SHA-256 is `a7944bbdb8618bc3a83dae65c49986b25439cc33d962da5a0b10afec8e361938`; the official SynthStrip image SHA-256 is `f95c4e04b91a5001f88ddbb24af5d33eda4e4aa97d338a86477f71a91bab48de`.
 

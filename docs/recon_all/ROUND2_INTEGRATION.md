@@ -67,7 +67,7 @@ GCA 对应独立参考中的 `mri_em_register`，拓扑 GA 对应 `mris_fix_topo
 
 现有[GPU 距离同输入实验](TOPOLOGY_GPU_DISTANCE_FITNESS.md)在一例真实冻结缺陷上完成完整首缺陷配对：CPU/GPU 均有 495 次搜索评分及 1 次最终评分，完整 CLI 为 1275.139/1225.616 秒，最终状态逐字节一致。这只验证该阶段当时的冻结源码，不是四项组合或当前整例提速。状态打包、GCA、半球调度各有单独阶段记录；本页不把其局部收益相加。
 
-[旧 f016 两例整例报告](../../validation/recon_all/optimizations/20261014_gpucw1_f016_partial/README.md)记录 sub-07 完成且 138/138 输出、23/138 严格逐文件通过，sub-06 在拓扑质量门失败。它不是随后修复的整例结果；该版本的最终脑区误差、网格局部异常、历史官方时间及受外部进程污染的显存样本均在报告中单列。[cbaffa 两例原始 T1 空目录整例](../../validation/recon_all/optimizations/20261016_gpucw1_cbaffa_two_case/README.md)均退出 0，138/138 输出和生产网格门通过，严格逐文件诊断分别为 14/138、23/138。四项组合的同条件提速、FNIT 自身显存峰值及整体指标等效仍未判定，不能用阶段测试或历史官方耗时补出结论。公开报告未附私有 T1 脑图；真实第四缺陷的[距离差图](../../validation/recon_all/optimizations/20261011_fnit4_gpu_fitness/fourth_real_roi.png)只对应旧阶段输入。
+[旧 f016 两例整例报告](../../validation/recon_all/optimizations/20261014_accelerator-a-1_f016_partial/README.md)记录 sub-07 完成且 138/138 输出、23/138 严格逐文件通过，sub-06 在拓扑质量门失败。它不是随后修复的整例结果；该版本的最终脑区误差、网格局部异常、历史官方时间及受外部进程污染的显存样本均在报告中单列。[cbaffa 两例原始 T1 空目录整例](../../validation/recon_all/optimizations/20261016_accelerator-a-1_cbaffa_two_case/README.md)均退出 0，138/138 输出和生产网格门通过，严格逐文件诊断分别为 14/138、23/138。四项组合的同条件提速、FNIT 自身显存峰值及整体指标等效仍未判定，不能用阶段测试或历史官方耗时补出结论。公开报告未附私有 T1 脑图；真实第四缺陷的[距离差图](../../validation/recon_all/optimizations/20261011_fnit4_gpu_fitness/fourth_real_roi.png)只对应旧阶段输入。
 
 ## 6. 更新与参考
 

@@ -1,6 +1,6 @@
 # EDDY 2111 overlay 源码对照
 
-用户提供的 `eddy_fsl2111_strict_overlay.zip` 是待验证候选。其校验清单通过，但附带状态文件明确说真实数据验收尚未完成。本次将它与 [FSL EDDY 2111.0](https://git.fmrib.ox.ac.uk/fsl/eddy) 及 [miscmaths Simplex](https://git.fmrib.ox.ac.uk/fsl/miscmaths) 的实现逐段对照，再用 gpucw1 的 `eddy_cuda10.2` 做同输入输出验证。源码目标提交为 `ecfef26151c2613d0f4e1b45dcbbe100b58db50c`；没有把此提交误写成服务器二进制的已核实构建号。
+用户提供的 `eddy_fsl2111_strict_overlay.zip` 是待验证候选。其校验清单通过，但附带状态文件明确说真实数据验收尚未完成。本次将它与 [FSL EDDY 2111.0](https://git.fmrib.ox.ac.uk/fsl/eddy) 及 [miscmaths Simplex](https://git.fmrib.ox.ac.uk/fsl/miscmaths) 的实现逐段对照，再用 accelerator-a-1 的 `eddy_cuda10.2` 做同输入输出验证。源码目标提交为 `ecfef26151c2613d0f4e1b45dcbbe100b58db50c`；没有把此提交误写成服务器二进制的已核实构建号。
 
 | 组件 | ZIP 候选的差异 | 本版处理 |
 |---|---|---|

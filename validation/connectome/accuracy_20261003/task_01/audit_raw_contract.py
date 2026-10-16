@@ -27,7 +27,7 @@ def main():
     report={"manifest_sha256":sha(args.manifest),"routes_sha256":sha(args.routes),
             "dataset":manifest["dataset"],"license":manifest["license"],
             "scope":"read-only raw hashes and actual staged/oracle input contract",
-            "software":{"FSL_version":Path("/public/software/apps/FSL/6.0.7.4/etc/fslversion").read_text().strip()},
+            "software":{"FSL_version":Path("/opt/reference/FSL/6.0.7.4/etc/fslversion").read_text().strip()},
             "cases":{}}
     for case in manifest["cases"]:
         case_id=case["case_id"];route=routes["cases"][case_id]

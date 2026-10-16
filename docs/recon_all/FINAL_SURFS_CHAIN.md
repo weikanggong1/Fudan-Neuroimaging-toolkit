@@ -35,7 +35,7 @@ cp brain.finalsurfs.mgz brain.finalsurfs.manedit.mgz
 
 ## 真实 T1 对照
 
-[保存的对照报告](../../validation/recon_all/python_gpu_port/finalsurfs_chain_20260927/report.json)使用去标识 `sub-01_T1w.nii.gz`（SHA-256 `f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a`）及其在 gpucw1 完成的 FreeSurfer 8.2 重建。两组完整的五步复跑读取**相同的六张官方保存输入图**，各输入哈希均记录在报告中。Python 生成的最终图与检查点均为 **0/16,777,216 个差异体素**，包含函数 I/O 用时 8.83 秒；五条官方命令包含进程启动和 I/O 用时 8.21 秒。这是在同一主机的一次非配对运行，不能由此判断稳定速度差。
+[保存的对照报告](../../validation/recon_all/python_gpu_port/finalsurfs_chain_20260927/report.json)使用去标识 `sub-01_T1w.nii.gz`（SHA-256 `f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a`）及其在 accelerator-a-1 完成的 FreeSurfer 8.2 重建。两组完整的五步复跑读取**相同的六张官方保存输入图**，各输入哈希均记录在报告中。Python 生成的最终图与检查点均为 **0/16,777,216 个差异体素**，包含函数 I/O 用时 8.83 秒；五条官方命令包含进程启动和 I/O 用时 8.21 秒。这是在同一主机的一次非配对运行，不能由此判断稳定速度差。
 
 FNIT v5 当时的 T1 前缀在此影像上已使 `brain`、`brainmask`、`entowm`、`aseg.presurf`、`nu` 的体素与官方相同，但尚未生成 `mca-dura`、`vsinus`。第二次复跑取其中**四张 FNIT 生成的输入**，只借用**两张官方辅助标签图**，9.13 秒得到 0/16,777,216 个最终图差异体素。这是有条件的上游测试，不是 FNIT 整例结果。
 

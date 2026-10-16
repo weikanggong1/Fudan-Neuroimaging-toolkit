@@ -1,4 +1,6 @@
-# DMRIPipeline：单被试扩散参数图流程
+# FNIT_dMRIPipeline
+
+> 统一 Python 入口：[`FNIT_dMRIPipeline`](../API_REFERENCE.md)，从 `fnit` 导入。下文配置、结果类型和细分算子保留高级兼容接口。
 
 | 项目 | 内容 |
 |---|---|
@@ -32,9 +34,9 @@ flowchart LR
 ## 2. Python 调用
 
 ```python
-from fnit.dmri_pipeline import DMRIPipeline
+from fnit import FNIT_dMRIPipeline
 
-diffusion_pipeline = DMRIPipeline(
+diffusion_pipeline = FNIT_dMRIPipeline(
     device="cuda:0",  # 计算设备
     registration_backend="tbss",  # 不需要T1w的FA配准分支
     synthstrip_weights="/data/weights/synthstrip.1.pt",  # 已校验标准权重
@@ -93,9 +95,9 @@ AP-only仍运行EDDY，以零susceptibility场并记录topup_applied=false。有
 MMORF最短调用：
 
 ```python
-from fnit.dmri_pipeline import DMRIPipeline
+from fnit import FNIT_dMRIPipeline
 
-multimodal_pipeline = DMRIPipeline(
+multimodal_pipeline = FNIT_dMRIPipeline(
     device="cuda:0",  # 目标GPU
     registration_backend="mmorf",  # T1与tensor联合配准
     synthstrip_weights="/data/weights/synthstrip.1.pt",  # 同标准checkpoint

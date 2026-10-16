@@ -38,7 +38,7 @@ norm_value = norm(left_vector)             # sqrt(SumSquare) 的 FP64 标量。
 
 ## 3. 诊断命令与参数
 
-实际运行源见 [probe_owned.py](source/probe_owned.py)、[run_owned_v2.sh](source/run_owned_v2.sh) 和 [preflight_owned_v2.py](source/preflight_owned_v2.py)。运行器使用 canonical 索引中的任务目录，先取得共用 CPU outer lock，再取得本叶 inner lock；nodecw7 八核亲和性为 `32,36,40,44,48,52,56,60`，各线程预算为 8，CUDA 不可见。控制器最多 900 秒、求解子进程最多 180 秒；不成功则停止。
+实际运行源见 [probe_owned.py](source/probe_owned.py)、[run_owned_v2.sh](source/run_owned_v2.sh) 和 [preflight_owned_v2.py](source/preflight_owned_v2.py)。运行器使用 canonical 索引中的任务目录，先取得共用 CPU outer lock，再取得本叶 inner lock；compute-a-7 八核亲和性为 `32,36,40,44,48,52,56,60`，各线程预算为 8，CUDA 不可见。控制器最多 900 秒、求解子进程最多 180 秒；不成功则停止。
 
 ```bash
 # oracle_directory：索引中原有授权共享系统目录，包含上述私有数组。

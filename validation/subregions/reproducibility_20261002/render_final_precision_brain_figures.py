@@ -67,7 +67,7 @@ def main() -> None:
             raise ValueError("candidate input no longer matches recorded input")
     baseline_dir = root / f"segment4_precision_export_final_full_{args.mode}_20261002"
     official = evidence / "official_r1"
-    t1 = (root.parent / "reconall_reference_gpucw1/fs_sub01/mri/norm.mgz"
+    t1 = (root.parent / "reconall_reference_accelerator-a-1/fs_sub01/mri/norm.mgz"
           if args.mode == "stage" else root.parent.parent / "examples/data/sub-01_T1w.nii.gz")
     candidate = candidate_dir / "subregions_native.nii.gz"
     baseline = baseline_dir / "subregions_native.nii.gz"

@@ -1,11 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 export PYTHONDONTWRITEBYTECODE=1 CUDA_VISIBLE_DEVICES=''
-FNIT_ROOT=/cwStorage/home/gongwk/Notebook_code/FNIT
+FNIT_ROOT=/data/fnit
 FNIT_ENV=$(readlink -f "$FNIT_ROOT/envs/default")
 "$FNIT_ENV/bin/python" - <<'PY'
 import hashlib,json,pathlib
-root=pathlib.Path('/cwStorage/home/gongwk/Notebook_code/FNIT')
+root=pathlib.Path('/data/fnit')
 def identity(p):
     h=hashlib.sha256()
     with p.open('rb') as s:

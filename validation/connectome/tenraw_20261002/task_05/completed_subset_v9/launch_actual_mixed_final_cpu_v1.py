@@ -1,7 +1,7 @@
-"""Root on headcw only: persistent metadata wait, then original CPU readers."""
+"""Root on control-host only: persistent metadata wait, then original CPU readers."""
 from pathlib import Path
 import os,json,hashlib,subprocess,datetime
-r=Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002')
+r=Path('/data/workspaces/fnit_connectome_tenraw_20261002')
 chain=r/'formal_actual_mixed_final_CPU_tools_v1/run_connectome_actual_mixed_final_cpu.py'
 common=chain.parent/'watch_connectome_actual_completion.py'
 configuration=r/'formal_actual_mixed_waiter_tools_v1/configuration.json'

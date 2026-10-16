@@ -106,7 +106,7 @@ def collect(*, fnit_root: Path, output: Path) -> dict:
         if numeric_leaves(original) != numeric_leaves(public):
             raise ValueError("export changed numeric/bool/null leaves or locations")
         data = (json.dumps(public, indent=2, allow_nan=False) + "\n").encode()
-        if re.search(rb"(?:/cpfs|/cwStorage|/(?:home|mnt)/|(?:\d{1,3}\.){3}\d{1,3})", data):
+        if re.search(rb"(?:/cpfs|/data/shared|/(?:home|mnt)/|(?:\d{1,3}\.){3}\d{1,3})", data):
             raise ValueError("public private-string scan failed")
         (output / name).write_bytes(data)
         entries.append({"path": name, "original_sha256": sha(raw), "published_sha256": sha(data),

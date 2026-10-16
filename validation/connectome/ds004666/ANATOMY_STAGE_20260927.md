@@ -2,7 +2,7 @@
 
 固定样本为 [OpenNeuro ds004666](https://openneuro.org/datasets/ds004666) 的 `sub-01/ses-2mm` T1w 与同次已校正 AP-DWI。此阶段以 **FreeSurfer 8.2 官方 `recon-all`** 产出的 `aparc+aseg.mgz` 为冻结输入；本包的近似版 Python recon-all 不参与参考臂或候选臂。原 UKB 脚本使用 FreeSurfer 7.1、FIRST 和 `5ttgen freesurfer -first`；本机 MRtrix 3.0.3 不支持 `-first`，因此 5TT 对照采用 `-nocrop -sgm_amyg_hipp` 适配参考。这个差别限制了与原 UKB 全流程的等价性。
 
-参考输入 SHA-256：`aparc+aseg.mgz` 为 `02e0dac0bb322e689d6c5910babe1f91b181c767d45d0bd2cdba72f508c476ab`，校正 DWI 的脑内均值 `b0_brain.nii.gz` 为 `21a929f9a3b4ed604e286a1bdea877f3eeae0ba3acc402ab0adc3ca319c638fd`，FreeSurfer `t1_brain.nii.gz` 为 `6c3f61d916ed177ab944e53c622620b1734d2b41789567dce0e563005bd28453`。其余输入和参考输出哈希分别保存在下列 JSON；[DWI 校正 provenance](corrected_input_provenance.public.json)记录 TOPUP/EDDY 条件。运算在 `gpucw1` 的 NVIDIA H100 上以 PyTorch 2.5.1、float32 和默认 TF32 执行；FSL 为 6.0.7.4，MRtrix 为 3.0.3。
+参考输入 SHA-256：`aparc+aseg.mgz` 为 `02e0dac0bb322e689d6c5910babe1f91b181c767d45d0bd2cdba72f508c476ab`，校正 DWI 的脑内均值 `b0_brain.nii.gz` 为 `21a929f9a3b4ed604e286a1bdea877f3eeae0ba3acc402ab0adc3ca319c638fd`，FreeSurfer `t1_brain.nii.gz` 为 `6c3f61d916ed177ab944e53c622620b1734d2b41789567dce0e563005bd28453`。其余输入和参考输出哈希分别保存在下列 JSON；[DWI 校正 provenance](corrected_input_provenance.public.json)记录 TOPUP/EDDY 条件。运算在 `accelerator-a-1` 的 NVIDIA H100 上以 PyTorch 2.5.1、float32 和默认 TF32 执行；FSL 为 6.0.7.4，MRtrix 为 3.0.3。
 
 | 阶段 | 相同输入与软件参考 | PyTorch 对照结果 | 单次墙钟时间 |
 |---|---|---|---|

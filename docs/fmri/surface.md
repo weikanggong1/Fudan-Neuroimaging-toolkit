@@ -1,4 +1,6 @@
-# fMRI Surface pipeline
+# FNIT_fMRISurface_pipeline
+
+> 统一 Python 入口：[`FNIT_fMRISurface_pipeline`](../API_REFERENCE.md)，从 `fnit` 导入。下文配置、结果类型和细分算子保留高级兼容接口。
 
 | 摘要 | 内容 |
 |---|---|
@@ -107,13 +109,13 @@ fnit-setup-fmri-surface-assets --output-dir /data/hcp_assets --fmriprep
 最短示例复用用户已有同源重建，缺少volume时由入口自动处理：
 
 ```python
-from fnit import fMRISurface_pipeline
+from fnit import FNIT_fMRISurface_pipeline
 
 bids_directory = "/data/bids"                         # 原始BIDS目录
 output_directory = "/data/derivatives/fnit"           # volume和surface共用结果目录
 subject_directory = "/data/subjects/sub-01"          # 与源T1w一致的已有subject
 surface_assets_directory = "/data/hcp_assets"         # 已校验HCP和TemplateFlow资源
-surface_result = fMRISurface_pipeline(                 # 返回最终路径与阶段时间
+surface_result = FNIT_fMRISurface_pipeline(                 # 返回最终路径与阶段时间
     bids_root=bids_directory,
     derivatives_root=output_directory,
     subject="01",                                    # 选择sub-01
@@ -133,7 +135,7 @@ print(surface_result.dtseries)                        # 91k CIFTI文件
 选择FNIT新重建前，按 [recon-all安装](../recon_all/README.md) 配置权重、图谱和native程序：
 
 ```python
-from fnit import fMRISurface_pipeline
+from fnit import FNIT_fMRISurface_pipeline
 
 reconstruction_options = {                            # FNIT重建所需资源与CPU预算
     "weights_dir": "/data/recon_weights",              # 完整recon-all模型组
@@ -141,7 +143,7 @@ reconstruction_options = {                            # FNIT重建所需资源�
     "native_bin_dir": "/data/fnit_native/bin",          # 独立源码构建程序
     "threads": 4,                                    # 重建CPU线程
 }
-surface_result = fMRISurface_pipeline(                 # 从原始MRI完成缺失阶段
+surface_result = FNIT_fMRISurface_pipeline(                 # 从原始MRI完成缺失阶段
     bids_root="/data/bids",                            # 配对原始BIDS
     derivatives_root="/data/derivatives/fnit",          # 新输出根目录
     subject="01",                                    # 被试标签
@@ -294,9 +296,9 @@ MSMSulc 单独分支的 `repair/error` 也在最终 float32 球面复核未通�
 以下示例对前置 MSMSulc 和最终 MSMAll native sphere 分别执行显式修复，并在投影前复核：
 
 ```python
-from fnit.fmri import fMRISurface_pipeline
+from fnit import FNIT_fMRISurface_pipeline
 
-surface_result = fMRISurface_pipeline(
+surface_result = FNIT_fMRISurface_pipeline(
     bids_root="/absolute/path/bids",
     derivatives_root="/absolute/path/derivatives",
     subject="0001",

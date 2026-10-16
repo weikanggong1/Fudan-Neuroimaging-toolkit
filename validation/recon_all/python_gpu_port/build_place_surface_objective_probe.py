@@ -40,7 +40,7 @@ def main() -> None:
             key, value = line.split(" = ", 1)
             definitions[key] = shlex.split(value)
     compiled = args.out / "mrisurf_mri_objective_probe.o"
-    compiler = "/home1/gongwk/anaconda3/bin/x86_64-conda-linux-gnu-g++"
+    compiler = "/home1/benchmark-user/anaconda3/bin/x86_64-conda-linux-gnu-g++"
     command = [compiler]
     for key in ("CXX_DEFINES", "CXX_INCLUDES", "CXX_FLAGS"):
         command += definitions[key]

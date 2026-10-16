@@ -1,6 +1,6 @@
 # `mris_sphere` legacy `abs` compatibility trial
 
-Status on 2026-09-27: the isolated trial completed on gpucw1 after the concurrent end-to-end run exited successfully. It corrected the first printed scale value but **failed ordered-coordinate parity** and increased the final error. The trial did not modify the production source or binary.
+Status on 2026-09-27: the isolated trial completed on accelerator-a-1 after the concurrent end-to-end run exited successfully. It corrected the first printed scale value but **failed ordered-coordinate parity** and increased the final error. The trial did not modify the production source or binary.
 
 ## First divergence and source
 
@@ -21,7 +21,7 @@ if (max_dim > .75*DEFAULT_RADIUS) {
 
 ## Isolated patch and build
 
-[`mris_sphere_legacy_abs_int.patch`](mris_sphere_legacy_abs_int.patch) changes only the three active bounding-box span expressions to `abs((int)(span))`. On headcw, a copy of `fs_cpp/source/mris_sphere/mris_sphere.cpp` was patched under `$root/sphere_abs_int_trial_20260927/`. The existing Conda Ninja compilation and link commands were read with `ninja -C "$root/fs_cpp/build" -t commands mris_sphere`; only the source, object, dependency, linker-map, and output-binary paths were redirected to the trial directory. The link reuses the unchanged Conda-built static libraries from the original build tree. `commands.json`, `compile.log`, `link.log`, `ldd.txt`, `build_result.json`, and the patch are retained remotely. This compiled just the one modified translation unit and linked a separate binary; compilation took 3.21 s and linking 0.96 s.
+[`mris_sphere_legacy_abs_int.patch`](mris_sphere_legacy_abs_int.patch) changes only the three active bounding-box span expressions to `abs((int)(span))`. On control-host, a copy of `fs_cpp/source/mris_sphere/mris_sphere.cpp` was patched under `$root/sphere_abs_int_trial_20260927/`. The existing Conda Ninja compilation and link commands were read with `ninja -C "$root/fs_cpp/build" -t commands mris_sphere`; only the source, object, dependency, linker-map, and output-binary paths were redirected to the trial directory. The link reuses the unchanged Conda-built static libraries from the original build tree. `commands.json`, `compile.log`, `link.log`, `ldd.txt`, `build_result.json`, and the patch are retained remotely. This compiled just the one modified translation unit and linked a separate binary; compilation took 3.21 s and linking 0.96 s.
 
 `patch --dry-run -d "$root/fs_cpp/source" -p1 < "$trial/legacy_abs_int.patch"` passed without changing the original source. The trial is a diagnostic compatibility experiment, not a replacement for the current build.
 
@@ -36,14 +36,14 @@ The trial binary's disassembly now includes `cvttss2si` at the same bounding-box
 
 ## Frozen-input result
 
-The exact [trial script](run_sphere_abs_int_trial.sh) ran on gpucw1 in a new subject copy after `reconall_conda_cpp_cc_e2e_20260927/reports/e2e.status` became `exit=0`. It copied the official paired subject, removed only its `lh.sphere` output, and matched the saved **111-file full input SHA-256 manifest byte for byte** (manifest SHA-256 `6b209e92dd1565543082418d5c08450ae6cd3c9cf773879f1b2ce52c9b01df2f`). The command was:
+The exact [trial script](run_sphere_abs_int_trial.sh) ran on accelerator-a-1 in a new subject copy after `reconall_conda_cpp_cc_e2e_20260927/reports/e2e.status` became `exit=0`. It copied the official paired subject, removed only its `lh.sphere` output, and matched the saved **111-file full input SHA-256 manifest byte for byte** (manifest SHA-256 `6b209e92dd1565543082418d5c08450ae6cd3c9cf773879f1b2ce52c9b01df2f`). The command was:
 
 ```bash
 export FS_LICENSE=/path/to/private/license.txt
 bash validation/recon_all/python_gpu_port/native_cpp_conda_20260927/run_sphere_abs_int_trial.sh
 ```
 
-On gpucw1 the script was copied to `$root/sphere_abs_int_trial_20260927/run_trial.sh`; its SHA-256 was `e2fca9aa9808df280d5e1c1ae93f420d046beb22f3979024dbf9c42ded69cb1e`. It invoked `/usr/bin/time -f '%e' -o "$trial/wall_seconds.txt" timeout 720 "$trial/mris_sphere" -threads 4 -seed 1234 "$surf/lh.inflated" "$surf/lh.sphere"` from the copied subject's `scripts` directory. `FS_LICENSE` pointed to the existing private license; its contents were not copied or logged. Full values are in [`sphere_abs_int_trial_result.json`](sphere_abs_int_trial_result.json).
+On accelerator-a-1 the script was copied to `$root/sphere_abs_int_trial_20260927/run_trial.sh`; its SHA-256 was `e2fca9aa9808df280d5e1c1ae93f420d046beb22f3979024dbf9c42ded69cb1e`. It invoked `/usr/bin/time -f '%e' -o "$trial/wall_seconds.txt" timeout 720 "$trial/mris_sphere" -threads 4 -seed 1234 "$surf/lh.inflated" "$surf/lh.sphere"` from the copied subject's `scripts` directory. `FS_LICENSE` pointed to the existing private license; its contents were not copied or logged. Full values are in [`sphere_abs_int_trial_result.json`](sphere_abs_int_trial_result.json).
 
 | Version | First scale | Wall time | Mean vertex distance to official | Maximum vertex distance | Ordered faces |
 | --- | ---: | ---: | ---: | ---: | --- |

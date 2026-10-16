@@ -22,7 +22,7 @@ sys.dont_write_bytecode = True  # Original frozen helper/environment directories
 
 MODE = 'selected_same_round_anatomy_fresh_raw_dwi_monitor_recovery'
 GPU = 'GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba'
-LOCK = '/tmp/fnit-recon-five-20261002-gongwk.gpu.lock'
+LOCK = '/tmp/fnit-recon-five-20261002-benchmark-user.gpu.lock'
 ATLASES = ['fs-aparc', 'aparc+tian-s1', 'aparc.a2009s+tian-s1', 'glasser+tian-s1',
            'glasser+tian-s4', 'schaefer200+tian-s1', 'schaefer500+tian-s4', 'schaefer1000+tian-s4']
 ARM_SOURCE_FINGERPRINTS = {'candidate':'9fd44cbc49c9cdfc16c9a8cff2971fec3239b450dce41222e6ef059861eb0dc7',

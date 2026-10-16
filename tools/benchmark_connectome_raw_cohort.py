@@ -25,7 +25,7 @@ import time
 import uuid
 
 SCHEMA_VERSION = 1
-GPU_LOCK = "/tmp/fnit-recon-five-20261002-gongwk.gpu.lock"
+GPU_LOCK = "/tmp/fnit-recon-five-20261002-benchmark-user.gpu.lock"
 MATRICES = ("count", "sift2_fbc", "mean_length", "mean_fa")
 ANATOMY = ("mri/brain.mgz", "mri/aparc+aseg.mgz", "mri/ribbon.mgz",
            "surf/lh.white", "surf/rh.white", "surf/lh.pial", "surf/rh.pial")
@@ -830,8 +830,8 @@ def parse_options(argv=None):
     selection = run.add_mutually_exclusive_group()
     selection.add_argument("--cases", nargs="+", help="formal selection, at least 10 different subjects")
     selection.add_argument("--pilot", nargs="+", help="explicit diagnostic subset; not a ten-case formal result")
-    run.add_argument("--cpu-host", default="nodecw10")
-    run.add_argument("--gpu-host", default="gpucw1")
+    run.add_argument("--cpu-host", required=True, help="authenticated CPU destination supplied by the caller")
+    run.add_argument("--gpu-host", required=True, help="authenticated GPU destination supplied by the caller")
     for kind in ("cpu", "gpu"):
         run.add_argument(f"--{kind}-control-path")
         run.add_argument(f"--{kind}-port", type=int)

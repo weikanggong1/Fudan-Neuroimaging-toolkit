@@ -262,10 +262,10 @@ The RH all-candidate MRI sort still swaps two unused-in-`select0` new edges
 at ranks 16,570/16,571 because one Python score is one float32 ULP higher.
 Later GA candidates can depend on that order.
 
-Evidence: [LH fitness](lh.initial_fitness_headcw_report.json),
-[RH fitness](rh.initial_fitness_headcw_report.json),
-[LH independent patch](lh.independent_first_patch_headcw.json),
-[RH independent patch](rh.independent_first_patch_headcw.json),
+Evidence: [LH fitness](lh.initial_fitness_control-host_report.json),
+[RH fitness](rh.initial_fitness_control-host_report.json),
+[LH independent patch](lh.independent_first_patch_control-host.json),
+[RH independent patch](rh.independent_first_patch_control-host.json),
 [validator](validate_topology_initial_fitness.py), and
 [preceding edge/segment report](TOPOLOGY_INDEPENDENT_SEGMENTS.md).
 
@@ -561,7 +561,7 @@ float32 components. The [RH full report](rh.installed_canonical_full.json)
 records 101,454/101,454 vertices and 304,362/304,362 components at both
 boundaries. Maximum absolute coordinate difference is 0 mm. The installed
 RAM snapshot SHA-256 values are; the four binary snapshots and GDB capture
-logs are retained on headcw in `topology_fix/native_canonical_reference_20260926/`:
+logs are retained on control-host in `topology_fix/native_canonical_reference_20260926/`:
 
 | Installed snapshot | LH | RH |
 | --- | --- | --- |

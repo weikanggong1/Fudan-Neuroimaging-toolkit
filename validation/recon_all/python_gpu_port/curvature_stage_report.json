@@ -1,7 +1,7 @@
 {
   "stage": "mris_place_surface --curv-map surface 2 10 output",
   "reference": "FreeSurfer 8.2.0-1 sub-01",
-  "host": "gpucw1",
+  "host": "accelerator-a-1",
   "gpu": "NVIDIA H100 PCIe",
   "device": "cuda:0",
   "acceptance_rule": "abs(candidate - reference) <= 0.005 + 0.001 * abs(reference) at every vertex",
@@ -14,9 +14,9 @@
       "map": "lh.curv",
       "device": "cuda:0",
       "native_command": [
-        "/public/software/apps/Freesurfer/8.2.0-1/bin/mris_place_surface",
+        "/opt/reference/Freesurfer/8.2.0-1/bin/mris_place_surface",
         "--curv-map",
-        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01/surf/lh.white",
+        "/data/workspaces/freesurfer_synth/work/reconall_reference_accelerator-a-1/fs_sub01/surf/lh.white",
         "2",
         "10",
         "results/curvature_benchmark_cuda0/lh.curv.native"
@@ -38,9 +38,9 @@
       "map": "lh.curv.pial",
       "device": "cuda:0",
       "native_command": [
-        "/public/software/apps/Freesurfer/8.2.0-1/bin/mris_place_surface",
+        "/opt/reference/Freesurfer/8.2.0-1/bin/mris_place_surface",
         "--curv-map",
-        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01/surf/lh.pial",
+        "/data/workspaces/freesurfer_synth/work/reconall_reference_accelerator-a-1/fs_sub01/surf/lh.pial",
         "2",
         "10",
         "results/curvature_benchmark_cuda0/lh.curv.pial.native"
@@ -62,9 +62,9 @@
       "map": "rh.curv",
       "device": "cuda:0",
       "native_command": [
-        "/public/software/apps/Freesurfer/8.2.0-1/bin/mris_place_surface",
+        "/opt/reference/Freesurfer/8.2.0-1/bin/mris_place_surface",
         "--curv-map",
-        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01/surf/rh.white",
+        "/data/workspaces/freesurfer_synth/work/reconall_reference_accelerator-a-1/fs_sub01/surf/rh.white",
         "2",
         "10",
         "results/curvature_benchmark_cuda0/rh.curv.native"
@@ -86,9 +86,9 @@
       "map": "rh.curv.pial",
       "device": "cuda:0",
       "native_command": [
-        "/public/software/apps/Freesurfer/8.2.0-1/bin/mris_place_surface",
+        "/opt/reference/Freesurfer/8.2.0-1/bin/mris_place_surface",
         "--curv-map",
-        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01/surf/rh.pial",
+        "/data/workspaces/freesurfer_synth/work/reconall_reference_accelerator-a-1/fs_sub01/surf/rh.pial",
         "2",
         "10",
         "results/curvature_benchmark_cuda0/rh.curv.pial.native"
@@ -107,7 +107,7 @@
       }
     }
   ],
-  "headcw_cpu_numerical_replay": {
+  "control-host_cpu_numerical_replay": {
     "lh.curv": {
       "vertices": 106622,
       "reference_range": [

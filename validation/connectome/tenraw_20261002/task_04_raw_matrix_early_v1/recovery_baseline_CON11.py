@@ -1,6 +1,6 @@
 import pathlib,json,hashlib,importlib.util,sys,os,time,datetime,subprocess,traceback
 sys.dont_write_bytecode=True
-root=pathlib.Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002');p=root/'task_04/raw_matrix_envelope_recovery_readonly_v2_baseline_CON11';p.mkdir(exist_ok=False)
+root=pathlib.Path('/data/workspaces/fnit_connectome_tenraw_20261002');p=root/'task_04/raw_matrix_envelope_recovery_readonly_v2_baseline_CON11';p.mkdir(exist_ok=False)
 sha=lambda f:hashlib.sha256(pathlib.Path(f).read_bytes()).hexdigest()
 producer=root/'formal_selected_monitor_recovery_tools_v3/benchmark_connectome_selected_raw_recovery.py'
 # Exact deployed producer identity is frozen in configuration before functions are imported.

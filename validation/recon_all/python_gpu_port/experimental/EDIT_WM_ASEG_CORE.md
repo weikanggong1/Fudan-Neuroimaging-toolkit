@@ -14,7 +14,7 @@ An isolated native run with `DIAG=0x8` wrote `lh_roi.mgz`, `rh_roi.mgz`, and `f1
 
 ## Frozen reference and voxel gates
 
-Input files are in `/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_main_20260924/single_subjects/fs_sub01/mri`; independent native references and GDB diagnostic raw arrays are in `/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_python_gpu_20260925/wm_asegedit_ref`. The validator checks input MGZ SHA-256 hashes: `wm.seg.mgz` `3cf79694f8e13889395e0e2a6e38508627ed1766bedecd751e76cece7884cd9f`, `brain.mgz` `1b7360d069b76c8a5a63f93f3c296dddeb4db725c4e2625e11ebfc156279f401`, `aseg.presurf.mgz` `263653b66a9aacba4d0d704781c6e67e581c86a9f99374e37d7e3f28d1674ce2`, and `entowm.mgz` `8bd292fc03e6a4a32ba9bedaa47f7e84e83e9594975df02f16f7fbd8cd9ca264`.
+Input files are in `/data/workspaces/freesurfer_synth/work/reconall_main_20260924/single_subjects/fs_sub01/mri`; independent native references and GDB diagnostic raw arrays are in `/data/workspaces/freesurfer_synth/work/reconall_python_gpu_20260925/wm_asegedit_ref`. The validator checks input MGZ SHA-256 hashes: `wm.seg.mgz` `3cf79694f8e13889395e0e2a6e38508627ed1766bedecd751e76cece7884cd9f`, `brain.mgz` `1b7360d069b76c8a5a63f93f3c296dddeb4db725c4e2625e11ebfc156279f401`, `aseg.presurf.mgz` `263653b66a9aacba4d0d704781c6e67e581c86a9f99374e37d7e3f28d1674ce2`, and `entowm.mgz` `8bd292fc03e6a4a32ba9bedaa47f7e84e83e9594975df02f16f7fbd8cd9ca264`.
 
 | Stage | Python vs native differing voxels | Fortran-order voxel SHA-256 |
 | --- | ---: | --- |
@@ -28,10 +28,10 @@ The first edit scans change **65,951** voxels from input. Later active MTL rules
 
 ## Timing and reproduction
 
-On the same headcw CPU and NFS input, one sequential CLI pair took **12.21 s** for Python and **35.00 s** for the exact native full command. This is one run per command, not a distribution or a GPU benchmark. A warm Python validator timed path proof 0.99 s, first edit scans 1.06 s, early/late MTL scans 0.23/0.11 s, below-hippocampus fill 0.08 s, final spackle 0.18 s, and fixed options 3.02 s; the validator also loads and compares several native volumes, so its total wall time is a different scope. Four synthetic tests passed.
+On the same control-host CPU and NFS input, one sequential CLI pair took **12.21 s** for Python and **35.00 s** for the exact native full command. This is one run per command, not a distribution or a GPU benchmark. A warm Python validator timed path proof 0.99 s, first edit scans 1.06 s, early/late MTL scans 0.23/0.11 s, below-hippocampus fill 0.08 s, final spackle 0.18 s, and fixed options 3.02 s; the validator also loads and compares several native volumes, so its total wall time is a different scope. Four synthetic tests passed.
 
 ```bash
-BASE=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work
+BASE=/data/workspaces/freesurfer_synth/work
 MRI=$BASE/reconall_main_20260924/single_subjects/fs_sub01/mri
 REF=$BASE/reconall_python_gpu_20260925/wm_asegedit_ref
 PYTHONPATH=src python -m fnit.recon_all.edit_wm_aseg_core_python \

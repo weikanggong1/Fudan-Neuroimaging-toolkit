@@ -35,7 +35,7 @@ FNIT 分别报告 API 计算、保存、API 总时间和独立进程墙钟；观
 
 官方报告本轮原始 T1 完整流程墙钟、`recon-all`、三个细分区命令及官方显式阶段 timer。没有独立计量或共同中间标签的步骤不填估算耗时或步骤 Dice；不复用历史个体的重建时间。
 
-服务器 `gpucw1` 有两块 H100、双路 Intel Xeon Gold 6430（128 个逻辑 CPU、64 个物理核）和约 1 TiB 内存，见 [硬件身份](hardware_identity.json)。官方四例并发、每例四线程；FNIT raw 与 stage 分别固定 GPU 1 和 GPU 0，每块 GPU 的自身队列依次运行。允许共享 GPU，记录物理 UUID、其他进程、利用率和自身 PID 显存。自身采样显存上限 19073 MiB（20 GB），CUDA 使用现有 FP32/TF32 与确定性累计，不使用 FP16。实际共享负载随日志公开。
+服务器 `accelerator-a-1` 有两块 H100、双路 Intel Xeon Gold 6430（128 个逻辑 CPU、64 个物理核）和约 1 TiB 内存，见 [硬件身份](hardware_identity.json)。官方四例并发、每例四线程；FNIT raw 与 stage 分别固定 GPU 1 和 GPU 0，每块 GPU 的自身队列依次运行。允许共享 GPU，记录物理 UUID、其他进程、利用率和自身 PID 显存。自身采样显存上限 19073 MiB（20 GB），CUDA 使用现有 FP32/TF32 与确定性累计，不使用 FP16。实际共享负载随日志公开。
 
 ## 数值与来源核验
 

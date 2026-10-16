@@ -8,10 +8,10 @@
 |---|---|
 | 阶段 1 | `3d9856c…+stage1tar0444db72`：未提交修改的冻结快照，非干净 Git commit；tar SHA-256 `0444db72c248fac01bf9385c615da4f0e9fbade94ebbe2ccd2a70942f0c2180f`。两例统计、厚度和 SynthSeg 精度诊断。 |
 | 冻结 `1b8c36d` | `1b8c36d25a68e253a1e59b6d02114890afa467de`；[部署源码清单](source_1b8c36d_manifest.json)。最终默认厚度的 sub-01 LH、后验缓冲区、线程测试及当前整例。 |
-| 后续剖析修复 | 基于 1b8，profiling.py SHA-256 `7eed61ea…`；headcw 8 项 CPU/模拟 CUDA 检查通过，实际命令 1.645 s，非真实 GPU 重建。完整报告 SHA 和远端路径在汇总 JSON。 |
+| 后续剖析修复 | 基于 1b8，profiling.py SHA-256 `7eed61ea…`；control-host 8 项 CPU/模拟 CUDA 检查通过，实际命令 1.645 s，非真实 GPU 重建。完整报告 SHA 和远端路径在汇总 JSON。 |
 | `12a4834` 后续入口/worker 修复 | 当前说明对应的提交；公开入口失败状态 8 项本地测试通过。厚度 worker 源码 SHA-256 `ab019eb7…` 已独立完成 sub-01 LH 真实 GPU 同输入复核，保存的 1b 厚度图零差异；不改阶段 1 量值归属。当前整例仍使用冻结 1b。 |
 
-GPU 阶段在 gpucw1 的 H100 PCIe（UUID `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba`）运行，CPU 为 Xeon Gold 6430；CPU 线程测试在 nodecw10 的 Xeon Gold 6418H 运行。Torch 2.5.1、CUDA 11.8、cuDNN 90100，Torch 线程预算 4；使用 float32，未启用 FP16/BF16。TF32 默认保留，SynthSeg 卷积的已验证 FP32 例外单独记录。输入、权重、资产、Conda 构建程序及独立参考程序的大小与 SHA-256 均在 [运行清单](runtime_fingerprints_1b8c36d.json)；[GPU](hardware_gpucw1_1b8c36d.json)和 [CPU](hardware_nodecw10_1b8c36d.json)快照记录当时资源。
+GPU 阶段在 accelerator-a-1 的 H100 PCIe（UUID `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba`）运行，CPU 为 Xeon Gold 6430；CPU 线程测试在 compute-a-10 的 Xeon Gold 6418H 运行。Torch 2.5.1、CUDA 11.8、cuDNN 90100，Torch 线程预算 4；使用 float32，未启用 FP16/BF16。TF32 默认保留，SynthSeg 卷积的已验证 FP32 例外单独记录。输入、权重、资产、Conda 构建程序及独立参考程序的大小与 SHA-256 均在 [运行清单](runtime_fingerprints_1b8c36d.json)；[GPU](hardware_accelerator-a-1_1b8c36d.json)和 [CPU](hardware_compute-a-10_1b8c36d.json)快照记录当时资源。
 
 `git diff e036f57..3d9856c -- src` 为空：3d9856c 只增加此前验证记录，算法源码与 e036 相同。本轮受控旧版可作为算法基线；GPU wrapper 对齐 cuDNN FP32 后才能比较性能，不能将旧实际 TF32→FP32 的标签变化归于优化。
 
@@ -94,8 +94,8 @@ Torch 两侧均为 4；Numba 初始容量/掩码 192，测试退出恢复 192。
 
 | 原始输入/主机 | 新版 | 同策略旧版 | 整例速度比 |
 |---|---|---|---|
-| sub-01 / gpucw1 | [冻结1b GPU重试](run_gpu_retry1_1b8c36d.sh)：完整命令 4972.667 s，API 4968.545 s | [e036受控完整命令](gpu_control_pair_summary.json)：5173.887 s；[复现入口](run_gpu_control_direct_20261001.sh) | 本次降时 3.889%，速度比 1.0405× |
-| sub-02 / nodecw10 | [冻结1b CPU](run_cpu_final_1b8c36d.sh)：完整命令 5295.422 s，API 5292.995 s | [e036受控结果](cpu_control_pair_summary.json)：wrapper 入口全程 5374.315 s，校验后流水线 5367.985 s | 完整命令边界不同，不计算该比值；共同校验后范围本次降时 1.495% |
+| sub-01 / accelerator-a-1 | [冻结1b GPU重试](run_gpu_retry1_1b8c36d.sh)：完整命令 4972.667 s，API 4968.545 s | [e036受控完整命令](gpu_control_pair_summary.json)：5173.887 s；[复现入口](run_gpu_control_direct_20261001.sh) | 本次降时 3.889%，速度比 1.0405× |
+| sub-02 / compute-a-10 | [冻结1b CPU](run_cpu_final_1b8c36d.sh)：完整命令 5295.422 s，API 5292.995 s | [e036受控结果](cpu_control_pair_summary.json)：wrapper 入口全程 5374.315 s，校验后流水线 5367.985 s | 完整命令边界不同，不计算该比值；共同校验后范围本次降时 1.495% |
 
 两例候选的版本、完整原始 JSON、每阶段及子步骤时间均在[整例剖析](candidate_whole_profile.json)。GPU 以初始化 CUDA 的 Python API 调用，CPU 以 CLI 调用；两者输入和主机不同，不能互作速度对照。GPU 主要耗时为双侧表面链 1531.251 s、球面配准 937.128 s、最终 white/pial 与指标链 777.542 s；CPU 对应为 1588.205、898.174、1124.751 s。GPU 66 阶段前后同步合计 0.009036 s，不能将同步当作本次主要瓶颈。
 
@@ -165,7 +165,7 @@ from pathlib import Path
 import os
 import subprocess
 
-runtime_root = Path("/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929")  # 已安装的声明 Conda 运行目录
+runtime_root = Path("/data/workspaces/freesurfer_synth/work/recon_standard_20260929")  # 已安装的声明 Conda 运行目录
 diagnostic_root = runtime_root / "volume_parity_20260930/fixes_20261001"  # 已有固定代码及报告
 candidate_root = diagnostic_root / "code_1b8c36d"  # 使用1b时绑定实际版本，不冒充stage1
 python_executable = runtime_root / "fnit_main_env/bin/python"  # 原始报告中的同一 Python

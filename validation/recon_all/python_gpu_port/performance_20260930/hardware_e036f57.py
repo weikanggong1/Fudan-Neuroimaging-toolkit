@@ -16,10 +16,10 @@ import torch
 def main() -> None:
     """读取固定 Conda 运行环境及 /proc，写出新的逐主机 JSON；失败时抛异常。"""
     host = platform.node()
-    root = Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929')
+    root = Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929')
     directory = root / 'volume_parity_20260930'
-    subject = 'full_sub01_e036f57_uuid' if host == 'gpucw1' else 'full_sub02_e036f57'
-    marker = ('run_initialized_cuda_api_e036f57_uuid.py' if host == 'gpucw1'
+    subject = 'full_sub01_e036f57_uuid' if host == 'accelerator-a-1' else 'full_sub02_e036f57'
+    marker = ('run_initialized_cuda_api_e036f57_uuid.py' if host == 'accelerator-a-1'
               else '-m fnit.recon_all.native_free')
     cpu = next(line.split(':', 1)[1].strip() for line in
                Path('/proc/cpuinfo').read_text().splitlines() if line.startswith('model name'))
@@ -48,7 +48,7 @@ def main() -> None:
             continue
     if len(report['actual_candidate_parent_processes']) != 1:
         raise ValueError('expected one active candidate parent; collect during the run')
-    if host == 'gpucw1':
+    if host == 'accelerator-a-1':
         report['gpu_nvidia_smi'] = subprocess.check_output(['nvidia-smi',
             '--query-gpu=index,name,uuid,driver_version,memory.total,memory.used,utilization.gpu',
             '--format=csv,noheader,nounits'], text=True).splitlines()

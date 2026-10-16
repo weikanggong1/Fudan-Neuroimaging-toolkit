@@ -43,11 +43,11 @@ def main():
     args.output.mkdir(mode=0o700,parents=True,exist_ok=False)
     if stat.S_IMODE(args.output.stat().st_mode)!=0o700:
         raise RuntimeError('real arrays require actual0700 output directory')
-    sys.path.insert(0,'/public/software/apps/Freesurfer/8.2.0-1/python/lib/python3.8/site-packages/samseg/gems')
+    sys.path.insert(0,'/opt/reference/Freesurfer/8.2.0-1/python/lib/python3.8/site-packages/samseg/gems')
     import gemsbindings as gems
     if digest(gems.__file__)!='8125a39cd9885ada66ac2945dc5d7e38737e3bb707bce26ad6d796340fadbf82':
         raise RuntimeError('installed native oracle binary changed')
-    native_core=Path('/public/software/apps/Freesurfer/8.2.0-1/python/lib/python3.8/site-packages/samseg/subregions/core.py')
+    native_core=Path('/opt/reference/Freesurfer/8.2.0-1/python/lib/python3.8/site-packages/samseg/subregions/core.py')
     if digest(native_core)!='beb64fa1f2a9d6b6946388fc6641b92ffc5a100bef47b96b55877d4df9d0d700':
         raise RuntimeError('installed native recipe options changed')
     original=json.loads((args.capture/'report.public.json').read_text())

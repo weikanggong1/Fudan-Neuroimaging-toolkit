@@ -11,7 +11,7 @@ import tempfile
 
 from stage1_io import bound, git_head, write_json
 
-ROOT = Path('/cwStorage/home/gongwk/Notebook_code/FNIT')
+ROOT = Path('/data/fnit')
 KEY = 'fnirt_cpu_level_rehydrate_20261006'
 LEAF = 'smri_cpu_20261004/remaining_20261006/fnirt-level-rehydrate-v1'
 LOCKS = ['.INDEX.codex.lock', '.index.lock', 'INDEX.json.lock', 'INDEX.md.lock',
@@ -58,8 +58,8 @@ def main():
                      'scope': 'one current linearize/internal evaluate at saved solve3 parameters; scalar and 2g/2diag exact bridge only; no H/callback/solve/native/full registration',
                      'point_sha256': '21d339a4d3c4310cc4e264a23bb446c55ceba0a716e08ecdef6d695ceac66f45',
                      'freeze_sha256': bound(workspace / 'freeze.public.json')['sha256'],
-                     'cpu_host': 'nodecw7', 'cpu_affinity': [32, 36, 40, 44, 48, 52, 56, 60], 'cpu_threads': 8,
-                     'outer_lock': str(ROOT / 'runs/smri_cpu_20261004/nodecw7.gems.cpu8.lock'),
+                     'cpu_host': 'compute-a-7', 'cpu_affinity': [32, 36, 40, 44, 48, 52, 56, 60], 'cpu_threads': 8,
+                     'outer_lock': str(ROOT / 'runs/smri_cpu_20261004/compute-a-7.gems.cpu8.lock'),
                      'outer_lock_wait_seconds': 19000, 'controller_timeout_seconds': 19600,
                      'scientific_child_timeout_seconds': 180, 'address_space_cap_bytes': 20_000_000_000,
                      'runtime_constraint': 'existing FNIT/Conda math only; no installed FSL link or runtime process; reference assets read in place'}
@@ -73,7 +73,7 @@ def main():
                 'reuse only coefficient-independent saved preprocessing. Exact current scalar/2g/independent2diag bridge, first mismatch stops. '
                 'No H materialization, callback, solver, native executable or full registration. '
                 'Current 17 FNIRT source hashes and existing coordinate source bound before/after; main HEAD is recorded separately. '
-                'Eight nodecw7 physical cores, common CPU outer lock then own inner lock, 19000s wait / 19600s controller / 180s child, 20GB address-space cap. '
+                'Eight compute-a-7 physical cores, common CPU outer lock then own inner lock, 19000s wait / 19600s controller / 180s child, 20GB address-space cap. '
                 'No production, environment-prefix or GPU changes. Private checkpoint requires all gates; Python cache identity is not preserved.\n')
             run.mkdir(parents=True, exist_ok=False, mode=0o700)
         else:

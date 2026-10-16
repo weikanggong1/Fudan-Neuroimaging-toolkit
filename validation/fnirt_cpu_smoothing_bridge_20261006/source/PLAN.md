@@ -4,7 +4,7 @@
 
 本 leaf 只准备一次 finite 保存图诊断，**没有上传、注册 INDEX、启动 worker 或执行数值**。目标是把旧 PyTorch 平滑的真实逐位结果与当前 Numba CPU helper 建立来源桥；没有新 normalization、RHS、H、PCG、原生程序或完整配准。
 
-旧 `e67c71a6` 实际源码在 CPU 上直接进入 PyTorch offset reference，冻结树没有 `_smoothing_cpu.py`；current `caab8ffc` 在 CPU FP32/5D/no-grad 输入上调用 `c31cef1b` Numba helper。因此旧 whole-image 证据不能自动当成当前 compiled helper 在该保存图上的实测。已有v27/nodecw8真实功能和组件合同保持其原有效范围，但未提供本node7首差保存moving的current/old整图bit checkpoint。这一差别由现场源码和旧 reference/optimized JSON 确认，记录在 `SOURCE_RUNTIME_GAP.public.json`。核、reference blur、均值和 masked blur 的旧/当前 AST 一致；本轮不改它们。
+旧 `e67c71a6` 实际源码在 CPU 上直接进入 PyTorch offset reference，冻结树没有 `_smoothing_cpu.py`；current `caab8ffc` 在 CPU FP32/5D/no-grad 输入上调用 `c31cef1b` Numba helper。因此旧 whole-image 证据不能自动当成当前 compiled helper 在该保存图上的实测。已有v27/compute-a-8真实功能和组件合同保持其原有效范围，但未提供本node7首差保存moving的current/old整图bit checkpoint。这一差别由现场源码和旧 reference/optimized JSON 确认，记录在 `SOURCE_RUNTIME_GAP.public.json`。核、reference blur、均值和 masked blur 的旧/当前 AST 一致；本轮不改它们。
 
 ## 2. 输入、私有 adapter 和输出
 
@@ -52,7 +52,7 @@ python lifecycle_smoothing.py --phase prepared --freeze-sha256 "$REVIEWED_FREEZE
 python lifecycle_smoothing.py --phase enqueue --freeze-sha256 "$REVIEWED_FREEZE_SHA256" --approved-lifecycle
 ```
 
-nodecw7，同CPU8物理核 `32,36,40,44,48,52,56,60`，共用 `nodecw7.gems.cpu8.lock`再module锁；Torch/OMP/BLAS/Numba8、interop1；科学child20,000,000,000B AS与180s TERM/5s KILL；CUDA_VISIBLE_DEVICES为空，无loader/JIT override。登记时sorted六锁并重读/保留其余INDEX字段，atomic replace保留permissions。所有新目录700/文件600，worker自己也umask077/output mode700，防止绕runner直调产生宽权限数据。
+compute-a-7，同CPU8物理核 `32,36,40,44,48,52,56,60`，共用 `compute-a-7.gems.cpu8.lock`再module锁；Torch/OMP/BLAS/Numba8、interop1；科学child20,000,000,000B AS与180s TERM/5s KILL；CUDA_VISIBLE_DEVICES为空，无loader/JIT override。登记时sorted六锁并重读/保留其余INDEX字段，atomic replace保留permissions。所有新目录700/文件600，worker自己也umask077/output mode700，防止绕runner直调产生宽权限数据。
 
 原软件内部对应 `fnirt_CF::SmoothObj`→`masked_smoothing`→NEWIMAGE separable smooth；没有独立官方CPU平滑CLI。旧 `fnirt --config=GM_2_MNI152GM_2mm.cnf` 完整输出已保存。本轮不会再调用fnirt或其它原软件。
 

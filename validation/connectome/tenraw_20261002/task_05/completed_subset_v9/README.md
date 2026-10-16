@@ -49,10 +49,10 @@ print(receipt['original_driver_status'])  # 仍是原真实失败状态。
 
 ```bash
 # 此实际receipt已创建，不能重复覆写；示例变量需使用新的输出位置。
-CPU_PYTHON='/cwStorage/home/gongwk/anaconda3/bin/python3.11'
-RECEIPT_WRITER='/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_actual_comparison_helper_v9/tools/reference/connectome_actual_gpu_completed_subset.py'
-ACTUAL_FAILED_DRIVER='/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_driver_v3/status.json'
-ACTUAL_SEVEN_ORIGINS='/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_driver_v3/recovery_origins.json'
+CPU_PYTHON='/data/user/anaconda3/bin/python3.11'
+RECEIPT_WRITER='/data/workspaces/fnit_connectome_tenraw_20261002/formal_actual_comparison_helper_v9/tools/reference/connectome_actual_gpu_completed_subset.py'
+ACTUAL_FAILED_DRIVER='/data/workspaces/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_driver_v3/status.json'
+ACTUAL_SEVEN_ORIGINS='/data/workspaces/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_driver_v3/recovery_origins.json'
 NEW_RECEIPT='/absolute/new/receipt.json'
 "$CPU_PYTHON" "$RECEIPT_WRITER" --driver-status "$ACTUAL_FAILED_DRIVER" --origins "$ACTUAL_SEVEN_ORIGINS" \
  --case-key baseline/sub-CON05 --case-key baseline/sub-CON11 \
@@ -86,11 +86,11 @@ NEW_RECEIPT='/absolute/new/receipt.json'
 
 新增 `run_connectome_actual_mixed_final_cpu.py` 仅运行已固定的 mixed metadata waiter；十例比较及表格完成并通过320唯一矩阵/130唯一FS记录门槛后，调用原冻结 `export_connectome_actual_cohort.py`，代表病例CON01/09、atlas fs-aparc。原 export 自身继续执行完整 source/output/summary guards。pending、v4失败或 reader错误均不导出。
 
-Root 在 headcw 的持久 launch 已准备于：
+Root 在 control-host 的持久 launch 已准备于：
 
 ```bash
-CPU_PYTHON='/cwStorage/home/gongwk/anaconda3/bin/python3.11'
-ROOT_CPU_LAUNCHER='/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_actual_mixed_final_CPU_tools_v1/launch_actual_mixed_final_cpu_v1.py'
+CPU_PYTHON='/data/user/anaconda3/bin/python3.11'
+ROOT_CPU_LAUNCHER='/data/workspaces/fnit_connectome_tenraw_20261002/formal_actual_mixed_final_CPU_tools_v1/launch_actual_mixed_final_cpu_v1.py'
 "$CPU_PYTHON" "$ROOT_CPU_LAUNCHER"
 ```
 

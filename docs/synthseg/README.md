@@ -1,4 +1,6 @@
-# 独立 33 类 SynthSeg
+# FNIT_SynthSeg
+
+> 统一 Python 入口：[`FNIT_SynthSeg`](../API_REFERENCE.md)，从 `fnit` 导入。下文配置、结果类型和细分算子保留高级兼容接口。
 
 [返回首页](../../README.md) · [完整旧文档与更早证据](../../validation/synthseg/readme_archive_20261005.md)
 
@@ -21,9 +23,9 @@
 ## 2. Python 调用
 
 ```python
-from fnit import SynthSeg
+from fnit import FNIT_SynthSeg
 
-segmentation_model = SynthSeg(
+segmentation_model = FNIT_SynthSeg(
     weights=None,  # 权重：按 FNIT 配置顺序查找四个官方模型文件
     device="cuda:0",  # 设备：第一张可见 CUDA GPU
     threads=4,  # CPU 线程：用于预处理和后处理
@@ -153,7 +155,7 @@ mri_synthseg --i sub-01_T1w.nii.gz --o reference/sub-01_synthseg.nii.gz \
 
 ![复用的公开T1分割图：新版本与该图的三个来源分割SHA相同，行序与原报告一致](../../validation/smri_cpu/seg_columns_integration_20261006/case02_current_cpu_labels.png)
 
-此前2026-10-05 的 CPU decoder 拼接仅减少临时缓冲，卷积与后处理保持原数值。公开原始 T1 的 nodecw7 八核对照中，旧/新完整 worker 为 **115.886/112.952 s**，最大 RSS 为 **15.34/13.51 GB**；标签、体积 CSV 和几何旧新相同。与同节点官方仍有 **1 个不同体素**、最小 Dice **0.99999857**、CSV 最大差 **0.800 mm³**，均为已有误差。官方正常冷 CLI 为 **55.046 s**，首次异常的 373.087 s 单独保留；worker 还包含资源校验和报告写出，不把两种时钟混作精确加速比，CPU 速度目标仍未通过。
+此前2026-10-05 的 CPU decoder 拼接仅减少临时缓冲，卷积与后处理保持原数值。公开原始 T1 的 compute-a-7 八核对照中，旧/新完整 worker 为 **115.886/112.952 s**，最大 RSS 为 **15.34/13.51 GB**；标签、体积 CSV 和几何旧新相同。与同节点官方仍有 **1 个不同体素**、最小 Dice **0.99999857**、CSV 最大差 **0.800 mm³**，均为已有误差。官方正常冷 CLI 为 **55.046 s**，首次异常的 373.087 s 单独保留；worker 还包含资源校验和报告写出，不把两种时钟混作精确加速比，CPU 速度目标仍未通过。
 
 同一真实 decoder 中间输入的拼接操作中位数 **0.9723→0.5294 s**，逐位一致；这是局部时间。H100 默认 TF32 与显式 `cudnn_tf32=False` 两组完整旧新输出、CSV、几何、allocated/reserved 相同。默认 reserved 为 **14.615 GB**，False 为 **9.326 GB**；共享 GPU 的背景负载不支持稳定速度或进程树物理峰值结论。显式 False 单例标签与官方完全相同，CSV 仍有最大 0.20 mm³ 尾差，不能推广为所有输入等价。[最新完整协议、逐区指标和运行边界](../../validation/smri_cpu/seg_memory_20261005/README.md)。
 
@@ -165,7 +167,7 @@ mri_synthseg --i sub-01_T1w.nii.gz --o reference/sub-01_synthseg.nii.gz \
 
 ![本次公开真实T1的官方和FNIT CPU标签](../../validation/smri_cpu/seg_memory_20261005/case02_cpu_labels.png)
 
-前版2026-10-04测试使用公开原始T1两例，nodecw10同8物理核/8线程。原版FreeSurfer8.2.0-1，FNIT冻结源码和每次文件SHA见[正式矩阵](../../validation/smri_cpu_20261004/t2_seg/README.md)；CPUfloat32、原后端分块，完整命令含权重加载、预后处理、标签/CSV保存。
+前版2026-10-04测试使用公开原始T1两例，compute-a-10同8物理核/8线程。原版FreeSurfer8.2.0-1，FNIT冻结源码和每次文件SHA见[正式矩阵](../../validation/smri_cpu_20261004/t2_seg/README.md)；CPUfloat32、原后端分块，完整命令含权重加载、预后处理、标签/CSV保存。
 
 ### 端到端 benchmark
 

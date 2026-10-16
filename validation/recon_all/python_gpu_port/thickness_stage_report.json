@@ -3,18 +3,18 @@
   "reference": "FreeSurfer 8.2.0-1",
   "subject": "sub-01",
   "acceptance_rule_mm": "abs(candidate - reference) <= 0.005 + 0.001 * abs(reference) at every vertex",
-  "raw_gpu_log": "thickness_gpucw1_raw.log",
+  "raw_gpu_log": "thickness_accelerator-a-1_raw.log",
   "initial_fixed_256_gpu_benchmark": {
-    "host": "gpucw1",
+    "host": "accelerator-a-1",
     "gpu": "NVIDIA H100 PCIe",
     "device": "cuda:0",
     "timing_method": "sequential fresh subprocess wall time, including imports, file I/O and CPU/GPU transfers",
     "candidate_search_version": "fixed 256-nearest prototype before adaptive expansion",
     "left": {
-      "white": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01/surf/lh.white",
-      "pial": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01/surf/lh.pial",
-      "native_command": ["/public/software/apps/Freesurfer/8.2.0-1/bin/mris_place_surface", "--thickness", "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01/surf/lh.white", "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01/surf/lh.pial", "20", "5", "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/mri_mask_gpu_pilot_20260925/results/thickness_native/lh.thickness"],
-      "gpu_command": ["/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/.venv/bin/python", "-m", "freesurfer_torch.recon_all.surface_thickness_gpu", "--device", "cuda:0", "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01/surf/lh.white", "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01/surf/lh.pial", "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/mri_mask_gpu_pilot_20260925/results/thickness_gpu/lh.thickness"],
+      "white": "/data/workspaces/freesurfer_synth/work/reconall_reference_accelerator-a-1/fs_sub01/surf/lh.white",
+      "pial": "/data/workspaces/freesurfer_synth/work/reconall_reference_accelerator-a-1/fs_sub01/surf/lh.pial",
+      "native_command": ["/opt/reference/Freesurfer/8.2.0-1/bin/mris_place_surface", "--thickness", "/data/workspaces/freesurfer_synth/work/reconall_reference_accelerator-a-1/fs_sub01/surf/lh.white", "/data/workspaces/freesurfer_synth/work/reconall_reference_accelerator-a-1/fs_sub01/surf/lh.pial", "20", "5", "/data/workspaces/freesurfer_synth/work/mri_mask_gpu_pilot_20260925/results/thickness_native/lh.thickness"],
+      "gpu_command": ["/data/workspaces/freesurfer_synth/.venv/bin/python", "-m", "freesurfer_torch.recon_all.surface_thickness_gpu", "--device", "cuda:0", "/data/workspaces/freesurfer_synth/work/reconall_reference_accelerator-a-1/fs_sub01/surf/lh.white", "/data/workspaces/freesurfer_synth/work/reconall_reference_accelerator-a-1/fs_sub01/surf/lh.pial", "/data/workspaces/freesurfer_synth/work/mri_mask_gpu_pilot_20260925/results/thickness_gpu/lh.thickness"],
       "native_seconds": 28.362985194660723,
       "gpu_seconds": 10.710018705110997,
       "vertices": 106622,
@@ -30,21 +30,21 @@
     }
   },
   "updated_cpu_validation": {
-    "host": "headcw",
+    "host": "control-host",
     "candidate_search_version": "adaptive expansion after 256 nearest candidates",
-    "validation_command": "cd /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/mri_mask_gpu_pilot_20260925 && PYTHONPATH=src /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/.venv/bin/python compare_thickness_cpu.py",
+    "validation_command": "cd /data/workspaces/freesurfer_synth/work/mri_mask_gpu_pilot_20260925 && PYTHONPATH=src /data/workspaces/freesurfer_synth/.venv/bin/python compare_thickness_cpu.py",
     "left": {"vertices": 106622, "outliers": 0, "maximum_abs_mm": 4.76837158203125e-7, "expanded_searches": 0, "total_seconds": 6.092305140569806, "binary_identical": false},
     "right": {"vertices": 105541, "outliers": 0, "maximum_abs_mm": 4.76837158203125e-7, "expanded_searches": 0, "total_seconds": 6.008515859954059, "binary_identical": false},
-    "focused_tests": "3 passed on headcw"
+    "focused_tests": "3 passed on control-host"
   },
   "adaptive_gpu_runs": {
-    "host": "gpucw1",
+    "host": "accelerator-a-1",
     "gpu": "NVIDIA H100 PCIe",
     "device": "cuda:0",
     "source_version": "adaptive candidate expansion; both successful runs reported zero expansions",
-    "comparison_command": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/.venv/bin/python compare_thickness_stage.py --reference-surf-dir /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01/surf --candidate-dir /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/mri_mask_gpu_pilot_20260925/results/thickness_gpu_adaptive",
+    "comparison_command": "/data/workspaces/freesurfer_synth/.venv/bin/python compare_thickness_stage.py --reference-surf-dir /data/workspaces/freesurfer_synth/work/reconall_reference_accelerator-a-1/fs_sub01/surf --candidate-dir /data/workspaces/freesurfer_synth/work/mri_mask_gpu_pilot_20260925/results/thickness_gpu_adaptive",
     "left": {
-      "gpu_command": ["/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/.venv/bin/python", "-m", "freesurfer_torch.recon_all.surface_thickness_gpu", "--device", "cuda:0", "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01/surf/lh.white", "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01/surf/lh.pial", "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/mri_mask_gpu_pilot_20260925/results/thickness_gpu_adaptive/lh.thickness"],
+      "gpu_command": ["/data/workspaces/freesurfer_synth/.venv/bin/python", "-m", "freesurfer_torch.recon_all.surface_thickness_gpu", "--device", "cuda:0", "/data/workspaces/freesurfer_synth/work/reconall_reference_accelerator-a-1/fs_sub01/surf/lh.white", "/data/workspaces/freesurfer_synth/work/reconall_reference_accelerator-a-1/fs_sub01/surf/lh.pial", "/data/workspaces/freesurfer_synth/work/mri_mask_gpu_pilot_20260925/results/thickness_gpu_adaptive/lh.thickness"],
       "wall_time_seconds": null,
       "module_total_seconds": 4.428225757088512,
       "vertices": 106622,
@@ -54,8 +54,8 @@
       "log": "thickness_adaptive_lh_success.log"
     },
     "right": {
-      "native_command": ["env", "FS_LICENSE=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_external_models_20260925/private_license.txt", "/public/software/apps/Freesurfer/8.2.0-1/bin/mris_place_surface", "--thickness", "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01/surf/rh.white", "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01/surf/rh.pial", "20", "5", "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/mri_mask_gpu_pilot_20260925/results/thickness_native_adaptive_pair/rh.thickness"],
-      "gpu_command": ["env", "PYTHONPATH=src", "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/.venv/bin/python", "-m", "freesurfer_torch.recon_all.surface_thickness_gpu", "--device", "cuda:0", "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01/surf/rh.white", "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_reference_gpucw1/fs_sub01/surf/rh.pial", "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/mri_mask_gpu_pilot_20260925/results/thickness_gpu_adaptive/rh.thickness"],
+      "native_command": ["env", "FS_LICENSE=/data/workspaces/freesurfer_synth/work/reconall_external_models_20260925/private_license.txt", "/opt/reference/Freesurfer/8.2.0-1/bin/mris_place_surface", "--thickness", "/data/workspaces/freesurfer_synth/work/reconall_reference_accelerator-a-1/fs_sub01/surf/rh.white", "/data/workspaces/freesurfer_synth/work/reconall_reference_accelerator-a-1/fs_sub01/surf/rh.pial", "20", "5", "/data/workspaces/freesurfer_synth/work/mri_mask_gpu_pilot_20260925/results/thickness_native_adaptive_pair/rh.thickness"],
+      "gpu_command": ["env", "PYTHONPATH=src", "/data/workspaces/freesurfer_synth/.venv/bin/python", "-m", "freesurfer_torch.recon_all.surface_thickness_gpu", "--device", "cuda:0", "/data/workspaces/freesurfer_synth/work/reconall_reference_accelerator-a-1/fs_sub01/surf/rh.white", "/data/workspaces/freesurfer_synth/work/reconall_reference_accelerator-a-1/fs_sub01/surf/rh.pial", "/data/workspaces/freesurfer_synth/work/mri_mask_gpu_pilot_20260925/results/thickness_gpu_adaptive/rh.thickness"],
       "native_wall_seconds": 27.62,
       "gpu_wall_seconds": 7.84,
       "native_reference_binary_identical": true,

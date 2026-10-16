@@ -37,7 +37,7 @@ PYTHONPATH=src python \
 ## 5．实测范围
 
 `local_contracts.json` 是实际本地数组 API／二进制 schema 合同报告。
-真实 GA before/after 状态捕获尚待更广 headcw 脚本上传授权；当前没有
+真实 GA before/after 状态捕获尚待更广 control-host 脚本上传授权；当前没有
 真实 MRI 阶段误差、原程序耗时、脑图或整例提速结论。严格真实复现和
 整体指标等效均未判定。显存未采样，JSON 使用 `null`，不是零显存。
 

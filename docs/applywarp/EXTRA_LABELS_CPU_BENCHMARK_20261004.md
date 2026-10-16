@@ -56,7 +56,7 @@ FSLOUTPUTTYPE=NIFTI /path/to/FSL/bin/applywarp \
 
 ## 5. 精度、耗时与图像范围
 
-使用同一 nodecw10、相同 CPU 亲和性；1/8 是两方的线程预算上限，报告另记实际 CPU 时间。每预算一次完整观察，不据此推断稳定加速比。完整 `91×109×91` 输出的 902,629 值逐值一致，49 个实际出现的标签（含背景）Dice 全部为 1。两方均保存 int16、slope=1、intercept=0；shape、affine、2 mm voxel size、mm/sec、qform/sform=4 完全一致。
+使用同一 compute-a-10、相同 CPU 亲和性；1/8 是两方的线程预算上限，报告另记实际 CPU 时间。每预算一次完整观察，不据此推断稳定加速比。完整 `91×109×91` 输出的 902,629 值逐值一致，49 个实际出现的标签（含背景）Dice 全部为 1。两方均保存 int16、slope=1、intercept=0；shape、affine、2 mm voxel size、mm/sec、qform/sform=4 完全一致。
 
 | CPU 预算 | 官方完整进程 | FNIT 完整进程 | FNIT 首次函数读写 | 官方实际平均 CPU 核数 | FNIT 实际平均 CPU 核数 |
 |---:|---:|---:|---:|---:|---:|

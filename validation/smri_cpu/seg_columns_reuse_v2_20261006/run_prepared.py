@@ -29,7 +29,7 @@ def main():
         args.run.mkdir(parents=True, mode=0o700)
     started = time.monotonic()
     deadline = started + 23000
-    lock = args.root / "runs/smri_cpu_20261004/nodecw7.gems.cpu8.lock"
+    lock = args.root / "runs/smri_cpu_20261004/compute-a-7.gems.cpu8.lock"
     fd = os.open(lock, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
     receipt = {"status": "waiting_common_CPU_lock", "controller_PID": os.getpid(),
                "outer_total_seconds": 23000, "PLAN": identity(args.workspace / "PLAN.json"),

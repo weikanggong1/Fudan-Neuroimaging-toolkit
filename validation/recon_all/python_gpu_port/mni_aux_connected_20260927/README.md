@@ -7,7 +7,7 @@ MNI152 LTA, MCA/dura and venous-sinus labels, and the downstream Python
 brain.finalsurfs stage. It uses the deidentified
 examples/data/sub-01_T1w.nii.gz scan (SHA-256
 f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a)
-and the completed FreeSurfer 8.2 reference on gpucw1. The v5 candidate's
+and the completed FreeSurfer 8.2 reference on accelerator-a-1. The v5 candidate's
 seven reused MRI inputs (orig, nu, synthseg.rca, brain, brainmask, entowm,
 aseg.presurf) each have 0 differing voxels and identical affine to official;
 see [input_comparison.json](input_comparison.json). The candidate generates
@@ -106,7 +106,7 @@ GPU LTA error; the present CPU run measured the final labels directly.
 
 The candidate stage sum is 42.79 s. The whole Python probe, including
 imports and repeated 256³ comparisons, was 57.25 s wall time, 4,916,784 KiB
-maximum resident set, on gpucw1. The official crop/SynthMorph and segmenter
+maximum resident set, on accelerator-a-1. The official crop/SynthMorph and segmenter
 times come from archived separate runs; load, process boundaries and date
 differ. They are stage context, not a paired acceleration estimate. The
 finalsurfs native timing was a separate same-input five-command replay.

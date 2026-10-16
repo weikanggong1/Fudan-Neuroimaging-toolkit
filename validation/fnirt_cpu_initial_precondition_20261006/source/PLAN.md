@@ -51,7 +51,7 @@ orderedULP按有限FP64的单调整数编码处理，signed zero保留区别；�
 
 ## 5. 调度和失败
 
-将来新的 canonical leaf 为 `smri_cpu_20261004/remaining_20261006/fnirt-initial-precondition-v1`。当前仅本地准备，暂无INDEX项。nodecw7 physicalCPU8 `32,36,40,44,48,52,56,60`、OMP/OpenBLAS/MKL/Numba8、Torch8/interop1；同commonCPU锁再module锁、outer wait19000/controller19600/child180s，20e9B AS上限（20GB，约18.63GiB）。保留环境prefix，CUDA invisible，不改TF32/默认dtype/grad外部状态。
+将来新的 canonical leaf 为 `smri_cpu_20261004/remaining_20261006/fnirt-initial-precondition-v1`。当前仅本地准备，暂无INDEX项。compute-a-7 physicalCPU8 `32,36,40,44,48,52,56,60`、OMP/OpenBLAS/MKL/Numba8、Torch8/interop1；同commonCPU锁再module锁、outer wait19000/controller19600/child180s，20e9B AS上限（20GB，约18.63GiB）。保留环境prefix，CUDA invisible，不改TF32/默认dtype/grad外部状态。
 
 umask077、目录700/文件600；已有output一律拒绝。任何源/input、schema、值/stride、初始系统hash、call2direction gate失败均停止，不自动变floor/线程/dtype或retry。成功或异常finally均记录已有operand afterhash / source/input / flags / FSL DSO前后身份快照，异常保留原science RC；runner仍执行after preflight。
 

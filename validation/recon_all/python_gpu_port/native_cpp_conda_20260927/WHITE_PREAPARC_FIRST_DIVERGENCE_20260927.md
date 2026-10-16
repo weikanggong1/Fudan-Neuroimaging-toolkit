@@ -16,7 +16,7 @@ same frozen official `lh.orig` instead of the archived official result.
 
 Source is pinned FreeSurfer commit `d932c45b7941662ea380a05efef580568b98d41a`.
 The installed binary was built with GCC 4.8.5; the Conda source binary with
-Conda GCC 11.4.0. Both run on gpucw1 with `--threads 4`, the same authorized
+Conda GCC 11.4.0. Both run on accelerator-a-1 with `--threads 4`, the same authorized
 external license, and FreeSurfer 8.2 command arguments. The installed binary
 is used only as an accuracy reference, never a packaged dependency.
 
@@ -101,8 +101,8 @@ would be speculative. No production code was modified.
 ## Reproducible artifacts
 
 Raw commands, logs, outputs, elapsed time and mesh JSON are in
-`/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/white_binary_pair_codex_20260927`
-and `/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/white_step7_probe_codex_20260927`.
+`/data/workspaces/freesurfer_synth/work/white_binary_pair_codex_20260927`
+and `/data/workspaces/freesurfer_synth/work/white_step7_probe_codex_20260927`.
 The latter's `buildprobe/commands.txt` records the sole diagnostic C++ object
 compile and link commands, and `buildprobe/lh.after_*.comparison.json` records
 preoptimizer exactness. No private license bytes were copied into artifacts.

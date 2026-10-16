@@ -25,7 +25,7 @@ The critical source-order details were Fast Marching boundary values of ±0.5 an
 
 ## Single same-host timing
 
-The candidate and native command each ran once, sequentially on headcw with the same input files. Times include process startup, file I/O, and compression. No warm-up or load matching was applied, so these are a single observation rather than a general speed estimate.
+The candidate and native command each ran once, sequentially on control-host with the same input files. Times include process startup, file I/O, and compression. No warm-up or load matching was applied, so these are a single observation rather than a general speed estimate.
 
 | Command | Wall time |
 | --- | ---: |

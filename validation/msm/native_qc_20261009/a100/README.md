@@ -106,7 +106,7 @@ A→B 块的 MSMSulc 增加 0.35%，MSMAll 减少 7.26%。两块间隔 1,555.241
 
 API 时钟包含线程预算设置、输入校验、完整修复及报告构建；导入、预置输入读取、设备初始化和独立落盘后 QC 在该时钟外。几何修复为有界 CPU 运算，两种入口保存的 float32 坐标逐位相同；CUDA 入口峰值 allocation/reserved 为 0.0108/0.0231 GB。独立重读实际 GIFTI 后，有限值、半径、原有拓扑及新翻折检查全部通过。未修复球面的官方数值精度、修复模块和完整 surface 各有独立验收。见[真实 native 修复报告](final_native_repair.public.json)。
 
-本地 MSM/surface 相关测试为 496 passed、44 skipped；跳过项属于本地 CUDA 或可选资源条件，另见[本地测试回执](final_local_tests.public.json)。同一冻结源码的 CFFF focused CUDA 测试另已完成 110 passed、0 skipped，覆盖 9 个 CUDA 案例，见[GPU 测试回执](final_focused_cuda.public.json)。
+本地 MSM/surface 相关测试为 496 passed、44 skipped；跳过项属于本地 CUDA 或可选资源条件，另见[本地测试回执](final_local_tests.public.json)。同一冻结源码的 accelerator-b focused CUDA 测试另已完成 110 passed、0 skipped，覆盖 9 个 CUDA 案例，见[GPU 测试回执](final_focused_cuda.public.json)。
 
 <a id="最终修复版完整-surface"></a>
 
@@ -196,7 +196,7 @@ GB 为十进制。allocation/reserved 是每次 API 前 reset 后的两侧共享
 
 ## 最终修复版源码与打包
 
-[完整 surface 的实际源码绑定](final_surface_publication_binding.public.json)核对了 80 个实际 Python、原生编译依赖及构建入口；[配准核心绑定](final_core_publication_binding.public.json)另外核对核心实际依赖。文件 SHA 均与当前待发布工作树相同。测量使用 CFFF 独立编译的 native 扩展，SHA-256 为 `4cc610b811d0f63d5095b88640cb351665e1eb77d96e86261b491f8891e20290`，编译选项为 C++17、`-fno-fast-math -ffp-contract=off`；本地 WSL 的独立二进制不作为同一 binary。
+[完整 surface 的实际源码绑定](final_surface_publication_binding.public.json)核对了 80 个实际 Python、原生编译依赖及构建入口；[配准核心绑定](final_core_publication_binding.public.json)另外核对核心实际依赖。文件 SHA 均与当前待发布工作树相同。测量使用 accelerator-b 独立编译的 native 扩展，SHA-256 为 `4cc610b811d0f63d5095b88640cb351665e1eb77d96e86261b491f8891e20290`，编译选项为 C++17、`-fno-fast-math -ffp-contract=off`；本地 WSL 的独立二进制不作为同一 binary。
 
 [源码包检查](packaging.public.json)确认八个关键运行时及许可文件存在并与工作树一致，已替代的 `_sphere_cpu.py` 不在包内。当前 Git 基线只说明开发背景；实际测量与待发布源码通过上述逐文件 SHA 绑定，发布后再记录远端提交。
 

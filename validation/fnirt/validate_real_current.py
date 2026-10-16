@@ -347,7 +347,7 @@ def main() -> None:
         },
         "execution": {
             "run_date": "2026-09-28",
-            "host": "gpucw1",
+            "host": "accelerator-a-1",
             "candidate_software": {
                 "pytorch": run_report["execution"]["torch"],
                 "pytorch_cuda": run_report["execution"]["torch_cuda"],

@@ -2,7 +2,7 @@
 
 [功能与用法](../../docs/eddy/README.md) · [机器报告](report.public.json) · [比较脚本](../../tools/validate_fsl2111_strict.py) · [源码对照](source_audit.md)
 
-2026 年 9 月 29 日在 gpucw1 用一例真实 UKB 格式 AP/PA DWI 验证公开 `TorchEDDY` 的数值路径。AP 图像为 104×104×72×105，包含 5 个 b0、50 个 b≈1000、50 个 b≈2000；共同脑掩膜含 242,316 个体素。两次运行固定相同的 AP、bval、bvec、掩膜、FNIT TOPUP 系数与运动文件、acqparams、index、参考帧及 GP 种子 12345。输入及两份校正图的 SHA-256 见[机器报告](report.public.json)。不发布原始 DWI。
+2026 年 9 月 29 日在 accelerator-a-1 用一例真实 UKB 格式 AP/PA DWI 验证公开 `TorchEDDY` 的数值路径。AP 图像为 104×104×72×105，包含 5 个 b0、50 个 b≈1000、50 个 b≈2000；共同脑掩膜含 242,316 个体素。两次运行固定相同的 AP、bval、bvec、掩膜、FNIT TOPUP 系数与运动文件、acqparams、index、参考帧及 GP 种子 12345。输入及两份校正图的 SHA-256 见[机器报告](report.public.json)。不发布原始 DWI。
 
 参考是 FSL 6.0.7.4 的 `eddy_cuda10.2`。FNIT 数值实现依据 [FSL EDDY 2111.0 源码](https://git.fmrib.ox.ac.uk/fsl/eddy)；服务器可执行文件的精确源码提交未核实。因此这里是对指定可执行文件的实际输出比较，不声称对所有 FSL 版本通用。
 
@@ -21,8 +21,8 @@
 
 | 程序 | 计算设备 | wall time | 计时边界 |
 |---|---|---:|---|
-| FSL `eddy_cuda10.2` | gpucw1 GPU | 10:21.19 | 从启动至结果写盘 |
-| FNIT TorchEDDY | gpucw1 H100 | 10:38.75 | Python 导入和 CUDA 初始化后，`TorchEDDY.run` 至结果写盘 |
+| FSL `eddy_cuda10.2` | accelerator-a-1 GPU | 10:21.19 | 从启动至结果写盘 |
+| FNIT TorchEDDY | accelerator-a-1 H100 | 10:38.75 | Python 导入和 CUDA 初始化后，`TorchEDDY.run` 至结果写盘 |
 
 两次均为真实病例完整 105 帧，使用同一 GP 种子 12345。FNIT 计时不含 Python 导入和 CUDA 初始化，FSL 计时包含进程启动；共享 GPU 负载也未隔离，因此这两个数不能直接计算稳定加速比。本版 FNIT 的 CUDA allocation 峰值为 4,843,410,944 字节（约 4.51 GiB）。
 

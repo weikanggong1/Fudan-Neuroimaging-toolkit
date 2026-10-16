@@ -6,7 +6,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-root = Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002')
+root = Path('/data/workspaces/fnit_connectome_tenraw_20261002')
 old = root / 'task_04/explicit_case_map_v1_configuration/case_origin_configuration.json'
 new = root / 'official_CON11_followon_CPU_v3/reference_execution_config.json'
 digest = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()

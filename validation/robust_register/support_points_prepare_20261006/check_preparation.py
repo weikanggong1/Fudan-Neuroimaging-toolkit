@@ -53,7 +53,7 @@ def check(private_plan, previous_manifest):
         for expression in (
             r"(?<![\d.])(?:10\.190\.248\.(?:228|214)|10\.193\.2\.99)(?![\d.])",
             r"(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})",
-            r"(?:/home1/gongwk|/cwStorage/home/gongwk|/mnt/c/Users/admin|/home/wgong)/",
+            r"(?:/home1/benchmark-user|/data/user|/data/local_user|/data/user)/",
         ):
             if re.search(expression, text):
                 raise ValueError("sensitive text in prepared public file: " + name)

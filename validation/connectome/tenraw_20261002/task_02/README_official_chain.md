@@ -31,7 +31,7 @@ from pathlib import Path
 import hashlib
 import json
 
-reference_root = Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002')
+reference_root = Path('/data/workspaces/fnit_connectome_tenraw_20261002')
 case_map_path = reference_root / 'task_02' / 'official_modeling_explicit_ten_delivery_v1' / 'completed_case_map.json'
 case_map = json.loads(case_map_path.read_text())
 for subject_name, actual_case in case_map['actual_completed_case_map'].items():
@@ -85,7 +85,7 @@ FA NaN和大于1的实际值不截断。方向第4轴是3个分量，没有物�
 
 `profile`固定brain=b<50均值+LAS BET f0.2/g-0.05/R；response mask=3.0.3默认dwi2mask；FOD/normalise mask分别六邻域膨胀2/侵蚀2；shells使用自身梯度且bvalue_scaling=no；tensor predicted迭代2；WM lmax8、GM/CSF lmax0；mtnormalise order3/niter15,7/reference0.28209479177，不加balanced。Dhollander采用本安装默认响应阶数与voxel选择；所有默认和实际argv在report中保留，不调整精度或算法。
 
-CON11实际完成来源单独绑定：正式FNIT baseline为`/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_v3/baseline/sub-CON11`；官方fresh CPU使用`task_01/official_CON11_CPU_fresh_origin_v1/sub-CON11`，原AP0/PA0 packing来源保持不变。verified CPU合同`/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_CON11_CPU_fresh_origin_v1/sub-CON11/completed_contract_verified.json`（SHA `d1e6d011f93cc288701ad593365ce01132048f254c17fbf50a1c144640221332`）通过strict外层守卫后，未改动的冻结model_case实际输出`/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/consumer_contract.json`（SHA `bb5ab1b71c2cbda4387cf918edadf292305e6af466042db0b4e9431bd9a15339`）。原worker的fresh ready_contract不强制verified sidecar，这项严格检查由新wrapper完成。逐病例collector核查完整consumer/report/全部文件SHA及网格，anatomy/repeat消费最终显式case-map；9旧route和1新route分开保留。
+CON11实际完成来源单独绑定：正式FNIT baseline为`/data/workspaces/fnit_connectome_tenraw_20261002/formal_selected_monitor_recovery_v3/baseline/sub-CON11`；官方fresh CPU使用`task_01/official_CON11_CPU_fresh_origin_v1/sub-CON11`，原AP0/PA0 packing来源保持不变。verified CPU合同`/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_CON11_CPU_fresh_origin_v1/sub-CON11/completed_contract_verified.json`（SHA `d1e6d011f93cc288701ad593365ce01132048f254c17fbf50a1c144640221332`）通过strict外层守卫后，未改动的冻结model_case实际输出`/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/consumer_contract.json`（SHA `bb5ab1b71c2cbda4387cf918edadf292305e6af466042db0b4e9431bd9a15339`）。原worker的fresh ready_contract不强制verified sidecar，这项严格检查由新wrapper完成。逐病例collector核查完整consumer/report/全部文件SHA及网格，anatomy/repeat消费最终显式case-map；9旧route和1新route分开保留。
 
 实际CON11 producer是`orchestrate_CON11_CPU_subset_v2.py`（SHA `bf62ce93000e79215317514fcd61ba0a15a06487ea1d775fb5342bd85f1206d4`），状态目录`CON11_subset_dispatcher_v2`，实际PID62745，模型wall104.563秒。v1/PID33340在科学模型启动前因将canonical AP raw链接的resolve目标误限在本病例目录而退出；原waiting status、终端错误和freeze保留。v2只允许AP DWI/bval/bvec链接到已逐项核验的canonical AP目标及SHA，自产field/mask/control仍严格在own目录；没有写入或链接旧CON11 FNIT目录。科学worker仍为`616b3f01197447da8255c20592165f066f03bc20b48765b9612ea6ada29d11c1`，原冻结配置SHA `7ec2008b29c077797c259cad1245c8d2f9999c86af621d0821c9bc7d52335627`未变；13条实际模型命令全部returncode0。新configuration SHA `96bbae28144cf4602e5fe5ff9edcccf53fbb15e41703d5fee9398fa223729a7f`、model freeze SHA `d27ed9a016db4c5938de69e5023a7de6448b731a7a95d23b83dcb09fb9f4e8b4`、launch SHA `d714f0adac1e9f5b46e610b87a0d1516ec2e77222a8afab6392639ef968e0bff`和status SHA `9cc71e53c7c5edf7485e71caac12e08fcf2c5052347c1decc69e2a7c0c0268c7`均经实际重哈希。
 
@@ -96,9 +96,9 @@ CON11实际完成来源单独绑定：正式FNIT baseline为`/cwStorage/home/gon
 以下记录实际 CPU budget 首次启动入口。当前十例已完成；原九例目录与独立 CON11 目录由完成映射连接。dispatcher 对已有 state-root/model namespace 拒绝覆盖：
 
 ```bash
-reference_root=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002
+reference_root=/data/workspaces/fnit_connectome_tenraw_20261002
 tool_directory="$reference_root/task_02"
-python_executable=/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/bin/python
+python_executable=/data/workspaces/fnit_conda_env_956b1a9/bin/python
 CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 MKL_NUM_THREADS=8  "$python_executable" "$tool_directory/wait_launch_CPU_budget_modeling_v1.py"  --config "$tool_directory/official_modeling_CPU_budget_raw10_v2.config.json"  --state-root "$tool_directory/CPU_budget_modeling_dispatcher_v2"
 ```
 
@@ -125,8 +125,8 @@ cat "$tool_directory/official_modeling_explicit_ten_delivery_v1/completed_case_m
 local_evidence_directory="validation/connectome/tenraw_20261002/task_02"
 python3 "$local_evidence_directory/audit_actual10_CPU_delivery.py" \
   --local-root "$local_evidence_directory" \
-  --control-path /tmp/fnit-bwas-headcw.sock \
-  --host gongwk@10.190.248.228 --port 39516 \
+  --control-path /tmp/fnit-bwas-control-host.sock \
+  --host user@compute.example.org --port 39516 \
   --output /tmp/new_ten_model_CPU_readonly_proof.json
 ```
 
@@ -234,7 +234,7 @@ FA NaN与大于1的值不截断，方向extra轴NaN间隔按非空间分量metad
 - 元数据调度修复：旧idle dispatcher117298在未启动模型时精确停止并保留freeze/status；dispatcher_v2 PID120790已实际启动modeling PID122690。35项来源守卫含完整verified合同读回、pending binding只写一次、raw/formal packing voxel变化拒绝；小夹具是provenance测试，不是MRI benchmark。
 - 2026-10-03，Task2 `e4be3868`：十例模型、十例同输入CPU诊断和十张脑图完成。原八例 model report、consumer 和脑图与新交付字节完全一致并复用；新 CON10/11 补齐。当前仅保留十例评估/摘要与实际完成映射，删除被替代的本地8例重复快照和退休 curation helper，SHA/大小在 `CURATION_final10.json`；原服务器快照和 Git 历史保留。
 - 历史失败：原rawprep v1两例CUDA OOM；v2两例实测own峰值43,203,428,352 bytes，budget_exceeded=true后SIGTERM -15，属于预算中止。旧OOM条件没有激活。旧建模v1/v2完成均0，coordinator172836/51766已退役；失败原report、freeze、status snapshot与retirement在原namespace保留。对应已执行工具/配置仅为历史证据，没有旧启动教程。
-- 独立复核：headcw CPU标准库实际完成448项检查，250份唯一模型/上游输出及sidecar重哈希一致，十例 consumer/model report/原诊断/脑图 SHA一致。新metadata guard与packing guard在head隔离CPU临时副本22项通过，不运行MRI/GPU solver。所有CON07历史trace、未复现批次及真实失败/原waiting metadata保留；旧v1终端guard错误与文档waiter退役原记录见 `actual_failed_metadata/`。当前freeze/完成receipt分开记录。
+- 独立复核：control-host CPU标准库实际完成448项检查，250份唯一模型/上游输出及sidecar重哈希一致，十例 consumer/model report/原诊断/脑图 SHA一致。新metadata guard与packing guard在head隔离CPU临时副本22项通过，不运行MRI/GPU solver。所有CON07历史trace、未复现批次及真实失败/原waiting metadata保留；旧v1终端guard错误与文档waiter退役原记录见 `actual_failed_metadata/`。当前freeze/完成receipt分开记录。
 - 清理：删除从未使用的`official_modeling_cpu_raw10_v3.config.json`和`official_chain_CPU_fallback.schema.json`，当前文档仅保留实际CPU预算入口。旧固定输入及ABBA记录另见README.md，职责与本轮独立链分开。
 
 ## 7. 原实现、参考文献与资源许可

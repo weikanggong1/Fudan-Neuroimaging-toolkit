@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 umask 077
-FNIT_ROOT=/cwStorage/home/gongwk/Notebook_code/FNIT
+FNIT_ROOT=/data/fnit
 FNIT_W="$FNIT_ROOT/workspaces/smri_cpu_20261004/remaining_20261006/fnirt-own-reductions-v1"
 FNIT_R="$FNIT_ROOT/runs/smri_cpu_20261004/remaining_20261006/fnirt-own-reductions-v1"
 FNIT_O="$FNIT_ROOT/runs/smri_cpu_20261004/remaining_20261004/synth/fnirt-pcg-shared-v2/oracle"
@@ -11,7 +11,7 @@ export CUDA_VISIBLE_DEVICES='' PYTHONDONTWRITEBYTECODE=1
 export NUMBA_CACHE_DIR="$FNIT_R/numba_cache"
 unset OPENBLAS_CORETYPE LD_PRELOAD PYTHONPATH LD_LIBRARY_PATH
 mkdir -p "$FNIT_R"
-exec 9>"$FNIT_ROOT/runs/smri_cpu_20261004/nodecw7.gems.cpu8.lock"
+exec 9>"$FNIT_ROOT/runs/smri_cpu_20261004/compute-a-7.gems.cpu8.lock"
 flock -w 600 9
 exec 8>"$FNIT_R/module.cpu8.lock"
 flock -w 20 8

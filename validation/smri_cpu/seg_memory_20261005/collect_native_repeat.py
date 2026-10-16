@@ -26,7 +26,7 @@ def main():
     assert sha(args.input) == "03e220aec0cc93cf26599987076b74410554871441188e7e379dfa82da55dc3d"
     source = report["source_binding"]
     assert sha(official_work / "source_binding.private.json") == report["source_binding_sha256"]
-    software = Path("/public/software/apps/Freesurfer/8.2.0-1")
+    software = Path("/opt/reference/Freesurfer/8.2.0-1")
     for relative, entry in source["sources"].items():
         assert sha(software / relative) == entry["sha256"]
     for name, entry in source["weights"].items():
@@ -40,7 +40,7 @@ def main():
     record_path = official_run / "records_repeat1/node7_seg33_repeat1/record.json"
     record = json.loads(record_path.read_text())
     assert record["status"] == "complete" and record["returncode"] == 0
-    assert record["hostname"] == source["hostname"] == "nodecw7"
+    assert record["hostname"] == source["hostname"] == "compute-a-7"
     assert record["cpu_affinity"] == source["cpu_affinity"]
     assert record["max_cpu_threads"] == 8
     assert record["job"]["env"]["FNIT_BENCHMARK_SOURCE_BINDING_SHA256"] == report["source_binding_sha256"]

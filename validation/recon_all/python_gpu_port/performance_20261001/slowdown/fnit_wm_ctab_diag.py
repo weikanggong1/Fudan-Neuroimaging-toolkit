@@ -16,7 +16,7 @@ def sha256(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-root = Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929')
+root = Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929')
 directory = root / 'volume_parity_20260930'
 source = directory / 'full_sub01_e036f57_uuid/mri'
 output = directory / 'slowdown_20261001/wm_ctab_profile'
@@ -41,7 +41,7 @@ for seed in (1, 2):
         (work / name).symlink_to(source / name)
     profile = work / 'ctab_profile.json'
     env = dict(os.environ, FREESURFER_HOME=str(root / 'assets'),
-               FS_LICENSE='/cwStorage/home/gongwk/.config/freesurfer-codex/license.txt',
+               FS_LICENSE='/data/user/.config/freesurfer-codex/license.txt',
                FREESURFER_SEED=str(seed), FNIT_CTAB_PROFILE=str(profile))
     before = resource.getrusage(resource.RUSAGE_CHILDREN)
     started = time.perf_counter()

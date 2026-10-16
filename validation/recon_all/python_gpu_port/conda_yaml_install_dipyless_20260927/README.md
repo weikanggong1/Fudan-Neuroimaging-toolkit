@@ -6,15 +6,15 @@
 | --- | --- |
 | `environment-recon-all-cpp.yml` SHA-256 | `68808ef667afa46804deadfca269320ffdd230a6d6156ad560b9aaf99e8fd799` |
 | `pyproject.toml` SHA-256 | `40600a1fe8408a50762f939f0a1a15cf7c36c3f85743e912912f104fcdc8af3e` |
-| 节点、Conda | headcw；Conda 24.11.3 |
-| 源码与新环境 | `/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_yaml_install_dipyless_20260927/repo`、同目录下的 `env` |
+| 节点、Conda | control-host；Conda 24.11.3 |
+| 源码与新环境 | `/data/workspaces/freesurfer_synth/work/fnit_yaml_install_dipyless_20260927/repo`、同目录下的 `env` |
 
 源码由上述 Git 提交的 `git archive` 单独展开。新环境从空目录创建，运行命令为：
 
 ```bash
-cd /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_yaml_install_dipyless_20260927/repo
+cd /data/workspaces/freesurfer_synth/work/fnit_yaml_install_dipyless_20260927/repo
 CONDA_OVERRIDE_GLIBC=2.17 conda env create \
-  -p /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_yaml_install_dipyless_20260927/env \
+  -p /data/workspaces/freesurfer_synth/work/fnit_yaml_install_dipyless_20260927/env \
   -f environment-recon-all-cpp.yml
 ```
 

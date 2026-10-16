@@ -26,7 +26,7 @@ from pathlib import Path
 from tools.benchmark_connectome_raw_cohort_envelope import compare
 
 # 以下路径均指服务器既有实际产物；baseline/candidate必须分开调用。
-remote_root = Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002')
+remote_root = Path('/data/workspaces/fnit_connectome_tenraw_20261002')
 case_id = 'sub-CON01'
 fnit_case_root = remote_root / 'formal_baseline_common_v3_raw_rerun_v1' / 'baseline' / case_id
 raw_report = compare(
@@ -52,7 +52,7 @@ raw_report = compare(
 
 ```bash
 # 以下为服务器 CON01 baseline 的已有产物；新输出文件请放到自己的空目录。
-remote_root="/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002"
+remote_root="/data/workspaces/fnit_connectome_tenraw_20261002"
 case_id="sub-CON01"
 official_case_directory="$remote_root/task_04/official_raw10_cpu_view_v3/$case_id"
 fnit_case_directory="$remote_root/formal_baseline_common_v3_raw_rerun_v1/baseline/$case_id"
@@ -117,7 +117,7 @@ CON01两臂六字段通过数依次为count L1 30/40、FBC L1 36/40、count支�
 
 上述时间只包含原实际只读 SHA/guard/矩阵统计，不是 raw pipeline 速度。原 GPU/CLI timing、allocated/reserved/process-tree 与采样资格保留在原服务器 gpu_report/wall/eligibility 中，具体路径/SHA 由 execution 绑定；本页未拼接成连续冷调用时间。
 
-2026-10-03 接入复核：gpucw1 的 96 个原文件读哈希 0.3980 秒；本地纯 stdlib 从保存的 pair 指标独立重放 **1680 项 gate**，逐项 threshold/decision/count 完全一致，合计 1259 项通过而七份报告整体均失败。headcw 空 CUDA 可见设备的 CPU 测试 **13 passed in 1.24 s**（完整 pytest 调用 1.6882 秒）。这些是身份和统计合同验证，不是影像算法速度或精度 benchmark。详见[接入复核](../../validation/connectome/tenraw_20261002/task_04_raw_matrix_early_v1/curation_actual_review_v1.json)及[CPU 实测测试](../../validation/connectome/tenraw_20261002/task_04_raw_matrix_early_v1/curation_actual_CPU_contract_tests_v1.json)。
+2026-10-03 接入复核：accelerator-a-1 的 96 个原文件读哈希 0.3980 秒；本地纯 stdlib 从保存的 pair 指标独立重放 **1680 项 gate**，逐项 threshold/decision/count 完全一致，合计 1259 项通过而七份报告整体均失败。control-host 空 CUDA 可见设备的 CPU 测试 **13 passed in 1.24 s**（完整 pytest 调用 1.6882 秒）。这些是身份和统计合同验证，不是影像算法速度或精度 benchmark。详见[接入复核](../../validation/connectome/tenraw_20261002/task_04_raw_matrix_early_v1/curation_actual_review_v1.json)及[CPU 实测测试](../../validation/connectome/tenraw_20261002/task_04_raw_matrix_early_v1/curation_actual_CPU_contract_tests_v1.json)。
 
 ![已保存的官方 raw CON01/03 脑图与矩阵示例](../../validation/connectome/tenraw_20261002/task_04_raw_reference_first_cases/official_raw_brain_and_matrix.png)
 

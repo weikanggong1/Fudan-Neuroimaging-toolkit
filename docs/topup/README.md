@@ -1,4 +1,6 @@
-# TorchTOPUP：相反相位编码b0畸变校正
+# FNIT_topup
+
+> 统一 Python 入口：[`FNIT_topup`](../API_REFERENCE.md)，从 `fnit` 导入。下文配置、结果类型和细分算子保留高级兼容接口。
 
 | 项目 | 内容 |
 |---|---|
@@ -17,14 +19,14 @@ TOPUP依据相反相位编码的两张b0估计共同磁场及运动，生成Hz�
 ## 2. Python 调用
 
 ```python
-from fnit.topup import TorchTOPUP
+from fnit import FNIT_topup
 
 opposite_b0_pair_path = "/data/B0_AP_PA.nii.gz"  # 两帧相反PE的原始b0
 acquisition_parameters_path = "/data/acqparams.txt"  # 两行PE向量+读出时间秒
 field_output_prefix = "/data/topup/fieldmap_out"  # 样条系数和运动参数根名
 field_hz_output_path = "/data/topup/fieldmap_fout.nii.gz"  # Hz场图
 corrected_b0_output_path = "/data/topup/fieldmap_iout.nii.gz"  # 两帧校正图
-field_result = TorchTOPUP(device="cuda:0").run(
+field_result = FNIT_topup(device="cuda:0").run(
     imain=opposite_b0_pair_path, datain=acquisition_parameters_path,
     out=field_output_prefix, fout=field_hz_output_path,
     iout=corrected_b0_output_path,

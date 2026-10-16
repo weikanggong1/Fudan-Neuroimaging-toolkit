@@ -29,7 +29,7 @@ def digest(path):
 
 
 def main():
-    root = Path('/cwStorage/home/gongwk/Notebook_code/FNIT')
+    root = Path('/data/fnit')
     workspace = root/'workspaces/smri_cpu_20261004'
     runs = root/'runs/smri_cpu_20261004'
     output = runs/'remaining_20261004/synth/sr_functions_node7_v1'
@@ -41,7 +41,7 @@ def main():
     old_cases = {item['case']: item for item in original['cases']}
     torch.set_num_threads(8)
     report = {'scope': 'candidate-only complete real function API, original saved uint8 oracle; no reference rerun',
-              'host': 'nodecw7', 'cpu_affinity': sorted(os.sched_getaffinity(0)),
+              'host': 'compute-a-7', 'cpu_affinity': sorted(os.sched_getaffinity(0)),
               'torch_threads': torch.get_num_threads(), 'torch_version': torch.__version__,
               'source_sha256': {path.name: digest(path) for path in
                   (Path(_cpu_inference.__file__).parent/'model.py',

@@ -52,9 +52,9 @@ Path(new_selection_path).write_text(json.dumps(selected_binding, indent=2) + "\n
 |source_fingerprint|原 arm 全部 FNIT 数值源码/install 文件的冻结 SHA 指纹；保持实际 641 candidate / da427 common baseline|
 |helpers|原同目录 cohort/recovery/rerun helper 的 path+SHA；candidate 另含原 staged helper；不复制或修改原脚本|
 
-`--runtime-declaration` 接受主任务实际 `runtime_preflight.json` 原格式，**不是重新编造的配置**。已交付路径：`/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/nvml_monitor_runtime_v1/runtime_preflight.json`，SHA `a67c203afc9b7a74da52fa3a5003dc16c70cd04e3a3e13f98db09ea6ec02054e`。新 `gpu_python` 是该目录下 `venv/bin/python`。工具实际在 CUDA 隐藏的子进程中复查原/新 Python binary、version、Torch/torch._C、NumPy/C extension、nibabel 的路径/版本/SHA，以及新增官方 nvidia-ml-py 13.580.82 的版本和模块 SHA。原 proof 的 source/wall unchanged、CUDA 未初始化及实际 monitor probe 必须成立。12 次 readonly probe 的零进程显存不是任何病例的显存验收。
+`--runtime-declaration` 接受主任务实际 `runtime_preflight.json` 原格式，**不是重新编造的配置**。已交付路径：`/data/workspaces/fnit_connectome_tenraw_20261002/nvml_monitor_runtime_v1/runtime_preflight.json`，SHA `a67c203afc9b7a74da52fa3a5003dc16c70cd04e3a3e13f98db09ea6ec02054e`。新 `gpu_python` 是该目录下 `venv/bin/python`。工具实际在 CUDA 隐藏的子进程中复查原/新 Python binary、version、Torch/torch._C、NumPy/C extension、nibabel 的路径/版本/SHA，以及新增官方 nvidia-ml-py 13.580.82 的版本和模块 SHA。原 proof 的 source/wall unchanged、CUDA 未初始化及实际 monitor probe 必须成立。12 次 readonly probe 的零进程显存不是任何病例的显存验收。
 
-科学参数固定：100k seeds、8 套 atlas、seed 0、GP seed 12345、8 CPU threads、`cuda:0`、`CUDA_VISIBLE_DEVICES=1`、物理 GPU UUID `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba`、`expandable_segments:True` 和原独占锁 `/tmp/fnit-recon-five-20261002-gongwk.gpu.lock`。原 candidate 的 compile/tracking 调度参数经成熟 staged 函数校验后原样传递。新配置只改 `run_root`、`gpu_python`、`stop_dispatch_path` 和重建的 `resources_manifest`；其他资源 path/size/SHA 必须与原清单一致。非监测资源不能变化。
+科学参数固定：100k seeds、8 套 atlas、seed 0、GP seed 12345、8 CPU threads、`cuda:0`、`CUDA_VISIBLE_DEVICES=1`、物理 GPU UUID `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba`、`expandable_segments:True` 和原独占锁 `/tmp/fnit-recon-five-20261002-benchmark-user.gpu.lock`。原 candidate 的 compile/tracking 调度参数经成熟 staged 函数校验后原样传递。新配置只改 `run_root`、`gpu_python`、`stop_dispatch_path` 和重建的 `resources_manifest`；其他资源 path/size/SHA 必须与原清单一致。非监测资源不能变化。
 
 输出结构：
 

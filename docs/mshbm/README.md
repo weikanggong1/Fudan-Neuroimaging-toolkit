@@ -1,4 +1,6 @@
-# MS-HBM：单被试 17 网络分区
+# FNIT_mshbm
+
+> 统一 Python 入口：[`FNIT_mshbm`](../API_REFERENCE.md)，从 `fnit` 导入。下文配置、结果类型和细分算子保留高级兼容接口。
 
 | 项目 | 内容 |
 |---|---|

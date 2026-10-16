@@ -7,7 +7,7 @@
 ## 输入、环境和可复现边界
 
 - 输入：仓库示例 `sub-01_T1w.nii.gz`，SHA-256 `f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a`。
-- 节点：`gpucw1`，NVIDIA H100 PCIe 80 GB，使用 `cuda:1`、4 个 CPU 线程；PyTorch 2.5.1/CUDA 11.8、nibabel 5.4.2、SciPy 1.17.1。N4 调用另一 Python 环境中的 SimpleITK 2.4.0；其算子在 CPU 上运行。张量为 float32，未使用 float16/bfloat16；SynthSeg 卷积关闭 cuDNN TF32 以保持本例硬标签一致，其余 CUDA 路径按既有 TF32 设置运行。
+- 节点：`accelerator-a-1`，NVIDIA H100 PCIe 80 GB，使用 `cuda:1`、4 个 CPU 线程；PyTorch 2.5.1/CUDA 11.8、nibabel 5.4.2、SciPy 1.17.1。N4 调用另一 Python 环境中的 SimpleITK 2.4.0；其算子在 CPU 上运行。张量为 float32，未使用 float16/bfloat16；SynthSeg 卷积关闭 cuDNN TF32 以保持本例硬标签一致，其余 CUDA 路径按既有 TF32 设置运行。
 - 对照：同一 T1 在同一节点的归档 FreeSurfer 8.2 `recon-all` 被试，官方日志 SHA-256 `6badf1a4c26e564a29f78a173547f4151920400ff4bda1047d15135c87998a66`。该官方运行不是本轮重新启动的配对冷启动，且共享节点负载未固定。
 - 候选运行从空被试目录启动。`native_free.py` 只启动一次 Python N4 子进程，没有 FreeSurfer 可执行程序调用。测试时权重和模板从现有 bundle 的 `models/` 与数据目录读取；bundle 同时含有原生程序，因此本轮没有完成“只有权重和模板的全新安装”测试。公开入口以 `fnit-setup-weights --model recon-all` 和 `fnit-setup-recon-all-assets` 下载外部文件，不要求用户安装 FreeSurfer。
 - 原整例运行 1781.889 秒。运行后发现 a2009s 体素编号偏移和未知 atlas 顶点的投影问题；用[可复现补算脚本](reproject_benchmark_subject.py)更新三种体素分区、`wmparc` 和其统计，实测增加 23.844 秒。报告的总时长 **1805.733 秒** 为两个实际运行阶段时间之和，并包含原流程被覆盖的第一次投影，属于保守计时。启动源码与最终修正源码 SHA-256 均在 `run.json`；新启动的流程已直接使用修正算法，无需补算。

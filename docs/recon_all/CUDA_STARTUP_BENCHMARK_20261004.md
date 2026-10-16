@@ -16,7 +16,7 @@
 
 ## 同输入真实阶段结果
 
-使用公开 `ds000114` 两例的 FNIT 自产检查点，固定 7 项被试输入、8 项图谱资产及 SHA。双侧执行 `aparc`、`aparc.a2009s`、`aparc.DKTatlas`，共 12 组配对。sub-06 两臂在父进程预初始化 CUDA，sub-07 两臂使用未预初始化父进程。实际 GPU 为 gpucw1 的 H100 GPU1，物理 UUID `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba`；每例总线程 4，两个 worker 各 2。实际 TF32 开启、float32、无 autocast。
+使用公开 `ds000114` 两例的 FNIT 自产检查点，固定 7 项被试输入、8 项图谱资产及 SHA。双侧执行 `aparc`、`aparc.a2009s`、`aparc.DKTatlas`，共 12 组配对。sub-06 两臂在父进程预初始化 CUDA，sub-07 两臂使用未预初始化父进程。实际 GPU 为 accelerator-a-1 的 H100 GPU1，物理 UUID `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba`；每例总线程 4，两个 worker 各 2。实际 TF32 开启、float32、无 autocast。
 
 | 病例 | 左 / 右顶点数 | 六套标签差异 | 全部出现标签 Dice | 色表 / 名称 | 有序网格 |
 | --- | ---: | ---: | ---: | --- | --- |
@@ -42,7 +42,7 @@ GPU0 同期有基线整例，合计声明 CPU 预算 8；这些单次墙钟是�
 
 ## 已保存连续前段的修复前后比较
 
-sub-06 原 816 基线在 annotation worker 首次 CUDA 分配失败，仍保留自产前段；8f 修复版从相同原始 T1 完成。两次均 gpucw1 / GPU0 / 总线程 4，绑定实际 launch、completion、pipeline、源码归档与输入 SHA。本次 CPU 比较 77.351 秒，检查 54 个共同文件；15 个计划路径至少一边缺失，10 张表面未证明与 white.preaparc anchor 对应，数值明确未评估。`talairach_with_skull.lta` 双方都不存在，不计为相同。
+sub-06 原 816 基线在 annotation worker 首次 CUDA 分配失败，仍保留自产前段；8f 修复版从相同原始 T1 完成。两次均 accelerator-a-1 / GPU0 / 总线程 4，绑定实际 launch、completion、pipeline、源码归档与输入 SHA。本次 CPU 比较 77.351 秒，检查 54 个共同文件；15 个计划路径至少一边缺失，10 张表面未证明与 white.preaparc anchor 对应，数值明确未评估。`talairach_with_skull.lta` 双方都不存在，不计为相同。
 
 13 张体积（原始导入、rawavg、orig、nu、T1、brainmask、norm、brain、wm.seg、wm.asegedit、wm、filled、aseg.presurf）的体素、完整 affine 与 dtype 差异均为 0；`talairach.lta` 的 16 个矩阵元素差异为 0。双侧 orig、white.preaparc、smoothwm、inflated、sphere、sphere.reg 共 12 张表面在坐标系、闭合单连通拓扑、有序面与顶点数门控通过后，坐标及有序面差异为 0。双侧 cortex 标签文件字节、成员集合及每顶点重复次数相同。
 

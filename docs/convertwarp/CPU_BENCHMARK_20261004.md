@@ -6,7 +6,7 @@
 
 函数源码 SHA-256 为 `5c25a942…0518c`，adapter 为 `0e71b19b…e045f`；协调任务随后冻结的 all_v11 使用相同的这两个文件。完整 SHA、每轮时间、分区误差和空间头信息见[公开机器报告](benchmark_20261004.public.json)。
 
-nodecw10 使用独立物理核：1 线程为 `65`，8 线程为 `65,69,73,77,81,85,89,93`。组内持 ConvertWarp 专属锁，原版 FSL 6.0.7.4、起点 main 与本次 FNIT 串行交替运行。其他功能组使用另外的物理核。真实影像及其注册输出完整参与读写，没有用模拟场或小 ROI 代替。
+compute-a-10 使用独立物理核：1 线程为 `65`，8 线程为 `65,69,73,77,81,85,89,93`。组内持 ConvertWarp 专属锁，原版 FSL 6.0.7.4、起点 main 与本次 FNIT 串行交替运行。其他功能组使用另外的物理核。真实影像及其注册输出完整参与读写，没有用模拟场或小 ROI 代替。
 
 完整进程时间包含启动、Python 导入或原版初始化、全部输入读取、转换及未压缩 `.nii` 保存；排除一轮 warmup 后取三轮配对中位数。API 单独在已导入的工作进程中 warmup 后重复三次，仍包含每次的读取与保存。原版进程与 FNIT API 的计时范围不同，速度比只用完整进程时间。
 
@@ -114,7 +114,7 @@ H100 使用同一 GPU、公共计时锁及 20,000,000,000 byte PyTorch 分配上
 
 ![完整公共样本的FSL/FNIT场幅值和向量差](assets/public_convertwarp_comparison.png)
 
-公共全场最大分量差 `1.5259×10⁻⁵ mm`；图的切面为 MNI x=0、y=−24、z=12 mm。此图的转换在 headcw 单核完成，只用于精度示例。CPU 速度表使用上面的 nodecw10 配对。
+公共全场最大分量差 `1.5259×10⁻⁵ mm`；图的切面为 MNI x=0、y=−24、z=12 mm。此图的转换在 control-host 单核完成，只用于精度示例。CPU 速度表使用上面的 compute-a-10 配对。
 
 [可编辑 SVG](assets/public_convertwarp_comparison.svg)、[公共来源 SHA 与完整误差](assets/public_figure_report.public.json)、[图指标](assets/public_convertwarp_comparison.json)随图保存。绘图脚本为 [`plot_public_comparison.py`](plot_public_comparison.py)，使用项目主环境已声明的 Matplotlib；实际旧服务器环境缺此包时，图在独立 overlay 环境生成，计时环境没有修改。
 

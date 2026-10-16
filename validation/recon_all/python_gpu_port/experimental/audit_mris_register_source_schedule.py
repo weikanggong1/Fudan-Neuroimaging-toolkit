@@ -12,19 +12,19 @@ from fnit.recon_all.mris_register_schedule import next_smoothwm_scale
 ROOT = Path(__file__).resolve().parents[1]
 SEGMENTS = {
     "lh": (
-        "mris_register_lh_default_epoch0057_0068_continuous_headcw.json",
-        "mris_register_lh_default_epoch0069_0080_resume_headcw.json",
-        "mris_register_lh_default_epoch0081_0087_resume_headcw.json",
-        "mris_register_lh_default_epoch0088_0094_resume_headcw.json",
-        "mris_register_lh_default_epoch0095_0101_resume_headcw.json",
-        "mris_register_lh_fold_cleanup_epoch0102_gpucw1.json",
-        "mris_register_lh_fold_cleanup_epoch0103_0107_gpucw1.json",
+        "mris_register_lh_default_epoch0057_0068_continuous_control-host.json",
+        "mris_register_lh_default_epoch0069_0080_resume_control-host.json",
+        "mris_register_lh_default_epoch0081_0087_resume_control-host.json",
+        "mris_register_lh_default_epoch0088_0094_resume_control-host.json",
+        "mris_register_lh_default_epoch0095_0101_resume_control-host.json",
+        "mris_register_lh_fold_cleanup_epoch0102_accelerator-a-1.json",
+        "mris_register_lh_fold_cleanup_epoch0103_0107_accelerator-a-1.json",
     ),
     "rh": (
-        "mris_register_rh_default_epoch0056_0058_area_scale_fixed_gpucw1.json",
-        "mris_register_rh_default_epoch0059_0066_area_scale_fixed_gpucw1.json",
-        "mris_register_rh_default_epoch0067_0083_first_difference_gpucw1.json",
-        "mris_register_rh_default_epoch0083_0097_lcorr_f32_gpucw1.json",
+        "mris_register_rh_default_epoch0056_0058_area_scale_fixed_accelerator-a-1.json",
+        "mris_register_rh_default_epoch0059_0066_area_scale_fixed_accelerator-a-1.json",
+        "mris_register_rh_default_epoch0067_0083_first_difference_accelerator-a-1.json",
+        "mris_register_rh_default_epoch0083_0097_lcorr_f32_accelerator-a-1.json",
     ),
 }
 

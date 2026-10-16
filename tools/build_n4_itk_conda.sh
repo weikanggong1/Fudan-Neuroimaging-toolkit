@@ -29,7 +29,7 @@ cmake -S "$root/tools/n4_itk" -B "$output_dir/n4-build" -G Ninja \
 cmake --build "$output_dir/n4-build" --parallel 2
 cmake --install "$output_dir/n4-build"
 ldd "$output_dir/bin/fnit_n4_itk" > "$output_dir/fnit_n4_itk.ldd"
-if grep -E 'not found|/public/software/apps/Freesurfer' "$output_dir/fnit_n4_itk.ldd"; then
+if grep -E 'not found|/opt/reference/Freesurfer' "$output_dir/fnit_n4_itk.ldd"; then
   echo "N4 binary has a missing or external FreeSurfer dynamic dependency" >&2
   exit 1
 fi

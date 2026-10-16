@@ -1,16 +1,16 @@
 {
   "scope": "same official-corrected DWI/gradient/mask ten-case tensor isolation, not raw end-to-end",
-  "host": "gpucw1",
+  "host": "accelerator-a-1",
   "pid": 75693,
   "torch": "2.5.1",
   "precision": "unchanged Float32 DWI/tensor image; Float64 solves; TF32 enabled; no iteration/mask/filter change",
   "sources": {
     "baseline": {
-      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/baseline/response.py",
+      "path": "/data/workspaces/fnit_connectome_accuracy_20261003_v1/task_02/baseline/response.py",
       "sha256": "258938a5f20ee7a6efc2fc1c50af5c93412030a60b78036438e8473f072e3b91"
     },
     "candidate": {
-      "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_02/candidate/src/fnit/connectome/response.py",
+      "path": "/data/workspaces/fnit_connectome_accuracy_20261003_v1/task_02/candidate/src/fnit/connectome/response.py",
       "sha256": "2a595044ff31a6497df5efcdeb5df7fe5a651c89a00f629dd819105707e40ebb"
     }
   },
@@ -26,59 +26,59 @@
       "official_tensor_command": {
         "label": "DTI",
         "command": [
-          "/public/software/apps/MRtrix3/3.0.3/bin/dwi2tensor",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/eddy/data.nii.gz",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/tensor.nii.gz",
+          "/opt/reference/MRtrix3/3.0.3/bin/dwi2tensor",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/eddy/data.nii.gz",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/tensor.nii.gz",
           "-grad",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/gradient_mrtrix.txt",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/gradient_mrtrix.txt",
           "-mask",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/brain_mask.nii.gz",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/brain_mask.nii.gz",
           "-iter",
           "2",
           "-nthreads",
           "8"
         ],
         "input_sha256": {
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/eddy/data.nii.gz": "27965c4079c022d60df9db32bc1b705519e4259331f855c32d8efaf5981a69bf",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/gradient_mrtrix.txt": "419e9b1b8d191aa8688622718a1326e3495443676da0945ba947b34c87178ef3",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/brain_mask.nii.gz": "00cdc215748b4d1452fba19fccb84cb2cfa976fbc626e3a4f229ca9e607671c6"
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/eddy/data.nii.gz": "27965c4079c022d60df9db32bc1b705519e4259331f855c32d8efaf5981a69bf",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/gradient_mrtrix.txt": "419e9b1b8d191aa8688622718a1326e3495443676da0945ba947b34c87178ef3",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/brain_mask.nii.gz": "00cdc215748b4d1452fba19fccb84cb2cfa976fbc626e3a4f229ca9e607671c6"
         },
         "binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
         "resolved_binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
         "version": "== dwi2tensor 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Ben Jeurissen (ben.jeurissen@uantwerpen.be)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
-        "host": "nodecw10",
+        "host": "compute-a-10",
         "started_utc": "2026-10-02T21:12:11.273532+00:00",
         "wall_s": 2.0006411522626877,
         "returncode": 0,
         "output_sha256": {
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/tensor.nii.gz": "f273ecd96dbfa4b9f670907d105b34cea976a54db0aea4add8410fd4f11c58eb"
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/tensor.nii.gz": "f273ecd96dbfa4b9f670907d105b34cea976a54db0aea4add8410fd4f11c58eb"
         }
       },
       "inputs": {
         "official_corrected_dwi": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/eddy/data.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON01/eddy/data.nii.gz",
           "sha256": "27965c4079c022d60df9db32bc1b705519e4259331f855c32d8efaf5981a69bf"
         },
         "official_gradient_mrtrix": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/gradient_mrtrix.txt",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/gradient_mrtrix.txt",
           "sha256": "419e9b1b8d191aa8688622718a1326e3495443676da0945ba947b34c87178ef3"
         },
         "brain_mask": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/brain_mask.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/brain_mask.nii.gz",
           "sha256": "00cdc215748b4d1452fba19fccb84cb2cfa976fbc626e3a4f229ca9e607671c6"
         },
         "FA": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/fa.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/fa.nii.gz",
           "sha256": "cf112d909c5f204191e73c4d719efda8ba9b0d173b57972fe8ab85f5792fb31f"
         },
         "principal_direction": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/direction.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/direction.nii.gz",
           "sha256": "b952c84b3d4e47498103c8cb5b1f14fbe7eda06d6d9806495df2b177641a7b45"
         }
       },
       "reference_geometry": {
         "fa": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/fa.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/fa.nii.gz",
           "sha256": "cf112d909c5f204191e73c4d719efda8ba9b0d173b57972fe8ab85f5792fb31f",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -89,7 +89,7 @@
           "affine_max_abs_header_difference": 0.0
         },
         "direction": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/direction.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/direction.nii.gz",
           "sha256": "b952c84b3d4e47498103c8cb5b1f14fbe7eda06d6d9806495df2b177641a7b45",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -101,7 +101,7 @@
           "affine_max_abs_header_difference": 0.0
         },
         "tensor": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/tensor.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON01/tensor.nii.gz",
           "sha256": "f273ecd96dbfa4b9f670907d105b34cea976a54db0aea4add8410fd4f11c58eb",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -1934,59 +1934,59 @@
       "official_tensor_command": {
         "label": "DTI",
         "command": [
-          "/public/software/apps/MRtrix3/3.0.3/bin/dwi2tensor",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON03/eddy/data.nii.gz",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/tensor.nii.gz",
+          "/opt/reference/MRtrix3/3.0.3/bin/dwi2tensor",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON03/eddy/data.nii.gz",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/tensor.nii.gz",
           "-grad",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/gradient_mrtrix.txt",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/gradient_mrtrix.txt",
           "-mask",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/brain_mask.nii.gz",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/brain_mask.nii.gz",
           "-iter",
           "2",
           "-nthreads",
           "8"
         ],
         "input_sha256": {
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON03/eddy/data.nii.gz": "893308e9800e8efbe3baf1fc596cfa96de1a8e54eadf8401f1e11259135d9dc1",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/gradient_mrtrix.txt": "82af95c721d71e5c9fc55a3adf90e22aa8a189506ab4c6cc6ee94bed98a537bd",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/brain_mask.nii.gz": "b488dcc6ee34e738cb4120551f198d57c060c0faf19ebe04f05c478edf30523c"
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON03/eddy/data.nii.gz": "893308e9800e8efbe3baf1fc596cfa96de1a8e54eadf8401f1e11259135d9dc1",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/gradient_mrtrix.txt": "82af95c721d71e5c9fc55a3adf90e22aa8a189506ab4c6cc6ee94bed98a537bd",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/brain_mask.nii.gz": "b488dcc6ee34e738cb4120551f198d57c060c0faf19ebe04f05c478edf30523c"
         },
         "binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
         "resolved_binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
         "version": "== dwi2tensor 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Ben Jeurissen (ben.jeurissen@uantwerpen.be)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
-        "host": "nodecw10",
+        "host": "compute-a-10",
         "started_utc": "2026-10-02T21:14:07.636063+00:00",
         "wall_s": 1.9729383513331413,
         "returncode": 0,
         "output_sha256": {
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/tensor.nii.gz": "a7269820cc71b5d2d6a5519ce915df2ea5b17afd5398af65343e48f3d46365d9"
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/tensor.nii.gz": "a7269820cc71b5d2d6a5519ce915df2ea5b17afd5398af65343e48f3d46365d9"
         }
       },
       "inputs": {
         "official_corrected_dwi": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON03/eddy/data.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON03/eddy/data.nii.gz",
           "sha256": "893308e9800e8efbe3baf1fc596cfa96de1a8e54eadf8401f1e11259135d9dc1"
         },
         "official_gradient_mrtrix": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/gradient_mrtrix.txt",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/gradient_mrtrix.txt",
           "sha256": "82af95c721d71e5c9fc55a3adf90e22aa8a189506ab4c6cc6ee94bed98a537bd"
         },
         "brain_mask": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/brain_mask.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/brain_mask.nii.gz",
           "sha256": "b488dcc6ee34e738cb4120551f198d57c060c0faf19ebe04f05c478edf30523c"
         },
         "FA": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/fa.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/fa.nii.gz",
           "sha256": "20966c564dad691b82b0daea5e63acc19dc7785a9865f126b1bf156cdc8695c2"
         },
         "principal_direction": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/direction.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/direction.nii.gz",
           "sha256": "dd8b5316e5bb35236cab75605d449f2a371db5d12515aa4e70851c18c15819fb"
         }
       },
       "reference_geometry": {
         "fa": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/fa.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/fa.nii.gz",
           "sha256": "20966c564dad691b82b0daea5e63acc19dc7785a9865f126b1bf156cdc8695c2",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -1997,7 +1997,7 @@
           "affine_max_abs_header_difference": 2.9802322387695312e-08
         },
         "direction": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/direction.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/direction.nii.gz",
           "sha256": "dd8b5316e5bb35236cab75605d449f2a371db5d12515aa4e70851c18c15819fb",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -2009,7 +2009,7 @@
           "affine_max_abs_header_difference": 2.9802322387695312e-08
         },
         "tensor": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/tensor.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON03/tensor.nii.gz",
           "sha256": "a7269820cc71b5d2d6a5519ce915df2ea5b17afd5398af65343e48f3d46365d9",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -3695,59 +3695,59 @@
       "official_tensor_command": {
         "label": "DTI",
         "command": [
-          "/public/software/apps/MRtrix3/3.0.3/bin/dwi2tensor",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON04/eddy/data.nii.gz",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/tensor.nii.gz",
+          "/opt/reference/MRtrix3/3.0.3/bin/dwi2tensor",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON04/eddy/data.nii.gz",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/tensor.nii.gz",
           "-grad",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/gradient_mrtrix.txt",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/gradient_mrtrix.txt",
           "-mask",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/brain_mask.nii.gz",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/brain_mask.nii.gz",
           "-iter",
           "2",
           "-nthreads",
           "8"
         ],
         "input_sha256": {
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON04/eddy/data.nii.gz": "48e566b587b0bc1b07fcf63a7472d3b544f2f28f39598ed9a504f5c40054fae3",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/gradient_mrtrix.txt": "6e9639a18f219306773370398c4a4163b0a97a377b1f45e917e5c3d23fbbbff1",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/brain_mask.nii.gz": "4faa75ff0f4e6479896c30ab182cd1961dbf6a767b7ea735ca649da14574508f"
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON04/eddy/data.nii.gz": "48e566b587b0bc1b07fcf63a7472d3b544f2f28f39598ed9a504f5c40054fae3",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/gradient_mrtrix.txt": "6e9639a18f219306773370398c4a4163b0a97a377b1f45e917e5c3d23fbbbff1",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/brain_mask.nii.gz": "4faa75ff0f4e6479896c30ab182cd1961dbf6a767b7ea735ca649da14574508f"
         },
         "binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
         "resolved_binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
         "version": "== dwi2tensor 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Ben Jeurissen (ben.jeurissen@uantwerpen.be)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
-        "host": "nodecw10",
+        "host": "compute-a-10",
         "started_utc": "2026-10-02T21:57:16.423978+00:00",
         "wall_s": 1.9739679023623466,
         "returncode": 0,
         "output_sha256": {
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/tensor.nii.gz": "aec96768d28868ce5fe3044146a3e98dd2dfc3ee94a36b2b0dd00bd05f3e0c82"
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/tensor.nii.gz": "aec96768d28868ce5fe3044146a3e98dd2dfc3ee94a36b2b0dd00bd05f3e0c82"
         }
       },
       "inputs": {
         "official_corrected_dwi": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON04/eddy/data.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON04/eddy/data.nii.gz",
           "sha256": "48e566b587b0bc1b07fcf63a7472d3b544f2f28f39598ed9a504f5c40054fae3"
         },
         "official_gradient_mrtrix": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/gradient_mrtrix.txt",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/gradient_mrtrix.txt",
           "sha256": "6e9639a18f219306773370398c4a4163b0a97a377b1f45e917e5c3d23fbbbff1"
         },
         "brain_mask": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/brain_mask.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/brain_mask.nii.gz",
           "sha256": "4faa75ff0f4e6479896c30ab182cd1961dbf6a767b7ea735ca649da14574508f"
         },
         "FA": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/fa.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/fa.nii.gz",
           "sha256": "3e6a4f32a22b6f44c8fbbb614b629f2c780cf6f65a14dae680fda659884422b1"
         },
         "principal_direction": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/direction.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/direction.nii.gz",
           "sha256": "5a63b58cf4ab90b203718267c8e85406294484dac30aa0ec7a0671f5023b0cde"
         }
       },
       "reference_geometry": {
         "fa": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/fa.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/fa.nii.gz",
           "sha256": "3e6a4f32a22b6f44c8fbbb614b629f2c780cf6f65a14dae680fda659884422b1",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -3758,7 +3758,7 @@
           "affine_max_abs_header_difference": 5.960464477539063e-08
         },
         "direction": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/direction.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/direction.nii.gz",
           "sha256": "5a63b58cf4ab90b203718267c8e85406294484dac30aa0ec7a0671f5023b0cde",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -3770,7 +3770,7 @@
           "affine_max_abs_header_difference": 5.960464477539063e-08
         },
         "tensor": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/tensor.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON04/tensor.nii.gz",
           "sha256": "aec96768d28868ce5fe3044146a3e98dd2dfc3ee94a36b2b0dd00bd05f3e0c82",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -4295,59 +4295,59 @@
       "official_tensor_command": {
         "label": "DTI",
         "command": [
-          "/public/software/apps/MRtrix3/3.0.3/bin/dwi2tensor",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON05/eddy/data.nii.gz",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/tensor.nii.gz",
+          "/opt/reference/MRtrix3/3.0.3/bin/dwi2tensor",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON05/eddy/data.nii.gz",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/tensor.nii.gz",
           "-grad",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/gradient_mrtrix.txt",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/gradient_mrtrix.txt",
           "-mask",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/brain_mask.nii.gz",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/brain_mask.nii.gz",
           "-iter",
           "2",
           "-nthreads",
           "8"
         ],
         "input_sha256": {
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON05/eddy/data.nii.gz": "e102c6cdc274a006e4aa28143c18f04d70fc05b1be758584f91b189461e3852a",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/gradient_mrtrix.txt": "471d9a07b688da9d275fed258d5b427c8eb9489d6bcf9911e01f5212ced1e5e1",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/brain_mask.nii.gz": "8d7f0dd70dc17d1e19dcb25439fcac4cba45bc1ea5a9ee87b810ce88f5a323cd"
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON05/eddy/data.nii.gz": "e102c6cdc274a006e4aa28143c18f04d70fc05b1be758584f91b189461e3852a",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/gradient_mrtrix.txt": "471d9a07b688da9d275fed258d5b427c8eb9489d6bcf9911e01f5212ced1e5e1",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/brain_mask.nii.gz": "8d7f0dd70dc17d1e19dcb25439fcac4cba45bc1ea5a9ee87b810ce88f5a323cd"
         },
         "binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
         "resolved_binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
         "version": "== dwi2tensor 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Ben Jeurissen (ben.jeurissen@uantwerpen.be)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
-        "host": "nodecw10",
+        "host": "compute-a-10",
         "started_utc": "2026-10-02T21:54:54.873690+00:00",
         "wall_s": 2.043498806655407,
         "returncode": 0,
         "output_sha256": {
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/tensor.nii.gz": "fb6f03ff70e25b783a9e4bec200f339ebb8f934fa3f031b960c86b854075ceb9"
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/tensor.nii.gz": "fb6f03ff70e25b783a9e4bec200f339ebb8f934fa3f031b960c86b854075ceb9"
         }
       },
       "inputs": {
         "official_corrected_dwi": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON05/eddy/data.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON05/eddy/data.nii.gz",
           "sha256": "e102c6cdc274a006e4aa28143c18f04d70fc05b1be758584f91b189461e3852a"
         },
         "official_gradient_mrtrix": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/gradient_mrtrix.txt",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/gradient_mrtrix.txt",
           "sha256": "471d9a07b688da9d275fed258d5b427c8eb9489d6bcf9911e01f5212ced1e5e1"
         },
         "brain_mask": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/brain_mask.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/brain_mask.nii.gz",
           "sha256": "8d7f0dd70dc17d1e19dcb25439fcac4cba45bc1ea5a9ee87b810ce88f5a323cd"
         },
         "FA": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/fa.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/fa.nii.gz",
           "sha256": "4b46b0bcb60cb1c0a154699f4814a7c4ee5b370ad0897aea0c0f839b3e179772"
         },
         "principal_direction": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/direction.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/direction.nii.gz",
           "sha256": "4165ba771d96999083a42f3f51160ad14511d8cd31c9b1992ca0aa087e78847a"
         }
       },
       "reference_geometry": {
         "fa": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/fa.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/fa.nii.gz",
           "sha256": "4b46b0bcb60cb1c0a154699f4814a7c4ee5b370ad0897aea0c0f839b3e179772",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -4358,7 +4358,7 @@
           "affine_max_abs_header_difference": 2.384185791015625e-07
         },
         "direction": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/direction.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/direction.nii.gz",
           "sha256": "4165ba771d96999083a42f3f51160ad14511d8cd31c9b1992ca0aa087e78847a",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -4370,7 +4370,7 @@
           "affine_max_abs_header_difference": 2.384185791015625e-07
         },
         "tensor": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/tensor.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON05/tensor.nii.gz",
           "sha256": "fb6f03ff70e25b783a9e4bec200f339ebb8f934fa3f031b960c86b854075ceb9",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -4925,59 +4925,59 @@
       "official_tensor_command": {
         "label": "DTI",
         "command": [
-          "/public/software/apps/MRtrix3/3.0.3/bin/dwi2tensor",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON06/eddy/data.nii.gz",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/tensor.nii.gz",
+          "/opt/reference/MRtrix3/3.0.3/bin/dwi2tensor",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON06/eddy/data.nii.gz",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/tensor.nii.gz",
           "-grad",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/gradient_mrtrix.txt",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/gradient_mrtrix.txt",
           "-mask",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/brain_mask.nii.gz",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/brain_mask.nii.gz",
           "-iter",
           "2",
           "-nthreads",
           "8"
         ],
         "input_sha256": {
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON06/eddy/data.nii.gz": "98c0f42f85d08aeddc276b14d5021a6745492f0b84f450ff0f8f8b8e6cffc6e4",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/gradient_mrtrix.txt": "caecf101e9c20b412421aa220e1e5ded65a217918cb809807dc7af7696a72e34",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/brain_mask.nii.gz": "6badfdb016ce3acc67caf410f49cd2b8e11c4f40465fafecbc98a4fb98b53a99"
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON06/eddy/data.nii.gz": "98c0f42f85d08aeddc276b14d5021a6745492f0b84f450ff0f8f8b8e6cffc6e4",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/gradient_mrtrix.txt": "caecf101e9c20b412421aa220e1e5ded65a217918cb809807dc7af7696a72e34",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/brain_mask.nii.gz": "6badfdb016ce3acc67caf410f49cd2b8e11c4f40465fafecbc98a4fb98b53a99"
         },
         "binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
         "resolved_binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
         "version": "== dwi2tensor 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Ben Jeurissen (ben.jeurissen@uantwerpen.be)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
-        "host": "nodecw10",
+        "host": "compute-a-10",
         "started_utc": "2026-10-02T22:39:15.550779+00:00",
         "wall_s": 2.024389050900936,
         "returncode": 0,
         "output_sha256": {
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/tensor.nii.gz": "0e43b8d3c76fbc081e364fd6e3e8da91ec35e9742363f4511a3078268b90380e"
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/tensor.nii.gz": "0e43b8d3c76fbc081e364fd6e3e8da91ec35e9742363f4511a3078268b90380e"
         }
       },
       "inputs": {
         "official_corrected_dwi": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON06/eddy/data.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON06/eddy/data.nii.gz",
           "sha256": "98c0f42f85d08aeddc276b14d5021a6745492f0b84f450ff0f8f8b8e6cffc6e4"
         },
         "official_gradient_mrtrix": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/gradient_mrtrix.txt",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/gradient_mrtrix.txt",
           "sha256": "caecf101e9c20b412421aa220e1e5ded65a217918cb809807dc7af7696a72e34"
         },
         "brain_mask": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/brain_mask.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/brain_mask.nii.gz",
           "sha256": "6badfdb016ce3acc67caf410f49cd2b8e11c4f40465fafecbc98a4fb98b53a99"
         },
         "FA": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/fa.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/fa.nii.gz",
           "sha256": "f1222b911ff70c0feb4a02fb3392447c7003501cee0ded5cfe841deb6ca78256"
         },
         "principal_direction": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/direction.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/direction.nii.gz",
           "sha256": "7a3aea8e2d8c7476a4700405b24ede22b2658fc0cbc1e230d18f73ee7dab9ca1"
         }
       },
       "reference_geometry": {
         "fa": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/fa.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/fa.nii.gz",
           "sha256": "f1222b911ff70c0feb4a02fb3392447c7003501cee0ded5cfe841deb6ca78256",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -4988,7 +4988,7 @@
           "affine_max_abs_header_difference": 2.384185791015625e-07
         },
         "direction": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/direction.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/direction.nii.gz",
           "sha256": "7a3aea8e2d8c7476a4700405b24ede22b2658fc0cbc1e230d18f73ee7dab9ca1",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -5000,7 +5000,7 @@
           "affine_max_abs_header_difference": 2.384185791015625e-07
         },
         "tensor": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/tensor.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON06/tensor.nii.gz",
           "sha256": "0e43b8d3c76fbc081e364fd6e3e8da91ec35e9742363f4511a3078268b90380e",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -5540,59 +5540,59 @@
       "official_tensor_command": {
         "label": "DTI",
         "command": [
-          "/public/software/apps/MRtrix3/3.0.3/bin/dwi2tensor",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.nii.gz",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/tensor.nii.gz",
+          "/opt/reference/MRtrix3/3.0.3/bin/dwi2tensor",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.nii.gz",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/tensor.nii.gz",
           "-grad",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gradient_mrtrix.txt",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gradient_mrtrix.txt",
           "-mask",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/brain_mask.nii.gz",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/brain_mask.nii.gz",
           "-iter",
           "2",
           "-nthreads",
           "8"
         ],
         "input_sha256": {
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.nii.gz": "e4dd1164aa1e82f8cc0faa331799e81921807e5a246a6e42d253766f1e8e2d06",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gradient_mrtrix.txt": "451f39e404802b922d4f9f525039da3cc69cbbafdd8c139e3e27a8158522c230",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/brain_mask.nii.gz": "a1ff61fec46c1120544357d746f3d6032a3a0cfc5f05c28a956a416e13c4a277"
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.nii.gz": "e4dd1164aa1e82f8cc0faa331799e81921807e5a246a6e42d253766f1e8e2d06",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gradient_mrtrix.txt": "451f39e404802b922d4f9f525039da3cc69cbbafdd8c139e3e27a8158522c230",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/brain_mask.nii.gz": "a1ff61fec46c1120544357d746f3d6032a3a0cfc5f05c28a956a416e13c4a277"
         },
         "binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
         "resolved_binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
         "version": "== dwi2tensor 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Ben Jeurissen (ben.jeurissen@uantwerpen.be)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
-        "host": "nodecw10",
+        "host": "compute-a-10",
         "started_utc": "2026-10-02T22:41:01.112870+00:00",
         "wall_s": 2.015324831008911,
         "returncode": 0,
         "output_sha256": {
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/tensor.nii.gz": "1613d6ddcd3e3c58d23ccc86cf25c8a3051e4c2adce0202fbd8f05018f0a5e31"
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/tensor.nii.gz": "1613d6ddcd3e3c58d23ccc86cf25c8a3051e4c2adce0202fbd8f05018f0a5e31"
         }
       },
       "inputs": {
         "official_corrected_dwi": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON07/eddy/data.nii.gz",
           "sha256": "e4dd1164aa1e82f8cc0faa331799e81921807e5a246a6e42d253766f1e8e2d06"
         },
         "official_gradient_mrtrix": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gradient_mrtrix.txt",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/gradient_mrtrix.txt",
           "sha256": "451f39e404802b922d4f9f525039da3cc69cbbafdd8c139e3e27a8158522c230"
         },
         "brain_mask": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/brain_mask.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/brain_mask.nii.gz",
           "sha256": "a1ff61fec46c1120544357d746f3d6032a3a0cfc5f05c28a956a416e13c4a277"
         },
         "FA": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/fa.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/fa.nii.gz",
           "sha256": "6ef292d2a676a478fe24c7c7854f6c4a45811d7c9dbbebb11ac24f04a0a3a764"
         },
         "principal_direction": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/direction.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/direction.nii.gz",
           "sha256": "0ebd8d291618ff04facd5997bf62b3bfc1058a4315b95966610ba7b7034ecb76"
         }
       },
       "reference_geometry": {
         "fa": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/fa.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/fa.nii.gz",
           "sha256": "6ef292d2a676a478fe24c7c7854f6c4a45811d7c9dbbebb11ac24f04a0a3a764",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -5603,7 +5603,7 @@
           "affine_max_abs_header_difference": 2.384185791015625e-07
         },
         "direction": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/direction.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/direction.nii.gz",
           "sha256": "0ebd8d291618ff04facd5997bf62b3bfc1058a4315b95966610ba7b7034ecb76",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -5615,7 +5615,7 @@
           "affine_max_abs_header_difference": 2.384185791015625e-07
         },
         "tensor": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/tensor.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON07/tensor.nii.gz",
           "sha256": "1613d6ddcd3e3c58d23ccc86cf25c8a3051e4c2adce0202fbd8f05018f0a5e31",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -6200,59 +6200,59 @@
       "official_tensor_command": {
         "label": "DTI",
         "command": [
-          "/public/software/apps/MRtrix3/3.0.3/bin/dwi2tensor",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON08/eddy/data.nii.gz",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/tensor.nii.gz",
+          "/opt/reference/MRtrix3/3.0.3/bin/dwi2tensor",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON08/eddy/data.nii.gz",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/tensor.nii.gz",
           "-grad",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/gradient_mrtrix.txt",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/gradient_mrtrix.txt",
           "-mask",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/brain_mask.nii.gz",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/brain_mask.nii.gz",
           "-iter",
           "2",
           "-nthreads",
           "8"
         ],
         "input_sha256": {
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON08/eddy/data.nii.gz": "784b1da48bddad2b248b2c789b54229d4ab71afab76999325199e11d1229ae41",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/gradient_mrtrix.txt": "84e5512e0f48be8e67eba510fbcd42b2d803148f036ec0c4c1c2a163fd08329c",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/brain_mask.nii.gz": "ed723db9c257b67f6d22e1defd95be128e6e4c94cec64c257dc2439394afaf42"
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON08/eddy/data.nii.gz": "784b1da48bddad2b248b2c789b54229d4ab71afab76999325199e11d1229ae41",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/gradient_mrtrix.txt": "84e5512e0f48be8e67eba510fbcd42b2d803148f036ec0c4c1c2a163fd08329c",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/brain_mask.nii.gz": "ed723db9c257b67f6d22e1defd95be128e6e4c94cec64c257dc2439394afaf42"
         },
         "binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
         "resolved_binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
         "version": "== dwi2tensor 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Ben Jeurissen (ben.jeurissen@uantwerpen.be)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
-        "host": "nodecw10",
+        "host": "compute-a-10",
         "started_utc": "2026-10-02T23:25:12.661757+00:00",
         "wall_s": 1.978654071688652,
         "returncode": 0,
         "output_sha256": {
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/tensor.nii.gz": "9306c3eddc93603ac6f0312dad0b5251a8c1d16a137f43d1030a5d92f43fc548"
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/tensor.nii.gz": "9306c3eddc93603ac6f0312dad0b5251a8c1d16a137f43d1030a5d92f43fc548"
         }
       },
       "inputs": {
         "official_corrected_dwi": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON08/eddy/data.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON08/eddy/data.nii.gz",
           "sha256": "784b1da48bddad2b248b2c789b54229d4ab71afab76999325199e11d1229ae41"
         },
         "official_gradient_mrtrix": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/gradient_mrtrix.txt",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/gradient_mrtrix.txt",
           "sha256": "84e5512e0f48be8e67eba510fbcd42b2d803148f036ec0c4c1c2a163fd08329c"
         },
         "brain_mask": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/brain_mask.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/brain_mask.nii.gz",
           "sha256": "ed723db9c257b67f6d22e1defd95be128e6e4c94cec64c257dc2439394afaf42"
         },
         "FA": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/fa.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/fa.nii.gz",
           "sha256": "e66e7d838a51eb7c17ae3a37c9ea22fcd4de673c3d897df1e1b69f64e1f7ae9a"
         },
         "principal_direction": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/direction.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/direction.nii.gz",
           "sha256": "f86d3017680170b4f7cb3489a9789eb0006e32c5ce617839379ff0aa8b404e92"
         }
       },
       "reference_geometry": {
         "fa": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/fa.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/fa.nii.gz",
           "sha256": "e66e7d838a51eb7c17ae3a37c9ea22fcd4de673c3d897df1e1b69f64e1f7ae9a",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -6263,7 +6263,7 @@
           "affine_max_abs_header_difference": 2.384185791015625e-07
         },
         "direction": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/direction.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/direction.nii.gz",
           "sha256": "f86d3017680170b4f7cb3489a9789eb0006e32c5ce617839379ff0aa8b404e92",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -6275,7 +6275,7 @@
           "affine_max_abs_header_difference": 2.384185791015625e-07
         },
         "tensor": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/tensor.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON08/tensor.nii.gz",
           "sha256": "9306c3eddc93603ac6f0312dad0b5251a8c1d16a137f43d1030a5d92f43fc548",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -6800,59 +6800,59 @@
       "official_tensor_command": {
         "label": "DTI",
         "command": [
-          "/public/software/apps/MRtrix3/3.0.3/bin/dwi2tensor",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON09/eddy/data.nii.gz",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/tensor.nii.gz",
+          "/opt/reference/MRtrix3/3.0.3/bin/dwi2tensor",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON09/eddy/data.nii.gz",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/tensor.nii.gz",
           "-grad",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/gradient_mrtrix.txt",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/gradient_mrtrix.txt",
           "-mask",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/brain_mask.nii.gz",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/brain_mask.nii.gz",
           "-iter",
           "2",
           "-nthreads",
           "8"
         ],
         "input_sha256": {
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON09/eddy/data.nii.gz": "6f7f2695efe02c542c30e9e5e1954fd355a8c208b6bdf33824ea3272c5e0ab3e",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/gradient_mrtrix.txt": "9762c916539922383d624067c9e7e83d31cfd6016db177630dd22f779ad697f5",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/brain_mask.nii.gz": "e2f60fabfbc2c93638afee7e5a5c7869414d82a5fe8eafbeb29bfe870c6fc07e"
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON09/eddy/data.nii.gz": "6f7f2695efe02c542c30e9e5e1954fd355a8c208b6bdf33824ea3272c5e0ab3e",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/gradient_mrtrix.txt": "9762c916539922383d624067c9e7e83d31cfd6016db177630dd22f779ad697f5",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/brain_mask.nii.gz": "e2f60fabfbc2c93638afee7e5a5c7869414d82a5fe8eafbeb29bfe870c6fc07e"
         },
         "binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
         "resolved_binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
         "version": "== dwi2tensor 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Ben Jeurissen (ben.jeurissen@uantwerpen.be)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
-        "host": "nodecw10",
+        "host": "compute-a-10",
         "started_utc": "2026-10-02T23:22:44.484482+00:00",
         "wall_s": 2.0484888777136803,
         "returncode": 0,
         "output_sha256": {
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/tensor.nii.gz": "78748d685596ef592c286e3bc679e70899efde873097187c094d16f015879f61"
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/tensor.nii.gz": "78748d685596ef592c286e3bc679e70899efde873097187c094d16f015879f61"
         }
       },
       "inputs": {
         "official_corrected_dwi": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON09/eddy/data.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON09/eddy/data.nii.gz",
           "sha256": "6f7f2695efe02c542c30e9e5e1954fd355a8c208b6bdf33824ea3272c5e0ab3e"
         },
         "official_gradient_mrtrix": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/gradient_mrtrix.txt",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/gradient_mrtrix.txt",
           "sha256": "9762c916539922383d624067c9e7e83d31cfd6016db177630dd22f779ad697f5"
         },
         "brain_mask": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/brain_mask.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/brain_mask.nii.gz",
           "sha256": "e2f60fabfbc2c93638afee7e5a5c7869414d82a5fe8eafbeb29bfe870c6fc07e"
         },
         "FA": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/fa.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/fa.nii.gz",
           "sha256": "971257bc52ff60e5a639ce6ef664657134df783ba35ca46d24d372993813a4a1"
         },
         "principal_direction": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/direction.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/direction.nii.gz",
           "sha256": "cad1e5974955eacd3f814f55b72f5f3c415b482e7a575595cee7631b2c1c388a"
         }
       },
       "reference_geometry": {
         "fa": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/fa.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/fa.nii.gz",
           "sha256": "971257bc52ff60e5a639ce6ef664657134df783ba35ca46d24d372993813a4a1",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -6863,7 +6863,7 @@
           "affine_max_abs_header_difference": 2.384185791015625e-07
         },
         "direction": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/direction.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/direction.nii.gz",
           "sha256": "cad1e5974955eacd3f814f55b72f5f3c415b482e7a575595cee7631b2c1c388a",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -6875,7 +6875,7 @@
           "affine_max_abs_header_difference": 2.384185791015625e-07
         },
         "tensor": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/tensor.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON09/tensor.nii.gz",
           "sha256": "78748d685596ef592c286e3bc679e70899efde873097187c094d16f015879f61",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -7415,59 +7415,59 @@
       "official_tensor_command": {
         "label": "DTI",
         "command": [
-          "/public/software/apps/MRtrix3/3.0.3/bin/dwi2tensor",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON10/eddy/data.nii.gz",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/tensor.nii.gz",
+          "/opt/reference/MRtrix3/3.0.3/bin/dwi2tensor",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON10/eddy/data.nii.gz",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/tensor.nii.gz",
           "-grad",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/gradient_mrtrix.txt",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/gradient_mrtrix.txt",
           "-mask",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/brain_mask.nii.gz",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/brain_mask.nii.gz",
           "-iter",
           "2",
           "-nthreads",
           "8"
         ],
         "input_sha256": {
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON10/eddy/data.nii.gz": "fab7b623b3edfe3bcaacb4017c3f1506d6d9d5527d44182a810014a1737fa16a",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/gradient_mrtrix.txt": "bc2f93607c495400798975d5a704922df777e6dd14afba53add7d231f81ea67c",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/brain_mask.nii.gz": "485969a52e054c1915a9b2c48837d5d5771d4c69d5e295effebac8639ba8b876"
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON10/eddy/data.nii.gz": "fab7b623b3edfe3bcaacb4017c3f1506d6d9d5527d44182a810014a1737fa16a",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/gradient_mrtrix.txt": "bc2f93607c495400798975d5a704922df777e6dd14afba53add7d231f81ea67c",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/brain_mask.nii.gz": "485969a52e054c1915a9b2c48837d5d5771d4c69d5e295effebac8639ba8b876"
         },
         "binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
         "resolved_binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
         "version": "== dwi2tensor 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Ben Jeurissen (ben.jeurissen@uantwerpen.be)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
-        "host": "nodecw10",
+        "host": "compute-a-10",
         "started_utc": "2026-10-03T00:20:25.102135+00:00",
         "wall_s": 2.025531031191349,
         "returncode": 0,
         "output_sha256": {
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/tensor.nii.gz": "818fc79c0d6f5ffc5aaa41b53c3fa0f6ea2d5cc82031f8c70e6a465158f913ba"
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/tensor.nii.gz": "818fc79c0d6f5ffc5aaa41b53c3fa0f6ea2d5cc82031f8c70e6a465158f913ba"
         }
       },
       "inputs": {
         "official_corrected_dwi": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON10/eddy/data.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_rawprep_cpu_budget_reference_v1/sub-CON10/eddy/data.nii.gz",
           "sha256": "fab7b623b3edfe3bcaacb4017c3f1506d6d9d5527d44182a810014a1737fa16a"
         },
         "official_gradient_mrtrix": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/gradient_mrtrix.txt",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/gradient_mrtrix.txt",
           "sha256": "bc2f93607c495400798975d5a704922df777e6dd14afba53add7d231f81ea67c"
         },
         "brain_mask": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/brain_mask.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/brain_mask.nii.gz",
           "sha256": "485969a52e054c1915a9b2c48837d5d5771d4c69d5e295effebac8639ba8b876"
         },
         "FA": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/fa.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/fa.nii.gz",
           "sha256": "5304050cf640604d7e7f91a7c1317d2758308c21f803c735b602d8db8032fc30"
         },
         "principal_direction": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/direction.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/direction.nii.gz",
           "sha256": "fc22fa4dd17e49014f863904523a439255b82f5af24538d137be37bbde6d0cad"
         }
       },
       "reference_geometry": {
         "fa": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/fa.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/fa.nii.gz",
           "sha256": "5304050cf640604d7e7f91a7c1317d2758308c21f803c735b602d8db8032fc30",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -7478,7 +7478,7 @@
           "affine_max_abs_header_difference": 2.842170943040401e-14
         },
         "direction": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/direction.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/direction.nii.gz",
           "sha256": "fc22fa4dd17e49014f863904523a439255b82f5af24538d137be37bbde6d0cad",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -7490,7 +7490,7 @@
           "affine_max_abs_header_difference": 2.842170943040401e-14
         },
         "tensor": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/tensor.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CPU_budget_raw10_v1/sub-CON10/tensor.nii.gz",
           "sha256": "818fc79c0d6f5ffc5aaa41b53c3fa0f6ea2d5cc82031f8c70e6a465158f913ba",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -8015,59 +8015,59 @@
       "official_tensor_command": {
         "label": "DTI",
         "command": [
-          "/public/software/apps/MRtrix3/3.0.3/bin/dwi2tensor",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_CON11_CPU_fresh_origin_v1/sub-CON11/eddy/data.nii.gz",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/tensor.nii.gz",
+          "/opt/reference/MRtrix3/3.0.3/bin/dwi2tensor",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_CON11_CPU_fresh_origin_v1/sub-CON11/eddy/data.nii.gz",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/tensor.nii.gz",
           "-grad",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/gradient_mrtrix.txt",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/gradient_mrtrix.txt",
           "-mask",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/brain_mask.nii.gz",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/brain_mask.nii.gz",
           "-iter",
           "2",
           "-nthreads",
           "8"
         ],
         "input_sha256": {
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_CON11_CPU_fresh_origin_v1/sub-CON11/eddy/data.nii.gz": "1dcbf6cd4bde5969f08c06020c1e9a967f5c8c153044d610d583820934af5fbc",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/gradient_mrtrix.txt": "2d7f86c885a8511004da4b9d8de0d8b6c63d4b70e6fbef6253327c7d632edf69",
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/brain_mask.nii.gz": "694ecfefe2a610b2d83c8bf5e777610841c182a7621b01b265a205a1968cf807"
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_CON11_CPU_fresh_origin_v1/sub-CON11/eddy/data.nii.gz": "1dcbf6cd4bde5969f08c06020c1e9a967f5c8c153044d610d583820934af5fbc",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/gradient_mrtrix.txt": "2d7f86c885a8511004da4b9d8de0d8b6c63d4b70e6fbef6253327c7d632edf69",
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/brain_mask.nii.gz": "694ecfefe2a610b2d83c8bf5e777610841c182a7621b01b265a205a1968cf807"
         },
         "binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
         "resolved_binary_sha256": "608f3fe8e91ec6e664379e01bd11df9a70aa6d76ad7dfee4951753cccd315129",
         "version": "== dwi2tensor 3.0.3-103-g026e850d ==\n64 bit release version, built Jun  1 2022, using Eigen 3.3.7\nAuthor(s): Ben Jeurissen (ben.jeurissen@uantwerpen.be)\nCopyright (c) 2008-2022 the MRtrix3 contributors.\n\nThis Source Code Form is subject to the terms of the Mozilla Public\nLicense, v. 2.0. If a copy of the MPL was not distributed with this\nfile, You can obtain one at http://mozilla.org/MPL/2.0/.\n\nCovered Software is provided under this License on an \"as is\"\nbasis, without warranty of any kind, either expressed, implied, or\nstatutory, including, without limitation, warranties that the\nCovered Software is free of defects, merchantable, fit for a\nparticular purpose or non-infringing.\nSee the Mozilla Public License v. 2.0 for more details.\n\nFor more details, see http://www.mrtrix.org/.\n\n",
-        "host": "nodecw10",
+        "host": "compute-a-10",
         "started_utc": "2026-10-03T01:31:39.285713+00:00",
         "wall_s": 2.016921244561672,
         "returncode": 0,
         "output_sha256": {
-          "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/tensor.nii.gz": "59fd314fe96bba4171645b079f71b095337ac739cfd4bd2cec510f604fbe1100"
+          "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/tensor.nii.gz": "59fd314fe96bba4171645b079f71b095337ac739cfd4bd2cec510f604fbe1100"
         }
       },
       "inputs": {
         "official_corrected_dwi": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01/official_CON11_CPU_fresh_origin_v1/sub-CON11/eddy/data.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_01/official_CON11_CPU_fresh_origin_v1/sub-CON11/eddy/data.nii.gz",
           "sha256": "1dcbf6cd4bde5969f08c06020c1e9a967f5c8c153044d610d583820934af5fbc"
         },
         "official_gradient_mrtrix": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/gradient_mrtrix.txt",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/gradient_mrtrix.txt",
           "sha256": "2d7f86c885a8511004da4b9d8de0d8b6c63d4b70e6fbef6253327c7d632edf69"
         },
         "brain_mask": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/brain_mask.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/brain_mask.nii.gz",
           "sha256": "694ecfefe2a610b2d83c8bf5e777610841c182a7621b01b265a205a1968cf807"
         },
         "FA": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/fa.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/fa.nii.gz",
           "sha256": "c4938b08b11ad8c5cc59e42c5e53540b6845a45fff6d2c67c1c27da038285735"
         },
         "principal_direction": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/direction.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/direction.nii.gz",
           "sha256": "c461cd24a5f4e0c5542e21403da4644914d4e9d743051afd6d0a618d1501bf7a"
         }
       },
       "reference_geometry": {
         "fa": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/fa.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/fa.nii.gz",
           "sha256": "c4938b08b11ad8c5cc59e42c5e53540b6845a45fff6d2c67c1c27da038285735",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -8078,7 +8078,7 @@
           "affine_max_abs_header_difference": 2.384185791015625e-07
         },
         "direction": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/direction.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/direction.nii.gz",
           "sha256": "c461cd24a5f4e0c5542e21403da4644914d4e9d743051afd6d0a618d1501bf7a",
           "storage_dtype": "float32",
           "storage_stride": [
@@ -8090,7 +8090,7 @@
           "affine_max_abs_header_difference": 2.384185791015625e-07
         },
         "tensor": {
-          "path": "/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/tensor.nii.gz",
+          "path": "/data/workspaces/fnit_connectome_tenraw_20261002/task_02/official_modeling_CON11_selected_recovery_v1/sub-CON11/tensor.nii.gz",
           "sha256": "59fd314fe96bba4171645b079f71b095337ac739cfd4bd2cec510f604fbe1100",
           "storage_dtype": "float32",
           "storage_stride": [

@@ -1,6 +1,6 @@
 #!/bin/bash
 set -eu
-FNIT_SERVER_ROOT=/cwStorage/home/gongwk/Notebook_code/FNIT
+FNIT_SERVER_ROOT=/data/fnit
 TASK_WORKSPACE=$FNIT_SERVER_ROOT/workspaces/smri_cpu_20261004/remaining_20261004/synth/morph-raw-sampler
 TASK_RUNS=$FNIT_SERVER_ROOT/runs/smri_cpu_20261004/remaining_20261004/synth/morph-raw-sampler
 MORPH_WORKSPACE=$FNIT_SERVER_ROOT/workspaces/smri_cpu_20261004/remaining_20261004/morph
@@ -20,9 +20,9 @@ else
 fi
 mkdir -p "$TASK_RUNS"
 mkdir -m 700 "$TASK_WORKSPACE/cache-final-v31-$PHASE"
-exec 8>"$FNIT_SERVER_ROOT/runs/smri_cpu_20261004/nodecw7.gems.cpu8.lock"
+exec 8>"$FNIT_SERVER_ROOT/runs/smri_cpu_20261004/compute-a-7.gems.cpu8.lock"
 flock -x 8
-exec 9>"$FNIT_SERVER_ROOT/runs/smri_cpu_20261004/nodecw7.synth.cpu8.lock"
+exec 9>"$FNIT_SERVER_ROOT/runs/smri_cpu_20261004/compute-a-7.synth.cpu8.lock"
 flock -x 9
 export PYTHONPATH="$MORPH_WORKSPACE/final_joint_v31_numba/src"
 export NUMBA_CACHE_DIR="$TASK_WORKSPACE/cache-final-v31-$PHASE"
@@ -34,11 +34,11 @@ COMMON_ARGUMENTS=(
   --helper-source-sha256 f87ae99bf1a4fb8fc42eb196801871dbaa7f141f135bcb4a761a7c979ebfdfcd
 )
 if [ "$PHASE" = full ]; then
-  ARGUMENTS=(--mode full --reference-root "$MORPH_RUNS/nodecw7_live_reference_v18"
-    --raw192 "$MORPH_RUNS/nodecw7_stage_v19/first_layer_reference/artifacts"
+  ARGUMENTS=(--mode full --reference-root "$MORPH_RUNS/compute-a-7_live_reference_v18"
+    --raw192 "$MORPH_RUNS/compute-a-7_stage_v19/first_layer_reference/artifacts"
     --output "$TASK_RUNS/replay-final-v31")
 else
-  ARGUMENTS=(--mode cold256 --reference "$MORPH_RUNS/nodecw7_live_reference_v18/joint_256/artifacts"
+  ARGUMENTS=(--mode cold256 --reference "$MORPH_RUNS/compute-a-7_live_reference_v18/joint_256/artifacts"
     --completed-report "$TASK_RUNS/replay-final-v31/report.private.json"
     --output "$TASK_RUNS/cold-final-v31.private.json")
 fi

@@ -78,7 +78,7 @@ python frozen_workspace/diagnose_saved_directions.py \
 
 `--current` 提供已存 H/g/独立 diagonal；`--oracle` 提供既有原生矩阵、RHS 和解；`--solutions` 提供两臂私有解及原 JSON；`--prior-summary` 绑定既有原生自然 69 轮记录；`--root` 用于核对当前源码；`--output` 必须是新目录；`--expected` 见 [10 项绑定](bindings/direction_expected.public.json)。
 
-实际调度脚本见 [两臂 v2](source/run_current_wait_v2.sh) 和 [保存方向诊断](source/run_saved_directions.sh)：同 nodecw7 八个物理核 `32,36,…,60`，Torch/OpenBLAS/MKL/Numba 预算 8，共同 outer CPU 锁之后取本模块 inner 锁，科学 child 硬上限 180 s。GPU 可见设备为空，`LD_LIBRARY_PATH` / `LD_PRELOAD` 清空。
+实际调度脚本见 [两臂 v2](source/run_current_wait_v2.sh) 和 [保存方向诊断](source/run_saved_directions.sh)：同 compute-a-7 八个物理核 `32,36,…,60`，Torch/OpenBLAS/MKL/Numba 预算 8，共同 outer CPU 锁之后取本模块 inner 锁，科学 child 硬上限 180 s。GPU 可见设备为空，`LD_LIBRARY_PATH` / `LD_PRELOAD` 清空。
 
 ## 4. 原软件调用与参考系统
 

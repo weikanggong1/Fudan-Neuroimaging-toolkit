@@ -1,5 +1,7 @@
 # GEMS 的 CPU 初始对齐实验桥
 
+> 历史实验：当前 FNIT 已移除两个独立准备 helper。本页结果不变；重放时必须显式提供校验通过的旧源码快照，不能从当前生产包导入。
+
 ## 1. 功能简介
 
 本目录提供海马/杏仁核的**初始对齐**入口。显式选择 `cpu-robust-experiment` 后，调用已验证的目标准备、右侧图谱头反射及可复用 CPU rigid→affine 实验适配器，最后重载第二阶段 mapmovhdr 的 MGH 头，并转换到当前 GEMS 处理网格。它返回图谱体素到 `context.image` 体素的 4×4 Double 矩阵，供后续 `atlas.transformed(matrix, transform_reference=True)` 使用。
@@ -47,6 +49,7 @@ with load_cpu_candidate(repository_root) as cpu_candidate:  # 加载一次，可
         cpu_candidate=cpu_candidate,
         output_directory="/absolute/path/new_initial_alignment",  # 必须尚不存在
         coarse_reference=coarse_label_path,  # 核验原标签值和 Double 几何并保留原头
+        preparation_source=repository_root / "validation/robust_register/rigid_affine_20261006/candidate_source/robust_register/preparation.py",  # 显式历史快照，加载前校验 SHA-256
         registration_parameters=None,       # 使用下表已测 rigid/affine 参数
     )
 atlas_to_context_voxel = initial_alignment.atlas_to_context_voxel  # float64，4×4
@@ -78,6 +81,7 @@ alignment_report = initial_alignment.report  # 准备、参数、坐标定义和
 | `cpu_candidate` | `None` | CPU 路径须传入仍打开的适配器；同实例复用 JIT 缓存，用 `with` / `close()` 释放 |
 | `output_directory` | `None` | CPU 路径必填新目录；softDice不写该目录 |
 | `coarse_reference` | `None` | 原同网格粗标签影像；否则从 ndarray 和 context.image 构造标签头 |
+| `preparation_source` | `None`，CPU实验必填 | 显式历史 `preparation.py`；SHA-256 必须为 `a94a6e3fa9b0aa6c53ff8a9d66fa6298096adc25b25a83918f08402785b648d7`；不从当前生产包导入 |
 | `registration_parameters` | `None` | 可覆盖下表参数；禁止 `mode`，固定先 rigid 再 affine。覆盖参数不继承原案例验收结论 |
 
 | 配准参数 | 默认值 | 含义 |
@@ -124,6 +128,7 @@ new_initial_alignment/
 
 ```bash
 python validation/torchgems/cpu_initial_alignment_20261007/run_initial_alignment.py \
+  --preparation-source validation/robust_register/rigid_affine_20261006/candidate_source/robust_register/preparation.py \
   --repository-root /absolute/path/FNIT \
   --image /absolute/path/norm.mgz \
   --coarse-segmentation /absolute/path/aseg.mgz \
@@ -204,7 +209,7 @@ mri_robust_register --mov rigid.header.mgz --dst targetMask.mgz \
 ## 7. 原实现、许可和参考文献
 
 - [FreeSurfer固定源提交d932c45](https://github.com/freesurfer/freesurfer/tree/d932c45b7941662ea380a05efef580568b98d41a)的 mri_robust_register；[SAMSEG原代码库](https://github.com/freesurfer/samseg)的 subregions/core.py、hippocampus.py；参考安装版8.2。原源身份在私密计划冻结，不复制发布SDK源码。
-- [FNIT目标准备说明](../../../docs/robust_register/PREPARATION.md)和[当前亚区分割说明](../../../docs/subregions/README.md)；本目录没有改写其当前默认方法。
+- [历史目标准备记录](../../robust_register/target_preparation_20261006/README.md)和[当前亚区分割说明](../../../docs/subregions/README.md)；本目录没有改写其当前默认方法。
 - Reuter M, Rosas HD, Fischl B. Highly accurate inverse consistent registration: a robust approach. NeuroImage (2010), [doi:10.1016/j.neuroimage.2010.07.020](https://doi.org/10.1016/j.neuroimage.2010.07.020)。
 - Iglesias JE et al. A computational atlas of the hippocampal formation using ex vivo, ultra-high resolution MRI. NeuroImage (2015), [doi:10.1016/j.neuroimage.2015.04.042](https://doi.org/10.1016/j.neuroimage.2015.04.042)。
 - Saygin ZM et al. High-resolution magnetic resonance imaging reveals nuclei of the human amygdala. NeuroImage (2017), [doi:10.1016/j.neuroimage.2017.04.046](https://doi.org/10.1016/j.neuroimage.2017.04.046)。

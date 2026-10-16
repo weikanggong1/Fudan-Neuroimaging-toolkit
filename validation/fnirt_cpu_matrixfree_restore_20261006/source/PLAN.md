@@ -39,7 +39,7 @@ NPZ加载只保证逻辑值。本 loader 按 producer summary 的 byte strides �
 
 未来独立 canonical workspace/run：`smri_cpu_20261004/remaining_20261006/fnirt-matrixfree-restored-v1`。审查批准后才能上传新文件和在六INDEX锁下登记自己的新叶。
 
-nodecw7物理核32,36,40,44,48,52,56,60，OMP/OpenBLAS/MKL/Numba8、Torch8/interop1；CUDA_VISIBLE_DEVICES为空，禁 loader overrides。共用outer CPU lock后取独立inner lock，outerwait19000s、controller19600s、sciencechild180s，20GB address-space cap；不抢占其它任务。umask077，上传代码600、目录700，新output必须不存在。
+compute-a-7物理核32,36,40,44,48,52,56,60，OMP/OpenBLAS/MKL/Numba8、Torch8/interop1；CUDA_VISIBLE_DEVICES为空，禁 loader overrides。共用outer CPU lock后取独立inner lock，outerwait19000s、controller19600s、sciencechild180s，20GB address-space cap；不抢占其它任务。umask077，上传代码600、目录700，新output必须不存在。
 
 时钟分别记导入/绑定、两套restore/closure工厂、每个callback/CSC及worker总界。第一callback可能包含Numba JIT与打包；顺序固定是数值控制，不是ABBA性能比较。前后FSL DSO身份快照只作为映射记录，不扩大为全程动态审计。
 

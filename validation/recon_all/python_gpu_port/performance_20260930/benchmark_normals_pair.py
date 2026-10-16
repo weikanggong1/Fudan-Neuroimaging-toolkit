@@ -2,7 +2,7 @@ import pathlib,importlib.util,sys,hashlib,json,time,platform
 import numpy as np,torch,numba
 from nibabel.freesurfer.io import read_geometry
 from fnit.recon_all import place_surface_normals as new
-d=pathlib.Path("/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930")
+d=pathlib.Path("/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930")
 spec=importlib.util.spec_from_file_location('original_normals_279',d/'original_normals_279.py')
 old=importlib.util.module_from_spec(spec);sys.modules[spec.name]=old;spec.loader.exec_module(old)
 torch.set_num_threads(4)

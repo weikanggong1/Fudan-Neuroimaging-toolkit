@@ -24,7 +24,7 @@ flowchart TD
 | --- | --- |
 | `--config` | 必需，UTF-8 JSON，含下列路径及两例列表 |
 | `--output` | 必需，新诊断目录；存在时拒绝覆盖 |
-| `--lock` | 必需，与整例相同的服务器本地锁，当前为`/tmp/fnit-recon-five-20261002-gongwk.gpu.lock` |
+| `--lock` | 必需，与整例相同的服务器本地锁，当前为`/tmp/fnit-recon-five-20261002-benchmark-user.gpu.lock` |
 | `--wait` | 默认关闭；启用后每15秒在锁外等待所有FNIT completion；失败completion直接报错 |
 | `--plan` | 默认关闭；只校验配置结构并打印计划，不读取影像、不运行数值算法、不创建结果目录 |
 | `python` | 既有主页Conda Python绝对路径，driver也用此Python启动 |
@@ -67,7 +67,7 @@ python_executable = Path("/path/to/fnit_main_env/bin/python")  # 主页Conda Pyt
 comparison_driver = Path("/path/to/coordinator/compare_whole_cases.py")
 comparison_config = Path("/path/to/coordinator/whole_comparison_config.json")
 comparison_output = Path("/path/to/parallel_20261002/whole_comparison_8d750e2")  # 必须新目录
-common_resource_lock = Path("/tmp/fnit-recon-five-20261002-gongwk.gpu.lock")
+common_resource_lock = Path("/tmp/fnit-recon-five-20261002-benchmark-user.gpu.lock")
 subprocess.run([
     str(python_executable), str(comparison_driver),
     "--config", str(comparison_config), "--output", str(comparison_output),
@@ -90,9 +90,9 @@ plot_recon_all_comparison.py
 
 ```bash
 python compare_whole_cases.py --config whole_comparison_config.json \
-  --output /path/to/new_comparison --lock /tmp/fnit-recon-five-20261002-gongwk.gpu.lock --plan
+  --output /path/to/new_comparison --lock /tmp/fnit-recon-five-20261002-benchmark-user.gpu.lock --plan
 python -u compare_whole_cases.py --config whole_comparison_config.json \
-  --output /path/to/new_comparison --lock /tmp/fnit-recon-five-20261002-gongwk.gpu.lock --wait
+  --output /path/to/new_comparison --lock /tmp/fnit-recon-five-20261002-benchmark-user.gpu.lock --wait
 ```
 
 driver自己取得共同锁，启动命令不要再外包同文件flock，以免重复持锁。数值导入也在锁内，CUDA不可见；没有服务器生产任务、球面完整regression或新的官方命令。比较和绘图耗时不计入整例时间。主程序失败保留已生成的报告和日志；重跑使用新输出目录。
@@ -101,7 +101,7 @@ driver自己取得共同锁，启动命令不要再外包同文件flock，以免
 
 这是离线比较器，没有对应的官方生成命令；官方参考来自已归档的`recon-all -all -parallel -openmp 4 -itkthreads 1`。生产FNIT不调用官方程序。
 
-官方sub01为2026-09-24的gpucw1归档，6790秒；sub02为2026-09-30的**nodecw10**归档，4143秒，与本轮FNIT的gpucw1跨主机。官方Synth在CPU，左右半球`openmp 4`并行可能总8线程，而本轮FNIT总预算4。官方时间用于归档上下文，不作本轮同资源配对提速；`execution_binding.json`完整保留逐例官方metadata与限制。
+官方sub01为2026-09-24的accelerator-a-1归档，6790秒；sub02为2026-09-30的**compute-a-10**归档，4143秒，与本轮FNIT的accelerator-a-1跨主机。官方Synth在CPU，左右半球`openmp 4`并行可能总8线程，而本轮FNIT总预算4。官方时间用于归档上下文，不作本轮同资源配对提速；`execution_binding.json`完整保留逐例官方metadata与限制。
 
 2026-10-02 baseline与candidate两例都已从原始T1和空目录完成，均138/138输出存在。候选计算提交为`8d750e25d4d067a43edb788a96b2086a1c031ba0`。完整命令墙钟sub01 3440.429→2248.712秒、sub02 3668.963→2322.500秒；pipeline与入口时间单列，详见[当前完整结果](../FINAL_RESULTS.md)。三方比较使用成功的sub02 retry_v3配置，不读首次失败目录。
 
@@ -133,13 +133,13 @@ v5已完成两例三方数值、质量和脑图比较；[终态](results_retry_v
 python validation/recon_all/optimizations/20261002_parallel/collect_completed_comparison.py \
   --remote-root /data/benchmark/whole_comparison_8d750e2_v2 \
   --output validation/recon_all/optimizations/20261002_parallel/whole_comparison/results_v2 \
-  --ssh-wrapper /path/to/ssh_gpucw1.sh \
-  --scp-wrapper /path/to/scp_gpucw1.sh
+  --ssh-wrapper /path/to/ssh_accelerator-a-1.sh \
+  --scp-wrapper /path/to/scp_accelerator-a-1.sh
 ```
 
 四个具名参数均必需：`remote-root`为已完成的远端比较目录；`output`为新本地
 目录；`ssh-wrapper`接受一条远端命令；`scp-wrapper`接受来源与目标路径，目标
-主机固定为本轮已授权的`gpucw1`。返回stdout计数，同时在输出目录旁写
+主机固定为本轮已授权的`accelerator-a-1`。返回stdout计数，同时在输出目录旁写
 `collected_comparison_v2.json`，包含原路径、每文件大小/SHA、收集器SHA和时间。
 这是元数据回收工具，没有对应的官方软件命令或独立影像计算API；实际完成
 情况以收集收据为准。

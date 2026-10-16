@@ -1,12 +1,12 @@
 #!/bin/bash
 set -e
-B=/cwStorage/home/gongwk/Notebook_code/FNIT
+B=/data/fnit
 W=$B/workspaces/smri_cpu_20261004/remaining_20261004/gems/fnirt-cpu-orientation-v1
 R=$B/runs/smri_cpu_20261004/remaining_20261004/gems/fnirt-cpu-orientation-v1
 O=$B/runs/smri_cpu_20261004/task4_vbm_official_cpu_v2/official_synthstrip_fast_fnirt
-F=/public/software/apps/FSL/6.0.7.4
+F=/opt/reference/FSL/6.0.7.4
 trap 'rc=$?; printf "{\"exit_code\":%s}\n" "$rc" > "$R/cpu_exit.public.json"' EXIT
-exec 9>"$B/runs/smri_cpu_20261004/nodecw7.gems.cpu8.lock"
+exec 9>"$B/runs/smri_cpu_20261004/compute-a-7.gems.cpu8.lock"
 flock 9
 export OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 MKL_NUM_THREADS=8
 for ARM in baseline candidate; do

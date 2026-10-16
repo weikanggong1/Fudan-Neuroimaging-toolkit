@@ -115,7 +115,7 @@ native 缺省 CUDA 链仍执行 N4、WM分割/编辑、拓扑、inflation、whit
 - 旧 `20261011_python_call_chain_audit`：当时24组76引用；当前工具复用其逐函数 SHA 与历史事件核验。
 - 本次 `748b+f958`：24组90引用、13组原程序条件、21项配方；显式完整 GA 已接入，root 路由开启面缓存，adapter/core 缺省仍False。1370个 Git/覆盖文件全部核验。
 - `0fdf8da6211a` 补审：60个实际Git源文件及482个函数行范围完成绑定核验；显式Python/GA的原程序分支、21项配方、CUDA目标、线程预算、精度例外和worker失败不回退均重新查看。482是源内函数定位数量，不代表482项算法测试。未消费未提交的距离接线或pial残余修改，也未执行新MRI/GPU。
-- 当前没有新整例/MRI、动态链接器或 OS 隔离结果；整体等效 `not_assessed`，新增原程序泄漏问题未发现。代码/依赖版本由声明快照绑定；不把本机安装包版本冒称 CFFF 环境。Python>=3.10、Torch>=2.1、NumPy1.x、Numba>=0.59、SimpleITK==2.5.6等声明及主页 Conda 的 Python3.11/Torch2.5.1/Triton3.1.0见机器报告；缓存没有新依赖。
+- 当前没有新整例/MRI、动态链接器或 OS 隔离结果；整体等效 `not_assessed`，新增原程序泄漏问题未发现。代码/依赖版本由声明快照绑定；不把本机安装包版本冒称 accelerator-b 环境。Python>=3.10、Torch>=2.1、NumPy1.x、Numba>=0.59、SimpleITK==2.5.6等声明及主页 Conda 的 Python3.11/Torch2.5.1/Triton3.1.0见机器报告；缓存没有新依赖。
 
 ## 7. 参考文献与源码
 

@@ -3,7 +3,7 @@
 输出 JSON、pip/CLI 日志和 wheel SHA；无 GPU 计算，无资源下载。
 """
 import hashlib,json,os,pathlib,subprocess,sys,time,platform
-R=pathlib.Path("/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001");C=pathlib.Path("/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate_integrated_ff372d7")
+R=pathlib.Path("/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001");C=pathlib.Path("/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate_integrated_ff372d7")
 D=R/"installation_ff372d7";D.mkdir()
 P=pathlib.Path(sys.executable).parent
 env=dict(os.environ,CUDA_VISIBLE_DEVICES="",CC=str(P/"x86_64-conda-linux-gnu-cc"),CXX=str(P/"x86_64-conda-linux-gnu-c++"))

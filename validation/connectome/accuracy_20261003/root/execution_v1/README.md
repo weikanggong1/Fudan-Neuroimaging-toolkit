@@ -41,7 +41,7 @@ print(accuracy_configuration["execution_order"])  # 实际十二次安排，不�
 
 ## 3. 命令行调用
 
-实际 CPU 回归在 nodecw10，GPU 回归在 gpucw1，共用主页 Conda 环境和独立测试 checkout。原命令与进程时间在各自 `status.json`；CPU 命令如下：
+实际 CPU 回归在 compute-a-10，GPU 回归在 accelerator-a-1，共用主页 Conda 环境和独立测试 checkout。原命令与进程时间在各自 `status.json`；CPU 命令如下：
 
 ```bash
 test_checkout_directory=/absolute/root_integrated_tests_v3

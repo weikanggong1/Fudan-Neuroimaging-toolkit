@@ -4,11 +4,11 @@ import json
 import platform
 from pathlib import Path
 
-base = Path('/cwStorage/home/gongwk/Notebook_code/FNIT')
+base = Path('/data/fnit')
 workspace = base / 'workspaces/smri_cpu_20261004/remaining_20261004/synth/fnirt-pcg-shared-v2'
 run = base / 'runs/smri_cpu_20261004/remaining_20261004/synth/fnirt-pcg-shared-v2'
 old = base / 'workspaces/smri_cpu_20261004/remaining_20261004/gems/fnirt-first-diff-v2'
-reference = Path('/public/software/apps/FSL/6.0.7.4')
+reference = Path('/opt/reference/FSL/6.0.7.4')
 paths = {f'probe/{name}': workspace / name for name in [
     'official_shared.cpp', 'official_shared.o', 'official_shared', 'build.sh', 'run_shared.sh',
     'replay_shared.py', 'analyze_native_vectors.py', 'build-object.log', 'build-link.log',

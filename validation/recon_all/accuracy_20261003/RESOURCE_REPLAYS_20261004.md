@@ -32,11 +32,11 @@ Python 函数 `verify(cohort_root=..., expected=..., report_path=...)`：
 
 ```bash
 # 原十例实验目录；复用原影像、权重和环境。
-FNIT_COHORT_ROOT=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003
+FNIT_COHORT_ROOT=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003
 # 新工具固定目录，与生产冻结源码分开。
-FNIT_REPLAY_TOOLS=/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/resource_replay_tools_v1
+FNIT_REPLAY_TOOLS=/data/fnit/workspaces/recon_accuracy_20261003/resource_replay_tools_v1
 # 既有 Conda 解释器，保持原 prefix。
-FNIT_REPLAY_PYTHON=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
+FNIT_REPLAY_PYTHON=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
 "$FNIT_REPLAY_PYTHON" "$FNIT_REPLAY_TOOLS/verify_replay_bindings.py" \
   --cohort-root "$FNIT_COHORT_ROOT" \
   --expected "$FNIT_REPLAY_TOOLS/resources_verified_816e5610.json" \
@@ -53,7 +53,7 @@ FNIT_REPLAY_PYTHON=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/re
 # plan 中固定解释器、包装器 SHA-256、共享锁及四例新输出路径。
 "$FNIT_REPLAY_PYTHON" "$FNIT_REPLAY_TOOLS/run_resource_replay_queue.py" \
   --plan "$FNIT_REPLAY_TOOLS/replay_plan.json" \
-  --report /cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/queue_status.json
+  --report /data/fnit/runs/recon_accuracy_20261003/baseline_resource_replays_v1/queue_status.json
 ```
 
 - `--plan: JSON 文件路径`：字段 `python`、`admission_script`、`admission_script_sha256`、`shared_lock`、`cases`。每个 case 提供 `id`、`original_config`、`retry_root` 和 `admission_report`。

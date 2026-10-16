@@ -14,7 +14,7 @@ from fingerprint_e036f57 import fingerprint
 
 def main() -> None:
     """使用本轮已声明的固定路径；不接受隐含的被试或阈值选项。"""
-    root = Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930')
+    root = Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930')
     baseline = root / 'full_sub01_e036f57_uuid/mri/transforms/synthmorph.1.0mm.1.0mm'
     candidate = root / 'sub01/mni_e036f57_after_full/mri/transforms/synthmorph.1.0mm.1.0mm'
     names = ['warp.to.mni152.1.0mm.1.0mm.nii.gz',

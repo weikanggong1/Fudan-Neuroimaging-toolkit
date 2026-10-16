@@ -24,7 +24,7 @@ A separate chained replay fed the Python-generated
 Python `aseg.mgz` into this aparc stage. Both resulting volumes again had
 0/16,777,216 voxel mismatches against official outputs. The inherited
 trailing MGH metadata prevented full-byte identity in the chain; see the
-[`chain report`](surface_volume_chain_headcw_report.json).
+[`chain report`](surface_volume_chain_control-host_report.json).
 
 The other two atlas volumes also matched all **16,777,216 voxels** and the
 complete decompressed MGH bytes against both the archived and fresh native
@@ -32,7 +32,7 @@ outputs. Feeding the existing Python-generated `aseg.chain.mgz` into each
 branch retained zero voxel differences; annotation and surface inputs were
 still frozen official files.
 
-| Same-input headcw cold CLI | Native | Python CPU |
+| Same-input control-host cold CLI | Native | Python CPU |
 | --- | ---: | ---: |
 | `aparc+aseg.mgz` | 27.20 s | 6.14 s |
 | `aparc.a2009s+aseg.mgz` | 24.43 s | 5.96 s |

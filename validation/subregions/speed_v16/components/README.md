@@ -1,6 +1,6 @@
 # 亚区分割 GPU 组件实测
 
-本页记录 `v16_c2` 组件优化，以及 `v16_c3` 的网格归属复用验证。使用同一真实 `sub-01` T1 的既有网格和 `norm/aseg/wmparc` 输入；运行中仅读取已保存的官方结果，不调用 FreeSurfer。服务器为 gpucw1，物理 GPU 1 为共享 H100 PCIe，4 个 CPU 线程，PyTorch 2.5.1，FP32 与 TF32。
+本页记录 `v16_c2` 组件优化，以及 `v16_c3` 的网格归属复用验证。使用同一真实 `sub-01` T1 的既有网格和 `norm/aseg/wmparc` 输入；运行中仅读取已保存的官方结果，不调用 FreeSurfer。服务器为 accelerator-a-1，物理 GPU 1 为共享 H100 PCIe，4 个 CPU 线程，PyTorch 2.5.1，FP32 与 TF32。
 
 汇总数值见 [component_summary.json](../component_summary.json)。本地归档中的 13 个组件文件和 8 个候选运行文件均已核对大小与 SHA-256；源码冻结清单的服务器核验也全部通过。
 

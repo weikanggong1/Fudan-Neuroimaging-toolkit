@@ -63,7 +63,7 @@ MNI 候选非零标签 82,986 体素，参照 83,840 体素；并集为 83,840�
 | 官方 FIX MNI → 相同投影/MS-HBM/标签回写/文件输出 | 96.54 s | 3,925,688 KiB |
 | 官方 FIX native → MNI，原版 FSL applywarp | 558.38 s | 5,408,076 KiB |
 
-线程设定为 `OMP_NUM_THREADS=8 MKL_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8`，CUDA 使用共享 gpucw1 H100。MS-HBM 推断仍在 CPU；float32 BOLD、TF32 开启，不用 fp16。表面模型耗时不同主要由输入和收敛过程不同引起，不是不同实现的加速比。官方上游 pipeline 的处理时间没有记录，不推算其完整时间。
+线程设定为 `OMP_NUM_THREADS=8 MKL_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8`，CUDA 使用共享 accelerator-a-1 H100。MS-HBM 推断仍在 CPU；float32 BOLD、TF32 开启，不用 fp16。表面模型耗时不同主要由输入和收敛过程不同引起，不是不同实现的加速比。官方上游 pipeline 的处理时间没有记录，不推算其完整时间。
 
 FSL 本机在写完输出后返回 255。生成文件已通过 gzip CRC、91×109×91×490、TR、affine 与有限值核查；接受该输出作条件参照，退出状态保留在 [`reference_matching.public.json`](reference_matching.public.json)。不能只凭存在文件认定命令成功。
 

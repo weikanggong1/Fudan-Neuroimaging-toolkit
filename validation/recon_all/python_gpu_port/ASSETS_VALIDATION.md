@@ -82,7 +82,7 @@ Personal license files, native executables, and model weights are excluded.
 The installer provides the complete **fixed-profile data asset set** without
 a native FreeSurfer runtime. This is an asset gate, not an end-to-end
 reconstruction parity claim. The focused asset suite passed **17/17** on
-`headcw` (previously 13/13 before the final 18 labels), including URL routing,
+`control-host` (previously 13/13 before the final 18 labels), including URL routing,
 hash rejection, and both archive extraction paths. Actual archive extraction
 into scratch passed `--verify-only` for all four MNI members and all 18
 `fsaverage` members; two sphere surfaces and one direct label also passed

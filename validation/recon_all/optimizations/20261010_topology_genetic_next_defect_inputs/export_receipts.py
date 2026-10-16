@@ -30,7 +30,7 @@ def export(*,fnit_root,output):
         raw=path.read_bytes();before=json.loads(raw);after=clean(before)
         assert dict(leaves(before))==dict(leaves(after))
         payload=(json.dumps(after,indent=2,allow_nan=False)+'\n').encode()
-        assert not re.search(rb'/cpfs01/|/cwStorage/|/mnt/c/|\b(?:\d{1,3}\.){3}\d{1,3}\b|\bgwk_\d+\b|PRIVATE KEY',payload)
+        assert not re.search(rb'/data/shared/|/data/shared/|/mnt/c/|\b(?:\d{1,3}\.){3}\d{1,3}\b|\bgwk_\d+\b|PRIVATE KEY',payload)
         (output/name).write_bytes(payload)
         manifest.append(dict(original_relative_path=str(path.relative_to(fnit_root)),original_sha256=sha(raw),
             published_relative_path=name,published_sha256=sha(payload),size_bytes=len(payload),numeric_bool_null_preservation=True))

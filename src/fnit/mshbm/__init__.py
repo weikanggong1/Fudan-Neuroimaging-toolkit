@@ -6,3 +6,7 @@ from .output import network_timeseries
 
 __all__ = ["load_assets", "parcellate", "profiles_from_timeseries",
            "parcellate_volume", "project_volume", "labels_to_volume", "network_timeseries"]
+
+from .api import FNIT_mshbm
+
+__all__.append("FNIT_mshbm")

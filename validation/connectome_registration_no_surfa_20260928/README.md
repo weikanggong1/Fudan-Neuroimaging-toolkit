@@ -33,7 +33,7 @@ flirt -in mean_b0.nii.gz -ref T1w.nii.gz \
 
 输入为公开 ds004666 同次 T1w 和 TOPUP/EDDY 校正 AP-DWI 的五个 b0 平均图。b0 是校正 DWI 第 0、21、42、63、84 个体积的实测强度均值，保留原 DWI 仿射，形状 104×104×72，SHA256 `0c1dee4472694a9c43d8355136ae2467d3a90d9f76729371ef95623fc7b1413d`。T1 形状 208×274×245，SHA256 `80ace482fbc8a5f18423e202118e58d8c9e9ac9bbd1fea9f243de3fff2572017`。输入文件不随仓库分发；[校正输入来源和原命令](../connectome/ds004666/corrected_input_provenance.public.json)可核对。
 
-同一 Conda 环境、headcw CPU、8 个 PyTorch 线程，对旧、新 `_registration` 各运行一次。更换前后的 b0/T1 载入体素、仿射、体素大小逐值一致。
+同一 Conda 环境、control-host CPU、8 个 PyTorch 线程，对旧、新 `_registration` 各运行一次。更换前后的 b0/T1 载入体素、仿射、体素大小逐值一致。
 
 | 项目 | 旧版 Surfa 路径 | 新版 NiBabel/Volume 路径 |
 |---|---:|---:|

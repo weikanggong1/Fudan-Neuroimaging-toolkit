@@ -2,7 +2,7 @@
 # At most33 additional CPU Double updates from saved accepted4; native37 is reused.
 set -eu
 umask 077
-B=/cwStorage/home/gongwk/Notebook_code/FNIT
+B=/data/fnit
 WR=$B/workspaces/smri_cpu_20261004/remaining_20261004/gems
 BASE=$B/runs/smri_cpu_20261004/remaining_20261004/gems
 W=$WR/f64-continue37-20261006-v1
@@ -10,7 +10,7 @@ R=$BASE/f64-continue37-20261006-v1
 SOURCE=$WR/cpu-epsilon-v1/source/src
 OLD=$WR/first-step-real-20261005-v1
 P=$B/envs/default/bin/python
-F=/public/software/apps/Freesurfer/8.2.0-1
+F=/opt/reference/Freesurfer/8.2.0-1
 mkdir -m 700 "$R"
 trap 'rc=$?; printf "{\"exit_code\":%s}\n" "$rc" > "$R/exit.public.json"' EXIT
 export OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 MKL_NUM_THREADS=8 NUMBA_NUM_THREADS=8 ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS=8
@@ -18,7 +18,7 @@ export PYTHONPATH=$SOURCE NUMBA_CACHE_DIR=$R/numba_cache
 export FNIT_GEMS_FROZEN_ADAPTER=$OLD/run_real.py
 export FNIT_GEMS_RAW_ADAPTER=$WR/raw-first-three-20261005-v1/raw_prior_cpu_adapter.py
 export FNIT_GEMS_F64_PROJECTION=1 FNIT_GEMS_F64_GAUSSIAN=1
-exec 9>"$B/runs/smri_cpu_20261004/nodecw7.gems.cpu8.lock"
+exec 9>"$B/runs/smri_cpu_20261004/compute-a-7.gems.cpu8.lock"
 flock 9
 taskset -c 32,36,40,44,48,52,56,60 timeout 30 "$P" "$W/check_portable_resume_contracts.py" --helper "$W/resume_f64_portable.py" --output "$R/portable_contracts.public.json" > "$R/contracts.log" 2>&1
 taskset -c 32,36,40,44,48,52,56,60 timeout --signal=TERM --kill-after=10 900 \

@@ -74,7 +74,7 @@ python analyze_native_vectors.py --run "$SHARED_PROBE_RUN_DIRECTORY"
 
 `--oracle` 是含 `state.json` 和共享 binary 的目录；`--output` 接收匿名 JSON 与私密 NumPy solution；`--run` 指向含 `oracle/` 与 `replay/` 的 probe 根。线程为 8，interop 为 1。[replay_shared.py](replay_shared.py) 调用冻结 FNIT 函数，通过 matvec 回调观察原求解循环，并断言重建的末端残差与其 report 完全相同。自有 NumBa CSC 累加使用 `fastmath=False`；另一个小循环只用于一次 division/reciprocal 的诊断控制，不进入生产。
 
-[run_shared.sh](run_shared.sh) 给出实际输入、核组和锁；在 nodecw7 的 `0,4,8,12,16,20,24,28` 八个物理核上顺序运行，取得 `nodecw7.synth.cpu8.lock`。重新运行时必须改为新的 workspace/run 名称，不能覆盖这次冻结产物。[build.sh](build.sh) 只在 headcw 编译自有参考包装并复用此前四个已绑定对象；nodecw7 不安装 compiler，不移动 Conda prefix。
+[run_shared.sh](run_shared.sh) 给出实际输入、核组和锁；在 compute-a-7 的 `0,4,8,12,16,20,24,28` 八个物理核上顺序运行，取得 `compute-a-7.synth.cpu8.lock`。重新运行时必须改为新的 workspace/run 名称，不能覆盖这次冻结产物。[build.sh](build.sh) 只在 control-host 编译自有参考包装并复用此前四个已绑定对象；compute-a-7 不安装 compiler，不移动 Conda prefix。
 
 ## 4. 对应原软件与状态约定
 

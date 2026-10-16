@@ -72,7 +72,7 @@ reconstruction_options = python_profile_options(
 python3 validation/recon_all/optimizations/20261011_current_whole_preparation/check_preparation.py
 ```
 
-待最终源码冻结、许可映射核对、CFFF 当前 wheel 独立安装验证和资源再检查完成后，未来命令形态如下。**尚未授权运行；外层计时与可信显存归属采样仍须接入后才能形成正式启动命令。**
+待最终源码冻结、许可映射核对、accelerator-b 当前 wheel 独立安装验证和资源再检查完成后，未来命令形态如下。**尚未授权运行；外层计时与可信显存归属采样仍须接入后才能形成正式启动命令。**
 
 ```bash
 # 私有变量：Python 环境、冻结包装器、原始 T1、新的空目录、权重、模板。

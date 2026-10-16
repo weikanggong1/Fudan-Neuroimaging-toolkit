@@ -1,4 +1,6 @@
-# TorchFLIRT：线性配准与已知矩阵重采样
+# FNIT_flirt
+
+> 统一 Python 入口：[`FNIT_flirt`](../API_REFERENCE.md)，从 `fnit` 导入。下文配置、结果类型和细分算子保留高级兼容接口。
 
 | 项目 | 内容 |
 |---|---|
@@ -17,13 +19,13 @@ FNIT提供12自由度CorRatio仿射配准、6自由度NormMI刚体配准和已�
 ## 2. Python 调用
 
 ```python
-from fnit.flirt import run_flirt
+from fnit import FNIT_flirt
 
 moving_image_path = "/data/subject_GM.nii.gz"  # 个体3D灰质图
 reference_image_path = "/data/template_GM.nii.gz"  # 模板与目标网格
 registered_image_path = "/data/subject_GM_in_template.nii.gz"  # 重采样结果
 forward_matrix_path = "/data/subject_GM_to_template.mat"  # input→reference的scaled-mm矩阵
-registration_result = run_flirt(
+registration_result = FNIT_flirt(
     input=moving_image_path, reference=reference_image_path,
     output=registered_image_path, omat=forward_matrix_path,
     dof=12, cost="corratio", device="cuda:0",  # 仿射配准

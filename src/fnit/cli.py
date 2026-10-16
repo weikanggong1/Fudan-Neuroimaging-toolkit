@@ -598,7 +598,11 @@ def _run_connectome(args):
         print(f"torch_peak_allocated_gib={torch.cuda.max_memory_allocated() / 2**30:.3f}")
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(prog='fnit')
+    selected_arguments = list(sys.argv[1:] if argv is None else argv)
+    if selected_arguments and selected_arguments[0].startswith('FNIT_'):
+        from .api_cli import run_cli
+        return run_cli(selected_arguments[0], selected_arguments[1:])
+    parser = argparse.ArgumentParser(prog='fnit', epilog='统一接口：fnit FNIT_<name> --help；完整名称见 docs/API_REFERENCE.md。')
     parser.add_argument('--version', action='version', version=f'Fudan Neuroimaging Toolkit (FNIT) {__version__}')
     commands = parser.add_subparsers(dest='command', required=True)
     commands.add_parser('fslmaths', help='PyTorch implementation of common fslmaths operations')

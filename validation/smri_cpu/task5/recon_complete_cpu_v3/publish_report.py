@@ -59,7 +59,7 @@ def anonymize(value, audit: dict, key: str = ""):
         audit["nonfinite_values_to_null"] += 1
         return None
     if isinstance(value, str):
-        if value.startswith(("/cwStorage/", "/home/", "/mnt/", "/public/", "/tmp/")):
+        if value.startswith(("/data/shared/", "/home/", "/mnt/", "/public/", "/tmp/")):
             audit["removed_absolute_string_values"] += 1
             return portable_member(value)
         # 比较器错误信息可能在文本中嵌入路径，避免只过滤顶层字段。

@@ -2,7 +2,7 @@
 
 ## 范围与版本
 
-2026-10-03，在 gpucw1 既有 FNIT Conda 环境中检查公共 Python/CLI、真实模板读写与映射、检查点及矩阵构建。最终冻结源码为 `d75fce8937e7aa4c719c4733960c89eb2e27f0aa`，**97 项通过，16.68 秒**。环境与六个实际生产模块 SHA-256 见 [provenance.public.json](provenance.public.json)，完整输出见 [focused_tests.txt](focused_tests.txt)。
+2026-10-03，在 accelerator-a-1 既有 FNIT Conda 环境中检查公共 Python/CLI、真实模板读写与映射、检查点及矩阵构建。最终冻结源码为 `d75fce8937e7aa4c719c4733960c89eb2e27f0aa`，**97 项通过，16.68 秒**。环境与六个实际生产模块 SHA-256 见 [provenance.public.json](provenance.public.json)，完整输出见 [focused_tests.txt](focused_tests.txt)。
 
 本组使用明确的小型 MRI、FreeSurfer 表面和 annotation 算例验证接口。仅把昂贵的 `_compute_shared_core` 换成三条已知轨迹；该替换包含配准、FOD、追踪和 SIFT2 求解。模板加载、surface→volume、ROI 规范化、端点配对、四矩阵聚合、内容哈希、缓存恢复及 CLI 输出均调用实际生产函数。**这是集成测试，不是十人的影像精度或耗时 benchmark。** 十人真实评测由协调者单列，不能以本报告推断 FNIT recon-all 或追踪与官方数值等价。
 

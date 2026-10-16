@@ -89,7 +89,7 @@ mri_synthseg --i /data/example/T1w.nii.gz \
 
 ## 5. 最新完整精度、时间及内存
 
-本轮同原始CC0 OpenNeuro ds003138 v1.0.1 case02 T1、同nodecw7/8物理核运行4个完整CPU新进程，既有正式官方输出和55.0464秒冷进程时钟复用，无新官方运行。原图SHA、H5、配置和17生产源/4支持源前后固定。[完整源绑定报告](../../validation/smri_cpu/seg_columns_integration_20261006/README.md) 与 [机械结果](../../validation/smri_cpu/seg_columns_integration_20261006/RESULTS.json) 保留全arm/raw receipt。
+本轮同原始CC0 OpenNeuro ds003138 v1.0.1 case02 T1、同compute-a-7/8物理核运行4个完整CPU新进程，既有正式官方输出和55.0464秒冷进程时钟复用，无新官方运行。原图SHA、H5、配置和17生产源/4支持源前后固定。[完整源绑定报告](../../validation/smri_cpu/seg_columns_integration_20261006/README.md) 与 [机械结果](../../validation/smri_cpu/seg_columns_integration_20261006/RESULTS.json) 保留全arm/raw receipt。
 
 | CPU arm | 冷进程秒 | API秒 | 构造/保存秒 | 最大RSS GB | 编译 |
 |---|---:|---:|---:|---:|---:|

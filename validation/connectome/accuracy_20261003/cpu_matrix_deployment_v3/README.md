@@ -20,7 +20,7 @@ flowchart TD
     G --> I
 ```
 
-只停了核对精确命令后的 nodecw10 CPU 控制器 PID 3130。原 v2 全部文件保留；新控制器 PID **41614** 使用独立 `root_matrix_analysis_v3` 与 `private_cpu_tools_v3`。正在运行的 GPU phase、其他 component controller、冻结目录和配置未修改。
+只停了核对精确命令后的 compute-a-10 CPU 控制器 PID 3130。原 v2 全部文件保留；新控制器 PID **41614** 使用独立 `root_matrix_analysis_v3` 与 `private_cpu_tools_v3`。正在运行的 GPU phase、其他 component controller、冻结目录和配置未修改。
 
 ## 2. Python 调用、输入与输出
 
@@ -29,7 +29,7 @@ import json
 from pathlib import Path
 from tools import analyze_connectome_accuracy_cohort as analysis
 
-configuration_path = Path("/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/accuracy_configuration.json")
+configuration_path = Path("/data/workspaces/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/accuracy_configuration.json")
 configuration = json.loads(configuration_path.read_bytes())  # 本轮原冻结配置
 raw_manifest = analysis.driver.bound(configuration["raw_manifest"])  # 校验原清单 SHA
 input_bindings = analysis.driver.bound(configuration["input_bindings"])  # 校验输入绑定
@@ -55,11 +55,11 @@ timing_result = analysis.optional_baseline_timing(
 
 ```bash
 CUDA_VISIBLE_DEVICES='' \
-PYTHONPATH=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/tools_source/tools \
-/cwStorage/home/gongwk/anaconda3/bin/python3.11 \
-  /cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/private_cpu_tools_v3/tools/analyze_connectome_accuracy_cohort.py \
-  --configuration /cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/accuracy_configuration.json \
-  --output-dir /cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/root_matrix_analysis_v3/sub-CON03 \
+PYTHONPATH=/data/workspaces/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/tools_source/tools \
+/data/user/anaconda3/bin/python3.11 \
+  /data/workspaces/fnit_connectome_accuracy_20261003_v1/private_cpu_tools_v3/tools/analyze_connectome_accuracy_cohort.py \
+  --configuration /data/workspaces/fnit_connectome_accuracy_20261003_v1/formal_frozen_v1/accuracy_configuration.json \
+  --output-dir /data/workspaces/fnit_connectome_accuracy_20261003_v1/root_matrix_analysis_v3/sub-CON03 \
   --case-id sub-CON03
 ```
 
@@ -71,7 +71,7 @@ PYTHONPATH=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_2026100
 
 ## 5. 实际报告、CPU 时间与原图
 
-nodecw10 实际 **38 项 CPU 协议与严格绑定回归通过**，见 [protocol_tests.json](protocol_tests.json)。覆盖未排期、缺同病例报告、running 且无 wall、failed 且 wall 损坏、正常 completed、缺 completed wall/校验异常传播、损坏 JSON 与缺失/未知状态。原 10 类 source/case/version/CLI/anatomy/计时污染回归保留。协议字节 fixture 不代表 MRI benchmark。
+compute-a-10 实际 **38 项 CPU 协议与严格绑定回归通过**，见 [protocol_tests.json](protocol_tests.json)。覆盖未排期、缺同病例报告、running 且无 wall、failed 且 wall 损坏、正常 completed、缺 completed wall/校验异常传播、损坏 JSON 与缺失/未知状态。原 10 类 source/case/version/CLI/anatomy/计时污染回归保留。协议字节 fixture 不代表 MRI benchmark。
 
 | 实际病例 | v3 分析执行 | 工具 CPU 秒 | 子进程墙钟秒 | 矩阵通过/总数 | 轨迹分布通过/总数 | 配对计时 |
 | --- | --- | ---: | ---: | ---: | ---: | --- |

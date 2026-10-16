@@ -2,7 +2,7 @@
 
 [功能与用法](../../docs/synthseg_plus/README.md) · [GPU 逐项结果](report.real.json) · [CPU 逐项结果](report.cpu.real.json) · [完整命令计时](timing.real.json) · [Python 调用计时](benchmark.volumes.real.json)
 
-输入为仓库公开的去面容 T1w `examples/data/sub-01_T1w.nii.gz`，SHA-256 为 `f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a`。两端均使用 FreeSurfer 8.2.0-1 的 SynthSeg 2.0 主网络和皮层分区权重；FNIT 推理不调用 FreeSurfer。测试在 gpucw1 的 H100 PCIe 上进行，CPU 线程数为 4。
+输入为仓库公开的去面容 T1w `examples/data/sub-01_T1w.nii.gz`，SHA-256 为 `f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a`。两端均使用 FreeSurfer 8.2.0-1 的 SynthSeg 2.0 主网络和皮层分区权重；FNIT 推理不调用 FreeSurfer。测试在 accelerator-a-1 的 H100 PCIe 上进行，CPU 线程数为 4。
 
 仓库附带原版生成的[合并标签图](reference/sub-01_official_synthseg_plus.nii.gz)和[软体积 CSV](reference/sub-01_official_volumes.csv)，SHA-256 分别为 `cc98218cdf55cec648612d492a70e80f08710730286f8867b6a6e09c7ce7e9bc` 与 `cadb6fd4f46f59ccc410acdc0836ee5d64f96939a1ed8aa850a3b81c848c7040`。安装 FNIT 和官方权重后，可直接用这两个参考文件做输出核对，无须安装 FreeSurfer。
 原版 `--cpu` 与 GPU 在本例生成的 NIfTI 和 CSV 均逐字节相同。

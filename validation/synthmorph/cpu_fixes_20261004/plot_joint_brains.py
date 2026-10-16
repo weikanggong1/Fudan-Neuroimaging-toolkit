@@ -30,8 +30,8 @@ def main():
     figure, axes = plt.subplots(2, 3, figsize=(10, 7), constrained_layout=True)
     rows = []
     for row, (extent, original_folder, candidate_folder) in enumerate((
-            (256, 'nodecw7_paired_v2/joint_reference', 'nodecw7_final_v29/joint'),
-            (192, 'nodecw7_final_v7/joint_192_reference', 'nodecw7_final_v29/joint_192'))):
+            (256, 'compute-a-7_paired_v2/joint_reference', 'compute-a-7_final_v29/joint'),
+            (192, 'compute-a-7_final_v7/joint_192_reference', 'compute-a-7_final_v29/joint_192'))):
         paths = [base / folder / 'moved.nii.gz' for folder in (original_folder, candidate_folder)]
         images = [nib.load(path) for path in paths]
         if any(image.shape != mask.shape or not np.array_equal(image.affine, mask_image.affine) for image in images):

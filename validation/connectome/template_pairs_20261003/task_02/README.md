@@ -4,7 +4,7 @@
 
 本记录绑定首个实现 `ea3cb054` 的三个计算模块，逐文件 SHA 见 [real_input_preflight.public.json](real_input_preflight.public.json)。完成：
 
-- gpucw1 上 CPU、4 线程，原矩阵/表面/节点与新 paired-template 回归 **30 passed，2.89 s**；CUDA 对该进程不可见，未初始化 GPU。[测试记录](unit_tests.public.json)。
+- accelerator-a-1 上 CPU、4 线程，原矩阵/表面/节点与新 paired-template 回归 **30 passed，2.89 s**；CUDA 对该进程不可见，未初始化 GPU。[测试记录](unit_tests.public.json)。
 - 十例公开 ds001226 的真实 recon-all 输入预检：CON01、CON03–CON11；每例读取双半球 aparc/a2009s `.annot` 及 `aparc+aseg.mgz` / `aparc.a2009s+aseg.mgz`。检查整数、有限值、表面顶点数、完整 LUT 和原始文件 SHA。
 - CON01 四张模板实际准备到既有 corrected-DWI 的 `96×96×60` 网格：使用该次运行已保存的 DWI→T1 scanner-RAS 变换，未重新配准。
 

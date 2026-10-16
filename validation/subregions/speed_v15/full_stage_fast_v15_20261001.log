@@ -137,30 +137,30 @@
 2026-10-01 11:38:25,268 GEMS outer 7/7 EM: 0.10 s
 2026-10-01 11:38:44,881 GEMS outer 7/7 mesh: 19.61 s, 25 evaluations
 Traceback (most recent call last):
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/validation/subregions/run_unified.py", line 231, in <module>
+  File "/data/workspaces/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/validation/subregions/run_unified.py", line 231, in <module>
     main()
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/validation/subregions/run_unified.py", line 142, in main
+  File "/data/workspaces/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/validation/subregions/run_unified.py", line 142, in main
     result = segment_subregions(
              ^^^^^^^^^^^^^^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/src/fnit/gems/pipeline.py", line 469, in segment_subregions
+  File "/data/workspaces/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/src/fnit/gems/pipeline.py", line 469, in segment_subregions
     outcome = recipe.run(context, device)
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/src/fnit/gems/recipes/hippo_amygdala.py", line 45, in run
+  File "/data/workspaces/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/src/fnit/gems/recipes/hippo_amygdala.py", line 45, in run
     return super().run(context, device)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/src/fnit/gems/recipes/base.py", line 354, in run
+  File "/data/workspaces/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/src/fnit/gems/recipes/base.py", line 354, in run
     fit, _, work_report = self.fit_intensity_mesh(fitted, context, device)
                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/src/fnit/gems/recipes/base.py", line 307, in fit_intensity_mesh
+  File "/data/workspaces/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/src/fnit/gems/recipes/base.py", line 307, in fit_intensity_mesh
     _, result = self._fit(atlas, data, image.affine,
                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/src/fnit/gems/recipes/base.py", line 238, in _fit
+  File "/data/workspaces/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/src/fnit/gems/recipes/base.py", line 238, in _fit
     result = TorchGEMS(atlas, device=device, block_size=block_size)(
              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/src/fnit/gems/core.py", line 378, in __call__
+  File "/data/workspaces/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/src/fnit/gems/core.py", line 378, in __call__
     posterior, _ = label_posterior(priors, gaussian_log_likelihood(image, params), label_classes)
                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/src/fnit/gems/gaussian.py", line 101, in label_posterior
+  File "/data/workspaces/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v15/src/fnit/gems/gaussian.py", line 101, in label_posterior
     log_joint = log_prior + class_log_likelihood[label_classes.long()]
                 ~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 776.00 MiB. GPU 0 has a total capacity of 79.11 GiB of which 443.06 MiB is free. Process 31669 has 804.00 MiB memory in use. Process 111021 has 43.64 GiB memory in use. Process 128734 has 23.03 GiB memory in use. Including non-PyTorch memory, this process has 6.59 GiB memory in use. Process 112955 has 948.00 MiB memory in use. Process 25390 has 3.68 GiB memory in use. 11.08 GiB allowed; Of the allocated memory 2.99 GiB is allocated by PyTorch, and 100.14 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)

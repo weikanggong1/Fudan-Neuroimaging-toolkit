@@ -44,7 +44,7 @@ def main():
             'peak_gpu_allocated_gib':runs['gpu'].get('peak_gpu_allocated_gib'),
             'scientific_gate':{name:run.get('flica_diagnostics') for name,run in runs.items()},
             'same_input_signature':runs['cpu'].get('input_signature')==runs['gpu'].get('input_signature') and runs['cpu'].get('input_signature') is not None,
-            'conditions':'Same gpucw1, eight CPU threads, sequential execution (order recorded separately), independent raw-image caches; CPU float64 and GPU float32 mMIGP; uncontrolled OS page cache; shared GPU load. No controlled speedup claim.'}
+            'conditions':'Same accelerator-a-1, eight CPU threads, sequential execution (order recorded separately), independent raw-image caches; CPU float64 and GPU float32 mMIGP; uncontrolled OS page cache; shared GPU load. No controlled speedup claim.'}
     left_dir=root/'cpu/output'; right_dir=root/'gpu/output'
     left_u=left_dir/'mmigp_100/U.npy'; right_u=right_dir/'mmigp_100/U.npy'
     if left_u.exists() and right_u.exists():

@@ -193,7 +193,7 @@ ComputeVN('/absolute/path/work/clean.dtseries.nii', 'NONE', ...
 | DR+VN | 1 / 8 | 381.639 / 184.906 | 103.930 / 99.782 | 78.871 / 74.660 | 6.91e-6 / 5.09e-7；8.26e-6 / 4.88e-7 |
 | WRN d7–d21 | 1 / 8 | 1943.838 / 1373.877 | 723.399 / 533.785 | 699.610 / 509.053 | 3.28e-6 / 2.35e-7；2.28e-6 / 2.00e-7 |
 
-每项是 nodecw10 的一次完整观测，源码、输入 SHA、实际核绑定和 CPU 使用见[最新回执](../../validation/fmri_cpu_20261004/task04_msm_surface/completion_status_20261005.public.json)。fresh process 包括 MATLAB 或 Python 的启动、读写和退出；原函数与 Workbench 分项另列在报告中。此前原 VN/DR 函数仍快于 FNIT 完整 API，本轮尚不能据 fresh 优势宣布计算已达到速度目标。
+每项是 compute-a-10 的一次完整观测，源码、输入 SHA、实际核绑定和 CPU 使用见[最新回执](../../validation/fmri_cpu_20261004/task04_msm_surface/completion_status_20261005.public.json)。fresh process 包括 MATLAB 或 Python 的启动、读写和退出；原函数与 Workbench 分项另列在报告中。此前原 VN/DR 函数仍快于 FNIT 完整 API，本轮尚不能据 fresh 优势宣布计算已达到速度目标。
 
 CPU1 WRN 原函数 1781.215 s，FNIT 冻结基线 API 954.113 s；保存 maps 最大差 `3.28e-6`、RMSE `2.35e-7`，40 列 weights 逐位相同，全部 CIFTI 轴相同。该节点负载约 2,500，这些是单次观测。原 nodes 的 spectra/绘图输出支路另行完整运行；不将没有写出的原节点时序标为通过。
 

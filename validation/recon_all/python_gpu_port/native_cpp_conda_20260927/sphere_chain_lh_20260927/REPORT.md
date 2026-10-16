@@ -4,25 +4,25 @@
 
 ## Exact inputs and commands
 
-The validated Python sphere was generated on headcw with `PYTHONPATH=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_python_gpu_20260925/fnit_reconall_snapshot_20260926d/src`:
+The validated Python sphere was generated on control-host with `PYTHONPATH=/data/workspaces/freesurfer_synth/work/reconall_python_gpu_20260925/fnit_reconall_snapshot_20260926d/src`:
 
 ```bash
 python -m fnit.recon_all.sphere_standard_run \
-  /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_python_gpu_20260925/tessellate/sphere/sphere_next_20260926/full_native_complete/lh/surf/lh.inflated \
-  /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_python_gpu_20260925/tessellate/sphere/sphere_next_20260926/full_native_complete/lh/surf/lh.smoothwm \
-  /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_python_gpu_20260925/tessellate/sphere/sphere_next_20260926/next_gpu_probe_20260926/lh.sphere.api_headcw \
-  --finish-device cpu --report /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_python_gpu_20260925/tessellate/sphere/sphere_next_20260926/next_gpu_probe_20260926/standard_sphere_lh_api_headcw.json
+  /data/workspaces/freesurfer_synth/work/reconall_python_gpu_20260925/tessellate/sphere/sphere_next_20260926/full_native_complete/lh/surf/lh.inflated \
+  /data/workspaces/freesurfer_synth/work/reconall_python_gpu_20260925/tessellate/sphere/sphere_next_20260926/full_native_complete/lh/surf/lh.smoothwm \
+  /data/workspaces/freesurfer_synth/work/reconall_python_gpu_20260925/tessellate/sphere/sphere_next_20260926/next_gpu_probe_20260926/lh.sphere.api_control-host \
+  --finish-device cpu --report /data/workspaces/freesurfer_synth/work/reconall_python_gpu_20260925/tessellate/sphere/sphere_next_20260926/next_gpu_probe_20260926/standard_sphere_lh_api_control-host.json
 ```
 
 For the new connection test, the current local FNIT `src/fnit` was frozen into an isolated remote source directory; source archive SHA-256 `254d586a9aaf598db0a7734fb65ac22eec93c7dfe40970edc30c4abe449194b7`. The command was:
 
 ```bash
-D=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_python_gpu_20260925/tessellate/sphere/sphere_next_20260926/sphere_register_chain_lh_20260927
-B=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_main_20260924
-W=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_python_gpu_20260925/tessellate/sphere/sphere_next_20260926
+D=/data/workspaces/freesurfer_synth/work/reconall_python_gpu_20260925/tessellate/sphere/sphere_next_20260926/sphere_register_chain_lh_20260927
+B=/data/workspaces/freesurfer_synth/work/reconall_main_20260924
+W=/data/workspaces/freesurfer_synth/work/reconall_python_gpu_20260925/tessellate/sphere/sphere_next_20260926
 PYTHONPATH="$D/src" OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 \
   python -m fnit.recon_all.mris_register_run \
-  "$W/next_gpu_probe_20260926/lh.sphere.api_headcw" \
+  "$W/next_gpu_probe_20260926/lh.sphere.api_control-host" \
   "$B/single_subjects/fs_sub01/surf/lh.smoothwm" \
   "$B/single_subjects/fs_sub01/surf/lh.sulc" \
   "$B/bundle/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif" \
@@ -44,7 +44,7 @@ PYTHONPATH="$D/src" OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 \
 | Ordered faces / volume geometry bytes | Both bitwise exact; SHA-256 `49603c29ba711ba3ae8a43ca39b1b929e4249ff7107615d1da5095baee49c99b` / `c4455e913b2688efdd569e9cb7822cf7e94c165139fe1878e9e52ef318056bd2` |
 | Temporary sulc seed and Python final file versus the prior native-sphere-input Python run | Both whole-file SHA-256 identical; all 55 sulc and 51 smoothwm update schedules, chosen dt values and next states identical |
 | Python stage times | Sphere 372.82 s including I/O; new registration 369.81 s inside API, 376.33 s shell wall including startup, peak RSS 766,384 KiB; two API times sum 742.63 s |
-| Native observations on headcw | Same-input conventional sphere without snapshot writes 240.64 s; fresh native registration from official sphere 157.62 s; sum 398.26 s, measured at different times/load |
+| Native observations on control-host | Same-input conventional sphere without snapshot writes 240.64 s; fresh native registration from official sphere 157.62 s; sum 398.26 s, measured at different times/load |
 
 The whole-file Python/native `sphere.reg` SHA values differ because the writers use different creation stamps and FreeSurfer provenance tags. The ordered numerical surface and volume geometry bytes match. Python sphere→registration chaining is therefore verified for this LH frozen input. A matched controlled timing trial and an independent RH chained trial remain open. Upstream topology, white/pial, sulc generation and downstream cortical measurements in `native_free` are still not accepted as whole-T1 equivalent.
 

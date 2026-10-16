@@ -69,7 +69,7 @@ def main():
               'baseline_commit': 'f1cbdab10fbfd573c3aa1b3461aa086dab220cfb',
               'fixed_gates': read(work / 'decode_v1/validation/synthmorph/cpu_20261004/acceptance.json'),
               'fixed_gates_sha256': digest(work / 'decode_v1/validation/synthmorph/cpu_20261004/acceptance.json'),
-              'protocol': {'CPU_host': 'nodecw7', 'physical_cores': [2, 6, 10, 14, 18, 22, 26, 30],
+              'protocol': {'CPU_host': 'compute-a-7', 'physical_cores': [2, 6, 10, 14, 18, 22, 26, 30],
                            'threads': 8, 'shared_node': True, 'OS_page_cache_flushed': False,
                            'timing_scope': 'one new process per baseline/reference/candidate CLI; not the historical R-C-C-R protocol'},
               'weights': {}, 'CPU_modes': {}, 'materialized_API': {},
@@ -78,32 +78,32 @@ def main():
         path = base / ('assets/weights/synthmorph.' + name + '.h5')
         report['weights'][path.name] = {'bytes': path.stat().st_size, 'sha256': digest(path)}
     for model in ('rigid', 'affine', 'deform', 'joint'):
-        namespace = {'rigid': 'nodecw7_rigid_v4', 'joint': 'nodecw7_final_v7'}.get(model, 'nodecw7_v2')
+        namespace = {'rigid': 'compute-a-7_rigid_v4', 'joint': 'compute-a-7_final_v7'}.get(model, 'compute-a-7_v2')
         candidate = runs / namespace / model
-        comparison = read(candidate / 'nodecw7_reference_comparison.private.json')
+        comparison = read(candidate / 'compute-a-7_reference_comparison.private.json')
         report['CPU_modes'][model] = {
-            'baseline': record(runs / 'nodecw7_paired_v2' / (model + '_baseline/record.json')),
-            'reference': record(runs / 'nodecw7_paired_v2' / (model + '_reference/record.json')),
+            'baseline': record(runs / 'compute-a-7_paired_v2' / (model + '_baseline/record.json')),
+            'reference': record(runs / 'compute-a-7_paired_v2' / (model + '_reference/record.json')),
             'candidate': record(candidate / 'record.json'), 'source': source(candidate / 'record.json'),
             'comparison': comparison, 'gate': gate(comparison, model)}
-    for model, namespace in [('affine', 'nodecw7_v2'), ('rigid', 'nodecw7_rigid_v4')]:
+    for model, namespace in [('affine', 'compute-a-7_v2'), ('rigid', 'compute-a-7_rigid_v4')]:
         root = runs / namespace / (model + '_object_api')
         report['materialized_API'][model] = {'run': record(root / 'record.json'),
                                             'report': read(root / 'artifacts/report.private.json')}
-    root = runs / 'nodecw7_final_v7/joint_object_api'
+    root = runs / 'compute-a-7_final_v7/joint_object_api'
     api = read(root / 'artifacts/report.private.json')
     api.pop('source_root', None)
     report['materialized_API']['joint'] = {'run': record(root / 'record.json'),
                                            'report': api,
                                            'contract': read(root / 'artifacts/materialized.private.json')}
-    root = runs / 'nodecw7_final_v7/joint_192'
-    comparison = read(root / 'nodecw7_reference_comparison.private.json')
+    root = runs / 'compute-a-7_final_v7/joint_192'
+    comparison = read(root / 'compute-a-7_reference_comparison.private.json')
     report['CPU_joint_192'] = {'extent': 192, 'hyper': .75, 'steps': 5,
                               'candidate': record(root / 'record.json'),
-                              'reference': record(runs / 'nodecw7_final_v7/joint_192_reference/record.json'),
+                              'reference': record(runs / 'compute-a-7_final_v7/joint_192_reference/record.json'),
                               'source': source(root / 'record.json'),
                               'comparison': comparison, 'gate': gate(comparison, 'joint')}
-    root = runs / 'nodecw7_world_v2/world_boundary'
+    root = runs / 'compute-a-7_world_v2/world_boundary'
     report['world_boundary'] = {'run': record(root / 'record.json'),
                                 'report': read(root / 'artifacts/report.private.json')}
     root = runs / 'gpu_affine_final_v7'
@@ -125,7 +125,7 @@ def main():
     original_outputs = {}
     for name in ('moved', 'fixed_moved', 'forward', 'inverse'):
         left = nib.load(root / (name + '.nii.gz'))
-        right = nib.load(runs / 'nodecw7_paired_v2/joint_reference' / (name + '.nii.gz'))
+        right = nib.load(runs / 'compute-a-7_paired_v2/joint_reference' / (name + '.nii.gz'))
         left_hash, right_hash = [hashlib.sha256(np.ascontiguousarray(np.asanyarray(image.dataobj)).tobytes()).hexdigest()
                                  for image in (left, right)]
         original_outputs[name] = {'array_sha256': [left_hash, right_hash],

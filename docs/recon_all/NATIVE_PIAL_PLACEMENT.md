@@ -68,11 +68,11 @@ mris_place_surface --adgws-in surf/autodet.gw.stats.lh.dat \
 
 ## 2026-10-02：当前同输入三方比较
 
-候选61926c7，gpucw1、4线程，输入为c248520的自产sub01左侧七项前置和aparc，
+候选61926c7，accelerator-a-1、4线程，输入为c248520的自产sub01左侧七项前置和aparc，
 每项SHA见[完整报告](../../validation/recon_all/optimizations/20261001_serial/stage5/native_reference.json)。
 官方8.2.0与FNIT Python完整有序坐标/面相同；当前Conda输出与冻结Conda几何
 相同，但相对本次官方均值0.031369mm、P99 0.225255mm、最大1.482209mm。
-程序版本分别为freesurfer 8.2.0和freesurfer gongwk-local，二进制SHA不同。
+程序版本分别为freesurfer 8.2.0和freesurfer benchmark-user-local，二进制SHA不同。
 这是当前程序产物之间的差异，具体源码/编译原因仍未定位，不能笼统归因于随机性。
 
 Conda176.787秒、官方133.863秒；Python同主机含冷JIT与读写1453.060→1232.634秒，

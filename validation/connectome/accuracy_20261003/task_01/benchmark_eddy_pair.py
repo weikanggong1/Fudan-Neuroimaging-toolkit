@@ -112,7 +112,7 @@ def main():
              "host":os.uname().nodename,"gpu_uuid":os.environ.get("CUDA_VISIBLE_DEVICES"),
              "shared_GPU_load":True,"stable_speedup_assessed":False,
              "threads":8,"script_SHA256":sha(__file__),"cases":{}}
-    lock=open("/tmp/fnit-recon-five-20261002-gongwk.gpu.lock","a+")
+    lock=open("/tmp/fnit-recon-five-20261002-benchmark-user.gpu.lock","a+")
     for subject in args.subjects:
         reference=args.reference_root/f"sub-{subject}"
         results["cases"][subject]={"runs":[]}

@@ -1,4 +1,6 @@
-# TorchEDDY：DWI运动和涡流校正
+# FNIT_eddy
+
+> 统一 Python 入口：[`FNIT_eddy`](../API_REFERENCE.md)，从 `fnit` 导入。下文配置、结果类型和细分算子保留高级兼容接口。
 
 | 项目 | 内容 |
 |---|---|
@@ -17,7 +19,7 @@
 ## 2. Python 调用
 
 ```python
-from fnit.eddy import TorchEDDY
+from fnit import FNIT_eddy
 
 input_diffusion_path = "/data/AP.nii.gz"  # 完整4D DWI
 brain_mask_path = "/data/nodif_brain_mask.nii.gz"  # 同DWI网格3D脑mask
@@ -26,7 +28,7 @@ volume_acquisition_index_path = "/data/eddy_index.txt"  # N个一开始的acqp�
 gradient_directions_path = "/data/AP.bvec"  # FSL 3×N梯度方向
 b_values_path = "/data/AP.bval"  # N个b值，s/mm²
 corrected_output_prefix = "/data/eddy/data"  # 文件根名
-eddy_result = TorchEDDY(device="cuda:0").run(
+eddy_result = FNIT_eddy(device="cuda:0").run(
     imain=input_diffusion_path, mask=brain_mask_path,
     acqp=acquisition_parameters_path, index=volume_acquisition_index_path,
     bvecs=gradient_directions_path, bvals=b_values_path,

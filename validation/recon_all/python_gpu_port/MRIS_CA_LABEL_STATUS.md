@@ -16,7 +16,7 @@ as called by FreeSurfer `OpenRan1`.
 All six Python outputs matched the saved official `.annot` **byte for byte**.
 Six fresh native runs with the same official arguments and no diagnostic
 snapshot option also matched those official files byte for byte. The
-[evidence JSON](gcsa_label_six_atlas_headcw.json) records SHA-256 for every
+[evidence JSON](gcsa_label_six_atlas_control-host.json) records SHA-256 for every
 surface, cortex label, atlas, template mesh, aseg volume, and output; it also
 records each Python substep and native wall time. The common aseg SHA-256 is
 `263653b66a9aacba4d0d704781c86a9f99374e37d7e3f28d1674ce2`.
@@ -31,7 +31,7 @@ records each Python substep and native wall time. The common aseg SHA-256 is
 | `rh.aparc.DKTatlas.annot` | 105,541 | 21.49 | 5.17 | `055cb307321d` |
 
 The Python timer starts inside `label_surface`, after interpreter imports. The
-native timer includes process startup. Runs were sequential on `headcw`, so
+native timer includes process startup. Runs were sequential on `control-host`, so
 these are observed single-run times rather than a repeated speed benchmark.
 The current Python implementation is slower than native for this stage; exact
 annotation output was the acceptance target.
@@ -48,7 +48,7 @@ the completed island output and the final `.annot` were exact. From native
 both final DK annotations at all vertices.
 
 The four focused binary-parser, GCS neighbor, medial-wall fallback, and
-annotation writer tests passed on `headcw` (`4 passed in 1.65s`). A separate
+annotation writer tests passed on `control-host` (`4 passed in 1.65s`). A separate
 native `_000` annotation was serialized by Python with identical SHA-256
 `81a7094785e46f1317c368f7efe080eee524702c32c24ceecef203e04eed9227`.
 

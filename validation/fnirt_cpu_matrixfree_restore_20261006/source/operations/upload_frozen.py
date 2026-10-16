@@ -8,7 +8,7 @@ import sys
 
 BASE = Path(__file__).resolve().parents[1]
 HELPER = BASE.parent / "remote_tty.py"
-DEST = "/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/smri_cpu_20261004/remaining_20261006/fnirt-matrixfree-restored-v1"
+DEST = "/data/fnit/workspaces/smri_cpu_20261004/remaining_20261006/fnirt-matrixfree-restored-v1"
 FREEZE = "782927b4984cf53b62a487fd7dde79b8da72ad238878b2ab0a08e6b1ef789150"
 
 
@@ -31,7 +31,7 @@ def main():
             # stdio route with the same no-overwrite/hash/private-mode checks.
             assert name == "PLAN.md"
             request = {"target": target, "sha256": identity["sha256"], "data": base64.b64encode(data).decode()}
-            script = "set -euo pipefail\n/cwStorage/home/gongwk/Notebook_code/FNIT/envs/default/bin/python - <<'PY'\n"
+            script = "set -euo pipefail\n/data/fnit/envs/default/bin/python - <<'PY'\n"
             script += "import base64,hashlib,json,os,stat,tempfile\nfrom pathlib import Path\n"
             script += "r=json.loads(" + repr(json.dumps(request)) + ")\nos.umask(0o077)\np=Path(r['target'])\np.parent.mkdir(parents=True,exist_ok=True,mode=0o700)\n"
             script += "b=base64.b64decode(r['data']);assert hashlib.sha256(b).hexdigest()==r['sha256']\n"

@@ -7,19 +7,19 @@
 
 运行期配置和包装器保存在协调者的私有目录，不提交密码、密钥、许可证或认证内容。
 每个会话读取同一配置，使用同一个 socket。先执行 `ssh -O check`，再通过该连接
-核对 `hostname`、`whoami` 和 `pwd`。本轮五个会话均已确认目标为 gpucw1、账号
-gongwk；各自的连接结果记录在私有 `task_N.connection.json`。
+核对 `hostname`、`whoami` 和 `pwd`。本轮五个会话均已确认目标为 accelerator-a-1、账号
+benchmark-user；各自的连接结果记录在私有 `task_N.connection.json`。
 
 ```bash
 # 将下面的路径设为协调者给出的私有包装器目录；不要另建认证连接。
 fnit_connection_directory=/path/to/private/coordination
 
 # 检查已有主连接后，在服务器执行只读身份核对。
-"$fnit_connection_directory/ssh_gpucw1.sh" 'hostname; whoami; pwd'
+"$fnit_connection_directory/ssh_accelerator-a-1.sh" 'hostname; whoami; pwd'
 
 # 传输各任务自己的源码归档，传输后在服务器核验其 SHA-256。
-"$fnit_connection_directory/scp_gpucw1.sh" \
-  /path/to/task_source.tar.gz gpucw1:/path/to/task/source.tar.gz
+"$fnit_connection_directory/scp_accelerator-a-1.sh" \
+  /path/to/task_source.tar.gz accelerator-a-1:/path/to/task/source.tar.gz
 ```
 
 SSH 包装器使用 `ssh -S SOCKET`；SCP 使用 `scp -o ControlPath=SOCKET`。

@@ -26,7 +26,7 @@
 
 ```bash
 # 仅 CPU 测试；环境复用原 Conda 包，不启动生产整例。
-candidate_workspace=/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/ten_case_candidate_cpu_v1
+candidate_workspace=/data/fnit/workspaces/recon_accuracy_20261003/ten_case_candidate_cpu_v1
 cd "$candidate_workspace"
 CUDA_VISIBLE_DEVICES='' PYTHONPATH="$candidate_workspace/src" \
 OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 NUMBA_NUM_THREADS=4 \

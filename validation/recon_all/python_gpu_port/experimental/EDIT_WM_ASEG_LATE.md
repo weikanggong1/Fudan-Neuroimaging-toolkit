@@ -18,7 +18,7 @@ The command always calls `remove_paths_to_cortex`, `edit_segmentation`, and `spa
 
 ## Inputs and isolated references
 
-Subject MRI path: `/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_main_20260924/single_subjects/fs_sub01/mri`. Isolated references: `/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_python_gpu_20260925/wm_asegedit_ref`.
+Subject MRI path: `/data/workspaces/freesurfer_synth/work/reconall_main_20260924/single_subjects/fs_sub01/mri`. Isolated references: `/data/workspaces/freesurfer_synth/work/reconall_python_gpu_20260925/wm_asegedit_ref`.
 
 | File | SHA-256 |
 | --- | --- |
@@ -42,12 +42,12 @@ The no-option native `core.mgz` differs from `wm.seg.mgz` at **66,173 / 16,777,2
 
 The Python late output has Fortran-order voxel SHA-256 `6a1312de6ff32e810f983a131dded18cdea6a11f845adb5077efd51cac74da2e`, identical to both full native voxel arrays. Decompressed MGH 284-byte header, all voxel bytes, and 20-byte scan parameters are identical to fresh native. Footer and gzip bytes differ because the Python writer retains the no-option core's command history, whereas full native records its complete command. Three synthetic tests passed.
 
-On headcw, fresh native no-option core took 18.29 s and the full native command 28.29 s. Python options from the already existing native core took 4.48 s with fill, including file I/O. These are different scopes and do not establish a complete replacement speedup. This stage runs on CPU using NumPy, SciPy and nibabel; its Python code never executes or reads a FreeSurfer runtime binary.
+On control-host, fresh native no-option core took 18.29 s and the full native command 28.29 s. Python options from the already existing native core took 4.48 s with fill, including file I/O. These are different scopes and do not establish a complete replacement speedup. This stage runs on CPU using NumPy, SciPy and nibabel; its Python code never executes or reads a FreeSurfer runtime binary.
 
 Reproduce this **substage** using the frozen native core reference:
 
 ```bash
-BASE=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work
+BASE=/data/workspaces/freesurfer_synth/work
 MRI=$BASE/reconall_main_20260924/single_subjects/fs_sub01/mri
 REF=$BASE/reconall_python_gpu_20260925/wm_asegedit_ref
 PYTHONPATH=src python -m fnit.recon_all.edit_wm_aseg_late_python \

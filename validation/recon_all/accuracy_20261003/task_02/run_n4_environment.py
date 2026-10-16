@@ -4,9 +4,9 @@ from pathlib import Path
 import nibabel as nib
 import numpy as np
 ROOT=Path('/tmp/fnit-recon-accuracy-20261003/task_02/diagnostic')
-BASE=Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929')
+BASE=Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929')
 ORIG=BASE/'reference_sub02_official/subjects/b_official/mri/orig.mgz'
-OFFICIAL=Path('/public/software/apps/Freesurfer/8.2.0-1/bin/AntsN4BiasFieldCorrectionFs')
+OFFICIAL=Path('/opt/reference/Freesurfer/8.2.0-1/bin/AntsN4BiasFieldCorrectionFs')
 NATIVE=ROOT/'build4_gcc48_clean/fnit_n4_diagnostic'
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def metric(a,b):
@@ -14,7 +14,7 @@ def metric(a,b):
 report={'host':platform.node(),'input_sha256':sha(ORIG),'official_binary_sha256':sha(OFFICIAL),'native_binary_sha256':sha(NATIVE),'runs':[],'kind':'diagnostic_only_not_production_backend'}
 with open('/tmp/fnit-shared-benchmark.lock','a') as lock:
  fcntl.flock(lock,fcntl.LOCK_EX)
- env=dict(os.environ,OMP_NUM_THREADS='4',OPENBLAS_NUM_THREADS='4',MKL_NUM_THREADS='4',FS_LICENSE='/cwStorage/home/gongwk/.config/freesurfer-codex/license.txt',FREESURFER_HOME='/public/software/apps/Freesurfer/8.2.0-1')
+ env=dict(os.environ,OMP_NUM_THREADS='4',OPENBLAS_NUM_THREADS='4',MKL_NUM_THREADS='4',FS_LICENSE='/data/user/.config/freesurfer-codex/license.txt',FREESURFER_HOME='/opt/reference/Freesurfer/8.2.0-1')
  env['LD_LIBRARY_PATH']='/tmp/fnit_itk4_build_20260929/ITK4-install-gcc48b/lib:/lib64:/usr/lib64'
  env['FNIT_N4_DIAGNOSTIC_PREFIX']=str(ROOT/'gcc48')
  commands=[('gcc48',[str(NATIVE),str(ROOT/'input.raw'),str(ROOT/'gcc48.final.raw'),'256','256','256','1','1','1','4',str(ROOT/'gcc48.profile.json')]),('official',[str(OFFICIAL),'-i',str(ORIG),'-o',str(ROOT/'official_repeat_float.mgz'),'--dtype','float'])]

@@ -1,11 +1,11 @@
 """服务器隔离诊断队列；逐阶段取得并释放全局资源锁。"""
 from __future__ import annotations
 import fcntl, hashlib, json, os, pathlib, subprocess, sys, time
-BASE=pathlib.Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929')
+BASE=pathlib.Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929')
 ROOT=BASE/'accuracy_20261003/task_04'
 PYTHON=BASE/'fnit_main_env/bin/python'
 SOURCE=BASE/'accuracy_20261003/baseline_runtime_816e5610'
-FS=pathlib.Path('/public/software/apps/Freesurfer/8.2.0-1')
+FS=pathlib.Path('/opt/reference/Freesurfer/8.2.0-1')
 COMMIT='816e5610417a4c587caf321049438a9554139016'
 CHECKPOINTS={'sub01':BASE/'parallel_20261002/whole_sub01_candidate_8d750e2','sub02':BASE/'parallel_20261002/whole_sub02_candidate_8d750e2_retry_v3'}
 

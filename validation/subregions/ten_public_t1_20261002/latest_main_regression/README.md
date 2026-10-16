@@ -69,7 +69,7 @@
 
 ## 硬件与共享负载
 
-两版 raw 均在 gpucw1 的同一张 NVIDIA H100 PCIe 上运行，物理 GPU 1，UUID `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba`，报告总显存 81559 MiB。本进程采样峰值上限为 **19073 MiB**（约 18.63 GiB）；十例均在上限内。峰值来自独立 GPU 日志对本进程 PID 的周期采样，不等于瞬时最高显存。PyTorch 分配峰值记录为 13.774–17.381 GiB，两版范围相同。
+两版 raw 均在 accelerator-a-1 的同一张 NVIDIA H100 PCIe 上运行，物理 GPU 1，UUID `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba`，报告总显存 81559 MiB。本进程采样峰值上限为 **19073 MiB**（约 18.63 GiB）；十例均在上限内。峰值来自独立 GPU 日志对本进程 PID 的周期采样，不等于瞬时最高显存。PyTorch 分配峰值记录为 13.774–17.381 GiB，两版范围相同。
 
 | 共享 GPU 条件 | 旧版 raw | main raw |
 |---|---:|---:|

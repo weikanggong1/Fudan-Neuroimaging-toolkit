@@ -2,7 +2,7 @@
 import json,hashlib,time
 from pathlib import Path
 from datetime import datetime,timezone
-R=Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01');A=R/'CPU_final10_independent_audit_v1';O=R/'CPU_final10_concise_metadata_v1';O.mkdir(exist_ok=False)
+R=Path('/data/workspaces/fnit_connectome_tenraw_20261002/task_01');A=R/'CPU_final10_independent_audit_v1';O=R/'CPU_final10_concise_metadata_v1';O.mkdir(exist_ok=False)
 def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def load(p):return json.loads(Path(p).read_text())
 def save(p,v):p.write_text(json.dumps(v,indent=2,allow_nan=False)+'\n')

@@ -23,9 +23,9 @@ parser.add_argument("--controlled-format", choices=("mgz", "nifti", "canonical-n
 args = parser.parse_args()
 args.output.mkdir(parents=True, exist_ok=False)
 torch.set_num_threads(8)
-binary = Path("/public/software/apps/MRtrix3/3.0.3/bin/mrtransform")
+binary = Path("/opt/reference/MRtrix3/3.0.3/bin/mrtransform")
 environment = os.environ.copy()
-environment["LD_LIBRARY_PATH"] = "/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/lib"
+environment["LD_LIBRARY_PATH"] = "/data/workspaces/fnit_conda_env_956b1a9/lib"
 environment["OMP_NUM_THREADS"] = "8"
 bindings = json.loads(args.bindings.read_text())
 

@@ -1,5 +1,5 @@
 import pathlib,json,numpy as np,nibabel as nib,hashlib
-r=pathlib.Path("/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001");report={'scope':'frozen_auxiliary_precision_diagnostic; cache_enabled; not_whole_speedup','production_commit':"61926c7dceae2f9097fa296e306cf1efa0a09191",'cases':{}}
+r=pathlib.Path("/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001");report={'scope':'frozen_auxiliary_precision_diagnostic; cache_enabled; not_whole_speedup','production_commit':"61926c7dceae2f9097fa296e306cf1efa0a09191",'cases':{}}
 for sub in ['01','02']:
  entry={'run':json.loads((r/('synth_aux_fp32_sub'+sub+'.json')).read_text()),'monitor':json.loads((r/('synth_aux_fp32_sub'+sub+'_monitor/monitor.json')).read_text()),'comparisons':{}}
  for ref in ['oldcpu','newgpu']:

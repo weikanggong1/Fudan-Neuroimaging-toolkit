@@ -2,12 +2,12 @@
 # One fixed-subject CPU EntoWM diagnostic; no FreeSurfer executable is called.
 set -euo pipefail
 
-work=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_python_gpu_20260925
+work=/data/workspaces/freesurfer_synth/work/reconall_python_gpu_20260925
 stage="$work/connected_entowm_cpu_20260926"
 snapshot="$work/fnit_reconall_snapshot_20260926c"
-official=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official
-python=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_main_20260924/venv/bin/python
-weights=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/weights
+official=/data/workspaces/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official
+python=/data/workspaces/freesurfer_synth/work/reconall_main_20260924/venv/bin/python
+weights=/data/workspaces/freesurfer_synth/weights
 
 mkdir -p "$stage"
 cd "$snapshot"

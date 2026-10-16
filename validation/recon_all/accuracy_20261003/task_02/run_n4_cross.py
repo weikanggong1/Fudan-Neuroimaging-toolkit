@@ -10,7 +10,7 @@ def metric(a,b):
 report={'kind':'diagnostic_only_not_production_backend','runs':[]}
 for tag,build,libraries in [('floatmask','build4_float_conda','/tmp/fnit_itk4_build_20260929/ITK4-install/lib'),('oldlibraries','build4_oldlibs_conda','/tmp/fnit_itk4_build_20260929/ITK4-install-gcc48b/lib')]:
  binary=ROOT/build/'fnit_n4_diagnostic'
- env=dict(os.environ,LD_LIBRARY_PATH=libraries+':/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib',FNIT_N4_DIAGNOSTIC_PREFIX=str(ROOT/tag),OMP_NUM_THREADS='4',OPENBLAS_NUM_THREADS='4',MKL_NUM_THREADS='4')
+ env=dict(os.environ,LD_LIBRARY_PATH=libraries+':/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib',FNIT_N4_DIAGNOSTIC_PREFIX=str(ROOT/tag),OMP_NUM_THREADS='4',OPENBLAS_NUM_THREADS='4',MKL_NUM_THREADS='4')
  with open('/tmp/fnit-shared-benchmark.lock','a') as lock:
   fcntl.flock(lock,fcntl.LOCK_EX);tick=time.perf_counter()
   subprocess.run([str(binary),str(ROOT/'input.raw'),str(ROOT/(tag+'.final.raw')),'256','256','256','1','1','1','4',str(ROOT/(tag+'.profile.json'))],env=env,check=True)

@@ -52,7 +52,7 @@ public_installation = export_installation(
 )
 ```
 
-导出器三参数均必填，返回并保存 `report` 与原报告 SHA。逐项核对完成收据、十二模块、21项配方、实际依赖与精度状态、CLI；只输出这些已声明字段和计时，GPU 未测保持 `null`。时间单位秒，文件大小为字节。校验或输出冲突抛异常；不导出原日志、路径或影像。`installation.json` 为本地实测，`cfff_installation.json` 为服务器安全字段，二者不是 MRI benchmark。
+导出器三参数均必填，返回并保存 `report` 与原报告 SHA。逐项核对完成收据、十二模块、21项配方、实际依赖与精度状态、CLI；只输出这些已声明字段和计时，GPU 未测保持 `null`。时间单位秒，文件大小为字节。校验或输出冲突抛异常；不导出原日志、路径或影像。`installation.json` 为本地实测，`accelerator-b_installation.json` 为服务器安全字段，二者不是 MRI benchmark。
 
 v2 导出器把固定合同写入代码：双方必须包含相同顺序的十二个唯一模块、六个声明的源码 overlay、21 项精确配方及两个指定 CLI。模块、wheel、N4、精度和 CLI 均拒绝未知键；校验完整 SHA、整数与 bool 类型，退出码必须是真正的整数 0，不能用 `False` 代替。重复 JSON 键、非有限计时、缺失模块、空 CLI 或不明源码路径在写出公共结果前失败。
 
@@ -100,8 +100,8 @@ v2 schema 合同可单独运行：`PYTHONDONTWRITEBYTECODE=1 python test_export_
 | 发布合同 | 9测试、23子测试，15.90秒；缺失/错误实际扫描后端被拒绝 | 小文件夹具，不是MRI |
 | 本地构建 / 安装 / 入口 | 2.242129 / 0.763629 / 7.154812秒；十二模块三处SHA相同 | 实际新wheel安装，无MRI/GPU |
 | 本地两个fresh CLI | 1.825254 / 2.290494秒 | 包含导入，无算法运行 |
-| CFFF安装 / 入口 / 合计 | 2.567623 / 15.022903 / 17.598017秒；十二模块三处SHA相同 | 现有依赖、一个CPU核、CUDA不可见 |
-| CFFF两个fresh CLI | 2.698571 / 3.243573秒 | 完整help进程，非重建时间 |
+| accelerator-b安装 / 入口 / 合计 | 2.567623 / 15.022903 / 17.598017秒；十二模块三处SHA相同 | 现有依赖、一个CPU核、CUDA不可见 |
+| accelerator-b两个fresh CLI | 2.698571 / 3.243573秒 | 完整help进程，非重建时间 |
 
 v2 已对上述完成安装的同一原报告在服务器实际导出，退出码为 0。原报告 SHA 仍为 `e1df7751face944909c2b9031d3e43d51c9078ecfe6af323f63c0c326a61aae9`，公共 JSON 保持 8,564 字节及 SHA `ac09aed915fbc5a3e57533f3ec16b6d08c7d163aae00b274e386f36a9a61f258`，与 v1 逐字节相同；不是只验证元数据夹具。此次仅重导出已完成安装报告，没有重新安装或执行重建，也没有测导出耗时或 GPU。现场结果由父任务的工具观察，见 [V2_ACTUAL_EXPORT.json](V2_ACTUAL_EXPORT.json)。
 
@@ -114,7 +114,7 @@ v2 已对上述完成安装的同一原报告在服务器实际导出，退出�
 ## 6. 版本与证据记录
 
 - 核心扫描提交 `1828ba7578971ad670e8168943fb8e1d93a97f90`；真实测试先绑定源SHA，不用提交时间替换实测版本。
-- 源码与实际安装对应 [installation.json](installation.json)、[cfff_installation.json](cfff_installation.json)；服务器原报告SHA `e1df7751face944909c2b9031d3e43d51c9078ecfe6af323f63c0c326a61aae9`。
+- 源码与实际安装对应 [installation.json](installation.json)、[accelerator-b_installation.json](accelerator-b_installation.json)；服务器原报告SHA `e1df7751face944909c2b9031d3e43d51c9078ecfe6af323f63c0c326a61aae9`。
 - [contracts.json](contracts.json)、[contracts.xml](contracts.xml)保留调用和错误发布门回归；JUnit本体15.877秒，pytest完整报告15.90秒。
 - [early_setup_failure.json](early_setup_failure.json)记录冻结完成前请求验证脚本的失败；[export_preflight_failure.json](export_preflight_failure.json)记录错误预期导出哈希。二者均在科学计算前停止，原结果未改写；修正后安装/导出独立保留。
 - 公共输出和导出器SHA见 [EXPORT_RECEIPT.json](EXPORT_RECEIPT.json)，全部交付文件见 `PUBLIC_MANIFEST.json`。旧冻源运行继续使用原文件，不原地更新。

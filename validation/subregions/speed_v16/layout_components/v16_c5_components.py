@@ -4,11 +4,11 @@ from pathlib import Path
 import subprocess
 import time
 
-root = Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930')
+root = Path('/data/workspaces/freesurfer_synth/work/fnit_subregions_unified_20260930')
 source = root / 'source_v16_c5'
 old = root / 'source_v15'
 prepared = root.parent / 'fnit_subregions_plus_20260928/samseg_native_build_20260929'
-python = '/home1/gongwk/anaconda3/bin/python'
+python = '/home1/benchmark-user/anaconda3/bin/python'
 env = dict(os.environ, CUDA_VISIBLE_DEVICES='0', PYTHONPATH=str(source / 'src'),
            OMP_NUM_THREADS='4', MKL_NUM_THREADS='4', OPENBLAS_NUM_THREADS='4',
            NUMEXPR_NUM_THREADS='4', PYTHONUNBUFFERED='1')

@@ -1,6 +1,6 @@
 # 原始 T1：全部亚区 CPU8 端到端验证
 
-2026-10-04，在 nodecw10 完成一张公开 T1 的 `segment_4_subregions(structures="all")` 完整 CPU 调用。输入为 OpenNeuro ds000114 snapshot 1.0.2（CC0），原始文件 SHA-256 为 `eb2bc2ff1f30441b0aff54685cfdd7f196bd02dccad4698100a8bad40421de22`。源码冻结为 `00fedf3544291b9c3e1db9b6c2d6fcef3917d958`，归档 SHA-256 为 `ab9a2d587d0fb9599fc2b6200011907b86e12b60f2630db131b62641ee755a72`。
+2026-10-04，在 compute-a-10 完成一张公开 T1 的 `segment_4_subregions(structures="all")` 完整 CPU 调用。输入为 OpenNeuro ds000114 snapshot 1.0.2（CC0），原始文件 SHA-256 为 `eb2bc2ff1f30441b0aff54685cfdd7f196bd02dccad4698100a8bad40421de22`。源码冻结为 `00fedf3544291b9c3e1db9b6c2d6fcef3917d958`，归档 SHA-256 为 `ab9a2d587d0fb9599fc2b6200011907b86e12b60f2630db131b62641ee755a72`。
 
 ## 流程、输入和输出
 

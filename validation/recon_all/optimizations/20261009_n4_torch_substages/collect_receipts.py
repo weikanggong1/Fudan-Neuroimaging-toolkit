@@ -44,7 +44,7 @@ hardware = json.loads(args.hardware_report.read_text())
 reference = args.run / "native_bundle.final.raw"
 clock_output = args.run / "diagnostic.final.raw"
 receipt = {"collected_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-    "receipt_collected_host": platform.node(), "benchmark_host": "gpucw1",
+    "receipt_collected_host": platform.node(), "benchmark_host": "accelerator-a-1",
     "code_base": args.code_base, "uncommitted_operator_code_identity": "per-report loaded module SHA256",
     "files": files, "weights_and_assets": "N4 has no external model weights or atlases",
     "unavailable_files_at_receipt_collection": [str(p) for p in paths if not p.is_file()],

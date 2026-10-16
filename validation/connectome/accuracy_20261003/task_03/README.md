@@ -97,7 +97,7 @@ fnit UKBConnectome_pipeline \
 同输入 worker 复用已有 [run_tracking_seed_repeat.py](../../tenraw_20261002/task_03/run_tracking_seed_repeat.py)，分别在全新目录调用 `run`，随后 `compare`。`source` 是只包含冻结 `fod.py`、`tracking.py` 的目录，`source-commit` 记录版本；`checkpoint` 是完整实际追踪输入 PT，`manifest` 是原始数据清单，`output` 为独立产物目录。其余参数省略即复用检查点的 100k、seed0、batch8192、`compile_arc=False`。严禁将官方 FOD oracle 的输入与 FNIT raw 检查点的计时混用。
 
 ```bash
-flock /tmp/fnit-recon-five-20261002-gongwk.gpu.lock \
+flock /tmp/fnit-recon-five-20261002-benchmark-user.gpu.lock \
   env CUDA_VISIBLE_DEVICES=GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba \
   python validation/connectome/tenraw_20261002/task_03/run_tracking_seed_repeat.py run \
   --source /data/accuracy/source_baseline --source-commit 7af34e6d072e843fb2558c931bb2781f1d4b0be9 \

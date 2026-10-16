@@ -2,7 +2,7 @@
 
 ## 1. 范围
 
-在 nodecw10 使用公开 ds001226 的 CON01 同一份原始 T1，调用 `prepare_recon_subject(recon_backend="freesurfer")` 重建解剖目录。它只检验官方来源适配器的真实运行、完成检查与再次调用跳过，不替代十人的 provided subject→SC benchmark，也不比较 FNIT 与官方 recon-all 数值精度。
+在 compute-a-10 使用公开 ds001226 的 CON01 同一份原始 T1，调用 `prepare_recon_subject(recon_backend="freesurfer")` 重建解剖目录。它只检验官方来源适配器的真实运行、完成检查与再次调用跳过，不替代十人的 provided subject→SC benchmark，也不比较 FNIT 与官方 recon-all 数值精度。
 
 运行限制为 CPU、4 个实际 CPU 的亲和性、`CUDA_VISIBLE_DEVICES=''`。官方调用依照适配器使用 `-all -parallel -openmp 4`。进程亲和性覆盖所有后代，防止双半球并行时超出四个实际 CPU。
 
@@ -11,7 +11,7 @@
 | 阶段 | 冻结 FNIT 源码 | 实际结果 |
 | --- | --- | --- |
 | 首次调用 | `8bc337c4ec688e64385ef5c2300d369281bf1a02` | 官方程序立即返回 `FREESURFER: Undefined variable.`；没有重建结果和完成缓存。 |
-| 初始化修复 | `3b697657919347281d02285b3cd634008635a4c0` | 三个相关测试文件共55项通过，11.94秒；原官方 setup 在 nodecw10 的只读初始化检查成功。 |
+| 初始化修复 | `3b697657919347281d02285b3cd634008635a4c0` | 三个相关测试文件共55项通过，11.94秒；原官方 setup 在 compute-a-10 的只读初始化检查成功。 |
 | `official_retry_v2` | 同上 | 2026-10-03 14:36:34–16:17:46 UTC 实际完成；首次调用6069.7609秒，第二次1.02243秒返回 `skipped`，文件未改变、官方完成与格式/几何检查通过。 |
 
 首次失败公开元数据见 [initial_failure.public.json](initial_failure.public.json)，修复测试输出见 [setup_fix_tests.txt](setup_fix_tests.txt)。MRI、完整 raw SHA、官方命令、PID与全部输出哈希只保存在服务器私有记录，不转移至本公开报告。最终公开摘要见 [fresh_complete.public.json](fresh_complete.public.json)；回收采用字段白名单。

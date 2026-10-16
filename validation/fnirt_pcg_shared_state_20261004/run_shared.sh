@@ -1,15 +1,15 @@
 #!/bin/bash
 # Two bounded native linear solves + FNIT same-system replays on real inputs.
 set -euo pipefail
-FNIT_SERVER_ROOT=/cwStorage/home/gongwk/Notebook_code/FNIT
+FNIT_SERVER_ROOT=/data/fnit
 PCG_WORK="$FNIT_SERVER_ROOT/workspaces/smri_cpu_20261004/remaining_20261004/synth/fnirt-pcg-shared-v2"
 PCG_RUN="$FNIT_SERVER_ROOT/runs/smri_cpu_20261004/remaining_20261004/synth/fnirt-pcg-shared-v2"
 OFFICIAL_INPUT="$FNIT_SERVER_ROOT/runs/smri_cpu_20261004/task4_vbm_official_cpu_v2/official_synthstrip_fast_fnirt"
-FSL_REFERENCE_ROOT=/public/software/apps/FSL/6.0.7.4
+FSL_REFERENCE_ROOT=/opt/reference/FSL/6.0.7.4
 GM_TEMPLATE="$FNIT_SERVER_ROOT/legacy/freesurfer_synth/work/ukb_vbm_gpu/assets/template_GM_v1.nii.gz"
 mkdir -p "$PCG_RUN"
 trap 'pcg_exit=$?; printf "{\"exit_code\":%s}\n" "$pcg_exit" > "$PCG_RUN/exit.public.json"' EXIT
-exec 9>"$FNIT_SERVER_ROOT/runs/smri_cpu_20261004/nodecw7.synth.cpu8.lock"
+exec 9>"$FNIT_SERVER_ROOT/runs/smri_cpu_20261004/compute-a-7.synth.cpu8.lock"
 flock 9
 export OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 MKL_NUM_THREADS=8 NUMBA_NUM_THREADS=8
 export CUDA_VISIBLE_DEVICES= FSLOUTPUTTYPE=NIFTI_GZ

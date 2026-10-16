@@ -236,7 +236,7 @@ def main():
         'extra_original_driver_status': 'failed', 'extra_full_api_seconds': None,
         'extra_saved_outputs_late_verified': True, 'figure_sha256': sha256(image_path)}
     text = json.dumps(report, indent=2, allow_nan=False) + '\n'
-    if any(token in text for token in ('/cwStorage/', '/home/', 'license.txt')):
+    if any(token in text for token in ('/data/shared/', '/home/', 'license.txt')):
         raise ValueError('public figure provenance contains a private path')
     (output / 'figure.public.json').write_text(text)
     print('CON08_BRAIN_FIGURE_COMPLETE', report['figure_sha256'])

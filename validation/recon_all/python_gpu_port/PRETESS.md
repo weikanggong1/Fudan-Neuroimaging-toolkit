@@ -16,7 +16,7 @@ This stage currently runs on NumPy/CPU. Source reference:
 | `filled.mgz 127 norm.mgz` | 0.745 s | 1.896 s | 9 | 0 / 16,777,216 |
 
 The [three-trial report](pretess_cpu_report.json) uses the same frozen input
-files on `headcw`, alternates native and resident Python runs, and records
+files on `control-host`, alternates native and resident Python runs, and records
 their SHA-256 values. The decompressed MGH header and all voxel bytes match
 for every paired run, with identical affines. The complete files differ in
 FreeSurfer command-history metadata; the Python output preserves the input

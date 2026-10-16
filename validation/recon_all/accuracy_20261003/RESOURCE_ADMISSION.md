@@ -42,19 +42,19 @@ CLI参数：`--report`为新JSON文件，必须不存在；`--preflight-only`只
 ## 具名命令
 
 ```bash
-FNIT_PYTHON=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
+FNIT_PYTHON=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
 FNIT_ADMISSION=/path/to/reviewed/resource_admission.py
 # 只读检查；报告应放在协调者的新runs目录。
 "$FNIT_PYTHON" "$FNIT_ADMISSION" --preflight-only \
-  --report /cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon-resource-retry-20261004/preflight.json
+  --report /data/fnit/runs/recon-resource-retry-20261004/preflight.json
 
 # 正式执行仅由协调者审核上传后进行；下列变量必须指向确认的实际路径。
 FNIT_ORIGINAL_CONFIG=/path/to/configs_v1/baseline_ds000114_sub-06.json
-FNIT_RETRY_ROOT=/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon-resource-retry-20261004/ds000114_sub-06/attempt-01
+FNIT_RETRY_ROOT=/data/fnit/runs/recon-resource-retry-20261004/ds000114_sub-06/attempt-01
 FNIT_SHARED_LOCK=/tmp/fnit-shared-benchmark.lock
 "$FNIT_PYTHON" "$FNIT_ADMISSION" --config "$FNIT_ORIGINAL_CONFIG" \
   --retry-root "$FNIT_RETRY_ROOT" --lock "$FNIT_SHARED_LOCK" \
-  --report /cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon-resource-retry-20261004/sub06-admission.json \
+  --report /data/fnit/runs/recon-resource-retry-20261004/sub06-admission.json \
   --poll-seconds 30 --query-timeout 5 --maximum-wait-seconds 86400
 ```
 
@@ -64,7 +64,7 @@ FNIT_SHARED_LOCK=/tmp/fnit-shared-benchmark.lock
 
 2026-10-04初版：4项聚焦单测通过，含精确十进制阈值、UUID错误、MiB→字节转换、配置/输出隔离，以及取得锁后的资源不足、查询错误和中断均退锁且不启动子进程。这些模拟数字是调度单测，不能称真实影像benchmark。
 
-同日04:18:41 UTC在gpucw1用本工具的`query_gpu`/`admitted`函数通过已认证SSH进行只读实测：总容量85,520,809,984字节，占用33,399,242,752字节，空闲51,542,753,280字节，准入判断true。没有取得benchmark锁，也没有启动GPU计算或整例，读数只代表该时刻，正式执行须重新查询。源码通过SSH标准输入命令执行，没有上传或修改冻结树。
+同日04:18:41 UTC在accelerator-a-1用本工具的`query_gpu`/`admitted`函数通过已认证SSH进行只读实测：总容量85,520,809,984字节，占用33,399,242,752字节，空闲51,542,753,280字节，准入判断true。没有取得benchmark锁，也没有启动GPU计算或整例，读数只代表该时刻，正式执行须重新查询。源码通过SSH标准输入命令执行，没有上传或修改冻结树。
 
 本工具没有独立原软件对应命令，属于 benchmark 调度包装器。当前真实重放和失败分型见[资源重放](RESOURCE_REPLAYS_20261004.md)；8f 启动修复的原始 T1 已完成，入口 2755.779 秒、138/138、父子同刻采样峰 10,951,327,744 字节，阶段、官方指标和脑图见[当前启动验证](../../../docs/recon_all/CUDA_STARTUP_BENCHMARK_20261004.md)。不能把准入成功解释为精度等效。
 
@@ -72,4 +72,4 @@ FNIT_SHARED_LOCK=/tmp/fnit-shared-benchmark.lock
 
 参考：[Python flock](https://docs.python.org/3/library/fcntl.html#fcntl.flock)、[NVIDIA nvidia-smi](https://docs.nvidia.com/deploy/nvidia-smi/index.html)。原FNIT监测与执行代码位于本仓库`validation/recon_all/python_gpu_port/run_monitored.py`和`validation/recon_all/optimizations/20261002_parallel/execute_whole_case.py`。
 
-2026-10-04中断清理修复：保留4项原单测，新增真实本地无GPU进程树测试（monitor→新session worker→grandchild），worker/grandchild忽略TERM触发有界升级KILL；清理期间独立进程始终无法取锁，退出后无活跃后代，另一个不相关session仍运行。另测试PID启动时间不符时不发送信号，共6项通过。gpucw1现场内核为3.10，Python无`pidfd_open`；兼容路径在发送每个信号前核对PID/starttime/PGID，并且测试强制走此路径。新内核可用时采用pidfd绑定身份；旧内核无法提供pidfd的原子身份保障，启动时间核对与STOP递归冻结用于缩小检查/发送之间的系统竞争窗口。该修复解决中断遗漏独立session的调度风险，未执行影像重跑，也不代表CUDA bootstrap或满载OOM已修复。
+2026-10-04中断清理修复：保留4项原单测，新增真实本地无GPU进程树测试（monitor→新session worker→grandchild），worker/grandchild忽略TERM触发有界升级KILL；清理期间独立进程始终无法取锁，退出后无活跃后代，另一个不相关session仍运行。另测试PID启动时间不符时不发送信号，共6项通过。accelerator-a-1现场内核为3.10，Python无`pidfd_open`；兼容路径在发送每个信号前核对PID/starttime/PGID，并且测试强制走此路径。新内核可用时采用pidfd绑定身份；旧内核无法提供pidfd的原子身份保障，启动时间核对与STOP递归冻结用于缩小检查/发送之间的系统竞争窗口。该修复解决中断遗漏独立session的调度风险，未执行影像重跑，也不代表CUDA bootstrap或满载OOM已修复。

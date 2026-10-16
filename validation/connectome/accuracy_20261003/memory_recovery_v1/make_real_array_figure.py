@@ -13,8 +13,8 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-root=Path('/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1')
-original=Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1')
+root=Path('/data/fnit/runs/connectome-accuracy-memory-recovery-20261003-v1')
+original=Path('/data/workspaces/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1')
 report=json.loads((root/'science_comparison.json').read_bytes());assert report['status']=='CPU_comparison_completed'
 cases=list(report['cases']);fig,axes=plt.subplots(len(cases),3,figsize=(9,3.6*len(cases)),squeeze=False,layout='constrained')
 receipts={}

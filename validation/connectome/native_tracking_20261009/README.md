@@ -216,7 +216,7 @@ tck2connectome tracks.tck atlas.nii fa.csv -symmetric -assignment_radial_search 
 （公开报告 `native_adapter_seconds`），从运行时校验后开始。100k 文件输入工具的
 `rows[*].adapter_seconds` 则是包含运行时校验的外层完整组件调用，两个字段计时边界不同。
 本环境首次构建阶段合计68.46 s，源码archive已事先缓存，不包含下载时间。
-allocated/reserved峰值7.69/8.77 GB；CFFF容器未可靠取得完整进程CUDA显存，
+allocated/reserved峰值7.69/8.77 GB；accelerator-b容器未可靠取得完整进程CUDA显存，
 不由allocator峰值宣告进程总占用严格低于20GB。
 换atlas后core=`skipped`，路径digest与权重逐字节不变。
 
@@ -230,7 +230,7 @@ allocated/reserved峰值7.69/8.77 GB；CFFF容器未可靠取得完整进程CUDA
 | 版本 | 内容与验收范围 |
 |---|---|
 | 本版，2026-10-09 | 源构建CPU MRtrix iFOD2/ACT；删除旧tracker与17个专用benchmark；真实corrected-DWI整链、两atlas、10k单线程精确oracle、100k同机比较及缓存复用。 |
-| `6ae32945` | 旧PyTorch eager SH无损优化；[历史报告](../tracking_cfff_20261009/README.md)，不作为本版原生追踪结果。 |
+| `6ae32945` | 旧PyTorch eager SH无损优化；[历史报告](../tracking_accelerator-b_20261009/README.md)，不作为本版原生追踪结果。 |
 | `e26a766a` | 旧完整100k进程显存审计；不替代本版显存测量。 |
 
 CPU connectome全套：1014 passed、6 CUDA缺失skip、362 subtests passed；

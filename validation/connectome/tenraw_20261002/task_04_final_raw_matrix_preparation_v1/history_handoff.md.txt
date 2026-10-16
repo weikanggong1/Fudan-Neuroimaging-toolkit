@@ -4,13 +4,13 @@
 
 ## 1. 状态与任务
 
-v1实际preflight曾通过冻结文件SHA检查；nodecw10旧PID52792已于2026-10-03 01:17:10 UTC按完整进程身份和pending记录停止，旧输出/启动/停止证据保留，未产生最终比较报告。当前v2加入完整official explicit map、命名空间与结束SHA guard，等待真实mapper交接，尚无v2 active waiter。早期七份failed报告原样保留，不覆盖root正在精简的专属docs/payload。
+v1实际preflight曾通过冻结文件SHA检查；compute-a-10旧PID52792已于2026-10-03 01:17:10 UTC按完整进程身份和pending记录停止，旧输出/启动/停止证据保留，未产生最终比较报告。当前v2加入完整official explicit map、命名空间与结束SHA guard，等待真实mapper交接，尚无v2 active waiter。早期七份failed报告原样保留，不覆盖root正在精简的专属docs/payload。
 
 最终范围为20个实际FNIT arm/case×8atlas。每条FNIT链仅seed0，对官方独立同raw五seed；每臂240项，总4800项单侧判定。FNITself与population均不评估，不混入固定输入5FNIT重复。
 
 ## 2. 所需final mapping schema
 
-直接复用Task5 v9的真实文件：`/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_actual_mixed_GPU_origins_v1/origins.json`。
+直接复用Task5 v9的真实文件：`/data/workspaces/fnit_connectome_tenraw_20261002/formal_actual_mixed_GPU_origins_v1/origins.json`。
 
 ```json
 {
@@ -40,18 +40,18 @@ v3六份：baseline05/11、candidate04/05/06/07；receipt SHA固定`07678861e925
 
 启动顺序：检查全部冻结source/config SHA；等待最终map文件与10个reference manifests；调用v9完成来源资格校验；逐例核对官方completed/五seed；调用原raw工具完成原始来源、node语义、atlas、matrix finite、GPU输出绑定guard与单侧统计；全部完成后复核报告/map SHA未变化。官方各病例reference_manifest scope和完整原命令合同由原raw工具核对。任一异常在新目录保留failure，不放宽门槛。
 
-输出新目录`/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/final_raw_matrix_twenty_watch_v1`：不可覆盖的observation、每臂`actual_inputs.json/envelope.json/execution.json`及最后`final_report.json`。仅20份全部实际完成时标比较coverage完成；科学通过另读每份matrix状态。所有等待、资格失败和实际只读wall time保留。
+输出新目录`/data/workspaces/fnit_connectome_tenraw_20261002/task_04/final_raw_matrix_twenty_watch_v1`：不可覆盖的observation、每臂`actual_inputs.json/envelope.json/execution.json`及最后`final_report.json`。仅20份全部实际完成时标比较coverage完成；科学通过另读每份matrix状态。所有等待、资格失败和实际只读wall time保留。
 
 ## 5. 命令行与参数
 
 ```bash
 # 历史v1实际启动命令（进程现已停止）；禁止重复使用同一output-root。
 CUDA_VISIBLE_DEVICES= OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
-  /cwStorage/home/gongwk/anaconda3/bin/python3.11 \
-  /cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/final_raw_matrix_tools_v1/benchmark_connectome_final_raw_envelope.py \
-  --config /cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/final_raw_matrix_tools_v1/configuration.json \
+  /data/user/anaconda3/bin/python3.11 \
+  /data/workspaces/fnit_connectome_tenraw_20261002/task_04/final_raw_matrix_tools_v1/benchmark_connectome_final_raw_envelope.py \
+  --config /data/workspaces/fnit_connectome_tenraw_20261002/task_04/final_raw_matrix_tools_v1/configuration.json \
   --config-sha256 bec71f47418e78ed1830e29da96eff66526d272e16c39f03b7f8cdc276d5b07e \
-  --output-root /cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04/final_raw_matrix_twenty_watch_v1 \
+  --output-root /data/workspaces/fnit_connectome_tenraw_20261002/task_04/final_raw_matrix_twenty_watch_v1 \
   --watch --poll-seconds 60 --timeout-hours 72
 ```
 
@@ -59,7 +59,7 @@ CUDA_VISIBLE_DEVICES= OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
 
 ## 6. 实际验证与当前界限
 
-[实际preflight](../../validation/connectome/tenraw_20261002/task_04_final_raw_matrix_preparation_v1/actual_preflight/observation_000000.json)记录缺少CON11、final origins不可用、matrix_comparison_started=false。随后实际PID/argv曾核对运行；01:17:10 UTC精确停止旧waiter，01:26:09 UTC实际hostname=nodecw10且PID已不存在，仍无final_report或failure。解释器、源/config SHA和syntax均已核验；20来源ready分支尚未在本轮运行，不把这些准备检查说成最终科学验收。Task5的151项CPU协议检查是其v9 reader验证，不充当本任务20实际报告。
+[实际preflight](../../validation/connectome/tenraw_20261002/task_04_final_raw_matrix_preparation_v1/actual_preflight/observation_000000.json)记录缺少CON11、final origins不可用、matrix_comparison_started=false。随后实际PID/argv曾核对运行；01:17:10 UTC精确停止旧waiter，01:26:09 UTC实际hostname=compute-a-10且PID已不存在，仍无final_report或failure。解释器、源/config SHA和syntax均已核验；20来源ready分支尚未在本轮运行，不把这些准备检查说成最终科学验收。Task5的151项CPU协议检查是其v9 reader验证，不充当本任务20实际报告。
 
 最终runner不会运行原软件命令，消费各例实际reference_manifest中的官方命令与报告。每臂输出FP、node数、原始SHA、科学差异及原软件self范围按真实结果报告；此时不填预期值或模拟结果。不新增脑图，待最终实际保存矩阵需要展示时再读取。
 

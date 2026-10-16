@@ -91,7 +91,7 @@ def build_audit(*, repository: Path, output: Path) -> dict:
     reports = {}
     for case in ("06", "07"):
         for variant in ("control", "candidate"):
-            relative = EVIDENCE / "reports/runs/recon_e2e_803aec50_cfff_20261009" / (
+            relative = EVIDENCE / "reports/runs/recon_e2e_803aec50_accelerator-b_20261009" / (
                 f"sub{case}-{variant}") / "subject/fnit-native-free-run.json"
             path = repository / relative
             report = json.loads(path.read_text())

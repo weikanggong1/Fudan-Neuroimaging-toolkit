@@ -30,7 +30,7 @@ mcflirt -in "$RAW_BOLD" -reffile "$REFERENCE" -out "$OUTPUT_PREFIX" \
   -mats -plots -rmsrel -rmsabs -stages 3 -spline_final
 ```
 
-CPU 实测在共享节点 nodecw8，Python 3.11.16、PyTorch 2.5.1、NumPy 1.26.4、Nibabel 5.4.2。每个进程设置 OMP、OpenBLAS、MKL、NumExpr、Numba 和 PyTorch 的 1/8 线程预算。1 线程亲和性为 CPU 8，8 线程为 8、12、16、20、24、28、32、40；同一任务锁覆盖输入/源码核验和 API。原软件实际线程数未单独采样，8 表示允许的线程与亲和性预算。
+CPU 实测在共享节点 compute-a-8，Python 3.11.16、PyTorch 2.5.1、NumPy 1.26.4、Nibabel 5.4.2。每个进程设置 OMP、OpenBLAS、MKL、NumExpr、Numba 和 PyTorch 的 1/8 线程预算。1 线程亲和性为 CPU 8，8 线程为 8、12、16、20、24、28、32、40；同一任务锁覆盖输入/源码核验和 API。原软件实际线程数未单独采样，8 表示允许的线程与亲和性预算。
 
 原软件计时包含 native 子进程启动、全部读取、优化、最终插值、标准文件和退出。FNIT API 包含完整影像读取与正常写盘；另记录导入、header 加载和额外未舍入证据保存。输入/源码哈希、精度分析和 `.npy` 证据保存均在 API 钟外。首次/热调用指同一进程的第一/第二次完整 API；首次不表示清空系统页缓存或 Numba 磁盘缓存。原软件与 FNIT 的进程边界不同，下面不宣布正式端到端达标。
 

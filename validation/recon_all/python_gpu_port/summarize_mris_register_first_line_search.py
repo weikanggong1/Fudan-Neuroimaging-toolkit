@@ -16,9 +16,9 @@ PATTERN = re.compile(
 
 
 def summarize(hemisphere: str) -> dict:
-    torch_report = json.loads((HERE / f"mris_register_{hemisphere}_first_line_search_headcw.json").read_text())
-    native_log = (HERE / f"mris_register_{hemisphere}_native_first_line_terms_headcw.log").read_text()
-    fit_log = (HERE / f"mris_register_{hemisphere}_native_first_line_fit_headcw.log").read_text()
+    torch_report = json.loads((HERE / f"mris_register_{hemisphere}_first_line_search_control-host.json").read_text())
+    native_log = (HERE / f"mris_register_{hemisphere}_native_first_line_terms_control-host.log").read_text()
+    fit_log = (HERE / f"mris_register_{hemisphere}_native_first_line_fit_control-host.log").read_text()
     native_records = PATTERN.findall(native_log)
     assert len(native_records) == 12
     assert [int(row[0]) for row in native_records] == list(range(1, 13))
@@ -77,7 +77,7 @@ def summarize(hemisphere: str) -> dict:
 if __name__ == "__main__":
     for side in ("lh", "rh"):
         report = summarize(side)
-        path = HERE / f"mris_register_{side}_first_line_parity_headcw.json"
+        path = HERE / f"mris_register_{side}_first_line_parity_control-host.json"
         path.write_text(json.dumps(report, indent=2) + "\n")
         print(side, report["native_selected_dt"],
               report["exact_ordered_vertices"],

@@ -7,7 +7,7 @@ import statistics
 import struct
 import zlib
 
-root = Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002')
+root = Path('/data/workspaces/fnit_connectome_tenraw_20261002')
 sha = lambda path: hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 def read(path):

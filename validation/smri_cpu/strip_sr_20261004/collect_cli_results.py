@@ -50,7 +50,7 @@ def main():
             record = json.loads(record_path.read_text())
             if record["status"] != "complete" or record.get("returncode") != 0:
                 break
-            if record["hostname"].split(".")[0] != "nodecw10":
+            if record["hostname"].split(".")[0] != "compute-a-10":
                 raise ValueError("CPU timing was recorded on the wrong host")
             if record["max_cpu_threads"] != 8 or record["cpu_affinity"] != "0,4,8,12,16,20,24,28":
                 raise ValueError("CPU timing resources differ from the fixed protocol")

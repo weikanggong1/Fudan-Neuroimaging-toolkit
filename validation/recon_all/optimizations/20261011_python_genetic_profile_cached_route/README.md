@@ -53,7 +53,7 @@ python tools/verify_recon_genetic_profile_install.py "${installation_arguments[@
 | 当前 wheel | 5,274,180字节，SHA-256 `b33e6999898864d44930e975e7ad344baca83592596dd7aa1a81c7a150d91463` |
 | 构建 / 独立安装 | 2.468 / 0.824秒，包含实际读写 |
 | fresh CLI | recon-all help 1.686秒；GA文件help 2.213秒；实际模块均来自独立安装目标 |
-| CFFF现有依赖环境独立安装 | 安装7.137秒、入口组14.299秒，总21.439秒；fresh CLI 2.788/3.501秒；源码、wheel、安装目标八模块SHA相同 |
+| accelerator-b现有依赖环境独立安装 | 安装7.137秒、入口组14.299秒，总21.439秒；fresh CLI 2.788/3.501秒；源码、wheel、安装目标八模块SHA相同 |
 | 整例包装入口回归 | 1项测试、3项子测试通过，8.84秒；真实main保留python-ga/python及缺省数字配方，在缺失T1预检处停止 |
 | CUDA与精度 | 导入/配方解析不初始化CUDA，保留调用者设置；未测GPU前向或显存 |
 | 原始T1整例 / 指标等效 / 600秒 | 当前GA配方尚未完成；整体等效未判定，速度目标未达到 |
@@ -62,7 +62,7 @@ python tools/verify_recon_genetic_profile_install.py "${installation_arguments[@
 
 已有依赖中的离线安装不证明全新 Conda、无预装脑影像软件环境或当前完整运行隔离通过。
 
-CFFF安装报告的安全字段与原始收据SHA见[cfff_installation.json](cfff_installation.json)。独立安装验证的冻结脚本为[verify_wheel.py](verify_wheel.py)和[verify_entry.private.py](verify_entry.private.py)；后者只检查安装目标、21项配方和fresh CLI，无私有内容。前者接受必填 `--workspace`、`--run-directory`：workspace包含本次wheel、与`installation.json`一致的`expected.json`及入口脚本；run-directory必须不存在。只离线安装现有wheel，不构建或下载依赖，验证八模块SHA，返回报告、COMPLETE和私有日志；失败返回非零，不生成成功收据。1核CPU、CUDA不可见，未执行GPU前向或MRI。时间不与本地安装比较速度。
+accelerator-b安装报告的安全字段与原始收据SHA见[accelerator-b_installation.json](accelerator-b_installation.json)。独立安装验证的冻结脚本为[verify_wheel.py](verify_wheel.py)和[verify_entry.private.py](verify_entry.private.py)；后者只检查安装目标、21项配方和fresh CLI，无私有内容。前者接受必填 `--workspace`、`--run-directory`：workspace包含本次wheel、与`installation.json`一致的`expected.json`及入口脚本；run-directory必须不存在。只离线安装现有wheel，不构建或下载依赖，验证八模块SHA，返回报告、COMPLETE和私有日志；失败返回非零，不生成成功收据。1核CPU、CUDA不可见，未执行GPU前向或MRI。时间不与本地安装比较速度。
 
 整例包装入口原来只允许native/python且解析时未保留显式GA；已修正。测试源码和JUnit见[benchmark_choice_contracts.json](benchmark_choice_contracts.json)、[benchmark_choice_contracts.xml](benchmark_choice_contracts.xml)，不计入上表原30项接线测试，不改写其结果。
 
@@ -71,7 +71,7 @@ CFFF安装报告的安全字段与原始收据SHA见[cfff_installation.json](cff
 - 2026-10-11：启用完整配方中的保留面索引缓存，校验实际参数并写入发布收据。
 - [首版接线与安装](../20261011_python_genetic_profile/README.md)保持原代码/测试/产物版本；本版单独保存新收据。
 - 文件接口增加布尔缓存参数的13项合同通过；新缓存库入口的7项合同和真实六评分对照见其报告。
-- CFFF的当前wheel独立安装/实际入口检查完成；整例包装支持显式GA并保留选择，新合同单独保存。
+- accelerator-b的当前wheel独立安装/实际入口检查完成；整例包装支持显式GA并保留选择，新合同单独保存。
 
 ## 7. 参考文献和源码
 

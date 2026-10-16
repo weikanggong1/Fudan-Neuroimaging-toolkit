@@ -1,6 +1,6 @@
 """只读检查五项精度任务的后台进程、共享锁与已有回执。
 
-输入 --root：本轮 gpucw1 验证根目录；输出 stdout JSON（UTC、PID、状态、SHA）。
+输入 --root：本轮 accelerator-a-1 验证根目录；输出 stdout JSON（UTC、PID、状态、SHA）。
 先读固定 FNIT 服务器索引，再沿 --root 指定的已冻结任务路径读取。
 不启动、暂停或终止任务，不读取影像像素、许可证内容或进程环境。
 病例占位仅计为已开始；完成数量要求对应阶段比较字段存在。
@@ -12,7 +12,7 @@ import argparse,json,pathlib,datetime,subprocess,hashlib,os
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--root',type=pathlib.Path,required=True,help='本轮服务器验证根目录')
 R=parser.parse_args().root
-server_root=pathlib.Path('/cwStorage/home/gongwk/Notebook_code/FNIT')
+server_root=pathlib.Path('/data/fnit')
 location_documents={}
 for name in ('README.md','INDEX.md','INDEX.json'):
  p=server_root/name
@@ -44,7 +44,7 @@ for k,ids in pids.items():
    row['children']=[{x:v[x] for x in ('pid','ppid','stat','elapsed','cpu_percent','comm','command')} for v in pr.values() if v['pid'] in descendants and v['pid']!=pid]
   out['tasks'][k]['processes'].append(row)
 reports={
- 'task_01':['task_01/pair_baseline_official_v1/ds000030_sub-10159/checkpoint.json','/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/evaluation/ds000030_sub-10171/checkpoint.json'],
+ 'task_01':['task_01/pair_baseline_official_v1/ds000030_sub-10159/checkpoint.json','/data/fnit/runs/recon_accuracy_20261003/evaluation/ds000030_sub-10171/checkpoint.json'],
  'task_02':['task_02/cohort_prefix/report.json'],
  'task_03':['task_03/frozen_v1/normalize/report.json','task_03/frozen_v1/cross/report.json','task_03/frozen_v1/tail/report.json','task_03/frozen_v1/coordinates_fp32/report.json','task_03/production_fix_abba_v1/report.json'],
  'task_04':['task_04/queue_status.json','task_04/different_meshes_sub01/report.json','task_04/seeded_sphere_sub01_lh_v1/receipt.json'],

@@ -104,7 +104,7 @@ GPU 评测遵守共享 flock，固定已核实 GPU UUID，`PYTORCH_CUDA_ALLOC_CO
 ## 4. 对应官方命令
 
 ```bash
-# 同一真实 corrected DWI、旋转 bvec、bval 和掩膜；本轮 reference 在 nodecw10 CPU8。
+# 同一真实 corrected DWI、旋转 bvec、bval 和掩膜；本轮 reference 在 compute-a-10 CPU8。
 mrinfo corrected_dwi.nii.gz -fslgrad eddy_rotated.bvec dwi.bval \
   -export_grad_mrtrix gradient_mrtrix.txt -nthreads 8
 dwi2tensor corrected_dwi.nii.gz tensor.nii.gz \

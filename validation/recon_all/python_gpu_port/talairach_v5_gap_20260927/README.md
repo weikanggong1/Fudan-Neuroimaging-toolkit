@@ -3,7 +3,7 @@
 This read-only audit uses the v5 FNIT prefix replay of
 examples/data/sub-01_T1w.nii.gz (SHA-256
 f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a)
-and its completed unmodified FreeSurfer 8.2 reconstruction on gpucw1.
+and its completed unmodified FreeSurfer 8.2 reconstruction on accelerator-a-1.
 The [probe](probe.py) compares saved outputs; it runs no model and changes
 neither subject. [report.json](report.json) records hashes and numbers.
 The v5 subject was a downstream prefix replay, not a new completed
@@ -33,7 +33,7 @@ device-dependent numerical path but does not itself validate a production
 fallback. The current SynthMorph constructor enables CUDA matmul and cuDNN
 TF32; whether TF32 is the responsible operation is **unproven**. A
 frozen-input, same-process GPU run with the relevant precision flags
-toggled is needed to isolate it. Shared gpucw1 GPUs were occupied during
+toggled is needed to isolate it. Shared accelerator-a-1 GPUs were occupied during
 this audit, so no such run or production edit was made.
 
 Existing v5 nu, brain, brainmask, entowm, aseg.presurf and other MRI-prefix

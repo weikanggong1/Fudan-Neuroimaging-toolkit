@@ -48,7 +48,7 @@ step, pcg_report = solver(
 
 协调者审查同一冻结清单后授权唯一派发；无数值重试。`source/PLAN*` 和 `freeze.public.json` 保留冻结时的 preparation 状态；实际执行状态以 [launch](run/launch.public.json)、三个 exit 和原 summary 为准，不能把历史计划状态视为任务仍待执行。
 
-controller173178 / start_ticks534104746；19000s 公共 CPU lock 等待、19600s controller、180s science child，20,000,000,000B address-space cap。nodecw7 physical cores 为 `32,36,40,44,48,52,56,60`；OMP/OpenBLAS/MKL/Numba8、Torch8/interop1。GPU invisible，CUDA 前后均未初始化；既有 cuDNN TF32=True / matmul TF32=False / grad / 默认 dtype 状态前后不变。输出700/600，实际 runner 永不覆盖已存在科学目录。
+controller173178 / start_ticks534104746；19000s 公共 CPU lock 等待、19600s controller、180s science child，20,000,000,000B address-space cap。compute-a-7 physical cores 为 `32,36,40,44,48,52,56,60`；OMP/OpenBLAS/MKL/Numba8、Torch8/interop1。GPU invisible，CUDA 前后均未初始化；既有 cuDNN TF32=True / matmul TF32=False / grad / 默认 dtype 状态前后不变。输出700/600，实际 runner 永不覆盖已存在科学目录。
 
 本地只读复核入口如下，不导入 NumPy/Torch/Numba、不运行数值：
 

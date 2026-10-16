@@ -112,10 +112,10 @@ CSD：`wm_response` 包含各 shell 的 zonal SH，至少前五阶；`gm_respons
 
 ```bash
 # 锁等待不计入脚本内runtime；GPU UUID显式绑定共享锁对应设备
-flock /tmp/fnit-recon-five-20261002-gongwk.gpu.lock \
+flock /tmp/fnit-recon-five-20261002-benchmark-user.gpu.lock \
   env CUDA_VISIBLE_DEVICES=GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba \
   PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
-  /cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/bin/python \
+  /data/workspaces/fnit_conda_env_956b1a9/bin/python \
   candidate/benchmark_modeling.py \
   --checkpoint checkpoint.json --baseline baseline --candidate candidate \
   --output results/pilot_subject --rounds 2 --profile
@@ -147,7 +147,7 @@ mtnormalise wm_reference.nii.gz wm_norm_reference.nii.gz \
 
 ## 5. 本轮精度、耗时与脑图
 
-真实脑图入口为 `plot_modeling.py --baseline <baseline-checkpoints> --candidate <candidate-checkpoints> --mask <brain-mask.nii.gz> --subject <公开ID> --output <figure.png>`，从同输入真实结果显示 FA、WM DC 与偏置场，AB共用色阶、另列绝对差值。本轮CON03校正DWI的官方DTI/响应reference已完成，nodecw10 8线程的dwi2tensor/tensor2metric/dwi2response wall为2.1064/0.1626/12.5675 s，见CON03_official_tensor_response.json，绑定实际二进制与输入/输出SHA。FNIT冻结baseline GPU链首次完整计算已结束，四步诊断wall分别0.6035/1.0465/105.1275/0.0779 s，但进程显存采样触发20 GB门槛，未通过验收；旧脚本在报错前未落盘显存数值，故不报告具体峰值。已保留原0_baseline.pt并仅用CPU导出recovered_baseline，来源SHA见recovery_provenance.json。这些结果只用于后续官方精度诊断，不作为显存或性能通过证据。修正后的脚本将在共享锁下重测，并在失败前保存所有证据；官方CSD/归一化reference已从这些真实冻结输出运行完成。两例新pilot同输入ABBA已完成；heldout与整例端到端由主任务继续验收，整例端到端另由 root 整合。
+真实脑图入口为 `plot_modeling.py --baseline <baseline-checkpoints> --candidate <candidate-checkpoints> --mask <brain-mask.nii.gz> --subject <公开ID> --output <figure.png>`，从同输入真实结果显示 FA、WM DC 与偏置场，AB共用色阶、另列绝对差值。本轮CON03校正DWI的官方DTI/响应reference已完成，compute-a-10 8线程的dwi2tensor/tensor2metric/dwi2response wall为2.1064/0.1626/12.5675 s，见CON03_official_tensor_response.json，绑定实际二进制与输入/输出SHA。FNIT冻结baseline GPU链首次完整计算已结束，四步诊断wall分别0.6035/1.0465/105.1275/0.0779 s，但进程显存采样触发20 GB门槛，未通过验收；旧脚本在报错前未落盘显存数值，故不报告具体峰值。已保留原0_baseline.pt并仅用CPU导出recovered_baseline，来源SHA见recovery_provenance.json。这些结果只用于后续官方精度诊断，不作为显存或性能通过证据。修正后的脚本将在共享锁下重测，并在失败前保存所有证据；官方CSD/归一化reference已从这些真实冻结输出运行完成。两例新pilot同输入ABBA已完成；heldout与整例端到端由主任务继续验收，整例端到端另由 root 整合。
 
 真实冻结GPU建模脑图见 [CON03_modeling_official.png](CON03_modeling_official.png)：FA、归一化WM DC与偏置场，显示98,626体素brain mask内共同切片及绝对差，来源文件及解释器绑定CON03_modeling_official.provenance.json；偏置场全网格误差另见报告，不以图内范围替代。
 
@@ -167,7 +167,7 @@ mtnormalise wm_reference.nii.gz wm_norm_reference.nii.gz \
 
 接受mask全网格neq=0。偏置场全网格max=2.44141e-4，亦完整保留，不用mask内值替换全图最大误差。独立Dhollander完整流程的11张离散mask（safe/crude/refined/final）均neq=0，见CON03_official_response_masks.json；最终GM/CSF/SFWM选择分别220/155/146体素。WM/GM/CSF响应max分别1.29734e-7/3.41061e-12/4.54747e-13。
 
-官方nodecw10八线程CSD/mtnormalise wall为58.1317/2.7299 s，绑定命令、版本及二进制SHA。FNIT冻结GPU首次四步wall仅为失败验收的诊断，两例同检查点真实ABBA已完成，结果见下表。官方GM/CSF保存[X,Y,Z,1]，FNIT保存[X,Y,Z]；修复reference_modeling.py的存储形状检查后只去除末尾单例通道，affine仍严格核对，stored_shapes随报告保存。这是评测脚本问题，未发现模型函数bug。`--compare-existing`仅重比已完成官方文件，不重跑命令，保存官方和冻结输出SHA。
+官方compute-a-10八线程CSD/mtnormalise wall为58.1317/2.7299 s，绑定命令、版本及二进制SHA。FNIT冻结GPU首次四步wall仅为失败验收的诊断，两例同检查点真实ABBA已完成，结果见下表。官方GM/CSF保存[X,Y,Z,1]，FNIT保存[X,Y,Z]；修复reference_modeling.py的存储形状检查后只去除末尾单例通道，affine仍严格核对，stored_shapes随报告保存。这是评测脚本问题，未发现模型函数bug。`--compare-existing`仅重比已完成官方文件，不重跑命令，保存官方和冻结输出SHA。
 
 另外完成了同一校正CON03/全脑mask的 CPU FA精度诊断（Float64 IWLS、4096批次、8线程），不是GPU或raw整例验收：98,626体素，FA max=0.0462486、P99=1.78814e-7、RMSE=1.47548e-4，196体素误差>1e-5；主方向按反极符号比较，角度max=0.00274281°、P99=0.000118984°。这些结果来自未改动的冻结response.py，不能归因于本轮ICLS索引优化，也不据此宣称与官方等效。完整mask/原批次的条件数instrumentation复现FA逐值一致（neq=0）；最差体素的逐轮法方程条件数见CON03_cpu_tensor_conditioning.json。已只读核查官方源码使用Float64 LLT法方程，与FNIT同一IWLS算法；当前仅证实病态问题中的后端数值差异，未确认源代码bug，未改变求解器、精度或信号阈值。
 
@@ -178,7 +178,7 @@ GPU 的首次基线诊断未绑定共享锁对应的 GPU UUID，保留远端原�
 ## 6. 版本与 benchmark 更新
 
 - f436de588647a0de80735e4a98d53df5d88e502d：本轮冻结基线，已含 Cholesky/投影约束跨批次复用。
-- 2026-10-02 task_02 候选：只缓存 ICLS step/completed/removal 的有序行索引；20 项 CPU/CUDA 建模测试通过（gpucw1，3.70 s），包括独立枚举可行面最优解的 active-set 回归。
+- 2026-10-02 task_02 候选：只缓存 ICLS step/completed/removal 的有序行索引；20 项 CPU/CUDA 建模测试通过（accelerator-a-1，3.70 s），包括独立枚举可行面最优解的 active-set 回归。
 - CON03官方组件精度已完成；真实候选4096 + expandable segments已通过单次显存和30项逐值比较，正式两轮ABBA和全输出字节审计已完成。未提出替换 solver、减少迭代、使用侵蚀mask FA冒充全mask FA或更改精度的接入。
 
 ## 7. 参考文献与原代码
@@ -188,7 +188,7 @@ GPU 的首次基线诊断未绑定共享锁对应的 GPU UUID，保留远端原�
 - Raffelt 等，2017，ISMRM 3541；Dhollander 等，2021，*Multi-tissue log-domain intensity and inhomogeneity normalisation for quantitative apparent fibre density*，ISMRM 2472。[mtnormalise 官方参考文献](https://userdocs.mrtrix.org/en/dev/reference/commands/mtnormalise.html)。[mtnormalise 原实现](https://github.com/MRtrix3/mrtrix3/blob/master/cmd/mtnormalise.cpp)。
 - Tournier、Smith 等，2019，*MRtrix3: A fast, flexible and open software framework for medical image processing and visualisation*，NeuroImage 202:116137。[原代码库与许可](https://github.com/MRtrix3/mrtrix3)。本轮没有复制或再发布原软件实现、原始影像或大中间结果。
 
-已只读验证 nodecw10 官方 `/public/software/apps/MRtrix3/3.0.3/bin/dwi2tensor` 和 `dwi2response` 可执行，实际版本均为 `3.0.3-103-g026e850d`，与当前建模实现所对齐的版本一致。真实CON03 DTI和响应reference已完成，CSD和归一化reference与全图比较均已完成。
+已只读验证 compute-a-10 官方 `/opt/reference/MRtrix3/3.0.3/bin/dwi2tensor` 和 `dwi2response` 可执行，实际版本均为 `3.0.3-103-g026e850d`，与当前建模实现所对齐的版本一致。真实CON03 DTI和响应reference已完成，CSD和归一化reference与全图比较均已完成。
 
 官方组件脚本 `reference_modeling.py` 接受 `--checkpoint`、`--baseline-outputs`、`--bin-dir`、`--output`。`--prepare-response-only` 只准备独立官方DTI与响应，可在等待GPU时执行；`--continue-prepared` 先逐项核对输入和已准备输出SHA，再继续同输入CSD/归一化比较，保留各次真正运行的命令/耗时。其中 `--bin-dir` 必须指向已审核的官方 MRtrix 安装；记录实际二进制 SHA/版本、8线程墙钟及误差。响应使用独立完整 Dhollander；CSD使用基线响应，归一化使用基线原始三组织，以隔离各组件误差。此脚本仅reference，不在产品调用图中。
 

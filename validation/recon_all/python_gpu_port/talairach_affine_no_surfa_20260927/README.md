@@ -6,7 +6,7 @@
 
 输入是 OpenNeuro ds000114 sub-01 的真实 T1 经 SynthStrip 生成的三张脑图：归档 `fs_sub01/mri/synthstrip.mgz`、重新运行的 FreeSurfer SynthStrip `official_image.mgz`、FNIT NiBabel SynthStrip `new_image.mgz`。三张图的文件 SHA-256 分别为 `326fb4e6013e059a2c7f75f3f83bd8e7c3c8233df388bf40394782e575dc0faa`、`a643b6e1d5c15aa5ebb611029f05a3795e61b1c74eaaa3984840ec7ba6db7aeb`、`0841dc73514a82d37ba8662e647a8fdacb55960a379a3e4cd71fcb6548a0ddb7`。后两张图在 SynthStrip 单独验收中体素与 affine 完全相同，MGH 文件字节因元数据不同。
 
-固定模板 `mni305.cor.stripped.mgz` 的 SHA-256 为 `fff93f13255a8d393c0e787fbfcfaf5eb379e88e955bda7e04e31552568878a4`；affine 权重 `synthmorph.affine.2.h5` 的 SHA-256 为 `1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6`。在 gpucw1 H100 上，以同一 Conda 环境、四个 CPU 线程、相同 GPU 和关闭 matmul/cuDNN TF32 的条件成对运行旧 Surfa 与新 NiBabel 路径。每组首次运行和交错的两次稳态运行均重新加载权重；先旧后新及新旧旧新的顺序见 JSON。两组用 `cuda:1`，新 SynthStrip 图像用 `cuda:0`，各组内部 GPU 一致。
+固定模板 `mni305.cor.stripped.mgz` 的 SHA-256 为 `fff93f13255a8d393c0e787fbfcfaf5eb379e88e955bda7e04e31552568878a4`；affine 权重 `synthmorph.affine.2.h5` 的 SHA-256 为 `1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6`。在 accelerator-a-1 H100 上，以同一 Conda 环境、四个 CPU 线程、相同 GPU 和关闭 matmul/cuDNN TF32 的条件成对运行旧 Surfa 与新 NiBabel 路径。每组首次运行和交错的两次稳态运行均重新加载权重；先旧后新及新旧旧新的顺序见 JSON。两组用 `cuda:1`，新 SynthStrip 图像用 `cuda:0`，各组内部 GPU 一致。
 
 | 脑图 | 4×4 元素相等 | LTA / XFM 字节相同 | eTIV 差（mm³） | 旧路径稳态中位数（秒） | 新路径稳态中位数（秒） |
 | --- | ---: | --- | ---: | ---: | ---: |

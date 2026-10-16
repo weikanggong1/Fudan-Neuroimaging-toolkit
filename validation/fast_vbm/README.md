@@ -4,7 +4,7 @@
 
 [功能、参数与调用](../../docs/fast_vbm/README.md) · [匿名标量报告](e2e.public.json) · [复现脚本](validate_real.py)
 
-2026-09-30 在 gpucw1 上用 `f958121` 的运行源码重跑一例真实临床 T1w，分别测试 FNIRT 和 SynthMorph 分支。两次均从原始 T1 开始，不传入 FSL GM 或仿射矩阵：SynthStrip → TorchFAST → TorchFLIRT → 非线性配准 → TorchApplyWarp → 非线性 Jacobian → 调制 GM → 保存全部结果。候选流程不调用 FSL 或 FreeSurfer。该提交的源码哈希见 JSON；后续文档和验证脚本更新不改变本次测量的算法。
+2026-09-30 在 accelerator-a-1 上用 `f958121` 的运行源码重跑一例真实临床 T1w，分别测试 FNIRT 和 SynthMorph 分支。两次均从原始 T1 开始，不传入 FSL GM 或仿射矩阵：SynthStrip → TorchFAST → TorchFLIRT → 非线性配准 → TorchApplyWarp → 非线性 Jacobian → 调制 GM → 保存全部结果。候选流程不调用 FSL 或 FreeSurfer。该提交的源码哈希见 JSON；后续文档和验证脚本更新不改变本次测量的算法。
 
 测量后的 main 仅在公共包入口新增无关的 SuperBigFLICA 延迟导入分支；本次算法文件逐个哈希相同，核对范围见[源码继承记录](../pipeline_source_equivalence.public.json)。
 

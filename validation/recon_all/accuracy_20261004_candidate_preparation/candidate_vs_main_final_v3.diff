@@ -180,7 +180,7 @@ index 663e6fb6..0df9739b 100644
 +)
 +```
 +
-+服务器7项单元回归通过（10.22 s，6项缓存+1项完整四轮控制流）；控制流测试强制终止拒绝，验证四轮均完成、顶点恢复、面和输出保留，不代替真实benchmark。初次测试因测试表面缺体积几何失败，补齐合法测试输入后通过，原失败记录仍保留服务器会话输出。同输入完整阶段序列已在 gpucw1 排队：white.preaparc/最终white分别比较官方与当前Conda；完整pial比较官方/Conda/Python，先LH后RH。Python white只有前缀，不参与完整white三方。各stage单独取得并释放共享锁，输入始终从同一旧自产冻结目录复制，官方输出不喂入下一项生产或候选。此处是算法诊断，不能冒充本轮10例整例。
++服务器7项单元回归通过（10.22 s，6项缓存+1项完整四轮控制流）；控制流测试强制终止拒绝，验证四轮均完成、顶点恢复、面和输出保留，不代替真实benchmark。初次测试因测试表面缺体积几何失败，补齐合法测试输入后通过，原失败记录仍保留服务器会话输出。同输入完整阶段序列已在 accelerator-a-1 排队：white.preaparc/最终white分别比较官方与当前Conda；完整pial比较官方/Conda/Python，先LH后RH。Python white只有前缀，不参与完整white三方。各stage单独取得并释放共享锁，输入始终从同一旧自产冻结目录复制，官方输出不喂入下一项生产或候选。此处是算法诊断，不能冒充本轮10例整例。
 +
 +官方固定CLI不输出每轮完整坐标快照，因此本轮native报告逐轮步长、SSE/RMS、拒绝次数和清理消息；Python额外保存四轮结束表面与全部试步。仅有日志标量时不宣称完整坐标逐轮对应。机器报告和复现入口见 `validation/recon_all/accuracy_20261003/task_05/placement_probe.py` 与 `run_placement_stages.sh`；阶段真实结果、GPU速度及10例指标尚待返回，整体等效仍为 `not_assessed`。
 diff --git a/docs/recon_all/SURFACE_STATS_CACHE.md b/docs/recon_all/SURFACE_STATS_CACHE.md
@@ -323,7 +323,7 @@ index 00000000..f45a48ad
 +
 +```bash
 +# 仅 CPU 测试；环境复用原 Conda 包，不启动生产整例。
-+candidate_workspace=/cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/recon_accuracy_20261003/ten_case_candidate_cpu_v1
++candidate_workspace=/data/fnit/workspaces/recon_accuracy_20261003/ten_case_candidate_cpu_v1
 +cd "$candidate_workspace"
 +CUDA_VISIBLE_DEVICES='' PYTHONPATH="$candidate_workspace/src" \
 +OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 NUMBA_NUM_THREADS=4 \
@@ -1409,13 +1409,13 @@ index 00000000..dcce5805
 +
 +## 复现与文件结构
 +
-+脚本固定使用用户授权 `gongwk@gpucw1` 的已有真实检查点。影像、raw导出、权重、许可证均留在服务器，不提交Git。所有benchmark使用 `/tmp/fnit-shared-benchmark.lock`；N4拟合1线程、重建4线程；GPU前段使用CUDA0、CPU线程4、默认TF32和现有逐阶段FP32例外。
++脚本固定使用用户授权 `user@accelerator-a-1` 的已有真实检查点。影像、raw导出、权重、许可证均留在服务器，不提交Git。所有benchmark使用 `/tmp/fnit-shared-benchmark.lock`；N4拟合1线程、重建4线程；GPU前段使用CUDA0、CPU线程4、默认TF32和现有逐阶段FP32例外。
 +
 +`inspect_frozen.py` 只读旧阶段，不含运行计时。`verify_synthstrip_writer.py` 在相同真实网络输出上AB/BA。`run_n4_diagnostic.py` 对相同公开源码派生的诊断程序分别链接已存在的ITK4与5。`run_n4_environment.py` 仅在隔离benchmark调用官方程序，不作为生产后端。`run_n4_cross.py` 每个variant单独取锁并释放。`cohort_prefix.py` 对固定十例原始T1运行完整前段AB/BA，保留失败，不替换被试，并按同刻父子进程采样显存。
 +
 +`prepare_n4_diagnostic.py` 生成的诊断源 `n4_diagnostic.cpp` 从公开基线 `tools/n4_itk/n4_itk.cpp` 生成，添加raw字段导出与ITK4编译兼容，不包含FS原软件代码或二进制。生成的 `gcc48/n4_diagnostic.cpp` 为同一诊断的C++11/floatmask版本；它只用于定位旧工具链，不能直接安装到生产。
 +
-+服务器隔离目录：`/tmp/fnit-recon-accuracy-20261003/task_02/diagnostic`。新十例前段：`/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_02/cohort_prefix`。完整网络与导入模块使用协调者SHA验证的 `baseline_runtime_816e5610/src`；首例此前已运行的8d750e2严格保留真实来源，各前段/Synth模块SHA与816一致。
++服务器隔离目录：`/tmp/fnit-recon-accuracy-20261003/task_02/diagnostic`。新十例前段：`/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_02/cohort_prefix`。完整网络与导入模块使用协调者SHA验证的 `baseline_runtime_816e5610/src`；首例此前已运行的8d750e2严格保留真实来源，各前段/Synth模块SHA与816一致。
 +
 +基线入口在部署时由下面命令生成，不在本报告目录复制整份旧生产源码：
 +
@@ -1440,7 +1440,7 @@ index 00000000..b538524d
 +from pathlib import Path
 +import nibabel as nib
 +import numpy as np
-+BASE=Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929')
++BASE=Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929')
 +ROOT=Path('/tmp/fnit-recon-accuracy-20261003/task_02/diagnostic')
 +RUNTIME=BASE/'accuracy_20261003/baseline_runtime_816e5610'
 +OUTPUT=BASE/'accuracy_20261003/task_02/cohort_prefix'
@@ -1515,13 +1515,13 @@ index 00000000..6ce0f3c3
 +++ b/validation/recon_all/accuracy_20261003/task_02/frozen.json
 @@ -0,0 +1,114 @@
 +{
-+  "host": "gpucw1",
++  "host": "accelerator-a-1",
 +  "kind": "frozen_existing_stage_diagnostic",
 +  "not_current_baseline_execution": true,
 +  "stages": [
 +    {
-+      "a": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/orig.mgz",
-+      "b": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/whole_sub01_candidate_8d750e2/mri/orig.mgz",
++      "a": "/data/workspaces/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/orig.mgz",
++      "b": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/whole_sub01_candidate_8d750e2/mri/orig.mgz",
 +      "sha_a": "c99c246200cc35479b6b8cd691457985b66f2062d4a37a0c3592ff1b678b985c",
 +      "sha_b": "90d60d520dc9822d289029cda97cb351654d19dfb68a1a946aa714f70e6ce79a",
 +      "shape": [
@@ -1537,8 +1537,8 @@ index 00000000..6ce0f3c3
 +      "p99_abs": 0.0
 +    },
 +    {
-+      "a": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/nu.mgz",
-+      "b": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/whole_sub01_candidate_8d750e2/mri/nu.mgz",
++      "a": "/data/workspaces/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/nu.mgz",
++      "b": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/whole_sub01_candidate_8d750e2/mri/nu.mgz",
 +      "sha_a": "a280ee9868ffc2117cabd2e53c14590c8ebefe3875ddaadc84c2bfcf1c005263",
 +      "sha_b": "0a443fc72feb66edc9706e75a363b2ba5d217012991f109cbec5f10f377e3a2b",
 +      "shape": [
@@ -1554,8 +1554,8 @@ index 00000000..6ce0f3c3
 +      "p99_abs": 0.0
 +    },
 +    {
-+      "a": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/synthstrip.mgz",
-+      "b": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/whole_sub01_candidate_8d750e2/mri/synthstrip.mgz",
++      "a": "/data/workspaces/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/synthstrip.mgz",
++      "b": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/whole_sub01_candidate_8d750e2/mri/synthstrip.mgz",
 +      "sha_a": "f95c4e04b91a5001f88ddbb24af5d33eda4e4aa97d338a86477f71a91bab48de",
 +      "sha_b": "906308edeb5ed2164db6b3fea85c9791b71fdf1675b8e7f7f1248606ecec1d79",
 +      "shape": [
@@ -1571,8 +1571,8 @@ index 00000000..6ce0f3c3
 +      "p99_abs": 0.0
 +    },
 +    {
-+      "a": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/orig.mgz",
-+      "b": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/whole_sub02_candidate_8d750e2_retry_v3/mri/orig.mgz",
++      "a": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/orig.mgz",
++      "b": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/whole_sub02_candidate_8d750e2_retry_v3/mri/orig.mgz",
 +      "sha_a": "18336675b248b38b32094482081dec9ab47efebe4cded9dfa4285adee88a28f9",
 +      "sha_b": "b619ffd13ae09c04fabbc3b6fa1ade35f40d565b2b133aa86c9c50418d8bde8c",
 +      "shape": [
@@ -1588,8 +1588,8 @@ index 00000000..6ce0f3c3
 +      "p99_abs": 0.0
 +    },
 +    {
-+      "a": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/nu.mgz",
-+      "b": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/whole_sub02_candidate_8d750e2_retry_v3/mri/nu.mgz",
++      "a": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/nu.mgz",
++      "b": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/whole_sub02_candidate_8d750e2_retry_v3/mri/nu.mgz",
 +      "sha_a": "206463514b256fe6c622d104ca89dccfd5180cb32405ef0f4258738c0638bbee",
 +      "sha_b": "4e8cc10bbe72c4661b1de71b9199693fea43bfcfa957276e18e8af033455a245",
 +      "shape": [
@@ -1605,8 +1605,8 @@ index 00000000..6ce0f3c3
 +      "p99_abs": 0.0
 +    },
 +    {
-+      "a": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/synthstrip.mgz",
-+      "b": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/whole_sub02_candidate_8d750e2_retry_v3/mri/synthstrip.mgz",
++      "a": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/synthstrip.mgz",
++      "b": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/whole_sub02_candidate_8d750e2_retry_v3/mri/synthstrip.mgz",
 +      "sha_a": "bc2eca79468d47fa7583d65a8458b4e6057ddcc9d423a0adb723d4751d93fa52",
 +      "sha_b": "39e65fe4a46f93304e60bc5f1b8474c5cf23222afb544822c297d6152d40a62a",
 +      "shape": [
@@ -1639,7 +1639,7 @@ index 00000000..33ae5187
 +from pathlib import Path
 +import nibabel as nib
 +import numpy as np
-+BASE=Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929')
++BASE=Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929')
 +def sha(path):
 +    with open(path,'rb') as stream:
 +        return hashlib.file_digest(stream,'sha256').hexdigest()
@@ -1669,7 +1669,7 @@ index 00000000..5a26d348
 +++ b/validation/recon_all/accuracy_20261003/task_02/n4_diagnostic.json
 @@ -0,0 +1,129 @@
 +{
-+  "host": "gpucw1",
++  "host": "accelerator-a-1",
 +  "source_commit": "816e5610417a4c587caf321049438a9554139016",
 +  "input_sha256": "df36b2f6b46f4ca815f68eff285997c087a8917fcff9b93712ac05e3150b98a7",
 +  "orig_sha256": "18336675b248b38b32094482081dec9ab47efebe4cded9dfa4285adee88a28f9",
@@ -1805,7 +1805,7 @@ index 00000000..cb2cebfe
 +++ b/validation/recon_all/accuracy_20261003/task_02/n4_environment.json
 @@ -0,0 +1,76 @@
 +{
-+  "host": "gpucw1",
++  "host": "accelerator-a-1",
 +  "input_sha256": "18336675b248b38b32094482081dec9ab47efebe4cded9dfa4285adee88a28f9",
 +  "official_binary_sha256": "9d77c96f6462e0f0f46a42b3ed59d7ed7364318d2006fb31dff96a953929d239",
 +  "native_binary_sha256": "a609d7ddbcadff3834f41d060c7abcc284db4b653ffab738f99117e496ec3599",
@@ -1831,9 +1831,9 @@ index 00000000..cb2cebfe
 +      "tag": "official",
 +      "wall_seconds": 208.31221234891564,
 +      "command": [
-+        "/public/software/apps/Freesurfer/8.2.0-1/bin/AntsN4BiasFieldCorrectionFs",
++        "/opt/reference/Freesurfer/8.2.0-1/bin/AntsN4BiasFieldCorrectionFs",
 +        "-i",
-+        "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/orig.mgz",
++        "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/orig.mgz",
 +        "-o",
 +        "/tmp/fnit-recon-accuracy-20261003/task_02/diagnostic/official_repeat_float.mgz",
 +        "--dtype",
@@ -1940,7 +1940,7 @@ index 00000000..f13ab750
 +report={'kind':'diagnostic_only_not_production_backend','runs':[]}
 +for tag,build,libraries in [('floatmask','build4_float_conda','/tmp/fnit_itk4_build_20260929/ITK4-install/lib'),('oldlibraries','build4_oldlibs_conda','/tmp/fnit_itk4_build_20260929/ITK4-install-gcc48b/lib')]:
 + binary=ROOT/build/'fnit_n4_diagnostic'
-+ env=dict(os.environ,LD_LIBRARY_PATH=libraries+':/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib',FNIT_N4_DIAGNOSTIC_PREFIX=str(ROOT/tag),OMP_NUM_THREADS='4',OPENBLAS_NUM_THREADS='4',MKL_NUM_THREADS='4')
++ env=dict(os.environ,LD_LIBRARY_PATH=libraries+':/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib',FNIT_N4_DIAGNOSTIC_PREFIX=str(ROOT/tag),OMP_NUM_THREADS='4',OPENBLAS_NUM_THREADS='4',MKL_NUM_THREADS='4')
 + with open('/tmp/fnit-shared-benchmark.lock','a') as lock:
 +  fcntl.flock(lock,fcntl.LOCK_EX);tick=time.perf_counter()
 +  subprocess.run([str(binary),str(ROOT/'input.raw'),str(ROOT/(tag+'.final.raw')),'256','256','256','1','1','1','4',str(ROOT/(tag+'.profile.json'))],env=env,check=True)
@@ -1959,7 +1959,7 @@ index 00000000..37859b96
 +from pathlib import Path
 +import nibabel as nib
 +import numpy as np
-+BASE=Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929')
++BASE=Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929')
 +ROOT=Path('/tmp/fnit-recon-accuracy-20261003/task_02/diagnostic')
 +REF=BASE/'reference_sub02_official/subjects/b_official/mri/orig.mgz'
 +OLD=BASE/'volume_parity_20260930/sub02/n4_float'
@@ -2007,9 +2007,9 @@ index 00000000..554520bd
 +import nibabel as nib
 +import numpy as np
 +ROOT=Path('/tmp/fnit-recon-accuracy-20261003/task_02/diagnostic')
-+BASE=Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929')
++BASE=Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929')
 +ORIG=BASE/'reference_sub02_official/subjects/b_official/mri/orig.mgz'
-+OFFICIAL=Path('/public/software/apps/Freesurfer/8.2.0-1/bin/AntsN4BiasFieldCorrectionFs')
++OFFICIAL=Path('/opt/reference/Freesurfer/8.2.0-1/bin/AntsN4BiasFieldCorrectionFs')
 +NATIVE=ROOT/'build4_gcc48_clean/fnit_n4_diagnostic'
 +def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 +def metric(a,b):
@@ -2017,7 +2017,7 @@ index 00000000..554520bd
 +report={'host':platform.node(),'input_sha256':sha(ORIG),'official_binary_sha256':sha(OFFICIAL),'native_binary_sha256':sha(NATIVE),'runs':[],'kind':'diagnostic_only_not_production_backend'}
 +with open('/tmp/fnit-shared-benchmark.lock','a') as lock:
 + fcntl.flock(lock,fcntl.LOCK_EX)
-+ env=dict(os.environ,OMP_NUM_THREADS='4',OPENBLAS_NUM_THREADS='4',MKL_NUM_THREADS='4',FS_LICENSE='/cwStorage/home/gongwk/.config/freesurfer-codex/license.txt',FREESURFER_HOME='/public/software/apps/Freesurfer/8.2.0-1')
++ env=dict(os.environ,OMP_NUM_THREADS='4',OPENBLAS_NUM_THREADS='4',MKL_NUM_THREADS='4',FS_LICENSE='/data/user/.config/freesurfer-codex/license.txt',FREESURFER_HOME='/opt/reference/Freesurfer/8.2.0-1')
 + env['LD_LIBRARY_PATH']='/tmp/fnit_itk4_build_20260929/ITK4-install-gcc48b/lib:/lib64:/usr/lib64'
 + env['FNIT_N4_DIAGNOSTIC_PREFIX']=str(ROOT/'gcc48')
 + commands=[('gcc48',[str(NATIVE),str(ROOT/'input.raw'),str(ROOT/'gcc48.final.raw'),'256','256','256','1','1','1','4',str(ROOT/'gcc48.profile.json')]),('official',[str(OFFICIAL),'-i',str(ORIG),'-o',str(ROOT/'official_repeat_float.mgz'),'--dtype','float'])]
@@ -2043,7 +2043,7 @@ index 00000000..309a2329
 +++ b/validation/recon_all/accuracy_20261003/task_02/synthstrip_writer.json
 @@ -0,0 +1,112 @@
 +{
-+  "host": "gpucw1",
++  "host": "accelerator-a-1",
 +  "validation": "same frozen network output, writer only",
 +  "code_sha256": "ab0a02eca9a738cf9c43e0cbcf179165fe187529bbc34ad1929b619fd60bc8d3",
 +  "runs": [
@@ -2167,7 +2167,7 @@ index 00000000..54ecc49e
 +import nibabel as nib
 +import numpy as np
 +ROOT=Path('/tmp/fnit-recon-accuracy-20261003/task_02/diagnostic')
-+BASE=Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929')
++BASE=Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929')
 +spec=importlib.util.spec_from_file_location('fnit.recon_all.input_talairach_chain_candidate',ROOT/'input_talairach_chain.py')
 +module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
 +report={'host':platform.node(),'validation':'same frozen network output, writer only','code_sha256':hashlib.sha256((ROOT/'input_talairach_chain.py').read_bytes()).hexdigest(),'runs':[]}
@@ -2236,7 +2236,7 @@ index 00000000..e502554b
 +
 +## 当前实测与历史
 +
-+`audit.json` 为 2026-10-03 gpucw1 实时重读冻结真实文件生成，并非把旧报告改日期。两例 orig 数值/affine 一致。sub01 nu/brainmask 各 2 体素差异，LTA max 0.0005735158920288086，norm 490692（max 8/P99 1），brain 705288（max 21/P99 2），filled 4844；sub02 nu 29、brainmask 17，LTA max 7.450580603862722e-9，norm 41（max 3/P99 0），brain 4502，filled 112。仅凭此不能把放大归因于 GCA 缓存或某个算子。
++`audit.json` 为 2026-10-03 accelerator-a-1 实时重读冻结真实文件生成，并非把旧报告改日期。两例 orig 数值/affine 一致。sub01 nu/brainmask 各 2 体素差异，LTA max 0.0005735158920288086，norm 490692（max 8/P99 1），brain 705288（max 21/P99 2），filled 4844；sub02 nu 29、brainmask 17，LTA max 7.450580603862722e-9，norm 41（max 3/P99 0），brain 4502，filled 112。仅凭此不能把放大归因于 GCA 缓存或某个算子。
 +
 +冻结同输入 normalize、tail 和四组合完整 EM 已排队，完成结果另存，不将排队视为实测完成。当前无生产修复或速度收益声明；整体等效 `not_assessed`。十例新数据所有受影响链和整例指标仍须完成。
 +
@@ -2278,8 +2278,8 @@ index 00000000..e502554b
 +
 +```bash
 +python collect_results.py \
-+  --receipts /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1 \
-+  --output /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/collected
++  --receipts /data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1 \
++  --output /data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/collected
 +```
 +
 +`--receipts` 为四种诊断的结果根，`--output` 为独占报告目录。输出各模式完成标记、四组合 CSV、尾段 CSV 和父 PID 显存采样摘要；缺报告记 `receipt_absent`，没有 `complete:true` 记 `running_or_waiting`。缺少父子进程树快照记 `not_available`。真实十例全链和整例仍由协调者统一调度，本文不替代它们。
@@ -2303,7 +2303,7 @@ index 00000000..e502554b
 +
 +两例 FP32 坐标诊断的 norm 与六帧 ctrl_pts 都为零差，网格/dtype相同。sub02 原 11 个 norm 体素（max 1）和 6 个 ctrl 元素残差消除，sub01 保持零差。sub02 八组诊断中，官方 nu 的两组均 norm11/ctrl6，FNIT nu 的两组均 norm41/ctrl6，mask 不增加差异；两例完整缓存 EM 在官方同输入都复现官方 LTA。六项 tail 回放全部零差，sub02 filled 本次完成耗时 54.12秒。
 +
-+成熟子函数修复已落在 `ca_normalize_python.atlas_samples`，内部新增 `prior_to_source_coordinates`，复用 VNL affine inverse并按原生逐项 FP32 运算；不缩放平移，nint 前提升已形成的 float 坐标。核对完整原生链发现：`GCAfindAllSamples` 初始 x/y/z 是 prior×spacing 的 atlas 坐标；`GCAcomputeSampleCoords` 仅在浮点 source 坐标位于闭区间 `[0,size-1]` 时覆盖它，越界应保留初始坐标。生产 helper 同时保留这条规则，没有体素特例或边缘 clip。三项 standalone 契约测试已在 gpucw1通过，涵盖负半整数、FP32 half-add、spacing/平移和255/255.1浮点边界；它们不代替真实 T1 benchmark。
++成熟子函数修复已落在 `ca_normalize_python.atlas_samples`，内部新增 `prior_to_source_coordinates`，复用 VNL affine inverse并按原生逐项 FP32 运算；不缩放平移，nint 前提升已形成的 float 坐标。核对完整原生链发现：`GCAfindAllSamples` 初始 x/y/z 是 prior×spacing 的 atlas 坐标；`GCAcomputeSampleCoords` 仅在浮点 source 坐标位于闭区间 `[0,size-1]` 时覆盖它，越界应保留初始坐标。生产 helper 同时保留这条规则，没有体素特例或边缘 clip。三项 standalone 契约测试已在 accelerator-a-1通过，涵盖负半整数、FP32 half-add、spacing/平移和255/255.1浮点边界；它们不代替真实 T1 benchmark。
 +
 +完整生产接口、所有参数/异常、原软件命令和版本记录见 [CA_NORMALIZATION.md](../../../../docs/recon_all/CA_NORMALIZATION.md)。无新依赖，不改变现有 GPU/TF32 设置，其他控制点/偏置场算子保留。
 +
@@ -2312,7 +2312,7 @@ index 00000000..e502554b
 +安全恢复命令（只读）：
 +
 +```bash
-+cat /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/production_fix_abba_v1/report.json
++cat /data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/production_fix_abba_v1/report.json
 +```
 +
 +不要重新执行原ABBA脚本覆盖/重复已有队列。生产修复当前source SHA为 `167be9d72496b7279b98e52b8f0d6c0808d2c09d02df24af1fed0fd331100b9b`；基线仍为公开816的冻结模块，SHA `abb436826e600101c2c5087e2367e8a36a7c038c99eda10bc4f5be1e7486661a`。十例新T1连续链及最终指标仍由协调者完成，整体等效 `not_assessed`。
@@ -2351,7 +2351,7 @@ index 00000000..c01a368c
 @@ -0,0 +1,176 @@
 +{
 +  "overall_equivalence": "not_assessed",
-+  "source_receipts": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1",
++  "source_receipts": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1",
 +  "modes": {
 +    "normalize": {
 +      "state": "complete",
@@ -2695,7 +2695,7 @@ index 00000000..11e0703e
 +    "state": "queued",
 +    "pid": 115793,
 +    "session": 83207,
-+    "receipt": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/production_fix_abba_v1/report.json",
++    "receipt": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/production_fix_abba_v1/report.json",
 +    "runs_required": 8,
 +    "lock_scope": "one_function_call_plus_result_compare"
 +  },
@@ -2874,8 +2874,8 @@ index 00000000..9c2270bc
 +      "seconds": 28.00984625890851,
 +      "norm": {
 +        "paths": [
-+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/coordinates_fp32/sub01/norm.mgz",
-+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/norm.mgz"
++          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/coordinates_fp32/sub01/norm.mgz",
++          "/data/workspaces/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/norm.mgz"
 +        ],
 +        "sha256": [
 +          "8379e3552d11b3f66f999cb983023e79270e70909bd1e90d1b230b245fc1dda1",
@@ -2906,8 +2906,8 @@ index 00000000..9c2270bc
 +      },
 +      "controls": {
 +        "paths": [
-+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/coordinates_fp32/sub01/ctrl_pts.mgz",
-+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/ctrl_pts.mgz"
++          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/coordinates_fp32/sub01/ctrl_pts.mgz",
++          "/data/workspaces/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/ctrl_pts.mgz"
 +        ],
 +        "sha256": [
 +          "e3ad3aed6886a8ff06dcd69b7996c5ddd7ac875dfeb5db13c9ebed7a1e19ac7f",
@@ -3099,8 +3099,8 @@ index 00000000..9c2270bc
 +      "seconds": 25.545517734717578,
 +      "norm": {
 +        "paths": [
-+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/coordinates_fp32/sub02/norm.mgz",
-+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/norm.mgz"
++          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/coordinates_fp32/sub02/norm.mgz",
++          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/norm.mgz"
 +        ],
 +        "sha256": [
 +          "39cb56a27ffa7d0f2b0281cde5404c831550131592b4b5fea8bf55a4d2397da3",
@@ -3131,8 +3131,8 @@ index 00000000..9c2270bc
 +      },
 +      "controls": {
 +        "paths": [
-+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/coordinates_fp32/sub02/ctrl_pts.mgz",
-+          "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/ctrl_pts.mgz"
++          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/coordinates_fp32/sub02/ctrl_pts.mgz",
++          "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/ctrl_pts.mgz"
 +        ],
 +        "sha256": [
 +          "4c35edec6250be81586475ac27fe4b9d73ad93873576a011fd60acae3202612c",
@@ -3190,9 +3190,9 @@ index 00000000..8f2b023d
 @@ -0,0 +1,1854 @@
 +{
 +  "mode": "cross",
-+  "hostname": "gpucw1",
++  "hostname": "accelerator-a-1",
 +  "commit": "816e5610417a4c587caf321049438a9554139016",
-+  "module": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/runtime/src/fnit/recon_all/ca_normalize_python.py",
++  "module": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/runtime/src/fnit/recon_all/ca_normalize_python.py",
 +  "module_sha256": "abb436826e600101c2c5087e2367e8a36a7c038c99eda10bc4f5be1e7486661a",
 +  "scope": "frozen_real_input_diagnostic",
 +  "equivalence": "not_assessed",
@@ -3364,8 +3364,8 @@ index 00000000..8f2b023d
 +          "lta_max_abs_vs_official": 0.0,
 +          "norm_vs_official": {
 +            "paths": [
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub01/officialnu_officialmask/mri/norm.mgz",
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/norm.mgz"
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub01/officialnu_officialmask/mri/norm.mgz",
++              "/data/workspaces/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/norm.mgz"
 +            ],
 +            "sha256": [
 +              "8379e3552d11b3f66f999cb983023e79270e70909bd1e90d1b230b245fc1dda1",
@@ -3396,8 +3396,8 @@ index 00000000..8f2b023d
 +          },
 +          "controls_vs_official": {
 +            "paths": [
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub01/officialnu_officialmask/mri/ctrl_pts.mgz",
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/ctrl_pts.mgz"
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub01/officialnu_officialmask/mri/ctrl_pts.mgz",
++              "/data/workspaces/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/ctrl_pts.mgz"
 +            ],
 +            "sha256": [
 +              "e3ad3aed6886a8ff06dcd69b7996c5ddd7ac875dfeb5db13c9ebed7a1e19ac7f",
@@ -3593,8 +3593,8 @@ index 00000000..8f2b023d
 +          "lta_max_abs_vs_official": 0.0005735158920288086,
 +          "norm_vs_official": {
 +            "paths": [
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub01/fnitnu_officialmask/mri/norm.mgz",
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/norm.mgz"
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub01/fnitnu_officialmask/mri/norm.mgz",
++              "/data/workspaces/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/norm.mgz"
 +            ],
 +            "sha256": [
 +              "3ff286de0bcb2e73aa875e3dd00fc1624ec6e8874a6a51224a060ff62cb77dd3",
@@ -3625,8 +3625,8 @@ index 00000000..8f2b023d
 +          },
 +          "controls_vs_official": {
 +            "paths": [
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub01/fnitnu_officialmask/mri/ctrl_pts.mgz",
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/ctrl_pts.mgz"
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub01/fnitnu_officialmask/mri/ctrl_pts.mgz",
++              "/data/workspaces/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/ctrl_pts.mgz"
 +            ],
 +            "sha256": [
 +              "e463d09f4e65554e43a176b416ab8f435b92196db2c4889d045198c8fa7a6f85",
@@ -3822,8 +3822,8 @@ index 00000000..8f2b023d
 +          "lta_max_abs_vs_official": 0.0,
 +          "norm_vs_official": {
 +            "paths": [
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub01/officialnu_fnitmask/mri/norm.mgz",
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/norm.mgz"
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub01/officialnu_fnitmask/mri/norm.mgz",
++              "/data/workspaces/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/norm.mgz"
 +            ],
 +            "sha256": [
 +              "8379e3552d11b3f66f999cb983023e79270e70909bd1e90d1b230b245fc1dda1",
@@ -3854,8 +3854,8 @@ index 00000000..8f2b023d
 +          },
 +          "controls_vs_official": {
 +            "paths": [
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub01/officialnu_fnitmask/mri/ctrl_pts.mgz",
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/ctrl_pts.mgz"
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub01/officialnu_fnitmask/mri/ctrl_pts.mgz",
++              "/data/workspaces/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/ctrl_pts.mgz"
 +            ],
 +            "sha256": [
 +              "e3ad3aed6886a8ff06dcd69b7996c5ddd7ac875dfeb5db13c9ebed7a1e19ac7f",
@@ -4051,8 +4051,8 @@ index 00000000..8f2b023d
 +          "lta_max_abs_vs_official": 0.0005735158920288086,
 +          "norm_vs_official": {
 +            "paths": [
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub01/fnitnu_fnitmask/mri/norm.mgz",
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/norm.mgz"
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub01/fnitnu_fnitmask/mri/norm.mgz",
++              "/data/workspaces/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/norm.mgz"
 +            ],
 +            "sha256": [
 +              "3ff286de0bcb2e73aa875e3dd00fc1624ec6e8874a6a51224a060ff62cb77dd3",
@@ -4083,8 +4083,8 @@ index 00000000..8f2b023d
 +          },
 +          "controls_vs_official": {
 +            "paths": [
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub01/fnitnu_fnitmask/mri/ctrl_pts.mgz",
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/ctrl_pts.mgz"
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub01/fnitnu_fnitmask/mri/ctrl_pts.mgz",
++              "/data/workspaces/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/ctrl_pts.mgz"
 +            ],
 +            "sha256": [
 +              "e463d09f4e65554e43a176b416ab8f435b92196db2c4889d045198c8fa7a6f85",
@@ -4285,8 +4285,8 @@ index 00000000..8f2b023d
 +          "lta_max_abs_vs_official": 0.0,
 +          "norm_vs_official": {
 +            "paths": [
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub02/officialnu_officialmask/mri/norm.mgz",
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/norm.mgz"
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub02/officialnu_officialmask/mri/norm.mgz",
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/norm.mgz"
 +            ],
 +            "sha256": [
 +              "8ccc70fc2018e4e555a3a4a10127c169a57dd55cdea9209575fe153083689499",
@@ -4317,8 +4317,8 @@ index 00000000..8f2b023d
 +          },
 +          "controls_vs_official": {
 +            "paths": [
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub02/officialnu_officialmask/mri/ctrl_pts.mgz",
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/ctrl_pts.mgz"
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub02/officialnu_officialmask/mri/ctrl_pts.mgz",
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/ctrl_pts.mgz"
 +            ],
 +            "sha256": [
 +              "895db74c7db22d7d1d4ab612cc8b3afeade13648e9788486d7698b6b80830af6",
@@ -4514,8 +4514,8 @@ index 00000000..8f2b023d
 +          "lta_max_abs_vs_official": 7.450580603862722e-09,
 +          "norm_vs_official": {
 +            "paths": [
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub02/fnitnu_officialmask/mri/norm.mgz",
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/norm.mgz"
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub02/fnitnu_officialmask/mri/norm.mgz",
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/norm.mgz"
 +            ],
 +            "sha256": [
 +              "a57e8626a8157a037390fb590ca264fda5eaf3d4b286b8f0515dc1e1e8b542da",
@@ -4546,8 +4546,8 @@ index 00000000..8f2b023d
 +          },
 +          "controls_vs_official": {
 +            "paths": [
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub02/fnitnu_officialmask/mri/ctrl_pts.mgz",
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/ctrl_pts.mgz"
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub02/fnitnu_officialmask/mri/ctrl_pts.mgz",
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/ctrl_pts.mgz"
 +            ],
 +            "sha256": [
 +              "148f7fc249ee25d7ca6789f1561df786188e11e3803c58b35f4531148d3660b4",
@@ -4743,8 +4743,8 @@ index 00000000..8f2b023d
 +          "lta_max_abs_vs_official": 0.0,
 +          "norm_vs_official": {
 +            "paths": [
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub02/officialnu_fnitmask/mri/norm.mgz",
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/norm.mgz"
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub02/officialnu_fnitmask/mri/norm.mgz",
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/norm.mgz"
 +            ],
 +            "sha256": [
 +              "8ccc70fc2018e4e555a3a4a10127c169a57dd55cdea9209575fe153083689499",
@@ -4775,8 +4775,8 @@ index 00000000..8f2b023d
 +          },
 +          "controls_vs_official": {
 +            "paths": [
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub02/officialnu_fnitmask/mri/ctrl_pts.mgz",
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/ctrl_pts.mgz"
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub02/officialnu_fnitmask/mri/ctrl_pts.mgz",
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/ctrl_pts.mgz"
 +            ],
 +            "sha256": [
 +              "895db74c7db22d7d1d4ab612cc8b3afeade13648e9788486d7698b6b80830af6",
@@ -4972,8 +4972,8 @@ index 00000000..8f2b023d
 +          "lta_max_abs_vs_official": 7.450580603862722e-09,
 +          "norm_vs_official": {
 +            "paths": [
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub02/fnitnu_fnitmask/mri/norm.mgz",
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/norm.mgz"
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub02/fnitnu_fnitmask/mri/norm.mgz",
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/norm.mgz"
 +            ],
 +            "sha256": [
 +              "a57e8626a8157a037390fb590ca264fda5eaf3d4b286b8f0515dc1e1e8b542da",
@@ -5004,8 +5004,8 @@ index 00000000..8f2b023d
 +          },
 +          "controls_vs_official": {
 +            "paths": [
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub02/fnitnu_fnitmask/mri/ctrl_pts.mgz",
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/ctrl_pts.mgz"
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/cross/sub02/fnitnu_fnitmask/mri/ctrl_pts.mgz",
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/ctrl_pts.mgz"
 +            ],
 +            "sha256": [
 +              "148f7fc249ee25d7ca6789f1561df786188e11e3803c58b35f4531148d3660b4",
@@ -5070,7 +5070,7 @@ index 00000000..c4a7d1d3
 +    ]
 +  },
 +  "native_contract_tests": {
-+    "host": "gpucw1",
++    "host": "accelerator-a-1",
 +    "passed": 3,
 +    "exit_code": 0,
 +    "test_sha256": "314c71f8b11dbb7de8df8897d16ae84cd99a117b8f880fa2084f3f95f667ae0f",
@@ -5090,8 +5090,8 @@ index 00000000..c4a7d1d3
 +      "baseline"
 +    ],
 +    "lock_granularity": "each_complete_CA_call_and_comparison",
-+    "receipt": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/production_fix_abba_v1/report.json",
-+    "log": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/production_fix_abba_v1.log",
++    "receipt": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/production_fix_abba_v1/report.json",
++    "log": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/production_fix_abba_v1.log",
 +    "in_original_guardian_watchlist": false,
 +    "script_sha256": "34a8c39726f6e1f2c65ced3e7f7965f31faaf7b64640b3b5ce3a6465d540d635"
 +  },
@@ -5107,7 +5107,7 @@ index 00000000..d108581f
 @@ -0,0 +1,2125 @@
 +{
 +  "commit": "816e5610417a4c587caf321049438a9554139016",
-+  "host": "gpucw1",
++  "host": "accelerator-a-1",
 +  "pid": 98758,
 +  "scope": "official_frozen_same_input_component_only",
 +  "overall_equivalence": "not_assessed",
@@ -5206,8 +5206,8 @@ index 00000000..d108581f
 +          },
 +          "comparison": {
 +            "paths": [
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/tail/sub01/brain.mgz",
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/brain.mgz"
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/tail/sub01/brain.mgz",
++              "/data/workspaces/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/brain.mgz"
 +            ],
 +            "sha256": [
 +              "7f74e7e03d563a1c3633f4b8eda7d2ecfa427fb947c5ff35ab78c5b915396b5b",
@@ -5248,8 +5248,8 @@ index 00000000..d108581f
 +          },
 +          "comparison": {
 +            "paths": [
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/tail/sub01/antsdn.brain.mgz",
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/antsdn.brain.mgz"
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/tail/sub01/antsdn.brain.mgz",
++              "/data/workspaces/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/antsdn.brain.mgz"
 +            ],
 +            "sha256": [
 +              "8cfbf4fa8f4253b924b6ef1110429fe6542cf1df27ea99114b46fecc1fc0cd85",
@@ -5291,8 +5291,8 @@ index 00000000..d108581f
 +          ],
 +          "comparison": {
 +            "paths": [
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/tail/sub01/filled.mgz",
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/filled.mgz"
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/tail/sub01/filled.mgz",
++              "/data/workspaces/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official/mri/filled.mgz"
 +            ],
 +            "sha256": [
 +              "54fe32283593948779d18ad58f1fbc4767b4520c85341e59563a3e96e952275b",
@@ -5420,8 +5420,8 @@ index 00000000..d108581f
 +          },
 +          "comparison": {
 +            "paths": [
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/tail/sub02/brain.mgz",
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/brain.mgz"
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/tail/sub02/brain.mgz",
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/brain.mgz"
 +            ],
 +            "sha256": [
 +              "ebfbf1fc93505a0826771a601f1b754db3a1f490f5ea9c6826a4ec2f279c31cd",
@@ -5462,8 +5462,8 @@ index 00000000..d108581f
 +          },
 +          "comparison": {
 +            "paths": [
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/tail/sub02/antsdn.brain.mgz",
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/antsdn.brain.mgz"
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/tail/sub02/antsdn.brain.mgz",
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/antsdn.brain.mgz"
 +            ],
 +            "sha256": [
 +              "12a29c501f348b9b1828f0e2c7ab0ca8f8066ba91d5679fefdeca03a746ebba4",
@@ -5505,8 +5505,8 @@ index 00000000..d108581f
 +          ],
 +          "comparison": {
 +            "paths": [
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/tail/sub02/filled.mgz",
-+              "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/filled.mgz"
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_03/frozen_v1/tail/sub02/filled.mgz",
++              "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/reference_sub02_official/subjects/b_official/mri/filled.mgz"
 +            ],
 +            "sha256": [
 +              "273172f3e78e6774fc443c6188a186dc57505385aaf79847277f6e79599000b0",
@@ -7370,7 +7370,7 @@ index 00000000..1290ba21
 +  "unit_tests": {
 +    "passed": 6,
 +    "seconds": 2.61,
-+    "host": "gpucw1",
++    "host": "accelerator-a-1",
 +    "log": "tests.log"
 +  },
 +  "candidate_source_sha256": {
@@ -7382,7 +7382,7 @@ index 00000000..1290ba21
 +  "real_stage": {
 +    "status": "queued",
 +    "pid": 51224,
-+    "receipt": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_05/receipt.json",
++    "receipt": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_05/receipt.json",
 +    "lock": "/tmp/fnit-shared-benchmark.lock",
 +    "gpu_uuid": "GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e",
 +    "threads": 2
@@ -7435,7 +7435,7 @@ index 00000000..a21e1686
 +report={'scope':'isolated_same_complete_input; old_frozen_FNIT_subject_for_diagnosis_only','kind':a.kind,'backend':a.backend,
 + 'hemi':h,'host':platform.node(),'threads':2,'target_gpu_uuid':os.environ.get('CUDA_VISIBLE_DEVICES'),'coordinate_space':'surface RAS','coordinate_unit':'mm',
 + 'overall_equivalence':'not_assessed','input_sha256':{path:sha(subject/path) for path in paths},
-+ 'script_sha256':sha(__file__),'resource_manifest_sha256':sha(Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/resources_verified_816e5610.json')) if (Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/resources_verified_816e5610.json')).is_file() else None,'runtime_sources_sha256':{str(path.name):sha(path) for path in Path(__import__('fnit.recon_all.place_pial_python',fromlist=['']).__file__).parent.glob('place*.py')},
++ 'script_sha256':sha(__file__),'resource_manifest_sha256':sha(Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/resources_verified_816e5610.json')) if (Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/resources_verified_816e5610.json')).is_file() else None,'runtime_sources_sha256':{str(path.name):sha(path) for path in Path(__import__('fnit.recon_all.place_pial_python',fromlist=['']).__file__).parent.glob('place*.py')},
 + 'complete_python_white':'unavailable; first-pass prefix intentionally excluded'}
 +output=subject/f'surf/{h}.probe'; started=time.perf_counter()
 +if a.backend=='python':
@@ -7499,7 +7499,7 @@ index 00000000..32bd368b
 +{
 +  "scope": "isolated_same_input_roi; historical_subject_only_for_diagnosis",
 +  "overall_equivalence": "not_assessed",
-+  "host": "gpucw1",
++  "host": "accelerator-a-1",
 +  "threads": 2,
 +  "device": "cuda:0",
 +  "baseline_commit": "816e5610417a4c587caf321049438a9554139016",
@@ -8964,16 +8964,16 @@ index 00000000..32bd368b
 +  },
 +  "official": {
 +    "command": [
-+      "/public/software/apps/Freesurfer/8.2.0-1/bin/mris_anatomical_stats",
++      "/opt/reference/Freesurfer/8.2.0-1/bin/mris_anatomical_stats",
 +      "-noglobal",
 +      "-no-th3",
 +      "-b",
 +      "-f",
-+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_05/roi_lh_v1/official.stats",
++      "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_05/roi_lh_v1/official.stats",
 +      "-a",
-+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_05/roi_lh_v1/official_subjects/diagnostic/label/lh.aparc.annot",
++      "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_05/roi_lh_v1/official_subjects/diagnostic/label/lh.aparc.annot",
 +      "-cortex",
-+      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_05/roi_lh_v1/official_subjects/diagnostic/label/lh.cortex.label",
++      "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_05/roi_lh_v1/official_subjects/diagnostic/label/lh.cortex.label",
 +      "diagnostic",
 +      "lh",
 +      "white"
@@ -9065,13 +9065,13 @@ index 00000000..350514f3
 @@ -0,0 +1,47 @@
 +#!/usr/bin/env bash
 +set -euo pipefail
-+stage_root=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003
-+stage_subject=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/whole_sub01_candidate_8d750e2
-+stage_python=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
-+stage_native=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/native_bundle/bin
++stage_root=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003
++stage_subject=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/whole_sub01_candidate_8d750e2
++stage_python=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
++stage_native=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/private_install_v1/native_bundle/bin
 +export CUDA_VISIBLE_DEVICES=GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e
 +export OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 NUMEXPR_NUM_THREADS=2 NUMBA_NUM_THREADS=2
-+export FS_LICENSE=/cwStorage/home/gongwk/.config/freesurfer-codex/license.txt
++export FS_LICENSE=/data/user/.config/freesurfer-codex/license.txt
 +export PYTHONPATH="$stage_root/task_05/source/src"
 +export NUMBA_CACHE_DIR="$stage_root/task_05/numba_cache"
 +mkdir -p "$NUMBA_CACHE_DIR" "$stage_root/task_05/placement_v1"
@@ -9087,12 +9087,12 @@ index 00000000..350514f3
 +      flock 9
 +      printf '{"status":"running","stage":"%s","overall_equivalence":"not_assessed"}\n' "$stage_name" > "$stage_root/task_05/placement_receipt.json"
 +      if [[ "$backend" == official ]]; then
-+        stage_binary=/public/software/apps/Freesurfer/8.2.0-1/bin/mris_place_surface
-+        stage_assets=/public/software/apps/Freesurfer/8.2.0-1
++        stage_binary=/opt/reference/Freesurfer/8.2.0-1/bin/mris_place_surface
++        stage_assets=/opt/reference/Freesurfer/8.2.0-1
 +      else
 +        stage_binary="$stage_native/mris_place_surface"
 +        if [[ "$kind" != pial ]]; then stage_binary="$stage_native/mris_place_surface_white_fast"; fi
-+        stage_assets=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets
++        stage_assets=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets
 +      fi
 +      set +e
 +      "$stage_python" "$stage_root/task_05/source/validation/recon_all/accuracy_20261003/task_05/placement_probe.py" \
@@ -9118,24 +9118,24 @@ index 00000000..7b640d9d
 @@ -0,0 +1,24 @@
 +#!/usr/bin/env bash
 +set -euo pipefail
-+stage_root=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003
++stage_root=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003
 +stage_report="$stage_root/task_05/roi_lh_v1"
 +mkdir -p "$stage_root/task_05"
 +printf '{"status":"queued","scope":"same_input_roi_diagnostic","overall_equivalence":"not_assessed"}\n' > "$stage_root/task_05/receipt.json"
 +export CUDA_VISIBLE_DEVICES=GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e
 +export OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 NUMEXPR_NUM_THREADS=2
-+export FS_LICENSE=/cwStorage/home/gongwk/.config/freesurfer-codex/license.txt
++export FS_LICENSE=/data/user/.config/freesurfer-codex/license.txt
 +export PYTHONPATH="$stage_root/task_05/source/src"
 +exec 9>/tmp/fnit-shared-benchmark.lock
 +flock 9
 +printf '{"status":"running","scope":"same_input_roi_diagnostic","overall_equivalence":"not_assessed"}\n' > "$stage_root/task_05/receipt.json"
 +set +e
-+/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python \
++/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python \
 + "$stage_root/task_05/source/validation/recon_all/accuracy_20261003/task_05/benchmark_roi_area.py" \
-+ --subject /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/whole_sub01_candidate_8d750e2 \
++ --subject /data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/whole_sub01_candidate_8d750e2 \
 + --output "$stage_report" --hemi lh --device cuda:0 \
 + --baseline-source "$stage_root/baseline_runtime_816e5610/src/fnit/recon_all/surface_stats_cache.py" \
-+ --official-home /public/software/apps/Freesurfer/8.2.0-1
++ --official-home /opt/reference/Freesurfer/8.2.0-1
 +stage_exit=$?
 +flock -u 9
 +printf '{"status":"finished","exit_code":%d,"scope":"same_input_roi_diagnostic","overall_equivalence":"not_assessed"}\n' "$stage_exit" > "$stage_root/task_05/receipt.json"
@@ -9174,7 +9174,7 @@ index 00000000..956226e8
 +  },
 +  "persistent_placement": {
 +    "pid": 78930,
-+    "receipt": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_05/placement_receipt.json",
++    "receipt": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_05/placement_receipt.json",
 +    "status": "queued_lh_prewhite_conda",
 +    "stage_order": "LH prewhite/white native pairs; LH pial three-way; RH same; lock released every stage"
 +  },

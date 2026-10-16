@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-TR=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929
+TR=/data/workspaces/freesurfer_synth/work/recon_standard_20260929
 D=$TR/volume_parity_20260930
 CODE=$D/fixes_20261001/code_1b8c36d
 PY=$TR/fnit_main_env/bin/python
@@ -9,7 +9,7 @@ export PYTHONPATH=$CODE/src OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 MKL_NUM_THR
 if [ "$case_name" = sub01 ]; then
  BASELINE=$D/full_sub01_e036f57_threads4_fp32_control
  CANDIDATE=$D/full_sub01_1b8c36d_retry1
- OFFICIAL=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official
+ OFFICIAL=/data/workspaces/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official
 else
  BASELINE=$D/full_sub02_e036f57_threads4_control
  CANDIDATE=$D/full_sub02_1b8c36d

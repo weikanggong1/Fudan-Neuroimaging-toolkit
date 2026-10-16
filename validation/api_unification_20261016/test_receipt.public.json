@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-16",
+  "baseline_commit": "97b708884180b2c9894689fc369610dfd2ba3588",
+  "package_version": "0.17.0",
+  "validation_scope": "public API, dispatch, related component regressions and publication contracts; not MRI benchmark",
+  "environment": {
+    "python": "3.11.16",
+    "torch": "2.5.1",
+    "cuda_runtime": "11.8"
+  },
+  "runs": [
+    {
+      "name": "canonical-and-related-api",
+      "command": "PYTHONPATH=src python -m pytest -q tests/test_canonical_api.py tests/test_public_api.py tests/test_unified_pipeline_api.py tests/api tests/robust_register tests/test_tf32_defaults.py tests/test_msm_cli.py tests/amico_noddi/test_amico_noddi.py tests/test_fmri_ica.py tests/dmri_pipeline/test_dmri_pipeline.py tests/probtrackx/test_matrix_io.py tests/probtrackx/test_connectome_outputs.py tests/bedpostx/test_bedpostx.py tests/documentation/test_public_privacy.py",
+      "summary": "324 passed in 14.30s",
+      "log_sha256": "daabd11d4ac55a9d84953f531fcc557f0ad094f7aed942b8ea445c673ec5cbb5",
+      "passed": 324
+    },
+    {
+      "name": "connectome-and-spatial-components",
+      "command": "OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 PYTHONPATH=src python -m pytest -q tests/connectome tests/applywarp tests/convertwarp tests/invwarp tests/flirt tests/test_fslmaths.py tests/test_space_conversion.py",
+      "skipped": 3,
+      "subtests_passed": 369,
+      "summary": "1475 passed, 3 skipped, 1 warning, 369 subtests passed in 149.94s (0:02:29)",
+      "log_sha256": "4c38789032c0a4a033b09a58172cccf7263b64096b7e0488b6c44ca8275bc464",
+      "passed": 1475
+    }
+  ],
+  "entire_repository_collection": {
+    "status": "blocked_by_preexisting_collection_errors",
+    "error_count": 14,
+    "same_errors_reproduced_on_baseline": true,
+    "categories": {
+      "duplicate_test_module_names": 3,
+      "missing_declared_tifffile_dependency_in_local_environment": 3,
+      "legacy_relative_import": 1,
+      "removed_fastpd_native_imports_in_legacy_tests": 7
+    },
+    "all_repository_tests_passed_claimed": false
+  },
+  "compatibility_bugs_fixed": [
+    "MSM options-before-positional-method parsing",
+    "read-only cross-host anatomy runtime verification versus execution host checks"
+  ],
+  "existing_test_contracts_corrected": [
+    "SynthMorph apply_transform device and frame_chunk_size already present in baseline",
+    "SynthSegParc constructor preserves scoped TF32 policy already present in baseline"
+  ],
+  "source_audit": "source_audit.public.json",
+  "isolated_install": "install_receipt.public.json",
+  "real_mri_benchmark_rerun": false,
+  "entrypoint_source_sha256": {
+    "src/fnit/__init__.py": "e38a2fa1c903edab26fb34c3f785c447949fd0ef3d47ba31d7fc3eef903d2a8c",
+    "src/fnit/_public_api.py": "47fc8a7169baa3a357d7e979152e308c52b213729afd7f857f0d45efd9861869",
+    "src/fnit/api_cli.py": "a25e6803babc26dee5cdd8389832f06fdb95a60bde13a43e5cfafc36134d7e35",
+    "src/fnit/msm/api.py": "c55e51b53cb700d639c8c78a74d43fdc325a8ff2359c74f93e0a9916d4e27039",
+    "src/fnit/amico_noddi/api.py": "4177fa12eb192ae822760bcd4e79b91a306fffdd32a8721088f50f1ca9a803ec",
+    "src/fnit/mshbm/api.py": "0c4d3fc21d1d784cd52f7fe9a2de7ce45eebfdff9de09e65576439cb5f21807b",
+    "pyproject.toml": "9a02ee12da9eda87a5a31d2a5bb59d12998011facb18e738b561eceee4bda546"
+  },
+  "final_publication_audit": "publication_audit.public.json"
+}

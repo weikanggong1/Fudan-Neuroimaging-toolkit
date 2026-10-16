@@ -131,7 +131,7 @@ MRTRIX_RNG_SEED=0 MRTRIX_CONFIGFILE=/dev/null \
 | 版本 | 范围与证据 |
 | --- | --- |
 | 原生后端 / 2026-10-09 | 固定官方源码独立构建、配置隔离、CPU iFOD2/ACT、连续点缓冲、实际 TCK header 与 runtime checkpoint 身份。[最新版报告](../../validation/connectome/native_tracking_20261009/README.md)。 |
-| 历史 [`6ae32945`](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/commit/6ae3294513be8cd9d9df8b92846f3235913c1955) | 旧 PyTorch SH eager 数据流优化，两种旧模式分别验证 byte exact。[原 A100 完整报告](../../validation/connectome/tracking_cfff_20261009/README.md)。 |
+| 历史 [`6ae32945`](https://github.com/weikanggong1/Fudan-Neuroimaging-toolkit/commit/6ae3294513be8cd9d9df8b92846f3235913c1955) | 旧 PyTorch SH eager 数据流优化，两种旧模式分别验证 byte exact。[原 A100 完整报告](../../validation/connectome/tracking_accelerator-b_20261009/README.md)。 |
 | 历史 `d4327049` | 旧 PyTorch 5TT 有序八角点取值与权重合并。[原 H100 完整报告](../../validation/connectome/tracking_exact_20261009/README.md)。 |
 | 历史精度轮 / 2026-10-03 | SGM 退出截断、旧十例 raw→SC 判断。[原精度记录](ACCURACY_OPTIMIZATION_20261003.md)。 |
 
@@ -141,16 +141,16 @@ MRTRIX_RNG_SEED=0 MRTRIX_CONFIGFILE=/dev/null \
 
 | 旧 PyTorch 同模式对照 | 旧基线 → 6ae / s | 原始数据 |
 | --- | --- | --- |
-| 10k eager | 25.207 → 22.136 | [原 JSON](../../validation/connectome/tracking_cfff_20261009/sh_preserved_10k.public.json) |
-| 100k eager | 299.628 → 178.184，共享负载波动明显 | [原 JSON](../../validation/connectome/tracking_cfff_20261009/sh_preserved_default_100k.public.json) |
-| 100k compiled | 112.591 → 112.919，无明确收益 | [原 JSON](../../validation/connectome/tracking_cfff_20261009/sh_preserved_compiled_100k.public.json) |
-| 同机独立官方 100k | 16.319 / 14.193 / 13.888，包含原生 I/O | [原 JSON](../../validation/connectome/tracking_cfff_20261009/mrtrix_100k.public.json) |
+| 10k eager | 25.207 → 22.136 | [原 JSON](../../validation/connectome/tracking_accelerator-b_20261009/sh_preserved_10k.public.json) |
+| 100k eager | 299.628 → 178.184，共享负载波动明显 | [原 JSON](../../validation/connectome/tracking_accelerator-b_20261009/sh_preserved_default_100k.public.json) |
+| 100k compiled | 112.591 → 112.919，无明确收益 | [原 JSON](../../validation/connectome/tracking_accelerator-b_20261009/sh_preserved_compiled_100k.public.json) |
+| 同机独立官方 100k | 16.319 / 14.193 / 13.888，包含原生 I/O | [原 JSON](../../validation/connectome/tracking_accelerator-b_20261009/mrtrix_100k.public.json) |
 
 当时新旧同模式 100k 路径字节一致、119 项 GPU 回归通过；该容器的进程 NVML 映射缺失，完整进程 <20 GB gate 未通过。所有慢样本、未采用实验及显存边界仍在原报告中。
 
-![历史 6ae PyTorch 与官方 MRtrix 真实 100k 流线投影；不是本版原生结果](../../validation/connectome/tracking_cfff_20261009/real100k_qc.png)
+![历史 6ae PyTorch 与官方 MRtrix 真实 100k 流线投影；不是本版原生结果](../../validation/connectome/tracking_accelerator-b_20261009/real100k_qc.png)
 
-历史 SH 压缩列、成功行索引与未保护编译候选的原结果见[原候选记录](../../validation/connectome/tracking_cfff_20261009/README.md#3-候选取舍)。不再保留这些候选的当前生产调用说明。
+历史 SH 压缩列、成功行索引与未保护编译候选的原结果见[原候选记录](../../validation/connectome/tracking_accelerator-b_20261009/README.md#3-候选取舍)。不再保留这些候选的当前生产调用说明。
 
 ## 7. 原实现与参考文献
 

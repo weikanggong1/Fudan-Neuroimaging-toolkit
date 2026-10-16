@@ -36,7 +36,7 @@ flowchart LR
 from pathlib import Path
 from tools.benchmark_connectome_tracking_population import compare
 
-benchmark_root = Path("/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002")
+benchmark_root = Path("/data/workspaces/fnit_connectome_tenraw_20261002")
 official_repeat_root = benchmark_root / "official_repeats_CON03_v2"
 fnit_checkpoint_directory = benchmark_root / "root_diagnostic_CON03_v2/checkpoints"
 population_report = compare(
@@ -55,8 +55,8 @@ population_report = compare(
 
 ```bash
 fnit_repository_dir=/path/to/Fudan-Neuroimaging-toolkit  # 本版已更新工具的检出目录
-benchmark_root=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002
-benchmark_python=/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/bin/python
+benchmark_root=/data/workspaces/fnit_connectome_tenraw_20261002
+benchmark_python=/data/workspaces/fnit_conda_env_956b1a9/bin/python
 official_repeat_directory="$benchmark_root/official_repeats_CON03_v2"
 fnit_checkpoint_directory="$benchmark_root/root_diagnostic_CON03_v2/checkpoints"
 fnit_connectome_directory="$benchmark_root/root_diagnostic_CON03_v2/connectome"
@@ -89,7 +89,7 @@ export CUDA_VISIBLE_DEVICES=""
 
 ## 4. 对应官方步骤
 
-实际官方为 nodecw10 MRtrix `3.0.3-103-g026e850d`，七个程序SHA绑定在合同报告。实际步长 `1.2500000175865187 mm`、最小长度 `5.000000070346075 mm`、最大250 mm、angle45、cutoff0.1、power0.5、samples3、trials1000、max_attempts1000、downsample2。每次 `-seeds 100000 -select 0 -nthreads 0`；下游8线程，不添加backtrack/crop/mask/zero_diagonal。原命令argv在服务器manifest中完整保留，通用命令及公式见[工具说明](../../../../tools/benchmark_connectome_repeat_envelope.md#4-对应官方命令和几何)。
+实际官方为 compute-a-10 MRtrix `3.0.3-103-g026e850d`，七个程序SHA绑定在合同报告。实际步长 `1.2500000175865187 mm`、最小长度 `5.000000070346075 mm`、最大250 mm、angle45、cutoff0.1、power0.5、samples3、trials1000、max_attempts1000、downsample2。每次 `-seeds 100000 -select 0 -nthreads 0`；下游8线程，不添加backtrack/crop/mask/zero_diagonal。原命令argv在服务器manifest中完整保留，通用命令及公式见[工具说明](../../../../tools/benchmark_connectome_repeat_envelope.md#4-对应官方命令和几何)。
 
 5TT ACT官方读入与源原始affine的角点差为 `8.09116e-6 mm`，与FNIT实际header-spacing算子差 `3.80257e-13 mm`；这是已有reader规范化语义。FOD官方读入与源角点差 `3.57538e-13 mm`。源齐次末行机器残差与NIfTI隐含末行分别记录，不声称完整4×4文件逐bit保存，也不新增事后科学容差。
 
@@ -144,7 +144,7 @@ Glasser+Tian S4 的共有边FA归一MAE在官方seed4比较为 **0.0852723330**�
 
 五轮官方参考 execution 总wall time **407.327秒**，包含输入导出、readback、五轮组件和输出检查；Python导入不在计时内；主入口总wall time 408.518秒，其中preflight 1.191秒。这里只是固定FOD之后的参考组件耗时，不包含raw预处理、recon-all、配准或FNIT完整pipeline，不据此声称十例端到端加速。FNIT逐阶段与整例耗时/显存验收由十例总报告独立完成。
 
-CPU分析使用gpucw1专用环境、CUDA不可见：population完整TCK读取和全部pair计算2.592秒；合同审计时间另记录。工具回归与原矩阵工具 **29 passed、1 skipped，3.96秒**，跳过专用环境中可选matplotlib绘图。小数组仅检验工具契约，不替代上述真实科学比较。
+CPU分析使用accelerator-a-1专用环境、CUDA不可见：population完整TCK读取和全部pair计算2.592秒；合同审计时间另记录。工具回归与原矩阵工具 **29 passed、1 skipped，3.96秒**，跳过专用环境中可选matplotlib绘图。小数组仅检验工具契约，不替代上述真实科学比较。
 
 ## 6. 更新与剩余工作
 

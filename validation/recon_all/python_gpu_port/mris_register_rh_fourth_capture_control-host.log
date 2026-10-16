@@ -1,0 +1,108 @@
+Breakpoint 1 at 0x480abe
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib64/libthread_db.so.1".
+using smoothwm curvature for final alignment
+using niterations = 1
+not removing negative triangles with iterative smoothing
+using write iterations = 1
+
+cwd /data/workspaces/freesurfer_synth/work/reconall_python_gpu_20260925/mris_register_fourth_epoch/rh
+cmdline /opt/reference/Freesurfer/8.2.0-1/bin/mris_register -curv -threads 4 -N 1 -remove_negative 0 -W 1 rh.sphere /opt/reference/Freesurfer/8.2.0-1/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif rh.sphere.reg.debug
+
+0 inflated.H
+1 sulc
+2 smoothwm (computed)
+8.2.0
+  8.2.0
+reading surface from rh.sphere...
+[New Thread 0x7fffe250f700 (LWP 2920959)]
+[New Thread 0x7fffe1d0e700 (LWP 2920960)]
+[New Thread 0x7fffe150d700 (LWP 2920961)]
+reading template parameterization from /opt/reference/Freesurfer/8.2.0-1/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif...
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
+MRISregister() -------
+max_passes = 4
+min_degrees = 0.500000
+max_degrees = 64.000000
+nangles = 8
+tol=5.0e-01, sigma=0.0, host=x86_6, nav=1024, nbrs=1, l_extern=10000.000, l_parea=0.200, l_nlarea=1.000, l_corr=1.000, l_dist=5.000
+using quadratic fit line minimization
+complete_dist_mat 0
+rms 0
+smooth_averages 0
+remove_neg 0
+ico_order 0
+which_surface 0
+target_radius 0.000000
+nfields 0
+scale 0.000000
+desired_rms_height -1.000000
+momentum 0.950000
+nbhd_size -10
+max_nbrs 10
+niterations 1
+nsurfaces 0
+SURFACES 3
+flags 16 (10)
+use curv 16
+no sulc 0
+no rigid align 0
+mris->nsize 1
+mris->hemisphere 1
+randomSeed 0
+
+tol=5.0e-01, sigma=0.0, host=x86_6, nav=1024, nbrs=1, l_extern=10000.000, l_parea=0.200, l_nlarea=1.000, l_corr=1.000, l_dist=5.000
+using quadratic fit line minimization
+--------------------
+1 Reading rh.sulc
+curvature mean = -0.000, std = 5.528
+reading precomputed curvature from rh.sulc
+
+blurring surfaces with sigma=4.00...
+curvature mean = 0.044, std = 0.874
+writing curvature file ./rh.sphere.reg.debug.target1 type -1
+done.
+curvature mean = 0.045, std = 0.811
+writing curvature file ./rh.sphere.reg.debug.sno1_target_blur4.00 type -1
+curvature mean = 0.003, std = 0.889
+writing curvature file ./rh.sphere.reg.debug.sno1_blur4.00 type -1
+finding optimal rigid alignment
+Starting MRISrigidBodyAlignGlobal()
+000: dt: 0.000, sse: 1247690.1 (0.343, 21.6, 0.480, 1.929), neg: 0 (%0.00:%0.00), avgs: 1024
+tol=5.0e-01, sigma=4.0, host=x86_6, nav=1024, nbrs=1, l_extern=10000.000, l_parea=0.200, l_nlarea=1.000, l_corr=1.000, l_dist=5.000
+using quadratic fit line minimization
+002: dt: 69.650, sse: 1372289.9 (0.348, 21.6, 0.479, 2.217), neg: 0 (%0.00:%0.00), avgs: 16384
+003: dt: 66.459, sse: 1188556.0 (0.355, 21.6, 0.476, 1.815), neg: 0 (%0.00:%0.00), avgs: 4096
+004: dt: 25.513, sse: 1074012.8 (0.362, 21.6, 0.474, 1.500), neg: 0 (%0.00:%0.00), avgs: 1024
+
+Thread 1 "mris_register" hit Breakpoint 1, 0x0000000000480abe in ?? ()
+FOURTH_EPOCH_CAPTURE {"checkpoint": "before_distance", "vertices": 105541, "positions_sha256": "3093035dc03d540b8a5e5890080c645ff6ca69cea95239697d29a82be82a07a8", "first_positions": [-35.11500930786133, -81.93335723876953, -45.319541931152344], "normals_sha256": "4164bbfcfca914c572e1f7e290335703769c95a283a21733bf5b79ea27dffc46", "first_normals": [-0.35138842463493347, -0.8191337585449219, -0.45337188243865967], "curvature_sha256": "b6f9f27edae1eed65e32aae8c83ac94ab81cf35c0d81ac69b84eb750ee6462ca", "first_curvature": [-1.2677026987075806], "e1_sha256": "9b4cdc50ba4c9abf3852d6d5fcb0c83fc76806468b29df5fb6b10d5614ee1ad3", "first_e1": [0.13933773338794708, 0.43749552965164185, -0.8883594870567322], "e2_sha256": "5d0dbc60ab52ad7df5a7dc80ee420847955d6e08e1bf49042e722feff9179414", "first_e2": [0.9251006245613098, -0.37752166390419006, -0.04081977531313896], "gradient_sha256": "586c1c6a9e74a529c2748470f57ad81c0cc36391710554526abb27037ce7fbcd", "first_gradient": [0.0, 0.0, 0.0], "avg_vertex_dist": 1.250777387426354}
+Breakpoint 2 at 0x480ac3
+
+Thread 1 "mris_register" hit Breakpoint 2, 0x0000000000480ac3 in ?? ()
+FOURTH_EPOCH_CAPTURE {"checkpoint": "after_distance", "vertices": 105541, "positions_sha256": "3093035dc03d540b8a5e5890080c645ff6ca69cea95239697d29a82be82a07a8", "first_positions": [-35.11500930786133, -81.93335723876953, -45.319541931152344], "normals_sha256": "4164bbfcfca914c572e1f7e290335703769c95a283a21733bf5b79ea27dffc46", "first_normals": [-0.35138842463493347, -0.8191337585449219, -0.45337188243865967], "curvature_sha256": "b6f9f27edae1eed65e32aae8c83ac94ab81cf35c0d81ac69b84eb750ee6462ca", "first_curvature": [-1.2677026987075806], "e1_sha256": "9b4cdc50ba4c9abf3852d6d5fcb0c83fc76806468b29df5fb6b10d5614ee1ad3", "first_e1": [0.13933773338794708, 0.43749552965164185, -0.8883594870567322], "e2_sha256": "5d0dbc60ab52ad7df5a7dc80ee420847955d6e08e1bf49042e722feff9179414", "first_e2": [0.9251006245613098, -0.37752166390419006, -0.04081977531313896], "gradient_sha256": "8c1080db7faba1037ed8968a622764cceb7a11ca95f633cda9c4dff1d85b3d7e", "first_gradient": [-0.00140189949888736, 0.0043939389288425446, -0.006852238904684782], "avg_vertex_dist": 1.250777387426354}
+Breakpoint 3 at 0x480af1
+
+Thread 1 "mris_register" hit Breakpoint 3, 0x0000000000480af1 in ?? ()
+FOURTH_EPOCH_CAPTURE {"checkpoint": "after_area", "vertices": 105541, "positions_sha256": "3093035dc03d540b8a5e5890080c645ff6ca69cea95239697d29a82be82a07a8", "first_positions": [-35.11500930786133, -81.93335723876953, -45.319541931152344], "normals_sha256": "4164bbfcfca914c572e1f7e290335703769c95a283a21733bf5b79ea27dffc46", "first_normals": [-0.35138842463493347, -0.8191337585449219, -0.45337188243865967], "curvature_sha256": "b6f9f27edae1eed65e32aae8c83ac94ab81cf35c0d81ac69b84eb750ee6462ca", "first_curvature": [-1.2677026987075806], "e1_sha256": "9b4cdc50ba4c9abf3852d6d5fcb0c83fc76806468b29df5fb6b10d5614ee1ad3", "first_e1": [0.13933773338794708, 0.43749552965164185, -0.8883594870567322], "e2_sha256": "5d0dbc60ab52ad7df5a7dc80ee420847955d6e08e1bf49042e722feff9179414", "first_e2": [0.9251006245613098, -0.37752166390419006, -0.04081977531313896], "gradient_sha256": "05a6b83496ade955959f4f685249dd929e3c90cfbb3bfd912e72e379f192ceb4", "first_gradient": [-0.005201844498515129, 0.006782790180295706, -0.007876703515648842], "avg_vertex_dist": 1.250777387426354}
+Breakpoint 4 at 0x480afc
+
+Thread 1 "mris_register" hit Breakpoint 4, 0x0000000000480afc in ?? ()
+FOURTH_EPOCH_CAPTURE {"checkpoint": "after_correlation", "vertices": 105541, "positions_sha256": "3093035dc03d540b8a5e5890080c645ff6ca69cea95239697d29a82be82a07a8", "first_positions": [-35.11500930786133, -81.93335723876953, -45.319541931152344], "normals_sha256": "4164bbfcfca914c572e1f7e290335703769c95a283a21733bf5b79ea27dffc46", "first_normals": [-0.35138842463493347, -0.8191337585449219, -0.45337188243865967], "curvature_sha256": "b6f9f27edae1eed65e32aae8c83ac94ab81cf35c0d81ac69b84eb750ee6462ca", "first_curvature": [-1.2677026987075806], "e1_sha256": "5d17342761bda4ec090c195ca642fdd5ebc73aa115077a971848c5f6c74f5169", "first_e1": [0.14323823153972626, 0.43151506781578064, -0.8906612992286682], "e2_sha256": "be28394ab7ac9c96fd64765d66a422cf458301ea0dcf26d2fdcc156bc55d8805", "first_e2": [0.9252074956893921, -0.37790825963020325, -0.0342981219291687], "gradient_sha256": "3f20d1c4442b9ddfacb59181735c0f859baca5796d294afd825254511cd7af57", "first_gradient": [0.03505123034119606, -0.02428094483911991, 0.017049606889486313], "avg_vertex_dist": 1.250777387426354}
+Breakpoint 5 at 0x480b46
+
+Thread 1 "mris_register" hit Breakpoint 5, 0x0000000000480b46 in ?? ()
+FOURTH_EPOCH_CAPTURE {"checkpoint": "before_average", "vertices": 105541, "positions_sha256": "3093035dc03d540b8a5e5890080c645ff6ca69cea95239697d29a82be82a07a8", "first_positions": [-35.11500930786133, -81.93335723876953, -45.319541931152344], "normals_sha256": "4164bbfcfca914c572e1f7e290335703769c95a283a21733bf5b79ea27dffc46", "first_normals": [-0.35138842463493347, -0.8191337585449219, -0.45337188243865967], "curvature_sha256": "b6f9f27edae1eed65e32aae8c83ac94ab81cf35c0d81ac69b84eb750ee6462ca", "first_curvature": [-1.2677026987075806], "e1_sha256": "5d17342761bda4ec090c195ca642fdd5ebc73aa115077a971848c5f6c74f5169", "first_e1": [0.14323823153972626, 0.43151506781578064, -0.8906612992286682], "e2_sha256": "be28394ab7ac9c96fd64765d66a422cf458301ea0dcf26d2fdcc156bc55d8805", "first_e2": [0.9252074956893921, -0.37790825963020325, -0.0342981219291687], "gradient_sha256": "3f20d1c4442b9ddfacb59181735c0f859baca5796d294afd825254511cd7af57", "first_gradient": [0.03505123034119606, -0.02428094483911991, 0.017049606889486313], "avg_vertex_dist": 1.250777387426354}
+Breakpoint 6 at 0x480b4b
+
+Thread 1 "mris_register" hit Breakpoint 6, 0x0000000000480b4b in ?? ()
+FOURTH_EPOCH_CAPTURE {"checkpoint": "after_average", "vertices": 105541, "positions_sha256": "3093035dc03d540b8a5e5890080c645ff6ca69cea95239697d29a82be82a07a8", "first_positions": [-35.11500930786133, -81.93335723876953, -45.319541931152344], "normals_sha256": "4164bbfcfca914c572e1f7e290335703769c95a283a21733bf5b79ea27dffc46", "first_normals": [-0.35138842463493347, -0.8191337585449219, -0.45337188243865967], "curvature_sha256": "b6f9f27edae1eed65e32aae8c83ac94ab81cf35c0d81ac69b84eb750ee6462ca", "first_curvature": [-1.2677026987075806], "e1_sha256": "5d17342761bda4ec090c195ca642fdd5ebc73aa115077a971848c5f6c74f5169", "first_e1": [0.14323823153972626, 0.43151506781578064, -0.8906612992286682], "e2_sha256": "be28394ab7ac9c96fd64765d66a422cf458301ea0dcf26d2fdcc156bc55d8805", "first_e2": [0.9252074956893921, -0.37790825963020325, -0.0342981219291687], "gradient_sha256": "06e379bf37f49910979349d38555daf7178efa757243d83b7a920c6587d63d10", "first_gradient": [0.019370224326848984, -0.011322182603180408, 0.009554646909236908], "avg_vertex_dist": 1.250777387426354}
+NATIVE_CAPTURE_REAL_S 32.03

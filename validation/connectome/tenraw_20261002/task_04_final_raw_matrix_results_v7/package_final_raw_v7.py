@@ -6,7 +6,7 @@ import io
 import json
 import tarfile
 
-root = Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_04')
+root = Path('/data/workspaces/fnit_connectome_tenraw_20261002/task_04')
 out = root.parent.parent/'fnit_connectome_final_raw_task04_20261003_v7'
 final = json.loads((out/'final_report.json').read_text())
 assert final['status'] == 'completed_twenty_actual_raw_matrix_comparisons'

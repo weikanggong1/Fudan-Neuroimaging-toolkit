@@ -32,7 +32,7 @@
 下面展示本次已执行命令；运行器拒绝已有生命周期和输出，不可用它重派本任务。
 
 ```bash
-FNIT_ROOT=/cwStorage/home/gongwk/Notebook_code/FNIT
+FNIT_ROOT=/data/fnit
 # 独立冻结源与独立输出目录；没有替换生产模块。
 FNIT_WORKSPACE="$FNIT_ROOT/workspaces/smri_cpu_20261004/remaining_20261006/fnirt-rhs-moving-control-v1"
 FNIT_OUTPUT="$FNIT_ROOT/runs/smri_cpu_20261004/remaining_20261006/fnirt-rhs-moving-control-v1/moving"
@@ -45,7 +45,7 @@ FNIT_OUTPUT="$FNIT_ROOT/runs/smri_cpu_20261004/remaining_20261006/fnirt-rhs-movi
 
 `--root`定义已有canonical仓库/输入；`--workspace`保存15项已审冻结payload；`--output`新建700目录，只写原summary；`--approved-moving-control`是本独立科学范围的执行门。实际调用由 [run_moving.sh](source/run_moving.sh) 设置CPU8、common outer锁/inner锁、环境和180s child。
 
-实际 nodecw7 亲和性32,36,40,44,48,52,56,60；Torch8/interop1，OMP/MKL/OpenBLAS/Numba8。Python3.11.16、Torch2.5.1、NumPy1.26.4、nibabel5.4.2、Numba0.61.2；真实prefix匹配canonical env/default，解释器SHA已记录。RLIMIT_AS20e9B是address space上限；maxRSS567760KiB另列。CUDA未初始化、TF32/default dtype/grad状态前后相同。DSO仅前后身份快照，不是全程syscall审计。
+实际 compute-a-7 亲和性32,36,40,44,48,52,56,60；Torch8/interop1，OMP/MKL/OpenBLAS/Numba8。Python3.11.16、Torch2.5.1、NumPy1.26.4、nibabel5.4.2、Numba0.61.2；真实prefix匹配canonical env/default，解释器SHA已记录。RLIMIT_AS20e9B是address space上限；maxRSS567760KiB另列。CUDA未初始化、TF32/default dtype/grad状态前后相同。DSO仅前后身份快照，不是全程syscall审计。
 
 ## 4. 原软件范围与 λ
 

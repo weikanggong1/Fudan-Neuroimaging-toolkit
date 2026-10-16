@@ -16,7 +16,7 @@ def runtime_record(value):
     record["build_records"] = [{"stage": row["log"].removesuffix(".log"),
                                  "seconds": row["seconds"], "returncode": row["returncode"]}
                                 for row in value["build_records"]]
-    record["compiler"] = "GCC/G++ 7.5.0; isolated CFFF validation environment"
+    record["compiler"] = "GCC/G++ 7.5.0; isolated accelerator-b validation environment"
     return record
 
 

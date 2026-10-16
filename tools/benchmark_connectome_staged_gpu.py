@@ -182,7 +182,7 @@ def verify_source(config):
                 "src/fnit/connectome/atlas_manifest.json", "pyproject.toml", "environment.yml"}
     if not required.issubset(current["source_sha256"]):
         raise ValueError("candidate freeze is missing required source/install files")
-    if config.get("cuda_alloc_conf") != ALLOCATOR or config.get("gpu_lock") != "/tmp/fnit-recon-five-20261002-gongwk.gpu.lock":
+    if config.get("cuda_alloc_conf") != ALLOCATOR or config.get("gpu_lock") != "/tmp/fnit-recon-five-20261002-benchmark-user.gpu.lock":
         raise ValueError("candidate needs the common expandable allocator and shared GPU lock")
     if not config.get("fnit_weights") or not config.get("gpu_uuid") or config.get("cpu_threads") != 8 or config.get("pilot") is not False:
         raise ValueError("formal candidate needs weights, verified GPU UUID, eight CPU threads and non-pilot protocol")
@@ -423,7 +423,7 @@ def staged_timing(prepared, gpu, gpu_head_start, gpu_head_end, gpu_head_wall):
             "cross_host_prep_to_gpu_utc_difference_seconds":(parse_utc(gpu_head_start)-parse_utc(prepared["end_utc"])).total_seconds(),
             "cross_host_prep_start_to_gpu_end_utc_difference_seconds":(parse_utc(gpu_head_end)-parse_utc(prepared["start_utc"])).total_seconds(),
             "cross_host_utc_differences_are_wall_timers":False, "continuous_cold_pipeline":False,
-            "scope":"nodecw10 local case monotonic preparation wall; actual head C4-batch connection UTC start to this case head GPU end includes pre-case scheduling/freeze/wait; node/head UTC differences descriptive only, never used to synthesize monotonic or per-case cold wall"}
+            "scope":"compute-a-10 local case monotonic preparation wall; actual head C4-batch connection UTC start to this case head GPU end includes pre-case scheduling/freeze/wait; node/head UTC differences descriptive only, never used to synthesize monotonic or per-case cold wall"}
     elapsed = positive((parse_utc(gpu_head_end)-parse_utc(prepared["start_utc"])).total_seconds(), "observed staged UTC elapsed")
     gap = positive((parse_utc(gpu_head_start)-parse_utc(prepared["end_utc"])).total_seconds(), "observed preparation/GPU gap")
     return {"official_recon_command_seconds":recon, "preparation_worker_wall_seconds":worker_wall, "preparation_head_wall_seconds":prep_wall,

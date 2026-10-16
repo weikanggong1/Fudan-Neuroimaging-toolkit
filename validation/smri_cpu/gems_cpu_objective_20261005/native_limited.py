@@ -53,12 +53,12 @@ def main():
         # The hard binding is checked before any native computation.
         raise RuntimeError('validated native v5 helper changed')
     helper = load(args.helper)
-    sys.path.insert(0, '/public/software/apps/Freesurfer/8.2.0-1/python/lib/python3.8/site-packages/samseg/gems')
+    sys.path.insert(0, '/opt/reference/Freesurfer/8.2.0-1/python/lib/python3.8/site-packages/samseg/gems')
     import gemsbindings as gems
     gems.setGlobalDefaultNumberOfThreads(8)
     if digest(gems.__file__) != '8125a39cd9885ada66ac2945dc5d7e38737e3bb707bce26ad6d796340fadbf82':
         raise RuntimeError('installed native binary changed')
-    core_path = Path('/public/software/apps/Freesurfer/8.2.0-1/python/lib/python3.8/site-packages/samseg/subregions/core.py')
+    core_path = Path('/opt/reference/Freesurfer/8.2.0-1/python/lib/python3.8/site-packages/samseg/subregions/core.py')
     if digest(core_path) != 'beb64fa1f2a9d6b6946388fc6641b92ffc5a100bef47b96b55877d4df9d0d700':
         raise RuntimeError('installed synthetic recipe/options changed')
     capture = json.loads((args.capture/'report.public.json').read_text())

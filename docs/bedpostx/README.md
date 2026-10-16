@@ -1,4 +1,6 @@
-# TorchBEDPOSTX：纤维方向后验估计
+# FNIT_bedpostx
+
+> 统一 Python 入口：[`FNIT_bedpostx`](../API_REFERENCE.md)，从 `fnit` 导入。下文配置、结果类型和细分算子保留高级兼容接口。
 
 | 项目 | 内容 |
 |---|---|
@@ -17,9 +19,9 @@
 ## 2. Python 调用
 
 ```python
-from fnit.bedpostx import TorchBEDPOSTX
+from fnit import FNIT_bedpostx
 
-posterior_model = TorchBEDPOSTX(
+posterior_model = FNIT_bedpostx(
     device="cuda:0",  # 指定GPU设备
     threads=1,  # 辅助CPU计算线程数
     chunk_size=4096,  # 每批脑体素数；小于默认以减少工作区

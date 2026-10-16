@@ -33,13 +33,13 @@ CPU 层分块使 fast 变慢，其结果仍保留在下表。
   H5/NPY 文件与 FNIT 权重逐个 size/SHA 相同。模型依照既有 FNIT 权重清单获取。
 - FNIT：Python 3.11 / PyTorch 2.5.1 / NumPy 1.26.4 / SciPy 1.17.1。
   官方 fspython 的 Python/TensorFlow 环境独立保留，不与 FNIT 替换环境混用。
-- 正式 CPU 配对组：nodecw10，8 个物理核 `1,5,9,13,17,21,25,29`，
+- 正式 CPU 配对组：compute-a-10，8 个物理核 `1,5,9,13,17,21,25,29`，
   8 个计算线程，任务专用串行锁。进程还会创建库辅助线程，报告实际线程峰值，
   所有线程仍受相同 8 核亲和性约束。该节点与其他任务共享。
 - 完整命令 wall 包含冷进程、Python/模型读取、预处理、全部网络和后处理、
   CSV 与影像保存。记录 `/usr/bin/time -v` RSS、进程树采样 RSS/线程与节点负载。
   GPU API 时间另列，不能当完整命令时间。
-- GPU 回归：gpucw1 的同一 H100 GPU0、同一串行锁，20,000,000,000 B allocator
+- GPU 回归：accelerator-a-1 的同一 H100 GPU0、同一串行锁，20,000,000,000 B allocator
   上限；FP32/既有 TF32 策略保留，没有新增 FP16/BF16。
 
 早期公共 CPU 核组 `0,4,...,28`、错误尺寸诊断和后续 NUMA1 组分别保留，

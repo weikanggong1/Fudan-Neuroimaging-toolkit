@@ -2,10 +2,10 @@
 setting unknown_nbr_spacing = 3
 using MR volume brainmask.mgz to mask input volume...
 
-== Number of threads available to /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mri_em_register for OpenMP = 4 == 
+== Number of threads available to /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mri_em_register for OpenMP = 4 ==
 reading 1 input volumes...
 logging results to talairach.log
-reading '/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/RB_all_2020-01-02.gca'...
+reading '/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/RB_all_2020-01-02.gca'...
 GCAread took 0 minutes and 1 seconds.
 average std = 7.2   using min determinant for regularization = 5.2
 0 singular and 884 ill-conditioned covariance matrices regularized
@@ -17,7 +17,7 @@ MRImask(): AllowDiffGeom = 1
 MRImask(): AllowDiffGeom = 1
 freeing gibbs priors...done.
 accounting for voxel sizes in initial transform
-bounding unknown intensity as < 5.9 or > 519.0 
+bounding unknown intensity as < 5.9 or > 519.0
 total sample mean = 79.1 (1017 zeros)
 ************************************************
 spacing=8, using 2841 sample points, tol=1.00e-05...
@@ -166,7 +166,7 @@ transform before final EM align:
 
 **************************************************
  EM alignment process ...
- Computing final MAP estimate using 315638 samples. 
+ Computing final MAP estimate using 315638 samples.
 **************************************************
 dt = 5.00e-06, momentum=0.80, tol=1.00e-07
 l_intensity = 1.0000
@@ -240,7 +240,7 @@ wm low:   79
 wm hi:    125
 gray low: 30
 gray hi:  99
-Doing initial trinary intensity segmentation 
+Doing initial trinary intensity segmentation
 MRIintensitySegmentation() wm_low=79, wm_hi=125, gray_hi=99
 white = 209014, nonwhite = 16376309, ambig = 191893, nmask = 0
 Using local statistics to label ambiguous voxels
@@ -309,7 +309,7 @@ MRIfindBrightNonWM(): 390 bright non-wm voxels segmented.
 MRIfilterMorphology() WM_MIN_VAL=5, DIAGONAL_FILL=230
 white matter segmentation took 0.8 minutes
 writing output to wm.seg.mgz...
-/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mri_edit_wm_with_aseg -keep-in -fix-ento-wm entowm.mgz 3 255 255 -fix-acj aseg.presurf.mgz 255 255 -fill-seg-wm -fix-scm-ha 1 wm.seg.mgz brain.mgz aseg.presurf.mgz wm.asegedit.mgz 
+/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mri_edit_wm_with_aseg -keep-in -fix-ento-wm entowm.mgz 3 255 255 -fix-acj aseg.presurf.mgz 255 255 -fill-seg-wm -fix-scm-ha 1 wm.seg.mgz brain.mgz aseg.presurf.mgz wm.asegedit.mgz
 preserving editing changes in input volume...
 mri_edit_wm_wit supposed to be reproducible but seed not set
 auto filling took 0.44 minutes
@@ -329,15 +329,15 @@ MRIfixEntoWM(): nchanged = 1453
 MRIfixEntoWM(): 255 255 Level=3
 MRIfixEntoWM(): nchanged = 598
 writing edited volume to wm.asegedit.mgz....
-gongwk-local
+benchmark-user-local
 
---inras: /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/tmp/deform.mgz input RAS warp.
---insrcgeom: /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/invol.crop.nii.gz atlas/source image (used for geometry).
---outfswarp: /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz output Freesurfer 3D morph.
+--inras: /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/tmp/deform.mgz input RAS warp.
+--insrcgeom: /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/invol.crop.nii.gz atlas/source image (used for geometry).
+--outfswarp: /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz output Freesurfer 3D morph.
 Setting vg_isEqual_Threshold to 0.000100
 INFO: using NIfTI-1 sform (sform_code=1)
 Applying LTAs to the GCAM
-GCAMwrite(/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz)
+GCAMwrite(/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz)
 [INFO] Warpfield::convert(): converting GCAM ...
 [INFO] Warpfield::convert(): gcam       [193 x 229 x 193]
 [INFO] Warpfield::convert(): gcam image [256 x 256 x 256]
@@ -345,7 +345,7 @@ GCAMwrite(/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_stand
 [INFO] Warpfield::convert(): total out of range voxel count: 0
 [INFO] niiWrite(): MGZ_INTENT_WARPMAP => NIFTI_INTENT_DISPVECT, intent_code = 1006, dimensions = {5, 193, 229, 193, 1, 3, 1, 1}
 [INFO] niiWrite(): convert displacement from 0 to 3
-/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mri_warp_convert successful.
+/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mri_warp_convert successful.
 INFO: using NIfTI-1 sform (sform_code=1)
 Loading gcam
 [INFO] niiRead(): intent_code = 1006, dimensions = {5, 193, 229, 193, 1, 3, 1, 1}
@@ -354,8 +354,8 @@ setting orig areas to linear transform determinant scaled 1.00
 Computing inverse of GCAM
 Filling inverse of GCAM
 Allocating inv_gcam...(256, 256, 256)
-Saving inverse to /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.inv.nii.gz
-GCAMwrite(/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.inv.nii.gz)
+Saving inverse to /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.inv.nii.gz
+GCAMwrite(/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.inv.nii.gz)
 [INFO] Warpfield::convert(): converting GCAM ...
 [INFO] Warpfield::convert(): gcam       [256 x 256 x 256]
 [INFO] Warpfield::convert(): gcam image [193 x 229 x 193]
@@ -363,25 +363,25 @@ GCAMwrite(/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_stand
 [INFO] Warpfield::convert(): total out of range voxel count: 0
 [INFO] niiWrite(): MGZ_INTENT_WARPMAP => NIFTI_INTENT_DISPVECT, intent_code = 1006, dimensions = {5, 256, 256, 256, 1, 3, 1, 1}
 [INFO] niiWrite(): convert displacement from 0 to 3
-/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mri_convert -rt nearest /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/orig.mgz -at /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/test.nii.gz 
+/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mri_convert -rt nearest /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/orig.mgz -at /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/test.nii.gz
 INFO: using NIfTI-1 sform (sform_code=1)
-reading from /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/orig.mgz...
+reading from /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/orig.mgz...
 TR=9.67, TE=0.00, TI=0.00, flip angle=0.00
 i_ras = (-1, -3.0268e-09, 9.31323e-10)
 j_ras = (-9.31323e-10, 7.45058e-09, -1)
 k_ras = (-1.39698e-09, 1, 7.45058e-09)
-INFO: Reading transformation from file /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz...
-INFO: Applying transformation from file /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz...
+INFO: Reading transformation from file /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz...
+INFO: Applying transformation from file /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz...
 Applying morph_3d ...
 [INFO] niiRead(): intent_code = 1006, dimensions = {5, 193, 229, 193, 1, 3, 1, 1}
 [DEBUG] Warpfield::read() gcam->status = GCAM_LABELED
 setting orig areas to linear transform determinant scaled 1.00
 morphing to atlas with resample type 0
-writing to /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/test.nii.gz...
+writing to /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/test.nii.gz...
 Not saving sulc
-Reading /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm.nofix
+Reading /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm.nofix
 avg radius = 43.3 mm, total surface area = 55179 mm^2
-step 000: RMS=0.150 (target=0.015)   step 005: RMS=0.113 (target=0.015)   step 010: RMS=0.083 (target=0.015)   step 015: RMS=0.067 (target=0.015)   step 020: RMS=0.058 (target=0.015)   step 025: RMS=0.051 (target=0.015)   step 030: RMS=0.044 (target=0.015)   step 035: RMS=0.040 (target=0.015)   step 040: RMS=0.038 (target=0.015)   step 045: RMS=0.036 (target=0.015)   step 050: RMS=0.036 (target=0.015)   step 055: RMS=0.035 (target=0.015)   step 060: RMS=0.034 (target=0.015)   writing inflated surface to /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.inflated.nofix
+step 000: RMS=0.150 (target=0.015)   step 005: RMS=0.113 (target=0.015)   step 010: RMS=0.083 (target=0.015)   step 015: RMS=0.067 (target=0.015)   step 020: RMS=0.058 (target=0.015)   step 025: RMS=0.051 (target=0.015)   step 030: RMS=0.044 (target=0.015)   step 035: RMS=0.040 (target=0.015)   step 040: RMS=0.038 (target=0.015)   step 045: RMS=0.036 (target=0.015)   step 050: RMS=0.036 (target=0.015)   step 055: RMS=0.035 (target=0.015)   step 060: RMS=0.034 (target=0.015)   writing inflated surface to /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.inflated.nofix
 inflation took 0.1 minutes
 
 inflation complete.
@@ -403,29 +403,29 @@ mris_inflate ru_nsignals 0
 mris_inflate ru_nvcsw    12830
 mris_inflate ru_nivcsw   176
 mri_label2vol supposed to be reproducible but seed not set
-Contraining to label /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/lh.nofix.cortex.label
+Contraining to label /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/lh.nofix.cortex.label
 Changing input type 0 to MRI_INT
 Converting defects to volume: offset=1000, merge=0
-Writing to /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/surface.defects.mgz
-gongwk-local
-gongwk-local
+Writing to /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/surface.defects.mgz
+benchmark-user-local
+benchmark-user-local
 
-cd /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri
-setenv SUBJECTS_DIR /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001
-/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/mris_place_surface --adgws-in /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/autodet.gw.stats.lh.dat --wm /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/wm.mgz --threads 4 --invol /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/brain.finalsurfs.mgz --lh --i /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.orig --o /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white.preaparc --white --seg /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aseg.presurf.mgz --restore-255 --nsmooth 5 --rip-bg-no-annot --rip-bg --rip-bg-lof --restore-255 --outvol /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/mrisps.wpa.mgz 
+cd /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri
+setenv SUBJECTS_DIR /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001
+/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/mris_place_surface --adgws-in /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/autodet.gw.stats.lh.dat --wm /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/wm.mgz --threads 4 --invol /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/brain.finalsurfs.mgz --lh --i /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.orig --o /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white.preaparc --white --seg /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aseg.presurf.mgz --restore-255 --nsmooth 5 --rip-bg-no-annot --rip-bg --rip-bg-lof --restore-255 --outvol /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/mrisps.wpa.mgz
 
-Reading in input surface /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.orig
+Reading in input surface /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.orig
 Smoothing surface before ripping with 5 iterations
 Area    211192  0.26800  0.06257 0.000449   0.5837
 Corner  633576 60.00000  9.35138 1.208505 169.6480
 Edge    316788  0.79039  0.11340 0.017036   1.3423
 Hinge   316788  6.50618  6.34494 0.000016 164.0101
 Not reading in aparc
-Reading in input volume /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/brain.finalsurfs.mgz
-Reading in seg volume /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aseg.presurf.mgz
-Reading in wm volume /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/wm.mgz
+Reading in input volume /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/brain.finalsurfs.mgz
+Reading in seg volume /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aseg.presurf.mgz
+Reading in wm volume /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/wm.mgz
 MRItrack255() nhits = 917
-MRIclipBrightWM(): nthresh=12642, wmmin=5, clip=110 
+MRIclipBrightWM(): nthresh=12642, wmmin=5, clip=110
 MRIfindBrightNonWM(): 462 bright non-wm voxels segmented.
 Masking bright non-wm for white surface
 MRImask(): AllowDiffGeom = 1
@@ -442,10 +442,10 @@ Ripping BG
 MRISripBasalGanglia(): 0 -2 2 0.5
 MRISripBasalGanglia(): 0 -2 2 0.5 ripped 122
 Ripping segs (eg, WMSA, BG, frozen)
-Starting MRISripSegs() d = (-2 2 0.5) segnos: 247 
+Starting MRISripSegs() d = (-2 2 0.5) segnos: 247
 MRISripSegs(): -2 2 0.5 ripped 0
 opt weights int=0.2 loc=0 rep=5 nspr=0.3 curv=1
-vertex 52799: xyz = (-46.9708,-5.49278,9.57428) oxyz = (-46.9708,-5.49278,9.57428) wxzy = (-46.9708,-5.49278,9.57428) pxyz = (0,0,0) 
+vertex 52799: xyz = (-46.9708,-5.49278,9.57428) oxyz = (-46.9708,-5.49278,9.57428) wxzy = (-46.9708,-5.49278,9.57428) pxyz = (0,0,0)
 CBVO Creating mask 105598
 n_averages 4
 Iteration 0 =========================================
@@ -464,10 +464,10 @@ Ripping BG
 MRISripBasalGanglia(): 0 -2 2 0.5
 MRISripBasalGanglia(): 0 -2 2 0.5 ripped 0
 Ripping segs (eg, WMSA, BG, frozen)
-Starting MRISripSegs() d = (-2 2 0.5) segnos: 247 247 
+Starting MRISripSegs() d = (-2 2 0.5) segnos: 247 247
 MRISripSegs(): -2 2 0.5 ripped 0
-Computing target border values 
-Entering MRIScomputeBorderValues_new(): 
+Computing target border values
+Entering MRIScomputeBorderValues_new():
   inside_hi   = 120.0000000;
   border_hi   = 108.9370350;
   border_low  =  51.0000000;
@@ -575,10 +575,10 @@ Ripping BG
 MRISripBasalGanglia(): 0 -2 2 0.5
 MRISripBasalGanglia(): 0 -2 2 0.5 ripped 3
 Ripping segs (eg, WMSA, BG, frozen)
-Starting MRISripSegs() d = (-2 2 0.5) segnos: 247 247 247 
+Starting MRISripSegs() d = (-2 2 0.5) segnos: 247 247 247
 MRISripSegs(): -2 2 0.5 ripped 0
-Computing target border values 
-Entering MRIScomputeBorderValues_new(): 
+Computing target border values
+Entering MRIScomputeBorderValues_new():
   inside_hi   = 120.0000000;
   border_hi   = 108.9370350;
   border_low  =  51.0000000;
@@ -655,10 +655,10 @@ Ripping BG
 MRISripBasalGanglia(): 0 -2 2 0.5
 MRISripBasalGanglia(): 0 -2 2 0.5 ripped 12
 Ripping segs (eg, WMSA, BG, frozen)
-Starting MRISripSegs() d = (-2 2 0.5) segnos: 247 247 247 247 
+Starting MRISripSegs() d = (-2 2 0.5) segnos: 247 247 247 247
 MRISripSegs(): -2 2 0.5 ripped 0
-Computing target border values 
-Entering MRIScomputeBorderValues_new(): 
+Computing target border values
+Entering MRIScomputeBorderValues_new():
   inside_hi   = 120.0000000;
   border_hi   = 108.9370350;
   border_low  =  51.0000000;
@@ -737,10 +737,10 @@ Ripping BG
 MRISripBasalGanglia(): 0 -2 2 0.5
 MRISripBasalGanglia(): 0 -2 2 0.5 ripped 10
 Ripping segs (eg, WMSA, BG, frozen)
-Starting MRISripSegs() d = (-2 2 0.5) segnos: 247 247 247 247 247 
+Starting MRISripSegs() d = (-2 2 0.5) segnos: 247 247 247 247 247
 MRISripSegs(): -2 2 0.5 ripped 0
-Computing target border values 
-Entering MRIScomputeBorderValues_new(): 
+Computing target border values
+Entering MRIScomputeBorderValues_new():
   inside_hi   = 120.0000000;
   border_hi   = 108.9370350;
   border_low  =  51.0000000;
@@ -798,13 +798,13 @@ Removing intersections
 #ET# mris_place_surface  3.26 minutes
 
 
-Writing output to /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white.preaparc
+Writing output to /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white.preaparc
 #VMPC# mris_place_surfaces VmPeak  1736404
 mris_place_surface done
-Reading /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm
+Reading /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm
 avg radius = 43.4 mm, total surface area = 67030 mm^2
-step 000: RMS=0.175 (target=0.015)   step 005: RMS=0.118 (target=0.015)   step 010: RMS=0.089 (target=0.015)   step 015: RMS=0.073 (target=0.015)   step 020: RMS=0.060 (target=0.015)   step 025: RMS=0.051 (target=0.015)   step 030: RMS=0.042 (target=0.015)   step 035: RMS=0.034 (target=0.015)   step 040: RMS=0.030 (target=0.015)   step 045: RMS=0.026 (target=0.015)   step 050: RMS=0.023 (target=0.015)   step 055: RMS=0.021 (target=0.015)   step 060: RMS=0.020 (target=0.015)   writing inflated surface to /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.inflated
-writing sulcal depths to /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.sulc
+step 000: RMS=0.175 (target=0.015)   step 005: RMS=0.118 (target=0.015)   step 010: RMS=0.089 (target=0.015)   step 015: RMS=0.073 (target=0.015)   step 020: RMS=0.060 (target=0.015)   step 025: RMS=0.051 (target=0.015)   step 030: RMS=0.042 (target=0.015)   step 035: RMS=0.034 (target=0.015)   step 040: RMS=0.030 (target=0.015)   step 045: RMS=0.026 (target=0.015)   step 050: RMS=0.023 (target=0.015)   step 055: RMS=0.021 (target=0.015)   step 060: RMS=0.020 (target=0.015)   writing inflated surface to /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.inflated
+writing sulcal depths to /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.sulc
 
 inflation complete.
 inflation took 0.2 minutes
@@ -824,18 +824,18 @@ mris_inflate ru_msgrcv   0
 mris_inflate ru_nsignals 0
 mris_inflate ru_nvcsw    2660
 mris_inflate ru_nivcsw   253
-/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate_integrated_ff372d7/src/fnit/recon_all/sphere_standard_line_search.py:108: RuntimeWarning: overflow encountered in scalar multiply
+/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate_integrated_ff372d7/src/fnit/recon_all/sphere_standard_line_search.py:108: RuntimeWarning: overflow encountered in scalar multiply
   determinant = a*e*i - a*h*f - d*b*i + d*h*c + g*b*f - g*e*c
-/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate_integrated_ff372d7/src/fnit/recon_all/sphere_standard_line_search.py:108: RuntimeWarning: invalid value encountered in scalar subtract
+/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate_integrated_ff372d7/src/fnit/recon_all/sphere_standard_line_search.py:108: RuntimeWarning: invalid value encountered in scalar subtract
   determinant = a*e*i - a*h*f - d*b*i + d*h*c + g*b*f - g*e*c
-/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate_integrated_ff372d7/src/fnit/recon_all/sphere_standard_line_search.py:113: RuntimeWarning: overflow encountered in scalar multiply
+/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate_integrated_ff372d7/src/fnit/recon_all/sphere_standard_line_search.py:113: RuntimeWarning: overflow encountered in scalar multiply
   [d*h - e*g, b*g - a*h, a*e - b*d]], np.float32)
-/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate_integrated_ff372d7/src/fnit/recon_all/sphere_standard_line_search.py:113: RuntimeWarning: invalid value encountered in scalar subtract
+/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/candidate_integrated_ff372d7/src/fnit/recon_all/sphere_standard_line_search.py:113: RuntimeWarning: invalid value encountered in scalar subtract
   [d*h - e*g, b*g - a*h, a*e - b*d]], np.float32)
 Not saving sulc
-Reading /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm.nofix
+Reading /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm.nofix
 avg radius = 42.7 mm, total surface area = 55108 mm^2
-step 000: RMS=0.147 (target=0.015)   step 005: RMS=0.112 (target=0.015)   step 010: RMS=0.081 (target=0.015)   step 015: RMS=0.066 (target=0.015)   step 020: RMS=0.058 (target=0.015)   step 025: RMS=0.051 (target=0.015)   step 030: RMS=0.043 (target=0.015)   step 035: RMS=0.038 (target=0.015)   step 040: RMS=0.036 (target=0.015)   step 045: RMS=0.034 (target=0.015)   step 050: RMS=0.032 (target=0.015)   step 055: RMS=0.031 (target=0.015)   step 060: RMS=0.031 (target=0.015)   writing inflated surface to /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.inflated.nofix
+step 000: RMS=0.147 (target=0.015)   step 005: RMS=0.112 (target=0.015)   step 010: RMS=0.081 (target=0.015)   step 015: RMS=0.066 (target=0.015)   step 020: RMS=0.058 (target=0.015)   step 025: RMS=0.051 (target=0.015)   step 030: RMS=0.043 (target=0.015)   step 035: RMS=0.038 (target=0.015)   step 040: RMS=0.036 (target=0.015)   step 045: RMS=0.034 (target=0.015)   step 050: RMS=0.032 (target=0.015)   step 055: RMS=0.031 (target=0.015)   step 060: RMS=0.031 (target=0.015)   writing inflated surface to /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.inflated.nofix
 inflation took 0.1 minutes
 
 inflation complete.
@@ -857,28 +857,28 @@ mris_inflate ru_nsignals 0
 mris_inflate ru_nvcsw    4463
 mris_inflate ru_nivcsw   158
 mri_label2vol supposed to be reproducible but seed not set
-Contraining to label /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/rh.nofix.cortex.label
+Contraining to label /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/rh.nofix.cortex.label
 Converting defects to volume: offset=2000, merge=1
-Writing to /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/surface.defects.mgz
-gongwk-local
-gongwk-local
+Writing to /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/surface.defects.mgz
+benchmark-user-local
+benchmark-user-local
 
-cd /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri
-setenv SUBJECTS_DIR /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001
-/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/mris_place_surface --adgws-in /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/autodet.gw.stats.rh.dat --wm /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/wm.mgz --threads 4 --invol /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/brain.finalsurfs.mgz --rh --i /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.orig --o /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white.preaparc --white --seg /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aseg.presurf.mgz --restore-255 --nsmooth 5 --rip-bg-no-annot --rip-bg --rip-bg-lof --restore-255 --outvol /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/mrisps.wpa.mgz 
+cd /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri
+setenv SUBJECTS_DIR /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001
+/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/mris_place_surface --adgws-in /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/autodet.gw.stats.rh.dat --wm /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/wm.mgz --threads 4 --invol /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/brain.finalsurfs.mgz --rh --i /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.orig --o /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white.preaparc --white --seg /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aseg.presurf.mgz --restore-255 --nsmooth 5 --rip-bg-no-annot --rip-bg --rip-bg-lof --restore-255 --outvol /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/mrisps.wpa.mgz
 
-Reading in input surface /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.orig
+Reading in input surface /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.orig
 Smoothing surface before ripping with 5 iterations
 Area    209234  0.27096  0.06348 0.002376   0.5974
 Corner  627702 60.00000  9.27122 4.172805 134.6047
 Edge    313851  0.79451  0.11434 0.041236   1.3130
 Hinge   313851  6.46585  6.38378 0.000016 154.2873
 Not reading in aparc
-Reading in input volume /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/brain.finalsurfs.mgz
-Reading in seg volume /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aseg.presurf.mgz
-Reading in wm volume /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/wm.mgz
+Reading in input volume /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/brain.finalsurfs.mgz
+Reading in seg volume /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aseg.presurf.mgz
+Reading in wm volume /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/wm.mgz
 MRItrack255() nhits = 917
-MRIclipBrightWM(): nthresh=12642, wmmin=5, clip=110 
+MRIclipBrightWM(): nthresh=12642, wmmin=5, clip=110
 MRIfindBrightNonWM(): 462 bright non-wm voxels segmented.
 Masking bright non-wm for white surface
 MRImask(): AllowDiffGeom = 1
@@ -896,10 +896,10 @@ Ripping BG
 MRISripBasalGanglia(): 0 -2 2 0.5
 MRISripBasalGanglia(): 0 -2 2 0.5 ripped 98
 Ripping segs (eg, WMSA, BG, frozen)
-Starting MRISripSegs() d = (-2 2 0.5) segnos: 247 
+Starting MRISripSegs() d = (-2 2 0.5) segnos: 247
 MRISripSegs(): -2 2 0.5 ripped 0
 opt weights int=0.2 loc=0 rep=5 nspr=0.3 curv=1
-vertex 52310: xyz = (34.8936,3.8244,-3.65994) oxyz = (34.8936,3.8244,-3.65994) wxzy = (34.8936,3.8244,-3.65994) pxyz = (0,0,0) 
+vertex 52310: xyz = (34.8936,3.8244,-3.65994) oxyz = (34.8936,3.8244,-3.65994) wxzy = (34.8936,3.8244,-3.65994) pxyz = (0,0,0)
 CBVO Creating mask 104619
 n_averages 4
 Iteration 0 =========================================
@@ -918,10 +918,10 @@ Ripping BG
 MRISripBasalGanglia(): 0 -2 2 0.5
 MRISripBasalGanglia(): 0 -2 2 0.5 ripped 0
 Ripping segs (eg, WMSA, BG, frozen)
-Starting MRISripSegs() d = (-2 2 0.5) segnos: 247 247 
+Starting MRISripSegs() d = (-2 2 0.5) segnos: 247 247
 MRISripSegs(): -2 2 0.5 ripped 0
-Computing target border values 
-Entering MRIScomputeBorderValues_new(): 
+Computing target border values
+Entering MRIScomputeBorderValues_new():
   inside_hi   = 120.0000000;
   border_hi   = 107.9370350;
   border_low  =  54.0000000;
@@ -1027,10 +1027,10 @@ Ripping BG
 MRISripBasalGanglia(): 0 -2 2 0.5
 MRISripBasalGanglia(): 0 -2 2 0.5 ripped 3
 Ripping segs (eg, WMSA, BG, frozen)
-Starting MRISripSegs() d = (-2 2 0.5) segnos: 247 247 247 
+Starting MRISripSegs() d = (-2 2 0.5) segnos: 247 247 247
 MRISripSegs(): -2 2 0.5 ripped 0
-Computing target border values 
-Entering MRIScomputeBorderValues_new(): 
+Computing target border values
+Entering MRIScomputeBorderValues_new():
   inside_hi   = 120.0000000;
   border_hi   = 107.9370350;
   border_low  =  54.0000000;
@@ -1105,10 +1105,10 @@ Ripping BG
 MRISripBasalGanglia(): 0 -2 2 0.5
 MRISripBasalGanglia(): 0 -2 2 0.5 ripped 7
 Ripping segs (eg, WMSA, BG, frozen)
-Starting MRISripSegs() d = (-2 2 0.5) segnos: 247 247 247 247 
+Starting MRISripSegs() d = (-2 2 0.5) segnos: 247 247 247 247
 MRISripSegs(): -2 2 0.5 ripped 0
-Computing target border values 
-Entering MRIScomputeBorderValues_new(): 
+Computing target border values
+Entering MRIScomputeBorderValues_new():
   inside_hi   = 120.0000000;
   border_hi   = 107.9370350;
   border_low  =  54.0000000;
@@ -1184,10 +1184,10 @@ Ripping BG
 MRISripBasalGanglia(): 0 -2 2 0.5
 MRISripBasalGanglia(): 0 -2 2 0.5 ripped 3
 Ripping segs (eg, WMSA, BG, frozen)
-Starting MRISripSegs() d = (-2 2 0.5) segnos: 247 247 247 247 247 
+Starting MRISripSegs() d = (-2 2 0.5) segnos: 247 247 247 247 247
 MRISripSegs(): -2 2 0.5 ripped 0
-Computing target border values 
-Entering MRIScomputeBorderValues_new(): 
+Computing target border values
+Entering MRIScomputeBorderValues_new():
   inside_hi   = 120.0000000;
   border_hi   = 107.9370350;
   border_low  =  54.0000000;
@@ -1244,13 +1244,13 @@ Removing intersections
 #ET# mris_place_surface  3.16 minutes
 
 
-Writing output to /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white.preaparc
+Writing output to /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white.preaparc
 #VMPC# mris_place_surfaces VmPeak  1681956
 mris_place_surface done
-Reading /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm
+Reading /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm
 avg radius = 42.7 mm, total surface area = 66701 mm^2
-step 000: RMS=0.173 (target=0.015)   step 005: RMS=0.118 (target=0.015)   step 010: RMS=0.088 (target=0.015)   step 015: RMS=0.071 (target=0.015)   step 020: RMS=0.061 (target=0.015)   step 025: RMS=0.050 (target=0.015)   step 030: RMS=0.040 (target=0.015)   step 035: RMS=0.033 (target=0.015)   step 040: RMS=0.029 (target=0.015)   step 045: RMS=0.026 (target=0.015)   step 050: RMS=0.023 (target=0.015)   step 055: RMS=0.021 (target=0.015)   step 060: RMS=0.020 (target=0.015)   writing inflated surface to /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.inflated
-writing sulcal depths to /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.sulc
+step 000: RMS=0.173 (target=0.015)   step 005: RMS=0.118 (target=0.015)   step 010: RMS=0.088 (target=0.015)   step 015: RMS=0.071 (target=0.015)   step 020: RMS=0.061 (target=0.015)   step 025: RMS=0.050 (target=0.015)   step 030: RMS=0.040 (target=0.015)   step 035: RMS=0.033 (target=0.015)   step 040: RMS=0.029 (target=0.015)   step 045: RMS=0.026 (target=0.015)   step 050: RMS=0.023 (target=0.015)   step 055: RMS=0.021 (target=0.015)   step 060: RMS=0.020 (target=0.015)   writing inflated surface to /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.inflated
+writing sulcal depths to /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.sulc
 
 inflation complete.
 inflation took 0.1 minutes
@@ -1271,9 +1271,9 @@ mris_inflate ru_nsignals 0
 mris_inflate ru_nvcsw    3478
 mris_inflate ru_nivcsw   196
 averaging curvature patterns 5 times...
-reading surface from /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.sphere.reg...
-reading template parameterization from /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif...
-writing curvature file to /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.avg_curv...
+reading surface from /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.sphere.reg...
+reading template parameterization from /data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif...
+writing curvature file to /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.avg_curv...
 TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
 TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
 TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
@@ -1284,9 +1284,9 @@ TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_samp
 TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
 TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
 averaging curvature patterns 5 times...
-reading surface from /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.sphere.reg...
-reading template parameterization from /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif...
-writing curvature file to /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.avg_curv...
+reading surface from /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.sphere.reg...
+reading template parameterization from /data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif...
+writing curvature file to /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.avg_curv...
 TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
 TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
 TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
@@ -1296,52 +1296,52 @@ TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_samp
 TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
 TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
 TiffReadStrippedImage(): read strip image 256 x 512, nsamples = 1, bits_per_sample = 32
-gongwk-local
-gongwk-local
+benchmark-user-local
+benchmark-user-local
 
-cd /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri
-setenv SUBJECTS_DIR /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001
-/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/mris_place_surface --adgws-in /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/autodet.gw.stats.lh.dat --seg /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aseg.presurf.mgz --threads 4 --wm /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/wm.mgz --invol /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/brain.finalsurfs.mgz --lh --i /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white.preaparc --o /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white --white --nsmooth 0 --rip-label /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/lh.cortex.label --rip-bg --rip-surf /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white.preaparc --aparc /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/lh.aparc.annot --restore-255 --restore-255 --outvol /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/mrisps.white.mgz --rip-bg-lof 
+cd /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri
+setenv SUBJECTS_DIR /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001
+/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/mris_place_surface --adgws-in /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/autodet.gw.stats.lh.dat --seg /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aseg.presurf.mgz --threads 4 --wm /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/wm.mgz --invol /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/brain.finalsurfs.mgz --lh --i /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white.preaparc --o /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white --white --nsmooth 0 --rip-label /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/lh.cortex.label --rip-bg --rip-surf /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white.preaparc --aparc /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/lh.aparc.annot --restore-255 --restore-255 --outvol /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/mrisps.white.mgz --rip-bg-lof
 
-Reading in input surface /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white.preaparc
+Reading in input surface /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white.preaparc
 Not smoothing input surface
 Area    211192  0.35400  0.14047 0.000640   2.3260
 Corner  633576 60.00000 14.96333 0.209364 177.2321
 Edge    316788  0.91892  0.23264 0.031349   3.9231
 Hinge   316788 10.87474 12.03229 0.000141 179.9507
-Reading in aparc /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/lh.aparc.annot
+Reading in aparc /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/lh.aparc.annot
 [INFO] CTABreadFromBinaryV2(): ct->nentries=36, num_entries_to_read=36
-Reading in input volume /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/brain.finalsurfs.mgz
-Reading in seg volume /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aseg.presurf.mgz
-Reading in wm volume /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/wm.mgz
+Reading in input volume /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/brain.finalsurfs.mgz
+Reading in seg volume /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aseg.presurf.mgz
+Reading in wm volume /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/wm.mgz
 MRItrack255() nhits = 917
-MRIclipBrightWM(): nthresh=12642, wmmin=5, clip=110 
+MRIclipBrightWM(): nthresh=12642, wmmin=5, clip=110
 MRIfindBrightNonWM(): 462 bright non-wm voxels segmented.
 Masking bright non-wm for white surface
 MRImask(): AllowDiffGeom = 1
 MRImask(): AllowDiffGeom = 1
 Restoring 255->110 917
 Ripping frozen voxels
-Ripping vertices not in label /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/lh.cortex.label
+Ripping vertices not in label /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/lh.cortex.label
 MRISripNotLabel() ripped 7693/105598 vertices (97905 unripped)
-Reading in ripping surface /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white.preaparc
-Reading in aparc /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/lh.aparc.annot for ripsurf
+Reading in ripping surface /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white.preaparc
+Reading in aparc /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/lh.aparc.annot for ripsurf
 [INFO] CTABreadFromBinaryV2(): ct->nentries=36, num_entries_to_read=36
 Ripping BG
 MRISripBasalGanglia(): 1 -2 2 0.5
 Ripping lateralorbitofrontal
 MRISripBasalGanglia(): 1 -2 2 0.5 ripped 668
 Ripping segs (eg, WMSA, BG, frozen)
-Starting MRISripSegs() d = (-2 2 0.5) segnos: 247 
+Starting MRISripSegs() d = (-2 2 0.5) segnos: 247
 MRISripSegs(): -2 2 0.5 ripped 0
 opt weights int=0.2 loc=0 rep=5 nspr=0.3 curv=1
-vertex 52799: xyz = (-46.4162,-4.92202,10.1745) oxyz = (-46.4162,-4.92202,10.1745) wxzy = (-46.4162,-4.92202,10.1745) pxyz = (0,0,0) 
+vertex 52799: xyz = (-46.4162,-4.92202,10.1745) oxyz = (-46.4162,-4.92202,10.1745) wxzy = (-46.4162,-4.92202,10.1745) pxyz = (0,0,0)
 CBVO Creating mask 105598
 n_averages 4
 Iteration 0 =========================================
 n_averages=4, current_sigma=2
-Computing target border values 
-Entering MRIScomputeBorderValues_new(): 
+Computing target border values
+Entering MRIScomputeBorderValues_new():
   inside_hi   = 120.0000000;
   border_hi   = 108.9370350;
   border_low  =  51.0000000;
@@ -1429,8 +1429,8 @@ positioning took 1.1 minutes
   done positioning surface
 Iteration 1 =========================================
 n_averages=2, current_sigma=1
-Computing target border values 
-Entering MRIScomputeBorderValues_new(): 
+Computing target border values
+Entering MRIScomputeBorderValues_new():
   inside_hi   = 120.0000000;
   border_hi   = 108.9370350;
   border_low  =  51.0000000;
@@ -1490,8 +1490,8 @@ positioning took 0.7 minutes
   done positioning surface
 Iteration 2 =========================================
 n_averages=1, current_sigma=0.5
-Computing target border values 
-Entering MRIScomputeBorderValues_new(): 
+Computing target border values
+Entering MRIScomputeBorderValues_new():
   inside_hi   = 120.0000000;
   border_hi   = 108.9370350;
   border_low  =  51.0000000;
@@ -1550,8 +1550,8 @@ positioning took 0.6 minutes
   done positioning surface
 Iteration 3 =========================================
 n_averages=0, current_sigma=0.25
-Computing target border values 
-Entering MRIScomputeBorderValues_new(): 
+Computing target border values
+Entering MRIScomputeBorderValues_new():
   inside_hi   = 120.0000000;
   border_hi   = 108.9370350;
   border_low  =  51.0000000;
@@ -1609,55 +1609,55 @@ Removing intersections
 #ET# mris_place_surface  3.03 minutes
 
 
-Writing output to /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white
+Writing output to /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white
 #VMPC# mris_place_surfaces VmPeak  1697432
 mris_place_surface done
-gongwk-local
-gongwk-local
+benchmark-user-local
+benchmark-user-local
 
-cd /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri
-setenv SUBJECTS_DIR /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001
-/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/mris_place_surface --adgws-in /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/autodet.gw.stats.rh.dat --seg /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aseg.presurf.mgz --threads 4 --wm /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/wm.mgz --invol /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/brain.finalsurfs.mgz --rh --i /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white.preaparc --o /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white --white --nsmooth 0 --rip-label /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/rh.cortex.label --rip-bg --rip-surf /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white.preaparc --aparc /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/rh.aparc.annot --restore-255 --restore-255 --outvol /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/mrisps.white.mgz --rip-bg-lof 
+cd /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri
+setenv SUBJECTS_DIR /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001
+/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/mris_place_surface --adgws-in /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/autodet.gw.stats.rh.dat --seg /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aseg.presurf.mgz --threads 4 --wm /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/wm.mgz --invol /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/brain.finalsurfs.mgz --rh --i /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white.preaparc --o /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white --white --nsmooth 0 --rip-label /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/rh.cortex.label --rip-bg --rip-surf /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white.preaparc --aparc /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/rh.aparc.annot --restore-255 --restore-255 --outvol /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/mrisps.white.mgz --rip-bg-lof
 
-Reading in input surface /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white.preaparc
+Reading in input surface /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white.preaparc
 Not smoothing input surface
 Area    209234  0.35445  0.14005 0.001646   3.4638
 Corner  627702 60.00000 14.89150 0.484995 177.5630
 Edge    313851  0.91930  0.23192 0.024733   4.0467
 Hinge   313851 10.89114 11.97403 0.000091 179.8720
-Reading in aparc /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/rh.aparc.annot
+Reading in aparc /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/rh.aparc.annot
 [INFO] CTABreadFromBinaryV2(): ct->nentries=36, num_entries_to_read=36
-Reading in input volume /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/brain.finalsurfs.mgz
-Reading in seg volume /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aseg.presurf.mgz
-Reading in wm volume /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/wm.mgz
+Reading in input volume /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/brain.finalsurfs.mgz
+Reading in seg volume /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aseg.presurf.mgz
+Reading in wm volume /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/wm.mgz
 MRItrack255() nhits = 917
-MRIclipBrightWM(): nthresh=12642, wmmin=5, clip=110 
+MRIclipBrightWM(): nthresh=12642, wmmin=5, clip=110
 MRIfindBrightNonWM(): 462 bright non-wm voxels segmented.
 Masking bright non-wm for white surface
 MRImask(): AllowDiffGeom = 1
 MRImask(): AllowDiffGeom = 1
 Restoring 255->110 917
 Ripping frozen voxels
-Ripping vertices not in label /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/rh.cortex.label
+Ripping vertices not in label /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/rh.cortex.label
 MRISripNotLabel() ripped 7695/104619 vertices (96924 unripped)
-Reading in ripping surface /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white.preaparc
-Reading in aparc /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/rh.aparc.annot for ripsurf
+Reading in ripping surface /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white.preaparc
+Reading in aparc /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/rh.aparc.annot for ripsurf
 [INFO] CTABreadFromBinaryV2(): ct->nentries=36, num_entries_to_read=36
 Ripping BG
 MRISripBasalGanglia(): 1 -2 2 0.5
 Ripping lateralorbitofrontal
 MRISripBasalGanglia(): 1 -2 2 0.5 ripped 525
 Ripping segs (eg, WMSA, BG, frozen)
-Starting MRISripSegs() d = (-2 2 0.5) segnos: 247 
+Starting MRISripSegs() d = (-2 2 0.5) segnos: 247
 MRISripSegs(): -2 2 0.5 ripped 0
 opt weights int=0.2 loc=0 rep=5 nspr=0.3 curv=1
-vertex 52310: xyz = (34.8091,3.91956,-3.31141) oxyz = (34.8091,3.91956,-3.31141) wxzy = (34.8091,3.91956,-3.31141) pxyz = (0,0,0) 
+vertex 52310: xyz = (34.8091,3.91956,-3.31141) oxyz = (34.8091,3.91956,-3.31141) wxzy = (34.8091,3.91956,-3.31141) pxyz = (0,0,0)
 CBVO Creating mask 104619
 n_averages 4
 Iteration 0 =========================================
 n_averages=4, current_sigma=2
-Computing target border values 
-Entering MRIScomputeBorderValues_new(): 
+Computing target border values
+Entering MRIScomputeBorderValues_new():
   inside_hi   = 120.0000000;
   border_hi   = 107.9370350;
   border_low  =  54.0000000;
@@ -1743,8 +1743,8 @@ positioning took 1.0 minutes
   done positioning surface
 Iteration 1 =========================================
 n_averages=2, current_sigma=1
-Computing target border values 
-Entering MRIScomputeBorderValues_new(): 
+Computing target border values
+Entering MRIScomputeBorderValues_new():
   inside_hi   = 120.0000000;
   border_hi   = 107.9370350;
   border_low  =  54.0000000;
@@ -1803,8 +1803,8 @@ positioning took 0.7 minutes
   done positioning surface
 Iteration 2 =========================================
 n_averages=1, current_sigma=0.5
-Computing target border values 
-Entering MRIScomputeBorderValues_new(): 
+Computing target border values
+Entering MRIScomputeBorderValues_new():
   inside_hi   = 120.0000000;
   border_hi   = 107.9370350;
   border_low  =  54.0000000;
@@ -1862,8 +1862,8 @@ positioning took 0.6 minutes
   done positioning surface
 Iteration 3 =========================================
 n_averages=0, current_sigma=0.25
-Computing target border values 
-Entering MRIScomputeBorderValues_new(): 
+Computing target border values
+Entering MRIScomputeBorderValues_new():
   inside_hi   = 120.0000000;
   border_hi   = 107.9370350;
   border_low  =  54.0000000;
@@ -1920,11 +1920,11 @@ Removing intersections
 #ET# mris_place_surface  2.68 minutes
 
 
-Writing output to /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white
+Writing output to /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white
 #VMPC# mris_place_surfaces VmPeak  1758204
 mris_place_surface done
              Toggling save flag on curvature files                       [ ok ]
-                 Outputting results using filestem [ /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/lh.curv.stats ]
+                 Outputting results using filestem [ /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/lh.curv.stats ]
              Toggling save flag on curvature files                       [ ok ]
                                    Setting surface [ whole_sub01_integrated_ff372d7/lh.smoothwm ]
                                 Reading surface...                       [ ok ]
@@ -1943,7 +1943,7 @@ Gb_filter = 0
 WARN:    S lookup   min:                          -0.018825
 WARN:    S explicit min:                          0.000000	vertex = 91
              Toggling save flag on curvature files                       [ ok ]
-                 Outputting results using filestem [ /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/rh.curv.stats ]
+                 Outputting results using filestem [ /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/rh.curv.stats ]
              Toggling save flag on curvature files                       [ ok ]
                                    Setting surface [ whole_sub01_integrated_ff372d7/rh.smoothwm ]
                                 Reading surface...                       [ ok ]
@@ -1960,11 +1960,11 @@ WARN:    S explicit min:                          0.000000	vertex = 91
 Gb_filter = 0
 {
   "profile": "single-t1-standard",
-  "input": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/examples/data/sub-01_T1w.nii.gz",
-  "subject_dir": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7",
+  "input": "/data/workspaces/freesurfer_synth/examples/data/sub-01_T1w.nii.gz",
+  "subject_dir": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7",
   "device": "cuda:0",
   "n4_binary": {
-    "binary": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/fnit_n4_itk",
+    "binary": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/fnit_n4_itk",
     "sha256": "6ccbd262a68941d97cebe6247d497d05f400d783607411517656099612eba72e"
   },
   "threads": 4,
@@ -2043,7 +2043,7 @@ Gb_filter = 0
     },
     "EntoWM_actual_forwards": [
       {
-        "model": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/weights/entowm.fsm31.t1.nstd00-30.nstd21-108.h5",
+        "model": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/weights/entowm.fsm31.t1.nstd00-30.nstd21-108.h5",
         "device": "cuda:0",
         "input_dtype": "torch.float32",
         "model_devices": [
@@ -3022,14 +3022,14 @@ Gb_filter = 0
   "status": "complete",
   "gca_registration": {
     "implementation": "native-c++",
-    "binary": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mri_em_register",
+    "binary": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mri_em_register",
     "sha256": "ffe027090e80379d32093be5d25eb41064eb79b49b75c924e7edb4b7d160964f"
   },
   "topology_repair": {
     "implementation": "native-c++",
-    "binary": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mris_fix_topology_fnit",
+    "binary": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mris_fix_topology_fnit",
     "sha256": "79175111afac50ca4a740a54d2e83a68ab1fbe78b857d8099052f3322301dce1",
-    "intersection_binary": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mris_remove_intersection",
+    "intersection_binary": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mris_remove_intersection",
     "intersection_sha256": "ea5bb5e06b57f103213692be7ea55c8a26c227cca200660d847fe3ecbfb7dde9",
     "upstream": "intensity-derived WM and aseg-guided fill"
   },
@@ -3040,21 +3040,21 @@ Gb_filter = 0
   },
   "white_preaparc": {
     "implementation": "Python MNI/aux/finalsurfs + Conda C++ placement",
-    "binary": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mris_place_surface",
+    "binary": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mris_place_surface",
     "sha256": "44ad3994f8b86809b447919094273d3aa591b49be935ac4e09139e66bdddfe65",
     "final_smoothwm": "Python 3 passes on CPU",
     "final_white_pial": "Conda source-built C++ white and pial after annotation"
   },
   "surface_metrics": {
     "implementation": "PyTorch CUDA",
-    "binary": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mris_place_surface",
+    "binary": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mris_place_surface",
     "sha256": "44ad3994f8b86809b447919094273d3aa591b49be935ac4e09139e66bdddfe65",
     "upstream": "placed final white/pial"
   },
   "sphere_generation": {
     "implementation": "Conda mris_inflate + Python quick/standard sphere",
     "mris_inflate": {
-      "binary": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mris_inflate",
+      "binary": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mris_inflate",
       "sha256": "078b41491986cba785fbe9288bff4c617d0f1ac2d721347e924e0166b5cb796d"
     },
     "finish_device": "cpu",
@@ -3070,11 +3070,11 @@ Gb_filter = 0
     },
     "reports": {
       "lh": {
-        "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.sphere",
-        "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm",
-        "sulc": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.sulc",
-        "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
-        "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.sphere.reg",
+        "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.sphere",
+        "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm",
+        "sulc": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.sulc",
+        "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+        "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.sphere.reg",
         "overlap_device": "cpu",
         "averaging_device": "cuda:0",
         "input_sha256": {
@@ -3086,10 +3086,10 @@ Gb_filter = 0
         "sulc_seed_sha256": "6aa794428b5d201cb5b069d55000fa672d4b0ad2c11dfa87d9d4cc7cb5129feb",
         "output_sha256": "7bb911fb6d5fbf16abdc276406b07facbbfbc0c1b515d87f05f2c963cb9cd45a",
         "sulc_pass": {
-          "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.sphere",
-          "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm",
-          "sulc": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.sulc",
-          "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+          "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.sphere",
+          "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm",
+          "sulc": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.sulc",
+          "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
           "output": "(temporary sulc seed)",
           "rigid_angles": [
             0.16580627858638763,
@@ -3844,11 +3844,11 @@ Gb_filter = 0
           "total_seconds_including_io": 70.10703434189782
         },
         "smoothwm_pass": {
-          "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.sphere",
-          "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm",
+          "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.sphere",
+          "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm",
           "sulc_seed": "(temporary sulc seed)",
-          "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
-          "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.sphere.reg",
+          "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+          "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.sphere.reg",
           "seed_iteration": 54,
           "overlap_device": "cpu",
           "setup_seconds_including_raw_fit": 10.413606636691839,
@@ -4578,11 +4578,11 @@ Gb_filter = 0
         "total_seconds_including_io": 133.70386405615136
       },
       "rh": {
-        "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.sphere",
-        "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm",
-        "sulc": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.sulc",
-        "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
-        "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.sphere.reg",
+        "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.sphere",
+        "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm",
+        "sulc": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.sulc",
+        "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+        "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.sphere.reg",
         "overlap_device": "cpu",
         "averaging_device": "cuda:0",
         "input_sha256": {
@@ -4594,10 +4594,10 @@ Gb_filter = 0
         "sulc_seed_sha256": "1da3d95f4da1fb303c109b3f4013cf5ff9dfc934862f8f7c33afca1e11e7063c",
         "output_sha256": "137a29b36602254fb7c382668a21f2bf2e05a088553174d744febd9591b3d92a",
         "sulc_pass": {
-          "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.sphere",
-          "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm",
-          "sulc": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.sulc",
-          "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+          "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.sphere",
+          "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm",
+          "sulc": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.sulc",
+          "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
           "output": "(temporary sulc seed)",
           "rigid_angles": [
             0.3228859007358551,
@@ -5366,11 +5366,11 @@ Gb_filter = 0
           "total_seconds_including_io": 67.47244191123173
         },
         "smoothwm_pass": {
-          "sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.sphere",
-          "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm",
+          "sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.sphere",
+          "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm",
           "sulc_seed": "(temporary sulc seed)",
-          "atlas": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
-          "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.sphere.reg",
+          "atlas": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/rh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+          "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.sphere.reg",
           "seed_iteration": 55,
           "overlap_device": "cpu",
           "setup_seconds_including_raw_fit": 6.671982648316771,
@@ -6201,7 +6201,7 @@ Gb_filter = 0
     "mris_curvature_stats_sha256": "185b087dd9d37601f8d0ac1c9103ca690154494485fdb6ce2fb15f4bed5b7ded"
   },
   "defects_volume": {
-    "binary": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mri_label2vol",
+    "binary": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mri_label2vol",
     "sha256": "78e67244b77e9decfef750225aa5aeb26edc0623a4b6f35444b8b750fa74559b"
   },
   "mni_nonlinear": {
@@ -6256,7 +6256,7 @@ Gb_filter = 0
         }
       },
       {
-        "model": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/weights/mca-dura.both-lh.nstd21.fhs.h5",
+        "model": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/weights/mca-dura.both-lh.nstd21.fhs.h5",
         "device": "cuda:0",
         "input_dtype": "torch.float32",
         "model_devices": [
@@ -6273,7 +6273,7 @@ Gb_filter = 0
         }
       },
       {
-        "model": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/weights/mca-dura.both-lh.nstd21.fhs.h5",
+        "model": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/weights/mca-dura.both-lh.nstd21.fhs.h5",
         "device": "cuda:0",
         "input_dtype": "torch.float32",
         "model_devices": [
@@ -6290,7 +6290,7 @@ Gb_filter = 0
         }
       },
       {
-        "model": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/weights/vsinus.no-sp.m.all.nstd10-070.h5",
+        "model": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/weights/vsinus.no-sp.m.all.nstd10-070.h5",
         "device": "cuda:0",
         "input_dtype": "torch.float32",
         "model_devices": [
@@ -6326,9 +6326,9 @@ Gb_filter = 0
         "sphere": 143.7304717428051
       },
       "standard_sphere_report": {
-        "inflated": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.inflated",
-        "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm",
-        "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.sphere",
+        "inflated": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.inflated",
+        "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm",
+        "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.sphere",
         "finish_device": "cpu",
         "averaging_device": "cuda:0",
         "initial_negative_area_pct": 0.021216798130250222,
@@ -8050,23 +8050,23 @@ Gb_filter = 0
         "total_seconds_including_io": 143.7304717428051
       },
       "white_preaparc_report": {
-        "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white.preaparc",
-        "stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/autodet.gw.stats.lh.dat",
-        "outvol": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/mrisps.wpa.mgz",
+        "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white.preaparc",
+        "stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/autodet.gw.stats.lh.dat",
+        "outvol": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/mrisps.wpa.mgz",
         "stats_seconds": 3.8313937010243535,
         "place_seconds": 201.1326594762504,
         "smoothwm_seconds": 4.918659497983754
       },
       "placement_pending": false,
       "final_white_report": {
-        "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white",
-        "outvol": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/mrisps.white.mgz",
+        "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white",
+        "outvol": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/mrisps.white.mgz",
         "seconds": 188.21546373795718
       },
       "pial_report": {
         "implementation": "conda-source-cpp",
-        "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.pial.T1",
-        "log": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/scripts/lh.pial.log",
+        "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.pial.T1",
+        "log": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/scripts/lh.pial.log",
         "vertices": 105598,
         "faces": 211192,
         "seconds": 170.13984557567164
@@ -8097,9 +8097,9 @@ Gb_filter = 0
         "sphere": 118.85641895001754
       },
       "standard_sphere_report": {
-        "inflated": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.inflated",
-        "smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm",
-        "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.sphere",
+        "inflated": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.inflated",
+        "smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm",
+        "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.sphere",
         "finish_device": "cpu",
         "averaging_device": "cuda:0",
         "initial_negative_area_pct": 0.004205577750861519,
@@ -9619,23 +9619,23 @@ Gb_filter = 0
         "total_seconds_including_io": 118.85641895001754
       },
       "white_preaparc_report": {
-        "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white.preaparc",
-        "stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/autodet.gw.stats.rh.dat",
-        "outvol": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/mrisps.wpa.mgz",
+        "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white.preaparc",
+        "stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/autodet.gw.stats.rh.dat",
+        "outvol": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/mrisps.wpa.mgz",
         "stats_seconds": 2.518355436157435,
         "place_seconds": 194.78945420868695,
         "smoothwm_seconds": 4.812799844890833
       },
       "placement_pending": false,
       "final_white_report": {
-        "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white",
-        "outvol": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/mrisps.white.mgz",
+        "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white",
+        "outvol": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/mrisps.white.mgz",
         "seconds": 166.24989225296304
       },
       "pial_report": {
         "implementation": "conda-source-cpp",
-        "output": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.pial.T1",
-        "log": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/scripts/rh.pial.log",
+        "output": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.pial.T1",
+        "log": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/scripts/rh.pial.log",
         "vertices": 104619,
         "faces": 209234,
         "seconds": 173.37357577076182
@@ -9719,144 +9719,144 @@ Gb_filter = 0
     "reason": "reference_subject_not_provided"
   },
   "outputs": {
-    "mri/T1.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/T1.mgz",
-    "mri/antsdn.brain.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/antsdn.brain.mgz",
-    "mri/aparc+aseg.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aparc+aseg.mgz",
-    "mri/aparc.DKTatlas+aseg.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aparc.DKTatlas+aseg.mgz",
-    "mri/aparc.a2009s+aseg.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aparc.a2009s+aseg.mgz",
-    "mri/aseg.auto.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aseg.auto.mgz",
-    "mri/aseg.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aseg.mgz",
-    "mri/aseg.presurf.hypos.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aseg.presurf.hypos.mgz",
-    "mri/aseg.presurf.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aseg.presurf.mgz",
-    "mri/brain.finalsurfs.manedit.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/brain.finalsurfs.manedit.mgz",
-    "mri/brain.finalsurfs.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/brain.finalsurfs.mgz",
-    "mri/brain.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/brain.mgz",
-    "mri/brainmask.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/brainmask.mgz",
-    "mri/ctrl_pts.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/ctrl_pts.mgz",
-    "mri/entowm.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/entowm.mgz",
-    "mri/filled.auto.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/filled.auto.mgz",
-    "mri/filled.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/filled.mgz",
-    "mri/lh.ribbon.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/lh.ribbon.mgz",
-    "mri/mca-dura.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/mca-dura.mgz",
-    "mri/mrisps.white.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/mrisps.white.mgz",
-    "mri/mrisps.wpa.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/mrisps.wpa.mgz",
-    "mri/norm.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/norm.mgz",
-    "mri/nu.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/nu.mgz",
-    "mri/orig.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/orig.mgz",
-    "mri/orig/001.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/orig/001.mgz",
-    "mri/rawavg.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/rawavg.mgz",
-    "mri/rh.ribbon.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/rh.ribbon.mgz",
-    "mri/ribbon.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/ribbon.mgz",
-    "mri/surface.defects.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/surface.defects.mgz",
-    "mri/synthseg.rca.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/synthseg.rca.mgz",
-    "mri/synthstrip.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/synthstrip.mgz",
-    "mri/transforms/synthmorph.1.0mm.1.0mm/test.nii.gz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/test.nii.gz",
-    "mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.inv.nii.gz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.inv.nii.gz",
-    "mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz",
-    "mri/vsinus.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/vsinus.mgz",
-    "mri/wm.asegedit.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/wm.asegedit.mgz",
-    "mri/wm.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/wm.mgz",
-    "mri/wm.seg.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/wm.seg.mgz",
-    "mri/wmparc.mgz": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/wmparc.mgz",
-    "surf/lh.w-g.pct.mgh": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.w-g.pct.mgh",
-    "surf/rh.w-g.pct.mgh": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.w-g.pct.mgh",
-    "surf/lh.orig": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.orig",
-    "surf/lh.smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm",
-    "surf/lh.inflated": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.inflated",
-    "surf/lh.white": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white",
-    "surf/lh.white.preaparc": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white.preaparc",
-    "surf/lh.pial": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.pial",
-    "surf/lh.pial.T1": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.pial.T1",
-    "surf/lh.sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.sphere",
-    "surf/lh.sphere.reg": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.sphere.reg",
-    "surf/rh.orig": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.orig",
-    "surf/rh.smoothwm": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm",
-    "surf/rh.inflated": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.inflated",
-    "surf/rh.white": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white",
-    "surf/rh.white.preaparc": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white.preaparc",
-    "surf/rh.pial": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.pial",
-    "surf/rh.pial.T1": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.pial.T1",
-    "surf/rh.sphere": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.sphere",
-    "surf/rh.sphere.reg": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.sphere.reg",
-    "surf/lh.thickness": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.thickness",
-    "surf/lh.area": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.area",
-    "surf/lh.area.pial": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.area.pial",
-    "surf/lh.area.mid": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.area.mid",
-    "surf/lh.volume": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.volume",
-    "surf/lh.curv": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.curv",
-    "surf/lh.curv.pial": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.curv.pial",
-    "surf/lh.avg_curv": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.avg_curv",
-    "surf/lh.sulc": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.sulc",
-    "surf/lh.jacobian_white": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.jacobian_white",
-    "surf/lh.inflated.H": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.inflated.H",
-    "surf/lh.inflated.K": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.inflated.K",
-    "surf/lh.smoothwm.BE.crv": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm.BE.crv",
-    "surf/lh.smoothwm.C.crv": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm.C.crv",
-    "surf/lh.smoothwm.FI.crv": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm.FI.crv",
-    "surf/lh.smoothwm.H.crv": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm.H.crv",
-    "surf/lh.smoothwm.K.crv": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm.K.crv",
-    "surf/lh.smoothwm.K1.crv": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm.K1.crv",
-    "surf/lh.smoothwm.K2.crv": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm.K2.crv",
-    "surf/lh.smoothwm.S.crv": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm.S.crv",
-    "surf/lh.white.preaparc.H": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white.preaparc.H",
-    "surf/lh.white.preaparc.K": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white.preaparc.K",
-    "surf/rh.thickness": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.thickness",
-    "surf/rh.area": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.area",
-    "surf/rh.area.pial": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.area.pial",
-    "surf/rh.area.mid": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.area.mid",
-    "surf/rh.volume": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.volume",
-    "surf/rh.curv": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.curv",
-    "surf/rh.curv.pial": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.curv.pial",
-    "surf/rh.avg_curv": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.avg_curv",
-    "surf/rh.sulc": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.sulc",
-    "surf/rh.jacobian_white": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.jacobian_white",
-    "surf/rh.inflated.H": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.inflated.H",
-    "surf/rh.inflated.K": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.inflated.K",
-    "surf/rh.smoothwm.BE.crv": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm.BE.crv",
-    "surf/rh.smoothwm.C.crv": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm.C.crv",
-    "surf/rh.smoothwm.FI.crv": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm.FI.crv",
-    "surf/rh.smoothwm.H.crv": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm.H.crv",
-    "surf/rh.smoothwm.K.crv": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm.K.crv",
-    "surf/rh.smoothwm.K1.crv": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm.K1.crv",
-    "surf/rh.smoothwm.K2.crv": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm.K2.crv",
-    "surf/rh.smoothwm.S.crv": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm.S.crv",
-    "surf/rh.white.preaparc.H": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white.preaparc.H",
-    "surf/rh.white.preaparc.K": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white.preaparc.K",
-    "label/lh.aparc.annot": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/lh.aparc.annot",
-    "label/lh.aparc.a2009s.annot": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/lh.aparc.a2009s.annot",
-    "label/lh.aparc.DKTatlas.annot": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/lh.aparc.DKTatlas.annot",
-    "label/lh.BA_exvivo.annot": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/lh.BA_exvivo.annot",
-    "label/lh.BA_exvivo.thresh.annot": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/lh.BA_exvivo.thresh.annot",
-    "label/lh.mpm.vpnl.annot": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/lh.mpm.vpnl.annot",
-    "label/rh.aparc.annot": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/rh.aparc.annot",
-    "label/rh.aparc.a2009s.annot": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/rh.aparc.a2009s.annot",
-    "label/rh.aparc.DKTatlas.annot": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/rh.aparc.DKTatlas.annot",
-    "label/rh.BA_exvivo.annot": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/rh.BA_exvivo.annot",
-    "label/rh.BA_exvivo.thresh.annot": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/rh.BA_exvivo.thresh.annot",
-    "label/rh.mpm.vpnl.annot": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/rh.mpm.vpnl.annot",
-    "stats/lh.aparc.stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/lh.aparc.stats",
-    "stats/lh.aparc.a2009s.stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/lh.aparc.a2009s.stats",
-    "stats/lh.aparc.DKTatlas.stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/lh.aparc.DKTatlas.stats",
-    "stats/lh.aparc.pial.stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/lh.aparc.pial.stats",
-    "stats/lh.BA_exvivo.stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/lh.BA_exvivo.stats",
-    "stats/lh.BA_exvivo.thresh.stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/lh.BA_exvivo.thresh.stats",
-    "stats/lh.curv.stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/lh.curv.stats",
-    "stats/lh.w-g.pct.stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/lh.w-g.pct.stats",
-    "stats/rh.aparc.stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/rh.aparc.stats",
-    "stats/rh.aparc.a2009s.stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/rh.aparc.a2009s.stats",
-    "stats/rh.aparc.DKTatlas.stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/rh.aparc.DKTatlas.stats",
-    "stats/rh.aparc.pial.stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/rh.aparc.pial.stats",
-    "stats/rh.BA_exvivo.stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/rh.BA_exvivo.stats",
-    "stats/rh.BA_exvivo.thresh.stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/rh.BA_exvivo.thresh.stats",
-    "stats/rh.curv.stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/rh.curv.stats",
-    "stats/rh.w-g.pct.stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/rh.w-g.pct.stats",
-    "stats/aseg.stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/aseg.stats",
-    "stats/wmparc.stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/wmparc.stats",
-    "stats/brainvol.stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/brainvol.stats",
-    "stats/entowm.stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/entowm.stats",
-    "stats/vsinus.stats": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/vsinus.stats",
-    "stats/synthseg.tiv.dat": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/synthseg.tiv.dat",
-    "stats/synthseg.vol.csv": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/synthseg.vol.csv"
+    "mri/T1.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/T1.mgz",
+    "mri/antsdn.brain.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/antsdn.brain.mgz",
+    "mri/aparc+aseg.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aparc+aseg.mgz",
+    "mri/aparc.DKTatlas+aseg.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aparc.DKTatlas+aseg.mgz",
+    "mri/aparc.a2009s+aseg.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aparc.a2009s+aseg.mgz",
+    "mri/aseg.auto.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aseg.auto.mgz",
+    "mri/aseg.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aseg.mgz",
+    "mri/aseg.presurf.hypos.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aseg.presurf.hypos.mgz",
+    "mri/aseg.presurf.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/aseg.presurf.mgz",
+    "mri/brain.finalsurfs.manedit.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/brain.finalsurfs.manedit.mgz",
+    "mri/brain.finalsurfs.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/brain.finalsurfs.mgz",
+    "mri/brain.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/brain.mgz",
+    "mri/brainmask.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/brainmask.mgz",
+    "mri/ctrl_pts.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/ctrl_pts.mgz",
+    "mri/entowm.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/entowm.mgz",
+    "mri/filled.auto.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/filled.auto.mgz",
+    "mri/filled.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/filled.mgz",
+    "mri/lh.ribbon.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/lh.ribbon.mgz",
+    "mri/mca-dura.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/mca-dura.mgz",
+    "mri/mrisps.white.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/mrisps.white.mgz",
+    "mri/mrisps.wpa.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/mrisps.wpa.mgz",
+    "mri/norm.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/norm.mgz",
+    "mri/nu.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/nu.mgz",
+    "mri/orig.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/orig.mgz",
+    "mri/orig/001.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/orig/001.mgz",
+    "mri/rawavg.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/rawavg.mgz",
+    "mri/rh.ribbon.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/rh.ribbon.mgz",
+    "mri/ribbon.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/ribbon.mgz",
+    "mri/surface.defects.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/surface.defects.mgz",
+    "mri/synthseg.rca.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/synthseg.rca.mgz",
+    "mri/synthstrip.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/synthstrip.mgz",
+    "mri/transforms/synthmorph.1.0mm.1.0mm/test.nii.gz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/test.nii.gz",
+    "mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.inv.nii.gz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.inv.nii.gz",
+    "mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/transforms/synthmorph.1.0mm.1.0mm/warp.to.mni152.1.0mm.1.0mm.nii.gz",
+    "mri/vsinus.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/vsinus.mgz",
+    "mri/wm.asegedit.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/wm.asegedit.mgz",
+    "mri/wm.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/wm.mgz",
+    "mri/wm.seg.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/wm.seg.mgz",
+    "mri/wmparc.mgz": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/mri/wmparc.mgz",
+    "surf/lh.w-g.pct.mgh": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.w-g.pct.mgh",
+    "surf/rh.w-g.pct.mgh": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.w-g.pct.mgh",
+    "surf/lh.orig": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.orig",
+    "surf/lh.smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm",
+    "surf/lh.inflated": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.inflated",
+    "surf/lh.white": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white",
+    "surf/lh.white.preaparc": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white.preaparc",
+    "surf/lh.pial": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.pial",
+    "surf/lh.pial.T1": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.pial.T1",
+    "surf/lh.sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.sphere",
+    "surf/lh.sphere.reg": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.sphere.reg",
+    "surf/rh.orig": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.orig",
+    "surf/rh.smoothwm": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm",
+    "surf/rh.inflated": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.inflated",
+    "surf/rh.white": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white",
+    "surf/rh.white.preaparc": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white.preaparc",
+    "surf/rh.pial": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.pial",
+    "surf/rh.pial.T1": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.pial.T1",
+    "surf/rh.sphere": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.sphere",
+    "surf/rh.sphere.reg": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.sphere.reg",
+    "surf/lh.thickness": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.thickness",
+    "surf/lh.area": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.area",
+    "surf/lh.area.pial": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.area.pial",
+    "surf/lh.area.mid": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.area.mid",
+    "surf/lh.volume": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.volume",
+    "surf/lh.curv": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.curv",
+    "surf/lh.curv.pial": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.curv.pial",
+    "surf/lh.avg_curv": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.avg_curv",
+    "surf/lh.sulc": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.sulc",
+    "surf/lh.jacobian_white": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.jacobian_white",
+    "surf/lh.inflated.H": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.inflated.H",
+    "surf/lh.inflated.K": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.inflated.K",
+    "surf/lh.smoothwm.BE.crv": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm.BE.crv",
+    "surf/lh.smoothwm.C.crv": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm.C.crv",
+    "surf/lh.smoothwm.FI.crv": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm.FI.crv",
+    "surf/lh.smoothwm.H.crv": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm.H.crv",
+    "surf/lh.smoothwm.K.crv": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm.K.crv",
+    "surf/lh.smoothwm.K1.crv": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm.K1.crv",
+    "surf/lh.smoothwm.K2.crv": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm.K2.crv",
+    "surf/lh.smoothwm.S.crv": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.smoothwm.S.crv",
+    "surf/lh.white.preaparc.H": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white.preaparc.H",
+    "surf/lh.white.preaparc.K": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/lh.white.preaparc.K",
+    "surf/rh.thickness": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.thickness",
+    "surf/rh.area": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.area",
+    "surf/rh.area.pial": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.area.pial",
+    "surf/rh.area.mid": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.area.mid",
+    "surf/rh.volume": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.volume",
+    "surf/rh.curv": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.curv",
+    "surf/rh.curv.pial": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.curv.pial",
+    "surf/rh.avg_curv": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.avg_curv",
+    "surf/rh.sulc": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.sulc",
+    "surf/rh.jacobian_white": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.jacobian_white",
+    "surf/rh.inflated.H": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.inflated.H",
+    "surf/rh.inflated.K": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.inflated.K",
+    "surf/rh.smoothwm.BE.crv": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm.BE.crv",
+    "surf/rh.smoothwm.C.crv": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm.C.crv",
+    "surf/rh.smoothwm.FI.crv": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm.FI.crv",
+    "surf/rh.smoothwm.H.crv": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm.H.crv",
+    "surf/rh.smoothwm.K.crv": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm.K.crv",
+    "surf/rh.smoothwm.K1.crv": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm.K1.crv",
+    "surf/rh.smoothwm.K2.crv": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm.K2.crv",
+    "surf/rh.smoothwm.S.crv": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.smoothwm.S.crv",
+    "surf/rh.white.preaparc.H": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white.preaparc.H",
+    "surf/rh.white.preaparc.K": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/surf/rh.white.preaparc.K",
+    "label/lh.aparc.annot": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/lh.aparc.annot",
+    "label/lh.aparc.a2009s.annot": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/lh.aparc.a2009s.annot",
+    "label/lh.aparc.DKTatlas.annot": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/lh.aparc.DKTatlas.annot",
+    "label/lh.BA_exvivo.annot": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/lh.BA_exvivo.annot",
+    "label/lh.BA_exvivo.thresh.annot": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/lh.BA_exvivo.thresh.annot",
+    "label/lh.mpm.vpnl.annot": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/lh.mpm.vpnl.annot",
+    "label/rh.aparc.annot": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/rh.aparc.annot",
+    "label/rh.aparc.a2009s.annot": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/rh.aparc.a2009s.annot",
+    "label/rh.aparc.DKTatlas.annot": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/rh.aparc.DKTatlas.annot",
+    "label/rh.BA_exvivo.annot": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/rh.BA_exvivo.annot",
+    "label/rh.BA_exvivo.thresh.annot": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/rh.BA_exvivo.thresh.annot",
+    "label/rh.mpm.vpnl.annot": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/label/rh.mpm.vpnl.annot",
+    "stats/lh.aparc.stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/lh.aparc.stats",
+    "stats/lh.aparc.a2009s.stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/lh.aparc.a2009s.stats",
+    "stats/lh.aparc.DKTatlas.stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/lh.aparc.DKTatlas.stats",
+    "stats/lh.aparc.pial.stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/lh.aparc.pial.stats",
+    "stats/lh.BA_exvivo.stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/lh.BA_exvivo.stats",
+    "stats/lh.BA_exvivo.thresh.stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/lh.BA_exvivo.thresh.stats",
+    "stats/lh.curv.stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/lh.curv.stats",
+    "stats/lh.w-g.pct.stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/lh.w-g.pct.stats",
+    "stats/rh.aparc.stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/rh.aparc.stats",
+    "stats/rh.aparc.a2009s.stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/rh.aparc.a2009s.stats",
+    "stats/rh.aparc.DKTatlas.stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/rh.aparc.DKTatlas.stats",
+    "stats/rh.aparc.pial.stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/rh.aparc.pial.stats",
+    "stats/rh.BA_exvivo.stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/rh.BA_exvivo.stats",
+    "stats/rh.BA_exvivo.thresh.stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/rh.BA_exvivo.thresh.stats",
+    "stats/rh.curv.stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/rh.curv.stats",
+    "stats/rh.w-g.pct.stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/rh.w-g.pct.stats",
+    "stats/aseg.stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/aseg.stats",
+    "stats/wmparc.stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/wmparc.stats",
+    "stats/brainvol.stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/brainvol.stats",
+    "stats/entowm.stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/entowm.stats",
+    "stats/vsinus.stats": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/vsinus.stats",
+    "stats/synthseg.tiv.dat": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/synthseg.tiv.dat",
+    "stats/synthseg.vol.csv": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/whole_sub01_integrated_ff372d7/stats/synthseg.vol.csv"
   },
   "total_seconds": 3449.5391079992987,
   "thread_budget": {

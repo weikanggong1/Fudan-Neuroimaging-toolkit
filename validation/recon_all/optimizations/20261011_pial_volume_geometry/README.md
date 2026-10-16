@@ -95,7 +95,7 @@ MKL_NUM_THREADS=4 NUMBA_NUM_THREADS=4 taskset -c 108-111 \
 
 - 原 FNIT pial 源 SHA `962e3604…`；最终候选 `223b538b…`，复用的几何子函数 `0df4ebcc…` 未修改。绑定的 Git base 是 `f3bd14e926520c160b4b585c0370d07771a9afd2`，候选脏源由完整 SHA 识别。
 - v1 真实检查拒绝了未消费的跨 MRI tkr 差异；v2 拒绝了有效标记的原格式行尾注释。两次都未进入优化、未写表面；没有改变 MRI、阈值或数值门。实际失败与计时保留在 [FAILURE_HISTORY.json](FAILURE_HISTORY.json)、[ACTUAL_RECEIPTS.json](ACTUAL_RECEIPTS.json)，冻源清单保留在 `frozen/v1`、`frozen/v2`；原样日志/源码保留计算端，不发布私人日志。
-- 本地初次基础环境 NumBa 导入失败；另一次扩展测试44通过/1失败，原因是本地缺已声明的 `tifffile`，并非放置算法失败。CFFF 专项因没有 `pytest` 未执行；没有为重复测试改旧环境或下载依赖。最终专属39测试在已有 FNIT Python 环境完成，详见 [LOCAL_CONTRACTS.json](LOCAL_CONTRACTS.json)。
+- 本地初次基础环境 NumBa 导入失败；另一次扩展测试44通过/1失败，原因是本地缺已声明的 `tifffile`，并非放置算法失败。accelerator-b 专项因没有 `pytest` 未执行；没有为重复测试改旧环境或下载依赖。最终专属39测试在已有 FNIT Python 环境完成，详见 [LOCAL_CONTRACTS.json](LOCAL_CONTRACTS.json)。
 - 无新增运行依赖；nibabel/NumPy/Numba 等沿主页 Conda 声明。未做新的干净 Conda 安装或整例隔离验证。
 
 ## 7．参考文献与原实现

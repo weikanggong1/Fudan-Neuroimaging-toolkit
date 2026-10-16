@@ -1,8 +1,8 @@
-# CPU robust 刚性／仿射配准
+# FNIT_mri_robust_register：CPU 刚性／仿射配准
 
 ## 1. 功能简介
 
-`CPURegistration` 在 CPU 上完成对称 robust 刚性或仿射配准。它使用 PyTorch 处理图像和金字塔，使用 Numba 保留原版 Float QR、残差和误差累计的运算顺序，使用 Double 处理质心及小矩阵。运行不需要 FreeSurfer、Surfa 或系统影像程序，不需要模型权重；依赖均已包含在主页 Conda 环境中。
+`FNIT_mri_robust_register` 在 CPU 上完成对称 robust 刚性或仿射配准。它使用 PyTorch 处理图像和金字塔，使用 Numba 保留原版 Float QR、残差和误差累计的运算顺序，使用 Double 处理质心及小矩阵。运行不需要 FreeSurfer、Surfa 或系统影像程序，不需要模型权重；依赖均已包含在主页 Conda 环境中。
 
 这是独立配准接口。GEMS 默认分割仍使用原有路径。已测的单例匹配范围为 `--sat 50` 的刚性6参数→仿射12参数；强度缩放、任意初始矩阵和随机抽样参数没有实现。更多输入和完整核团分割尚待验收。
 
@@ -22,40 +22,34 @@ flowchart LR
 
 ```python
 from pathlib import Path
-from fnit.robust_register import load_cpu_registration
+from fnit.robust_register import FNIT_mri_robust_register
 
 source_image_path = Path("atlas/AtlasDump.mgz")  # moving：非负3D源图
 target_image_path = Path("alignment/targetMask.mgz")  # fixed：非负3D目标图
-stage_directory = Path("robust_registration")  # 必须是尚不存在的目录
+stage_directory = Path("robust_registration")  # 两阶段调用必须是尚不存在的目录
 
-with load_cpu_registration() as registration:
-    registration_result = registration.cpu_robust_rigid_affine(
-        source=source_image_path,
-        target=target_image_path,
-        stage_directory=stage_directory,
-        device="cpu",                 # 此入口只接受CPU
-        saturation=50.0,              # Tukey权重阈值，与已测原命令相同
-        iterations_per_level=5,        # 每层的配准更新上限
-        stop_distance=0.01,            # 原版变换距离的停止阈值
-        initialize_translation=True,   # 按质心差初始化
-        pyramid_min_size=16,           # 最小金字塔尺寸
-        pyramid_max_size=-1,           # 不限制初始金字塔尺寸
-        highres_iterations=-1,         # 最高分辨率沿用每层迭代上限
-        spatial_chunk_size=131072,     # 图像采样坐标分块
-        memory_budget_gb=20.0,         # 十进制GB，保守缓冲预检
-        tf32=True,                     # 保留通用参数，CPU不使用TF32
-    )
-    combined_RAS_matrix = registration_result["combined_RAS_matrix"]
-    affine_report = registration_result["affine"].report
-
-    # 若只需要单阶段，可在with内用下面调用替代两阶段调用。
-    # single_result = registration.cpu_robust_register(
-    #     source=source_image_path, target=target_image_path, mode="rigid")
-
-# 上面的with结束后实例已关闭；再次调用会报错。需要时建立新实例。
+registration_result = FNIT_mri_robust_register(
+    source=source_image_path,
+    target=target_image_path,
+    mode="rigid-affine",           # 单阶段可选 "rigid" 或 "affine"
+    stage_directory=stage_directory,  # 单阶段省略此参数
+    device="cpu",                 # 当前独立实现只接受CPU
+    saturation=50.0,              # Tukey权重阈值，与已测原命令相同
+    iterations_per_level=5,        # 每层的配准更新上限
+    stop_distance=0.01,            # 原版变换距离的停止阈值
+    initialize_translation=True,   # 按质心差初始化
+    pyramid_min_size=16,           # 最小金字塔尺寸
+    pyramid_max_size=-1,           # 不限制初始金字塔尺寸
+    highres_iterations=-1,         # 最高分辨率沿用每层迭代上限
+    spatial_chunk_size=131072,     # 图像采样坐标分块
+    memory_budget_gb=20.0,         # 十进制GB，保守缓冲预检
+    tf32=True,                    # 保留通用参数，CPU不使用TF32
+)
+combined_RAS_matrix = registration_result["combined_RAS_matrix"]
+affine_report = registration_result["affine"].report
 ```
 
-同一实例可顺序处理多对影像；每一对使用不同的 `stage_directory`。`close()` 阻止后续调用，但不卸载进程内模块和 Numba JIT 缓存。新实例也可复用这些模块。实例锁只串行化该实例；多个实例首次 JIT 应由调用者串行安排。Python API 不修改调用者的线程数或 CUDA 精度标志。
+函数在独立 `CPURegistration` 上转发一次成熟实现，退出时关闭该实例；不改变运算、默认参数或调用者线程／精度状态。批量顺序复用仍可通过兼容的 `load_cpu_registration()` 与 `CPURegistration`；每一对使用不同的 `stage_directory`。`close()` 阻止后续调用，但不卸载进程内模块和 Numba JIT 缓存。新实例也可复用这些模块。实例锁只串行化该实例；多个实例首次 JIT 应由调用者串行安排。Python API 不修改调用者的线程数或 CUDA 精度标志。
 
 ### 输入与所有参数
 
@@ -64,8 +58,8 @@ with load_cpu_registration() as registration:
 | `source` | 单帧3D MGH/MGZ、NIfTI 路径或 nibabel 图像。moving 输入；体素值有限、非负，各轴至少2。 |
 | `target` | 与 `source` 格式相同的 fixed 输入；两图不必同网格。坐标为 scanner RAS mm。NIfTI 未标单位按mm处理，其它空间单位拒绝。 |
 | 输入存储dtype | `uint8`、`int16`、`int32` 或 `float32`；读取后图像计算采用float32。需有效、有限、正体素大小及正交体素轴；非法几何、负强度或零质心质量明确报错。 |
-| `mode` | 单阶段方法参数，默认 `"rigid"`；还支持 `"affine"`。两阶段方法固定先rigid再affine，不接受此参数。 |
-| `stage_directory` | 两阶段方法必填的新目录；存在时拒绝，避免覆盖。包含阶段MGH和LTA。 |
+| `mode` | 默认 `"rigid"`；可选 `"affine"`、`"rigid-affine"`。两阶段固定先rigid再affine，并保留MGH保存／重读边界。 |
+| `stage_directory` | 默认 `None`；`mode="rigid-affine"` 必填新目录，存在时拒绝，包含阶段MGH和LTA。单阶段传入此参数会报错。 |
 | `device` | 默认 `"cpu"`，只接受CPU；CUDA请求在读图前报错。 |
 | `saturation` | 默认 `50.0`，有限正数。控制Tukey权重；6/12列且50时使用已验证的CPU保序求解，其它值保留原PyTorch求解，尚未做官方效果验收。 |
 | `iterations_per_level` | 默认 `5`，正整数，各金字塔层的更新上限。 |
@@ -112,7 +106,7 @@ mri_robust_register --mov rigid.header.mgz --dst target.mgz \
   --lta affine.lta --mapmovhdr affine.header.mgz --affine --sat 50 -verbose 0
 ```
 
-官方比较使用FreeSurfer 8.2安装版。`--mapmovhdr`仅更新头信息。GEMS核团流程的掩膜和右侧atlas准备见[前处理说明](PREPARATION.md)。这些原软件命令只用于独立benchmark，不由FNIT接口执行。
+官方比较使用FreeSurfer 8.2安装版。`--mapmovhdr`仅更新头信息。GEMS核团流程由[FNIT_fs_segment_subregions](../subregions/README.md)单独提供。这些原软件命令只用于独立benchmark，不由FNIT接口执行。
 
 ## 5. 最新精度、耗时与脑图
 
@@ -141,7 +135,7 @@ mri_robust_register --mov rigid.header.mgz --dst target.mgz \
 
 GEMS初始对齐桥同例另通过20/20、133点及20,100个Double网格点0误差，有序122,333个四面体不变。桥API2.905737秒，其中准备/保存0.738513、rigid/affine2.158899、坐标转换0.008169秒。它使用原最终MGH几何的源定义网格参考，尚不是安装版C++初始化trace，也没有验收完整GEMS拟合。原运行在输出保存后被未登记依赖库门阻断；完成现有Conda库来源核验后，只读取保存结果补评分和网格检查，未重做配准。
 
-![真实案例配准输入的目标掩膜：官方与FNIT](../../validation/robust_register/target_preparation_20261006/preparation_targets.png)
+![历史真实案例用于配准的目标掩膜：官方与FNIT](../../validation/robust_register/target_preparation_20261006/preparation_targets.png)
 
 图展示同网格目标掩膜。完整wheel构建、独立安装和本例CPU接口实测均已完成；更多真实输入、完整分割、全新Conda环境及同启动边界速度仍待验证。既有GPU数学代码未改，本次没有新增GPU性能benchmark。
 
@@ -152,6 +146,8 @@ GEMS初始对齐桥同例另通过20/20、133点及20,100个Double网格点0误�
 正式安装包真实 CPU 检查 **20/20** 项通过；冷 API **2.254 s**，导入另计 **1.594 s**，官方冷 CLI 仍更快，因此不宣称提速。GPU 完整速度本轮未测。见 [统一 benchmark 索引](../BENCHMARK_INDEX.md)。
 
 ## 6. 最近版本与 benchmark
+
+- 2026-10-16：统一为 `FNIT_mri_robust_register` 函数入口，薄包装保留成熟CPU算术及原默认值；兼容context继续提供。独立目标准备与atlas头反射不再属于当前函数库。上述真实benchmark仍绑定原测试版本，本次接口改名未重算影像。
 
 - 2026-10-06：前处理数据/几何逐位匹配；早期完整配准17/20，保留负结果。
 - 2026-10-07：保序Double质心、Float LINPACK QR、逐行残差和Float误差累计修正；同真实A/b的自然4轮IRLS全部记录逐位同；完整刚性/仿射20/20。

@@ -2,16 +2,16 @@
 # Two finite diagnostic probes. Production files and GPU are never used.
 set -euo pipefail
 umask 077
-FNIT_ROOT=/cwStorage/home/gongwk/Notebook_code/FNIT
+FNIT_ROOT=/data/fnit
 FNIT_PROBE_WORK=$FNIT_ROOT/workspaces/smri_cpu_20261004/remaining_20261006/fnirt-shared-followup-v1
 FNIT_PROBE_RUN=$FNIT_ROOT/runs/smri_cpu_20261004/remaining_20261006/fnirt-shared-followup-v1
 FNIT_ORACLE=$FNIT_ROOT/runs/smri_cpu_20261004/remaining_20261004/synth/fnirt-pcg-shared-v2/oracle
 FNIT_GM_INPUT=$FNIT_ROOT/runs/smri_cpu_20261004/task4_vbm_official_cpu_v2/official_synthstrip_fast_fnirt
-FNIT_FSL_ROOT=/public/software/apps/FSL/6.0.7.4
+FNIT_FSL_ROOT=/opt/reference/FSL/6.0.7.4
 FNIT_PYTHON=$FNIT_ROOT/envs/default/bin/python
 mkdir -m 700 "$FNIT_PROBE_RUN"
 trap 'fnit_status=$?; printf "{\"exit_code\":%s}\n" "$fnit_status" > "$FNIT_PROBE_RUN/exit.public.json"' EXIT
-exec 9>"$FNIT_ROOT/runs/smri_cpu_20261004/nodecw7.gems.cpu8.lock"
+exec 9>"$FNIT_ROOT/runs/smri_cpu_20261004/compute-a-7.gems.cpu8.lock"
 flock -w 1200 9
 exec 8>"$FNIT_ROOT/runs/smri_cpu_20261004/remaining_20261006/fnirt-shared-followup-v1.cpu8.lock"
 flock -w 60 8

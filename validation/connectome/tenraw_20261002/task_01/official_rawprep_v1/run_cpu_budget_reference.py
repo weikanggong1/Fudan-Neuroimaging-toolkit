@@ -91,8 +91,8 @@ def run_case(case,args):
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     for name in ('manifest','raw-root','pilot-root','heldout-root','fnit-selection-root','budget-evidence','output-root'):p.add_argument('--'+name,type=Path,required=True)
-    p.add_argument('--fsl-dir',type=Path,default=Path('/public/software/apps/FSL/6.0.7.4'))
-    p.add_argument('--freesurfer-dir',type=Path,default=Path('/public/software/apps/Freesurfer/8.2.0-1'))
+    p.add_argument('--fsl-dir',type=Path,default=Path('/opt/reference/FSL/6.0.7.4'))
+    p.add_argument('--freesurfer-dir',type=Path,default=Path('/opt/reference/Freesurfer/8.2.0-1'))
     args=p.parse_args();args.solver='cpu';args.eddy_binary='eddy_cpu';args.gpu_lock=Path(LOCK)
     os.environ['CUDA_VISIBLE_DEVICES']=''
     if args.output_root.exists():raise ValueError('fresh CPU budget reference namespace required')

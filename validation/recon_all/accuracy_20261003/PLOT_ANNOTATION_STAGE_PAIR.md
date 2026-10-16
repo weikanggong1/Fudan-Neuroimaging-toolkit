@@ -40,7 +40,7 @@ print(plot_receipt['hemispheres'])
 ```
 
 ```bash
-FNIT_PLOT_PYTHON=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
+FNIT_PLOT_PYTHON=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
 "${FNIT_PLOT_PYTHON}" plot_annotation_stage_pair.py \
   --baseline-stage /absolute/baseline/annotation.stage.json \
   --candidate-stage /absolute/candidate/annotation.stage.json \

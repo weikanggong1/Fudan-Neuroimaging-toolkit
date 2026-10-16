@@ -10,7 +10,7 @@
 
 主调度的 `total_seconds` 包含各阶段加载模型、读写影像、传输和计算，指定设备的末尾同步计入阶段秒数；开始同步在阶段计时点之前，仍包含在函数总时间中。它从入口资产校验后开始。外层 `command_wall_nanoseconds` 从启动 Python 前计时，另包含导入、入口校验和初始化。两种时间分开报告；旧基线没有外层时间时，不编造同范围的命令总时间比。共享硬件的单次差值只作为本次观察，不能当作独占资源的稳定速度比。本次 GPU 总时间减去阶段秒数之和约 1.23 s；不能把几百秒的异常阶段耗时称为计时外的等待或从总时间中扣除。
 
-本轮前后均设置 PyTorch 与支持该选项的原生程序为 4 线程；没有全局限制 Numba、BLAS 或 OpenMP。Numba 默认可用线程在 gpucw1 为 128、nodecw10 为 192，不能将这两例描述成整个进程仅使用四线程。硬件、库版本及运行进程的线程环境保存在逐主机 JSON 中。
+本轮前后均设置 PyTorch 与支持该选项的原生程序为 4 线程；没有全局限制 Numba、BLAS 或 OpenMP。Numba 默认可用线程在 accelerator-a-1 为 128、compute-a-10 为 192，不能将这两例描述成整个进程仅使用四线程。硬件、库版本及运行进程的线程环境保存在逐主机 JSON 中。
 
 [GPU 启动器](../../validation/recon_all/python_gpu_port/performance_20260930/launch_full_recon_gpu.sh)使用九个路径/资源参数和一个汇总路径：`python_bin` 为主页 Conda Python，`code_root` 为固定源码的 `src/`，`input_t1` 为原始 T1，`subject` 为不存在的输出目录，`weights`/`assets` 为已校验资源，`gpu_index` 为 NVML 物理 GPU 编号，`sample_csv` 为采样表，`run_log` 为 stdout/stderr，`run_summary` 为退出码、采样最大值、次数和外层时间。启动器查询该编号的 UUID，同时用于 CUDA 可见设备和显存采样；逻辑设备为 `cuda:0`。`FS_LICENSE` 只传许可证路径。每一行分别记录父进程、当时的子进程和两者合计字节数；不同时间的峰值不相加。采样循环睡眠 2 秒，查询耗时使实际间隔略长，连续峰值未获保证。
 
@@ -129,7 +129,7 @@ python validation/recon_all/python_gpu_port/summarize_performance_runs.py \
 | 脚本 | 全部输入及输出结构 |
 | --- | --- |
 | `performance_20260930/fingerprint_e036f57.py` | 读取本轮 provenance、14 程序构建清单及其声明的两个原始 T1、权重、资产、候选/参考程序；输出 `runtime_fingerprints_e036f57.json`，逐文件保存 SHA-256、字节大小与 mismatches。`fingerprint(path=...)` 返回 `{size_bytes: int, sha256: str}`，文件读取失败时抛异常。不读取许可证或参考影像。 |
-| `performance_20260930/hardware_e036f57.py` | 在 gpucw1/nodecw10 的主页 Conda 环境读取版本、CPU/NVML 和本次正在运行的候选父进程 `/proc`；输出 `hardware_主机_e036f57.json`，含线程及六个声明的环境变量。只读取本人的目标进程，不初始化 CUDA；不是恰好一个本次父进程时失败，须在整例运行中执行。 |
+| `performance_20260930/hardware_e036f57.py` | 在 accelerator-a-1/compute-a-10 的主页 Conda 环境读取版本、CPU/NVML 和本次正在运行的候选父进程 `/proc`；输出 `hardware_主机_e036f57.json`，含线程及六个声明的环境变量。只读取本人的目标进程，不初始化 CUDA；不是恰好一个本次父进程时失败，须在整例运行中执行。 |
 | `performance_20260930/benchmark_wm_edit_repeat_e036f57.py` | 冻结本次 FNIT 的 entowm、aseg.presurf、wm.seg、brain（1 mm conform 网格）与 Conda WM 编辑程序，参数由 command 数组完整保存；输出两个新 WM 与日志、report.json。报告含 shape/dtype、仿射一致性、差异体素数、最大/P99 灰度差、秒数及程序/输入/脚本哈希。Linux `children_max_rss_bytes` 为该诊断父进程累计子进程最大 RSS，单位字节，不是单个子进程的独立峰值。 |
 | `performance_20260930/launch_mni_e036f57_after_full.sh` | 使用本次已完成 FNIT 整例的 orig、裁剪 T1、aff.lta 和不变的权重/资产/Conda 三程序，显式调用既有 `benchmark_mni_nonlinear.py`，设备 UUID、四线程、关闭分配缓存固定；输出新的 MNI 诊断目录、四子步骤计时 JSON、日志、退出码与外层纳秒数。模型阶段沿用已验证 FP32 例外，调用后恢复 TF32。未另测本次独立阶段进程显存，allocated/reserved 为不可用，不能写成零。 |
 | `performance_20260930/compare_mni_replay_e036f57.py` | 读取上述两套 FNIT MNI 输出，复用既有严格体积比较器；输出比较 JSON，含三个 NIfTI 的输入哈希、dtype、shape、仿射/头一致性及最大/P99 差。向量 warp 与强度检查图保留各自原网格，不重采样；1e-6 浮点容差沿用比较器，不改变门槛。 |

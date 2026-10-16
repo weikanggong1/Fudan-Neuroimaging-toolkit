@@ -1,6 +1,6 @@
 from pathlib import Path
 import datetime,hashlib,json,subprocess,time,os
-r=Path('/cwStorage/home/gongwk/Notebook_code/FNIT/runs/fmri_reference_alignment_20261004/bold_reference_v1');state=r/'candidate.queue.private.json';samples=r/'candidate.gpu_observation.private.jsonl';rows=[]
+r=Path('/data/fnit/runs/fmri_reference_alignment_20261004/bold_reference_v1');state=r/'candidate.queue.private.json';samples=r/'candidate.gpu_observation.private.jsonl';rows=[]
 while True:
  q=json.loads(state.read_text());pid=q.get('child_pid');case=q.get('current_case')
  t=datetime.datetime.now(datetime.timezone.utc).isoformat()

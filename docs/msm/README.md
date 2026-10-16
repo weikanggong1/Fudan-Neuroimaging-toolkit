@@ -1,4 +1,6 @@
-# FNIT MSM：MSMSulc球面配准
+# FNIT_newmsm
+
+> 统一 Python 入口：[`FNIT_newmsm`](../API_REFERENCE.md)，从 `fnit` 导入。下文配置、结果类型和细分算子保留高级兼容接口。
 
 | 项目 | 内容 |
 |---|---|
@@ -44,8 +46,8 @@ flowchart LR
 ## 2. Python 调用
 
 ```python
-from fnit import prepare_fmriprep_surface_inputs
-from fnit.msm import MSMSulcConfig, prepare_msmsulc_inputs, run_msmsulc
+from fnit import FNIT_newmsm, prepare_fmriprep_surface_inputs
+from fnit.msm import MSMSulcConfig, prepare_msmsulc_inputs
 
 prepared = prepare_fmriprep_surface_inputs(
     subject_dir="/absolute/path/recon-all/sub-0001",  # 已完成 T1w recon-all 的目录
@@ -65,7 +67,8 @@ inputs = prepare_msmsulc_inputs(
     parallel=True,                                   # 双侧转换和仿射准备并行
     cpu_threads=8,                                   # 本次准备的总 CPU 预算
 )
-spheres = run_msmsulc(
+spheres = FNIT_newmsm(
+    method="msmsulc",                                # 脑沟模式；多特征模式选 msmall
     inputs=inputs,                                    # {"L": MSMSulcInputs, "R": MSMSulcInputs}
     output_dir="/absolute/path/work/msm-output",    # 注册球面与 JSON 报告目录
     device="cuda:0",                                 # PyTorch 计算设备，也可为 cpu
@@ -78,6 +81,8 @@ spheres = run_msmsulc(
 print(spheres["L"])  # L.sphere.MSMSulc.native.surf.gii
 print(spheres["R"])  # R.sphere.MSMSulc.native.surf.gii
 ```
+
+`FNIT_newmsm(method="msmsulc")` 接收左右 `MSMSulcInputs`；`method="msmall"` 接收左右 `MSMAllInputs` 并使用 `MSMAllConfig`。两模式共享输出目录、设备、执行策略和总线程参数，但不混用输入特征。MSMAll 的 `qc_policy` 保留默认 `report`；非默认策略明确报错。完整参数见[统一接口表](../API_REFERENCE.md)。
 
 ### 输入数据格式
 
@@ -303,7 +308,7 @@ MSMSulc 保存球面与固定原版严格相同，左侧仍有 2 个翻折，故
 | CPU1 | 1537.903 | 455.084 | 452.696 |
 | CPU8 | 466.986 | 173.393 | 171.057 |
 
-每项是在 nodecw8 同一 CPU 预算的一次完整运行，fresh 包括程序启动和读写。实际锁内候选源码树 SHA、输入不变检查、负载和 CPU 使用见[最新聚合回执](../../validation/fmri_cpu_20261004/task04_msm_surface/completion_status_20261005.public.json)。CUDA、float32 和梯度运算保留已有 Tensor 路径；最终快照的完整 GPU 回归见下一节；下方历史 GPU 专项保留其实际源码范围。
+每项是在 compute-a-8 同一 CPU 预算的一次完整运行，fresh 包括程序启动和读写。实际锁内候选源码树 SHA、输入不变检查、负载和 CPU 使用见[最新聚合回执](../../validation/fmri_cpu_20261004/task04_msm_surface/completion_status_20261005.public.json)。CUDA、float32 和梯度运算保留已有 Tensor 路径；最终快照的完整 GPU 回归见下一节；下方历史 GPU 专项保留其实际源码范围。
 
 
 同一例已有 volume 和 recon-all/graymid、490 帧、TR 0.735 s、STC 关闭，三次均重新准备输入并估计双侧 MSMSulc。表中 MSM 时间**包含准备与配准**，完整 API 另含投影、CIFTI、QC 和最终保存；不包含前序 volume、recon-all、编译、包导入或 CUDA 初始化。

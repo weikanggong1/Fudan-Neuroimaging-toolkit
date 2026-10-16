@@ -37,7 +37,7 @@ c24_layer_weight_sha256 = c24_real_plan["layer"]["kernel_value_sha256"]
 **以下为准备好的命令，当前不要执行。** 上传冻结清单、六INDEX锁登记、根审查批准后才运行一次：
 
 ```bash
-python run_real_abba.py   --root /cwStorage/home/gongwk/Notebook_code/FNIT   --workspace /cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/smri_cpu_20261004/remaining_20261006/seg-columns-c24-real-layer-v1   --run /cwStorage/home/gongwk/Notebook_code/FNIT/runs/smri_cpu_20261004/remaining_20261006/seg-columns-c24-real-layer-v1   --approved-real-layer
+python run_real_abba.py   --root /data/fnit   --workspace /data/fnit/workspaces/smri_cpu_20261004/remaining_20261006/seg-columns-c24-real-layer-v1   --run /data/fnit/runs/smri_cpu_20261004/remaining_20261006/seg-columns-c24-real-layer-v1   --approved-real-layer
 ```
 
 CPU8同物理核 `[32,36,40,44,48,52,56,60]`，intra/inter8，环境线程8，CUDA不可见。共用锁最多120秒；capture180秒，每个arm180秒，外层1020秒，首失败停止/无重试/不放宽bit0。地址空间和最终实际`ru_maxrss`各≤32GB，二者分开记录；AS cap不是实测RSS。前置剩余磁盘≥6GB，再核新数组总字节≤4,227,860,000。每次只驻留一个pass input/output，比较和哈希使用≤8MiB片段；scratch仅单层调用，不缓存跨pass。

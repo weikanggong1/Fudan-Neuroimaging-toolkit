@@ -41,7 +41,7 @@ optimized臂使用新`SpatialNormalCPU`；reference臂只强制`cpu_normal=None`
 python validation/fnirt_cpu_matrixfree_restore_20261006/verify_report.py
 ```
 
-当次 [runner](source/run_stage2.sh) 在nodecw7共用CPU锁后取自身inner lock，实际worker命令为：
+当次 [runner](source/run_stage2.sh) 在compute-a-7共用CPU锁后取自身inner lock，实际worker命令为：
 
 ```bash
 # fnit_root：现场核过README/INDEX的统一FNIT根目录。

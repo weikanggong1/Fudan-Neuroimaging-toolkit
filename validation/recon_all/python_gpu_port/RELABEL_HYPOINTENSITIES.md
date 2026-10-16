@@ -13,7 +13,7 @@ as hypointense, matching fresh native logs. Its two recovery passes changed
 963 voxels; the final result differs from the input in one voxel. The output
 matched both a fresh official command and the archived official result for
 **all 16,777,216 voxels and the complete decompressed MGH content**. The
-same-input headcw CLI run took **5.15 s Python versus 11.14 s native**. Both
+same-input control-host CLI run took **5.15 s Python versus 11.14 s native**. Both
 times include process startup and file I/O; only one pair was collected, so
 this is a measured example rather than a general speed claim. One synthetic
 two-pass recovery test passed.

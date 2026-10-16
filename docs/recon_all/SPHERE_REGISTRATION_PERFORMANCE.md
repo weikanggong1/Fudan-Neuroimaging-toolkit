@@ -30,7 +30,7 @@ CPU 调用把图中平均后端换为既有 Numba。GPU 只执行保序平均；
 
 ## 真实剖析找到了什么
 
-本轮在 `gpucw1` 对 sub01 左半球的 FNIT 自产冻结输入运行 cProfile，实际
+本轮在 `accelerator-a-1` 对 sub01 左半球的 FNIT 自产冻结输入运行 cProfile，实际
 代码是 **`1b8c36d25a68e253a1e59b6d02114890afa467de`**，Torch/Numba 均为
 4 线程，`CUDA_VISIBLE_DEVICES` 为空。本次读取 `sphere`、`smoothwm`、
 `sulc` 和声明的 folding TIFF；保存的旧 `sphere.reg` 只参与结果比较。
@@ -59,7 +59,7 @@ CPU 调用把图中平均后端换为既有 Numba。GPU 只执行保序平均；
 
 CPU 每轮使用前后两个缓冲区，不同顶点独立更新，因此可并行顶点，同时保留每个顶点内的邻接累加顺序和 FP32 舍入。调用沿用 Torch/Numba 线程预算，结束时恢复原线程掩码；少于 8,192 个顶点用一线程。CUDA 仍使用原 Triton 内核。
 
-nodecw7 的真实完整左半球为 119,451 顶点、238,898 面，输入是既有距离/面积目标生成的非零梯度。同一八核预算、旧→新→新→旧，256 轮暖调用中位数从 **1.317464 s 降至 0.314495 s（4.189 倍）**；1/16/256 轮输出均逐值相同。首调用含 JIT 为旧 0.284 s、新 0.767 s，新编译更久。
+compute-a-7 的真实完整左半球为 119,451 顶点、238,898 面，输入是既有距离/面积目标生成的非零梯度。同一八核预算、旧→新→新→旧，256 轮暖调用中位数从 **1.317464 s 降至 0.314495 s（4.189 倍）**；1/16/256 轮输出均逐值相同。首调用含 JIT 为旧 0.284 s、新 0.767 s，新编译更久。
 
 同一完整梯度的 GPU 回归三个轮数也逐值相同，峰值 allocated/reserved 为 25.273/46.137 MB；256 轮旧/新中位数 0.007663/0.007829 s。毫秒级共享 GPU 计时保留原数，不作为稳定速度变化。上述 ABBA 范围为平均算子；随后补测的完整左半球结果见下一节。未重测原始 T1 的 recon-all，上游拓扑和逐顶点对应问题仍保留。[完整 CPU/GPU 记录与重放脚本](../../validation/smri_cpu/recon_fixes_20261004/README.md)。
 
@@ -69,7 +69,7 @@ nodecw7 的真实完整左半球为 119,451 顶点、238,898 面，输入是既�
 
 全部 358,353 坐标分量、面顺序及解码 volume geometry 与官方相同，最大误差 0 mm，保存后负面积面均为 0。旧/新 sulc seed、刚体搜索、接受步长、尺度/轮数与清理轨迹也相同。整体文件 SHA 单列，不声明官方文件逐字节相同。
 
-nodecw7 同八核的新进程墙钟为旧 **764.907 s**、新 **348.038 s**、官方 **261.199 s**；新仍比官方慢 **33.25%**。108 次实际平均累计为 227.280→48.069 s，包含首次 JIT。每臂仅一次，共享节点负载和缓存会影响时间；平均器之前的未修改刚体搜索也由 152.859 降至 49.294 s，因此整段旧/新 2.198 倍仅作观测，不全归因于此补丁。其他阶段和 RSS 均见[完整七节报告、重放与脑图](../../validation/smri_cpu/recon_fixes_20261004/FULL_REGISTRATION.md)。
+compute-a-7 同八核的新进程墙钟为旧 **764.907 s**、新 **348.038 s**、官方 **261.199 s**；新仍比官方慢 **33.25%**。108 次实际平均累计为 227.280→48.069 s，包含首次 JIT。每臂仅一次，共享节点负载和缓存会影响时间；平均器之前的未修改刚体搜索也由 152.859 降至 49.294 s，因此整段旧/新 2.198 倍仅作观测，不全归因于此补丁。其他阶段和 RSS 均见[完整七节报告、重放与脑图](../../validation/smri_cpu/recon_fixes_20261004/FULL_REGISTRATION.md)。
 
 ![相同真实输入的官方与 FNIT 注册球面](../../validation/smri_cpu/recon_fixes_20261004/results/full_cpu_registration.png)
 
@@ -84,7 +84,7 @@ int64(105,598,12)，有效列数为 int64(105,598)。运行前后输入文件、
 `f7691862c3161c2f4b68f6a667f8feb16ef0bec3f6706ec54974af0253b336de`，
 不是已提交的新版整例结果。
 
-主机为 gpucw1，CPU 为 Xeon Gold 6430，目标 GPU 为 H100 PCIe，UUID
+主机为 accelerator-a-1，CPU 为 Xeon Gold 6430，目标 GPU 为 H100 PCIe，UUID
 `GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba`；Torch intraop/Numba 均为
 4，Torch interop 64 沿用原值。使用 Torch 2.5.1、Numba 0.67.0、
 Triton 3.1.0、CUDA 11.8；float32，matmul/cuDNN TF32 开启，autocast 关闭。
@@ -330,7 +330,7 @@ python -m fnit.recon_all.mris_register_run \
 差异以及已记录的选中 `dt`/状态/相交轨迹。官方表面只通过
 `--official-surface` 作额外诊断，不进入生产或配准输入。
 
-sub01 LH 在同一 gpucw1、同输入、Torch/Numba 4 线程预算下完成一次
+sub01 LH 在同一 accelerator-a-1、同输入、Torch/Numba 4 线程预算下完成一次
 CPU→GPU 配对。基线实际代码为 `1b8c36d25a68e253a1e59b6d02114890afa467de`；
 候选为 `764607c` 工作树快照，归档 SHA
 `f7691862c3161c2f4b68f6a667f8feb16ef0bec3f6706ec54974af0253b336de`。

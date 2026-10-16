@@ -7,3 +7,7 @@ __all__ = [
     "RegistrationResult", "SynthMorph", "WorldTransformChain", "apply_transform",
     "convert_warp_to_fsl", "network_space",
 ]
+
+# Unified public name; the mature implementation and defaults are unchanged.
+FNIT_SynthMorph = SynthMorph
+__all__.append("FNIT_SynthMorph")

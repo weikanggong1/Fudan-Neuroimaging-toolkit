@@ -41,8 +41,8 @@ subprocess.run(["python3", str(verification_script), "--source", str(repository_
 以下命令用于服务器实际 raw phase 全部结束后，生成新的最终来源收据。当前尚未满足完成条件；脚本拒绝把未完成覆盖记为最终通过。
 
 ```bash
-accuracy_root=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1
-/cwStorage/home/gongwk/anaconda3/bin/python3.11 \
+accuracy_root=/data/workspaces/fnit_connectome_accuracy_20261003_v1
+/data/user/anaconda3/bin/python3.11 \
   "$accuracy_root/final_source_acceptance_v1/verify_source_acceptance.py" \
   --source "$accuracy_root/formal_frozen_v1/candidate" \
   --configuration "$accuracy_root/formal_frozen_v1/accuracy_configuration.json" \
@@ -85,7 +85,7 @@ accuracy_root=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_2026
 ## 6. 最近核验与状态
 
 - 本地 [源码/AST 收据](local_science_identity_receipt.json)：Git `f980` 科学树等于 `1fe`，五文件逐字节/AST匹配，生产差异范围正好五文件。
-- nodecw10 [源目录与 producer 快照收据](server_current_source_receipt.json)：冻结源和现存测试 checkout 完整指纹同一；采集时已完成三次来源匹配；最终 12 次 gate 待完成。
+- compute-a-10 [源目录与 producer 快照收据](server_current_source_receipt.json)：冻结源和现存测试 checkout 完整指纹同一；采集时已完成三次来源匹配；最终 12 次 gate 待完成。
 - 原失败回归日志仍保留于 `root/execution_v1`；本次未重跑测试或修改部署环境。公共报告 helper 的额外回归见 [CPU 部署 v3](../cpu_matrix_deployment_v3/README.md)。
 
 ## 7. 代码与依据

@@ -39,7 +39,7 @@ def main():
         "schema_version": 1, "date": "2026-10-04", "status": "complete",
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "dataset": "OpenNeuro ds000114 v1.0.2; FNIT defaced public T1w examples",
-        "dataset_license": "CC0", "host": "nodecw10", "run_id": args.run_root.name,
+        "dataset_license": "CC0", "host": "compute-a-10", "run_id": args.run_root.name,
         "scope": "Full original affine-candidate batched trajectories with old tensor and fused CPU samples; original batch reducers and search budget retained",
         "reference": "Frozen v16 fixed-input same-budget complete registration",
         "worker_sha256": hashlib.sha256((args.run_root / "worker.py").read_bytes()).hexdigest(),
@@ -50,7 +50,7 @@ def main():
         "records": records,
     }
     serialized = json.dumps(report, indent=2, allow_nan=False) + "\n"
-    assert all(value not in serialized for value in ("/cwStorage/", "/mnt/c/Users/", ".sock"))
+    assert all(value not in serialized for value in ("/data/shared/", "/mnt/c/Users/", ".sock"))
     args.output.write_text(serialized)
     print(json.dumps({"status": report["status"], "complete_cases": len(records)}))
 

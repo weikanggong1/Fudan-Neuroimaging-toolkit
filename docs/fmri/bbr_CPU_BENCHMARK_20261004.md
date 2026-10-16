@@ -41,7 +41,7 @@ python benchmark_baseline.py --case-json /private/inputs.json --case bbr \
   --cpu-lock /private/task01_motion_bbr.lock
 ```
 
-CPU 实测在共享节点 nodecw8，Python 3.11.16、PyTorch 2.5.1、NumPy 1.26.4、Nibabel 5.4.2。两个预算的 CPU 亲和性分别是 `[8]`、`[8,12,16,20,24,28,32,40]`；OMP、OpenBLAS、MKL、NumExpr、Numba 与 PyTorch 均设置 1/8 线程。源码/输入核验和 API 使用同一任务锁。原软件实际线程数未单独采样；8 指允许的环境线程与亲和性预算。
+CPU 实测在共享节点 compute-a-8，Python 3.11.16、PyTorch 2.5.1、NumPy 1.26.4、Nibabel 5.4.2。两个预算的 CPU 亲和性分别是 `[8]`、`[8,12,16,20,24,28,32,40]`；OMP、OpenBLAS、MKL、NumExpr、Numba 与 PyTorch 均设置 1/8 线程。源码/输入核验和 API 使用同一任务锁。原软件实际线程数未单独采样；8 指允许的环境线程与亲和性预算。
 
 ## 完整精度与耗时
 

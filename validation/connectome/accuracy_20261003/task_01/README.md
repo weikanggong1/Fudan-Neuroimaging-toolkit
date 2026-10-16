@@ -99,7 +99,7 @@ python validation/connectome/accuracy_20261003/task_01/audit_saved_gradients.py 
 
 ## 4. 对应原软件调用
 
-实际核对 `/public/software/apps/FSL/6.0.7.4/etc/fslversion` 为 6.0.7.4。独立参考使用 CPU8 EDDY、同 raw、fieldcoef、mask、gradient、index、seed 和参考帧；程序 SHA 与输入 SHA 见旧官方合同和新配对报告。官方文件只在 benchmark 隔离诊断中读取。
+实际核对 `/opt/reference/FSL/6.0.7.4/etc/fslversion` 为 6.0.7.4。独立参考使用 CPU8 EDDY、同 raw、fieldcoef、mask、gradient、index、seed 和参考帧；程序 SHA 与输入 SHA 见旧官方合同和新配对报告。官方文件只在 benchmark 隔离诊断中读取。
 
 ```bash
 eddy_cpu --imain=AP.nii.gz --mask=nodif_brain_mask.nii.gz \
@@ -213,7 +213,7 @@ CON03 v1 的退化不限于 outlier 不同切片：[只读隔离](outlier_isolat
 - 候选回归：[CPU 58 passed/16 CUDA skipped](CPU_regression_v2.log)；[CUDA EDDY+旋转 61 passed](GPU_regression_v2.log)；[CUDA B=2/padding/短轴/SciPy/coeff-gradient 回退 4 passed](GPU_sampler_regression_v1.log)；[CPU BIDS/cache 13 passed](CPU_cache_regression_v2.log)。这些回归验证候选兼容性，未代替真实精度门槛。测试分别为 [rotation](experiment_rotation_candidate_v1.py)、[cache](experiment_cache_candidate_v2.py)、[sampler](experiment_sampler_cuda_v1.py)，限定对应冻结候选源。
 - 最终只提交本目录的诊断、反证、复现工具和图；`bids.py`、`geometry.py`、`spline.py` 均恢复起点科学版本，EDDY 缓存 revision 没有进入生产。源快照、失败启动及成功重试 lineage 均保留于 [source_snapshots.json](source_snapshots.json) 和对应报告。
 
-所有新增科学输出位于服务器新根 `/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/task_01`；源快照运行时冻结。原始 NIfTI、权重、许可证及旧结果没有改写；本仓库只收聚合 JSON、复现工具与脑图。
+所有新增科学输出位于服务器新根 `/data/workspaces/fnit_connectome_accuracy_20261003_v1/task_01`；源快照运行时冻结。原始 NIfTI、权重、许可证及旧结果没有改写；本仓库只收聚合 JSON、复现工具与脑图。
 
 ## 7. 参考文献和原软件代码库
 

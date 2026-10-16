@@ -138,7 +138,7 @@ mri_robust_register --mov rigid.header.mgz --dst target_mask.mgz \
 
 ## 6. 更新记录与待验收项
 
-- **2026-10-06 A**：真实目标掩膜/反射头信息单例门通过；两次 JSON 元数据序列化失败与只读恢复单列，详见 [PREPARATION.md](../../../docs/robust_register/PREPARATION.md)。1mm 实例未触发 voxel resize 分支。
+- **2026-10-06 A**：真实目标掩膜/反射头信息单例门通过；两次 JSON 元数据序列化失败与只读恢复单列，详见 [PREPARATION.md](../target_preparation_20261006/README.md)。1mm 实例未触发 voxel resize 分支。
 - **2026-10-06 B 候选**：独立实现 source-defined preparation、pyramid、halfway、analytic flow、MAD/Tukey/Float QR 和两阶段 API/CLI。初版局部报告暴露 nibabel shape 的 NumPy integer JSON 问题，已显式转 Python int；没有重跑 MRI。一次真实注册已完成，严格门未过；没有接入端到端 GEMS。
 - 已确认成熟 helper 数学边界不同，所以本地保留专属 adapter。没有去改通用 GPU 采样、GEMS 目标函数或默认 alignment。
 - 剩余：VNL/PyTorch QR 和 reduction 的真实精度、初始化/BSpline 真实输入中间结果、两阶段矩阵/warp/header、CPU8速度、GPU 默认 TF32 精度与 20 GB 峰值。任何失败保留原值与门槛。

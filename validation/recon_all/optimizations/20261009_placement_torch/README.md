@@ -2,7 +2,7 @@
 
 基线本地提交 `937263e04eb1be1a5053952ff2b673213cdf966f`。本轮候选通过实际
 模块 SHA-256 绑定；它不是一个已发布 main 的整例结果。CPU 参考函数来自
-gpucw1 已有源码，每个被调用模块的哈希保存在 JSON，不用服务器旧 repo
+accelerator-a-1 已有源码，每个被调用模块的哈希保存在 JSON，不用服务器旧 repo
 提交 `4edcd4b1b408fa4ceb08fa646b4f619b3cc9d365` 冒充候选提交。
 
 ## 已完成
@@ -11,7 +11,7 @@ gpucw1 已有源码，每个被调用模块的哈希保存在 JSON，不用服�
   两跳 quadratic curvature，以及原定义的逐列 float32 5×5 QR。
 - 完整 Python pial 及 white 首轮前缀显式接入
   `regularization_backend="torch"`；默认 CPU 和原动态碰撞/目标/清理保持。
-- 三项 gpucw1 CPU 源次序回归通过；最终本地代码 15 项针对性回归通过，
+- 三项 accelerator-a-1 CPU 源次序回归通过；最终本地代码 15 项针对性回归通过，
   10.74 s（包含原 pial 拒绝停止、索引、奇异QR失败及统计缓存测试）。
 - 真实公开 ds000114 sub-07 自产冻结 MRI/white/labels 双侧 ABBA；两份报告
   均保留初次慢的候选，没有删除不利性能结果。
@@ -28,7 +28,7 @@ gpucw1 已有源码，每个被调用模块的哈希保存在 JSON，不用服�
 bytes；reserved 均为 197132288 bytes。这是内核分配器观测，不是整例或
 父子进程同时总显存。固定上下文建立 0.164/0.151 s 单列。
 
-实际硬件：gpucw1、Intel Xeon Gold 6430（128逻辑CPU）；H100 PCIe GPU0
+实际硬件：accelerator-a-1、Intel Xeon Gold 6430（128逻辑CPU）；H100 PCIe GPU0
 UUID `GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e`。显式 PyTorch/Numba/
 OpenMP/BLAS 四线程；CPU亲和性未固定，当前允许 0–127。TF32 默认开启，
 本内核显式 float32/float64，不启用半精度。共享主机单次 ABBA 不能宣布
@@ -44,7 +44,7 @@ OpenMP/BLAS 四线程；CPU亲和性未固定，当前允许 0–127。TF32 默�
 
 完整 LH pial CPU→Torch 同输入配对已经完成，原始产物保存在服务器固定目录：
 `runs/recon_torch_surface_20261009/full_pial_sub07_lh_v1/`。
-持久会话为 headcw 的 `fnit-surface-full-pial-20261009`，每步保存坐标哈希、
+持久会话为 control-host 的 `fnit-surface-full-pial-20261009`，每步保存坐标哈希、
 SSE/RMS、dt、接受/拒绝以及四轮边界。完整报告将检查输出文件、有序面、
 坐标与全部试步轨迹。此次冻结 v1 未在运行时改写。
 
@@ -92,10 +92,10 @@ SSE/RMS、dt、接受/拒绝以及四轮边界。完整报告将检查输出文�
 必要的当前法向/斥力依赖到独立 workspace，未替换服务器正式 repo 或环境。
 ## 碰撞迁移补充（2026-10-09）
 
-`collision_sub07_lh_v3_interrupted.json`保留gpucw1作业中断和实际检查点SHA，
+`collision_sub07_lh_v3_interrupted.json`保留accelerator-a-1作业中断和实际检查点SHA，
 没有最终报告、没有完成的精度或性能结论；不得把先前已写的检查点当作通过。
 
-`collision_replay_cpu_v5.json`是headcw四线程CPU上部分真实动态面对的回放，
+`collision_replay_cpu_v5.json`是control-host四线程CPU上部分真实动态面对的回放，
 131,108对（864对源相交）逐对bool零差异。Torch CPU热中位数0.036486/0.033302秒，
 源Numba0.034877/0.031787秒；CUDA未初始化。此文件不证明GPU性能、完整迭代、
 完整pial或整例。脚本与输入/实际kernel版本见报告，中文说明见

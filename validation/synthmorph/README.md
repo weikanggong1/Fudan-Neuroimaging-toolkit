@@ -19,7 +19,7 @@
 
 ## FSL warp 转换复核
 
-仓库自带的 OpenNeuro ds000114 去面部 T1w 可直接复核。以下命令在 gpucw1 H100 上运行；`module load fsl` 只用于生成对照，FNIT 正常调用不需要 FSL。`--weights` 指向 `fnit-setup-weights` 下载的官方 SynthMorph 权重目录。
+仓库自带的 OpenNeuro ds000114 去面部 T1w 可直接复核。以下命令在 accelerator-a-1 H100 上运行；`module load fsl` 只用于生成对照，FNIT 正常调用不需要 FSL。`--weights` 指向 `fnit-setup-weights` 下载的官方 SynthMorph 权重目录。
 
 ```bash
 module load fsl
@@ -45,4 +45,4 @@ pytest -q tests/synthmorph/test_spatial.py \
   tests/synthmorph/test_pipeline_geometry.py
 ```
 
-最终源码快照上，headcw CPU 为 `16 passed in 1.63 s`，gpucw1 H100 为 `26 passed in 4.00 s`。这些是半体素、边界、affine/dense warp 和 CPU/GPU 行为测试，不是新的真实标签数据 benchmark，也不能借用 12 例 registration 指标声明 nearest 的真实数据数值等价。
+最终源码快照上，control-host CPU 为 `16 passed in 1.63 s`，accelerator-a-1 H100 为 `26 passed in 4.00 s`。这些是半体素、边界、affine/dense warp 和 CPU/GPU 行为测试，不是新的真实标签数据 benchmark，也不能借用 12 例 registration 指标声明 nearest 的真实数据数值等价。

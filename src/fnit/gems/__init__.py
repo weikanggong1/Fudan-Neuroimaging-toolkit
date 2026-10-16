@@ -8,6 +8,9 @@ from .rasterize import BlockIndex, build_block_index, rasterize_priors
 
 
 def __getattr__(name):
+    if name == "FNIT_fs_segment_subregions":
+        from .pipeline import segment_4_subregions
+        return segment_4_subregions
     if name in {"SubregionResult", "segment_4_subregions"}:
         from . import pipeline
         return getattr(pipeline, name)
@@ -26,4 +29,5 @@ __all__ = [
     "BlockIndex", "build_block_index", "rasterize_priors",
     "prepare_brainstem_atlas",
     "prepare_subregion_atlases",
+    "FNIT_fs_segment_subregions",
 ]

@@ -50,7 +50,7 @@ python tools/benchmark_recon_topology_genetic_next_defect_inputs.py \
 | 固定原 ETable | 4,723边端点、used、MRI分数零差；旧边138 |
 | 当前查询 | 4,851个有向候选对，98行，65个 used1 候选对 |
 | 输入状态 | canonical、topology、邻接计算前后字节不变 |
-| 合同 | CFFF 12项通过，5.614秒；本地12项通过，3.127秒 |
+| 合同 | accelerator-b 12项通过，5.614秒；本地12项通过，3.127秒 |
 
 | 顺序 | 完整 API（秒） | 输出写入（秒） | 当前状态准备（秒） |
 | --- | ---: | ---: | ---: |

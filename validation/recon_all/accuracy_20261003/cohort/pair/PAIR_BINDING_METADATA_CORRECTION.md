@@ -49,7 +49,7 @@
 
 4项输入绑定/verify-only回归覆盖不同输入与两个程序SHA、两个评估角色、程序漂移拒绝、仅核验退出且拒绝已有输出。另4项纠正审计回归覆盖唯一纠正且原文件不变、额外绑定字段变化拒绝、冻结回执及错误来源拒绝、伪称数值完成拒绝。连同10项既有角色绑定回归，共18项CPU测试通过（0.204秒）。临时小文件只验证工具逻辑；真实资源重核单独报告。
 
-2026-10-04 gpucw1 实际部署 `4c084d8a4714beccbcf670d54236d3454af5ee5d` 工具，原 sub-06 官方对照配置只改变 output 后，完整 `--verify-only` 入口 21.501 秒、exit 0。audit 再核验六份原/新实际回执和当前输入，`metadata_correction_verified`、exit 0，唯一差异为 input_sha256：原错误值 `8aa986c658663d2c26fa482a2ce303c4eecc28fbd69e4f6e9bace438be058200` 是原程序清单末项 SHA，正确输入为 `7e33afb28f631fac31d81e2428a6144f61aba4102859c694eeb49ee584de04f7`。没有重跑数值比较，原输入、运行和数值报告保持。完整[真实回执](../../runtime/startup_pair_binding_correction_v1/correction.json)与原/新 checkpoint、binding、配置、工具 SHA 一并归档，归档 SHA `fe809462507f630957060676061f06bdeee0767a5ca25c71ce9d58fed612ecba`。
+2026-10-04 accelerator-a-1 实际部署 `4c084d8a4714beccbcf670d54236d3454af5ee5d` 工具，原 sub-06 官方对照配置只改变 output 后，完整 `--verify-only` 入口 21.501 秒、exit 0。audit 再核验六份原/新实际回执和当前输入，`metadata_correction_verified`、exit 0，唯一差异为 input_sha256：原错误值 `8aa986c658663d2c26fa482a2ce303c4eecc28fbd69e4f6e9bace438be058200` 是原程序清单末项 SHA，正确输入为 `7e33afb28f631fac31d81e2428a6144f61aba4102859c694eeb49ee584de04f7`。没有重跑数值比较，原输入、运行和数值报告保持。完整[真实回执](../../runtime/startup_pair_binding_correction_v1/correction.json)与原/新 checkpoint、binding、配置、工具 SHA 一并归档，归档 SHA `fe809462507f630957060676061f06bdeee0767a5ca25c71ce9d58fed612ecba`。
 
 2026-10-04：修复SHA变量遮蔽，新增只核验模式与独立元数据纠正审计；不改生产源码，不改变已有数值比较和结论。
 

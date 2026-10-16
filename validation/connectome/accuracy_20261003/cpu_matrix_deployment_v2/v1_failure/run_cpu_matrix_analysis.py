@@ -6,7 +6,7 @@ from pathlib import Path
 import subprocess
 import time
 
-root = Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1')
+root = Path('/data/workspaces/fnit_connectome_accuracy_20261003_v1')
 frozen = root / 'formal_frozen_v1'
 configuration = frozen / 'accuracy_configuration.json'
 expected = 'f8eba1cbf3eab2baa549172b32be2c9d3b1014ad478f6e3702d7987378f52f8c'

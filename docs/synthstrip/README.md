@@ -1,4 +1,6 @@
-# SynthStrip：脑提取
+# FNIT_SynthStrip
+
+> 统一 Python 入口：[`FNIT_SynthStrip`](../API_REFERENCE.md)，从 `fnit` 导入。下文配置、结果类型和细分算子保留高级兼容接口。
 
 [返回首页](../../README.md) · [完整旧文档与更早证据](../../validation/synthstrip/readme_archive_20261005.md)
 
@@ -25,11 +27,11 @@ CUDA默认TF32；CPU oneDNN可用时用channels_last_3d，模型与输入保持f
 
 ```python
 from pathlib import Path
-from fnit import SynthStrip
+from fnit import FNIT_SynthStrip
 
 output_directory = Path("results")  # 本次输出目录
 output_directory.mkdir(parents=True, exist_ok=True)  # 准备保存目录
-brain_extraction_model = SynthStrip(
+brain_extraction_model = FNIT_SynthStrip(
     weights="/path/to/weights",  # 权重：官方 PT 文件或权重目录
     device="cuda:0",  # 设备：第一张可见 CUDA GPU
     no_csf=False,  # 模型：保留 CSF 的默认模型
@@ -143,7 +145,7 @@ mri_synthstrip -i subject_T1w.nii.gz -o reference/subject_brain.nii.gz \
 
 ## 5. 最新精度和运行时间
 
-2026-10-04正式CPU CLI测试用公开ds003138 v1.0.1两例原始T1及9个附加场景，原版为FreeSurfer 8.2.0-1。冻结模块`6b7aeafd`与共享几何`dc2fc052`，nodecw10相同8物理核/8线程，默认T1按ABBA各两次。CPU张量float32；完整CLI含启动、模型加载、读写。报告保留逐文件源码SHA、权重、RSS和负载，不改标为本次文档整理的main。
+2026-10-04正式CPU CLI测试用公开ds003138 v1.0.1两例原始T1及9个附加场景，原版为FreeSurfer 8.2.0-1。冻结模块`6b7aeafd`与共享几何`dc2fc052`，compute-a-10相同8物理核/8线程，默认T1按ABBA各两次。CPU张量float32；完整CLI含启动、模型加载、读写。报告保留逐文件源码SHA、权重、RSS和负载，不改标为本次文档整理的main。
 
 ### 端到端 benchmark
 

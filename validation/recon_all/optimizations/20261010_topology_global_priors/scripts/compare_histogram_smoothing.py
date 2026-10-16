@@ -77,7 +77,7 @@ def main():
         old_source_git_commit=manifest['old_source_git_commit'],comparisons=comparisons,
         precision=dict(float32_source_order=True,fp16_bf16=False,cuda_used=False,
                        tf32_policy_unchanged=True,gpu_memory='not_assessed'),
-        environment=dict(role='candidate CFFF shared CPU',python=platform.python_version(),
+        environment=dict(role='candidate accelerator-b shared CPU',python=platform.python_version(),
                          numpy=np.__version__,cpu_model=cpu_model,
                          cpu_affinity=sorted(__import__('os').sched_getaffinity(0))),
         seconds=dict(import_load=loaded,script_before_report=time.perf_counter()-started),

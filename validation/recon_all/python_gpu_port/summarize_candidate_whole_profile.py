@@ -59,8 +59,8 @@ def summarize_case(root: Path, case: str, provenance: dict) -> dict:
     if command["exit_code"] != 0:
         raise ValueError(f"Candidate command failed: {case}")
     api = load_json(root / f"whole/{case}/candidate_api.json") if gpu else None
-    hardware_path = ("hardware_gpucw1_retry1_1b8c36d.json" if gpu
-                     else "hardware_nodecw10_1b8c36d.json")
+    hardware_path = ("hardware_accelerator-a-1_retry1_1b8c36d.json" if gpu
+                     else "hardware_compute-a-10_1b8c36d.json")
     hardware = load_json(root / hardware_path)
     stage_by_name = {row["name"]: row for row in run["stages"]}
     total = run["total_seconds"]
@@ -221,7 +221,7 @@ def main() -> None:
             "build_manifest_sha256", "expected_manifest_sha256", "weights", "assets", "binaries", "reference_binaries", "inputs")},
         "cases": {case: summarize_case(root, case, provenance) for case in ("sub01", "sub02")},
         "speedup": None, "overall_metric_equivalence": "not_assessed",
-        "comparability": "Sub01 CUDA API on gpucw1 and sub02 CPU CLI on nodecw10 are distinct candidate configurations; do not use their ratio as GPU speedup.",
+        "comparability": "Sub01 CUDA API on accelerator-a-1 and sub02 CPU CLI on compute-a-10 are distinct candidate configurations; do not use their ratio as GPU speedup.",
         "script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n")

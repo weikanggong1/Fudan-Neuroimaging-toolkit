@@ -54,8 +54,8 @@ def main():
                         help="New private root; existing attempts are preserved")
     args = parser.parse_args()
     os.umask(0o077)
-    if socket.gethostname() != "nodecw10":
-        raise ValueError("Original and candidate must run on licensed nodecw10")
+    if socket.gethostname() != "compute-a-10":
+        raise ValueError("Original and candidate must run on licensed compute-a-10")
     if args.output_root.exists():
         raise FileExistsError("Inspect the existing attempt before any resubmission")
     cfg = json.loads(args.config.read_text())

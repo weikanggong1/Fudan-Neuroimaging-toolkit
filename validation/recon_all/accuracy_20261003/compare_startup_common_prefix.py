@@ -424,7 +424,7 @@ def main(argv=None):
             'baseline_whole_case_complete':False,'overall_metric_equivalence':'not_assessed'}
     start=time.monotonic();path=out/'common_prefix.json';write(path,report)
     try:
-        index=Path(config.get('fnit_index','/cwStorage/home/gongwk/Notebook_code/FNIT/INDEX.json'))
+        index=Path(config.get('fnit_index','/data/fnit/INDEX.json'))
         read(index);report['fnit_index_sha256']=digest(index)
         with Path(config['lock']).open('a+') as lock:
             wait=time.monotonic();fcntl.flock(lock,fcntl.LOCK_EX)

@@ -3,7 +3,7 @@ import hashlib, json, platform
 from pathlib import Path
 import nibabel as nib
 import numpy as np
-BASE=Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929')
+BASE=Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929')
 def sha(path):
     with open(path,'rb') as stream:
         return hashlib.file_digest(stream,'sha256').hexdigest()

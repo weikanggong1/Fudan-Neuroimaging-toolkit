@@ -2,7 +2,7 @@
 
 ## 审查范围与版本
 
-2026-10-02 在 gpucw1 读取实际安装的 FreeSurfer 8.2。build stamp 为 `freesurfer-linux-centos7_x86_64-8.2.0-20260314-d932c45`，SAMSEG 为 `0.5a0+17.g2ce2b6b`。审查对象是当前对照所用的 Python `segment_subregions`，包括脑干、丘脑和左右海马–杏仁核；不是旧 MATLAB 可执行程序，也没有重跑 recon-all。
+2026-10-02 在 accelerator-a-1 读取实际安装的 FreeSurfer 8.2。build stamp 为 `freesurfer-linux-centos7_x86_64-8.2.0-20260314-d932c45`，SAMSEG 为 `0.5a0+17.g2ce2b6b`。审查对象是当前对照所用的 Python `segment_subregions`，包括脑干、丘脑和左右海马–杏仁核；不是旧 MATLAB 可执行程序，也没有重跑 recon-all。
 
 [安装源码审计](official_source_audit.json)记录 8 个 Python 源文件、原生 GEMS `.so`、`segment_subregions`、`fspython` 和 `mri_robust_register` 的路径、大小和 SHA-256。CLI 和核心 Python 文件与 SAMSEG 上游 `2ce2b6b` 的内容逐字节一致，见[上游内容校验](upstream_source_identity.json)。原生注册源码按实际 FS build 的 `d932c45` 核查，见[注册源码清单](registration_source_identity.json)。这里只保存审计信息，没有复制发布官方源码。
 
@@ -38,9 +38,9 @@ FS [mri_robust_register.cpp 第 70 行](https://github.com/freesurfer/freesurfer
 
 ```bash
 # 已处理的公开真实 T1；三项 mri 文件保持同一内容和 SHA-256。
-benchmark_subjects_dir=/absolute/path/reconall_reference_gpucw1
+benchmark_subjects_dir=/absolute/path/reconall_reference_accelerator-a-1
 benchmark_output_dir=/absolute/path/reproducibility/official_r1
-export FREESURFER_HOME=/public/software/apps/Freesurfer/8.2.0-1
+export FREESURFER_HOME=/opt/reference/Freesurfer/8.2.0-1
 export PATH="$FREESURFER_HOME/bin:$PATH"
 export OMP_NUM_THREADS=4
 export OPENBLAS_NUM_THREADS=4

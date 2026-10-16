@@ -4,7 +4,7 @@ from pathlib import Path
 import nibabel as nib
 import numpy as np
 ROOT=Path('/tmp/fnit-recon-accuracy-20261003/task_02/diagnostic')
-BASE=Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929')
+BASE=Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929')
 spec=importlib.util.spec_from_file_location('fnit.recon_all.input_talairach_chain_candidate',ROOT/'input_talairach_chain.py')
 module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
 report={'host':platform.node(),'validation':'same frozen network output, writer only','code_sha256':hashlib.sha256((ROOT/'input_talairach_chain.py').read_bytes()).hexdigest(),'runs':[]}

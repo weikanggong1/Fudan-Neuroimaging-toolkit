@@ -1,4 +1,4 @@
-"""CUDA entry points enable TF32 while retaining float32 tensors."""
+"""CUDA defaults and scoped segmentation policy retain float32 tensors."""
 
 import pytest
 import torch
@@ -111,7 +111,6 @@ def test_cuda_synthsr_enables_tf32(monkeypatch):
     ("constructor", "arguments"),
     (
         (WMHSynthSeg, ("missing-weights",)),
-        (SynthSegParc, ("missing-weights", "missing-labels")),
     ),
 )
 def test_cuda_segmentation_components_enable_tf32(
@@ -132,10 +131,11 @@ def test_cuda_segmentation_components_enable_tf32(
 @pytest.mark.parametrize("constructor,arguments", [
     (SynthSeg, ("missing-weights",)),
     (SynthSegSegmenter, ("missing-weights", "missing-labels")),
+    (SynthSegParc, ("missing-weights", "missing-labels")),
 ])
 def test_scoped_segmentation_construction_preserves_cuda_policy(
         monkeypatch, initial, constructor, arguments):
-    # These two APIs apply CUDA precision only while running posterior(),
+    # These APIs apply CUDA precision only while running posterior(),
     # and retain the caller's policy even when resource resolution fails.
     monkeypatch.setattr(torch.cuda, "is_available", lambda: True)
     monkeypatch.setattr(torch.backends.cuda.matmul, "allow_tf32", initial)

@@ -28,7 +28,7 @@ flowchart TD
 ```python
 from tools.benchmark_connectome_staged_gpu import main
 
-# 这些路径位于 headcw、nodecw10 和 gpucw1 共同可读的存储。
+# 这些路径位于 control-host、compute-a-10 和 accelerator-a-1 共同可读的存储。
 # candidate_gpu_config.json 必须由真实冻结的候选代码生成。
 return_code = main([
     "--prep-config", "/shared/prepared/anatomy_prep_config.json",
@@ -63,7 +63,7 @@ return_code = main([
 | `n_seeds`、`seed`、`eddy_gp_seed` | 与原声明相同；本轮为 100000 attempted seeds、追踪 seed 0、EDDY GP seed 12345。GP seed 由共同 wall 工具注入。 |
 | `gpu_host`、`gpu_port`、`gpu_control_path`、`gpu_python` | SSH 目标、可选端口/ControlMaster 路径、已有 Python 环境。使用参数列表和 `shlex.join`，不记录凭据。 |
 | `device`、`cuda_visible_devices`、`gpu_uuid`、`gpu_cpu_threads`、`gpu_path_prefix` | 与原声明相同的设备、UUID、线程和 Workbench PATH。 |
-| `gpu_lock` | `/tmp/fnit-recon-five-20261002-gongwk.gpu.lock`；与其他本轮 GPU 工作共用。只在 GPU 阶段拿锁。 |
+| `gpu_lock` | `/tmp/fnit-recon-five-20261002-benchmark-user.gpu.lock`；与其他本轮 GPU 工作共用。只在 GPU 阶段拿锁。 |
 | `cuda_alloc_conf` | `expandable_segments:True`，与共同基线相同。 |
 | `fnit_weights` | 已验证权重目录；SynthStrip、SynthMorph 等实际文件大小/SHA 必须符合项目清单。 |
 | `wall_script`、`wall_script_sha256` | 与共同基线相同的正式 wall 评测器及其真实 SHA；不得指向未经审核的新计时实现。 |
@@ -81,7 +81,7 @@ return_code = main([
 
 ## 3. 命令行
 
-在 headcw 的已认证连接中运行；下面的候选配置必须已经由总控制器真实冻结。工具实现交付时尚未启动此命令。
+在 control-host 的已认证连接中运行；下面的候选配置必须已经由总控制器真实冻结。工具实现交付时尚未启动此命令。
 
 ```bash
 benchmark_root=/data/reference/fnit_connectome_tenraw_20261002
@@ -124,7 +124,7 @@ benchmark_harness="$benchmark_root/formal_harness_staged_gpu_v2"
 
 各例的准备计时来自各自原控制器和实际主机，等待间隔保留原始 UTC 观察值；多批准备不被伪装成一次连续冷十例评测。
 
-如果一批准备在 nodecw10 本地运行，映射可有第三个来源：A 为 CON01/03，B 为 CON04–07，C 为 CON08–11。各来源的 `case_ids` 只列实际被选中的原始准备结果；B 中 CON08–11 的 SSH 失败保持原样，不混入成功来源。
+如果一批准备在 compute-a-10 本地运行，映射可有第三个来源：A 为 CON01/03，B 为 CON04–07，C 为 CON08–11。各来源的 `case_ids` 只列实际被选中的原始准备结果；B 中 CON08–11 的 SSH 失败保持原样，不混入成功来源。
 
 C 的准备 timer 来自 node 控制器，保留 `preparation_coordinator_wall_seconds`，不填 `preparation_head_wall_seconds`。`cross_host_*_utc_difference_seconds` 可包含主机时钟偏差，明确不作为 wall timer。实际不可变 head SSH 开始记录可给出 `head_C_batch_start_to_case_gpu_end_observed_utc_seconds`：它是**整个 C4 batch 的 head 连接起点到本例 GPU 结束**，包含本例之前的启动、排队、代码冻结和等待，不能当作单例连续冷 wall。实际 head 包装连接的 monotonic 总时长和 node 每例时长分别保留。
 

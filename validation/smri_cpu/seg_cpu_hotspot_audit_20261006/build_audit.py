@@ -91,7 +91,7 @@ def main():
         {
             "fnit_relative_path": "runs/smri_cpu_20261004/t2_seg/profiles/t2_synthseg_case01_profile_initial.json",
             "sha256": "86dfb40200277e97941b71c043166d81a5f5cc5ff605a5da345327c6521dddb6",
-            "read_only_remote_record": True, "hostname": "nodecw10", "input_alias": "case01",
+            "read_only_remote_record": True, "hostname": "compute-a-10", "input_alias": "case01",
             "input_sha256": "afd1a20fe75fdea44313f0eda05020b916c87234e7a2045f7ccc6bb7c6e90b19",
             "network_shape": [192, 224, 224], "api_seconds": 147.199004,
             "module_conv_inclusive_seconds": 96.123398,
@@ -103,7 +103,7 @@ def main():
         {
             "fnit_relative_path": "runs/smri_cpu_20261004/t2_seg/profiles/t2_parc_case01_profile_initial.json",
             "sha256": "378ea0760ac78bf4e423999908842893d6e729f3d320969ff08a1513ea89f574",
-            "read_only_remote_record": True, "hostname": "nodecw10", "input_alias": "case01",
+            "read_only_remote_record": True, "hostname": "compute-a-10", "input_alias": "case01",
             "input_sha256": "afd1a20fe75fdea44313f0eda05020b916c87234e7a2045f7ccc6bb7c6e90b19",
             "network_shape": [192, 224, 224], "fast": True, "api_seconds": 59.238149,
             "module_conv_inclusive_seconds": 23.993880,

@@ -118,7 +118,7 @@ def main() -> None:
         "baseline": "whole/sub01/baseline_run.json",
         "baseline_control": "whole/sub01/baseline_control.json",
         "baseline_monitor": "whole/sub01/baseline_monitor.json",
-        "hardware": "hardware_gpucw1_retry1_1b8c36d.json",
+        "hardware": "hardware_accelerator-a-1_retry1_1b8c36d.json",
         "runtime": "runtime_fingerprints_1b8c36d.json",
     }
     values = {key: read_json(root / name) for key, name in names.items()}
@@ -129,7 +129,7 @@ def main() -> None:
     checks = {
         "both_execution_complete": candidate["status"] == baseline["status"] == control["status"] == "complete",
         "both_command_exit_zero": after_monitor["exit_code"] == before_monitor["exit_code"] == 0,
-        "same_host": control["hostname"] == values["hardware"]["host"] == "gpucw1",
+        "same_host": control["hostname"] == values["hardware"]["host"] == "accelerator-a-1",
         "same_gpu_uuid": before_monitor["gpu_uuid"] == control["CUDA_VISIBLE_DEVICES"] == api["CUDA_VISIBLE_DEVICES"] == uuid,
         "candidate_api_device_uuid_matches": api["device_uuid"].removeprefix("GPU-") == uuid.removeprefix("GPU-"),
         "same_requested_device": candidate["device"] == baseline["device"] == control["device"] == api["device"] == "cuda:0",

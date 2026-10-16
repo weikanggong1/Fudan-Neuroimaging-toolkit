@@ -9,7 +9,7 @@ def digest(path):
 
 
 def main():
-    base = Path('/cwStorage/home/gongwk/Notebook_code/FNIT')
+    base = Path('/data/fnit')
     workspace = base / 'workspaces/smri_cpu_20261004/remaining_20261004/gems/cpu-epsilon-v1'
     run = base / 'runs/smri_cpu_20261004/remaining_20261004/gems/cpu-epsilon-v1'
     old_source = base / 'workspaces/smri_cpu_20261004/remaining_20261004/gems/baseline-f1cbdab/src'
@@ -33,7 +33,7 @@ def main():
     files = {str(p.relative_to(atlas)): digest(p) for p in sorted(atlas.rglob('*')) if p.is_file()}
     # Both arms use the same packed atlas. Installed source files establish the
     # link to the first-state oracle; prepared pack helper files are also bound.
-    upstream = Path('/public/software/apps/Freesurfer/8.2.0-1/average')
+    upstream = Path('/opt/reference/Freesurfer/8.2.0-1/average')
     upstream_dirs = {'brainstem': upstream / 'BrainstemSS/atlas',
                      'thalamus': upstream / 'ThalamicNuclei/atlas',
                      'hippo-amygdala-left': upstream / 'HippoSF/atlas',
@@ -55,7 +55,7 @@ def main():
                            for tag, root in [('baseline', old_source), ('candidate', new_source)]},
                'helpers_sha256': {name: digest(workspace / name) for name in
                                   ('worker.py', 'gems_stage_contract.py', 'queue_runner_v3.py')},
-               'baseline_brainstem_reuse': str(base / 'runs/smri_cpu_20261004/remaining_20261004/gems/nodecw7-cache-v1/baseline-f1cbdab/artifacts'),
+               'baseline_brainstem_reuse': str(base / 'runs/smri_cpu_20261004/remaining_20261004/gems/compute-a-7-cache-v1/baseline-f1cbdab/artifacts'),
                'accepted_gaussian_repair': 'candidate includes cafbfa04; baseline lacks the no-hyper broadcast fix, but all real recipe EM calls provide hyperparameters and synthetic calls use fixed Gaussians',
                'reference_labels_used_for_fitting': False,
                'timing_scope': 'cold processes for the fixed norm/aseg/wmparc recipe stage; no raw T1 reconstruction; reused official arrays do not provide a same-node official speed denominator'}

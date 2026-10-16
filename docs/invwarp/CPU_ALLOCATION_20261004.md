@@ -1,6 +1,6 @@
 # InvWarp CPU 迭代分配优化：源 v28
 
-[返回功能页](README.md) · [旧新完整门槛](assets/cpu-allocation-v2-node8-20261004.public.json) · [nodecw8 官方配对](assets/cpu-allocation-v2-node8-official-20261004.public.json)
+[返回功能页](README.md) · [旧新完整门槛](assets/cpu-allocation-v2-node8-20261004.public.json) · [compute-a-8 官方配对](assets/cpu-allocation-v2-node8-official-20261004.public.json)
 
 ## 1. 功能简介
 
@@ -64,7 +64,7 @@ invwarp --ref=/absolute/path/native_reference.nii.gz \
 
 ### 最新官方配对
 
-nodecw8（Xeon Gold 6418H）上的新正式配对固定同一完整真实 T1 系数和输出网格。使用一次完整 pair warmup、三次 AB/BA 交替进程；已导入 API 另执行一次完整 warmup 和三次全量读取、求逆、保存。实际候选为严格 v2 冻结 overlay，其四个 Inv/Convert/Apply/normalizer runtime SHA 与组合 freeze28 相同；上述四个 runtime SHA 与当前实现相同。
+compute-a-8（Xeon Gold 6418H）上的新正式配对固定同一完整真实 T1 系数和输出网格。使用一次完整 pair warmup、三次 AB/BA 交替进程；已导入 API 另执行一次完整 warmup 和三次全量读取、求逆、保存。实际候选为严格 v2 冻结 overlay，其四个 Inv/Convert/Apply/normalizer runtime SHA 与组合 freeze28 相同；上述四个 runtime SHA 与当前实现相同。
 
 | 线程上限 | 官方完整进程中位数 | FNIT 完整进程中位数 | FNIT 已导入 API 中位数（含读写） | 完整进程速度目标 |
 |---|---:|---:|---:|---|
@@ -77,7 +77,7 @@ nodecw8（Xeon Gold 6418H）上的新正式配对固定同一完整真实 T1 系
 
 ### 旧新完整分配门槛
 
-nodecw8 的两方使用相同物理核 `35,39,43,47,51,55,59,63`，CPU1 取 35，旧源是冻结 v26，新源是严格 v2 两文件 overlay。输入与 v26 官方病例逐文件核对相同。完整输出为 `162×215×180×3`，共有 18,808,200 个值；保留全部网格、30 次实际修正、阈值 0.01 mm 和未压缩 NIfTI 保存。
+compute-a-8 的两方使用相同物理核 `35,39,43,47,51,55,59,63`，CPU1 取 35，旧源是冻结 v26，新源是严格 v2 两文件 overlay。输入与 v26 官方病例逐文件核对相同。完整输出为 `162×215×180×3`，共有 18,808,200 个值；保留全部网格、30 次实际修正、阈值 0.01 mm 和未压缩 NIfTI 保存。
 
 1/8 核各一次完整 instrumented API 的旧新保存文件 SHA-256、QC、whole-grid valid fraction、停止状态均相同；跨 1/8 核文件也相同。全部 658 个 src/tools Python 文件运行前后未变，实际导入来自相应冻结树。入口模块导入排除，函数内惰性导入/JIT 计入；没有对官方时钟计算速度比。
 
@@ -93,7 +93,7 @@ nodecw8 的两方使用相同物理核 `35,39,43,47,51,55,59,63`，CPU1 取 35�
 
 阶段是同一次完整调用内的直接计时，保存与求解分别记录。归一化的 32 次 inclusive 时钟位于求解内部，不能再相加。调度统计只记录主线程；8 核时不把主线程 runqueue 当作全进程总等待。
 
-whole-grid `valid_fraction=0.760825`，指定脑掩膜中的 `valid_field_fraction_in_region` 使用另一分母，不能相互替代。`converged=False`、`iterations_used=30` 在两方保持相同。上述单次诊断显示分配与系统 CPU 成本下降；正式官方时钟见本节首表。nodecw10 的 v26 历史时钟保留其原节点和源码来源，不与此轮组成优化速度比。
+whole-grid `valid_fraction=0.760825`，指定脑掩膜中的 `valid_field_fraction_in_region` 使用另一分母，不能相互替代。`converged=False`、`iterations_used=30` 在两方保持相同。上述单次诊断显示分配与系统 CPU 成本下降；正式官方时钟见本节首表。compute-a-10 的 v26 历史时钟保留其原节点和源码来源，不与此轮组成优化速度比。
 
 私有病例仅发布聚合数字。可视化沿用[既有公开 CC0 T1 反场示例](README.md#公开-t1-示例与完整功能矩阵)，该脑图绑定旧 v17，其对应的误差保留原来源。源 v28 的[本地实际 CUDA 正确性门槛](../../validation/multimodal_cpu_20261004/cuda_invwarp_v28_local_20261004.public.json)包含 12 对/24 次保存，操作序列、峰值 allocation 和文件逐位一致；小网格不作 GPU 性能 benchmark。
 
@@ -101,7 +101,7 @@ whole-grid `valid_fraction=0.760825`，指定脑掩膜中的 `valid_field_fracti
 
 ### 源 v28 的完整单核分步骤诊断
 
-在同一正式输入、nodecw8 CPU35 和共享锁下，先完整运行一次预热，再 profile 一次完整读取、30 次修正和保存。预热、profile 与严格 v2 gate 的整个输出文件逐位一致，QC、停止状态和输入/源码前后校验通过；源 v28 的 659 个 src/tools Python 文件保持不变。[阶段时钟和 Torch operator self 记录](assets/cpu-allocation-v28-node8-profile-20261004.public.json)与上面的官方计时分开。
+在同一正式输入、compute-a-8 CPU35 和共享锁下，先完整运行一次预热，再 profile 一次完整读取、30 次修正和保存。预热、profile 与严格 v2 gate 的整个输出文件逐位一致，QC、停止状态和输入/源码前后校验通过；源 v28 的 659 个 src/tools Python 文件保持不变。[阶段时钟和 Torch operator self 记录](assets/cpu-allocation-v28-node8-profile-20261004.public.json)与上面的官方计时分开。
 
 instrumented API 为 45.735 s，其中完整求解调用 45.185 s、保存 0.532 s；累计 CPU user/system 为 22.630/23.074 s，minor faults 为 10,071,965，major faults 为 0。主线程实际运行 45.697 s、runqueue 等待 0.027 s。该 profile 包含 profiler 与 wrapper 成本。
 
@@ -126,8 +126,8 @@ instrumented API 为 45.735 s，其中完整求解调用 45.185 s、保存 0.532
 
 | 来源 | 更新和证据 |
 |---|---|
-| 严格 v2，源 v28 | 两步 FP64 fresh-base 加法和 CPU 标量停止减少分配；160 项定向回归通过，覆盖实际 CUDA、NaN payload/Inf/signed zero、ULP 阈值、布局、dtype 提升、fresh/no-alias、梯度/dual/func 回退。nodecw8 完整 1/8 核保存文件与 QC/30 次停止一致；新官方完整进程 CPU1 未达、CPU8 达速度目标。 |
-| 分配原型 v1 | nodecw10 完整 1/8 核文件一致，但不具有严格 v2 的全部类型和 AD guard；未收入生产。重载节点 wall time 与 nodecw8 分开保留。 |
+| 严格 v2，源 v28 | 两步 FP64 fresh-base 加法和 CPU 标量停止减少分配；160 项定向回归通过，覆盖实际 CUDA、NaN payload/Inf/signed zero、ULP 阈值、布局、dtype 提升、fresh/no-alias、梯度/dual/func 回退。compute-a-8 完整 1/8 核保存文件与 QC/30 次停止一致；新官方完整进程 CPU1 未达、CPU8 达速度目标。 |
+| 分配原型 v1 | compute-a-10 完整 1/8 核文件一致，但不具有严格 v2 的全部类型和 AD guard；未收入生产。重载节点 wall time 与 compute-a-8 分开保留。 |
 | v26 静态坐标版本 | 完整真实官方 CPU1/8 warm+3 配对与 H100 保存文件门槛见 [v26 正式记录](../applywarp/cpu_static_diagonal_all26_official_20261004.public.json)。新诊断不重写该版时钟。 |
 
 本次性能证据仅覆盖该完整系数反场。普通 ConvertWarp 默认单次查询仍用原算式；本次逆场时间不能写作 ConvertWarp 官方时间。新的 dense 功能回归与原矩阵路径回归属于接口证据，真实官方功能矩阵仍保留各自版本来源。

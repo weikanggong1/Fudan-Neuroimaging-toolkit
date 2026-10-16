@@ -103,7 +103,7 @@ def summarize(paired_directory: Path) -> dict:
         "subject": "sub02",
         "candidate_commit": region["code_commit"],
         "baseline_commit": "e036f57b62b99d2af4cd8853ab2f1e6d2a9f8c68",
-        "comparison_kind": "independent raw-T1 whole CPU runs, same nodecw10 hardware and actual Torch/Numba masks 4",
+        "comparison_kind": "independent raw-T1 whole CPU runs, same compute-a-10 hardware and actual Torch/Numba masks 4",
         "strict_reproduction_vs_controlled_baseline": {
             key: strict[key] for key in ("checked", "passed", "all_pass")
         } | {"not_all_serialized_files_byte_identical": any(not item["serialized_sha256_equal"] for stages in shape.values() for item in stages.values())},

@@ -54,8 +54,8 @@ the independent candidate remains exact. This does not establish equality
 for later genetic candidates or the final `best` patch.
 
 The independent fixed-subject results are
-[`lh.independent_first_patch_headcw.json`](lh.independent_first_patch_headcw.json)
-and [`rh.independent_first_patch_headcw.json`](rh.independent_first_patch_headcw.json).
+[`lh.independent_first_patch_control-host.json`](lh.independent_first_patch_control-host.json)
+and [`rh.independent_first_patch_control-host.json`](rh.independent_first_patch_control-host.json).
 The upstream capture-free old-edge segmentation is reported in
 [`TOPOLOGY_INDEPENDENT_SEGMENTS.md`](TOPOLOGY_INDEPENDENT_SEGMENTS.md).
 The first candidate's Euler/face validity gates and initial GA fitness
@@ -83,12 +83,12 @@ topology fixer or end-to-end recon-all parity is claimed.
 
 ## Reproducible evidence
 
-Machine-readable results are `lh.topology_patch_first_candidate_headcw.json`,
-`rh.topology_patch_first_candidate_headcw.json`, and the corresponding
-`lh.topology_ga_segments_headcw.json` and `rh.topology_ga_segments_headcw.json`.
+Machine-readable results are `lh.topology_patch_first_candidate_control-host.json`,
+`rh.topology_patch_first_candidate_control-host.json`, and the corresponding
+`lh.topology_ga_segments_control-host.json` and `rh.topology_ga_segments_control-host.json`.
 The frozen native files
-are in `$P/topology_fix` on headcw, where
-`P=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_python_gpu_20260925`:
+are in `$P/topology_fix` on control-host, where
+`P=/data/workspaces/freesurfer_synth/work/reconall_python_gpu_20260925`:
 
 | Reference file relative to `$P/topology_fix` | SHA256 |
 | --- | --- |
@@ -103,11 +103,11 @@ The RH first candidate was also saved by an earlier bounded diagnostic run.
 Its raw file hash differs only because the FreeSurfer surface header records
 the write time; its ordered vertex and face arrays are bitwise identical.
 
-To rerun the comparison in the synced checkout on headcw:
+To rerun the comparison in the synced checkout on control-host:
 
 ```bash
 cd "$P/repo_ci/ci_checkout"
-R=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_main_20260924
+R=/data/workspaces/freesurfer_synth/work/reconall_main_20260924
 PYTHONPATH=src:. "$R/venv/bin/python" \
   validation/recon_all/python_gpu_port/experimental/topology_patch_edges_probe.py \
   --diagnostics "$P/topology_fix/native_diag" \

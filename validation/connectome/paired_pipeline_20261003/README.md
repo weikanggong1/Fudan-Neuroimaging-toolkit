@@ -77,7 +77,7 @@ assert preflight_report["cuda_initialized"] is False
 | `--input-mode` | `corrected` 或 `raw`；前者本轮提供 corrected DWI，后者启动原始 DWI 预处理 |
 | `--gpu-uuid` | 实际所用 GPU UUID；推荐显式给出，避免 CUDA index/NVML 对应不明 |
 | `--memory-sample-interval` | `0.5` 秒，own PID/process tree 采样间隔 |
-| `--gpu-lock` | `/tmp/fnit-recon-five-20261002-gongwk.gpu.lock`，与当前重建任务共享的 GPU 锁 |
+| `--gpu-lock` | `/tmp/fnit-recon-five-20261002-benchmark-user.gpu.lock`，与当前重建任务共享的 GPU 锁 |
 
 ## 3. 命令行
 

@@ -141,7 +141,7 @@ def main():
     signal.signal(signal.SIGTERM,stopped)
     signal.setitimer(signal.ITIMER_REAL,max(.1,deadline-time.monotonic()))
     try:
-        lock_path = args.root/'runs/smri_cpu_20261004/nodecw7.gems.cpu8.lock'
+        lock_path = args.root/'runs/smri_cpu_20261004/compute-a-7.gems.cpu8.lock'
         lock_fd = os.open(lock_path,os.O_CREAT|os.O_RDWR|os.O_NOFOLLOW,0o600)
         lock_stat = os.fstat(lock_fd)
         require(stat.S_ISREG(lock_stat.st_mode) and lock_stat.st_uid == os.getuid(),'CPU8 lock must be owned regular file')

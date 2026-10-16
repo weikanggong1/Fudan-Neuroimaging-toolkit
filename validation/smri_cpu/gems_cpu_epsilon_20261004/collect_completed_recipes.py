@@ -8,7 +8,7 @@ import time
 
 
 def main():
-    base = Path('/cwStorage/home/gongwk/Notebook_code/FNIT')
+    base = Path('/data/fnit')
     workspace = base / 'workspaces/smri_cpu_20261004/remaining_20261004/gems/cpu-epsilon-v1'
     run = base / 'runs/smri_cpu_20261004/remaining_20261004/gems/cpu-epsilon-v1'
     subject = base / 'legacy/freesurfer_synth/work/fnit_subregions_unified_20260930/ten_public_t1_20261002/cases/sub-02/official/subjects/sub-02/mri'

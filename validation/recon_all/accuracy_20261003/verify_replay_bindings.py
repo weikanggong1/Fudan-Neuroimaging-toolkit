@@ -10,7 +10,7 @@ def digest(path):
 
 def _verify(*, cohort_root, expected, report_path):
  R=Path(cohort_root);report_path=Path(report_path)
- S=Path('/cwStorage/home/gongwk/Notebook_code/FNIT')
+ S=Path('/data/fnit')
  index_sha={}
  for n in ('README.md','INDEX.md','INDEX.json'):
   raw=(S/n).read_bytes();raw.decode('utf-8');index_sha[n]=hashlib.sha256(raw).hexdigest()

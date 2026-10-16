@@ -124,7 +124,7 @@ python validation/recon_all/accuracy_20261003/prioritize_diagnostics.py \
   --timeout-seconds 21600
 ```
 
-`runtime/`保存本轮源码、程序、资源与启动凭据；`coordination_status.json`记录采集时状态。候选commit未知时保持未知。新增验证工具均使用Python标准库；生产修复复用主页Conda既有nibabel/PyTorch，不增加运行依赖。当前gpucw1有官方软件用于参考，物理无预装软件的隔离整例尚未验证。
+`runtime/`保存本轮源码、程序、资源与启动凭据；`coordination_status.json`记录采集时状态。候选commit未知时保持未知。新增验证工具均使用Python标准库；生产修复复用主页Conda既有nibabel/PyTorch，不增加运行依赖。当前accelerator-a-1有官方软件用于参考，物理无预装软件的隔离整例尚未验证。
 
 ## 当前证据与验收口径
 

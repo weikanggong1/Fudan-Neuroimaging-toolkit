@@ -1,0 +1,29 @@
+{
+  "subject": "fs_sub01",
+  "host": "control-host",
+  "date": "2026-09-25",
+  "input_volumes": [
+    "Python-generated aseg.presurf.hypos.mgz",
+    "Python-generated ribbon.mgz"
+  ],
+  "frozen_other_inputs": [
+    "official lh/rh white and pial surfaces",
+    "official lh/rh cortex labels and aparc annotations"
+  ],
+  "python_chain": [
+    "surf2volseg_fix_python.fix_presurf_volume",
+    "surf2volseg_cortex_python.label_cortex_volume",
+    "surf2volseg_wm_python.label_wm_volume"
+  ],
+  "resident_seconds": {
+    "fix_presurf": 4.063073051162064,
+    "label_cortex": 3.5132713690400124,
+    "label_wm": 3.094805463217199
+  },
+  "comparisons_to_official": {
+    "aseg.mgz": {"mismatch_voxels": 0, "total_voxels": 16777216},
+    "aparc+aseg.mgz": {"mismatch_voxels": 0, "total_voxels": 16777216},
+    "wmparc.mgz": {"mismatch_voxels": 0, "total_voxels": 16777216}
+  },
+  "interpretation": "The chain used Python-produced input volumes and Python-generated intermediate volumes; surfaces, cortex masks, and annotations remained official frozen files."
+}

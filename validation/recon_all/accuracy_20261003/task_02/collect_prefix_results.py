@@ -2,7 +2,7 @@
 import csv,hashlib,json
 from pathlib import Path
 import numpy as np
-BASE=Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929')
+BASE=Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929')
 ROOT=BASE/'accuracy_20261003/task_02/cohort_prefix'
 COHORT=BASE/'accuracy_20261003/cohort/cohort_verified.json'
 OUTPUT=Path('/tmp/fnit-recon-accuracy-20261003/task_02/diagnostic')

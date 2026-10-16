@@ -18,7 +18,7 @@ def main():
     parser.add_argument('--sigma', type=float, default=3.)
     args = parser.parse_args()
     args.output.mkdir(exist_ok=False, parents=True)
-    sys.path.insert(0, '/public/software/apps/Freesurfer/8.2.0-1/python/lib/python3.8/site-packages/samseg/gems')
+    sys.path.insert(0, '/opt/reference/Freesurfer/8.2.0-1/python/lib/python3.8/site-packages/samseg/gems')
     import gemsbindings as gems
     data = np.load(args.shared)
     reference = np.asfortranarray(data['reference'].astype(np.float64))

@@ -9,3 +9,7 @@ __all__ = [
     "OUTPUT_FILENAMES",
     "VBMRegistrationResult",
 ]
+
+# Unified public name; the mature implementation and defaults are unchanged.
+FNIT_fslvbm = FastVBM
+__all__.append("FNIT_fslvbm")

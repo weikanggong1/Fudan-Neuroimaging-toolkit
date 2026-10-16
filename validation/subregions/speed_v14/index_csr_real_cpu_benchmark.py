@@ -63,8 +63,8 @@ parser.add_argument('--output', required=True, type=Path)
 args = parser.parse_args()
 old, old_sha = load_function(args.old_raster)
 new, new_sha = load_function(args.new_raster)
-root = Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930')
-prepared = Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929')
+root = Path('/data/workspaces/freesurfer_synth/work/fnit_subregions_unified_20260930')
+prepared = Path('/data/workspaces/freesurfer_synth/work/fnit_subregions_plus_20260928/samseg_native_build_20260929')
 report = {'mode': 'real_saved_mesh_cpu_block_index_comparison', 'host': socket.gethostname(), 'started_utc': datetime.now(timezone.utc).isoformat(), 'python': platform.python_version(), 'numpy': np.__version__, 'gpu_used': False, 'repeats': 3, 'timing_scope': 'build_block_index only; image loading, hashes, equality and tracemalloc excluded', 'old_function_sha256': old_sha, 'new_function_sha256': new_sha, 'source_files': {'old': identity(args.old_raster), 'new': identity(args.new_raster)}, 'cases': {}}
 for name, directory in [('thalamus', 'port_thalamus_debug'), ('hippo-amygdala-left', 'port_hippo_integrated_fullfix_left_tmp')]:
     stage = prepared / directory

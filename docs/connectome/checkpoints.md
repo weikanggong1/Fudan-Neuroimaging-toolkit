@@ -134,7 +134,7 @@ checkpoints/
 
 本版原生追踪的真实核心恢复、模板复用、整链耗时及脑图集中在[原生追踪评测](../../validation/connectome/native_tracking_20261009/README.md)。以下 CPU 与十例记录来自 2026-10-03 的旧 PyTorch 追踪版本；它们保留缓存合同的历史证据，不是当前后端的性能结果。
 
-gpucw1 的现有 Conda 环境，CUDA 隐藏、CPU 4 线程；[原始 CPU 回归报告](../../validation/connectome/paired_20261003/task_03/cpu_gate_v3.json) 与 [日志](../../validation/connectome/paired_20261003/task_03/focused_cpu_v3.log) 绑定实际源码 SHA，前后相同，CUDA 初始化前后均 `False`。
+accelerator-a-1 的现有 Conda 环境，CUDA 隐藏、CPU 4 线程；[原始 CPU 回归报告](../../validation/connectome/paired_20261003/task_03/cpu_gate_v3.json) 与 [日志](../../validation/connectome/paired_20261003/task_03/focused_cpu_v3.log) 绑定实际源码 SHA，前后相同，CUDA 初始化前后均 `False`。
 
 | 检查 | 实际结果 |
 |---|---|

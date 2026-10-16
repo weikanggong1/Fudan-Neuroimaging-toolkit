@@ -24,7 +24,7 @@ gives eTIV 1,310,267.038702 versus 1,310,266.552537 mm³ officially, an
 absolute difference of 0.486165 mm³ (about 0.37 ppm). The subject CLI also
 accepts the existing XFM directly when a voxel LTA is unavailable; that
 fallback was independently exercised with a 1.450583 mm³ eTIV difference.
-One headcw CPU call including inference and output write took 11.01 s under
+One control-host CPU call including inference and output write took 11.01 s under
 shared load; it is not a paired native speed estimate. The full stats file is
 not byte-identical because the eTIV and posterior volumes differ slightly.
 

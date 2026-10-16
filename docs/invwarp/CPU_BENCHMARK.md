@@ -16,7 +16,7 @@
 | 相同真实输入的完整迭代预算 | `iterations`、`tolerance_mm` | 保留全部网格和迭代上限；实际迭代数和收敛状态 |
 
 FNIT 是全局仿射初始化的 fixed-point 求逆；FSL 使用其原生求逆算法、正则化和 Jacobian 约束。
-2026-10-04 在 nodecw10 实测的 FSL 6.0.7.4 `invwarp` 不接受 `--niter`，尽管官方网页曾列出这一选项。
+2026-10-04 在 compute-a-10 实测的 FSL 6.0.7.4 `invwarp` 不接受 `--niter`，尽管官方网页曾列出这一选项。
 因此本版参照保留官方内部默认停止设置，FNIT 单列其 `iterations/tolerance_mm`，不能称相同迭代预算或停止规则。
 只有独立核验过该选项的其他程序版本，adapter 才通过 `resources.invwarp_supports_niter=true` 传入该 flag。
 FSL `regularise/jmin/jmax/noconstraint` 当前没有 FNIT 对应选项，标 `unsupported`。
@@ -39,7 +39,7 @@ FSL `regularise/jmin/jmax/noconstraint` 当前没有 FNIT 对应选项，标 `un
 }
 ```
 
-在 nodecw10 固定相同 CPU 亲和性和 1/8 线程预算；完整功能记录包含读取和反场保存。相同完整原生命令的复用只提供精度参照，另列新官方时钟是否存在。
+在 compute-a-10 固定相同 CPU 亲和性和 1/8 线程预算；完整功能记录包含读取和反场保存。相同完整原生命令的复用只提供精度参照，另列新官方时钟是否存在。
 Python 导入/冷进程与已导入 API 时间分列；官方实际 CPU 时间和线程利用率另查。
 FSL 6.0.7.4 实际解析不支持 `--nthr/--threads/--nthreads/--num_threads`；线程预算是环境上限和相同亲和性，
 不是官方实际使用的线程数。正式公开补充使用 NUMA2 `34,38,42,46,50,54,58,62`（CPU1=34），
@@ -116,9 +116,9 @@ CUDA 路径仍执行原算式。专项回归固定旧求逆循环，覆盖 dense
 
 CPU1 仍未达到速度目标，CPU8 更快；全部 18,808,200 个坐标值有限且几何相同。相对原版，全网格分量 MAE/RMSE/max 为 0.10954/0.32135/7.02610 mm；指定脑掩膜 1,397,640 体素内向量差 mean/median/p95/max 为 0.01723/0.01008/0.03361/7.31428 mm。原版与 FNIT 的脑区有效覆盖均为 99.83343%；composition 残差与独立算法误差另列，不能据此称严格数值等价。历史 v17 的完整功能矩阵和 v23 的重复计时仍保持原源码来源。
 
-### 最新源 v28：nodecw8 完整官方配对
+### 最新源 v28：compute-a-8 完整官方配对
 
-[v28 正式报告](assets/cpu-allocation-v2-node8-official-20261004.public.json)使用同一完整真实 T1 系数，读取、求逆并保存全部 `162×215×180×3` 未压缩反场。原版和 FNIT 在 nodecw8 的同一核组、相同 1/8 线程上限下完成一次完整 pair warmup 和三对交替进程；已导入 API 另执行一次完整 warmup 与三次完整读写。候选的四个 InvWarp、ConvertWarp、ApplyWarp 与归一化模块 SHA 与组合冻结源 v28 相同；nodecw10 的历史时钟另列。
+[v28 正式报告](assets/cpu-allocation-v2-node8-official-20261004.public.json)使用同一完整真实 T1 系数，读取、求逆并保存全部 `162×215×180×3` 未压缩反场。原版和 FNIT 在 compute-a-8 的同一核组、相同 1/8 线程上限下完成一次完整 pair warmup 和三对交替进程；已导入 API 另执行一次完整 warmup 与三次完整读写。候选的四个 InvWarp、ConvertWarp、ApplyWarp 与归一化模块 SHA 与组合冻结源 v28 相同；compute-a-10 的历史时钟另列。
 
 | 线程上限 | 原版完整进程中位数 | FNIT 完整进程中位数 | FNIT 热 API 中位数（含读写） | 速度目标 |
 |---|---:|---:|---:|---|

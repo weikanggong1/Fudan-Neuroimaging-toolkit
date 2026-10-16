@@ -19,11 +19,11 @@
 
 输入为完整真实 T1w、DWI、490 帧 BOLD、实际估计的形变和公开 MNI152/HCP 模板、解剖图谱。配准保留完整优化日程，4D 不删帧，反场保留完整输出网格。私有病例仅公开聚合指标；脑图使用可公开的 CC0 样例或有许可的模板。
 
-较早结果在 nodecw10 测量；后续 FNIRT v27 和 InvWarp v28 在用户指定的 nodecw8 测量。两节点现场均核对为 Xeon Gold 6418H、96 个物理核，使用同一个固定 Conda 环境。每项官方与 FNIT 在同一节点、同一物理核亲和性及 1/8 线程预算下交替运行，不混合两节点时间。预算是上限，原版 FNIRT/InvWarp 仍主要使用一个核，报告记录实际 user/system CPU 时间。
+较早结果在 compute-a-10 测量；后续 FNIRT v27 和 InvWarp v28 在用户指定的 compute-a-8 测量。两节点现场均核对为 Xeon Gold 6418H、96 个物理核，使用同一个固定 Conda 环境。每项官方与 FNIT 在同一节点、同一物理核亲和性及 1/8 线程预算下交替运行，不混合两节点时间。预算是上限，原版 FNIRT/InvWarp 仍主要使用一个核，报告记录实际 user/system CPU 时间。
 
 FSL 为现场可运行的 6.0.7.4；空间转换使用固定 CBIG 原函数、MATLAB R2018b 和 Workbench 2.0.0。World 参照为指定的 fMRIPrep 25.2.4 容器。原程序只由隔离 benchmark 调用，FNIT 运行时不增加原软件依赖。Numba、NumPy、SciPy 和 PyTorch 已在主页环境中。
 
-完整进程含启动、导入、读取、全部计算和保存。重复配对先完整预热一次、再运行三次；一次完整观察单独标记。API 时间含全部读写但排除入口启动；分步骤插桩时间与正式配对分列，包含子函数的阶段钟不可相加。nodecw10 后期约有 2,500 个可运行任务，迁移前未完成或外层暂停过的时钟不计作完整 benchmark。
+完整进程含启动、导入、读取、全部计算和保存。重复配对先完整预热一次、再运行三次；一次完整观察单独标记。API 时间含全部读写但排除入口启动；分步骤插桩时间与正式配对分列，包含子函数的阶段钟不可相加。compute-a-10 后期约有 2,500 个可运行任务，迁移前未完成或外层暂停过的时钟不计作完整 benchmark。
 
 ## 3. 最新完整 CPU 结果
 
@@ -37,11 +37,11 @@ FSL 为现场可运行的 6.0.7.4；空间转换使用固定 CBIG 原函数、MA
 | ApplyWarp，105 帧校正 DWI，经 TBSS 系数场→MNI 2 mm | 457.843 / 431.278 | 11.243 / 7.571 | 全部 94,776,045 值；relative L2 2.088×10⁻⁶；[报告](../../docs/applywarp/mni_dwi_105_20261004.public.json) |
 | ApplyWarp，完整 T1w，trilinear float | 2.297 / 2.549 | 5.637 / 3.732 | 小 3D 完整进程未达速度目标；50 组中 10 组达标 |
 | World，490 帧 BOLD→MNI | 301.475 / 56.297 | 241.778 / 46.831 | 双方 BLAS=1、帧并发=1/8；[最新两预算报告](../../docs/applywarp/world_cpu_latest_20261004.public.json) |
-| FNIRT，default 四级，v27/nodecw8 | 181.041 / 172.209 | 149.123 / 57.680 | 完整文件与前版 FNIT 相同；[八项最新主配对](../../docs/fnirt/assets/cpu-primary-v27-node8-20261004.public.json) |
-| FNIRT，六级 T1，v27/nodecw8 | 224.018 / 221.801 | 293.713 / 169.214 | 单线程未达目标，8 线程更快 |
-| FNIRT，完整 TBSS 三阶段，v27/nodecw8 | 836.237 / 831.938 | 795.217 / 400.189 | 完整阶段链、Jacobian 和四图保存 |
-| FNIRT，完整 GM 混合 LM/SCG，v27/nodecw8 | 548.107 / 556.218 | 143.569 / 63.277 | 官方完整两进程链；两预算更快 |
-| InvWarp，完整 T1 系数反场，v28/nodecw8 | 35.878 / 36.679 | 50.899 / 21.661 | 脑内向量差 p95 0.033606 mm；单线程未达目标；[配对](../../docs/invwarp/assets/cpu-allocation-v2-node8-official-20261004.public.json) |
+| FNIRT，default 四级，v27/compute-a-8 | 181.041 / 172.209 | 149.123 / 57.680 | 完整文件与前版 FNIT 相同；[八项最新主配对](../../docs/fnirt/assets/cpu-primary-v27-node8-20261004.public.json) |
+| FNIRT，六级 T1，v27/compute-a-8 | 224.018 / 221.801 | 293.713 / 169.214 | 单线程未达目标，8 线程更快 |
+| FNIRT，完整 TBSS 三阶段，v27/compute-a-8 | 836.237 / 831.938 | 795.217 / 400.189 | 完整阶段链、Jacobian 和四图保存 |
+| FNIRT，完整 GM 混合 LM/SCG，v27/compute-a-8 | 548.107 / 556.218 | 143.569 / 63.277 | 官方完整两进程链；两预算更快 |
+| InvWarp，完整 T1 系数反场，v28/compute-a-8 | 35.878 / 36.679 | 50.899 / 21.661 | 脑内向量差 p95 0.033606 mm；单线程未达目标；[配对](../../docs/invwarp/assets/cpu-allocation-v2-node8-official-20261004.public.json) |
 | ConvertWarp，14 个场/矩阵组合 | 逐项见报告 | 逐项见报告 | 28/28 更快，1 线程 1.263–4.512×、8 线程 1.279–4.347×；最大场差 ≤3.052×10⁻⁵ mm |
 | MNI152 T1 2 mm→fsaverage164k | 8.625 / 5.000 | 2.220 / 2.158 | 连续图 relative L2 约 2–3×10⁻⁷ |
 | fsaverage164k→默认 MNI | 36.909 / 34.414 | 5.101 / 4.580 | 完整输出逐值相同 |

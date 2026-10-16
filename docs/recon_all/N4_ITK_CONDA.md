@@ -82,13 +82,13 @@ result = run_input_n4_chain(
 
 ## 真实 T1 比较
 
-固定输入为 sub01 的 256³ `orig.mgz`，SHA-256 `d79723f94bfc149ff36c89094a3d734b888a03cecbc32dc57a22992e8a5e817f`。一次 headcw 测试中，`nu0.mgz` 相对官方有 **9 / 16,777,216** 个体素不同，均低 1 个灰度级；最终 `nu.mgz` 有 **8 / 16,777,216** 个体素不同，最大差 2。两步仿射及 MGH 前 284 字节相同。完整数值和哈希见[验证报告](../../validation/recon_all/python_gpu_port/n4_itk_conda_20260927/README.md)。
+固定输入为 sub01 的 256³ `orig.mgz`，SHA-256 `d79723f94bfc149ff36c89094a3d734b888a03cecbc32dc57a22992e8a5e817f`。一次 control-host 测试中，`nu0.mgz` 相对官方有 **9 / 16,777,216** 个体素不同，均低 1 个灰度级；最终 `nu.mgz` 有 **8 / 16,777,216** 个体素不同，最大差 2。两步仿射及 MGH 前 284 字节相同。完整数值和哈希见[验证报告](../../validation/recon_all/python_gpu_port/n4_itk_conda_20260927/README.md)。
 
 包装器单次耗时 107.89 秒，之前同输入的官方 N4 单次耗时 168.26 秒；两次处于不同共享负载，不能作为受控加速比。N4 仍运行于 CPU。
 
 在 2026-09-29 的自产上游整例中，`nu.mgz` 与归档官方结果有 2 个体素不同。另将固定 FreeSurfer 源码中的 `AntsN4BiasFieldCorrectionFs` **在同一 Conda 中编译**并运行于相同 `orig.mgz`，经同一 FNIT `make_nu` 后有 42 个体素不同。[当时的程序哈希和体素数](../../validation/recon_all/python_gpu_port/n4_source_probe_20260929.json)可复查。2026-09-30的前段验证重新从两例原始 T1 运行，确认该版本首差已在 N4 浮点输出出现；量化后的差异为 2 / 30 个体素，四组注册输入也已重新配对，见[现版前段报告](VOLUME_PREFIX_PARITY_20260930.md)。旧实验不作为现版整例皮层指标验收。
 
-在 gpucw1 上以相同 `orig` 的体素和 MGH 头独立重跑官方 N4，后处理的 `nu` 与归档官方图逐体素一致，FNIT 同主机输出仍差 2 个体素；同一官方程序在 headcw 上重跑则差 34 个体素。[配对记录](../../validation/recon_all/python_gpu_port/n4_same_host_replay_20260930.json)区分了实现差异与主机差异。官方重跑只作为隔离的参考，不进入 FNIT 标准路径；两处前段差异也不足以单独解释后续所有表面误差。
+在 accelerator-a-1 上以相同 `orig` 的体素和 MGH 头独立重跑官方 N4，后处理的 `nu` 与归档官方图逐体素一致，FNIT 同主机输出仍差 2 个体素；同一官方程序在 control-host 上重跑则差 34 个体素。[配对记录](../../validation/recon_all/python_gpu_port/n4_same_host_replay_20260930.json)区分了实现差异与主机差异。官方重跑只作为隔离的参考，不进入 FNIT 标准路径；两处前段差异也不足以单独解释后续所有表面误差。
 
 ## 参考文献与原实现
 

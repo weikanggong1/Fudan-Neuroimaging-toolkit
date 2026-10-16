@@ -18,8 +18,8 @@
 - 固定本轮初始基线，并为每阶段记录上一阶段的实际提交与资源配置；同设备的配对顺序运行，阶段收益不能简单相加。
 - 每次验证记录实际 Git commit、未提交代码差异、源码 SHA-256、输入/权重/资产/程序 SHA-256；不得把旧报告改标为当前实测。
 - 本轮已有起点见 `validation/recon_all/python_gpu_port/performance_hotspots_20261001/WHOLE_RESULTS.md`；对应两例报告在其 `whole/sub01/`、`whole/sub02/`。这些记录绑定各自测试版本，不能代替后续候选验证。
-- 从 manifest 和已授权环境定位数据、权重、资产及参考，优先复用，不重复下载。服务器登录使用用户本轮提供的 headcw 授权入口；连接地址、端口和账号仅保存在本地任务配置中。认证后按实际授权跳转 gpucw1、nodecw10 或 nodecw12，复用持久连接并先核对主机、账号和目录。密码仅由用户在 WSL tmux 交互输入，不在脚本、日志或仓库保存密码、令牌和许可证内容。
-- FNIT服务器固定入口为 `/cwStorage/home/gongwk/Notebook_code/FNIT`；先读取该目录的 `README.md`、`INDEX.md` 或 `INDEX.json`，现场核对仓库状态并按同一索引定位既有任务。正式主仓库为 `FNIT/repo`；新任务源码放 `FNIT/workspaces/<任务名>`，产物放 `FNIT/runs/<任务名>`，转移包放 `FNIT/archive/transfers`，日志放 `FNIT/logs`，不在Notebook_code根目录新增FNIT文件夹。
+- 从 manifest 和已授权环境定位数据、权重、资产及参考，优先复用，不重复下载。服务器登录使用用户本轮提供的 control-host 授权入口；连接地址、端口和账号仅保存在本地任务配置中。认证后按实际授权跳转 accelerator-a-1、compute-a-10 或 compute-a-12，复用持久连接并先核对主机、账号和目录。密码仅由用户在 WSL tmux 交互输入，不在脚本、日志或仓库保存密码、令牌和许可证内容。
+- FNIT服务器固定入口为 `/data/fnit`；先读取该目录的 `README.md`、`INDEX.md` 或 `INDEX.json`，现场核对仓库状态并按同一索引定位既有任务。正式主仓库为 `FNIT/repo`；新任务源码放 `FNIT/workspaces/<任务名>`，产物放 `FNIT/runs/<任务名>`，转移包放 `FNIT/archive/transfers`，日志放 `FNIT/logs`，不在Notebook_code根目录新增FNIT文件夹。
 - 已有运行目录和Conda环境保留原实体路径，通过统一目录链接访问；不得移动环境prefix或更换正在验证的冻结源码。`snapshots` 和 `legacy/freesurfer_synth` 为历史来源，使用前核对版本，不能当作最新main。各FNIT子任务读取同一固定索引；更新路径时同步索引，保留兼容入口直到相关任务完成。
 
 ## 2. 实现、依赖与资源
@@ -88,7 +88,7 @@
 - 分别报告执行完成、输出完整、网格质量、严格复现、优化是否引入退化、整体指标等效。整体等效阈值尚未正式确认，保持 `not_assessed`；不得事后放宽、隐藏系统偏差或删除失败项。
 - 优先复用官方重复性记录。必要时固定输入、版本、硬件、线程和种子补测；跨环境差异单列，不能一概归因于随机性。
 - 模拟数据仅用于有意义的单元测试，不替代真实 benchmark。无干净环境整例及执行/动态库/文件访问证据时，隔离部署标为未验证；PATH/ldd 不足以宣布通过。
-- 禁止向 GitHub 上传 UKB 相关字段、原始数据、具体位点或基因分析表、表型名称和 field id，以及 CFFF 服务器地址等敏感信息；公共说明只描述输入的意义、结构和格式。
+- 禁止向 GitHub 上传 UKB 相关字段、原始数据、具体位点或基因分析表、表型名称和 field id，以及 accelerator-b 服务器地址等敏感信息；公共说明只描述输入的意义、结构和格式。
 
 
 ## 7. 文档与交付

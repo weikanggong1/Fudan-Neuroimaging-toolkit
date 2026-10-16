@@ -39,7 +39,7 @@ def build(bindings_path, case_id, destination):
         "reference": {
             "container": tools["official_container"],
             "container_prefix": [tools["singularity"]["path"], "exec", "--cleanenv", "--bind",
-                                 "/cwStorage,/public,/home1", tools["official_container"]["path"]],
+                                 "/data/shared,/public,/home1", tools["official_container"]["path"]],
             "workbench": tools["official_workbench"]["container_path"],
             "workbench_sha256": tools["official_workbench"]["sha256"],
         },

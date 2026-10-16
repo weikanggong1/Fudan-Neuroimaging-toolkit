@@ -14,9 +14,9 @@ then performs one-ring closing, largest-component filtering, four erosions,
 four dilations, and another largest-component filter. It writes the same
 ordered ASCII `.label` format without invoking FreeSurfer.
 
-## Paired validation on headcw
+## Paired validation on control-host
 
-Input: official frozen `reconall_reference_gpucw1/fs_sub01` subject. Native
+Input: official frozen `reconall_reference_accelerator-a-1/fs_sub01` subject. Native
 FreeSurfer 8.2.0-1 was freshly replayed with the same bilateral calls. The
 Python API and `python -m fnit.recon_all.label_cortex_python`
 CLI were each checked. Complete output text, including header, vertex IDs,
@@ -29,7 +29,7 @@ coordinates, and stat values, is byte-for-byte equal on both hemispheres.
 
 Times are one sequential same-host process run per hemisphere with
 `OMP_NUM_THREADS=4` for native, including input and output I/O. Two focused
-operation tests pass on headcw. `benchmark_label_cortex.py` reproduces the
+operation tests pass on control-host. `benchmark_label_cortex.py` reproduces the
 Python API comparison against a native `.label` and reports exact byte and
 ordered-vertex checks.
 

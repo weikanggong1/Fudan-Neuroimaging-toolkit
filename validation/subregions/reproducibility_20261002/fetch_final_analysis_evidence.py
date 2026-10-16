@@ -9,7 +9,7 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--phase',choices=('first-stage','first-raw','complete'),required=True)
     parser.add_argument('--remote-helper',type=Path,default=Path('/tmp/fnit_subregions_remote.py'))
-    parser.add_argument('--remote-root',default='/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930')
+    parser.add_argument('--remote-root',default='/data/workspaces/freesurfer_synth/work/fnit_subregions_unified_20260930')
     parser.add_argument('--output-dir',type=Path,default=Path(__file__).parent)
     args=parser.parse_args()
     archive_path=Path('/tmp')/('fnit_final_'+args.phase+'_derived_20261002.tar.gz')

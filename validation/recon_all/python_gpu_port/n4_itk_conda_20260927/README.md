@@ -1,6 +1,6 @@
 # N4 Conda C++ 单阶段实测
 
-2026-09-27 在 headcw 用固定的真实 sub01 T1 `orig.mgz`（SHA-256 `d79723f94bfc149ff36c89094a3d734b888a03cecbc32dc57a22992e8a5e817f`，256³ uint8）测试。仓库源码经 Conda GCC 11.4.0、ITK 5.4.7 从干净目录编译；产物 SHA-256 为 `b6a50763053193e5ada2e50ca7e257c2df8d3c9b05073d55f1a06d7164e18117`。`ldd` 没有 FreeSurfer、SimpleITK 或缺失库；在 gpucw1 的 glibc 2.17 节点启动成功。没有安装或调用 FreeSurfer/ANTsPy/SimpleITK 运行包。官方程序只用于隔离对照。
+2026-09-27 在 control-host 用固定的真实 sub01 T1 `orig.mgz`（SHA-256 `d79723f94bfc149ff36c89094a3d734b888a03cecbc32dc57a22992e8a5e817f`，256³ uint8）测试。仓库源码经 Conda GCC 11.4.0、ITK 5.4.7 从干净目录编译；产物 SHA-256 为 `b6a50763053193e5ada2e50ca7e257c2df8d3c9b05073d55f1a06d7164e18117`。`ldd` 没有 FreeSurfer、SimpleITK 或缺失库；在 accelerator-a-1 的 glibc 2.17 节点启动成功。没有安装或调用 FreeSurfer/ANTsPy/SimpleITK 运行包。官方程序只用于隔离对照。
 
 | 输出 | 与同输入官方结果一致的体素 | 最大灰度差 | 仿射 / MGH 前 284 字节 |
 | --- | ---: | ---: | --- |

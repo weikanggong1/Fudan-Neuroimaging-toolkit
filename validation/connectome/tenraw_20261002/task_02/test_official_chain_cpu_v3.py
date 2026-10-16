@@ -79,7 +79,7 @@ def test_raw_mutation_rejected_after_matching_report(tmp_path):
 
 
 def cpu_report(root):
-    binary = '/public/software/apps/FSL/6.0.7.4/bin/eddy_cpu'
+    binary = '/opt/reference/FSL/6.0.7.4/bin/eddy_cpu'
     paths = {'imain':root/'raw/AP.nii.gz','mask':root/'mask/nodif_brain_mask.nii.gz',
              'acqp':root/'topup/acqparams.txt','index':root/'eddy/eddy_index.txt',
              'bvecs':root/'raw/AP.bvec','bvals':root/'raw/AP.bval',
@@ -107,7 +107,7 @@ def test_cpu_cannot_be_mislabelled_as_gpu(tmp_path,mutation):
     elif mutation=='missing_uuid':report.pop('GPU_UUID')
     elif mutation=='gpu_stage':stage['GPU']=True
     elif mutation=='cuda_env':stage['env']['CUDA_VISIBLE_DEVICES']='0'
-    else:stage['command'][0]='/public/software/apps/FSL/6.0.7.4/bin/eddy_cuda10.2'
+    else:stage['command'][0]='/opt/reference/FSL/6.0.7.4/bin/eddy_cuda10.2'
     with pytest.raises(ValueError):m.validate_eddy_solver(report,tmp_path)
 
 

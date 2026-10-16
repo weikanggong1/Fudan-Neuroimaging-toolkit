@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# 在 gpucw1 运行，只读取冻结 FNIT 网格和已保存厚度，不改整例或代码快照。
+# 在 accelerator-a-1 运行，只读取冻结 FNIT 网格和已保存厚度，不改整例或代码快照。
 set -euo pipefail
-task_root=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929
+task_root=/data/workspaces/freesurfer_synth/work/recon_standard_20260929
 volume_root="$task_root/volume_parity_20260930"
 frozen_code="$volume_root/fixes_20261001/code_1b8c36d" # 只读取既有监控脚本
 diagnostic_dir="$volume_root/fixes_20261001/thickness_workers_ab019" # 独立候选及新输出

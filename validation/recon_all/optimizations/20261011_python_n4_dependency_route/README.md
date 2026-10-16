@@ -54,14 +54,14 @@ python tools/verify_recon_genetic_profile_install.py "${installation_arguments[@
 | 缺依赖提前失败及已有 GA 入口合同 | 9 测试、21 子测试通过；13.64 秒 | 实际私有调度函数和真实 benchmark main；无 MRI/GPU 前向 |
 | 修复后离线构建 / 安装 / 入口组 | 2.883 / 0.970 / 6.893 秒 | 本地已有依赖、实际独立安装，不是干净 Conda 整例 |
 | 修复后 fresh CLI help | 1.668 / 2.165 秒 | 实际从独立安装目标导入，不是影像性能 |
-| CFFF 新目标安装 / 入口组 / 合计 | 2.488 / 14.097 / 16.588 秒；fresh CLI 2.457 / 2.959 秒 | 源码、wheel、安装目标十模块 SHA 相同；实际所选 N4 库预检通过 |
+| accelerator-b 新目标安装 / 入口组 / 合计 | 2.488 / 14.097 / 16.588 秒；fresh CLI 2.457 / 2.959 秒 | 源码、wheel、安装目标十模块 SHA 相同；实际所选 N4 库预检通过 |
 | N4 实际运行依赖 | SimpleITK 2.5.6 / ITK 5.4，扩展库 SHA `c25cd8cf7053c8224c246744e1f1bc9af12db0c95a8221b27e9546cc4511b62c` | 预检不初始化 CUDA、不改变调用者 TF32 标志 |
-| CFFF 完整 N4 同输入回归 | API 187.914 秒；decoded 体素差异、最大/P99误差为0；nu0文件字节相同 | 使用公开 sub06 冻结 orig；不是从原始 T1 的整例，也不消除旧 N4 对官方差异 |
+| accelerator-b 完整 N4 同输入回归 | API 187.914 秒；decoded 体素差异、最大/P99误差为0；nu0文件字节相同 | 使用公开 sub06 冻结 orig；不是从原始 T1 的整例，也不消除旧 N4 对官方差异 |
 | 当前整例严格复现 / 整体等效 / 600 秒 | 未评估 / 未判定 / 未达到 | 本页不能据导入成功宣称完整重建成功 |
 
 完整安全字段和原始私有收据 SHA 见 [raw_t1_failure_v1.json](raw_t1_failure_v1.json)。修复后的合同命令、代码 SHA 和 JUnit 见 [contracts.json](contracts.json)、[contracts.xml](contracts.xml)。影像阶段精度和脑图引用对应真实运行报告，不由接口测试生成。
 
-服务器的实际安装、安全字段和原始收据 SHA 见 [cfff_installation.json](cfff_installation.json)。冻结控制器 [verify_wheel.py](verify_wheel.py) 接受必填 `--workspace`、`--run-directory`，从新 workspace 的 wheel、`expected.json` 及 [verify_entry.private.py](verify_entry.private.py) 安装到新 run；该入口脚本无私有内容，验证实际模块、21项配方、所选 N4 依赖与 fresh CLI。控制器只离线安装，不构建或下载依赖；失败不写成功 COMPLETE，日志留在本次私有目录。服务器已有固定分发包恢复在另一私有 target，旧环境 prefix 未改写；1核、CUDA不可见，不能证明干净 Conda 完整运行。完整 N4 输入、输出哈希和运行状态见[阶段依赖回归](../20261011_n4_dependency_preflight/README.md)。
+服务器的实际安装、安全字段和原始收据 SHA 见 [accelerator-b_installation.json](accelerator-b_installation.json)。冻结控制器 [verify_wheel.py](verify_wheel.py) 接受必填 `--workspace`、`--run-directory`，从新 workspace 的 wheel、`expected.json` 及 [verify_entry.private.py](verify_entry.private.py) 安装到新 run；该入口脚本无私有内容，验证实际模块、21项配方、所选 N4 依赖与 fresh CLI。控制器只离线安装，不构建或下载依赖；失败不写成功 COMPLETE，日志留在本次私有目录。服务器已有固定分发包恢复在另一私有 target，旧环境 prefix 未改写；1核、CUDA不可见，不能证明干净 Conda 完整运行。完整 N4 输入、输出哈希和运行状态见[阶段依赖回归](../20261011_n4_dependency_preflight/README.md)。
 
 失败运行的显存采样请求间隔 0.5 秒，实际最大间隔 1.281 秒，共 96 样本。目标卡计算进程合计观察峰值 8,212,447,232 字节、设备占用峰值 8,227,127,296 字节；容器与宿主进程归属未解析，父子 FNIT 同时占用峰值为 `null`，不是零，也不是整例 20 GB 通过证明。PyTorch allocated/reserved 及原始采样边界在机器报告中保留。
 

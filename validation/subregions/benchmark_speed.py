@@ -34,7 +34,7 @@ def main():
     output = root / args.label
     if output.exists() or (root / (args.label + "_status.json")).exists():
         parser.error("benchmark label already exists; use a fresh label")
-    mri = root.parent / "reconall_reference_gpucw1/fs_sub01/mri"
+    mri = root.parent / "reconall_reference_accelerator-a-1/fs_sub01/mri"
     refs = root.parent / "fnit_subregions_plus_20260928"
     fraction = args.memory_fraction or (.14 if args.mode == "stage" else .23)
     command = [args.python, str(source / "validation/subregions/run_unified.py"),
@@ -42,9 +42,9 @@ def main():
                "--device", "cuda:0", "--gpu-memory-fraction", str(fraction),
                "--output-dir", str(output),
                "--reference-brainstem", str(refs / "official_brainstem/brainstemSsLabels.FSvoxelSpace.mgz"),
-               "--reference-thalamus", str(refs / "official_thalamus_gpucw1_full_sub01_20260929/ThalamicNuclei.FSvoxelSpace.mgz"),
-               "--reference-left", str(refs / "official_hippo_gpucw1_full_sub01_20260929/lh.hippoAmygLabels.FSvoxelSpace.mgz"),
-               "--reference-right", str(refs / "official_hippo_gpucw1_full_sub01_20260929/rh.hippoAmygLabels.FSvoxelSpace.mgz")]
+               "--reference-thalamus", str(refs / "official_thalamus_accelerator-a-1_full_sub01_20260929/ThalamicNuclei.FSvoxelSpace.mgz"),
+               "--reference-left", str(refs / "official_hippo_accelerator-a-1_full_sub01_20260929/lh.hippoAmygLabels.FSvoxelSpace.mgz"),
+               "--reference-right", str(refs / "official_hippo_accelerator-a-1_full_sub01_20260929/rh.hippoAmygLabels.FSvoxelSpace.mgz")]
     if args.mode == "stage":
         command += ["--t1", str(mri / "norm.mgz"), "--aseg", str(mri / "aseg.mgz"),
                     "--wmparc", str(mri / "wmparc.mgz")]

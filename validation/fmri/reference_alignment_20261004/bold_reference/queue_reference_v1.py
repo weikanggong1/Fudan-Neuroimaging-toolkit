@@ -1,7 +1,7 @@
 import argparse,datetime,hashlib,json,os,subprocess,sys,time
 from pathlib import Path
 p=argparse.ArgumentParser();p.add_argument('phase',choices=('official','candidate'));args=p.parse_args()
-r=Path('/cwStorage/home/gongwk/Notebook_code/FNIT');w=r/'workspaces/fmri_reference_alignment_20261004';code=w/'bold_reference_v1_code';run=r/'runs/fmri_reference_alignment_20261004/bold_reference_v1'
+r=Path('/data/fnit');w=r/'workspaces/fmri_reference_alignment_20261004';code=w/'bold_reference_v1_code';run=r/'runs/fmri_reference_alignment_20261004/bold_reference_v1'
 driver=code/'run_reference_benchmark.py';manifest=w/'input_manifest.private.json';source=w/'source_v1';lock=r/'workspaces/fnit_surface_ten_public_20261003/.fnit_physical_gpu_0_benchmark.lock'
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 assert sha(driver)=='a4a794fbfb26d20cd393521aa19bc510ff1bcbff2f4e5db6e39cbaec8a06b4aa'

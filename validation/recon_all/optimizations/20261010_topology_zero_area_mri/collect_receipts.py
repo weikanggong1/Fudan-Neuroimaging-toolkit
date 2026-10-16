@@ -29,7 +29,7 @@ def sanitize(value, host):
     if isinstance(value, str):
         value = value.replace(host, '<validation-host>') if host else value
         value = re.sub(r'/cpfs[0-9]+/projects-HDD/[^\s\"\x27]+?/public/[^/]+/FNIT', '<FNIT_ROOT>', value)
-        value = re.sub(r'/cwStorage/home/[^/]+/Notebook_code', '<REFERENCE_ROOT>', value)
+        value = re.sub(r'/data/shared/home/[^/]+/Notebook_code', '<REFERENCE_ROOT>', value)
         return value
     return value
 

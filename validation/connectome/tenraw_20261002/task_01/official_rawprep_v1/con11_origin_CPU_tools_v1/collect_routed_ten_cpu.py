@@ -84,8 +84,8 @@ flowchart LR
 import subprocess
 from pathlib import Path
 # 变量指向已有实际证据，新交付目录必须不存在。
-remote_task_directory = Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/task_01')
-existing_plot_python_path = '/home1/gongwk/anaconda3/bin/python'
+remote_task_directory = Path('/data/workspaces/fnit_connectome_tenraw_20261002/task_01')
+existing_plot_python_path = '/home1/benchmark-user/anaconda3/bin/python'
 subprocess.run(['python', 'collect_routed_ten_cpu.py',
  '--routes', str(remote_task_directory / 'explicit_actual_CPU_case_routes_v1.json'),
  '--prefix-delivery', str(remote_task_directory / 'CPU_reference_prefix9_delivery_v1'),

@@ -1,4 +1,4 @@
-# 四类脑亚区分割：`segment_4_subregions`
+# 四类脑亚区分割：`FNIT_fs_segment_subregions`
 
 [返回首页](../../README.md) · [完整旧文档与更早证据](../../validation/subregions/readme_archive_20261005.md)
 
@@ -7,7 +7,7 @@
 | 输入 | 单幅原生3D T1w；可选同网格粗标签/皮层/wmparc |
 | 输出 | 原生int32合并标签、110项软硬体积、可选HR/后验 |
 | 对应原软件 | FreeSurfer recon-all＋segment_subregions三命令 |
-| Python / CLI | fnit.segment_4_subregions；fnit segment-4-subregions |
+| Python / CLI | fnit.FNIT_fs_segment_subregions；fnit segment-4-subregions |
 | CPU / GPU | CPU/CUDA；PyTorch、Numba、nibabel；CUDA 可选区域并行，默认保持顺序执行 |
 
 <a id="2026-10-02-gpu-完整流程-benchmark"></a>
@@ -20,7 +20,7 @@
 
 原始T1默认共享一次 `SynthSegPlus`（普通 SynthSeg 2.0 `--parc`），生成粗标签、DK68和白质代理，再用TorchFAST校正/归一化及图谱拟合。已有粗标签时按已准备T1直接拟合，跳过自动强度与1mm网格准备；同阶段对照用独立官方norm/aseg/wmparc。两种输入范围不可混为同一个benchmark。
 
-本流程不调用 `prepare_subregion_alignment_target` 或 `reflect_atlas_header`。那两个函数属于 SAMSEG/`mri_robust_register` 的独立对齐前处理：前者需要已有标签并输出二值配准目标，后者只反射 atlas 头几何。右侧海马/杏仁核 recipe 内部对 soft-Dice 对齐做了等价的 affine 反射，但不使用这两个准备函数，也不执行 robust rigid/affine。若业务需要先做该前处理，再运行本分割，应由上层流程显式串联，不能把准备图像当作 `coarse_segmentation` 或分割输出。
+当前 `FNIT_fs_segment_subregions` 复用原有 GEMS 分割流程。右侧海马／杏仁核在 recipe 内处理 soft-Dice 对齐所需的 affine 反射；默认流程不执行 robust rigid／affine。独立配准使用 [FNIT_mri_robust_register](../robust_register/README.md)，其输出不能直接当作 `coarse_segmentation`。此前独立的对齐准备 helper 已从当前函数库移除，历史实验记录仍按各自冻结版本保留。
 
 ```mermaid
 flowchart LR
@@ -39,9 +39,9 @@ flowchart LR
 ## 2. Python 调用
 
 ```python
-from fnit import segment_4_subregions
+from fnit import FNIT_fs_segment_subregions
 
-subregion_result = segment_4_subregions(
+subregion_result = FNIT_fs_segment_subregions(
     t1="/absolute/path/sub-01_T1w.nii.gz",       # 输入：一张原始三维 T1
     atlas_root=None,                            # 输入：None 使用 FNIT 图谱缓存
     structures="all",                          # 输入：默认全部结构，也可选择单项或列表
@@ -134,7 +134,7 @@ sub-01_subregions/
 
 ```python
 selected_structures = ["brainstem", "thalamus"]  # 只拟合脑干和双侧丘脑
-partial_subregion_result = segment_4_subregions(
+partial_subregion_result = FNIT_fs_segment_subregions(
     t1="/data/sub01_T1w.nii.gz",  # 一幅原始3D T1w
     atlas_root="/data/subregion_atlases",  # 已准备并校验的图谱根目录
     structures=selected_structures,  # 固定结构名称列表
@@ -269,6 +269,8 @@ segment_subregions hippo-amygdala --cross sub01 --sd reference/subjects --thread
 脑干拟合约占 API **91%**；优化后后验和拟合状态相同，API 降低 **8.76%**，但仍未达到官方速度。原始 T1 全亚区 FNIT **104.02 min**；原网格 4/105、高分辨率 5/105 分区通过，官方同范围完整时钟缺失。GPU 本轮没有新的完整端到端时钟。见 [统一 benchmark 索引](../BENCHMARK_INDEX.md)。
 
 ## 6. 最近版本和 benchmark
+
+- 2026-10-16：公开入口统一为 `FNIT_fs_segment_subregions`，与既有分割函数为同一对象；科学计算、默认参数和结果结构保持。独立准备 helper 从当前库删除，不属于该分割的计算路径。本次命名变更不重算历史 benchmark。
 
 成熟 GEMS Gaussian 子函数曾在未提供超参数时错误广播 `[C,M] / [C]`；已改为各类、各模态除以对应样本质量，返回 `[C,M]` 均值。现有四个亚区 recipe 的强度拟合提供超参数，合成拟合使用固定 Gaussian，因此不进入该错误分支。CPU 固定 EM 数据缓存无速度或内存收益，裁剪插值候选使部分 GPU 亚区退步，两者未接入默认；实际状态和被撤回补丁见[本轮 GEMS 记录](../../validation/smri_cpu/gems_fixes_20261004/README.md)。
 

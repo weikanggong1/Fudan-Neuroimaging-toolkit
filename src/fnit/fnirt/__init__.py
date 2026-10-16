@@ -10,6 +10,9 @@ from .io import (
 
 
 def __getattr__(name):
+    if name == "FNIT_fnirt":
+        from .standalone import run_fnirt
+        return run_fnirt
     if name in {
         "FSL_SOURCE_VERSIONS",
         "FNIRTConfig",
@@ -41,4 +44,5 @@ __all__ = [
     "make_fsl_coefficient_image",
     "save_fsl_coefficients",
     "spm_like_mean",
+    "FNIT_fnirt",
 ]

@@ -42,7 +42,7 @@ their stored coordinates still satisfy the vertexwise tolerance above. The
 Python geometric detector sees two additional partner faces on the left,
 but those faces add no vertices: both defect components and all four diagnostic
 maps are exact. This difference does not establish full algorithm parity on
-other inputs. The [JSON report](topology_preflight_headcw_report.json) records
+other inputs. The [JSON report](topology_preflight_control-host_report.json) records
 input/reference SHA-256 values and exact counts. The
 [validator](validate_topology_preflight.py) recomputes the comparisons from
 the frozen files; [focused tests](../../../tests/recon_all/test_topology_preflight_python.py)
@@ -52,7 +52,7 @@ For the next boundary, a diagnostic-only `qsort` interposer captured the native
 genetic search. These native calls took 3.92 s (LH) and 5.17 s (RH). The
 [edge-table validator](validate_topology_edge_table.py) confirms every Python
 endpoint pair and `used` flag in original candidate order against the native
-table; the [JSON report](topology_edge_table_headcw_report.json) records the
+table; the [JSON report](topology_edge_table_control-host_report.json) records the
 capture hashes. The diagnostic interposer is
 [`topology_capture_edges.c`](topology_capture_edges.c). The alternate saved
 native sphere image is not the exact geometry of this `-ga` run: its small

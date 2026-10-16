@@ -24,7 +24,7 @@ CPU run used source SHA-256
 `8043810b543078220a876c1490b7b00d6b43560c02e248dca4e4af4222bd2284`;
 the current chain additionally writes a voxel-space Talairach LTA.
 
-A headcw CPU run used the original T1 SHA-256
+A control-host CPU run used the original T1 SHA-256
 `f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a`,
 SynthStrip weight `37417f802196186441aae3e7f385d94f8a98c64a88acaeaa2723af995c653e33`,
 SynthMorph affine weight `1ac5304b683036e5177f5b4ad38fa09fcbbe7883e742d6fa5bdaedd0e619ced6`,
@@ -32,7 +32,7 @@ and MNI305 stripped template
 `fff93f13255a8d393c0e787fbfcfaf5eb379e88e955bda7e04e31552568878a4`.
 The latter was copied to an external asset directory and checked against the
 [verified asset manifest](ASSETS_VALIDATION.md). The asset downloader's
-separate network attempt failed in this headcw session; the local checked
+separate network attempt failed in this control-host session; the local checked
 copy provided the exact required bytes.
 
 | Output | Archived unmodified official | Archived hybrid |
@@ -67,4 +67,4 @@ was 0.00012255, and the maximum displacement across eight input-grid corners
 was 0.0004203 mm. Its determinant gives eTIV 1,310,267.038702 mm³ versus
 1,310,266.552537 mm³ officially (absolute difference 0.486165 mm³). See
 [the transform report](connected_talairach_voxel_lta_20260926.json) and
-[replay comparator](experimental/compare_talairach_voxel_lta.py). The updated one-call API has been rerun from a new empty subject folder on gpucw1; its SynthStrip inference took 9.80 s and reproduced the official voxel data. The earlier CPU voxel-LTA comparison above remains a separate historical replay.
+[replay comparator](experimental/compare_talairach_voxel_lta.py). The updated one-call API has been rerun from a new empty subject folder on accelerator-a-1; its SynthStrip inference took 9.80 s and reproduced the official voxel data. The earlier CPU voxel-LTA comparison above remains a separate historical replay.

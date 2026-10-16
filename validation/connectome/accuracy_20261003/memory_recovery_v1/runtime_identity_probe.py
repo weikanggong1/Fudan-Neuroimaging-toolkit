@@ -8,9 +8,9 @@ import sys
 import time
 
 sys.dont_write_bytecode = True
-OLD = Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002')
-NEW = Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1')
-ORIGINAL = '/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/bin/python'
+OLD = Path('/data/workspaces/fnit_connectome_tenraw_20261002')
+NEW = Path('/data/workspaces/fnit_connectome_accuracy_20261003_v1')
+ORIGINAL = '/data/workspaces/fnit_conda_env_956b1a9/bin/python'
 MONITOR = str(OLD/'nvml_monitor_runtime_v1/venv/bin/python')
 UUID = 'GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba'
 

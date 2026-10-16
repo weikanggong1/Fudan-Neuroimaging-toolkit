@@ -24,7 +24,7 @@ def digest(path):
 
 
 def main():
-    root=Path('/cwStorage/home/gongwk/Notebook_code/FNIT')
+    root=Path('/data/fnit')
     workspace=root/'workspaces/smri_cpu_20261004';runs=root/'runs/smri_cpu_20261004'
     output=runs/'remaining_20261004/synth/sr_domains_node7_v1';output.mkdir(exist_ok=True)
     jobs=[];definitions={};old_cases={}
@@ -38,7 +38,7 @@ def main():
            'real_epi_first_channel_sr','real_epi_npz_sr')
     torch.set_num_threads(8)
     report={'scope':'candidate-only complete real API on six unique inputs; original saved reference, no original rerun',
-            'host':'nodecw7','cpu_affinity':sorted(os.sched_getaffinity(0)),
+            'host':'compute-a-7','cpu_affinity':sorted(os.sched_getaffinity(0)),
             'torch_threads':torch.get_num_threads(),'torch_version':torch.__version__,
             'source_sha256':{p.name:digest(p) for p in (Path(_cpu_inference.__file__).parent/'model.py',
                 Path(_cpu_inference.__file__),Path(_cpu_inference.__file__).parent/'_cpu_math.py')},

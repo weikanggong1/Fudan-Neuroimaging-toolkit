@@ -1,4 +1,6 @@
-# TorchFAST：T1 组织分割与偏置校正
+# FNIT_fslfast
+
+> 统一 Python 入口：[`FNIT_fslfast`](../API_REFERENCE.md)，从 `fnit` 导入。下文配置、结果类型和细分算子保留高级兼容接口。
 
 [返回首页](../../README.md) · [完整旧文档与更早证据](../../validation/fast/readme_archive_20261005.md)
 
@@ -25,9 +27,9 @@
 ## 2. Python 调用
 
 ```python
-from fnit.fast import TorchFAST
+from fnit import FNIT_fslfast
 
-tissue_segmentation_model = TorchFAST(
+tissue_segmentation_model = FNIT_fslfast(
     device="cuda:0",  # 第一张可见 CUDA GPU；也可用 "cpu"
     threads=1,  # PyTorch CPU 线程数
     execution="fsl",  # 按 FAST4 的顺序更新组织后验与混合组织标签

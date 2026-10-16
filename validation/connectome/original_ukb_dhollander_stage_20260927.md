@@ -53,6 +53,6 @@ dwi2response dhollander corrected.mif wm.txt gm.txt csf.txt \
 | 张量 FA 图 | 2.13e−11 | 5.96e−8 |
 | 两级单纤维指标图 | 4.00e−8 / 1.19e−7 | 2.38e−7 / 3.58e−7 |
 
-MRtrix 完整命令（8 线程，保留中间图）耗时 27.04 s、最大 RSS 0.614 GiB；当前版 FNIT 在 nodecw10 的 CPU 8 线程已载入张量后的核心计算耗时 3.197 s；此前 H100 时间和进程 RSS 属于旧版求解器，已撤下。官方完整命令与 FNIT 核心计时边界不同，不据此宣称整链加速。聚合数据见[JSON](original_ukb_dhollander.public.json)；公开配对 DWI 的脑图及另一份完全一致的默认掩膜比较见[ds004666 示例](default_dwi_mask_stage_20260927.md)。受试者编号、私有路径、输入哈希、原始图像和逐体素数据仅保留在授权服务器。
+MRtrix 完整命令（8 线程，保留中间图）耗时 27.04 s、最大 RSS 0.614 GiB；当前版 FNIT 在 compute-a-10 的 CPU 8 线程已载入张量后的核心计算耗时 3.197 s；此前 H100 时间和进程 RSS 属于旧版求解器，已撤下。官方完整命令与 FNIT 核心计时边界不同，不据此宣称整链加速。聚合数据见[JSON](original_ukb_dhollander.public.json)；公开配对 DWI 的脑图及另一份完全一致的默认掩膜比较见[ds004666 示例](default_dwi_mask_stage_20260927.md)。受试者编号、私有路径、输入哈希、原始图像和逐体素数据仅保留在授权服务器。
 
 该阶段只证明掩膜和 Dhollander 响应；全脑 FOD、mtnormalise、解剖、追踪、SIFT2 与最终连接矩阵需分别通过同输入检查。

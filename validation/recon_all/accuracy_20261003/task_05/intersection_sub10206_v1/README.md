@@ -4,7 +4,7 @@
 
 本报告对应公开真实 T1 `ds000030_sub-10206` 的冻结基线 `816e5610417a4c587caf321049438a9554139016`，不是任务5候选整例。输入 SHA 为 `1d1f71a21c9415aa8a91c55b8505eab16c0b091ad71263f0da976839a6bc9ab4`。失败回执保留 exit 1；138项文件齐全不能代替几何质量通过。整体等效仍为 `not_assessed`，没有修改门槛或生产算法。
 
-轻量诊断在已授权 gpucw1 运行，隐藏 CUDA，CPU线程预算2；只读已有表面，不重新放置、不修补被试、不启动整例。影像和表面原文件留在服务器，报告仅保存哈希、面/顶点编号、面积和数值见证。该主机安装了官方 benchmark 软件，本次不是物理隔离部署验证。
+轻量诊断在已授权 accelerator-a-1 运行，隐藏 CUDA，CPU线程预算2；只读已有表面，不重新放置、不修补被试、不启动整例。影像和表面原文件留在服务器，报告仅保存哈希、面/顶点编号、面积和数值见证。该主机安装了官方 benchmark 软件，本次不是物理隔离部署验证。
 
 | 同一冻结Python检测器，各自原网格 | 相交面 / 面对 | 零面积面 | 最小面积 mm² | 精确有理数严格穿越面对 |
 |---|---:|---:|---:|---:|
@@ -41,8 +41,8 @@ Python检测器和生产placement谓词在全部30个报告面对上均判断相
 
 ```bash
 # 在本报告目录执行，复用已认证SSH；各路径先按FNIT统一索引复验。
-fnit_ssh=/tmp/fnit-recon-five-20261002/coordination/ssh_gpucw1.sh
-fnit_legacy_root=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929
+fnit_ssh=/tmp/fnit-recon-five-20261002/coordination/ssh_accelerator-a-1.sh
+fnit_legacy_root=/data/workspaces/freesurfer_synth/work/recon_standard_20260929
 fnit_accuracy_root="$fnit_legacy_root/accuracy_20261003"  # 保留现有冻结实体
 fnit_python="$fnit_legacy_root/fnit_main_env/bin/python" # 原实际prefix
 # 只读保存网格，标准输出写新的报告路径，不覆盖已有失败记录。

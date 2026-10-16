@@ -26,7 +26,7 @@ Connected Python `smoothwm → inflated → qsphere` runs now match the official
 
 ## Timing and scope
 
-A [sequential same-input LH pair](inflate_qsphere_paired_lh_headcw.json) on headcw took **6.986 s native and 41.710 s Python** for full `mris_inflate` CLI execution, including input/output I/O and process startup. Both output geometries and volume metadata were exactly equal. This is one pair, so it estimates about **6.0× slower Python CPU execution**, not a stable distribution. The separate corrected LH/RH Python calls that ran concurrently took 41.34/46.44 s; the RH value is not a paired native comparison. This stage remains CPU-only and has been checked on one T1. Other surface statuses, ripped vertices, degenerate-normal perturbations, optional energy terms, and multi-subject parity remain unverified. It has not yet been connected to a native-free recon-all runner.
+A [sequential same-input LH pair](inflate_qsphere_paired_lh_control-host.json) on control-host took **6.986 s native and 41.710 s Python** for full `mris_inflate` CLI execution, including input/output I/O and process startup. Both output geometries and volume metadata were exactly equal. This is one pair, so it estimates about **6.0× slower Python CPU execution**, not a stable distribution. The separate corrected LH/RH Python calls that ran concurrently took 41.34/46.44 s; the RH value is not a paired native comparison. This stage remains CPU-only and has been checked on one T1. Other surface statuses, ripped vertices, degenerate-normal perturbations, optional energy terms, and multi-subject parity remain unverified. It has not yet been connected to a native-free recon-all runner.
 
 ## Exact CPU kernel optimization
 
@@ -39,7 +39,7 @@ and volume geometry for both hemispheres. The [structured bilateral
 report](inflate_qsphere_numba_optimized_report.json) stores input, output,
 and implementation SHA-256 values.
 
-One independent headcw CLI observation took **30.31 s LH** and **24.25 s RH**
+One independent control-host CLI observation took **30.31 s LH** and **24.25 s RH**
 for inflation, including interpreter startup and I/O. The earlier clean LH
 native/Python pair was 6.986/41.710 s using the previous Python source. These
 new calls occurred under different shared-host load, so the change in observed

@@ -6,7 +6,7 @@ Reference source: FreeSurfer 8.2 at commit `d932c45b7941662ea380a05efef580568b98
 
 ## Frozen same-input validation
 
-Host: `headcw`, subject `fs_sub01`. Inputs are under `/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_main_20260924`:
+Host: `control-host`, subject `fs_sub01`. Inputs are under `/data/workspaces/freesurfer_synth/work/reconall_main_20260924`:
 
 | Input | SHA-256 |
 | --- | --- |
@@ -20,8 +20,8 @@ The freshly run official command was:
 ```bash
 source /etc/profile
 module load freesurfer
-export FS_LICENSE=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_external_models_20260925/private_license.txt
-B=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_main_20260924
+export FS_LICENSE=/data/workspaces/freesurfer_synth/work/reconall_external_models_20260925/private_license.txt
+B=/data/workspaces/freesurfer_synth/work/reconall_main_20260924
 S=$B/single_subjects/fs_sub01/mri
 mri_ca_normalize -c ctrl_pts.mgz -mask "$S/brainmask.mgz" "$S/nu.mgz" \
   "$B/bundle/average/RB_all_2020-01-02.gca" "$S/transforms/talairach.lta" norm.mgz

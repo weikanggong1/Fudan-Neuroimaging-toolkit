@@ -126,7 +126,7 @@ def main() -> None:
         if " = " in line:
             key, value = line.split(" = ", 1)
             definitions[key] = shlex.split(value)
-    compiler = "/home1/gongwk/anaconda3/bin/x86_64-conda-linux-gnu-g++"
+    compiler = "/home1/benchmark-user/anaconda3/bin/x86_64-conda-linux-gnu-g++"
     compiled = args.out / "mris_place_surface_border_probe.o"
     command = [compiler]
     for key in ("CXX_DEFINES", "CXX_INCLUDES", "CXX_FLAGS"):

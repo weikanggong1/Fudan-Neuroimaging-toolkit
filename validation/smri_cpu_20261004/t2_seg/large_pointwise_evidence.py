@@ -35,7 +35,7 @@ def main():
                       "cpu_threads": 8, "cpu_affinity": "32,36,40,44,48,52,56,60",
                       "gpu_memory_budget_bytes": 20_000_000_000},
         "failure": {
-            "scope": "large CPU 1x1x1 segmentation likelihood on nodecw10",
+            "scope": "large CPU 1x1x1 segmentation likelihood on compute-a-10",
             "oneDNN_version": "3.5.3", "torch_version": "2.5.1",
             "input_channels": 24, "output_channels": 33,
             "output_logical_bytes": 2_452_488_192,
@@ -167,7 +167,7 @@ def main():
         if not report["gpu_allocator_gate_passed"]:
             report["gpu_status"] = "failed"
     payload = json.dumps(report, indent=2, ensure_ascii=False) + "\n"
-    for private_text in ("/cwStorage/", "/home/", "/mnt/", "sub-02", "FS_LICENSE"):
+    for private_text in ("/data/shared/", "/home/", "/mnt/", "sub-02", "FS_LICENSE"):
         if private_text in payload:
             raise ValueError("Private field in public report: " + private_text)
     args.output.parent.mkdir(parents=True, exist_ok=True)

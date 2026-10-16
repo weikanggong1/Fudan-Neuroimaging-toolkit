@@ -4,7 +4,7 @@
 
 本目录从 Git `b9068f21bfde09829292551488bbd61a4444c565` 的独立 worktree 汇总最终证据，只读取实际 JSON/PNG。工具使用 Python 标准库，保留原指标值、原门槛和逐项判定，仅新增通过计数与描述性中位数。正式 12 次 raw 调用与十例 CPU full_cohort 已全部结束，两项最终工具真实 exit 0；生产、冻结源码、配置、科学比较工具和原运行控制器未修改。
 
-统一服务器入口是 `/cwStorage/home/gongwk/Notebook_code/FNIT`，先读取其中 README/INDEX。本任务索引为 `FNIT/workspaces/fnit_connectome_accuracy_20261003_v1`，它与原 `Notebook_code/fnit_connectome_accuracy_20261003_v1` 是同一实体；上一轮 tenraw 链接也已核对，见[只读统一入口收据](unified_entry_receipt.json)。正在运行的任务、freeze 与实际 Conda prefix 保持原路径，原收据字节未改。
+统一服务器入口是 `/data/fnit`，先读取其中 README/INDEX。本任务索引为 `FNIT/workspaces/fnit_connectome_accuracy_20261003_v1`，它与原 `Notebook_code/fnit_connectome_accuracy_20261003_v1` 是同一实体；上一轮 tenraw 链接也已核对，见[只读统一入口收据](unified_entry_receipt.json)。正在运行的任务、freeze 与实际 Conda prefix 保持原路径，原收据字节未改。
 
 ```mermaid
 flowchart TD
@@ -37,9 +37,9 @@ import os
 import subprocess
 from pathlib import Path
 
-accuracy_root_directory = Path("/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1")
+accuracy_root_directory = Path("/data/workspaces/fnit_connectome_accuracy_20261003_v1")
 extraction_directory = accuracy_root_directory / "final_cohort_summary_v1"
-anaconda_python_executable = "/cwStorage/home/gongwk/anaconda3/bin/python3.11"  # 已有 CPU 解释器
+anaconda_python_executable = "/data/user/anaconda3/bin/python3.11"  # 已有 CPU 解释器
 extraction_command = [
     anaconda_python_executable,
     str(extraction_directory / "extract_completed_cohort.py"),
@@ -67,9 +67,9 @@ subprocess.run(extraction_command, env=cpu_environment, check=True)
 以下两条命令均已在实际 12 次调用和 full_cohort 结束后执行。实际顺序为来源核验、原报告摘录；[原命令与 exit 0](actual_completed/waiter_status.json) 保留完整 argv。目标现已存在，不能直接重复执行这些命令。
 
 ```bash
-accuracy_root_directory=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1
+accuracy_root_directory=/data/workspaces/fnit_connectome_accuracy_20261003_v1
 # 先核验最终来源；其通过不代替精度、时间或显存判定。
-/cwStorage/home/gongwk/anaconda3/bin/python3.11 \
+/data/user/anaconda3/bin/python3.11 \
   "$accuracy_root_directory/final_source_acceptance_v1/verify_source_acceptance.py" \
   --source "$accuracy_root_directory/formal_frozen_v1/candidate" \
   --configuration "$accuracy_root_directory/formal_frozen_v1/accuracy_configuration.json" \
@@ -78,7 +78,7 @@ accuracy_root_directory=/cwStorage/home/gongwk/Notebook_code/fnit_connectome_acc
   --output "$accuracy_root_directory/final_source_acceptance_v1/final_completed_source_receipt.json"
 
 CUDA_VISIBLE_DEVICES='' PYTHONDONTWRITEBYTECODE=1 \
-  /cwStorage/home/gongwk/anaconda3/bin/python3.11 \
+  /data/user/anaconda3/bin/python3.11 \
   "$accuracy_root_directory/final_cohort_summary_v1/extract_completed_cohort.py" \
   --configuration "$accuracy_root_directory/formal_frozen_v1/accuracy_configuration.json" \
   --analysis-report "$accuracy_root_directory/root_matrix_analysis_v3/full_cohort/report.json" \
@@ -88,7 +88,7 @@ CUDA_VISIBLE_DEVICES='' PYTHONDONTWRITEBYTECODE=1 \
 
 最终目录已经存在时拒绝覆盖；原报告缺文件、SHA 不符、来源/CLI/输入/已完成 FS 绑定不符、field 缺失及全队列未完成均失败。baseline `CON01/03` 在完整报告中真实为 `assessed`；另外八例未排期 baseline 的计时仍 `not_assessed`。
 
-[wait_for_completed_cohort.py](wait_for_completed_cohort.py) 是新增的 CPU 部署等候器，nodecw10 原 PID 107317，55 秒读取一次实际状态。它只在 raw `execution_completed`、full_cohort `analysis_completed` 和十例/12 次覆盖齐全后顺序执行原工具；两个工具之后才评原显存资格。显存门失败继续保留科学摘录，不能解释为显存验收通过。两原工具字节始终未改。
+[wait_for_completed_cohort.py](wait_for_completed_cohort.py) 是新增的 CPU 部署等候器，compute-a-10 原 PID 107317，55 秒读取一次实际状态。它只在 raw `execution_completed`、full_cohort `analysis_completed` 和十例/12 次覆盖齐全后顺序执行原工具；两个工具之后才评原显存资格。显存门失败继续保留科学摘录，不能解释为显存验收通过。两原工具字节始终未改。
 
 ## 4. 原软件调用与映射
 
@@ -98,7 +98,7 @@ population 的 `tdi` 保留原定义：存储点的 world-to-grid `np.rint` poin
 
 ## 5. 最新实际结果、时间、显存与原图
 
-nodecw10 / gongwk 的已有 Anaconda Python **3.11.7** 完成最终核验与摘录。extractor SHA 为 `2b781c2f147c5b1282f877ac3764236c7c935ea4d91aa2736c4ee8b2d514274d`，source verifier 为 `9d004bd1832fa6ad979e9e0452ffcd1ad5ba201e0a92a4ab03059a88fd662e08`。候选及现存测试 checkout 的 1,211 文件指纹均为 `a27fe1ad0aca34c23b62017dc0bacb6b7a4c44d3423bf855a840509ffc1b6e82`；12 次 producer 的完整 before/after 清单逐项匹配，见[最终来源收据](actual_completed/final_completed_source_receipt.json)。测试期间的历史 before/after 未记录这一原界限继续保留，不用现存 checkout 补造历史。
+compute-a-10 / benchmark-user 的已有 Anaconda Python **3.11.7** 完成最终核验与摘录。extractor SHA 为 `2b781c2f147c5b1282f877ac3764236c7c935ea4d91aa2736c4ee8b2d514274d`，source verifier 为 `9d004bd1832fa6ad979e9e0452ffcd1ad5ba201e0a92a4ab03059a88fd662e08`。候选及现存测试 checkout 的 1,211 文件指纹均为 `a27fe1ad0aca34c23b62017dc0bacb6b7a4c44d3423bf855a840509ffc1b6e82`；12 次 producer 的完整 before/after 清单逐项匹配，见[最终来源收据](actual_completed/final_completed_source_receipt.json)。测试期间的历史 before/after 未记录这一原界限继续保留，不用现存 checkout 补造历史。
 
 | 实际最终步骤 | 执行状态 | 时间（秒） |
 | --- | --- | ---: |

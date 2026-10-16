@@ -1,6 +1,6 @@
 # 上游 MRI 与左侧原始表面诊断
 
-核对时间：2026-09-27 11:47 CST，gpucw1。候选为 `reconall_conda_cpp_e2e_20260927/subjects/sub01`，官方参考为 `reconall_benchmark_pair_ac_20260924/official_subjects/a_official`。两者使用同一 T1；下表是**完整流水线输出之间**的比较，不能据此判断替换的某个 C++ 命令与官方同输入算法是否一致。候选仍在运行，本报告只覆盖当时已有的文件。
+核对时间：2026-09-27 11:47 CST，accelerator-a-1。候选为 `reconall_conda_cpp_e2e_20260927/subjects/sub01`，官方参考为 `reconall_benchmark_pair_ac_20260924/official_subjects/a_official`。两者使用同一 T1；下表是**完整流水线输出之间**的比较，不能据此判断替换的某个 C++ 命令与官方同输入算法是否一致。候选仍在运行，本报告只覆盖当时已有的文件。
 
 ## 体积文件
 

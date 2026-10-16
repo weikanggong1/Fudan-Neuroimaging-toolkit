@@ -162,7 +162,7 @@ def main():
         "excluded": "Private zero-weight prototype was not merged or used for these timings",
     }
     serialized = json.dumps(report, indent=2, allow_nan=False) + "\n"
-    assert all(value not in serialized for value in ("/cwStorage/", "/mnt/c/Users/", ".sock"))
+    assert all(value not in serialized for value in ("/data/shared/", "/mnt/c/Users/", ".sock"))
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(serialized)
     if args.tables:

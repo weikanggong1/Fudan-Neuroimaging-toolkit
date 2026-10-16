@@ -24,7 +24,7 @@ def __getattr__(name):
     if name == "FLIRTResult":
         from .types import FLIRTResult
         return FLIRTResult
-    if name == "run_flirt":
+    if name in {"run_flirt", "FNIT_flirt"}:
         from .standalone import run_flirt
         return run_flirt
     raise AttributeError(name)
@@ -43,4 +43,5 @@ __all__ = [
     "voxel_to_fsl_scaled_mm",
     "world_to_flirt_affine",
     "run_flirt",
+    "FNIT_flirt",
 ]

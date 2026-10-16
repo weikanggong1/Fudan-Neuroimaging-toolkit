@@ -1,13 +1,13 @@
 # Isolated FreeSurfer 8.2 `mris_place_surface` CPU profiling
 
-This is a research experiment in `work/native_place_profile_20260924`. It is not part of the published GPU recon-all bundle. The main certification on gpucw1 GPU1 was not touched. The instrumentation and comparison scripts are included beside this report; the original FreeSurfer source, binaries, and MRI inputs remain outside Git.
+This is a research experiment in `work/native_place_profile_20260924`. It is not part of the published GPU recon-all bundle. The main certification on accelerator-a-1 GPU1 was not touched. The instrumentation and comparison scripts are included beside this report; the original FreeSurfer source, binaries, and MRI inputs remain outside Git.
 
 ## Real-input replay and build parity
 
-- Source: FreeSurfer commit `d932c45b7941662ea380a05efef580568b98d41a` (`utils/mrisurf_mri.cpp`, `utils/mrisurf_timeStep.cpp`). The installed reference is `/public/software/apps/Freesurfer/8.2.0-1/bin/mris_place_surface` (SHA-256 `67139c3590f961f879a4214cd01f173b42986c7b178d1851dfa3f08e8acf12aa`).
+- Source: FreeSurfer commit `d932c45b7941662ea380a05efef580568b98d41a` (`utils/mrisurf_mri.cpp`, `utils/mrisurf_timeStep.cpp`). The installed reference is `/opt/reference/Freesurfer/8.2.0-1/bin/mris_place_surface` (SHA-256 `67139c3590f961f879a4214cd01f173b42986c7b178d1851dfa3f08e8acf12aa`).
 - Input: actual sub-01 `wm.mgz`, `brain.finalsurfs.mgz`, `aseg.presurf.mgz`, `lh.orig`, and `autodet.gw.stats.lh.dat`; same `WhitePreAparc lh` command and 4 threads as the original recon-all log. `evidence/inputs.sha256` records the copies.
-- The installed reference binary replay took 98.42 s on headcw. Its `lh.white.preaparc` 106,622 vertices and 213,240 faces, vertex coordinates and ordered faces, and `mrisps.wpa.mgz` voxels exactly matched the original sub-01 outputs (`evidence/original_vs_official.json`).
-- The uninstrumented binary rebuilt from the source on headcw took 118.24 s. Its faces and `mrisps.wpa.mgz` voxels matched the official binary, but 98,057/106,622 vertex coordinates differed (maximum 0.6300 mm, P99 0.0070 mm; `evidence/input_vs_clean.json`). Thus this compiler/toolchain build is **not numerically identical to the installed FreeSurfer surface output**. The toolchain uses conda GCC 11.2, C++17, the local ITK 5.3 build, and conda libtiff 6. Timings measured in the instrumented build must be interpreted as *that rebuild's* hotspots; they do not establish exact runtime fractions of the installed binary or qualify a CUDA replacement.
+- The installed reference binary replay took 98.42 s on control-host. Its `lh.white.preaparc` 106,622 vertices and 213,240 faces, vertex coordinates and ordered faces, and `mrisps.wpa.mgz` voxels exactly matched the original sub-01 outputs (`evidence/original_vs_official.json`).
+- The uninstrumented binary rebuilt from the source on control-host took 118.24 s. Its faces and `mrisps.wpa.mgz` voxels matched the official binary, but 98,057/106,622 vertex coordinates differed (maximum 0.6300 mm, P99 0.0070 mm; `evidence/input_vs_clean.json`). Thus this compiler/toolchain build is **not numerically identical to the installed FreeSurfer surface output**. The toolchain uses conda GCC 11.2, C++17, the local ITK 5.3 build, and conda libtiff 6. Timings measured in the instrumented build must be interpreted as *that rebuild's* hotspots; they do not establish exact runtime fractions of the installed binary or qualify a CUDA replacement.
 
 ## Instrumentation
 

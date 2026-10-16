@@ -77,7 +77,7 @@ mris_fix_topology -ga -seed 1234 -threads 4 reference_subject lh
 
 公开 CC0 ds000114/sub-07/ses-test 左半球，冻结自产 `79a41cdd` 上游。完整候选 110,534 顶点、216,860 面，99 个 patch 顶点实际触及 **261 个面**。自产面法向 783 个分量、完整 21×19×16 下游有向距离均与同输入参考逐位一致，最大/P99 误差为 0；自身重复及两次参考的相关字段也精确。
 
-在 CFFF Xeon Platinum 8369B、四线程、CPU affinity 120–123：
+在 accelerator-b Xeon Platinum 8369B、四线程、CPU affinity 120–123：
 
 | 已测范围 | 秒 |
 | --- | ---: |

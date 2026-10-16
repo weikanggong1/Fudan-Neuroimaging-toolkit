@@ -10,7 +10,7 @@ The source only relabels cerebral WM (2/41) and WM hypointensity IDs. `--label-w
 
 ## Frozen inputs
 
-All paths below are under `/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_main_20260924/single_subjects/fs_sub01`; the isolated native and Python results are in `/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_python_gpu_20260925/wmparc_ref`.
+All paths below are under `/data/workspaces/freesurfer_synth/work/reconall_main_20260924/single_subjects/fs_sub01`; the isolated native and Python results are in `/data/workspaces/freesurfer_synth/work/reconall_python_gpu_20260925/wmparc_ref`.
 
 | Relative input path | SHA-256 |
 | --- | --- |
@@ -26,14 +26,14 @@ The official native command also reads `surf/lh.pial` (`f7c61a103d48497d38fb46ff
 
 ## Result and timing
 
-A fresh headcw native rerun matched the existing official `mri/wmparc.mgz` at **0 / 16,777,216** voxels. The Python result also matched that original official output at **0 / 16,777,216** voxels. Its Fortran-order voxel SHA-256 is `5f00cb7ff68868ea47f21c7286dd5473dca1264c1f4e35ce4ded05977578d4a5`. More strongly, the **entire decompressed MGH payload**, including geometry and footer metadata, is byte-identical to the original official output. Gzip container bytes differ: Python file SHA-256 `3021e5b6dcdc2804f32ebf03706100eee7c84de1ad182e97f1e5db7d201e9354`, original official file SHA-256 `fc764c8396989984c550319240a96a06134e4a7708579a8dfae1321a9e77da2c`.
+A fresh control-host native rerun matched the existing official `mri/wmparc.mgz` at **0 / 16,777,216** voxels. The Python result also matched that original official output at **0 / 16,777,216** voxels. Its Fortran-order voxel SHA-256 is `5f00cb7ff68868ea47f21c7286dd5473dca1264c1f4e35ce4ded05977578d4a5`. More strongly, the **entire decompressed MGH payload**, including geometry and footer metadata, is byte-identical to the original official output. Gzip container bytes differ: Python file SHA-256 `3021e5b6dcdc2804f32ebf03706100eee7c84de1ad182e97f1e5db7d201e9354`, original official file SHA-256 `fc764c8396989984c550319240a96a06134e4a7708579a8dfae1321a9e77da2c`.
 
-On the same headcw host and fixed input, the complete Python step took **5.70 s**, versus **9.69 s** for the fresh native rerun (`--threads 4`). Both include input and output. This is one paired run, not a multi-subject speed estimate. The Python work ran on CPU; its PyTorch normal computation also used CPU. The test `test_surf2volseg_wm_python.py` checks lateralization, the 5 mm cutoff, future WMSA unknown labels, and preservation of unrelated labels. The fixed subject does not test native nearest-annotation recovery for unannotated cortex vertices or the real-data hypo labels.
+On the same control-host host and fixed input, the complete Python step took **5.70 s**, versus **9.69 s** for the fresh native rerun (`--threads 4`). Both include input and output. This is one paired run, not a multi-subject speed estimate. The Python work ran on CPU; its PyTorch normal computation also used CPU. The test `test_surf2volseg_wm_python.py` checks lateralization, the 5 mm cutoff, future WMSA unknown labels, and preservation of unrelated labels. The fixed subject does not test native nearest-annotation recovery for unannotated cortex vertices or the real-data hypo labels.
 
 Reproduce the Python stage and compare against both native references:
 
 ```bash
-BASE=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work
+BASE=/data/workspaces/freesurfer_synth/work
 SUBJ=$BASE/reconall_main_20260924/single_subjects/fs_sub01
 REF=$BASE/reconall_python_gpu_20260925/wmparc_ref
 PYTHONPATH=src python -m fnit.recon_all.surf2volseg_wm_python \

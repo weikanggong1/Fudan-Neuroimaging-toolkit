@@ -10,7 +10,7 @@ mris_register -curv -threads 4 surf/rh.sphere average/rh.folding.atlas.acfb40.no
 ```
 
 The actual paths are under
-`/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_main_20260924`.
+`/data/workspaces/freesurfer_synth/work/reconall_main_20260924`.
 The pinned source is FreeSurfer 8.2.0 commit
 `d932c45b7941662ea380a05efef580568b98d41a`. The active path is
 `mris_register/mris_register.cpp` → `utils/mrisurf_integrate.cpp` and
@@ -23,7 +23,7 @@ same bits as float32 yields plausible mean, variance and degree-of-freedom
 frames, including a maximum degree-of-freedom value of 40 in LH frame 2.
 
 The archived full native calls took **243.41 s LH** and **233.33 s RH** on
-`gpucw1` with four CPU threads (`@#@FSTIME` wall seconds). Their initial
+`accelerator-a-1` with four CPU threads (`@#@FSTIME` wall seconds). Their initial
 rigid search took about 0.15/0.16 min according to the log. These are
 archived native timings, not a matched candidate comparison.
 
@@ -55,8 +55,8 @@ operations, and are **not** a full-stage speed comparison. An earlier run
 measured 0.258/0.306 s, indicating run-to-run variation. The focused tests
 passed 3/3. The CPU reports
 include SHA-256 values for both frozen inputs and fresh native outputs:
-[`LH`](mris_register_lh_zero_step_headcw.json),
-[`RH`](mris_register_rh_zero_step_headcw.json). Reproduce the tensor check with
+[`LH`](mris_register_lh_zero_step_control-host.json),
+[`RH`](mris_register_rh_zero_step_control-host.json). Reproduce the tensor check with
 [`benchmark_mris_register_kernels.py`](benchmark_mris_register_kernels.py).
 
 The source sulc values before normalization have mean/std
@@ -91,8 +91,8 @@ The native diagnostic runs all four scales and writes multiple curves; its
 time is **not** directly comparable with one Torch sampling call. Torch
 timings are single CPU observations excluding file I/O and startup. Paired
 input/output SHA-256 values and vertex errors are in
-[`LH`](mris_register_lh_atlas_headcw.json) and
-[`RH`](mris_register_rh_atlas_headcw.json). Reproduce with
+[`LH`](mris_register_lh_atlas_control-host.json) and
+[`RH`](mris_register_rh_atlas_control-host.json). Reproduce with
 [`probe_mris_register_atlas.py`](probe_mris_register_atlas.py). The analytical
 sphere-axis test passed 1/1. This checkpoint does not cover source curvature
 parameterization, blurred mean-frame sampling or angle search. Atlas variance
@@ -121,8 +121,8 @@ matches the diagnostic variance grid at **every pixel**:
 | RH | 131,072 / 131,072 | 0 | 0.229 s |
 
 Paired atlas/grid hashes and single-run timings are in
-[`LH`](mris_register_lh_blur_headcw.json) and
-[`RH`](mris_register_rh_blur_headcw.json). Reproduce with
+[`LH`](mris_register_lh_blur_control-host.json) and
+[`RH`](mris_register_rh_blur_control-host.json). Reproduce with
 [`probe_mris_register_blur_frame.py`](probe_mris_register_blur_frame.py);
 the constant-frame unit test passed. The source and target mean-frame grids
 are checked next.
@@ -149,12 +149,12 @@ These are three separate Python calls and include repeated sigma-4 blur work;
 they are not a combined-stage benchmark. The native rigid diagnostics took
 7.21/7.73 s and include the angle search, so their timing is also a different
 workload. Input and native-grid hashes, all-pixel errors and timings are in
-[`LH source`](mris_register_lh_source_sigma4_headcw.json),
-[`LH target`](mris_register_lh_target_sigma4_headcw.json),
-[`LH variance`](mris_register_lh_variance_sigma4_headcw.json),
-[`RH source`](mris_register_rh_source_sigma4_headcw.json),
-[`RH target`](mris_register_rh_target_sigma4_headcw.json), and
-[`RH variance`](mris_register_rh_variance_sigma4_headcw.json). The analytical
+[`LH source`](mris_register_lh_source_sigma4_control-host.json),
+[`LH target`](mris_register_lh_target_sigma4_control-host.json),
+[`LH variance`](mris_register_lh_variance_sigma4_control-host.json),
+[`RH source`](mris_register_rh_source_sigma4_control-host.json),
+[`RH target`](mris_register_rh_target_sigma4_control-host.json), and
+[`RH variance`](mris_register_rh_variance_sigma4_control-host.json). The analytical
 atlas, blur and parameterization tests passed 3/3. The independent rigid search is verified below; nonlinear deformation remains open.
 
 ## Exact rigid transform with native-selected angles
@@ -177,8 +177,8 @@ parameterization, blurring and global angle search; Torch timing excludes I/O,
 startup and angle search. It is **not** a registration speedup measurement.
 The frozen input and fresh rigid output SHA-256 values, angle inputs, per-vertex
 errors and kernel timings are in the paired
-[`LH`](mris_register_lh_rigid_headcw.json) and
-[`RH`](mris_register_rh_rigid_headcw.json) reports. The native rigid outputs
+[`LH`](mris_register_lh_rigid_control-host.json) and
+[`RH`](mris_register_rh_rigid_control-host.json) reports. The native rigid outputs
 have SHA-256 `b22b3be1f006848b4dc616cf05d68351064f4e7055d341ea5c817d4b4b2c33e4`
 LH and `4918b98f7edb6499378a8c7863d006e41528f76bbe1ca47146084d9eab342d47`
 RH. Reproduce the vertex check with
@@ -209,8 +209,8 @@ and rotation therefore took about 65.43/48.25 s excluding file I/O. The
 paired native `-N 0` rigid diagnostic took 7.21/7.73 s including file I/O;
 this Python rigid stage is currently slower. These are single observations on
 a shared host, not a controlled speed benchmark or a GPU result. Input hashes, ordered-vertex checks and
-single-run times are in [`LH`](mris_register_lh_search_headcw.json) and
-[`RH`](mris_register_rh_search_headcw.json); reproduce with
+single-run times are in [`LH`](mris_register_lh_search_control-host.json) and
+[`RH`](mris_register_rh_search_control-host.json); reproduce with
 [`probe_mris_register_search.py`](probe_mris_register_search.py). Focused
 objective tests passed 2/2 in the remote PyTorch environment.
 
@@ -227,8 +227,8 @@ Independent API validation on both frozen hemispheres matched every ordered
 native rigid vertex and all faces again: LH **44.33 s**, RH **45.27 s** on
 CPU excluding I/O. It omits the diagnostic source-grid reconstruction and
 comparison, so these times are shorter than the probe above. The paired API
-reports are [`LH`](mris_register_lh_rigid_api_headcw.json) and
-[`RH`](mris_register_rh_rigid_api_headcw.json); reproduce with
+reports are [`LH`](mris_register_lh_rigid_api_control-host.json) and
+[`RH`](mris_register_rh_rigid_api_control-host.json); reproduce with
 [`probe_mris_register_rigid_api.py`](probe_mris_register_rigid_api.py).
 
 ## First nonlinear checkpoints
@@ -249,8 +249,8 @@ reference:
 
 Both face arrays remain equal. A second LH diagnostic with `-V 0` reproduced
 the first saved surface exactly. Reference surface hashes and displacements
-are in [`LH`](mris_register_lh_first_step_headcw.json) and
-[`RH`](mris_register_rh_first_step_headcw.json), generated by
+are in [`LH`](mris_register_lh_first_step_control-host.json) and
+[`RH`](mris_register_rh_first_step_control-host.json), generated by
 [`probe_mris_register_first_step.py`](probe_mris_register_first_step.py).
 These diagnostics were stopped after saving that surface, with no full
 `recon-all` rerun.
@@ -274,8 +274,8 @@ it, angle/area changes it again, and curvature correlation gives the
 pre-average gradient. The polar-correlation and subsequent zero-weight terms
 do not change that first pre-average gradient. Exact per-stage SHA-256 hashes,
 first vectors, scalar values and native diagnostic times are in the
-[`LH`](mris_register_lh_first_force_stages_headcw.json) and
-[`RH`](mris_register_rh_first_force_stages_headcw.json) reports. These are
+[`LH`](mris_register_lh_first_force_stages_control-host.json) and
+[`RH`](mris_register_rh_first_force_stages_control-host.json) reports. These are
 observed native checkpoints. Python now generates the distance and
 angle/area forces independently; curvature correlation remains open.
 
@@ -300,12 +300,12 @@ API already reproduces that checkpoint on both sides.
 | RH | 105,541 / 105,541 | 633,234 / 633,234 each | 105,541 / 105,541 | 7.72 s |
 
 The exact first-distance API hashes and timings are in
-[`LH`](mris_register_lh_first_distance_api_headcw.json) and
-[`RH`](mris_register_rh_first_distance_api_headcw.json); reproduce with
+[`LH`](mris_register_lh_first_distance_api_control-host.json) and
+[`RH`](mris_register_rh_first_distance_api_control-host.json); reproduce with
 [`probe_mris_register_first_distance_api.py`](probe_mris_register_first_distance_api.py).
 The separately checked edge-length and distance-force components are in
-[`LH`](mris_register_lh_distance_from_surfaces_headcw.json) and
-[`RH`](mris_register_rh_distance_from_surfaces_headcw.json), reproducible with
+[`LH`](mris_register_lh_distance_from_surfaces_control-host.json) and
+[`RH`](mris_register_rh_distance_from_surfaces_control-host.json), reproducible with
 [`probe_mris_register_distance_from_surfaces.py`](probe_mris_register_distance_from_surfaces.py).
 The CPU stage times include Python topology construction and three-hop
 counting, but exclude input reads and the preceding rigid search. They are
@@ -330,8 +330,8 @@ combined distance-plus-area result has no native intermediate force input:
 | RH | 211,078 / 211,078 each | 105,541 / 105,541 | 4.98 / 12.17 s |
 
 The fixed input, native checkpoint and predicted gradient SHA-256 values are
-in [`LH`](mris_register_lh_first_area_api_headcw.json) and
-[`RH`](mris_register_rh_first_area_api_headcw.json); reproduce with
+in [`LH`](mris_register_lh_first_area_api_control-host.json) and
+[`RH`](mris_register_rh_first_area_api_control-host.json); reproduce with
 [`probe_mris_register_first_area_api.py`](probe_mris_register_first_area_api.py).
 Times exclude file reads and the preceding rigid search. The native face
 arrays were read at the start of the area force with
@@ -366,8 +366,8 @@ The predicted/native float32 gradient hashes are identical:
 LH and
 `373bae6caa23f0f5df85fa6825188e1563a17028c3a65789163a17116074fb26`
 RH. Paired input hashes, exact counts and timings are in
-[`LH`](mris_register_lh_first_correlation_api_headcw.json) and
-[`RH`](mris_register_rh_first_correlation_api_headcw.json), reproducible with
+[`LH`](mris_register_lh_first_correlation_api_control-host.json) and
+[`RH`](mris_register_rh_first_correlation_api_control-host.json), reproducible with
 [`probe_mris_register_first_correlation_api.py`](probe_mris_register_first_correlation_api.py).
 The native arrays were read by
 [`capture_mris_register_correlation_inputs.gdb`](capture_mris_register_correlation_inputs.gdb)
@@ -384,8 +384,8 @@ ordered neighbor entries. A debugger diagnostic changed only the first
 average count from 16,384 to one, then stopped at the return instruction.
 `average_gradients_once` matched every native resulting vector byte for byte.
 The paired one-iteration reports are
-[`LH`](mris_register_lh_first_average_headcw.json) and
-[`RH`](mris_register_rh_first_average_headcw.json); reproduce with
+[`LH`](mris_register_lh_first_average_control-host.json) and
+[`RH`](mris_register_rh_first_average_control-host.json); reproduce with
 [`probe_mris_register_first_average.py`](probe_mris_register_first_average.py).
 
 With the **actual 16,384** iterations, `average_gradients` independently
@@ -394,8 +394,8 @@ pre-average gradient: 106,622/106,622 LH and 105,541/105,541
 RH, maximum error zero. The native post-average hashes also equal the
 independently captured gradients at the following line-search entry. Paired
 hashes and timings are in
-[`LH`](mris_register_lh_full_average_headcw.json) and
-[`RH`](mris_register_rh_full_average_headcw.json); reproduce with
+[`LH`](mris_register_lh_full_average_control-host.json) and
+[`RH`](mris_register_rh_full_average_control-host.json); reproduce with
 [`probe_mris_register_full_average.py`](probe_mris_register_full_average.py).
 The new source-input probe now reproduces that same pre-average gradient
 exactly, so the isolated average and source-input force checks compose to
@@ -409,8 +409,8 @@ this is a parity result and not a speedup claim.
 Finally, `apply_spherical_gradient` reproduces the first saved native surface
 at **every ordered vertex** on both sides when supplied the observed native
 pre-line-search gradient and selected `dt`; see
-[`LH`](mris_register_lh_first_gradient_apply_headcw.json) and
-[`RH`](mris_register_rh_first_gradient_apply_headcw.json), reproducible with
+[`LH`](mris_register_lh_first_gradient_apply_control-host.json) and
+[`RH`](mris_register_rh_first_gradient_apply_control-host.json), reproducible with
 [`probe_mris_register_first_gradient_apply.py`](probe_mris_register_first_gradient_apply.py).
 That conditional check supplied the native-selected `dt`; the independent
 selection is validated next. The focused PyTorch nonlinear-kernel tests passed
@@ -462,14 +462,14 @@ post-flush debugger register-state error; all 12 log records, including the
 nine line-search trials, are present in each retained log. These GDB wall
 times and the CPU-only PyTorch kernel times are not matched stage benchmarks.
 
-Paired reports are [`LH`](mris_register_lh_first_line_parity_headcw.json)
-and [`RH`](mris_register_rh_first_line_parity_headcw.json). The raw PyTorch
-reports are [`LH`](mris_register_lh_first_line_search_headcw.json) and
-[`RH`](mris_register_rh_first_line_search_headcw.json); the native
-[`LH fit`](mris_register_lh_native_first_line_fit_headcw.log),
-[`RH fit`](mris_register_rh_native_first_line_fit_headcw.log),
-[`LH terms`](mris_register_lh_native_first_line_terms_headcw.log), and
-[`RH terms`](mris_register_rh_native_first_line_terms_headcw.log) logs retain
+Paired reports are [`LH`](mris_register_lh_first_line_parity_control-host.json)
+and [`RH`](mris_register_rh_first_line_parity_control-host.json). The raw PyTorch
+reports are [`LH`](mris_register_lh_first_line_search_control-host.json) and
+[`RH`](mris_register_rh_first_line_search_control-host.json); the native
+[`LH fit`](mris_register_lh_native_first_line_fit_control-host.log),
+[`RH fit`](mris_register_rh_native_first_line_fit_control-host.log),
+[`LH terms`](mris_register_lh_native_first_line_terms_control-host.log), and
+[`RH terms`](mris_register_rh_native_first_line_terms_control-host.log) logs retain
 the reference values. Reproduce the frozen PyTorch trial with
 [`probe_mris_register_first_line_search.py`](probe_mris_register_first_line_search.py),
 the native captures with
@@ -504,12 +504,12 @@ surfaces.
 
 Every listed coordinate/gradient comparison has maximum absolute error **0**;
 the raw paired reports retain per-input, official file and capture hashes:
-[LH](mris_register_lh_second_epoch_headcw.json),
-[RH](mris_register_rh_second_epoch_headcw.json). The installed log prints the second `dt` as 85.397 LH and 66.459 RH. A
+[LH](mris_register_lh_second_epoch_control-host.json),
+[RH](mris_register_rh_second_epoch_control-host.json). The installed log prints the second `dt` as 85.397 LH and 66.459 RH. A
 read-only [quadratic-fit capture](capture_mris_register_second_line_fit.gdb)
 confirmed the exact values above and retained each side's three SSE samples:
-[LH](mris_register_lh_second_line_fit_headcw.log),
-[RH](mris_register_rh_second_line_fit_headcw.log).
+[LH](mris_register_lh_second_line_fit_control-host.log),
+[RH](mris_register_rh_second_line_fit_control-host.log).
 
 The first independent attempt matched all second-call gradients exactly but
 chose LH `dt=85.38683319091797`, leaving only 3/106,622 saved vertices exact.
@@ -556,12 +556,12 @@ comparison. Ordered faces are asserted equal throughout.
 | RH | 105,541 / 105,541 each | 105,541 / 105,541 | 25.513355255126953 | 0 |
 
 All listed maximum absolute errors are **0**. The paired
-[LH](mris_register_lh_third_epoch_headcw.json) and
-[RH](mris_register_rh_third_epoch_headcw.json) reports include source,
+[LH](mris_register_lh_third_epoch_control-host.json) and
+[RH](mris_register_rh_third_epoch_control-host.json) reports include source,
 original-input, reference-surface and capture-script SHA-256 values. Exact
 installed-binary quadratic fit inputs, coefficients and steps are in the
-[LH](mris_register_lh_third_line_fit_headcw.log) and
-[RH](mris_register_rh_third_line_fit_headcw.log) logs, captured by
+[LH](mris_register_lh_third_line_fit_control-host.log) and
+[RH](mris_register_rh_third_line_fit_control-host.log) logs, captured by
 [the read-only script](capture_mris_register_third_line_fit.gdb). The corrected
 VXL inverse already reproduced both fits; no further computational fix was
 needed. The focused nonlinear and first-three-fit tests passed **9/9** after
@@ -608,20 +608,20 @@ needed. The regression test includes an inverted spherical face and both
 fourth-fit matrices; the targeted nonlinear and line-fit tests passed **10/10**
 in the remote PyTorch environment.
 
-The paired [LH](mris_register_lh_fourth_epoch_headcw.json) and
-[RH](mris_register_rh_fourth_epoch_headcw.json) reports retain original-input,
+The paired [LH](mris_register_lh_fourth_epoch_control-host.json) and
+[RH](mris_register_rh_fourth_epoch_control-host.json) reports retain original-input,
 reference-surface, installed-binary, GDB-script and Python-source SHA-256
 values, together with every checkpoint's exact-vertex count and maximum
-error. Native [LH](mris_register_lh_fourth_capture_headcw.log) and
-[RH](mris_register_rh_fourth_capture_headcw.log) checkpoint logs and
-[LH](mris_register_lh_fourth_line_fit_headcw.log) and
-[RH](mris_register_rh_fourth_line_fit_headcw.log) fit logs are retained. The
+error. Native [LH](mris_register_lh_fourth_capture_control-host.log) and
+[RH](mris_register_rh_fourth_capture_control-host.log) checkpoint logs and
+[LH](mris_register_lh_fourth_line_fit_control-host.log) and
+[RH](mris_register_rh_fourth_line_fit_control-host.log) fit logs are retained. The
 reference `debug0005` file hashes are
 `5ffbebe84b0ddee66ba84bdd65b01481a01525a24e029825904e84ae83b35a72`
 LH and `ef4f059d1542b2934d4535be5e304603a2a4b9d0d32077b676f598b6fce24bae`
 RH. The initial divergent reports are also retained:
-[LH](mris_register_lh_fourth_epoch_initial_headcw.json) and
-[RH](mris_register_rh_fourth_epoch_initial_headcw.json).
+[LH](mris_register_lh_fourth_epoch_initial_control-host.json) and
+[RH](mris_register_rh_fourth_epoch_initial_control-host.json).
 
 Fourth-call Python CPU force / 256-average / line-search timings were
 **15.35 / 1.35 / 0.30 s LH** and **17.14 / 1.64 / 0.46 s RH**, four threads,
@@ -656,13 +656,13 @@ the negative faces at the fifth start; no new force or step-size fix was
 needed. The native reference `debug0006` hashes are
 `b1a3c4b2226cdf7efa48dd09b825cda5d2f0c85e135be382d7524b99fc198f2e`
 LH and `bf93a5906486176ba783acd42f54200c2b13bb39b752f60536fab9eabb7b0af6`
-RH. The paired [LH](mris_register_lh_fifth_epoch_headcw.json) and
-[RH](mris_register_rh_fifth_epoch_headcw.json) reports retain all input,
+RH. The paired [LH](mris_register_lh_fifth_epoch_control-host.json) and
+[RH](mris_register_rh_fifth_epoch_control-host.json) reports retain all input,
 source, checkpoint and output SHA-256 values and all-vertex errors. Native
-[LH](mris_register_lh_fifth_capture_headcw.log) and
-[RH](mris_register_rh_fifth_capture_headcw.log) checkpoint logs, plus
-[LH](mris_register_lh_fifth_line_fit_headcw.log) and
-[RH](mris_register_rh_fifth_line_fit_headcw.log) fit logs, retain the official
+[LH](mris_register_lh_fifth_capture_control-host.log) and
+[RH](mris_register_rh_fifth_capture_control-host.log) checkpoint logs, plus
+[LH](mris_register_lh_fifth_line_fit_control-host.log) and
+[RH](mris_register_rh_fifth_line_fit_control-host.log) fit logs, retain the official
 values. Both captured fifth-fit cases were added to the focused regression;
 the nonlinear and line-fit tests passed **10/10** remotely.
 
@@ -683,8 +683,8 @@ archived same-subject FreeSurfer final surface:
 | LH | 0 / 106,622 | 2.383 / 5.058 mm | 10.648 mm |
 | RH | 0 / 105,541 | 2.408 / 5.369 mm | 8.620 mm |
 
-The paired [LH](mris_register_lh_fifth_vs_final_headcw.json) and
-[RH](mris_register_rh_fifth_vs_final_headcw.json) reports include both file
+The paired [LH](mris_register_lh_fifth_vs_final_control-host.json) and
+[RH](mris_register_rh_fifth_vs_final_control-host.json) reports include both file
 hashes. The final reference hashes are
 `801d345eb11c4b02e64aa453bc388f18e8cd47e8bb0beed7d75868d92276b8f8`
 LH and `0e2a10093721f2f75f7460c559aa982560abd44662a9dac16865d42cb419fa8b`
@@ -717,15 +717,15 @@ Every passing update matched all 106,622 LH or 105,541 RH ordered vertices,
 with maximum coordinate error **0 mm**. The per-update full-precision Python
 `dt`, native log's three-decimal `dt`, native surface SHA-256, exact count,
 maximum error and force/average/line timing are in the compact
-[LH](mris_register_lh_schedule_summary_headcw.json) and
-[RH](mris_register_rh_schedule_summary_headcw.json) manifests. Full objective
+[LH](mris_register_lh_schedule_summary_control-host.json) and
+[RH](mris_register_rh_schedule_summary_control-host.json) manifests. Full objective
 trial samples, input hashes, seed hashes, reference surface hashes and timings
-are in the [LH 7–17](mris_register_lh_schedule_sigma4_only_headcw.json),
-[RH 7–17](mris_register_rh_schedule_sigma4_only_headcw.json),
-[LH 18–39](mris_register_lh_schedule_to_sno2_headcw.json) and
-[RH 18–39](mris_register_rh_schedule_to_sno2_headcw.json) reports. The
-archived [LH](mris_register_lh_n1_debug_out_headcw.log) and
-[RH](mris_register_rh_n1_debug_out_headcw.log) official diagnostic logs have
+are in the [LH 7–17](mris_register_lh_schedule_sigma4_only_control-host.json),
+[RH 7–17](mris_register_rh_schedule_sigma4_only_control-host.json),
+[LH 18–39](mris_register_lh_schedule_to_sno2_control-host.json) and
+[RH 18–39](mris_register_rh_schedule_to_sno2_control-host.json) reports. The
+archived [LH](mris_register_lh_n1_debug_out_control-host.log) and
+[RH](mris_register_rh_n1_debug_out_control-host.log) official diagnostic logs have
 SHA-256 `d03b2eab334facdef1710f11d0cff1648898ddb9412637e202c245b3e8b83cde`
 and `8fa7d833f346771618a2389cd16de3771c7ace31112c714ca523ba00700668b6`.
 The first LH 7–17 run used an earlier native log with a different file hash;
@@ -737,8 +737,8 @@ The installed official binary has SHA-256
 
 The installed complete `-N 1` diagnostic took **92.97 s LH** and **120.89 s
 RH** with four CPU threads, including rigid and all later calls. Its
-[LH](mris_register_lh_n1_native_run_headcw.log) and
-[RH](mris_register_rh_n1_native_run_headcw.log) logs retain the complete diagnostic through `debug0071`. The segmented Python CPU replay has different setup and incomplete
+[LH](mris_register_lh_n1_native_run_control-host.log) and
+[RH](mris_register_rh_n1_native_run_control-host.log) logs retain the complete diagnostic through `debug0071`. The segmented Python CPU replay has different setup and incomplete
 work, so these numbers are **not** a matched full-stage speed benchmark or a
 GPU result. The selected Python `dt` after update 6 is recorded at full
 precision, but the official log rounds it to three decimals; exact native
@@ -769,10 +769,10 @@ Errors in this table are maximum absolute float32 values, in millimeters for
 coordinates and in native numeric units for curvature and force. The first
 different input is the smoothwm curvature; the first differing force is the
 correlation term. The stage comparison, both predicted/native array hashes
-and NPZ hashes are retained in the [LH](mris_register_lh_sno2_first_operator_headcw.json)
-and [RH](mris_register_rh_sno2_first_operator_headcw.json) reports, with
-[LH](mris_register_lh_sno2_capture_headcw.log) and
-[RH](mris_register_rh_sno2_capture_headcw.log) GDB logs. The comparison
+and NPZ hashes are retained in the [LH](mris_register_lh_sno2_first_operator_control-host.json)
+and [RH](mris_register_rh_sno2_first_operator_control-host.json) reports, with
+[LH](mris_register_lh_sno2_capture_control-host.log) and
+[RH](mris_register_rh_sno2_capture_control-host.log) GDB logs. The comparison
 script is [here](compare_mris_register_sno2_checkpoint.py). The native
 update-39 log prints `dt=2.827` LH and `dt=2.580` RH, whereas the incomplete
 Python branch selects 0.003348 and 0.048077 respectively. The candidate
@@ -787,8 +787,8 @@ The new `mris_register_smoothwm.py` computes three-hop quadratic-form mean
 curvature from each frozen `smoothwm` in PyTorch. The probe compares **every
 raw H value** with the installed FreeSurfer 8.2 array captured immediately
 before normalization. Both input surface SHA-256 values and native/predicted
-raw-array hashes are in the linked [LH](mris_register_lh_sno2_raw_sequential_headcw.json)
-and [RH](mris_register_rh_sno2_raw_sequential_headcw.json) reports. Their source
+raw-array hashes are in the linked [LH](mris_register_lh_sno2_raw_sequential_control-host.json)
+and [RH](mris_register_rh_sno2_raw_sequential_control-host.json) reports. Their source
 surface hashes are `36e199e4d971a39457a4ad1d0b8eed3a84feb236ada29c05e297ffdd865a5002`
 LH and `b67ceb95069d865bb11f6c2b20bac99eab9f19982b73d3c9c43735b7bedbe7ca`
 RH. The native raw-array hashes are `319c755b667a04331ef0c545714aaf5897c9a04e0c08a882b69b48542f0ab39c`
@@ -804,8 +804,8 @@ float32 arithmetic order and provides the reusable post-average spring
 operator. Given the exact native post-average gradient as an operator-level
 input, that PyTorch spring matches **all 106,622 LH and 105,541 RH vertices
 exactly**, maximum error 0. The paired
-[LH](mris_register_lh_sno2_spring_production_headcw.json) and
-[RH](mris_register_rh_sno2_spring_production_headcw.json) reports include
+[LH](mris_register_lh_sno2_spring_production_control-host.json) and
+[RH](mris_register_rh_sno2_spring_production_control-host.json) reports include
 input/output hashes and 1.01/0.87 s single-run CPU times.
 
 The complete one-update probe started from the native-exact `debug0038`
@@ -818,8 +818,8 @@ and post-spring force, and saved surface at every ordered vertex with maximum
 error zero. The selected `dt` was exactly `2.826995849609375` LH and
 `2.5797934532165527` RH. Paired input/output SHA-256, all checkpoint
 errors and per-operation single-run CPU timings are in the
-[LH](mris_register_lh_sno2_epoch_native_raw_headcw.json) and
-[RH](mris_register_rh_sno2_epoch_native_raw_headcw.json) reports. This
+[LH](mris_register_lh_sno2_epoch_native_raw_control-host.json) and
+[RH](mris_register_rh_sno2_epoch_native_raw_control-host.json) reports. This
 conditional result proves the downstream operators at the same checkpoint;
 it does not establish an independent full-stage match.
 
@@ -829,8 +829,8 @@ sigma-4 blurred source curve (maximum absolute error 3.34e-6 LH and
 **0.000123 mm LH / 0.000355 mm RH** across all ordered vertices. Only
 3,996/106,622 LH and 228/105,541 RH vertices are bitwise exact; the selected
 `dt` changes to `2.8273253440856934` and `2.578439712524414`.
-The [LH](mris_register_lh_sno2_epoch_sequential_headcw.json) and
-[RH](mris_register_rh_sno2_epoch_sequential_headcw.json) reports retain
+The [LH](mris_register_lh_sno2_epoch_sequential_control-host.json) and
+[RH](mris_register_rh_sno2_epoch_sequential_control-host.json) reports retain
 these full-array comparisons, all input/native-output hashes and individual
 setup, force, average, spring and line-search CPU times. Those times cover
 one isolated update, exclude I/O and were measured under shared-host load;
@@ -841,8 +841,8 @@ The `-N 1` diagnostic changes the official iteration count and is distinct
 from the default recon-all call. Even the **complete official** `-N 1` surface
 matches zero ordered vertices of the archived default official `sphere.reg`:
 its median per-vertex distance is 1.602 mm LH and 1.844 mm RH. The paired
-[LH](mris_register_lh_n1_final_vs_default_headcw.json) and
-[RH](mris_register_rh_n1_final_vs_default_headcw.json) reports retain both
+[LH](mris_register_lh_n1_final_vs_default_control-host.json) and
+[RH](mris_register_rh_n1_final_vs_default_control-host.json) reports retain both
 file hashes and all-vertex comparison. The default final reference hashes are
 `801d345eb11c4b02e64aa453bc388f18e8cd47e8bb0beed7d75868d92276b8f8`
 LH and `0e2a10093721f2f75f7460c559aa982560abd44662a9dac16865d42cb419fa8b`
@@ -866,11 +866,11 @@ The binary SHA-256 is again
 Both face arrays are equal. The newly written surface files have different
 SHA-256 hashes because their headers differ; the geometry comparison above is
 on decoded original-order coordinates. The paired
-[LH](mris_register_lh_default_reference_check_headcw.json) and
-[RH](mris_register_rh_default_reference_check_headcw.json) reports include
+[LH](mris_register_lh_default_reference_check_control-host.json) and
+[RH](mris_register_rh_default_reference_check_control-host.json) reports include
 all frozen input, binary, native log, checkpoint log and final-output hashes.
-These native wall times were observed on a shared headcw host and should not
-be interpreted as a matched speed comparison with the earlier gpucw1 archive.
+These native wall times were observed on a shared control-host host and should not
+be interpreted as a matched speed comparison with the earlier accelerator-a-1 archive.
 
 Default registration retains up to 25 iterations per integration call,
 whereas `-N 1` uses one. Their first saved update (`debug0002`) is identical
@@ -883,9 +883,9 @@ The initial default LH PyTorch continuous replay matched native `debug0002`
 at all 106,622 ordered vertices, selected `dt=70.93703089944263`. At
 `debug0003`, its original implementation selected `dt=198.3500518798828`
 versus the native log's rounded `196.340` and differed by a maximum
-0.0734673 mm. The [initial report](mris_register_lh_default_first_difference_headcw.json)
+0.0734673 mm. The [initial report](mris_register_lh_default_first_difference_control-host.json)
 retains paired input, output and candidate-array hashes plus timings.
-Read-only [GDB checkpoints](mris_register_lh_default_second_capture_headcw.log)
+Read-only [GDB checkpoints](mris_register_lh_default_second_capture_control-host.log)
 showed the first different operator: native `MRISintegrate` projects only once
 at the start of a call, whereas the candidate projected again on every
 iteration. At the second iteration, native pre-force positions equal the
@@ -902,16 +902,16 @@ vertices in the first update. **Every** checkpoint at `debug0003` then matched
 all 106,622 vertices exactly: starting positions, normals, distance, area and
 correlation gradients, 16,384-average gradient, and saved surface. Its
 `dt=196.33958435058594` agrees with the installed log's rounded value.
-The paired [before](mris_register_lh_default_second_operator_initial_headcw.json)
-and [after](mris_register_lh_default_second_operator_fixed_headcw.json)
+The paired [before](mris_register_lh_default_second_operator_initial_control-host.json)
+and [after](mris_register_lh_default_second_operator_fixed_control-host.json)
 reports retain all native/predicted array hashes and per-operation CPU times.
 The post-fix LH 16,384-average kernel took 89.57 s under shared-host load.
 
 The same paired default RH second update also matched **all 105,541 ordered
 vertices exactly** at each GDB checkpoint and saved `debug0003`, selecting
 `dt=135.03231811523438` (installed log: `135.032`). Its
-[checkpoint report](mris_register_rh_default_second_operator_fixed_headcw.json)
-and read-only [capture](mris_register_rh_default_second_capture_headcw.log)
+[checkpoint report](mris_register_rh_default_second_operator_fixed_control-host.json)
+and read-only [capture](mris_register_rh_default_second_capture_control-host.log)
 retain source, reference and predicted hashes, each force/gradient comparison
 and individual CPU timings. This confirms two default updates per side, not
 the full default sequence. Focused nonlinear and line-search tests passed
@@ -922,7 +922,7 @@ matched `debug0003` geometry and stayed inside the same 16,384-average
 integration call. It selected `dt=64.76956939697266` and matched the installed
 `debug0004` at **106,622/106,622 ordered vertices**, maximum error 0 mm.
 The saved Python candidate surface was reopened and also matched all vertices
-and faces exactly. Its [report](mris_register_lh_default_epoch0004_headcw.json)
+and faces exactly. Its [report](mris_register_lh_default_epoch0004_control-host.json)
 records the frozen input, native output, predicted array and serialized
 candidate SHA-256 values. Single-run CPU times excluding I/O were 13.93 s
 force, 89.42 s averaging and 0.33 s line search under shared-host load.
@@ -930,10 +930,10 @@ The next bounded LH continuation used the reopened independent candidate
 `debug0004` and stayed in the same 16,384-average call. It selected
 `dt=170.02264404296875`; the installed `debug0005` and the saved Python
 candidate match at **106,622/106,622 ordered vertices and all faces**, maximum
-error 0 mm. The [epoch-5 report](mris_register_lh_default_epoch0005_headcw.json)
+error 0 mm. The [epoch-5 report](mris_register_lh_default_epoch0005_control-host.json)
 includes input/native-output, predicted-array, serialized-output SHA-256,
 readback comparison and per-operation time: force 16.19 s, averaging 105.22 s,
-line search 0.38 s excluding I/O. This run shared headcw CPU with the RH
+line search 0.38 s excluding I/O. This run shared control-host CPU with the RH
 pial validation; its timing is an observation, not a matched speed ratio.
 
 ### Default sulcal continuation and first smoothwm difference
@@ -956,27 +956,27 @@ the **ordered saved checkpoint writes**. Its scale map covered all 107 LH and
 | LH | `debug0002`–`debug0056` (55 updates) | 106,622 / 106,622; maximum error 0 mm | `debug0056` |
 | RH | `debug0002`–`debug0055` (54 updates) | 105,541 / 105,541; maximum error 0 mm | `debug0055` |
 
-The newly paired LH segment reports are [0006](mris_register_lh_default_epoch0006_headcw.json),
-[0007–0009](mris_register_lh_default_epoch0007_0009_headcw.json),
-[0010–0012](mris_register_lh_default_epoch0010_0012_headcw.json),
-[0013–0026](mris_register_lh_default_epoch0013_0026_headcw.json),
-[0027–0033](mris_register_lh_default_epoch0027_0033_headcw.json),
-[0034–0041](mris_register_lh_default_epoch0034_0041_headcw.json),
-[0042–0048](mris_register_lh_default_epoch0042_0048_headcw.json) and
-[0049–0056](mris_register_lh_default_epoch0049_0056_headcw.json).
-The RH reports are [0004](mris_register_rh_default_epoch0004_headcw.json),
-[0005](mris_register_rh_default_epoch0005_headcw.json),
-[0006–0009](mris_register_rh_default_epoch0006_0009_headcw.json),
-[0010–0026](mris_register_rh_default_epoch0010_0026_headcw.json),
-[0027–0033](mris_register_rh_default_epoch0027_0033_headcw.json),
-[0034–0041](mris_register_rh_default_epoch0034_0041_headcw.json),
-[0042–0048](mris_register_rh_default_epoch0042_0048_headcw.json) and
-[0049–0055](mris_register_rh_default_epoch0049_0055_headcw.json).
+The newly paired LH segment reports are [0006](mris_register_lh_default_epoch0006_control-host.json),
+[0007–0009](mris_register_lh_default_epoch0007_0009_control-host.json),
+[0010–0012](mris_register_lh_default_epoch0010_0012_control-host.json),
+[0013–0026](mris_register_lh_default_epoch0013_0026_control-host.json),
+[0027–0033](mris_register_lh_default_epoch0027_0033_control-host.json),
+[0034–0041](mris_register_lh_default_epoch0034_0041_control-host.json),
+[0042–0048](mris_register_lh_default_epoch0042_0048_control-host.json) and
+[0049–0056](mris_register_lh_default_epoch0049_0056_control-host.json).
+The RH reports are [0004](mris_register_rh_default_epoch0004_control-host.json),
+[0005](mris_register_rh_default_epoch0005_control-host.json),
+[0006–0009](mris_register_rh_default_epoch0006_0009_control-host.json),
+[0010–0026](mris_register_rh_default_epoch0010_0026_control-host.json),
+[0027–0033](mris_register_rh_default_epoch0027_0033_control-host.json),
+[0034–0041](mris_register_rh_default_epoch0034_0041_control-host.json),
+[0042–0048](mris_register_rh_default_epoch0042_0048_control-host.json) and
+[0049–0055](mris_register_rh_default_epoch0049_0055_control-host.json).
 The 53 LH and 52 RH newly paired numbered updates have no gaps and every
 comparison is exact. The last serialized sulc seeds were separately reopened and matched
 all ordered vertices and faces exactly on both sides; their file hashes are in
-the [readback report](mris_register_default_sulc_last_seed_readback_headcw.json).
-These CPU times were observed under varying shared headcw load and are not an
+the [readback report](mris_register_default_sulc_last_seed_readback_control-host.json).
+These CPU times were observed under varying shared control-host load and are not an
 end-to-end matched benchmark.
 
 The next installed update changes the source from sulc to `smoothwm` curvature:
@@ -987,8 +987,8 @@ the PyTorch smoothwm force, 1,024-average, spring and line search gives the
 installed saved output at every ordered vertex: LH 106,622/106,622 with
 `dt=2.721714973449707`, RH 105,541/105,541 with
 `dt=2.542891502380371`; maximum error 0 mm. The conditional reports are
-[LH](mris_register_lh_default_epoch0057_native_raw_headcw.json) and
-[RH](mris_register_rh_default_epoch0056_native_raw_headcw.json).
+[LH](mris_register_lh_default_epoch0057_native_raw_control-host.json) and
+[RH](mris_register_rh_default_epoch0056_native_raw_control-host.json).
 
 Replacing that one input with the independent PyTorch raw H identifies the
 first native-free default output difference. LH `debug0057` matches
@@ -996,8 +996,8 @@ first native-free default output difference. LH `debug0057` matches
 7.62939453125e-6 mm and unchanged `dt`. RH `debug0056` matches 253/105,541
 exactly; 12,639 vertices are within 1e-5 mm, the maximum coordinate error is
 3.452301025390625e-4 mm, and `dt` becomes 2.544266700744629. The paired
-independent-input reports are [LH](mris_register_lh_default_epoch0057_independent_raw_headcw.json)
-and [RH](mris_register_rh_default_epoch0056_independent_raw_headcw.json).
+independent-input reports are [LH](mris_register_lh_default_epoch0057_independent_raw_control-host.json)
+and [RH](mris_register_rh_default_epoch0056_independent_raw_control-host.json).
 This conditional intervention located the initial difference at the raw
 `smoothwm` curvature input. The RH correction below supersedes that failed
 independent-input trial; later default-stage and final `sphere.reg` parity
@@ -1035,12 +1035,12 @@ is read from the native log; independent stopping remains unverified.
 
 The prior RH `debug0056`–`debug0057` continuation was exact but selected
 `dt=1.7613636255264282` at `debug0058`, versus the installed
-`1.8571428060531616`. A gpucw1 FreeSurfer 8.2.0-1 GDB run captured the
+`1.8571428060531616`. A accelerator-a-1 FreeSurfer 8.2.0-1 GDB run captured the
 three native bracket SSEs at the actual fit, using the same binary, input
-sphere, atlas and four threads. The [capture and comparison](mris_register_rh_default_epoch0058_native_line_fit_gpucw1.json)
+sphere, atlas and four threads. The [capture and comparison](mris_register_rh_default_epoch0058_native_line_fit_accelerator-a-1.json)
 retain the native matrix, inverse, RHS, coefficients, input hashes, source
-script and full log hashes. The [raw fit log](mris_register_rh_default_epoch0058_native_line_fit_gpucw1.log)
-and [compressed FreeSurfer SSE-term log](mris_register_rh_default_epoch0058_native_sse_terms_gpucw1.log.gz)
+script and full log hashes. The [raw fit log](mris_register_rh_default_epoch0058_native_line_fit_accelerator-a-1.log)
+and [compressed FreeSurfer SSE-term log](mris_register_rh_default_epoch0058_native_sse_terms_accelerator-a-1.log.gz)
 are included for audit.
 
 | Trial dt | Native SSE | Old Python SSE | Corrected Python SSE | Native/corrected float32 SSE |
@@ -1057,32 +1057,32 @@ used a double ratio. Casting that one ratio to float32 changes neither the
 previously exact force nor its float32 `dist_scale`, but aligns all three
 stored scores and restores the native quadratic candidate. This is a
 source-derived and empirically checked precision fix, not a change to the
-matrix inverse order. The [fixed RH report](mris_register_rh_default_epoch0056_0058_area_scale_fixed_gpucw1.json)
+matrix inverse order. The [fixed RH report](mris_register_rh_default_epoch0056_0058_area_scale_fixed_accelerator-a-1.json)
 shows `debug0056`, `debug0057`, and `debug0058` each match **105,541/105,541
 ordered native vertices**, maximum coordinate error 0 mm, with the same
-native-selected step at each update. The [resumed RH report](mris_register_rh_default_epoch0059_0066_area_scale_fixed_gpucw1.json)
+native-selected step at each update. The [resumed RH report](mris_register_rh_default_epoch0059_0066_area_scale_fixed_accelerator-a-1.json)
 then matches all eight consecutive `debug0059`–`debug0066` checkpoints at
 105,541/105,541 ordered vertices each, with maximum coordinate error 0 mm.
 The fixed probe uses the native raw H array as a controlled input; its
 independent production computation was separately shown to match the same
 full-array hash. The integration schedule is still read from the native log.
 
-The earlier [unfixed continuation](mris_register_rh_default_epoch0056_0061_divergence_headcw.json)
+The earlier [unfixed continuation](mris_register_rh_default_epoch0056_0061_divergence_control-host.json)
 shows why this 0.125 ULP mattered: its coordinate error reached 0.1981 mm
 by `debug0061`. It is retained as pre-fix evidence.
 
 ### RH `debug0067`–`debug0097`: complete normal smoothwm updates
 
-The [continuous continuation](mris_register_rh_default_epoch0067_0083_first_difference_gpucw1.json)
+The [continuous continuation](mris_register_rh_default_epoch0067_0083_first_difference_accelerator-a-1.json)
 resumes from the exact `debug0066` checkpoint and matches each of the 16
 `debug0067`–`debug0082` saved surfaces at **105,541/105,541 ordered vertices**,
 maximum coordinate error 0 mm. This crosses the sigma-2 switch at
-`debug0077`. The [sigma-2 resume check](mris_register_rh_default_epoch0083_sigma2_resume_gpucw1.json)
+`debug0077`. The [sigma-2 resume check](mris_register_rh_default_epoch0083_sigma2_resume_accelerator-a-1.json)
 reconstructs that switch from the exact `debug0076` seed and reproduces the
 continuous `debug0083` trial SSEs and selected step exactly. The probe now
 restores this stage state when resuming after a sigma switch.
 
-At `debug0083`, the [native GDB fit and comparison](mris_register_rh_default_epoch0083_native_line_fit_gpucw1.json)
+At `debug0083`, the [native GDB fit and comparison](mris_register_rh_default_epoch0083_native_line_fit_accelerator-a-1.json)
 show the first new decision mismatch. The first bracket SSE is
 1,333,351.6875719244 native versus 1,333,351.6874348717 Python; these
 round to 1,333,351.75 and 1,333,351.625 in float32. The middle and upper
@@ -1093,8 +1093,8 @@ to the Python projected surface and gradient produces the native checkpoint
 at all 105,541 vertices exactly. This isolates the observed output mismatch
 to the selected step; the score terms were audited next.
 
-The [native SSE log](mris_register_rh_default_epoch0083_native_sse_terms_gpucw1.log.gz)
-and [source-order summation check](mris_register_rh_default_epoch0083_sse_order_gpucw1.log)
+The [native SSE log](mris_register_rh_default_epoch0083_native_sse_terms_accelerator-a-1.log.gz)
+and [source-order summation check](mris_register_rh_default_epoch0083_sse_order_accelerator-a-1.log)
 localize the small score difference to percentage area, spring and correlation
 terms. Sequential Python sums of the already computed per-face and per-vertex
 terms did not close it. The native-step replay is a diagnostic, not an
@@ -1106,7 +1106,7 @@ multiplied by Python's double `0.05`. Using the float32-stored coefficient
 changes the three `debug0083` bracket scores to 1,333,351.6876297435,
 1,333,308.4455033988 and 1,333,274.7667974494. Their float32 values
 now match the three native fit inputs exactly; the remaining double-score
-differences do not alter the decision. The [independent corrected run](mris_register_rh_default_epoch0083_0097_lcorr_f32_gpucw1.json)
+differences do not alter the decision. The [independent corrected run](mris_register_rh_default_epoch0083_0097_lcorr_f32_accelerator-a-1.json)
 selects native `dt=0.04196085984684431` at `debug0083`, then matches every
 `debug0083`–`debug0097` surface at **105,541/105,541 ordered vertices and all
 faces**, maximum coordinate error 0 mm. No native step is injected. Its
@@ -1120,9 +1120,9 @@ fit input or pairwise score ordering. This is a source-equivalent decision
 audit, not a repeated 27-update run. Thus the complete bounded RH smoothwm
 path, `debug0056`–`debug0097`, matches every saved vertex and face.
 
-The [native final-surface check](mris_register_rh_final_surface_vs_debug0097_gpucw1.json)
+The [native final-surface check](mris_register_rh_final_surface_vs_debug0097_accelerator-a-1.json)
 shows that native `rh.sphere.reg` and `debug0097` have identical coordinate
-and face bytes. Their [volume geometry fields](mris_register_rh_final_volume_info_compare_headcw.json)
+and face bytes. Their [volume geometry fields](mris_register_rh_final_volume_info_compare_control-host.json)
 also match; only trailing provenance bytes differ. The native RH run had
 zero negative triangles at the final repair call, which makes that loop a
 no-op. The bounded Python trajectory therefore reaches the official RH
@@ -1164,7 +1164,7 @@ ordered geometry had separately matched the Python sulc seed exactly. It
 used the independently computed raw smoothwm curvature and matched native
 `debug0057`–`debug0060` at all 106,622 vertices; the three new decisions were
 `1024 → 256 → 64 → 64`. See the
-[LH runtime report](mris_register_lh_source_schedule_first4_headcw.json).
+[LH runtime report](mris_register_lh_source_schedule_first4_control-host.json).
 Three focused scheduler tests passed at this intermediate checkpoint. The
 continuous bilateral run and final one-call validation are reported below.
 The older bounded geometry replays retain their logged schedule by default.
@@ -1186,23 +1186,23 @@ from the saved LH `debug0056` and RH `debug0055` sulc meshes, whose geometry
 was separately reproduced by Python, a **single continuous** source-scheduled
 run matched all 51 LH and 42 RH official smoothwm/fold checkpoints at every
 ordered vertex, with maximum error 0 mm. Both schedules terminated from the
-Python SSE rather than an official log. The [LH trajectory](mris_register_lh_source_schedule_full_independent_headcw.json)
-and [RH trajectory](mris_register_rh_source_schedule_full_independent_gpucw1.json)
+Python SSE rather than an official log. The [LH trajectory](mris_register_lh_source_schedule_full_independent_control-host.json)
+and [RH trajectory](mris_register_rh_source_schedule_full_independent_accelerator-a-1.json)
 retain every selected step, scale decision, native reference hash, coordinate
 hash and timing. Native checkpoint meshes were read for comparison only.
 
-Separate [LH](mris_register_lh_smoothwm_api_headcw.json) and
-[RH](mris_register_rh_smoothwm_api_headcw.json) calls of the installed API
+Separate [LH](mris_register_lh_smoothwm_api_control-host.json) and
+[RH](mris_register_rh_smoothwm_api_control-host.json) calls of the installed API
 computed raw curvature again and wrote final `sphere.reg` files. The
-[independent LH comparator](mris_register_lh_smoothwm_api_final_compare_headcw.json)
-and [RH comparator](mris_register_rh_smoothwm_api_final_compare_headcw.json)
+[independent LH comparator](mris_register_lh_smoothwm_api_final_compare_control-host.json)
+and [RH comparator](mris_register_rh_smoothwm_api_final_compare_control-host.json)
 found 106,622/106,622 and 105,541/105,541 exact ordered vertices,
 identical ordered faces and volume geometry, and all 51/42 selected steps
 identical to the separate continuous probes. LH ran all 102 overlap repair
 updates; RH had no negative triangles. File hashes differ because the Python
 writer uses its own provenance stamp.
 
-The two API calls took 876.99 s LH and 797.29 s RH on headcw, including input
+The two API calls took 876.99 s LH and 797.29 s RH on control-host, including input
 and output I/O and with four PyTorch CPU threads. Their integration portions
 were 860.03 s and 782.46 s; final repair took 2.86 s and 0.01 s. The
 separate LH checkpoint probe spent 756.39 of 816.29 s of recorded update
@@ -1211,8 +1211,8 @@ compute in force construction. Earlier official logs report approximately
 includes rigid and sulc passes. These are different stage boundaries and
 shared-host load conditions; they do not establish a matched speed ratio.
 
-A [paired first-force CPU/CUDA0 diagnostic](mris_register_lh_first_force_cpu_cuda0_gpucw1.json)
-on gpucw1 with float32 and TF32 enabled took 32.76 s CPU and 33.58 s CUDA,
+A [paired first-force CPU/CUDA0 diagnostic](mris_register_lh_first_force_cpu_cuda0_accelerator-a-1.json)
+on accelerator-a-1 with float32 and TF32 enabled took 32.76 s CPU and 33.58 s CUDA,
 excluding tensor transfer. The maximum force difference was 1.55e-5;
 106,615/106,622 vertices were within 1e-5. This direct CUDA substitution
 has not been adopted. Force construction repeatedly builds ordered topology
@@ -1242,17 +1242,17 @@ The new [`run_register_sulc` API and CLI](../../../src/fnit/recon_all/mris_regis
 starts from `sphere`, `smoothwm`, `sulc`, and the external folding-atlas TIFF.
 It performs the independent rigid search and every source-scheduled sulc
 update without reading an installed FreeSurfer mesh or log. Its bilateral
-[LH](mris_register_lh_sulc_api_headcw.json) and
-[RH](mris_register_rh_sulc_api_headcw.json) headcw calls selected 55 and 54
+[LH](mris_register_lh_sulc_api_control-host.json) and
+[RH](mris_register_rh_sulc_api_control-host.json) control-host calls selected 55 and 54
 updates and terminated at native iteration numbers 56 and 55. The
-[LH final comparator](mris_register_lh_sulc_api_final_compare_headcw.json)
-and [RH final comparator](mris_register_rh_sulc_api_final_compare_headcw.json)
+[LH final comparator](mris_register_lh_sulc_api_final_compare_control-host.json)
+and [RH final comparator](mris_register_rh_sulc_api_final_compare_control-host.json)
 found all 106,622 and 105,541 ordered vertices exact, all ordered faces and
 volume geometry equal, and all 53/52 previously saved selected steps equal.
 The file hashes differ due to the Python writer's provenance stamp.
 
-The [LH](mris_register_lh_stage_connection_attestation_headcw.json) and
-[RH](mris_register_rh_stage_connection_attestation_headcw.json) connection
+The [LH](mris_register_lh_stage_connection_attestation_control-host.json) and
+[RH](mris_register_rh_stage_connection_attestation_control-host.json) connection
 checks prove the new sulc seeds have the same ordered geometry, face order,
 source `sphere`/`smoothwm`/atlas file hashes and iteration numbers as the
 inputs of the previously exact smoothwm API. The one-call
@@ -1260,7 +1260,7 @@ inputs of the previously exact smoothwm API. The one-call
 has now also passed a fresh bilateral numerical run, detailed below. It is
 not a T1-to-metrics reconstruction.
 
-The standalone sulc calls took 1,465.67 s LH and 1,336.97 s RH on headcw
+The standalone sulc calls took 1,465.67 s LH and 1,336.97 s RH on control-host
 with four PyTorch CPU threads; the prior standalone smoothwm calls took
 876.99 s and 797.29 s. Their separate-call sums are 2,342.67 s LH and
 2,134.26 s RH. The earlier installed FreeSurfer logs report about 154.08 s
@@ -1282,8 +1282,8 @@ result at all 106,622 vertices, with zero maximum error, in 28.67 s versus
 1,024-iteration checks were also exact at all 106,622 LH and 105,541 RH
 vertices; the production wrapper passed an additional exact LH 64-iteration
 check. The [benchmark script](experimental/benchmark_mris_register_average_numba.py)
-and [16,384-iteration report](mris_register_lh_average_numba_16384_headcw.json)
-retain input shape, timings and error. These are CPU measurements on headcw;
+and [16,384-iteration report](mris_register_lh_average_numba_16384_control-host.json)
+retain input shape, timings and error. These are CPU measurements on control-host;
 no GPU speed claim follows from them.
 
 A fresh **one-call** `run_register_sphere` execution then started from the
@@ -1298,7 +1298,7 @@ source diff. Consequently the machine comparison records the seed-hash field
 as `null`, rather than claiming it read a missing report field.
 
 A new unmodified FreeSurfer 8.2 `mris_register -curv -threads 4` run on the
-same inputs and headcw host generated fresh LH/RH references. They reproduced
+same inputs and control-host host generated fresh LH/RH references. They reproduced
 the archived official ordered geometry and faces exactly. The independent
 [full-stage comparator](experimental/compare_mris_register_full_api.py)
 checked the Python output against those fresh references and the previously
@@ -1311,19 +1311,19 @@ validated PyTorch stage schedules:
 
 The Python sulc and smoothwm portions took 1,102.74/926.98 s LH and
 1,273.81/763.09 s RH. Full reports are
-[LH](mris_register_lh_numba_full_headcw.json) and
-[RH](mris_register_rh_numba_full_headcw.json); exact comparisons are
-[LH](mris_register_lh_numba_full_compare_headcw.json) and
-[RH](mris_register_rh_numba_full_compare_headcw.json). The native
-[LH](mris_register_native_pair_lh_headcw.log) and
-[RH](mris_register_native_pair_rh_headcw.log) logs retain the commands and
+[LH](mris_register_lh_numba_full_control-host.json) and
+[RH](mris_register_rh_numba_full_control-host.json); exact comparisons are
+[LH](mris_register_lh_numba_full_compare_control-host.json) and
+[RH](mris_register_rh_numba_full_compare_control-host.json). The native
+[LH](mris_register_native_pair_lh_control-host.log) and
+[RH](mris_register_native_pair_rh_control-host.log) logs retain the commands and
 `/usr/bin/time` wall times. Both Python jobs ran concurrently, and the native
 controls ran during those jobs on a shared host. These numbers are descriptive
 same-host observations, not controlled paired speed ratios. The current Python
 registration is substantially slower than native despite the exact averaging
 kernel improvement.
 
-A [real LH force profile](mris_register_lh_force_profile_headcw.json) found
+A [real LH force profile](mris_register_lh_force_profile_control-host.json) found
 8.03 s for one distance-force call and 5.22 s for one area-force call. The
 distance force repeatedly rebuilt vertex normals (5.18 s), three-hop
 neighbor counts (1.42 s) and ordered neighbors (1.30 s) even though face
@@ -1346,12 +1346,12 @@ The [bilateral real-mesh benchmark](experimental/benchmark_mris_register_force_c
 compared the old and cached normal, distance-force and area-force arrays
 with projection enabled and disabled. **Every vertex in every array matched
 exactly** (106,622 LH; 105,541 RH; maximum absolute error 0). For one
-normal+distance+area call on headcw, the LH old/cached times were
+normal+distance+area call on control-host, the LH old/cached times were
 17.74/0.165 s without projection and 17.58/0.129 s with projection; RH was
 17.21/0.131 s and 18.24/0.154 s. Building each cache took 7.55 s LH and
 7.82 s RH. These are isolated CPU calls under shared-host load, not complete
-stage speed ratios. The [LH](mris_register_lh_force_cache_headcw.json) and
-[RH](mris_register_rh_force_cache_headcw.json) reports retain all comparisons.
+stage speed ratios. The [LH](mris_register_lh_force_cache_control-host.json) and
+[RH](mris_register_rh_force_cache_control-host.json) reports retain all comparisons.
 
 A first integrated run generated byte-identical bilateral sulc seeds, then
 stopped in smoothwm because `face_area_normals` was mistakenly removed from
@@ -1374,11 +1374,11 @@ those factors are descriptive. Both versions executed each hemisphere in a
 separate concurrent process. Current cached Python registration remains
 slower than the native program; the native controls ran while the earlier
 Python pair was active, so these measurements do not establish controlled
-Python/native speed ratios. The complete [LH](mris_register_lh_force_cache_full_headcw.json)
-and [RH](mris_register_rh_force_cache_full_headcw.json) reports include input,
+Python/native speed ratios. The complete [LH](mris_register_lh_force_cache_full_control-host.json)
+and [RH](mris_register_rh_force_cache_full_control-host.json) reports include input,
 seed and output SHA-256 values, full selected-step trajectories and stage
-times. The strict comparisons are [LH](mris_register_lh_force_cache_full_compare_headcw.json)
-and [RH](mris_register_rh_force_cache_full_compare_headcw.json).
+times. The strict comparisons are [LH](mris_register_lh_force_cache_full_compare_control-host.json)
+and [RH](mris_register_rh_force_cache_full_compare_control-host.json).
 
 This exact accelerated stage still starts from supplied conventional surface
 inputs and runs its numerical core on CPU PyTorch/Numba. It is not a complete

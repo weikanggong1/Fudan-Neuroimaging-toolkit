@@ -1,12 +1,12 @@
 #!/bin/bash -l
 set -uo pipefail
-stage=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_python_gpu_20260925/fnit_connected_gpu_20260926
+stage=/data/workspaces/freesurfer_synth/work/reconall_python_gpu_20260925/fnit_connected_gpu_20260926
 out="$stage/official_posterior_fp32_20260926"
 mkdir -p "$out"
 exec >"$out/run.log" 2>&1
 module load freesurfer
 tool=$(command -v mri_synthseg)
-if [[ "$tool" != /public/software/apps/Freesurfer/8.2.0-1/bin/mri_synthseg ]]; then
+if [[ "$tool" != /opt/reference/Freesurfer/8.2.0-1/bin/mri_synthseg ]]; then
   printf 'unexpected FreeSurfer binary: %s\n' "$tool"
   printf '2\n' >"$out/exit"
   exit 2

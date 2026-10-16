@@ -36,7 +36,7 @@ The current candidate's `nu.mgz`, `brainmask.mgz`, and `talairach.lta` were copi
 | `norm.mgz` (256³ uint8) | 284/284 equal | 0 / 16,777,216 | 0 |
 | `ctrl_pts.mgz` (256³ × 6 float32) | 284/284 equal | 0 / 100,663,296 | 0 |
 
-The candidate end to end run's existing Python outputs also matched this fresh official run at every voxel/value and in the 284 byte MGH header. Compressed file hashes differed, so complete byte identity was not established. In this paired gpucw1 run, `/usr/bin/time` recorded **91.44 s** for the official executable and **35.47 s** for the Python process including startup; the candidate integrated Python stage recorded **32.78 s**. Node load varied, so these single timings are descriptive rather than a throughput speedup claim. The earlier independent frozen input check likewise found zero output differences and recorded Python 17.49 s; see [`CA_NORMALIZE.md`](../CA_NORMALIZE.md).
+The candidate end to end run's existing Python outputs also matched this fresh official run at every voxel/value and in the 284 byte MGH header. Compressed file hashes differed, so complete byte identity was not established. In this paired accelerator-a-1 run, `/usr/bin/time` recorded **91.44 s** for the official executable and **35.47 s** for the Python process including startup; the candidate integrated Python stage recorded **32.78 s**. Node load varied, so these single timings are descriptive rather than a throughput speedup claim. The earlier independent frozen input check likewise found zero output differences and recorded Python 17.49 s; see [`CA_NORMALIZE.md`](../CA_NORMALIZE.md).
 
 ## Source of the complete subject difference
 

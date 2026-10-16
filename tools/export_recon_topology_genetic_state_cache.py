@@ -97,7 +97,7 @@ def export_metrics(*, input_run, baseline_run, frozen_source, output_directory):
     raw=(json.dumps(extra,indent=2,allow_nan=False)+'\n').encode()
     if [(type(v),v)for v in numeric_leaves(extra)] != [(type(v),v)for v in numeric_leaves(json.loads(raw))]:
         raise RuntimeError('state-cache metric value/type changed in public JSON')
-    for forbidden in ('/cpfs','/cwStorage/','/home/','FS_LICENSE','PRIVATE KEY'):
+    for forbidden in ('/cpfs','/data/shared/','/home/','FS_LICENSE','PRIVATE KEY'):
         if forbidden in raw.decode():
             raise ValueError('private metadata cannot be published')
     import re

@@ -8,7 +8,7 @@ from pathlib import Path
 import stat
 import tempfile
 
-ROOT=Path('/cwStorage/home/gongwk/Notebook_code/FNIT')
+ROOT=Path('/data/fnit')
 KEY='fnirt_cpu_current_replay_20261006'
 LEAF='smri_cpu_20261004/remaining_20261006/fnirt-current-pcg-replay-v1'
 BASE='4f3267abac486314636d9b081a85b78833e62167'
@@ -40,9 +40,9 @@ def main():
         entry={'workspace':str(ROOT/'workspaces'/LEAF),'run_path':str(ROOT/'runs'/LEAF),
             'baseline_commit':BASE,'status':'bounded_arithmetic_research',
             'scope':'small arithmetic/guard contracts then one saved current H/g/diag system, old/new PCG pair with shared strict CSC; no assembly/MRI/reference process',
-            'production_change':False,'gpu_enabled':False,'cpu_host':'nodecw7',
+            'production_change':False,'gpu_enabled':False,'cpu_host':'compute-a-7',
             'cpu_affinity':[32,36,40,44,48,52,56,60],'cpu_threads':8,
-            'outer_lock':str(ROOT/'runs/smri_cpu_20261004/nodecw7.gems.cpu8.lock'),
+            'outer_lock':str(ROOT/'runs/smri_cpu_20261004/compute-a-7.gems.cpu8.lock'),
             'runtime_constraint':'candidate uses own existing-dependency reductions; no installed FSL linking/calls',
             'child_timeout_seconds':180,'outer_lock_wait_seconds':1800}
         tasks=data.setdefault('active_tasks',{})
@@ -54,7 +54,7 @@ def main():
             text=text.rstrip()+'\n\n'+heading+'\n\n'+(
                 '`workspaces/'+LEAF+'`, with outputs at the matching `runs/` leaf. '
                 'Actual baseline `'+BASE+'`; small arithmetic/guard contracts before a single saved current H/g/diag old/new PCG pair, using shared strict CSC and unchanged 1e-3/500. '
-                'Eight nodecw7 cores under the common CPU outer lock and a module inner lock. '
+                'Eight compute-a-7 cores under the common CPU outer lock and a module inner lock. '
                 'Independent candidate has no installed FSL link or runtime call; reference solution is only compared after solving. '
                 'No production, GPU, MRI, assembly or full registration changes. Frozen inputs/results remain unchanged.\n')
         for group in ('workspaces','runs'):(ROOT/group/LEAF).mkdir(parents=True,exist_ok=True,mode=0o700)

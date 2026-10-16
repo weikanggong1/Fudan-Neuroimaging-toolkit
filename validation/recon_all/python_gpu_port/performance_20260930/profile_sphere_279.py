@@ -2,7 +2,7 @@ import cProfile,pstats,pathlib,json,hashlib,platform,time
 import torch, numba, numpy as np
 from nibabel.freesurfer.io import read_geometry
 from fnit.recon_all import sphere_standard_run
-p=pathlib.Path("/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930")
+p=pathlib.Path("/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930")
 base=p/'full_sub01_279e09f';out=p/'sub01/sphere_profile_279'
 out.mkdir(exist_ok=False)
 torch.set_num_threads(4)

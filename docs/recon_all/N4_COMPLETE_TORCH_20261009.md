@@ -106,7 +106,7 @@ AntsN4BiasFieldCorrectionFs -i orig.mgz -o nu.mgz
 
 新节点已完成公开 ds000114 sub-02/sub-07 的冻结同输入阶段配对。首例为官方 conformed 诊断输入，第二例为 FNIT 自产 conformed 输入；都不是原始 T1 recon-all 整例。输入均为 256³、1 mm、FP32 xyz；首例 raw SHA 为 `df36b2f6…b98a7`，第二例为 `dfeeee66…af566`，完整哈希保留在数据 manifest 和每份报告。CPU 为 Xeon Platinum 8369B，线程固定 1、CPU affinity 为 0–3，目标为 A100-SXM4-80GB，matmul/cuDNN TF32=True，不用半精度。冻结完整源码基线 `a756fffb`，实际算法仍以 loaded-module SHA 绑定。
 
-两例的原生 N4 各重跑两次，输出 SHA 精确一致；重新编译的最终导出诊断也分别与原生输出精确一致。原生 RPATH 重定位后 SHA 为 `5c6156bd…c437b`，新诊断 SHA 为 `998f6595…b6ac`。首例新节点原生输出与旧 gpucw1 存档的浮点最大/P99 差为 `7.63×10⁻⁵/3.05×10⁻⁵`，uint8 有 36 个 −1 差异；这是跨环境对照，不能视为随机性或预先归因某个编译器。此轮没有重跑 FreeSurfer ITK4.8 官方程序。
+两例的原生 N4 各重跑两次，输出 SHA 精确一致；重新编译的最终导出诊断也分别与原生输出精确一致。原生 RPATH 重定位后 SHA 为 `5c6156bd…c437b`，新诊断 SHA 为 `998f6595…b6ac`。首例新节点原生输出与旧 accelerator-a-1 存档的浮点最大/P99 差为 `7.63×10⁻⁵/3.05×10⁻⁵`，uint8 有 36 个 −1 差异；这是跨环境对照，不能视为随机性或预先归因某个编译器。此轮没有重跑 FreeSurfer ITK4.8 官方程序。
 
 | 输入 / 后端 | 完整 raw API 秒，含加载、传输与写出 | FP32 最大差 / P99，对同节点 native | uint8 不同体素 / 最大差 |
 |---|---:|---|---|
@@ -137,13 +137,13 @@ GPU 表格采用每组第二次、不开逐子段同步剖析的完整 API；GPU
 
 两例文件 API/CLI 的 4 项真实 MGZ 回归均通过：shape、uint8、affine、zooms、图像类型和同版张量量化值一致，API 与 CLI 文件 SHA 相同。v1 相对 native 的变化分别为 3772 个 −1 和 3259 个 +1。文件 API 墙钟为 2.505/2.383s，冷 CLI 为 6.359/35.630s；第二例 CLI 自报完整 API 为 16.426s，明确为共享负载观察，不能当作稳定吞吐。
 
-GPU 张量 allocated 峰值约 1.295 GB、reserved 约 1.384 GB。CFFF 的 Python PID 和 `nvidia-smi` PID 不匹配，原 raw benchmark 自身 PID 采样无值；文件回归复用 FNIT namespace 采样器，父子占用标为 `ownership_unresolved`、峰值 null。实际目标 UUID 整卡采样达 **27,468,496,896 字节**，包含归属未决进程，不能认定 N4 自身超限，也不能据 allocated 宣布父子进程低于 20 GB。请求间隔 0.1s，实际最大间隔分别为 1.114/9.240s；这组采样不能保证捕获连续峰值。
+GPU 张量 allocated 峰值约 1.295 GB、reserved 约 1.384 GB。accelerator-b 的 Python PID 和 `nvidia-smi` PID 不匹配，原 raw benchmark 自身 PID 采样无值；文件回归复用 FNIT namespace 采样器，父子占用标为 `ownership_unresolved`、峰值 null。实际目标 UUID 整卡采样达 **27,468,496,896 字节**，包含归属未决进程，不能认定 N4 自身超限，也不能据 allocated 宣布父子进程低于 20 GB。请求间隔 0.1s，实际最大间隔分别为 1.114/9.240s；这组采样不能保证捕获连续峰值。
 
 sub-07 的 v1 差异中脑内 1289、脑外 1970 个体素，变体为脑内 1317、脑外 2019；两者最大六连通簇都为 2 个体素。脑内量化变化位置的浮点最大差分别为 0.001812/0.001842。sub-02 本轮未迁移同网格 mask，未报其脑内分组。sub-02 全部正前景浮点差偏负，sub-07 全部偏正，这是强度的系统性尾差，尚未证明无实质影响。该归因在候选完整计算之后进行，不能直接解释为分割标签变化或最终指标退化。
 
-完整阶段、文件接口、收据和 CSV 见 [A100 报告目录](../../validation/recon_all/optimizations/20261009_n4_torch_substages/reports/cfff_20261009_v1/)、[完整配对 JSON](../../validation/recon_all/optimizations/20261009_n4_torch_substages/reports/cfff_20261009_v1/complete_pair/summary.json) 与 [指标 CSV](../../validation/recon_all/optimizations/20261009_n4_torch_substages/reports/cfff_20261009_v1/summary_metrics.csv)。原始私有报告包 1,907,898 字节，88 个导出文件 SHA 校验通过；不包含 raw/MGZ MRI、许可证或凭据。公开副本只将私有目录前缀和容器主机名替换为 `FNIT_ROOT`/`BENCHMARK_HOST`，所有数值、算法、输入及程序 SHA 保留；[公开导出映射](../../validation/recon_all/optimizations/20261009_n4_torch_substages/reports/cfff_20261009_v1/public_export_manifest.json) 分别记录原始与公开文件 SHA，不能用原始文件 SHA 校验脱敏后的文件。收据逐项记录实际库与源码，另外保留一个显式不可用的预期头文件名，不把缺失记录伪装为全项通过。
+完整阶段、文件接口、收据和 CSV 见 [A100 报告目录](../../validation/recon_all/optimizations/20261009_n4_torch_substages/reports/accelerator-b_20261009_v1/)、[完整配对 JSON](../../validation/recon_all/optimizations/20261009_n4_torch_substages/reports/accelerator-b_20261009_v1/complete_pair/summary.json) 与 [指标 CSV](../../validation/recon_all/optimizations/20261009_n4_torch_substages/reports/accelerator-b_20261009_v1/summary_metrics.csv)。原始私有报告包 1,907,898 字节，88 个导出文件 SHA 校验通过；不包含 raw/MGZ MRI、许可证或凭据。公开副本只将私有目录前缀和容器主机名替换为 `FNIT_ROOT`/`BENCHMARK_HOST`，所有数值、算法、输入及程序 SHA 保留；[公开导出映射](../../validation/recon_all/optimizations/20261009_n4_torch_substages/reports/accelerator-b_20261009_v1/public_export_manifest.json) 分别记录原始与公开文件 SHA，不能用原始文件 SHA 校验脱敏后的文件。收据逐项记录实际库与源码，另外保留一个显式不可用的预期头文件名，不把缺失记录伪装为全项通过。
 
-![sub-07 同网格 N4 浮点误差和量化变化，最大误差平面](../../validation/recon_all/optimizations/20261009_n4_torch_substages/reports/cfff_20261009_v1/complete_pair/ds000114_sub-07/errors_v1_gpu_2.png)
+![sub-07 同网格 N4 浮点误差和量化变化，最大误差平面](../../validation/recon_all/optimizations/20261009_n4_torch_substages/reports/accelerator-b_20261009_v1/complete_pair/ds000114_sub-07/errors_v1_gpu_2.png)
 
 严格完整 N4 复现仍未通过；文件接口合同通过；整体指标等效、N4 优化对最终分割/网格/脑区指标的影响及原始 T1 整例提速均未判定。下面 H100 记录保留其旧版本和单例范围，不能与新节点耗时合并。
 
@@ -151,7 +151,7 @@ sub-07 的 v1 差异中脑内 1289、脑外 1970 个体素，变体为脑内 131
 
 这是**一例真实 conformed T1 的冻结同输入 N4 阶段测试**，不是原始 T1 recon-all 整例。输入为 256³、1 mm、FP32，raw SHA-256 为 `df36b2f6b46f4ca815f68eff285997c087a8917fcff9b93712ac05e3150b98a7`。对应 MRI 文件 SHA 为 `18336675b248b38b32094482081dec9ab47efebe4cded9dfa4285adee88a28f9`；两种 SHA 属于不同数据表示，解码后 raw 已核对一致。
 
-代码基线为 `8801f4fa1c7036f80982e2f87efec5f9b3979df0`，当时未提交的算子由每份 JSON 的 loaded-module SHA 绑定。主机为 gpucw1，CPU 为 Intel Xeon Gold 6430，GPU 为 H100，Torch 2.5.1/CUDA 11.8，CPU 与 ITK fitting/reconstruction 都设为 1 线程；未固定 N4 进程 affinity，共享负载存在。精度为 FP32 图像/权重，FP64 分段归约和 complex128 FFT，不用 FP16/BF16。该过程无 GEMM/卷积，TF32 不影响本算子；实际进程记录 matmul TF32=False、cuDNN TF32=True，没有通过修改全局策略宣称启用了 TF32。
+代码基线为 `8801f4fa1c7036f80982e2f87efec5f9b3979df0`，当时未提交的算子由每份 JSON 的 loaded-module SHA 绑定。主机为 accelerator-a-1，CPU 为 Intel Xeon Gold 6430，GPU 为 H100，Torch 2.5.1/CUDA 11.8，CPU 与 ITK fitting/reconstruction 都设为 1 线程；未固定 N4 进程 affinity，共享负载存在。精度为 FP32 图像/权重，FP64 分段归约和 complex128 FFT，不用 FP16/BF16。该过程无 GEMM/卷积，TF32 不影响本算子；实际进程记录 matmul TF32=False、cuDNN TF32=True，没有通过修改全局策略宣称启用了 TF32。
 
 当前 native bundle SHA 为 `6ccbd262a68941d97cebe6247d497d05f400d783607411517656099612eba72e`；只增加时钟的诊断二进制 SHA 为 `50b6f380212bc7b70e2761de25e2b4975d4e8360ef26bc7dc54614ab922bd656`。两者本轮完整 FP32 输出 SHA 都为 `c61c8bfad3a00c8e760281416291146eff3260e359c8c678264ccb46bfe761c3`，逐字节一致，支持计时诊断未改算法。原官方 ITK4.8 同输入重复稳定性沿用带哈希历史记录，本轮没有重新启动官方 N4；与当前 ITK5.4.7 对照单列，不能混称当前官方重跑。
 

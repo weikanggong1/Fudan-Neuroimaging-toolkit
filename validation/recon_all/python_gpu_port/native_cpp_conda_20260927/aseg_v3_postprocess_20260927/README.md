@@ -76,11 +76,11 @@ than recomputing them. The final report status is `complete`.
 Reproduce the isolated check with [probe.py](probe.py) in the archived v3
 Python environment, `PYTHONPATH` pointing to v3 source, the installed
 FreeSurfer binaries, and fresh `--out`. The actual reference roots were
-`/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official`
+`/data/workspaces/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official`
 and
-`/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/v3_e2e/subjects/sub01`.
+`/data/workspaces/freesurfer_synth/work/reconall_wm_agent_20260927/v3_e2e/subjects/sub01`.
 Remote scratch output is at
-`/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_wm_agent_20260927/aseg_v3_postprocess_20260927/run1`.
+`/data/workspaces/freesurfer_synth/work/reconall_wm_agent_20260927/aseg_v3_postprocess_20260927/run1`.
 
 This establishes only the v3 final-volume branch boundary on one T1. It does
 not establish final cortical surface, vertex metric, ROI, or end-to-end parity.

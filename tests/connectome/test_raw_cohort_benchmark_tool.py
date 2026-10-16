@@ -120,7 +120,7 @@ class CommandAndFreshnessTests(unittest.TestCase):
     def test_safe_ssh_argument_roundtrip(self):
         adversarial = "space ' quote; $(touch /tmp/do-not-run) `uname` $SECRET"
         command = ["/shared/python", "worker.py", adversarial]
-        actual = cohort.ssh_command("gongwk@nodecw10", 22, "/tmp/socket with space", command)
+        actual = cohort.ssh_command("user@compute-a-10", 22, "/tmp/socket with space", command)
         self.assertEqual(shlex.split(actual[-1]), command)
         self.assertIn("BatchMode=yes", actual)
         self.assertIn("ControlMaster=no", actual)
@@ -188,7 +188,7 @@ class CommandAndFreshnessTests(unittest.TestCase):
 
     def test_remote_payload_uses_stdin_not_long_shell_argument(self):
         cfg = config()
-        cfg.update(cpu_host="nodecw10", cpu_python="/shared/python", worker_script="/shared/worker.py")
+        cfg.update(cpu_host="compute-a-10", cpu_python="/shared/python", worker_script="/shared/worker.py")
         payload = {"raw_provenance": "x" * 200000}
         with tempfile.TemporaryDirectory() as directory, patch.object(cohort.subprocess, "run") as run:
             run.return_value = subprocess.CompletedProcess([], 0, '{"status":"ok"}', "")
@@ -204,6 +204,7 @@ class EntryGateTests(unittest.TestCase):
     def arguments():
         return ["run", "--manifest", "/shared/manifest.json", "--run-root", "/shared/new-run",
                 "--report-dir", "/shared/new-reports", "--baseline-source", "/shared/baseline",
+                "--cpu-host", "cpu.example.org", "--gpu-host", "gpu.example.org",
                 "--cpu-python", "/usr/bin/python3", "--gpu-python", "/shared/conda/python",
                 "--worker-script", "/shared/worker.py", "--wall-script", "/shared/wall.py",
                 "--freesurfer-home", "/shared/freesurfer", "--recon-all", "/shared/freesurfer/bin/recon-all"]

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# headcw 的独立只读 CPU benchmark；不触碰整例、GPU 或生产快照。
+# control-host 的独立只读 CPU benchmark；不触碰整例、GPU 或生产快照。
 set -euo pipefail
-task_root=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929
+task_root=/data/workspaces/freesurfer_synth/work/recon_standard_20260929
 volume_root="$task_root/volume_parity_20260930"
 code_root="$volume_root/fixes_20261001/code_1b8c36d" # 仅导入冻结成熟检测组件
 diagnostic_root="$volume_root/fixes_20261001/extended_quality_1b8c36d_v2" # 正长度重叠判据的独立目录

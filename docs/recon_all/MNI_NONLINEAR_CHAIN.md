@@ -60,7 +60,7 @@ python tools/benchmark_recon_python_metrics_install.py --config /data/validation
 
 去标识真实 `sub-01` 的阶段原型在 CPU 上完成 PyTorch deform 推理用时 91.50 s；相同官方存档与 FNIT 输出的前向位移相关性超过 0.9999999999999、平均绝对差 0.0000084 mm。逆向位移相关性超过 0.9999999999、最大局部差 0.233 mm；检查图非零区域相关性 0.9999973，有 127 个不同体素。详细值见[机器记录](../../validation/recon_all/python_gpu_port/mni_nonlinear_real_20260929.json)。该阶段结果是同一真实 T1 的阶段比较，不能替代全流程 138 项验收。
 
-2026-09-30 的两例新连续链输入对照显示：跳过未使用的重采样图后，前向 warp、逆向 warp 和检查图的 **SHA-256 均与原 CPU 阶段完全相同**。`sub-02` 同在 headcw 上用时 282.33→253.95 秒；`sub-01` 同在 gpucw1 上用时 339.99→343.26 秒，共享负载使单次时间不能证明稳定提速。配对分解显示耗时还集中在 deform 模型和原生 warp 求逆。[逐例机器报告](../../validation/recon_all/python_gpu_port/performance_20260930/README.md)保留模型、转换、求逆及检查图秒数。
+2026-09-30 的两例新连续链输入对照显示：跳过未使用的重采样图后，前向 warp、逆向 warp 和检查图的 **SHA-256 均与原 CPU 阶段完全相同**。`sub-02` 同在 control-host 上用时 282.33→253.95 秒；`sub-01` 同在 accelerator-a-1 上用时 339.99→343.26 秒，共享负载使单次时间不能证明稳定提速。配对分解显示耗时还集中在 deform 模型和原生 warp 求逆。[逐例机器报告](../../validation/recon_all/python_gpu_port/performance_20260930/README.md)保留模型、转换、求逆及检查图秒数。
 
 TF32 CUDA 的正向/逆向 warp 相对 CPU 的 P99 差为 0.075/1.108 mm，检查图相差 220,314 个体素，父子进程采样峰值 20,308,819,968 字节。本阶段采用 FP32 CUDA：两例正向/逆向 P99 差均为约 0.000015/0.000031 mm，最大逆向差分别为 0.000473/0.000183 mm；最近邻检查图分别相差 19/17 个体素。这些差异全部保留在严格复现诊断中，不能以文件不一致单独否定 GPU 路径。
 

@@ -10,7 +10,7 @@ fi
 T1_IMAGE=$1
 TIAN_IMAGE=$2
 OUTPUT_DIR=$3
-FSLDIR=/public/software/apps/FSL/6.0.7.4
+FSLDIR=/opt/reference/FSL/6.0.7.4
 . "$FSLDIR/etc/fslconf/fsl.sh"
 export FSLDIR FSLOUTPUTTYPE=NIFTI_GZ
 export PATH="$FSLDIR/bin:$PATH"

@@ -22,7 +22,7 @@ import nibabel as nib
 import numpy as np
 
 GPU_UUID = 'GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e'
-LOCK = '/tmp/fnit-connectome-tenraw-gongwk.gpu0.lock'
+LOCK = '/tmp/fnit-connectome-tenraw-benchmark-user.gpu0.lock'
 EDDY_FLAGS = ['--flm=quadratic', '--resamp=jac', '--slm=linear', '--niter=8',
               '--fwhm=10,8,4,2,0,0,0,0', '--ff=10', '--sep_offs_move',
               '--nvoxhp=1000', '--repol', '--rms', '--initrand=12345']
@@ -316,7 +316,7 @@ def run_subject(case, args, prepare):
     finally:
         report['observed_rawprep_total_wall_seconds'] = time.perf_counter() - started
         report['rawprep_wall_excluding_GPU_queue_seconds'] = report['observed_rawprep_total_wall_seconds'] - report['GPU_lock_wait_seconds']
-        report['timing_policy'] = 'whole subject measured wall; queue wait separately recorded. CPU stages run on declared host, not nodecw10. Stage times not medians; hash/read/write and startup included.'
+        report['timing_policy'] = 'whole subject measured wall; queue wait separately recorded. CPU stages run on declared host, not compute-a-10. Stage times not medians; hash/read/write and startup included.'
         save(output / 'report.json', report)
         if args.phase == 'cpu' and report.get('CPU_prepared'):
             save(output / 'CPU_prepared_report.json', report)
@@ -367,8 +367,8 @@ def main():
     parser.add_argument('--raw-root', type=Path, required=True)
     parser.add_argument('--output-root', type=Path, required=True)
     parser.add_argument('--fnit-source', type=Path, required=True)
-    parser.add_argument('--fsl-dir', type=Path, default=Path('/public/software/apps/FSL/6.0.7.4'))
-    parser.add_argument('--freesurfer-dir', type=Path, default=Path('/public/software/apps/Freesurfer/8.2.0-1'))
+    parser.add_argument('--fsl-dir', type=Path, default=Path('/opt/reference/FSL/6.0.7.4'))
+    parser.add_argument('--freesurfer-dir', type=Path, default=Path('/opt/reference/Freesurfer/8.2.0-1'))
     parser.add_argument('--gpu-lock', type=Path, default=Path(LOCK))
     parser.add_argument('--subjects', nargs='+', required=True)
     parser.add_argument('--workers', type=int, default=2)

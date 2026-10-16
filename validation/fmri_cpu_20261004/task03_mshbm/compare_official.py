@@ -168,7 +168,7 @@ def main():
                 or fnit_report["environment"]["affinity"] != official_job["affinity"]
                 or fnit_job["affinity"] != official_job["affinity"]):
             raise ValueError("Original and FNIT must use the same actual CPU thread/affinity budget")
-        if (fnit_report["environment"].get("hostname") != "nodecw10"
+        if (fnit_report["environment"].get("hostname") != "compute-a-10"
                 or fnit_report["environment"].get("torch_threads") != official_job["threads"]
                 or fnit_report["environment"].get("torch_interop_threads") != 1):
             raise ValueError("The actual FNIT process host and Torch thread count must match")

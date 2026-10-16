@@ -197,7 +197,7 @@ sub07 LH反向white最大6.179mm；两例white↔pial穿越及sub07球面负向�
 
 ## 6．版本和benchmark
 
-- 79a41cdd：完整Gibbs/remesh候选接线，61项真实CFFF契约与wheel安装通过；
+- 79a41cdd：完整Gibbs/remesh候选接线，61项真实accelerator-b契约与wheel安装通过；
   两例原始T1均完成，本组没有整例加速，默认未替换。
 - e34a1829：完整dense GPU球面收尾，旧版两例原始T1和独立官方评分；
   [旧报告](../20261010_whole_sphere_finish_a100_e34a1829/README.md)保留原版本与计时。

@@ -13,8 +13,8 @@ import sys
 import time
 
 sys.dont_write_bytecode=True
-ROOT=Path('/cwStorage/home/gongwk/Notebook_code/FNIT/runs/connectome-accuracy-memory-recovery-20261003-v1')
-ORIGIN=Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1')
+ROOT=Path('/data/fnit/runs/connectome-accuracy-memory-recovery-20261003-v1')
+ORIGIN=Path('/data/workspaces/fnit_connectome_accuracy_20261003_v1/formal_accuracy_raw_v1')
 CONFIG=ORIGIN.parent/'formal_frozen_v1/accuracy_configuration.json'
 CONFIG_SHA='f8eba1cbf3eab2baa549172b32be2c9d3b1014ad478f6e3702d7987378f52f8c'
 

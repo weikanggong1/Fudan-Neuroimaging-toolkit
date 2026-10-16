@@ -76,7 +76,7 @@ def main() -> None:
         args.build_root / "utils/CMakeFiles/utils.dir/flags.make",
         args.build_root / "mris_make_surfaces/CMakeFiles/mris_place_surface.dir/flags.make",
     )
-    compiler = "/home1/gongwk/anaconda3/bin/x86_64-conda-linux-gnu-g++"
+    compiler = "/home1/benchmark-user/anaconda3/bin/x86_64-conda-linux-gnu-g++"
     report = {
         "source_git_commit": subprocess.check_output(
             ["git", "-C", str(args.source_root), "rev-parse", "HEAD"], text=True,
@@ -117,8 +117,8 @@ def main() -> None:
             "",
         ),
         "non_scientific_runtime_environment": {
-            "FREESURFER_HOME": "/public/software/apps/Freesurfer/8.2.0-1",
-            "SUBJECTS_DIR": "/public/software/apps/Freesurfer/8.2.0-1/subjects",
+            "FREESURFER_HOME": "/opt/reference/Freesurfer/8.2.0-1",
+            "SUBJECTS_DIR": "/opt/reference/Freesurfer/8.2.0-1/subjects",
             "FS_LICENSE": "provided to both processes; credential content omitted",
         },
     }

@@ -66,7 +66,7 @@ def main() -> None:
              "candidate_command": "whole/sub02/candidate_command.json",
              "baseline": "whole/sub02/baseline_run.json",
              "baseline_control": "whole/sub02/baseline_control.json",
-             "hardware": "hardware_nodecw10_1b8c36d.json",
+             "hardware": "hardware_compute-a-10_1b8c36d.json",
              "runtime": "runtime_fingerprints_1b8c36d.json"}
     values = {key: read_json(root / name) for key, name in names.items()}
     candidate, baseline, control = (values[key] for key in ("candidate", "baseline", "baseline_control"))

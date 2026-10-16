@@ -1,7 +1,7 @@
 import hashlib, json, os, subprocess, time, sys
 from pathlib import Path
-root=Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/nvml_monitor_runtime_v1')
-original=Path('/cwStorage/home/gongwk/Notebook_code/fnit_conda_env_956b1a9/bin/python')
+root=Path('/data/workspaces/fnit_connectome_tenraw_20261002/nvml_monitor_runtime_v1')
+original=Path('/data/workspaces/fnit_conda_env_956b1a9/bin/python')
 venv=root/'venv'
 wheel=root/'nvidia_ml_py-13.580.82-py3-none-any.whl'
 assert hashlib.sha256(wheel.read_bytes()).hexdigest()=='4361db337b0c551e2d101936dae2e9a60f957af26818e8c0c3a1f32b8db8d0a7'
@@ -40,7 +40,7 @@ for line in query.stdout.splitlines():
 api={int(x.pid):int(x.usedGpuMemory) for x in rows}
 common=api.keys()&smi.keys()
 comparison={str(pid):{'NVML_bytes':api[pid],'SMI_bytes':smi[pid],'equal':api[pid]==smi[pid]} for pid in common}
-s=Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_tenraw_20261002/formal_harness_staged_gpu_v2/benchmark_connectome_raw_bids.py')
+s=Path('/data/workspaces/fnit_connectome_tenraw_20261002/formal_harness_staged_gpu_v2/benchmark_connectome_raw_bids.py')
 spec=importlib.util.spec_from_file_location('original_wall',s);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 monitor=m.GPUProcessMonitor(torch,'cuda:0',interval=.5,gpu_uuid=uuid);monitor.start();time.sleep(6);report=monitor.finish();after=torch.cuda.is_initialized()
 assert not before and not after and report['backend']=='pynvml' and report['failed_samples']==0 and not report['errors'] and report['samples']>=10

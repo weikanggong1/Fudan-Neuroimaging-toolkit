@@ -56,3 +56,38 @@ class CPURegistration:
 def load_cpu_registration():
     """Create a reusable context without importing the registration engine."""
     return CPURegistration()
+
+
+def FNIT_mri_robust_register(
+    source, target, *, mode="rigid", stage_directory=None, device="cpu",
+    saturation=50.0, iterations_per_level=5, stop_distance=0.01,
+    initialize_translation=True, pyramid_min_size=16, pyramid_max_size=-1,
+    highres_iterations=-1, spatial_chunk_size=131072, memory_budget_gb=20.0,
+    tf32=True,
+):
+    """Register 3D images with the mature CPU rigid/affine implementation.
+
+    ``mode="rigid-affine"`` requires a new ``stage_directory`` and retains
+    the MGH save/reload boundary between the two stages. Single-stage calls
+    return ``RobustRegistrationResult``; the pair returns the existing dict.
+    Device, parameter validation, arithmetic and caller state are unchanged.
+    """
+    if mode not in {"rigid", "affine", "rigid-affine"}:
+        raise ValueError("mode must be rigid, affine or rigid-affine")
+    if mode == "rigid-affine" and stage_directory is None:
+        raise ValueError("stage_directory is required for rigid-affine")
+    if mode != "rigid-affine" and stage_directory is not None:
+        raise ValueError("stage_directory is only accepted for rigid-affine")
+    parameters = dict(
+        device=device, saturation=saturation,
+        iterations_per_level=iterations_per_level, stop_distance=stop_distance,
+        initialize_translation=initialize_translation,
+        pyramid_min_size=pyramid_min_size, pyramid_max_size=pyramid_max_size,
+        highres_iterations=highres_iterations, spatial_chunk_size=spatial_chunk_size,
+        memory_budget_gb=memory_budget_gb, tf32=tf32,
+    )
+    with load_cpu_registration() as registration:
+        if mode == "rigid-affine":
+            return registration.cpu_robust_rigid_affine(
+                source, target, stage_directory=stage_directory, **parameters)
+        return registration.cpu_robust_register(source, target, mode=mode, **parameters)

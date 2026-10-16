@@ -40,7 +40,7 @@ applywarp --in=labels.nii --ref=reference.nii --warp=dense.nii \
 
 ## 5. 精度与耗时
 
-nodecw10，Xeon Gold 6418H；双方用同一 CPU 亲和性和 1/8 线程上限。每项排除一组完整 warmup，保留三组交替 AB/BA，表中为完整进程中位数，包含启动、import、加载、完整计算及保存。节点为共享节点；实际 user/system CPU 使用另见 JSON。线程上限相同不意味着官方自动使用全部线程。
+compute-a-10，Xeon Gold 6418H；双方用同一 CPU 亲和性和 1/8 线程上限。每项排除一组完整 warmup，保留三组交替 AB/BA，表中为完整进程中位数，包含启动、import、加载、完整计算及保存。节点为共享节点；实际 user/system CPU 使用另见 JSON。线程上限相同不意味着官方自动使用全部线程。
 
 首个 adapter 调用的时间也单独保存：它排除 Python 启动与 Torch 配置，但包含功能模块的首次 import、完整读写。`--api-repetitions 0` 没有产生独立的已加载 API 重复，不把这个数称为“纯计算”或与官方 CLI 计算加速比。
 

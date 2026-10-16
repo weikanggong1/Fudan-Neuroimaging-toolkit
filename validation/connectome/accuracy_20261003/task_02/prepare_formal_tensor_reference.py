@@ -24,7 +24,7 @@ def main():
     parser.add_argument('--old-root',type=Path,required=True)
     parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--pipeline',type=Path,required=True)
-    parser.add_argument('--mrtrix-bin',type=Path,default=Path('/public/software/apps/MRtrix3/3.0.3/bin'))
+    parser.add_argument('--mrtrix-bin',type=Path,default=Path('/opt/reference/MRtrix3/3.0.3/bin'))
     args=parser.parse_args()
     if args.output.exists(): raise ValueError('fresh reference namespace required')
     args.output.mkdir(parents=True)

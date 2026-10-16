@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-FNIT_SERVER_ROOT=/cwStorage/home/gongwk/Notebook_code/FNIT
+FNIT_SERVER_ROOT=/data/fnit
 SR_WORKSPACE="$FNIT_SERVER_ROOT/workspaces/smri_cpu_20261004"
 SR_SOURCE="$SR_WORKSPACE/remaining_20261004/synth"
 SR_RUNS="$FNIT_SERVER_ROOT/runs/smri_cpu_20261004"
@@ -8,7 +8,7 @@ SR_OUTPUT="$SR_RUNS/remaining_20261004/synth"
 SR_LOGS="$FNIT_SERVER_ROOT/logs/smri_cpu_20261004/remaining_20261004/synth"
 export CUDA_VISIBLE_DEVICES=GPU-26e41f63-1a65-6b3e-5370-fa9a2934ca8e
 export OMP_NUM_THREADS=8 MKL_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 NUMBA_NUM_THREADS=8
-exec 9>"$SR_RUNS/gpucw1.gpu.lock"
+exec 9>"$SR_RUNS/accelerator-a-1.gpu.lock"
 flock 9
 for SR_ARM in old1 new1 new2 old2; do
     SR_DEST="$SR_OUTPUT/sr_normal_gpu_cli_v1_$SR_ARM"

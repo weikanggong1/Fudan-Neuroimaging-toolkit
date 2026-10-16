@@ -100,7 +100,7 @@ FreeSurfer 皮层表面方法背景：Dale, Fischl & Sereno, *NeuroImage* 9, 179
 
 本次使用此前从原始 T1 连续生成的 `sub-01`、`sub-02` FNIT 表面作为冻结同输入。统计输入在旧实现与缓存实现之间完全相同；不重跑表面放置，也不把手动统计补跑称为整例。每轮比较双侧各六份 `.stats`，包含三套主要图谱的 white、aparc 的 pial、BA_exvivo 和 BA_exvivo.thresh 的 white。
 
-计时均在 `gpucw1`、同一物理 GPU UUID `GPU-anonymized-device-007` 上进行，逻辑设备 `cuda:0`，PyTorch 2.5.1、Python 3.11.16、PyTorch 线程预算 4；矩阵乘法和 cuDNN TF32 均开启，没有半精度。分配缓存策略保持 `PYTORCH_NO_CUDA_MEMORY_CACHING=1`。
+计时均在 `accelerator-a-1`、同一物理 GPU UUID `GPU-anonymized-device-007` 上进行，逻辑设备 `cuda:0`，PyTorch 2.5.1、Python 3.11.16、PyTorch 线程预算 4；矩阵乘法和 cuDNN TF32 均开启，没有半精度。分配缓存策略保持 `PYTORCH_NO_CUDA_MEMORY_CACHING=1`。
 
 | 真实输入 | 轮次及执行顺序 | 旧实现（s） | 缓存实现（s） | 本统计阶段速度比 | 完整文本回归 |
 |---|---|---:|---:|---:|---|

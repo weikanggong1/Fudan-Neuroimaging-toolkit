@@ -7,14 +7,14 @@ wm.asegedit.mgz`. `edit_wm_aseg_core_python.py` and
 `edit_wm_aseg_late_python.py` replay this fixed call in NumPy, SciPy and
 Numba on CPU. They invoke no FreeSurfer program.
 
-On headcw, the Python output, a fresh native rerun, and the archived native
+On control-host, the Python output, a fresh native rerun, and the archived native
 `wm.asegedit.mgz` had **zero mismatches across all 16,777,216 voxels**. The
 284-byte MGH header also matched. The first decompressed byte difference
 between Python and fresh native was at offset 16,777,679, after the voxel
 payload ending at offset 16,777,500; the following command-history tags differ.
 This is a voxel/header result, not complete file byte identity.
 
-One matched-input, fresh-process CLI pair on headcw took 27.49 s native and
+One matched-input, fresh-process CLI pair on control-host took 27.49 s native and
 8.45 s Python. These are single observations with file I/O and Python startup
 included, so they do not establish an end-to-end speed ratio. The Python
 implementation is CPU only, and its core has an explicit input-hash gate:

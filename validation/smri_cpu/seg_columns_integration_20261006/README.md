@@ -18,7 +18,7 @@
 
 ## 3. 实际运行、缓存与合同
 
-运行资源为nodecw7同8物理核，CPU affinity `32,36,40,44,48,52,56,60`、共同CPU锁、每完整arm 600s/32e9 AS与RSS上限。GPU默认True普通33类运行在同H100 UUID，两arm各300s/20e9，派发前可用显存84.09 GB；共同GPU锁。每arm完成即保存原输出/退出receipt并严格核同名gzip+CSV SHA，首差停止后续。无新官方运行或未影响模式重跑。
+运行资源为compute-a-7同8物理核，CPU affinity `32,36,40,44,48,52,56,60`、共同CPU锁、每完整arm 600s/32e9 AS与RSS上限。GPU默认True普通33类运行在同H100 UUID，两arm各300s/20e9，派发前可用显存84.09 GB；共同GPU锁。每arm完成即保存原输出/退出receipt并严格核同名gzip+CSV SHA，首差停止后续。无新官方运行或未影响模式重跑。
 
 1. [phase1原始receipt](phase1_results/phase1/QUEUE.json)：已有Conda Python3.11/Torch2.5.1/GCC11真实构建加载1次；全新短合同cache。metadata阶段copy/SGEMM为0。artifact17,640 B、SHA `74678cc0…`；源码4385 B保持已验收旧C++字节。随后一个新进程复用artifact，6个数值case、13个copy/poison/signed-zero oracle、23个fallback/异常case全部通过，12copy/12SGEMM，所有uint32位差0、shape/stride/参数/lifetime/flags门通过。短worker RSS0.506 GB。
 2. [CPU完整队列](whole_results/whole_cpu/QUEUE.json)：A1原、B1独立cold cache、B2相同cache的新warm进程、A2原。B1编译1次、B2编译0次；两candidate各2真实forward、2命中层、28copy/28SGEMM。short cache保留，没有删除以制造cold。实际 [CPU_EXIT](whole_results/CPU_EXIT.json) rc0。
@@ -35,7 +35,7 @@ mri_synthseg --i /data/example/T1w.nii.gz \
   --cpu --threads 8
 ```
 
-同例、同nodecw7、同8核官方输出/时钟复用 [正式记录](../seg_memory_20261005/OFFICIAL_NODE7_FAST_BA_REPEAT.public.json)，正常冷进程55.046403秒；原373秒异常保留且不用于加速分母。官方边界是module/CLI import、完整推理、主图和CSV；本轮FNIT冷进程包含资源/源码preflight、imports、构造、API、图/CSV保存和收尾。API包含合资格层每次runtime/header/provider/权重SHA、compiler probe及首次compile。两种边界并列，不把API单独与CLI当同一时间。
+同例、同compute-a-7、同8核官方输出/时钟复用 [正式记录](../seg_memory_20261005/OFFICIAL_NODE7_FAST_BA_REPEAT.public.json)，正常冷进程55.046403秒；原373秒异常保留且不用于加速分母。官方边界是module/CLI import、完整推理、主图和CSV；本轮FNIT冷进程包含资源/源码preflight、imports、构造、API、图/CSV保存和收尾。API包含合资格层每次runtime/header/provider/权重SHA、compiler probe及首次compile。两种边界并列，不把API单独与CLI当同一时间。
 
 唯一新posthoc只读取已保存的A1/B2/官方图与CSV，使用既有比较器。先原子保存全scalar/逐标签/CSV/完整header JSON，再用NumPy+stdlib生成新离散PNG。它是保存结果的数值评分与绘图，**不是模型benchmark，也不是metadata-only**；0新CNN/native/GPU。posthoc v1因目标环境无Matplotlib退出，原日志/EXIT保留；一次授权v2成功，无安装依赖或模型重跑。
 

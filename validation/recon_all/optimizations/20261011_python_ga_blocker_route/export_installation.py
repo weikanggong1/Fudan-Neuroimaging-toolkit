@@ -198,7 +198,7 @@ def export_installation(*, run_directory: Path, expected_report: Path, output_fi
     _keys(expected, EXPECTED_KEYS)
     _constant(actual["status"], "passed")
     _constant(expected["status"], "passed")
-    _constant(actual["scope"], "CFFF existing dependencies; independent wheel target/import/fresh CLI only")
+    _constant(actual["scope"], "accelerator-b existing dependencies; independent wheel target/import/fresh CLI only")
     _constant(expected["scope"], "offline wheel/import/CLI; existing dependencies")
     _constant(expected["dependency_installation"], "existing environment; --no-deps --no-index")
     _integer(expected["source_file_count"], 1)

@@ -8,9 +8,9 @@
     "path": "validation/recon_all/python_gpu_port/performance_20261001/candidate_whole_profile.json",
     "sha256": "8d648a5157e6e741b480f471bd7b825af484674cab0e6a0ad05ef15bf7e2ff4a"
   },
-  "timing_scope": "outer stage包括调用内加载/传输/读写及显式目标GPU同步；nested子时间不相加，非纯kernel。sub01 gpucw1 CUDA与sub02 nodecw10 CPU不构成设备速度对照。",
+  "timing_scope": "outer stage包括调用内加载/传输/读写及显式目标GPU同步；nested子时间不相加，非纯kernel。sub01 accelerator-a-1 CUDA与sub02 compute-a-10 CPU不构成设备速度对照。",
   "source_binding": {
-    "remote_code_directory": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/code_1b8c36d",
+    "remote_code_directory": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/code_1b8c36d",
     "remote_sha_equals_git_1b": true,
     "verified_module_count": 25,
     "modules": {
@@ -118,7 +118,7 @@
   },
   "current_cases": {
     "sub01": {
-      "host": "gpucw1",
+      "host": "accelerator-a-1",
       "main_device": "cuda:0",
       "stage_seconds": {
         "T1_normalize": 185.4260512162,
@@ -226,7 +226,7 @@
       }
     },
     "sub02": {
-      "host": "nodecw10",
+      "host": "compute-a-10",
       "main_device": "cpu",
       "stage_seconds": {
         "T1_normalize": 72.16737869381905,
@@ -618,7 +618,7 @@
   ],
   "maturity_evidence": [
     {
-      "path": "validation/recon_all/python_gpu_port/standard_sphere_lh_finish_cuda1_gpucw1.json",
+      "path": "validation/recon_all/python_gpu_port/standard_sphere_lh_finish_cuda1_accelerator-a-1.json",
       "sha256": "44307951e1ba5d4fdb425a1b0c68faff6b910bbdaa0a65f422b70562b39ae5ea",
       "scope": "历史LH frozen-input CUDA finish；非完整sphere；缺当前源码/硬件绑定。",
       "historical_timing_not_used_for_priorities": true,
@@ -631,7 +631,7 @@
       }
     },
     {
-      "path": "validation/recon_all/python_gpu_port/mris_register_lh_overlap_cuda_gpucw1.json",
+      "path": "validation/recon_all/python_gpu_port/mris_register_lh_overlap_cuda_accelerator-a-1.json",
       "sha256": "053908f498c42242b29b3e85c21f0e94d8181c0ab14628c57a733123b35dea89",
       "scope": "历史LH frozen-input CUDA overlap；非完整注册。",
       "historical_timing_not_used_for_priorities": true,
@@ -644,7 +644,7 @@
       }
     },
     {
-      "path": "validation/recon_all/python_gpu_port/mris_register_lh_first_force_cpu_cuda0_gpucw1.json",
+      "path": "validation/recon_all/python_gpu_port/mris_register_lh_first_force_cpu_cuda0_accelerator-a-1.json",
       "sha256": "dbe65ea61bb3667348486d13537058b4e63cbb3b3cfc2704a6c5ca9fcb82a5e7",
       "scope": "历史首轮partial force，非平均/线搜索/完整schedule；未据旧耗时建议GPU默认。",
       "historical_timing_not_used_for_priorities": true,
@@ -701,7 +701,7 @@
       "findings": {}
     },
     {
-      "path": "validation/recon_all/python_gpu_port/mris_register_lh_numba_full_compare_headcw.json",
+      "path": "validation/recon_all/python_gpu_port/mris_register_lh_numba_full_compare_control-host.json",
       "sha256": "bb6ed62b112acd74578d26c15cd3ed3f445fdaa29897456c00d1a97590994081",
       "scope": "历史完整CPU注册同输入；非CUDA。",
       "historical_timing_not_used_for_priorities": true,
@@ -716,7 +716,7 @@
       }
     },
     {
-      "path": "validation/recon_all/python_gpu_port/mris_register_rh_numba_full_compare_headcw.json",
+      "path": "validation/recon_all/python_gpu_port/mris_register_rh_numba_full_compare_control-host.json",
       "sha256": "a44708294f07f8060d8de1981072531faa15711fb0ef82487775842f8d1cb275",
       "scope": "历史完整CPU注册同输入；非CUDA。",
       "historical_timing_not_used_for_priorities": true,
@@ -965,7 +965,7 @@
   "next_priority_command": {
     "priority": "当前控制整例结束后，优先冻结sub01 LH完整注册CPU调用剖析，定位averaging/force/line-search实际瓶颈。",
     "executed": false,
-    "host": "gpucw1，与sub01候选同主机",
+    "host": "accelerator-a-1，与sub01候选同主机",
     "entrypoint_source": [
       {
         "path": "src/fnit/recon_all/mris_register_run.py",
@@ -978,7 +978,7 @@
     ],
     "input_paths_verified_exist_on_head_shared_fs": true,
     "env": {
-      "PYTHONPATH": "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/code_1b8c36d/src",
+      "PYTHONPATH": "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/code_1b8c36d/src",
       "CUDA_VISIBLE_DEVICES": "",
       "OMP_NUM_THREADS": "4",
       "MKL_NUM_THREADS": "4",
@@ -987,22 +987,22 @@
       "NUMBA_NUM_THREADS": "4"
     },
     "argv": [
-      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
+      "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python",
       "-m",
       "cProfile",
       "-o",
-      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/register_profile_sub01_lh_1b.pstats",
+      "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/register_profile_sub01_lh_1b.pstats",
       "-m",
       "fnit.recon_all.mris_register_run",
-      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/lh.sphere",
-      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/lh.smoothwm",
-      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/lh.sulc",
-      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
-      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/register_profile_sub01_lh_1b.sphere.reg",
+      "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/lh.sphere",
+      "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/lh.smoothwm",
+      "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/full_sub01_1b8c36d_retry1/surf/lh.sulc",
+      "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif",
+      "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/register_profile_sub01_lh_1b.sphere.reg",
       "--overlap-device",
       "cpu",
       "--report",
-      "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/register_profile_sub01_lh_1b.json"
+      "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/register_profile_sub01_lh_1b.json"
     ],
     "parameter_comments_cn": {
       "sphere/smoothwm": "冻结候选自产surface RAS/mm网格，保持有序面。",

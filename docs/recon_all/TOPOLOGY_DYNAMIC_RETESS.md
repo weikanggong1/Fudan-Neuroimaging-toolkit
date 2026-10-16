@@ -142,7 +142,7 @@ mris_fix_topology -mgz -sphere qsphere.nofix -inflated inflated.nofix \
 
 ## 5. 当前真实数据精度和时间
 
-公开 ds000114 sub07 ses-test LH；输入来自79a41cdd原始T1连续链。CFFF同机、
+公开 ds000114 sub07 ses-test LH；输入来自79a41cdd原始T1连续链。accelerator-b同机、
 CPU8–11/总4线程、CUDA隐藏，固定源seed1234。原MRI、权重、程序及输入SHA
 保留在[机器可读报告](../../validation/recon_all/optimizations/20261010_topology_dynamic_retessellation/README.md)。
 

@@ -34,7 +34,7 @@ FNIT 占显存 6802 MiB，另一计算进程占 23498 MiB；GPU1 同时有一个
 
 实际执行源码根目录：
 
-`/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v12`
+`/data/workspaces/freesurfer_synth/work/fnit_subregions_unified_20260930/source_v12`
 
 | 文件与行 | 可证实的路径 |
 |---|---|
@@ -55,4 +55,4 @@ FNIT 占显存 6802 MiB，另一计算进程占 23498 MiB；GPU1 同时有一个
 
 **不能从此窗口推出：** 整个 20 多分钟全部由其他 GPU 任务导致；其计算与驱动等待的独占时间；是否出现比历史更多的 strong-Wolfe trials；adaptive rebuild 的次数及候选四面体数量；是否有特定极端 trial 导致索引候选膨胀。这些量未由冻结日志记录。前一 brainstem 较快也不能证明后续阶段享有相同共享负载或相同 kernel 提交特征。
 
-远端二进制采样保留于 `gpucw1:/tmp/fnit-p5740-readonly-perf.data`；本地只保存上述小型诊断。停止进一步采样。
+远端二进制采样保留于 `accelerator-a-1:/tmp/fnit-p5740-readonly-perf.data`；本地只保存上述小型诊断。停止进一步采样。

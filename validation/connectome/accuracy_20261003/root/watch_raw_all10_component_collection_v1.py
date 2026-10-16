@@ -15,7 +15,7 @@ import time
 import traceback
 from datetime import datetime, timezone
 
-ROOT = Path('/cwStorage/home/gongwk/Notebook_code/fnit_connectome_accuracy_20261003_v1')
+ROOT = Path('/data/workspaces/fnit_connectome_accuracy_20261003_v1')
 WATCH = ROOT / 'root_component_collection_all10_wait_v1'
 CONFIG = ROOT / 'formal_frozen_v1/accuracy_configuration.json'
 CONFIG_SHA = 'f8eba1cbf3eab2baa549172b32be2c9d3b1014ad478f6e3702d7987378f52f8c'
@@ -49,7 +49,7 @@ def save(x):
 
 def run():
     assert os.environ.get('CUDA_VISIBLE_DEVICES') == ''
-    assert socket.gethostname() == 'nodecw10'
+    assert socket.gethostname() == 'compute-a-10'
     assert not (WATCH/'status.json').exists()
     assert not COLLECTED.exists()
     sources = [(CONFIG, CONFIG_SHA), (HELPER, HELPER_SHA), (CONTROL, CONTROL_SHA), (COLLECTOR, COLLECTOR_SHA),

@@ -1,6 +1,6 @@
 from pathlib import Path
 import os,sys,time,json,hashlib,subprocess
-root=Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930');source=Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/source_precision_controls_20261001');folder=Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/fnit_subregions_unified_20260930/precision_hippo_regressions_20261002');worker=source/'validation/subregions/analyze_raw_precision.py'
+root=Path('/data/workspaces/freesurfer_synth/work/fnit_subregions_unified_20260930');source=Path('/data/workspaces/freesurfer_synth/work/fnit_subregions_unified_20260930/source_precision_controls_20261001');folder=Path('/data/workspaces/freesurfer_synth/work/fnit_subregions_unified_20260930/precision_hippo_regressions_20261002');worker=source/'validation/subregions/analyze_raw_precision.py'
 def main():
  man=json.loads((source/'source_manifest.json').read_text())
  assert all((source/x['path']).stat().st_size==x['bytes'] and hashlib.sha256((source/x['path']).read_bytes()).hexdigest()==x['sha256'] for x in man['files'])

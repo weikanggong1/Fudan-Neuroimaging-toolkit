@@ -1,4 +1,6 @@
-# SynthMorph：配准与 3D/4D 变换应用
+# FNIT_SynthMorph
+
+> 统一 Python 入口：[`FNIT_SynthMorph`](../API_REFERENCE.md)，从 `fnit` 导入。下文配置、结果类型和细分算子保留高级兼容接口。
 
 [返回首页](../../README.md) · [完整旧文档与更早证据](../../validation/synthmorph/readme_archive_20261005.md)
 
@@ -39,11 +41,11 @@ flowchart LR
 
 ```python
 from pathlib import Path
-from fnit import SynthMorph, apply_transform
+from fnit import FNIT_SynthMorph, apply_transform
 
 registration_output_directory = Path("results")  # 配准与标签结果目录
 registration_output_directory.mkdir(parents=True, exist_ok=True)  # 准备保存目录
-registration_model = SynthMorph(
+registration_model = FNIT_SynthMorph(
     weights="/path/to/weights",  # 已校验的affine和deform权重目录
     device="cuda:0",  # 网络设备，无GPU时用cpu
     model="joint",  # 联合仿射与非线性配准
@@ -256,7 +258,7 @@ CPU joint 的原始体素坐标八角采样现在可使用仓库自写的 NumBa 
 
 最新实现修复 CPU joint 的首次分歧：NIfTI 默认缩放后转 float32；初始网络输入按原始体素坐标有序八角插值；仿射特征显式采用 oneDNN 卷积；置信、XYZ moments、4×4 LU/solve、平方根与中心组合保留明确的 FP32 次序。既有 rigid/affine 返回变换与最终图像的 pull 契约保留。最终采样、权重、deform 网络、速度积分、standalone affine/rigid 以及全部 CUDA 公式保持。各入口、局部 hook、训练和 autocast 的保护条件另有回归。
 
-真实输入为 OpenNeuro `ds003138` v1.0.1 的两幅完整 `224×288×288` T1w（CC0）。当前所有 CLI 在 **nodecw7**，8 线程、同八物理核及同组锁；没有使用 nodecw10 时间。页面缓存未清空，节点有大量外部内存任务与存储等待，以下是实际观测。
+真实输入为 OpenNeuro `ds003138` v1.0.1 的两幅完整 `224×288×288` T1w（CC0）。当前所有 CLI 在 **compute-a-7**，8 线程、同八物理核及同组锁；没有使用 compute-a-10 时间。页面缓存未清空，节点有大量外部内存任务与存储等待，以下是实际观测。
 
 | 默认 extent256 | 当前完整 CLI（秒） | 固定双向精度门 |
 |---|---:|---|
@@ -275,7 +277,7 @@ CPU joint 的原始体素坐标八角采样现在可使用仓库自写的 NumBa 
 
 CPU joint 的 Eigen 适配器是 FNIT 自有小段 C++，不调用原软件。主页 Conda 环境固定 `eigen=3.4.0`、GCC/GXX `11`；wheel/sdist 包含 `.cpp`。首次 CPU joint 推理懒编译，默认缓存 `~/.cache/fnit/synthmorph/cpu_eigen`；`FNIT_SYNTHMORPH_BUILD_CACHE` 可指定缓存，`CXX`/`FNIT_EIGEN_INCLUDE` 可指定独立 Conda compiler/headers。缺少依赖或 headers 版本不是 `3.4.0` 时会报清晰错误。cache identity 绑定源码、Eigen headers、compiler/flags 和 binary SHA；编译末尾显式关闭 fast-math/FMA contraction。缓存目录和文件限定为当前用户拥有的普通目录/文件，权限分别为 `0700`/`0600`，拒绝符号链接和文件硬链接。锁等待上限 20 秒，共享文件系统 ENOLCK 最多尝试 3 次；compiler 版本查询上限 5 秒，编译上限 60 秒，超时只结束本次编译子进程组。首次含构建的阶段 `18.191 s`、完整 stage worker `20.526 s`，已有缓存阶段进程 `2.255 s`；上面 CLI 已有编译缓存。其他模式、CUDA、训练不加载该适配器。
 
-**2026-10-05 缓存兼容修复（v34）**：nodecw7 的 Conda Python 不支持 `chmod(..., follow_symlinks=False)`，v33 在编译前抛出 `NotImplementedError`。现通过 `O_DIRECTORY | O_NOFOLLOW` 打开目录，对同一文件描述符检查用户所有权、设置并再次确认 `0700`；无法执行权限策略的文件系统明确报错。源码、Eigen 版本和数值计算保持原定义，失败记录保留。
+**2026-10-05 缓存兼容修复（v34）**：compute-a-7 的 Conda Python 不支持 `chmod(..., follow_symlinks=False)`，v33 在编译前抛出 `NotImplementedError`。现通过 `O_DIRECTORY | O_NOFOLLOW` 打开目录，对同一文件描述符检查用户所有权、设置并再次确认 `0700`；无法执行权限策略的文件系统明确报错。源码、Eigen 版本和数值计算保持原定义，失败记录保留。
 
 新冻结 v34 在独立 Conda Eigen `3.4.0` / GCC `11.4.0` 下重新编译，两种 extent 保存的 **8 个真实 4×4 矩阵**与旧适配器结果逐位相同，重复调用也相同。实际目录为 `0700`、三份缓存文件为 `0600`。首次构建及调用 `19.581485 s`，同进程缓存调用 `0.000058 s`，包含导入和读写的整个验证 `22.288850 s`；这些是矩阵阶段，完整配准不在本次时钟中。[完整源码、529 份头文件、compiler、binary 绑定及失败记录](../../validation/synthmorph/cpu_fixes_20261004/eigen_loader_v34.public.json)。最终缓存能力合同 9 项通过，包含上述平台能力缺失及文件系统不落实权限时的拒绝行为。
 
@@ -295,7 +297,7 @@ CPU joint 的 Eigen 适配器是 FNIT 自有小段 C++，不调用原软件。�
 |---|---|---|
 | 2026-10-05 | CPU有序NumBa采样、安全Eigen cache平台修复；GPU入口与数学源码保留 | [完整192/256/API全同，256单共享节点ABBA中位下降4.91%；暖/冷采样分别列出](../../validation/synthmorph/cpu_fixes_20261004/full_sampler_v35.public.json)；[GPU隔离审计](../../validation/synthmorph/cpu_fixes_20261004/gpu_route_v35.public.json) |
 | 2026-10-04 joint 续修 | 原始坐标输入、oneDNN 小网格卷积、有序仿射算术、Eigen3.4.0；保护训练/hooks/autocast，CUDA 保留 | [192/256 全门、物化 API、三模式输出保持、GPU joint pair、当前 CPU 约慢5%](../../validation/synthmorph/cpu_fixes_20261004/README.md) |
-| 2026-10-04 已归档 v7 | CPU NIfTI 解码、rigid/affine 返回仿射契约、joint 两种归约形状；GPU 原公式保留 | [nodecw7 四模式全部固定门、物化对象/192明确未过项、H100 affine 当前源码和 shared World](../../validation/synthmorph/cpu_fixes_20261004/README.md) |
+| 2026-10-04 已归档 v7 | CPU NIfTI 解码、rigid/affine 返回仿射契约、joint 两种归约形状；GPU 原公式保留 | [compute-a-7 四模式全部固定门、物化对象/192明确未过项、H100 affine 当前源码和 shared World](../../validation/synthmorph/cpu_fixes_20261004/README.md) |
 | 2026-10-04 | CPU 构造精度隔离、最终 linear 有效域/affine 坐标、nearest 半体素舍入、积分 grid 复用与 init debug 几何；GPU 原路径保留 | [四模式、参数、独立 apply、GPU 回归与明确未过项](../../validation/synthmorph/cpu_20261004/README.md)；历史 4D 的 CPU 逐位结论不作为本次边界修复版结论 |
 | 2026-10-02 | `WorldTransformChain` 接入公共volume采样器，支持同一次插值中的固定场、BBR与逐帧HMC，新增spline/边界/mask参数 | `tests/synthmorph/test_world_transform.py` 契约测试；[完整 490 帧 API、矩阵/调用门与脑图](../../validation/fmri/public_resamplers_20261002/README.md)通过 |
 | 2026-10-02 | 独立apply一次解码、float32输入复用、坐标复用、可选CUDA与frame chunk，仿射准备复用voxel grid | [本轮真实影像报告](../../validation/registration_lossless_20261002/README.md)；完整490帧同设备位模式、header与保存重读均通过 |

@@ -2,7 +2,7 @@
 
 本页保存采样角度修正前的完整球面结果；修正后已有[同输入初始矩阵及前四步验证](../candidate_sphere_first_difference_20260927/README.md)，完整球面仍在单阶段复测。
 
-本次接续[已保存的自产 MRI、拓扑和白质预放置阶段](../white_connected_prefix_20260927/README.md)，输入为去标识的 `sub-01_T1w.nii.gz`（SHA-256：`f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a`）。候选被试位于 gpucw1 的 `/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_finalsurfs_stage_20260927/white_candidate_no_official_topology_fslicense`。官方 FreeSurfer 8.2 被试 `/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official` 只用于输出比较。这是保存阶段的接续试验，尚非从原始 T1 在单一进程完成的整例重建。
+本次接续[已保存的自产 MRI、拓扑和白质预放置阶段](../white_connected_prefix_20260927/README.md)，输入为去标识的 `sub-01_T1w.nii.gz`（SHA-256：`f20410a4efd8e6a05cd04d55730a4a5492ecf9ad1b234fe0fd4661e448270c6a`）。候选被试位于 accelerator-a-1 的 `/data/workspaces/freesurfer_synth/work/reconall_finalsurfs_stage_20260927/white_candidate_no_official_topology_fslicense`。官方 FreeSurfer 8.2 被试 `/data/workspaces/freesurfer_synth/work/reconall_benchmark_pair_ac_20260924/official_subjects/a_official` 只用于输出比较。这是保存阶段的接续试验，尚非从原始 T1 在单一进程完成的整例重建。
 
 旧 v5 被试的左侧表面有 106,695 个顶点、213,386 个面，`sulc` 和 `aparc.annot` 也各有 106,695 项；当前候选与官方被试均为 106,622 个顶点、213,240 个面，因此不能复用旧注释。[网格数量审计](saved_v5_audit.json)保留了逐文件记录。
 
@@ -38,8 +38,8 @@ Conda 膨胀耗时 [12.72 秒](white_candidate_lh_inflate_time.txt)、峰值 RSS
 为判断微小上游误差是否也影响官方优化，将**自产** `lh.inflated` 和 `lh.smoothwm` 逐字节复制到隔离目录。运行前后 `cmp` 均相同；两份[输入哈希](candidate_sphere_official_control/input_sha256.txt)分别为 `f3a2128de469dc3c8d06e2649f85f420b26c84f95aea3c7912f677b4e57afd30` 和 `6d1a5d30639f3678c2e825d69b816f9bc35d5411546145f6c0bcab29a5fd0b91`。官方程序 SHA-256 为 `c34ca308a7fa03acdb3f689bf6125cf3d0198c37c3a62992a29f68e631c73612`。设置私有 `FS_LICENSE`、`FREESURFER_HOME`、`SUBJECTS_DIR` 和 `OMP_NUM_THREADS=4` 后，用 600 秒超时保护执行：
 
 ```bash
-CONTROL=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_finalsurfs_stage_20260927/candidate_sphere_official_control
-/public/software/apps/Freesurfer/8.2.0-1/bin/mris_sphere -threads 4 -seed 1234 \
+CONTROL=/data/workspaces/freesurfer_synth/work/reconall_finalsurfs_stage_20260927/candidate_sphere_official_control
+/opt/reference/Freesurfer/8.2.0-1/bin/mris_sphere -threads 4 -seed 1234 \
   "$CONTROL/subjects/sub01/surf/lh.inflated" "$CONTROL/subjects/sub01/surf/lh.sphere"
 ```
 

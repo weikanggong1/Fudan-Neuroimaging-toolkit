@@ -36,4 +36,4 @@ CUDA_VISIBLE_DEVICES='' PYTHONPATH=src python -m pytest -q -p no:cacheprovider \
 
 ## 7. 来源
 
-源码提交 `7a9b369bd8fc55996a80d1cb17222cc8e1ce395c`；实际执行在 headcw、FNIT Conda Python 3.11 环境。完整命令、源码归档和输出 SHA 见各次 `launch.json`、`report.json` 及汇总验证记录。
+源码提交 `7a9b369bd8fc55996a80d1cb17222cc8e1ce395c`；实际执行在 control-host、FNIT Conda Python 3.11 环境。完整命令、源码归档和输出 SHA 见各次 `launch.json`、`report.json` 及汇总验证记录。

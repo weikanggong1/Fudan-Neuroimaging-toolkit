@@ -30,7 +30,7 @@ flowchart TD
 
 参考为 FSL 6.0.7.4、官方 Python AMICO 2.0.3、FreeSurfer 8.2 安装内的原版 SynthStrip 脚本及同 SHA 标准模型。SynthStrip 在安装提供的 8 线程 CPU Python 环境中运行；FNIT 使用 H100 GPU。参考的 mask 来自其自身 TOPUP 均值，FNIT 来自 FNIT 自产均值，没有借用参考 mask、场或校正 DWI。参考是 UKB 命令的明确适配链：原 T1 mask 改为 b0 SynthStrip、MCR AMICO 改为 Python AMICO、使用 rotated bvec、seed12345、不执行 GDC。
 
-服务器为 gpucw1 / H100 PCIe。双方各 8 CPU 线程，参考固定 cores0–7，FNIT cores8–15；同一目标 GPU 的本任务计算串行，早期参考 CPU 配准与合并前 FNIT GPU 流程在不同 CPU 核上重叠；当前 main 整合复测在参考链完成后运行。输出位于同一节点私有 tmp 文件系统，raw 只读。未清空系统或 Triton 缓存；共享机器的时间为描述性观测。FNIT allocator 上限20,000,000,000 bytes，图像 float32、默认 TF32，TOPUP 沿用官方 double 系数/求解器与插值累加，不使用 FP16/BF16。
+服务器为 accelerator-a-1 / H100 PCIe。双方各 8 CPU 线程，参考固定 cores0–7，FNIT cores8–15；同一目标 GPU 的本任务计算串行，早期参考 CPU 配准与合并前 FNIT GPU 流程在不同 CPU 核上重叠；当前 main 整合复测在参考链完成后运行。输出位于同一节点私有 tmp 文件系统，raw 只读。未清空系统或 Triton 缓存；共享机器的时间为描述性观测。FNIT allocator 上限20,000,000,000 bytes，图像 float32、默认 TF32，TOPUP 沿用官方 double 系数/求解器与插值累加，不使用 FP16/BF16。
 
 许可证、程序、模型、模板、输入和源码 SHA 见 JSON。FSL/FreeSurfer/AMICO 仅在独立验证侧使用；本次不发布它们的二进制、权重、模板或原始影像。
 

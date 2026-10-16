@@ -4,7 +4,7 @@
 
 ## 已完成的真实阶段门
 
-与[上一轮首差报告](../README.md)使用同一个 CC0 原始T1、相同校验的权重及私有中间数组。nodecw7固定8核 `0,4,8,12,16,20,24,28`，Torch/Numba 8线程，沿用同一专属锁。
+与[上一轮首差报告](../README.md)使用同一个 CC0 原始T1、相同校验的权重及私有中间数组。compute-a-7固定8核 `0,4,8,12,16,20,24,28`，Torch/Numba 8线程，沿用同一专属锁。
 
 | 阶段 | 完整真实数组 | 数值结果 | 实测阶段秒数 |
 |---|---:|---|---:|
@@ -105,7 +105,7 @@ output = input * scale + offset
 
 ### CPU 生产 ABBA：完整精度
 
-[旧1](reports/sr_production_cpu_abba_node7_v1_old1.public.json)、[新1](reports/sr_production_cpu_abba_node7_v1_new1.public.json)、[新2](reports/sr_production_cpu_abba_node7_v1_new2.public.json)、[旧2](reports/sr_production_cpu_abba_node7_v1_old2.public.json)在同nodecw7核组/8线程/专属锁串行执行。两新臂都保持原CNN输入SHA，完整预测SHA分别为上述`10f6bac6…`和`708af413…`；最终float与uint8逐值全同官方、affine同。NIfTI SHA `dff4ef9d658243a500704c141290c636414e7e871e3d6fccf5b2f211a7328922`，NPZ SHA `fba3de5d788d11a149db26fbda720c8c3d25f69a26cb91083bc33776487e55f3`。旧两臂均保留3,522点浮点失败与527个uint8差1。
+[旧1](reports/sr_production_cpu_abba_node7_v1_old1.public.json)、[新1](reports/sr_production_cpu_abba_node7_v1_new1.public.json)、[新2](reports/sr_production_cpu_abba_node7_v1_new2.public.json)、[旧2](reports/sr_production_cpu_abba_node7_v1_old2.public.json)在同compute-a-7核组/8线程/专属锁串行执行。两新臂都保持原CNN输入SHA，完整预测SHA分别为上述`10f6bac6…`和`708af413…`；最终float与uint8逐值全同官方、affine同。NIfTI SHA `dff4ef9d658243a500704c141290c636414e7e871e3d6fccf5b2f211a7328922`，NPZ SHA `fba3de5d788d11a149db26fbda720c8c3d25f69a26cb91083bc33776487e55f3`。旧两臂均保留3,522点浮点失败与527个uint8差1。
 
 | 同driver阶段（s） | 旧1 / 新1 / 新2 / 旧2 |
 |---|---|
@@ -123,7 +123,7 @@ output = input * scale + offset
 
 [`cpu_cli_abba.sh`](cpu_cli_abba.sh)运行真实公开CLI，仅保存正常NIfTI；每次新进程，候选每次独立空NumBa缓存。无网络wrapper、CNN数组复制、NPZ保存或运行内哈希。GNUwall从flock内启动，含正常导入/模型加载/JIT/推理/写盘，排队不计入；[`collect_normal_cli.py`](collect_normal_cli.py)的后续全图/header/SHA比较不计入。
 
-[完整正常CLI报告](reports/sr_normal_cli_node7_v1.public.json)：官方1/旧1/新1/新2/旧2/官方2为148.68/28.24/29.91/26.77/29.08/75.17 s。中位官方111.925、旧28.660、新28.340 s；GNU峰值RSS分别最大8.780/10.222/7.496 GB。候选与官方连NIfTI文件及header SHA全同。官方GPFS冷导入/缓存波动明显，节点load约24–28；不据此断言稳定4倍加速。旧新正常CLI基本持平，候选RSS约降低26.7%。旧nodecw10时钟仅属历史，不与本次除比。
+[完整正常CLI报告](reports/sr_normal_cli_node7_v1.public.json)：官方1/旧1/新1/新2/旧2/官方2为148.68/28.24/29.91/26.77/29.08/75.17 s。中位官方111.925、旧28.660、新28.340 s；GNU峰值RSS分别最大8.780/10.222/7.496 GB。候选与官方连NIfTI文件及header SHA全同。官方GPFS冷导入/缓存波动明显，节点load约24–28；不据此断言稳定4倍加速。旧新正常CLI基本持平，候选RSS约降低26.7%。旧compute-a-10时钟仅属历史，不与本次除比。
 
 ### CPU 参数分支
 
@@ -133,7 +133,7 @@ output = input * scale + offset
 
 ### 不同真实输入与尺寸的最小扩展
 
-[`cpu_domain_gate.py`](cpu_domain_gate.py)只运行冻结候选，复用既有官方保存结果；同nodecw7核组/8线程/锁。没有重跑原软件，也没有将格式/目录等同输入组合重复重建。[唯一域结果](reports/sr_domains_node7_v1.public.json)保留原gate、参考SHA和最新输出：
+[`cpu_domain_gate.py`](cpu_domain_gate.py)只运行冻结候选，复用既有官方保存结果；同compute-a-7核组/8线程/锁。没有重跑原软件，也没有将格式/目录等同输入组合重复重建。[唯一域结果](reports/sr_domains_node7_v1.public.json)保留原gate、参考SHA和最新输出：
 
 | 唯一真实场景 | 完整值数 | 本次结果 | 旧结果 |
 |---|---:|---|---|

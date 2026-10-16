@@ -1,6 +1,6 @@
 # Isolated CUDA pilot: `mris_place_surface` intensity term
 
-Tested on gpucw1 with the FreeSurfer 8.2 `fs_sub01` result. This is an isolated
+Tested on accelerator-a-1 with the FreeSurfer 8.2 `fs_sub01` result. This is an isolated
 kernel experiment; the recon-all package and native runtime were not changed.
 Source basis: commit `d932c45b7941662ea380a05efef580568b98d41a`,
 `utils/mrisurf_compute_dxyz.cpp:1941` (`mrisComputeIntensityTerm`), called from
@@ -14,7 +14,7 @@ The pilot implements the default non-multimodal, `grad_dir=0`,
 `fill_interior=0`, `l_intensity=0.2` path, with active vertices. It does not test
 the complete native function or official surface output.
 
-| gpucw1 trial | CPU 1 thread | CPU 4 threads | CUDA kernel | CUDA call including alloc/copy | Different float32 gradient values |
+| accelerator-a-1 trial | CPU 1 thread | CPU 4 threads | CUDA kernel | CUDA call including alloc/copy | Different float32 gradient values |
 |---|---:|---:|---:|---:|---:|
 | 1 | 25.34 ms | 9.49 ms | 4.79 ms | 15.58 ms | 0 / 319,866 |
 | 2 | 28.37 ms | 9.54 ms | 0.64 ms | 3.39 ms | 0 / 319,866 |
@@ -62,7 +62,7 @@ trial should record per-vertex move decisions and bucket ordering before a CUDA
 port. Any integrated change must pass the full ordered-surface, vertex metric,
 segmentation and regional-statistics gates against the installed official binary.
 
-Raw files: `evidence/trial{1,2,3}.json`, `evidence/cpu_headcw.jsonl`,
+Raw files: `evidence/trial{1,2,3}.json`, `evidence/cpu_control-host.jsonl`,
 `evidence/gradient_magnitude.json`.
 SHA-256: fixture `e1ca23a1c3ed2da31d2b744af97f65a4b79d48e5a5b356625a681f96bebc6c61`,
 tested binary `329accd3e6a00418809b1543a3a7b543111b527473324d386f79626e71b755de`,

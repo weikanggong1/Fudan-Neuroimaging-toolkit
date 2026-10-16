@@ -112,7 +112,7 @@ def main() -> None:
         raise ValueError("Preserve the existing final queue; use a newly declared output prefix")
     source_manifest, runtime = verified_source(source)
     driver = source / "validation/subregions/run_unified.py"
-    mri = root.parent / "reconall_reference_gpucw1/fs_sub01/mri"
+    mri = root.parent / "reconall_reference_accelerator-a-1/fs_sub01/mri"
     raw_t1 = root.parent.parent / "examples/data/sub-01_T1w.nii.gz"
     official = folder / "official_r1"
     references = {"brainstem": official / "brainstem/brainstemSsLabels.FSvoxelSpace.mgz",

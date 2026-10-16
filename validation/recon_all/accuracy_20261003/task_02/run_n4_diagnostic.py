@@ -3,7 +3,7 @@ import fcntl, hashlib, json, os, platform, subprocess, time
 from pathlib import Path
 import nibabel as nib
 import numpy as np
-BASE=Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929')
+BASE=Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929')
 ROOT=Path('/tmp/fnit-recon-accuracy-20261003/task_02/diagnostic')
 REF=BASE/'reference_sub02_official/subjects/b_official/mri/orig.mgz'
 OLD=BASE/'volume_parity_20260930/sub02/n4_float'

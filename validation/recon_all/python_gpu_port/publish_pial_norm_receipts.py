@@ -17,7 +17,7 @@ def sanitize(value):
         return {sanitize(k): sanitize(v) for k, v in value.items() if k not in OMIT}
     if isinstance(value, list):
         return [sanitize(v) for v in value]
-    if isinstance(value, str) and (value.startswith("/") or "/cpfs" in value or "/cwStorage" in value):
+    if isinstance(value, str) and (value.startswith("/") or "/cpfs" in value or "/data/shared" in value):
         return "[private-artifact]/" + value.rsplit("/", 1)[-1]
     return value
 

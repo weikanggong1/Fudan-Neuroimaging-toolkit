@@ -20,6 +20,9 @@ from .surface_prepare import (T1SurfacePair, T1SurfaceGeometry, T1SurfacePrepara
 
 
 def __getattr__(name):
+    if name == "FNIT_fMRIVolume_pipeline":
+        from .end_to_end import fMRIVolume_pipeline
+        return fMRIVolume_pipeline
     if name in ("FMRIVolumeResult", "fMRIVolume_pipeline"):
         from . import end_to_end
         return getattr(end_to_end, name)
@@ -45,3 +48,7 @@ __all__ = [
     "T1SurfacePair", "T1SurfaceGeometry", "T1SurfacePreparation",
     "prepare_fmriprep_surface_inputs", "prepare_t1w_surface_geometry",
 ]
+
+# 按统一接口清单保留 Sruface 拼写；计算仍使用成熟 surface 流程。
+FNIT_fMRISurface_pipeline = fMRISurface_pipeline
+__all__ += ["FNIT_fMRIVolume_pipeline", "FNIT_fMRISurface_pipeline"]

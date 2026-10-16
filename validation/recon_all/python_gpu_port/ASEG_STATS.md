@@ -24,7 +24,7 @@ uncorrected-surface Euler values were -16/-14, giving 9/8 holes as in the
 official output. File headers that identify the command, host, time, and
 paths differ by design.
 
-| Same-input headcw CLI | Time |
+| Same-input control-host CLI | Time |
 | --- | ---: |
 | Fresh FreeSurfer 8.2 `mri_segstats` | 22.66 s |
 | Python/Numba CPU | 10.34 s |

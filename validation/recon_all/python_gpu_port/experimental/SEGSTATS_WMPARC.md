@@ -23,7 +23,7 @@ Source is FreeSurfer 8.2.0 commit `d932c45b7941662ea380a05efef580568b98d41a`:
 
 ## Frozen inputs
 
-All subject paths are under `/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_main_20260924/single_subjects/fs_sub01`.
+All subject paths are under `/data/workspaces/freesurfer_synth/work/reconall_main_20260924/single_subjects/fs_sub01`.
 
 | Input | SHA-256 |
 | --- | --- |
@@ -35,14 +35,14 @@ All subject paths are under `/cwStorage/home/gongwk/Notebook_code/freesurfer_syn
 | `stats/synthseg.tiv.dat` | `b78b3e547b49550024c49f39eae9ccd483d235098560b53a0f2cc50f2a0aede6` |
 | `WMParcStatsLUT.txt` | `1eb362b9d929797179106ba37eecaa8eff2830f1509be8e7b56238e6ac7c6dbf` |
 
-The isolated results are under `/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/reconall_python_gpu_20260925/wmparc_stats_ref`. A fresh native headcw rerun produced `wmparc.native.stats` with **0 differences in 70 rows, 700 row fields and 7 Measure lines** against the original recon-all `stats/wmparc.stats` (original SHA-256 `d80766f123223a6ac078edac2cf7a7b1b7efe15b7ed59378cadf4bb8c4433eb3`). The Python `wmparc.python.stats` also has **0 differences** in those fields and in all TableCol/NRows/NTableCols/ColHeaders schema tokens against both native outputs. Thus the tolerance is exact at the statistics file's printed precision: 0.1 mm³ for PV volume, 0.0001 for norm mean/std/min/max/range, and 0.000001 for summary volumes. The Python file SHA-256 is `6b9f00b68e134fd8edb733595f8b7a5098ad7bf594d3ad6604db6ff1b32c1136`; complete-file bytes differ because the Python header identifies its own generating program and has different path, host and timestamp provenance.
+The isolated results are under `/data/workspaces/freesurfer_synth/work/reconall_python_gpu_20260925/wmparc_stats_ref`. A fresh native control-host rerun produced `wmparc.native.stats` with **0 differences in 70 rows, 700 row fields and 7 Measure lines** against the original recon-all `stats/wmparc.stats` (original SHA-256 `d80766f123223a6ac078edac2cf7a7b1b7efe15b7ed59378cadf4bb8c4433eb3`). The Python `wmparc.python.stats` also has **0 differences** in those fields and in all TableCol/NRows/NTableCols/ColHeaders schema tokens against both native outputs. Thus the tolerance is exact at the statistics file's printed precision: 0.1 mm³ for PV volume, 0.0001 for norm mean/std/min/max/range, and 0.000001 for summary volumes. The Python file SHA-256 is `6b9f00b68e134fd8edb733595f8b7a5098ad7bf594d3ad6604db6ff1b32c1136`; complete-file bytes differ because the Python header identifies its own generating program and has different path, host and timestamp provenance.
 
-On the same headcw host with the same inputs, the fresh native rerun took **100.34 s**. The final Python step took **10.14 s** immediately after its last code change and **9.35 s** on a repeat with a warm Numba cache. These are complete CLI wall times, not a multi-subject benchmark. The repeated output retained 0 numerical differences. Two synthetic unit tests passed. These timings only cover this wmparc statistics step, not recon-all or GPU acceleration.
+On the same control-host host with the same inputs, the fresh native rerun took **100.34 s**. The final Python step took **10.14 s** immediately after its last code change and **9.35 s** on a repeat with a warm Numba cache. These are complete CLI wall times, not a multi-subject benchmark. The repeated output retained 0 numerical differences. Two synthetic unit tests passed. These timings only cover this wmparc statistics step, not recon-all or GPU acceleration.
 
 To reproduce the fixed-input check:
 
 ```bash
-BASE=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work
+BASE=/data/workspaces/freesurfer_synth/work
 SUBJ=$BASE/reconall_main_20260924/single_subjects/fs_sub01
 LUT=$BASE/reconall_main_20260924/bundle/WMParcStatsLUT.txt
 REF=$BASE/reconall_python_gpu_20260925/wmparc_stats_ref

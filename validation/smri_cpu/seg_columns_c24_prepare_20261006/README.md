@@ -48,9 +48,9 @@ layer_output = columns_helper.forward(
 
 ```bash
 python run_prepared.py \
-  --root /cwStorage/home/gongwk/Notebook_code/FNIT \
-  --workspace /cwStorage/home/gongwk/Notebook_code/FNIT/workspaces/smri_cpu_20261004/remaining_20261006/seg-columns-c24-contract-v1 \
-  --run /cwStorage/home/gongwk/Notebook_code/FNIT/runs/smri_cpu_20261004/remaining_20261006/seg-columns-c24-contract-v1 \
+  --root /data/fnit \
+  --workspace /data/fnit/workspaces/smri_cpu_20261004/remaining_20261006/seg-columns-c24-contract-v1 \
+  --run /data/fnit/runs/smri_cpu_20261004/remaining_20261006/seg-columns-c24-contract-v1 \
   --approved-contracts
 ```
 

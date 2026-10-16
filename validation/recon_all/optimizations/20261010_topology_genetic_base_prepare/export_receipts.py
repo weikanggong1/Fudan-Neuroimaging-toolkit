@@ -41,7 +41,7 @@ def export(*,fnit_root:Path,output:Path):
         if isinstance(value,list):return [clean(item) for item in value]
         if isinstance(value,str):
             value=value.replace(str(fnit_root),'<FNIT>')
-            value=re.sub(r'/cwStorage/home/[^/]+/Notebook_code/FNIT', '<REFERENCE_FNIT>', value)
+            value=re.sub(r'/data/shared/home/[^/]+/Notebook_code/FNIT', '<REFERENCE_FNIT>', value)
             value=re.sub(r'/mnt/c/[^\s\"\']+', '<LOCAL_WORKTREE>', value)
             value=re.sub(r'/home/[^\s\"\']+', '<LOCAL_ENV>', value)
             return value
@@ -50,7 +50,7 @@ def export(*,fnit_root:Path,output:Path):
         raw=(fnit_root/relative).read_bytes();original=json.loads(raw);public=clean(original)
         assert dict(numeric_leaves(original))==dict(numeric_leaves(public))
         payload=(json.dumps(public,indent=2,allow_nan=False)+'\n').encode()
-        for forbidden in ['/cpfs01/','/cwStorage/']:
+        for forbidden in ['/data/shared/','/data/shared/']:
             if forbidden.encode() in payload:raise ValueError('private marker in public metadata: '+forbidden)
         if re.search(rb'\b(?:\d{1,3}\.){3}\d{1,3}\b|\bgwk_\d+\b', payload):
             raise ValueError('private network or account marker in public metadata')

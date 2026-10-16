@@ -3,7 +3,7 @@ import torch
 import numpy as np
 from nibabel.freesurfer.io import read_morph_data
 from fnit.recon_all.native_free import _run_surface_metrics
-p=pathlib.Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930')
+p=pathlib.Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930')
 while True:
  f=p/'full_sub01_279e09f'/'fnit-native-free-run.json'
  if f.exists():
@@ -18,7 +18,7 @@ for name in ['white','pial']:
 t=torch.cuda; t.init();t.synchronize('cuda:0');t.reset_peak_memory_stats('cuda:0')
 torch.backends.cuda.matmul.allow_tf32=True
 torch.backends.cudnn.allow_tf32=True
-timings=_run_surface_metrics(pathlib.Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/mris_place_surface'),root,'lh',pathlib.Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets'),device='cuda:0')
+timings=_run_surface_metrics(pathlib.Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/mris_place_surface'),root,'lh',pathlib.Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets'),device='cuda:0')
 rows={}
 for name in timings:
  a=read_morph_data(base/'surf'/('lh.'+name));b=read_morph_data(root/'surf'/('lh.'+name));error=np.abs(a.astype(np.float64)-b)

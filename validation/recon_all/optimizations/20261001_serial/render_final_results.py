@@ -123,7 +123,7 @@ def main():
     lines=["# 五阶段优化：当前两例整例验证",
         "",f"实际计算源码：`{commit}`。最终文档提交不改写这一版本记录。",
         "两例均从原始 T1 和空目录运行；sub-01 使用已初始化 CUDA 的 Python API，sub-02 使用 CLI。",
-        "H100、gpucw1、目标 GPU UUID 与线程预算 4 固定；单次共享服务器观察，未测稳定吞吐。",
+        "H100、accelerator-a-1、目标 GPU UUID 与线程预算 4 固定；单次共享服务器观察，未测稳定吞吐。",
         f"[完整机器报告]({a.summary.relative_to(a.output.parent).as_posix()})、"
         f"[精简指标]({a.metrics.relative_to(a.output.parent).as_posix()})及原始文件保留 SHA-256。",
         "整体指标等效没有已确认阈值，保持 `not_assessed`；严格138比较继续用于排错。",

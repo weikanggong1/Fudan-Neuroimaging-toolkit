@@ -53,12 +53,12 @@ class PreparationFixture(unittest.TestCase):
         setup = official_home / "SetUpFreeSurfer.sh"
         setup.write_bytes(b"Official setup identity fixture; not executed.")
         self.original_config = {"run_root": str(self.old_root), "cpu_threads": 8, "cpu_jobs": 2,
-                                "cpu_host": "nodecw10", "cpu_python": sys.executable,
+                                "cpu_host": "compute-a-10", "cpu_python": sys.executable,
                                 "anatomy_validation_python": sys.executable, "cpu_control_path": "/tmp/verified socket",
                                 "recon_all": str(executable), "freesurfer_home": str(official_home), "atlases": ["fs-aparc"],
                                 "pilot": False, "sources": {"baseline": "/no_candidate_source_access"},
                                 "frozen_sources": {"baseline": {"source_fingerprint": "not-used"}},
-                                "gpu_host": "gpucw1", "gpu_lock": "/tmp/do-not-acquire", "n_seeds": 100000,
+                                "gpu_host": "accelerator-a-1", "gpu_lock": "/tmp/do-not-acquire", "n_seeds": 100000,
                                 "atlas_options": ["--mni-template", "/declared/future/resource.nii.gz"]}
         job = self.old_root / "baseline" / self.cases[0]["case_id"]
         command, launch, _ = cohort.recon_command(self.original_config, self.cases[0], job)
@@ -175,7 +175,7 @@ class ConfigurationTests(PreparationFixture):
         self.assertEqual(command[-3:], ["-all", "-openmp", "8"])
         self.assertTrue(subject.is_relative_to(job))
         self.assertNotIn(case["t1w"], launch[2])
-        ssh = cohort.ssh_command("nodecw10", None, None, launch)
+        ssh = cohort.ssh_command("compute-a-10", None, None, launch)
         self.assertEqual(shlex.split(ssh[-1]), launch)
 
 

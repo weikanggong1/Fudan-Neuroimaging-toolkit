@@ -8,7 +8,7 @@ import sys
 import time
 from datetime import datetime, timezone
 
-ROOT = Path('/cwStorage/home/gongwk/Notebook_code/FNIT')
+ROOT = Path('/data/fnit')
 COMMIT = '3a0c9aba6321b4981fd8174b4b191515459aa38b'
 ARCHIVE = '03cc806fb449a8620c8caa78b1af86dfaff6b64ab9e9e7c5210cf12184aa7f31'
 PLAN_SHA = '3b6b76bb0b816899d3e07f8fe339c2ea9f1b6b3247d4a70501de2ef63451dd9e'

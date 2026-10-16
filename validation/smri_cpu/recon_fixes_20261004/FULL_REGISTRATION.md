@@ -83,7 +83,7 @@ mris_register -curv -threads 8 \
   /data/results/official/lh.sphere.reg
 ```
 
-原程序从同目录读取对应的 smoothwm/sulc。三臂在 nodecw7 同一组八个物理核心 `3,7,11,15,19,23,27,31` 内串行执行，CUDA 隐藏。Torch 2.5.1、Numba 0.61.2、NumPy 1.26.4、nibabel 5.4.2。
+原程序从同目录读取对应的 smoothwm/sulc。三臂在 compute-a-7 同一组八个物理核心 `3,7,11,15,19,23,27,31` 内串行执行，CUDA 隐藏。Torch 2.5.1、Numba 0.61.2、NumPy 1.26.4、nibabel 5.4.2。
 
 ## 5. 最新精度、完整时间和脑图
 

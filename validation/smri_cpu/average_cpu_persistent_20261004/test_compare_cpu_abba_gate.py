@@ -26,13 +26,13 @@ def evidence():
         queued[name] = {
             "job": deepcopy(job), "job_sha256": hashlib.sha256(json.dumps(job, sort_keys=True).encode()).hexdigest(),
             "argv": ["taskset", "-c", "3,7,11,15,19,23,27,31", "/usr/bin/time", "-v", "-o", "time.txt", *job["argv"]],
-            "max_cpu_threads": 8, "cpu_affinity": "3,7,11,15,19,23,27,31", "hostname": "nodecw7",
+            "max_cpu_threads": 8, "cpu_affinity": "3,7,11,15,19,23,27,31", "hostname": "compute-a-7",
             "environment": {**{key: "8" for key in gate.THREAD_VARIABLES},
                             "CUDA_VISIBLE_DEVICES": "", "PYTHONPATH": job["env"]["PYTHONPATH"]},
         }
         record = {"averaging_source_sha256": gate.BASELINE_SHA256 if name.startswith("baseline") else "candidate-wrapper-sha",
                   "common_source_sha256": deepcopy(common), "versions": {"torch": "fixed-version"},
-                  "threads": 8, "affinity": list(gate.AFFINITY), "hostname": "nodecw7",
+                  "threads": 8, "affinity": list(gate.AFFINITY), "hostname": "compute-a-7",
                   "averaging_calls": [{"iterations": 16}]}
         if name.startswith("candidate"):
             library = name + ".so"

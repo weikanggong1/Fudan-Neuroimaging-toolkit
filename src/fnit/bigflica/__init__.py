@@ -4,3 +4,6 @@ from ..dictionary_learning import fit_dicl
 from .pipeline import apply_model, fit_mmigp, run_bigflica
 
 __all__ = ["apply_model", "fit_dicl", "fit_mmigp", "run_bigflica"]
+
+FNIT_bigflica = run_bigflica
+__all__.append('FNIT_bigflica')

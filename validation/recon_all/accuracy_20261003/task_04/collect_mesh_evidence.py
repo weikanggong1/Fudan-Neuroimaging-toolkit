@@ -1,7 +1,7 @@
 import hashlib,json,pathlib,sys
 import nibabel.freesurfer.io as fsio
 import numpy as np
-root=pathlib.Path('/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_04');base=root.parent.parent;source=root.parent/'baseline_runtime_816e5610';sys.path.insert(0,str(source/'src'))
+root=pathlib.Path('/data/workspaces/freesurfer_synth/work/recon_standard_20260929/accuracy_20261003/task_04');base=root.parent.parent;source=root.parent/'baseline_runtime_816e5610';sys.path.insert(0,str(source/'src'))
 from fnit.recon_all.compare_subject import _topology
 
 def sha(p):return hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()

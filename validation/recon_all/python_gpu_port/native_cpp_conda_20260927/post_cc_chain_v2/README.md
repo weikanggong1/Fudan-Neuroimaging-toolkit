@@ -12,7 +12,7 @@ output using the completed v2 subject's different surfaces and labels.
 ## Inputs and isolation
 
 The v2 E2E status was `exit=0` and its run report `complete` before the probe
-started on headcw. The script copied the entire candidate subject to a new
+started on control-host. The script copied the entire candidate subject to a new
 scratch directory and changed only that copy. It checked SHA-256 for all seven
 required source files before and after; `source_input_sha256_unchanged=true`.
 The candidate was `reconall_conda_cpp_cc_e2e_20260927/subjects/sub01`; the
@@ -54,7 +54,7 @@ decompressed MGH files therefore also differ.
 
 ## Runtime and integration boundary
 
-| Isolated headcw stage | Seconds |
+| Isolated control-host stage | Seconds |
 | --- | ---: |
 | Copy whole subject | 1.03 |
 | Python/Numba volmask | 10.04 |

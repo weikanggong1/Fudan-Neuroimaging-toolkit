@@ -23,7 +23,7 @@ export CUDA_VISIBLE_DEVICES="$gpu_index"
 export PYTORCH_NO_CUDA_MEMORY_CACHING=1
 
 started_ns=$(date +%s%N)
-"$python_bin" /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/run_initialized_cuda_api_e036f57_threads.py "$input_t1" "$subject" \
+"$python_bin" /data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/run_initialized_cuda_api_e036f57_threads.py "$input_t1" "$subject" \
   --weights-dir "$weights" --assets-dir "$assets" \
   --device cuda:0 --threads 4 >"$run_log" 2>&1 &
 main_pid=$!

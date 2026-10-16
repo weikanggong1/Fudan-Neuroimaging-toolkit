@@ -19,7 +19,7 @@ CPU调度回归覆盖真实fresh exec请求留存、模拟首CUDA分配失败的
 
 ## 当前验证与调用示例
 
-2026-10-04在gpucw1的独立源码副本做17项CPU调度回归，全部通过；unittest记录22.920秒，完整解释器起止25.419秒。CUDA_VISIBLE_DEVICES为空，原生线程预算4。输入是小型调度夹具，验证失败记录和文件发布，不能代替真实影像benchmark。[机器回执](../../validation/recon_all/accuracy_20261003/runtime/oom_report_patch_cpu_v1_completion.json)绑定两个模块及测试文件SHA；源码来自冻816，只覆盖本次诊断模块。
+2026-10-04在accelerator-a-1的独立源码副本做17项CPU调度回归，全部通过；unittest记录22.920秒，完整解释器起止25.419秒。CUDA_VISIBLE_DEVICES为空，原生线程预算4。输入是小型调度夹具，验证失败记录和文件发布，不能代替真实影像benchmark。[机器回执](../../validation/recon_all/accuracy_20261003/runtime/oom_report_patch_cpu_v1_completion.json)绑定两个模块及测试文件SHA；源码来自冻816，只覆盖本次诊断模块。
 
 ```python
 from fnit.recon_all.hemisphere_parallel import run_hemisphere_group

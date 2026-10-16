@@ -14,7 +14,7 @@ one-ring nonlinear-area fold-repair update is in `sphere_standard_nonlinear.py`.
 | `before`: exact ordered vertices | 106,622 / 106,622 | 105,541 / 105,541 |
 | `after`: exact ordered vertices | 106,622 / 106,622 | 105,541 / 105,541 |
 | `after`: exact ordered faces | 213,240 / 213,240 | 211,078 / 211,078 |
-| Python scale + projection, headcw | 0.0206 s | 0.0148 s |
+| Python scale + projection, control-host | 0.0206 s | 0.0148 s |
 
 The metric sampler constructs the source-order 1–7 ring candidates on the
 frozen `smoothwm`, carries FreeSurfer's seeded VNL random stream through all
@@ -29,7 +29,7 @@ the first `MRISsampleDistances` call, before any `MRISunfold` optimization.
 The Python and native tables have the same number of entries, and every
 entry agrees at all four printed decimal places in source row order:
 
-| Whole metric validation on headcw | LH | RH |
+| Whole metric validation on control-host | LH | RH |
 | --- | ---: | ---: |
 | Vertices | 106,622 | 105,541 |
 | Sampled entries | 8,268,920 | 8,183,354 |
@@ -100,7 +100,7 @@ coordinate-fitted dt in the gradient reports is diagnostic. The independent
 search and every updated vertex satisfy the 0.00001 mm first-step checkpoint
 criterion. Reports are [LH](standard_sphere_line_search_lh.json) and
 [RH](standard_sphere_line_search_rh.json). The focused float32 fit regression
-passes on headcw (`1 passed`). Timing includes Numba JIT for the gradient,
+passes on control-host (`1 passed`). Timing includes Numba JIT for the gradient,
 while line-search timing is warm; no native matched-time claim follows.
 
 ## Paired repair and next-epoch checkpoints
@@ -251,7 +251,7 @@ were logged to two decimals; Python differs from those printed values by at
 most 0.0051 LH / 0.0049 RH. Every selected candidate matches and every
 Python time step rounds to the native three-decimal printout.
 
-These timings are from CPU Numba on headcw and include cache/JIT loading.
+These timings are from CPU Numba on control-host and include cache/JIT loading.
 The native log reports only the whole isolated command in coarse hundredths
 of an hour and includes other work. A matched stage speed ratio is therefore
 not established. The focused tests, including the writer's exact
@@ -292,7 +292,7 @@ values differ. [LH audit](full_native_audit_lh.json) and
 [RH audit](full_native_audit_rh.json) include the copied-input SHA256 values,
 final-section hashes, checkpoint indices, native log SHA256, and wall time.
 
-| Full conventional native baseline on headcw, four threads | LH | RH |
+| Full conventional native baseline on control-host, four threads | LH | RH |
 | --- | ---: | ---: |
 | Ordered coordinate components equal to official | 319,866 / 319,866 | 316,623 / 316,623 |
 | Ordered faces equal to official | 213,240 / 213,240 | 211,078 / 211,078 |
@@ -437,7 +437,7 @@ replays updates 0–5 from the original `inflated` and `smoothwm` inputs,
 without injecting any native checkpoint; every update is bitwise exact.
 The bounded GDB capture took 20.91 s, the isolated corrected line search
 1.25 s, and the continuous probe's original metric build 15.87 s on a
-shared headcw node. These are observations with different workloads, not a
+shared control-host node. These are observations with different workloads, not a
 matched speed comparison.
 
 The next saved RH update, index 6, also matches: its input and output are
@@ -487,17 +487,17 @@ and input hashes, and per-step timings:
 | RH index 8 | 1024 / 1024 | 6436.5712890625 / 6436.571 | 4.32e-7 | 316,623 / 316,623 |
 
 The bounded native captures ended after six LH and nine RH line-search
-decisions, in 18.89 s and 20.86 s under shared headcw load. At that
+decisions, in 18.89 s and 20.86 s under shared control-host load. At that
 point, LH index 6 and RH index 9 were unverified. The initial no-injection
 propagation from the original input reached LH index 3 and RH index 6;
 the later one-step replays had SHA-proven exact coordinate entry states. None of these timings is a matched benchmark.
 
-The corrected Python CPU observations under shared headcw load include the
+The corrected Python CPU observations under shared control-host load include the
 original distance-matrix construction and one-ring setup times plus each
 step's gradient, averaging, line-search, and projection times in the linked
 reports. These bounded prefixes do not establish a full-stage speed ratio.
 The isolated native full-stage LH/RH reference took `252.20 s` / `113.20 s`
-on headcw and has bitwise-identical final ordered vertices, faces, and volume
+on control-host and has bitwise-identical final ordered vertices, faces, and volume
 geometry to the archived official surfaces. The checkpoint-resumed path
 above was a previous boundary. The complete final-sphere validation below
 supersedes it. Source-ordered sphere optimization runs on CPU Numba.
@@ -521,7 +521,7 @@ No native checkpoint supplies a coordinate or a scale decision during this
 replay; saved native snapshots are read only after each Python update to
 compare ordered vertices and faces.
 
-| Original-input gpucw1 CPU replay | LH | RH |
+| Original-input accelerator-a-1 CPU replay | LH | RH |
 | --- | ---: | ---: |
 | Consecutive saved updates checked | 33 (indices 0–32) | 49 (indices 0–48) |
 | Exact coordinate components at every update | 319,866 / 319,866 | 316,623 / 316,623 |
@@ -536,13 +536,13 @@ begins at index 30. RH first-unfold scales switch at indices 12, 19, 28,
 38, 41, and 43; its second unfold begins at index 48. These boundaries
 come from Python's own SSE and stopping rule. The complete per-update
 input/checkpoint hashes, coordinate comparisons, decisions, and timings are
-in the [LH report](standard_sphere_lh_auto_from_input_gpucw1.json) and
-[RH report](standard_sphere_rh_auto_from_input_gpucw1.json). The reported
+in the [LH report](standard_sphere_lh_auto_from_input_accelerator-a-1.json) and
+[RH report](standard_sphere_rh_auto_from_input_accelerator-a-1.json). The reported
 probe SHA-256 matches the committed validator, and the scheduler module's
 SHA-256 is `58e101cefcc9c25688d14794f021c0f598db53c6968d7c79e1835d023ac85b8d`.
 
 The timings exclude native-checkpoint reads, report serialization, and
-process startup; they are not paired with a native run on gpucw1. The
+process startup; they are not paired with a native run on accelerator-a-1. The
 original frozen captures stopped at those limits; the complete validation
 below uses newly captured native stage checkpoints.
 
@@ -561,7 +561,7 @@ The standalone [Python API](../../../src/fnit/recon_all/sphere_standard_run.py)
 reads only `inflated` and `smoothwm` and writes the final `sphere`; it does
 not read native checkpoints or invoke FreeSurfer. It chooses the initial
 negative-area branch from the projected input and all later scales from its
-own SSE. On the frozen `fs_sub01` subject, both independent headcw CPU runs
+own SSE. On the frozen `fs_sub01` subject, both independent control-host CPU runs
 match the complete native output payload exactly:
 
 | Standalone API and exact final payload | LH | RH |
@@ -572,30 +572,30 @@ match the complete native output payload exactly:
 | Ordered vertex bytes match | yes | yes |
 | Ordered face bytes match | yes | yes |
 | Volume geometry bytes match | yes | yes |
-| Total headcw CPU time, including I/O | 372.82 s | 220.17 s |
+| Total control-host CPU time, including I/O | 372.82 s | 220.17 s |
 | Original metric setup, including JIT | 20.39 s | 15.85 s |
 | All optimization updates | 349.62 s | 202.39 s |
 | Final projection and overlap cleanup | 1.91 s | 1.32 s |
 
-The [LH API report](standard_sphere_lh_api_headcw.json),
-[RH API report](standard_sphere_rh_api_headcw.json), and byte-level
-[LH](standard_sphere_lh_api_headcw_file_audit.json) /
-[RH](standard_sphere_rh_api_headcw_file_audit.json) audits retain update
+The [LH API report](standard_sphere_lh_api_control-host.json),
+[RH API report](standard_sphere_rh_api_control-host.json), and byte-level
+[LH](standard_sphere_lh_api_control-host_file_audit.json) /
+[RH](standard_sphere_rh_api_control-host_file_audit.json) audits retain update
 counts, stage times, input paths, and final payload hashes. Whole-file hashes
 differ because the creation stamp and provenance tags differ. No comparison
 uses those tags as a numerical criterion.
 
-The continuous gpucw1 [RH probe](standard_sphere_rh_full_python_gpucw1.json)
+The continuous accelerator-a-1 [RH probe](standard_sphere_rh_full_python_accelerator-a-1.json)
 propagated its own coordinates from original input through all 134 updates;
 every native snapshot had all 316,623 float32 components exact, and the H100
 final cleanup produced the exact final 105,541-vertex sphere. The equivalent
 LH run reached update 242 without a reported checkpoint divergence, but its
 GPU0 final cleanup raised CUDA out-of-memory before its report could be
-written. The isolated [LH GPU1 cleanup](standard_sphere_lh_finish_cuda1_gpucw1.json)
+written. The isolated [LH GPU1 cleanup](standard_sphere_lh_finish_cuda1_accelerator-a-1.json)
 from the exact native last checkpoint matches all 106,622 final vertices and
 all 20 native negative-triangle counts. Separate CPU final-cleanup reports
-([LH](standard_sphere_lh_finish_cpu_headcw.json),
-[RH](standard_sphere_rh_finish_cpu_headcw.json)) are also exact.
+([LH](standard_sphere_lh_finish_cpu_control-host.json),
+[RH](standard_sphere_rh_finish_cpu_control-host.json)) are also exact.
 
 Reproduce the independent stage with:
 
@@ -607,21 +607,21 @@ python -m fnit.recon_all.sphere_standard_run \
 
 `--finish-device` affects only the final overlap cleanup. Metric sampling,
 gradients, line search, and schedule currently use CPU/Numba; this is not a
-full-GPU implementation. The native complete-capture times (381.18 s LH, 200.28 s RH on gpucw1)
+full-GPU implementation. The native complete-capture times (381.18 s LH, 200.28 s RH on accelerator-a-1)
 include writing every intermediate snapshot and are not speed comparators.
-A separate same-input, same-host headcw native run without snapshot writes
+A separate same-input, same-host control-host native run without snapshot writes
 passed the same byte-level geometry audit for each hemisphere:
 
-| Headcw conventional sphere, including I/O | LH | RH |
+| control-host conventional sphere, including I/O | LH | RH |
 | --- | ---: | ---: |
 | Native FreeSurfer 8.2, four threads | 240.64 s | 109.72 s |
 | Independent Python CPU API | 372.82 s | 220.17 s |
 | Observed Python/native ratio | 1.55× | 2.01× |
 
-The [benchmark report](standard_sphere_stage_benchmark_headcw.json) links
+The [benchmark report](standard_sphere_stage_benchmark_control-host.json) links
 input hashes, native log/time-record hashes, bilateral
-[LH](standard_sphere_native_benchmark_lh_headcw_audit.json) and
-[RH](standard_sphere_native_benchmark_rh_headcw_audit.json) output audits,
+[LH](standard_sphere_native_benchmark_lh_control-host_audit.json) and
+[RH](standard_sphere_native_benchmark_rh_control-host_audit.json) output audits,
 and Python times for metric construction, each optimization stage, and final
 cleanup. The calls ran sequentially on a shared host. Native used four
 threads; Python used the environment's default CPU thread settings and

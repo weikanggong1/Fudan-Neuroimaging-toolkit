@@ -42,4 +42,4 @@
 - `plot_cohort.py`：`f135af099a67d543bfbefbbabbe8a71f1c6ba044133a7b5767d8368787e5b4ab`。
 - 统计 helper：`beef69670191f89ebf3a0d71395c274b54b7c61d02ed096abebebd7a5172f842`。
 - 真实 raw 审计：`820774cb5af76224b427f7495d8bdcbfc75f87473e3d95d3b5018c6fdb476059`。
-- gpucw1 使用 nibabel 5.4.0、NumPy 1.26.4、SciPy 1.11.4。本机 nibabel 为 5.4.2，但本次检查的 `resample_from_to` 与 `MGHHeader.get_affine` 函数源码哈希和服务器完全一致，分别是 `e3bf6d6c195711b3a72faf9a7854567154d45243e7065f716465da1d8ded5cb7`、`3c30492d3d88dd0bc7295c49490a8d71be7a783bbda7ed4cdc6a8a9d33011855`。该检查只读取库代码与版本字符串。
+- accelerator-a-1 使用 nibabel 5.4.0、NumPy 1.26.4、SciPy 1.11.4。本机 nibabel 为 5.4.2，但本次检查的 `resample_from_to` 与 `MGHHeader.get_affine` 函数源码哈希和服务器完全一致，分别是 `e3bf6d6c195711b3a72faf9a7854567154d45243e7065f716465da1d8ded5cb7`、`3c30492d3d88dd0bc7295c49490a8d71be7a783bbda7ed4cdc6a8a9d33011855`。该检查只读取库代码与版本字符串。

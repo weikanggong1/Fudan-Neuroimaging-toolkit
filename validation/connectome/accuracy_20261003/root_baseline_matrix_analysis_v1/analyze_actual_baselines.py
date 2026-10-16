@@ -31,7 +31,7 @@ def main():
     parser.add_argument("--timeout-hours", type=float, default=24.)
     args = parser.parse_args()
     require(os.environ.get("CUDA_VISIBLE_DEVICES") == "", "explicit CPU GPU isolation required")
-    require(socket.gethostname() == "nodecw10", "the actual CPU host must be nodecw10")
+    require(socket.gethostname() == "compute-a-10", "the actual CPU host must be compute-a-10")
     require(1 <= args.poll_seconds <= 60 and 0 < args.timeout_hours <= 48, "invalid wait budget")
     sys.dont_write_bytecode = True
     sys.path.insert(0, str(args.frozen_tools.resolve().parent))

@@ -2,10 +2,10 @@ bash: warning: setlocale: LC_ALL: cannot change locale (C.UTF-8)
 setting unknown_nbr_spacing = 3
 using MR volume brainmask.mgz to mask input volume...
 
-== Number of threads available to /cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mri_em_register for OpenMP = 4 ==
+== Number of threads available to /data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mri_em_register for OpenMP = 4 ==
 reading 1 input volumes...
 logging results to talairach.log
-reading '/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/assets/average/RB_all_2020-01-02.gca'...
+reading '/data/workspaces/freesurfer_synth/work/recon_standard_20260929/assets/average/RB_all_2020-01-02.gca'...
 GCAread took 0 minutes and 1 seconds.
 average std = 7.2   using min determinant for regularization = 5.2
 0 singular and 884 ill-conditioned covariance matrices regularized
@@ -309,7 +309,7 @@ MRIfindBrightNonWM(): 390 bright non-wm voxels segmented.
 MRIfilterMorphology() WM_MIN_VAL=5, DIAGONAL_FILL=230
 white matter segmentation took 0.8 minutes
 writing output to wm.seg.mgz...
-/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mri_edit_wm_with_aseg -keep-in -fix-ento-wm entowm.mgz 3 255 255 -fix-acj aseg.presurf.mgz 255 255 -fill-seg-wm -fix-scm-ha 1 wm.seg.mgz brain.mgz aseg.presurf.mgz wm.asegedit.mgz
+/data/workspaces/freesurfer_synth/work/recon_standard_20260929/serial_20261001/native_bundle/bin/mri_edit_wm_with_aseg -keep-in -fix-ento-wm entowm.mgz 3 255 255 -fix-acj aseg.presurf.mgz 255 255 -fill-seg-wm -fix-scm-ha 1 wm.seg.mgz brain.mgz aseg.presurf.mgz wm.asegedit.mgz
 preserving editing changes in input volume...
 mri_edit_wm_wit supposed to be reproducible but seed not set
 auto filling took 0.45 minutes
@@ -330,67 +330,67 @@ MRIfixEntoWM(): 255 255 Level=3
 MRIfixEntoWM(): nchanged = 598
 writing edited volume to wm.asegedit.mgz....
 Traceback (most recent call last):
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_03/validation/recon_all/optimizations/20261002_parallel/task_03/benchmark_chain.py", line 105, in <module>
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_03/validation/recon_all/optimizations/20261002_parallel/task_03/benchmark_chain.py", line 105, in <module>
     stage('mri_fill',fill_mgz,mri/'wm.mgz',mri/'aseg.presurf.mgz',lta,assets/'SubCorticalMassLUT.txt',mri/'filled.mgz',args.output/'scripts/ponscc.cut.log')
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_03/validation/recon_all/optimizations/20261002_parallel/task_03/benchmark_chain.py", line 81, in stage
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_03/validation/recon_all/optimizations/20261002_parallel/task_03/benchmark_chain.py", line 81, in stage
     report['stages'].append({'name':name,'seconds_including_io':time.perf_counter()-tick,'torch_allocated_bytes':torch.cuda.memory_allocated(),'torch_reserved_bytes':torch.cuda.memory_reserved()});save();return result
                                                                                                                                                                                                      ^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_03/validation/recon_all/optimizations/20261002_parallel/task_03/benchmark_chain.py", line 42, in save
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_03/validation/recon_all/optimizations/20261002_parallel/task_03/benchmark_chain.py", line 42, in save
     def save(): (args.output/'report.json').write_text(json.dumps(report,indent=2)+'\n')
                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/__init__.py", line 238, in dumps
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/__init__.py", line 238, in dumps
     **kw).encode(obj)
           ^^^^^^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 202, in encode
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 202, in encode
     chunks = list(chunks)
              ^^^^^^^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 432, in _iterencode
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 432, in _iterencode
     yield from _iterencode_dict(o, _current_indent_level)
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 406, in _iterencode_dict
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 406, in _iterencode_dict
     yield from chunks
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 406, in _iterencode_dict
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 406, in _iterencode_dict
     yield from chunks
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 406, in _iterencode_dict
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 406, in _iterencode_dict
     yield from chunks
   [Previous line repeated 1 more time]
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 326, in _iterencode_list
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 326, in _iterencode_list
     yield from chunks
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 439, in _iterencode
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 439, in _iterencode
     o = _default(o)
         ^^^^^^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 180, in default
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 180, in default
     raise TypeError(f'Object of type {o.__class__.__name__} '
 TypeError: Object of type int32 is not JSON serializable
 
 During handling of the above exception, another exception occurred:
 
 Traceback (most recent call last):
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_03/validation/recon_all/optimizations/20261002_parallel/task_03/benchmark_chain.py", line 126, in <module>
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_03/validation/recon_all/optimizations/20261002_parallel/task_03/benchmark_chain.py", line 126, in <module>
     source=Path(__file__).resolve().parents[5]/'src/fnit/recon_all';report['source_sha256']={str(path.relative_to(source)):sha(path) for path in source.rglob('*.py')};report['script_sha256']=sha(__file__);save()
                                                                                                                                                                                                              ^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_03/validation/recon_all/optimizations/20261002_parallel/task_03/benchmark_chain.py", line 42, in save
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/parallel_20261002/task_03/validation/recon_all/optimizations/20261002_parallel/task_03/benchmark_chain.py", line 42, in save
     def save(): (args.output/'report.json').write_text(json.dumps(report,indent=2)+'\n')
                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/__init__.py", line 238, in dumps
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/__init__.py", line 238, in dumps
     **kw).encode(obj)
           ^^^^^^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 202, in encode
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 202, in encode
     chunks = list(chunks)
              ^^^^^^^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 432, in _iterencode
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 432, in _iterencode
     yield from _iterencode_dict(o, _current_indent_level)
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 406, in _iterencode_dict
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 406, in _iterencode_dict
     yield from chunks
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 406, in _iterencode_dict
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 406, in _iterencode_dict
     yield from chunks
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 406, in _iterencode_dict
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 406, in _iterencode_dict
     yield from chunks
   [Previous line repeated 1 more time]
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 326, in _iterencode_list
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 326, in _iterencode_list
     yield from chunks
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 439, in _iterencode
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 439, in _iterencode
     o = _default(o)
         ^^^^^^^^^^^
-  File "/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 180, in default
+  File "/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/lib/python3.11/json/encoder.py", line 180, in default
     raise TypeError(f'Object of type {o.__class__.__name__} '
 TypeError: Object of type int32 is not JSON serializable

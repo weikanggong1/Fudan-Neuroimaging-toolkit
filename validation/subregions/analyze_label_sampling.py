@@ -28,7 +28,7 @@ def main():
     validation = json.loads((run / 'report.json').read_text())
     known = {r['id']: r for c in validation['comparisons'].values() for r in c['regions']}
     base_image = nib.load(api['input'])
-    base_coarse = np.asarray(nib.load(work / 'reconall_reference_gpucw1/fs_sub01/mri/aseg.mgz').dataobj, dtype=np.int32)
+    base_coarse = np.asarray(nib.load(work / 'reconall_reference_accelerator-a-1/fs_sub01/mri/aseg.mgz').dataobj, dtype=np.int32)
 
     def load(path):
         image = nib.load(path)
@@ -131,9 +131,9 @@ def main():
                 'max_affine_rounding_mm': float(np.max(np.abs(exact - image.affine))), 'metrics': metrics}
 
     families = [
-        ('thalamus', official / 'official_thalamus_gpucw1_full_sub01_20260929', 'ThalamicNuclei', 0),
-        ('hippo-amygdala-left', official / 'official_hippo_gpucw1_full_sub01_20260929', 'lh.hippoAmygLabels', 0),
-        ('hippo-amygdala-right', official / 'official_hippo_gpucw1_full_sub01_20260929', 'rh.hippoAmygLabels', 10000),
+        ('thalamus', official / 'official_thalamus_accelerator-a-1_full_sub01_20260929', 'ThalamicNuclei', 0),
+        ('hippo-amygdala-left', official / 'official_hippo_accelerator-a-1_full_sub01_20260929', 'lh.hippoAmygLabels', 0),
+        ('hippo-amygdala-right', official / 'official_hippo_accelerator-a-1_full_sub01_20260929', 'rh.hippoAmygLabels', 10000),
     ]
     for family, folder, stem, offset in families:
         oi, oa = load(folder / f'{stem}.mgz')

@@ -13,7 +13,7 @@
 - 数据来自既有公共 ds003138 v1.0.1（CC0）记录。GM `224×288×288`；template `91×109×91, 2 mm`。实际 header zoom 与 affine 用于 FLIRT 转换。
 - 官方参考目录：`FNIT/runs/smri_cpu_20261004/task4_vbm_official_cpu_v2/official_synthstrip_fast_fnirt`；template：`FNIT/legacy/freesurfer_synth/work/ukb_vbm_gpu/assets/template_GM_v1.nii.gz`；mask：安装 FSL 6.0.7.4 的 `MNI152_T1_2mm_brain_mask_dil.nii.gz`。
 - 保留完整 `GMFNIRTConfig()`：subsampling `4,2,1,1`、miter `5,5,10,5`、input FWHM `6,4,2,2`、reference FWHM `4,2,0,0`、lambda `150,75,50,30`、10 mm warp resolution、global linear intensity、SSD weighted lambda、LM、FP64 系数/梯度/solver。前三层不启用 explicit reference mask，最后一层启用；没有改评价网格或阈值。
-- nodecw7，CPU `32,36,40,44,48,52,56,60`，8 Torch/OMP/BLAS threads，同一 `nodecw7.gems.cpu8.lock`。baseline 后 candidate，各运行一次完整 FNIRT。没有连续负载采样；配对耗时为本次观测，不能作为稳定性能保证。
+- compute-a-7，CPU `32,36,40,44,48,52,56,60`，8 Torch/OMP/BLAS threads，同一 `compute-a-7.gems.cpu8.lock`。baseline 后 candidate，各运行一次完整 FNIRT。没有连续负载采样；配对耗时为本次观测，不能作为稳定性能保证。
 - baseline 使用 `gems/fnirt-jacobian-v1/source/src`；candidate 使用独立 `gems/fnirt-cpu-orientation-v1/source/src`，仅 `registration.py` 改变。旧冻结源码、旧输出和环境 prefix 保留。
 - input、source、output SHA-256、实际 affinity、完整 QC 分别在 [baseline](cpu-baseline.public.json)、[candidate](cpu-candidate.public.json)；模块配对 SHA 和失败记录在 [binding](binding.public.json)。
 

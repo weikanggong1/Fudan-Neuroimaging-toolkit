@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# 完整WM冻结文件接口；在gpucw1恢复且协调者批准GPU窗口后运行。
+# 完整WM冻结文件接口；在accelerator-a-1恢复且协调者批准GPU窗口后运行。
 : "${FNIT_HIST_SOURCE:?三维uint8 antsdn.brain.mgz}"
 : "${FNIT_HIST_OUTPUT_DIR:?不存在的候选报告目录}"
 : "${FNIT_REFERENCE_BINARY:?固定源码Conda编译mri_segment路径}"

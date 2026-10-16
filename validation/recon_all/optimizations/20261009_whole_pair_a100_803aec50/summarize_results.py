@@ -53,7 +53,7 @@ def summarize_results(*, reports_dir: Path, sub06_official_dir: Path, output_dir
                      paired_global_measures=regions["global_brainvol_measures"])
         entry["process_memory"] = {}
         for kind in ("control", "candidate"):
-            run_dir = reports_dir / "runs/recon_e2e_803aec50_cfff_20261009" / f"sub{case}-{kind}"
+            run_dir = reports_dir / "runs/recon_e2e_803aec50_accelerator-b_20261009" / f"sub{case}-{kind}"
             bench, runtime = read(run_dir / "benchmark.json"), read(run_dir / "subject/fnit-native-free-run.json")
             if bench["runtime_status"] != "complete" or bench["exit_code"] != 0 or runtime["status"] != "complete":
                 raise ValueError("unfinished whole run: " + case + " " + kind)

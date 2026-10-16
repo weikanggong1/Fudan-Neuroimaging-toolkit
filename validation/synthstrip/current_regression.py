@@ -212,7 +212,7 @@ def main() -> None:
             },
         },
         "environment": {
-            "host": "gpucw1",
+            "host": "accelerator-a-1",
             "gpu": "NVIDIA H100 PCIe",
             "shared_node_timing": True,
         },

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
-TR=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929
+TR=/data/workspaces/freesurfer_synth/work/recon_standard_20260929
 D=$TR/volume_parity_20260930
-CODE=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/code_1b8c36d
+CODE=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/volume_parity_20260930/fixes_20261001/code_1b8c36d
 PY=$TR/fnit_main_env/bin/python
 OUT=$D/fixes_20261001/cpu_final_1b8c36d
 mkdir "$OUT"
 export PYTHONPATH=$CODE/src CUDA_VISIBLE_DEVICES=''
-export FREESURFER_HOME=$TR/assets FS_LICENSE=/cwStorage/home/gongwk/.config/freesurfer-codex/license.txt
+export FREESURFER_HOME=$TR/assets FS_LICENSE=/data/user/.config/freesurfer-codex/license.txt
 export OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4 OMP_NUM_THREADS=4 NUMEXPR_NUM_THREADS=4
 for case in sub01 sub02; do
  SUB=$D/full_sub01_e036f57_uuid
@@ -25,7 +25,7 @@ import hashlib, json, platform, resource, subprocess, sys, time
 from pathlib import Path
 root, base, code, out = map(Path, sys.argv[1:])
 args = [str(root/'fnit_main_env/bin/python'), '-m', 'fnit.recon_all.native_free',
- '/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/examples/data/sub-02_T1w.nii.gz',
+ '/data/workspaces/freesurfer_synth/examples/data/sub-02_T1w.nii.gz',
  str(base/'full_sub02_1b8c36d'), '--weights-dir', str(root/'weights'),
  '--assets-dir', str(root/'assets'), '--device', 'cpu', '--threads', '4', '--profile-stages']
 tick = time.perf_counter()

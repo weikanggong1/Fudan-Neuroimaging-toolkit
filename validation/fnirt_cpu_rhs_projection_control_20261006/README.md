@@ -51,7 +51,7 @@ python lifecycle_projection.py --phase enqueue \
 python verify_report.py
 ```
 
-nodecw7八物理核 `32,36,40,44,48,52,56,60`；OMP/BLAS/Numba/Torch8，interop1。共同CPU8锁120s、module锁20s、controller360s、child180s+kill5s、AS20,000,000,000B；prepared/queued/completed六INDEX锁 sorted `LOCK_EX|LOCK_NB` 共同25s截止，失败关闭全部fd且未写INDEX，不自动retry。目录700、冻结payload和run输出600，worker umask077/output700。非冻结、仅哈希的UPLOAD_SERVER_VERIFY原文件为644，处于700 workspace内；实际权限记录保留。[派发](v2/run/launch.public.json)、[完成登记](v2/run/index_completed.public.json)。
+compute-a-7八物理核 `32,36,40,44,48,52,56,60`；OMP/BLAS/Numba/Torch8，interop1。共同CPU8锁120s、module锁20s、controller360s、child180s+kill5s、AS20,000,000,000B；prepared/queued/completed六INDEX锁 sorted `LOCK_EX|LOCK_NB` 共同25s截止，失败关闭全部fd且未写INDEX，不自动retry。目录700、冻结payload和run输出600，worker umask077/output700。非冻结、仅哈希的UPLOAD_SERVER_VERIFY原文件为644，处于700 workspace内；实际权限记录保留。[派发](v2/run/launch.public.json)、[完成登记](v2/run/index_completed.public.json)。
 
 v1 controller77738，原overall/science/post RC `1/1/0`；v2 controller89880，原三RC `0/0/0`。两阶段的canonical HEAD均 `7ff215ee…`。23源/9输入/科学冻结前后匹配，可用operands、flags全部不变；CUDA未初始化，FSL DSO前后快照空，仅代表记录时状态。[v1原summary](v1/run/projection/summary.public.json)、[v2原summary](v2/run/projection/summary.public.json)。
 

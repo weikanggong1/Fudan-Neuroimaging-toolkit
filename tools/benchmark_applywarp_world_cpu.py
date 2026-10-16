@@ -238,7 +238,7 @@ def run(args):
                     save_json(request_path, request)
                     command = [args.python, str(tool), "worker", "--request", str(request_path), "--result", str(result_path)]
                     if backend == "official":
-                        command = [manifest["singularity"], "exec", "--cleanenv", "--bind", "/cwStorage:/cwStorage",
+                        command = [manifest["singularity"], "exec", "--cleanenv", "--bind", "/data/shared:/data/shared",
                                    "--bind", "/public:/public", manifest["fmriprep_image"], "python", str(tool),
                                    "official-worker", "--request", str(request_path), "--result", str(result_path)]
                     env = environment(threads)

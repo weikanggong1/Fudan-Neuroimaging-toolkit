@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 umask 077
-FNIT_ROOT=/cwStorage/home/gongwk/Notebook_code/FNIT
+FNIT_ROOT=/data/fnit
 FNIT_W="$FNIT_ROOT/workspaces/smri_cpu_20261004/remaining_20261006/fnirt-own-reductions-v1"
 FNIT_R="$FNIT_ROOT/runs/smri_cpu_20261004/remaining_20261006/fnirt-own-reductions-v1"
 FNIT_ENV=$(readlink -f "$FNIT_ROOT/envs/default")
@@ -9,7 +9,7 @@ export OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=8 MKL_NUM_THREADS=8 NUMBA_NUM_THRE
 export CUDA_VISIBLE_DEVICES='' PYTHONDONTWRITEBYTECODE=1
 unset OPENBLAS_CORETYPE LD_PRELOAD
 mkdir -p "$FNIT_R"
-exec 9>"$FNIT_ROOT/runs/smri_cpu_20261004/nodecw7.gems.cpu8.lock"
+exec 9>"$FNIT_ROOT/runs/smri_cpu_20261004/compute-a-7.gems.cpu8.lock"
 flock -w 480 9
 exec 8>"$FNIT_R/module.cpu8.lock"
 flock -w 20 8

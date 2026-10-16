@@ -208,7 +208,7 @@ DOI：[10.1006/nimg.1998.0396](https://doi.org/10.1006/nimg.1998.0396)。
 真实四半球配对已完成；实际基线为
 `1b8c36d25a68e253a1e59b6d02114890afa467de`，候选为 `764607c` 加
 归档 `7a79fed40ab97a0675ba9fef2112eb58e7b393090ce4e4388604e7cccbf1a8f0`。
-使用两例 FNIT 自产的冻结前置网格，在 gpucw1 同机依次执行独立 CPU
+使用两例 FNIT 自产的冻结前置网格，在 accelerator-a-1 同机依次执行独立 CPU
 进程，Torch/Numba/OMP/BLAS 为4，float64 remesh 和原float32 quick规则。
 每侧一次 AB 配对、未启用 cProfile，阶段墙钟包含文件读写/JIT，不含
 Python 导入；进程墙钟及 RSS 另外记录。当前两模块的 SHA 与实测候选相同。

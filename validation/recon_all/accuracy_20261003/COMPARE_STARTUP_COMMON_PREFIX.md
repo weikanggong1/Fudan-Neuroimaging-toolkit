@@ -19,7 +19,7 @@
 - `baseline_pipeline_sha256/candidate_pipeline_sha256`：根任务从两次实际output/fnit-native-free-run.json字节冻结的SHA256，必填。不得从其他case复制回执再生成假绑定。
 - `comparison_code_root`：冻结FNIT源码，用于成熟 `compare_subject._topology`；不替换运行源码。
 - `scripts_dir`：已有 `compare_volume_prefix.py` 所在目录。
-- `fnit_index`：可选，默认 `/cwStorage/home/gongwk/Notebook_code/FNIT/INDEX.json`；运行时读取并记录SHA。
+- `fnit_index`：可选，默认 `/data/fnit/INDEX.json`；运行时读取并记录SHA。
 - `lock`：共享锁 `/tmp/fnit-shared-benchmark.lock`；整个CPU比较取得锁后进行。
 - `output`：不存在的新比较目录。
 
@@ -27,8 +27,8 @@
 
 ```json
 {
-  "baseline_config": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/retry_config.json",
-  "candidate_config": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/retry_config.json",
+  "baseline_config": "/data/fnit/runs/recon_accuracy_20261003/baseline_resource_replays_v1/ds000114_sub-06/attempt_01/retry_config.json",
+  "candidate_config": "/data/fnit/runs/recon_accuracy_20261003/startup_whole_sub06_v2/attempt_01/retry_config.json",
   "baseline_archive": "/absolute/path/verified_baseline_816.tar.gz",
   "candidate_archive": "/absolute/path/verified_startup_8f.tar.gz",
   "baseline_commit": "ACTUAL_BASELINE_FULL_COMMIT",
@@ -40,7 +40,7 @@
   "comparison_code_root": "/absolute/path/frozen_comparison_source",
   "scripts_dir": "/absolute/path/frozen_comparison_source/validation/recon_all/python_gpu_port",
   "lock": "/tmp/fnit-shared-benchmark.lock",
-  "output": "/cwStorage/home/gongwk/Notebook_code/FNIT/runs/recon_accuracy_20261003/common_prefix_sub06_v1"
+  "output": "/data/fnit/runs/recon_accuracy_20261003/common_prefix_sub06_v1"
 }
 ```
 
@@ -55,7 +55,7 @@ exit_code = main(argv=['--config', comparison_configuration_path])
 
 ```bash
 # 保持已验证Conda解释器；工具自己禁用CUDA并设置各库CPU线程预算4。
-FNIT_COMPARISON_PYTHON=/cwStorage/home/gongwk/Notebook_code/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
+FNIT_COMPARISON_PYTHON=/data/workspaces/freesurfer_synth/work/recon_standard_20260929/fnit_main_env/bin/python
 "$FNIT_COMPARISON_PYTHON" compare_startup_common_prefix.py --config /absolute/path/frozen_common_prefix_config.json
 ```
 
@@ -83,7 +83,7 @@ v2按现场实际pipeline schema，读取同一批bytes并计算SHA，再解析J
 
 ## CPU回归与依赖
 
-依赖为现有环境的NumPy/Nibabel/SciPy；没有新增包。回归覆盖失败baseline身份、候选完成门控、prepared不能冒充执行、输入/源码/archive漂移、额外Python源码、缺失artifact不当作零差异，及错case回执、非法退出码、路径与precision、138及mesh/numeric状态。表面和计数门控在既有Conda依赖可用时执行；本地无这些包，明确 skip，未安装依赖。v2 在 gpucw1 已有 Conda 环境隐藏 CUDA 的 15 项测试通过（0.584 秒），v3 扩展至 19 项，全部通过（0.747 秒）。临时小文件只验证比较工具；真实 benchmark 单独报告。
+依赖为现有环境的NumPy/Nibabel/SciPy；没有新增包。回归覆盖失败baseline身份、候选完成门控、prepared不能冒充执行、输入/源码/archive漂移、额外Python源码、缺失artifact不当作零差异，及错case回执、非法退出码、路径与precision、138及mesh/numeric状态。表面和计数门控在既有Conda依赖可用时执行；本地无这些包，明确 skip，未安装依赖。v2 在 accelerator-a-1 已有 Conda 环境隐藏 CUDA 的 15 项测试通过（0.584 秒），v3 扩展至 19 项，全部通过（0.747 秒）。临时小文件只验证比较工具；真实 benchmark 单独报告。
 
 原实现：`validation/recon_all/python_gpu_port/compare_volume_prefix.py` 和 `src/fnit/recon_all/compare_subject.py`；数据读取使用Nibabel。官方参照来源和公开数据许可沿用本轮cohort文档，本工具没有新官方计算或新精度结果。
 
