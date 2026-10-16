@@ -8,6 +8,8 @@
 
 第二轮候选选项见[接线与验收边界](ROUND2_INTEGRATION.md)、[持久双半球调度](PERSISTENT_HEMISPHERE_PIPELINE.md)和[Triton 编译器选择](TRITON_RUNTIME.md)；[f016 两例部分整例记录](../../validation/recon_all/optimizations/20261014_accelerator-a-1_f016_partial/README.md)单列旧版结果。[cbaffa 两例原始 T1 整例与完成的 v2 事后评估](../../validation/recon_all/optimizations/20261016_accelerator-a-1_cbaffa_two_case/README.md)分别记录执行、138 项输出、网格质量和数值诊断，整体指标等效与同环境提速尚未判定。
 
+本轮按用户要求显式选用[Conda 独立编译表面加速配方](NATIVE_TOPOLOGY_FINISH.md)，切换拓扑 GA、preclean/remesh/postclean 及已有原生 white/pial 路径，同时保留自有 GPU 指标与其他已优化阶段。[阶段回归与整例测评](../../validation/recon_all/optimizations/20261016_native_surface_hotspots/README.md)绑定冻结科学源码 `93affde8`；两例原始 T1 整例正在运行，2,000 秒目标、最终误差和整例显存尚未判定。
+
 [返回首页](../../README.md) · [完整旧文档与更早证据](../../validation/recon_all/readme_archive_20261005.md)
 
 | 项目 | 内容 |
@@ -95,6 +97,7 @@ reconstruction_report = run_recon_all_python(
     sphere_finish_backend="cpu",  # torch复用完整dense GPU球面收尾；须cuda:N和两个隔离worker
     surface_placement_backend="native",  # 原放置对照；python复用完整preaparc/white/pial
     topology_backend="native",  # 原GA对照；python为完整数字拓扑候选，算法不同
+    topology_finish_backend="python",  # 默认自有收尾；conda-cpp仅配backend/native及topology/native
     annotation_gibbs_backend="python",  # numba复用完整有序重分类；GPU几何/随机序列不变
     remesh_scalar_storage="numpy",  # python优化已有CPU remesh双精度存储；拆缩/平滑顺序不变
     mni_execution="in-process",  # parallel-late在末尾将完整MNI与CPU网格检查并行；总线程至少2
@@ -165,6 +168,7 @@ python_reconstruction_report = run_recon_all_python(
 | `inflate_backend` | 否 | `str` | `'native'` | torch复用完整标准inflated/sulc；须cuda:N与hemisphere_workers=2，仅surface子exec局部启用缓存；nofix和后续球面算法保持 |
 | `surface_placement_backend` | 否 | `str` | `'native'` | native为原放置对照；python复用完整四轮preaparc/white/pial及自有指标，允许有序CPU核。python配方固定python |
 | `topology_backend` | 否 | `str` | `'native'` | native为原GA对照；python为完整数字拓扑；python-ga为完整自有有序GA。python配方默认数字python并保留显式python-ga；真实缺陷标签编号域分别检查，整体等效未判定 |
+| `topology_finish_backend` | 否 | `str` | `'python'` | python保留自有remesh/相交清理；conda-cpp显式使用Conda自编译preclean→三轮remesh→postclean，仅允许backend=native且topology_backend=native；结构与双谓词零相交门通过后发布orig。详见[原生表面配方](NATIVE_TOPOLOGY_FINISH.md) |
 | `sphere_finish_backend` | 否 | `str` | `'cpu'` | torch复用完整dense GPU标准sphere收尾，全部设备须cuda:N与hemisphere_workers=2，surface子exec局部缓存；原负面标记/SOAP/全投影/停止保持，不选择实验marked；python配方固定torch。 |
 | `remesh_scalar_storage` | 否 | `str` | 'numpy' | python复用已有CPU完整remesh的双精度标量存储；拆缩/堆/平滑保持同序，首次JIT与I/O计入 |
 | `annotation_gibbs_backend` | 否 | `str` | `'python'` | numba复用完整有序Gibbs重分类；共用GPU几何缓存，保持随机序列、标签/坐标及总线程，首次JIT/打包计入阶段 |
@@ -202,6 +206,7 @@ python_reconstruction_report = run_recon_all_python(
 | `inflate_backend` | 否 | `str` | `'native'` | torch使用完整标准inflated/sulc GPU算法；所有设备须cuda:N且hemisphere_workers=2，非法组合调度前拒绝 |
 | `surface_placement_backend` | 否 | `str` | `'native'` | native为原放置对照；python复用完整四轮preaparc/white/pial及自有指标，允许有序CPU核。python配方固定python |
 | `topology_backend` | 否 | `str` | `'native'` | native为原GA对照；python为完整数字拓扑；python-ga为完整自有有序GA。python配方默认数字python并保留显式python-ga；真实缺陷标签编号域分别检查，整体等效未判定 |
+| `topology_finish_backend` | 否 | `str` | `'python'` | python保留自有remesh/相交清理；conda-cpp显式使用Conda自编译preclean→三轮remesh→postclean，仅允许backend=native且topology_backend=native；结构与双谓词零相交门通过后发布orig。详见[原生表面配方](NATIVE_TOPOLOGY_FINISH.md) |
 | `sphere_finish_backend` | 否 | `str` | `'cpu'` | torch复用完整dense GPU标准sphere收尾，全部设备须cuda:N与hemisphere_workers=2，surface子exec局部缓存；原负面标记/SOAP/全投影/停止保持，不选择实验marked；python配方固定torch。 |
 | `remesh_scalar_storage` | 否 | `str` | 'numpy' | python使用既有完整CPU remesh双精度标量存储，保持有序拆缩；python配方固定python |
 | `annotation_gibbs_backend` | 否 | `str` | `'python'` | numba为完整有序Gibbs核，GPU特征/随机序列保持；python配方固定numba |
@@ -317,6 +322,7 @@ reconstruction_reports = run_recon_all_python_batch(
     inflate_backend="native",  # torch仅支持显式CUDA和两个半球worker，标准表面输出同序
     surface_placement_backend="native",  # 原放置对照；python复用完整四轮white/pial
     topology_backend="native",  # 原GA对照；python使用完整数字拓扑，非GA复现
+    topology_finish_backend="python",  # 默认自有收尾；conda-cpp仅配backend/native及topology/native
     sphere_finish_backend="cpu",  # torch在表面子exec复用完整GPU收尾；父精度和缓存保持
     annotation_gibbs_backend="python",  # numba原样传给每例CLI，有序反馈不改标签
     remesh_scalar_storage="numpy",  # python原样传入，每侧完整remesh保持原有堆顺序
@@ -386,6 +392,7 @@ fnit-recon-all subject_T1w.nii.gz subjects/sub01-python \
 | `--inflate-backend` | `inflate_backend` | 默认native；torch仅替换标准inflated/sulc，须cuda:N和两个半球worker，surface子exec局部启用缓存 |
 | `--surface-placement-backend` | `surface_placement_backend` | native为原放置对照；python为完整自有四轮preaparc/white/pial及指标；python配方固定python |
 | `--topology-backend` | `topology_backend` | native为原GA对照；python为完整数字拓扑；python-ga为完整自有有序GA，Python配方保留显式选择；整体等效未判定 |
+| `--topology-finish-backend` | `topology_finish_backend` | 默认python；conda-cpp只允许backend=native、topology_backend=native，执行独立构建preclean/remesh3/postclean及严格orig发布门 |
 | `--sphere-finish-backend` | `sphere_finish_backend` | 默认cpu；torch仅迁移既有完整dense标准sphere收尾，须cuda:N和两个缓存surface worker；注册收尾保持；python配方固定torch。 |
 | `--remesh-scalar-storage` | `remesh_scalar_storage` | 默认numpy；python仅优化CPU完整remesh双精度存储，算法及三轮平滑不变 |
 | `--annotation-gibbs-backend` | `annotation_gibbs_backend` | 默认python；numba复用完整有序重分类，三图谱共享原特征，首次JIT/打包/读写计入墙钟 |
