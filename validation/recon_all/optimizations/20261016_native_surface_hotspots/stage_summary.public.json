@@ -1,0 +1,221 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-16",
+  "host_alias": "accelerator-a-1",
+  "scope": "frozen_same_FNIT_premesh_production_function_stage; raw_T1_v2_failed_at_SynthSeg; successful_end_to_end_not_assessed",
+  "publication_status": "work_branch_only; main_not_pushed",
+  "provenance": {
+    "upstream_freesurfer_commit": "d932c45b7941662ea380a05efef580568b98d41a",
+    "native_build": {
+      "status": "complete",
+      "exit_code": 0,
+      "origin": "independently_compiled_in_Conda_from_pinned_source",
+      "copied_installed_FreeSurfer_binaries": false
+    },
+    "native_programs_sha256": {
+      "mris_remesh": "008add1ec4dde4bb3bd5b8c6d41cc31b0adc4e893347d63d7dabdc5529a7fd4a",
+      "mris_remove_intersection": "4f0ccd8a0fcecccc2a7964bf4f6ee5d5c8d9a51b6a432080afe417cbb0ba6f38"
+    },
+    "stage_code_commit": "91b7035ece299f3eef7fbc5a5f8e7703a3efaa5b",
+    "end_to_end_code_commit": "efa85ef0eecdfcec2bff097fdd141b5997d97c53",
+    "native_free_py_sha256_at_both_commits": "2d5393b12d1b34f9eda3f4afae6dfcb5f579fd969bb3cc4ce5a6de6555ee8b92",
+    "end_to_end_source_manifest_sha256": "39c5a30ce19573f726b1a4bdc76aa45978f3d5622ef5bf457315939a446c7c45",
+    "reproduction_scripts_sha256": {
+      "benchmark_same_input.py": "9f2df302b1ae7e70a34553794331182843c520022d1139b9d36b51c3ed40d413",
+      "benchmark_pipeline_finish.py": "146b60eecdd1c0a71e70cda8b6138869ba5a0b59470ff7efce4be6c60109e76f"
+    }
+  },
+  "direct_remesh_then_cleanup": {
+    "case": "ds000114_sub-07",
+    "hemisphere": "rh",
+    "input": "frozen_FNIT_native_GA_orig_premesh",
+    "quality_status": "failed",
+    "source_intersecting_faces_after": 11,
+    "geometric_intersecting_faces_after": 11,
+    "private_report_sha256": "2f9bca5355f405c2253cb581807bac46d820adab5e7dbd209ac0e201c04245b7"
+  },
+  "production_finish_chain": {
+    "function": "fnit.recon_all.native_free._finish_native_topology",
+    "steps": [
+      "native_preclean",
+      "native_remesh_3_iterations",
+      "native_postclean",
+      "strict_quality_gate",
+      "atomic_publication"
+    ],
+    "original_premesh_preserved": true,
+    "private_report_sha256": "9065ed65c5c57c71a857bbf252be01e6cb17cdcedccf970af7d463cb759b999f",
+    "cases": [
+      {
+        "case": "ds000114_sub-06",
+        "hemisphere": "lh",
+        "wall_seconds_including_checks_and_io": 85.952282,
+        "stage_seconds": {
+          "preclean": 4.637519,
+          "remesh": 21.149648,
+          "postclean": 60.094713,
+          "publication": 0.032206
+        },
+        "execution_status": "complete",
+        "final_structure_status": "passed",
+        "source_intersecting_faces_after": 0,
+        "geometric_intersecting_faces_after": 0
+      },
+      {
+        "case": "ds000114_sub-07",
+        "hemisphere": "rh",
+        "wall_seconds_including_checks_and_io": 71.897877,
+        "stage_seconds": {
+          "preclean": 4.126558,
+          "remesh": 18.091389,
+          "postclean": 49.620352,
+          "publication": 0.028552
+        },
+        "execution_status": "complete",
+        "final_structure_status": "passed",
+        "source_intersecting_faces_after": 0,
+        "geometric_intersecting_faces_after": 0
+      }
+    ]
+  },
+  "tests": {
+    "environment": "actual_Conda",
+    "passed": 15,
+    "groups": {
+      "native_finish_chain": 11,
+      "native_remesh_installer": 1,
+      "supervisor": 3
+    },
+    "contract_tests_do_not_replace_real_data_benchmark": true,
+    "latest_resource_regression": {
+      "environment": "actual_Conda_frozen_source_93affde8",
+      "native_candidate_publication_tests_passed": 14,
+      "shared_gpu_admission_tests_passed": 7,
+      "single_gpu_ownership_tests_passed": 15,
+      "admission_and_ownership_suite_passed": 22,
+      "suite_counts_not_additive": true
+    }
+  },
+  "raw_T1_end_to_end": {
+    "cases": [
+      "ds000114_sub-06",
+      "ds000114_sub-07"
+    ],
+    "target_seconds_per_subject": 2000,
+    "v1": {
+      "status": "failed_before_subject_creation",
+      "cause": "launch_PYTHONPATH_lost_declared_SimpleITK_dependency",
+      "artifacts_preserved": true,
+      "scientific_execution_assessed": false
+    },
+    "v2": {
+      "status": "failed_both_cases_at_SynthSeg_CUDA_OOM",
+      "dependency_environment_manifest_sha256": "c25cd8cf7053c8224c246744e1f1bc9af12db0c95a8221b27e9546cc4511b62c",
+      "SimpleITK_version": "2.5.6",
+      "full_wall_seconds": null,
+      "output_138_complete": false,
+      "strict_file_reproduction": "not_assessed",
+      "Dice_surface_distance_thickness_area_volume_local_outliers": "not_assessed",
+      "overall_metric_equivalence": "not_assessed",
+      "speed_target_2000_seconds": "not_assessed",
+      "cause": "shared_GPU0_external_jobs_consumed_available_memory_before_SynthSeg",
+      "artifacts_preserved": true,
+      "case_results": [
+        {
+          "case": "ds000114_sub-06",
+          "execution_status": "failed",
+          "failed_stage": "SynthSeg",
+          "error": "CUDA_out_of_memory",
+          "complete_end_to_end_run": false
+        },
+        {
+          "case": "ds000114_sub-07",
+          "execution_status": "failed",
+          "failed_stage": "SynthSeg",
+          "error": "CUDA_out_of_memory",
+          "complete_end_to_end_run": false
+        }
+      ]
+    },
+    "v3": {
+      "code_commit": "93affde8d369ee6ade22f2c105701ed6577e89a4",
+      "status": "running",
+      "target_GPU_index": 1,
+      "frozen_job_sha256": "1769b323ee9d003204952fae2044627535895febc004c6df9f5432abad4abb8d",
+      "verified_files": 2264,
+      "minimum_free_gpu_bytes": 22000000000,
+      "measured_free_gpu_bytes_before_spawn": 27848081408,
+      "native_program_manifest_sha256": "3cb9b290a76bb94ecd2be1d76ac7cc52ff0fb5d7929e181a915c85b4ae4b3b7e",
+      "full_wall_seconds": null,
+      "speed_target_2000_seconds": "not_assessed",
+      "strict_reproduction": "not_assessed",
+      "overall_metric_equivalence": "not_assessed"
+    }
+  },
+  "resources_and_precision": {
+    "timing_environment": "shared_host_and_GPU; no_controlled_paired_E2E_speedup_claim",
+    "stage_accelerator": "native_CPU_programs_and_independent_FNIT_quality_checks",
+    "gpu_default_precision": "TF32_with_existing_verified_FP32_exceptions",
+    "FP16_or_BF16_enabled": false,
+    "whole_run_gpu_memory_budget_bytes": 20000000000,
+    "whole_run_owned_simultaneous_gpu_peak_bytes": null,
+    "whole_run_memory_budget_status": "not_assessed",
+    "clean_environment_runtime_isolation": "not_assessed",
+    "shared_GPU_admission": {
+      "optional_job_field": "minimum_free_gpu_bytes",
+      "unit": "bytes",
+      "validation": "positive_integer_excluding_bool",
+      "identity": "target_physical_index_and_full_UUID_verified",
+      "checked_immediately_before_science_spawn": true,
+      "insufficient_memory_action": "no_science_process; preserve_failure_receipt; release_pre_spawn_unresolved_marker",
+      "resource_reservation": false
+    }
+  },
+  "acceptance": {
+    "frozen_stage_execution": "complete_two_inputs",
+    "frozen_stage_final_mesh_quality": "passed_two_inputs",
+    "stage_identity_to_original_Python_or_official": "not_assessed",
+    "raw_T1_execution_and_138_outputs": "v2_failed_both_cases_at_SynthSeg; successful_end_to_end_not_assessed",
+    "strict_reproduction": "not_assessed_for_this_recipe",
+    "optimization_degradation": "not_assessed_for_this_recipe",
+    "overall_metric_equivalence": "not_assessed"
+  },
+  "same_input_SynthSeg_GPU1_probe": {
+    "scope": "frozen_same_input_stage_probe_not_raw_T1_end_to_end",
+    "target_physical_GPU_index": 1,
+    "execution_status": "complete",
+    "wall_seconds": 11.013759778,
+    "different_segmentation_voxels": 0,
+    "affine_maximum_absolute_error": 0,
+    "overall_metric_equivalence": "not_assessed"
+  },
+  "frozen_production_function_regression_v2": {
+    "code_commit": "93affde8d369ee6ade22f2c105701ed6577e89a4",
+    "native_free_py_sha256": "64412e3a161a12cd5ddc85caec5faccb5300183c4758d9bc9341793f83ecfb88",
+    "source_manifest_sha256": "e8dca760536d19bc72a88f4bfe67a5768d4380902958f7cd1b82913e4072b30d",
+    "report_sha256": "4b1c9a2dc6336055e29840b292f3692b03d065f9adb9dc4588e8c28829529d16",
+    "scope": "same_FNIT_premesh_production_function_not_raw_T1_E2E",
+    "cases": [
+      {
+        "case": "ds000114_sub-06",
+        "hemisphere": "lh",
+        "wall_seconds": 87.21758812002372,
+        "vertices": 129674,
+        "faces": 259344,
+        "ordered_faces_equal_to_pre_filename_fix": true,
+        "coordinates_equal_to_pre_filename_fix": true,
+        "basic_structure_and_zero_intersection_gates": "passed"
+      },
+      {
+        "case": "ds000114_sub-07",
+        "hemisphere": "rh",
+        "wall_seconds": 72.22949972306378,
+        "vertices": 115122,
+        "faces": 230240,
+        "ordered_faces_equal_to_pre_filename_fix": true,
+        "coordinates_equal_to_pre_filename_fix": true,
+        "basic_structure_and_zero_intersection_gates": "passed"
+      }
+    ]
+  }
+}
