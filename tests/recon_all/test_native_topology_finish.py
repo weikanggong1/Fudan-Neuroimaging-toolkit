@@ -263,7 +263,7 @@ class NativeTopologyFinishTest(unittest.TestCase):
                     "--weights-dir", str(root / "weights"),
                     "--assets-dir", str(root / "assets"),
                     "--native-bin-dir", str(root / "bin"),
-                    "--device", "cpu", "--backend", "native",
+                    "--device", "cuda:0", "--backend", "native",
                     "--topology-backend", "native",
                     "--topology-finish-backend", "conda-cpp",
                     "--surface-placement-backend", "native",
