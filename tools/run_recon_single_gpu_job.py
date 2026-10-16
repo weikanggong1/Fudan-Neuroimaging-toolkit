@@ -2,6 +2,8 @@
 
 调度器不实现任何科学算法。job JSON 的 argv 必须是已审查的完整命令。
 CUDA 在 fresh exec 之前映射；等待租约的时间不计入验证墙钟。
+共享卡作业可设 minimum_free_gpu_bytes（正整数字节数），在启动前核对
+目标 UUID 和空闲显存；这次查询不预留资源，启动后仍可能有其他作业进入。
 """
 
 import argparse
@@ -179,6 +181,43 @@ def gpu_snapshot(index, expected_uuid):
         else:
             other_count += 1
     return inventory, "\n".join(selected), other_count
+
+
+def minimum_free_gpu_bytes(job):
+    """读取可选的启动显存门槛（字节）；不接受 bool、零或浮点数。"""
+    if "minimum_free_gpu_bytes" not in job:
+        return None
+    value = job["minimum_free_gpu_bytes"]
+    if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+        raise ValueError("minimum_free_gpu_bytes必须是正整数字节数")
+    return value
+
+
+def gpu_free_memory(index, expected_uuid):
+    """查询目标物理卡当前空闲字节和 UUID；失败或身份不符时禁止启动。
+
+    nvidia-smi 的 memory.free 以整数 MiB 返回，按 1,048,576 换算字节；
+    报告保留原始值与查询时间。此快照不构成显存预留。
+    """
+    query_started_unix = time.time()
+    output = subprocess.run(
+        ["nvidia-smi", f"--id={expected_uuid}",
+         "--query-gpu=index,uuid,memory.free", "--format=csv,noheader,nounits"],
+        capture_output=True, text=True, timeout=15, check=True
+    ).stdout
+    rows = list(csv.reader(io.StringIO(output), skipinitialspace=True))
+    if len(rows) != 1 or len(rows[0]) != 3:
+        raise RuntimeError("目标GPU空闲显存查询格式无法核验")
+    ordinal, uuid, free_mib = (cell.strip() for cell in rows[0])
+    if (ordinal != str(index) or uuid != expected_uuid or not free_mib.isascii()
+            or not free_mib.isdecimal() or str(int(free_mib)) != free_mib):
+        raise RuntimeError("目标GPU空闲显存或物理索引/UUID无法核验")
+    return {"physical_gpu_index": index, "gpu_uuid": uuid,
+            "memory_free_mib": int(free_mib),
+            "memory_free_bytes": int(free_mib) * 1048576,
+            "query_started_unix": query_started_unix,
+            "query_completed_unix": time.time(),
+            "memory_unit": "MiB", "resource_reservation": False}
 
 
 def gpu_process_entries(snapshot):
@@ -529,6 +568,9 @@ def execute(job_file, lock_path):
     if job.get("threads") != 4:
         raise ValueError("单卡队列总线程必须为4")
     gpu_index = physical_gpu_index(job)
+    free_memory_threshold = minimum_free_gpu_bytes(job)
+    require_idle_gpu = job.get("require_idle_gpu", True)
+    verify_gpu_identity = require_idle_gpu or free_memory_threshold is not None
     cpus = job["cpu_affinity"]
     if len(set(cpus)) != 4 or not set(cpus).issubset(os.sched_getaffinity(0)):
         raise ValueError("CPU 亲和性必须是目标节点允许的四个不同核心")
@@ -564,7 +606,7 @@ def execute(job_file, lock_path):
             for output in job.get("new_output_paths", []):
                 if Path(output).exists():
                     raise FileExistsError(f"拒绝覆盖旧输出：{output}")
-            if job.get("require_idle_gpu", True):
+            if verify_gpu_identity:
                 inventory, snapshot, other_count = gpu_snapshot(
                     gpu_index, job["expected_gpu_uuid"])
                 report["actual_gpu_inventory"] = inventory
@@ -572,7 +614,7 @@ def execute(job_file, lock_path):
                 report["selected_gpu_uuid"] = job["expected_gpu_uuid"]
                 report["other_gpu_process_count_before"] = other_count
                 report["gpu_processes_before"] = snapshot
-                if snapshot:
+                if require_idle_gpu and snapshot:
                     raise RuntimeError("目标卡已有计算进程；保留回执，不抢占或终止")
             env = os.environ.copy()
             env.update(job.get("env", {}))
@@ -580,7 +622,7 @@ def execute(job_file, lock_path):
                 env.pop(name, None)
             # 完整UUID避免物理索引与CUDA运行时枚举顺序不同；进程内仍是cuda:0。
             env["CUDA_VISIBLE_DEVICES"] = (
-                job["expected_gpu_uuid"] if job.get("require_idle_gpu", True)
+                job["expected_gpu_uuid"] if verify_gpu_identity
                 else job["cuda_visible_devices"])
             report["cuda_visible_devices"] = env["CUDA_VISIBLE_DEVICES"]
             report["logical_cuda_device"] = "cuda:0"
@@ -596,6 +638,14 @@ def execute(job_file, lock_path):
             report["descendant_audit_method"] = "Linux child subreaper plus kernel-adopted descendants"
             observed = {}
             with (receipt_dir / "stdout.private.log").open("wb") as log:
+                if free_memory_threshold is not None:
+                    report["minimum_free_gpu_bytes"] = free_memory_threshold
+                    memory = gpu_free_memory(gpu_index, job["expected_gpu_uuid"])
+                    report["gpu_memory_before_spawn"] = memory
+                    if memory["memory_free_bytes"] < free_memory_threshold:
+                        raise RuntimeError(
+                            "目标GPU启动前空闲显存不足："
+                            f"{memory['memory_free_bytes']} < {free_memory_threshold}字节")
                 report["science_spawn_attempted"] = True
                 save(unresolved, report)
                 child_started = time.monotonic()

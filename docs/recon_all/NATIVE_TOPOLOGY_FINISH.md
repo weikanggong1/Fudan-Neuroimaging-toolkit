@@ -39,9 +39,9 @@ reconstruction_report = run_recon_all_python(
 )
 ```
 
-`orig.premesh`、`orig` 均为 FreeSurfer 三角面文件，顶点 `(N, 3)` 使用 surface RAS、毫米，面 `(F, 3)` 为有序顶点索引。`mri/filled.mgz` 与 `mri/norm.mgz` 属于 conformed 体素网格。`mris_remesh` 可以改变顶点数和拓扑；清理阶段必须保留 remesh 后的有序面、顶点数与 MRI 几何头。成功时 `surf/H.orig` 是清理后的输出，`scripts/H.native-preclean.json`、`scripts/H.native-remesh.json` 与 `scripts/H.native-intersection.json` 记录输入、候选、程序和输出 SHA-256、阶段秒数及质量检查；`scripts/H.native-topology-finish.json` 绑定完整链、最终候选 SHA 与原子发布，原始 premesh 的 SHA 也会复核。末次候选须通过闭合、单连通、genus-0、非流形顶点、面方向、零面积与两种独立相交谓词的检查。顶层返回值和 `fnit-native-free-run.json` 还记录程序 SHA、138 项路径和完整墙钟。
+`orig.premesh`、`orig` 均为 FreeSurfer 三角面文件，顶点 `(N, 3)` 使用 surface RAS、毫米，面 `(F, 3)` 为有序顶点索引。`mri/filled.mgz` 与 `mri/norm.mgz` 属于 conformed 体素网格。`mris_remesh` 可以改变顶点数和拓扑；清理阶段必须保留 remesh 后的有序面、顶点数与 MRI 几何头。成功时 `surf/H.orig` 是清理后的输出，`scripts/H.native-preclean.json`、`scripts/H.native-remesh.json` 与 `scripts/H.native-intersection.json` 记录输入、候选、程序和输出 SHA-256、阶段秒数及质量检查；`scripts/H.native-topology-finish.json` 绑定完整链、最终候选 SHA 与原子发布，原始 premesh 的 SHA 也会复核。末次候选须通过闭合、单连通、genus-0、非流形顶点、面方向、零面积与两种独立相交谓词的检查。候选使用 `surf/H.orig.native-preclean.candidate`、`H.orig.native-remesh.candidate`、`H.orig.native-intersection.candidate`；原子写出暂用 `H.orig.native-publish.candidate`，替换 `H.orig` 后该暂存文件消失。文件名从 `lh.`/`rh.` 开始，按现有半球所有权规则经过双侧成功屏障发布；任一侧质量检查失败时，两侧均不向公共被试目录发布候选或改写 `orig`。顶层返回值和 `fnit-native-free-run.json` 还记录程序 SHA、138 项路径和完整墙钟。
 
-`topology_finish_backend` 仅接受 `python`（默认）和 `conda-cpp`。后者只允许与 `backend="native"`、`topology_backend="native"` 搭配；程序缺失、命令失败、无效网格、MRI 几何头改变或任一相交谓词仍为非零均抛异常。原生程序退出码 0 不代表相交门通过。三步均先写入 `surf/.H.orig.native-*.candidate`；成功和失败均保留三份候选及收据。只有最终候选与完整质量收据的 SHA 一致时，才通过单次原子替换发布 `orig`；失败时原有 `orig` 保持原字节，或继续不存在。`backend="python"` 的纯自有计算配方继续使用 Python remesh 和清理，不会检查或调用这些原生程序。
+`topology_finish_backend` 仅接受 `python`（默认）和 `conda-cpp`。后者只允许与 `backend="native"`、`topology_backend="native"` 搭配；程序缺失、命令失败、无效网格、MRI 几何头改变或任一相交谓词仍为非零均抛异常。原生程序退出码 0 不代表相交门通过。三步均先写入 `surf/H.orig.native-*.candidate`；成功和失败均保留三份候选及收据。只有最终候选与完整质量收据的 SHA 一致时，才通过单次原子替换发布 `orig`；失败时原有 `orig` 保持原字节，或继续不存在。`backend="python"` 的纯自有计算配方继续使用 Python remesh 和清理，不会检查或调用这些原生程序。
 
 安装前提是主页 Conda 路径确实独立构建并列出 `mris_remesh`、`mris_remove_intersection` 和 `mris_fix_topology_fnit` 的哈希。若当前安装清单缺少 `mris_remesh`，入口会在创建被试输出前报缺失程序；不能从系统 FreeSurfer 复制二进制。个人许可证只留在私有运行环境，不进入仓库。
 
@@ -67,9 +67,9 @@ fnit-recon-all /data/public/sub-06_T1w.nii.gz /data/runs/sub-06 \
 
 ```bash
 mris_fix_topology_fnit -ga -seed 1234 -sphere qsphere.nofix -inflated inflated.nofix -orig orig.nofix -out orig.premesh SUBJECT lh
-mris_remove_intersection SUBJECT/surf/lh.orig.premesh SUBJECT/surf/.lh.orig.native-preclean.candidate
-mris_remesh -i SUBJECT/surf/.lh.orig.native-preclean.candidate -o SUBJECT/surf/.lh.orig.native-remesh.candidate --remesh --iters 3
-mris_remove_intersection SUBJECT/surf/.lh.orig.native-remesh.candidate SUBJECT/surf/.lh.orig.native-intersection.candidate
+mris_remove_intersection SUBJECT/surf/lh.orig.premesh SUBJECT/surf/lh.orig.native-preclean.candidate
+mris_remesh -i SUBJECT/surf/lh.orig.native-preclean.candidate -o SUBJECT/surf/lh.orig.native-remesh.candidate --remesh --iters 3
+mris_remove_intersection SUBJECT/surf/lh.orig.native-remesh.candidate SUBJECT/surf/lh.orig.native-intersection.candidate
 mris_place_surface --pial --lh --i SUBJECT/surf/lh.white --o SUBJECT/surf/lh.pial.T1
 mrisp_paint -a 5 ATLAS#6 SUBJECT/surf/lh.sphere.reg SUBJECT/surf/lh.avg_curv
 ```

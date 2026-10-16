@@ -4,6 +4,7 @@ import contextlib
 import importlib.util
 import io
 import json
+import os
 from pathlib import Path
 import shutil
 import sys
@@ -19,6 +20,37 @@ from fnit.recon_all.native_free import (
     _prepare_native_topology, _run_native_intersection, _run_native_remesh,
     _validate_topology_finish_backend, main,
 )
+
+
+# Real fresh-exec workers exercise the production publisher, while native CLI
+# copies and intersection counts stay controlled scheduling fixtures.
+NATIVE_FINISH_WORKER = r'''
+def execute(subject, hemi, device, threads, operation, binary, fail_lh=False):
+    from pathlib import Path
+    import shutil
+    from unittest.mock import patch
+    from fnit.recon_all.native_free import _finish_native_topology
+    subject = Path(subject)
+    def native(command, **kwargs):
+        if "-i" in command:
+            shutil.copyfile(command[2], command[4])
+        else:
+            shutil.copyfile(command[1], command[2])
+    geometric_count = int(fail_lh and hemi == "lh")
+    with patch("fnit.recon_all.native_free.subprocess.run", side_effect=native), \
+         patch("fnit.recon_all.place_surface_intersection_marking.mark_source_intersections",
+               return_value=(None, 0)), \
+         patch("fnit.recon_all.native_free._bounded_geometric_intersections",
+               return_value=(geometric_count, {"test_fixture": True})):
+        _finish_native_topology(subject=subject, hemi=hemi, assets=subject.parent,
+                                remesh_binary=Path(binary), intersection_binary=Path(binary))
+    artifacts = {name: str(subject / "surf" / (hemi + ".orig.native-" + name + ".candidate"))
+                 for name in ("preclean", "remesh", "intersection")}
+    artifacts["orig"] = str(subject / "surf" / (hemi + ".orig"))
+    artifacts.update({name + "_receipt": str(subject / "scripts" / (hemi + ".native-" + name + ".json"))
+                      for name in ("preclean", "remesh", "intersection", "topology-finish")})
+    return {"artifacts": artifacts}
+'''
 
 
 class NativeTopologyFinishTest(unittest.TestCase):
@@ -40,6 +72,74 @@ class NativeTopologyFinishTest(unittest.TestCase):
         fs.write_geometry(str(source), vertices, faces, volume_info=volume_info)
         return subject, source, vertices, faces
 
+    def _actual_publication_group(self, directory, subject, *, fail_lh=False):
+        from fnit.recon_all.hemisphere_parallel import run_hemisphere_group
+        root = Path(directory)
+        (root / "native_finish_publication_fixture.py").write_text(NATIVE_FINISH_WORKER)
+        binary = root / "mock-native"
+        binary.write_bytes(b"controlled native CLI fixture")
+        pythonpath = str(root) + os.pathsep + os.environ.get("PYTHONPATH", "")
+        with patch.dict(os.environ, {"PYTHONPATH": pythonpath}):
+            return run_hemisphere_group(
+                subject=subject, operation="nativefinish", device="cpu", threads=4, workers=2,
+                callable_path="native_finish_publication_fixture:execute",
+                kwargs={"binary": str(binary), "fail_lh": fail_lh})
+
+    def test_native_candidate_names_obey_existing_hemisphere_ownership(self):
+        from fnit.recon_all.hemisphere_parallel import _owned
+        for hemi, other in (("lh", "rh"), ("rh", "lh")):
+            for name in ("preclean", "remesh", "intersection", "publish"):
+                relative = f"surf/{hemi}.orig.native-{name}.candidate"
+                self.assertTrue(_owned(relative, hemi), relative)
+                self.assertFalse(_owned(relative, other), relative)
+                # Shared-write rules stay strict: hidden candidates are not owned.
+                self.assertFalse(_owned(f"surf/.{hemi}.orig.native-{name}.candidate", hemi))
+
+    def test_real_publisher_retains_all_native_artifacts_for_both_hemispheres(self):
+        with tempfile.TemporaryDirectory() as directory:
+            subject, source, _, _ = self._subject(directory)
+            shutil.copyfile(source, subject / "surf/rh.orig.premesh")
+            before = source.read_bytes()
+            report = self._actual_publication_group(directory, subject)
+            self.assertEqual(report["status"], "complete")
+            for hemi in ("lh", "rh"):
+                artifacts = report["values"][hemi]["artifacts"]
+                for name in ("preclean", "remesh", "intersection", "orig"):
+                    path = Path(artifacts[name])
+                    self.assertTrue(path.is_file(), path)
+                    self.assertEqual(path.read_bytes(), before)
+                    self.assertIn(str(path.relative_to(subject)), report["published"])
+                for name in ("preclean", "remesh", "intersection", "topology-finish"):
+                    path = Path(artifacts[name + "_receipt"])
+                    self.assertEqual(path.parent, subject / "scripts")
+                    self.assertEqual(path.name, f"nativefinish.{hemi}.{hemi}.native-{name}.json")
+                    self.assertEqual(json.loads(path.read_text())["status"], "complete")
+                    self.assertIn(str(path.relative_to(subject)), report["published"])
+                self.assertEqual((subject / f"surf/{hemi}.orig.premesh").read_bytes(), before)
+                # Atomic publication consumes only its staging file.
+                self.assertFalse((subject / f"surf/{hemi}.orig.native-publish.candidate").exists())
+            self.assertFalse(list((subject / "surf").glob(".*.orig.native-*.candidate")))
+            self.assertFalse(list((subject / "scripts").glob("hemi-*")))
+
+    def test_real_publisher_quality_failure_leaves_both_public_orig_unchanged(self):
+        from fnit.recon_all.hemisphere_parallel import HemisphereGroupError
+        with tempfile.TemporaryDirectory() as directory:
+            subject, source, _, _ = self._subject(directory)
+            shutil.copyfile(source, subject / "surf/rh.orig.premesh")
+            for hemi in ("lh", "rh"):
+                (subject / f"surf/{hemi}.orig").write_bytes((hemi + " accepted orig").encode())
+            with self.assertRaises(HemisphereGroupError) as caught:
+                self._actual_publication_group(directory, subject, fail_lh=True)
+            self.assertEqual(caught.exception.report["status"], "failed")
+            self.assertEqual(caught.exception.report["published"], [])
+            self.assertIn("native intersection left 0 source / 1 geometric",
+                          caught.exception.report["workers"]["lh"]["error"])
+            for hemi in ("lh", "rh"):
+                self.assertEqual((subject / f"surf/{hemi}.orig").read_bytes(),
+                                 (hemi + " accepted orig").encode())
+            self.assertFalse(list((subject / "surf").glob("*.orig.native-*.candidate")))
+            self.assertFalse(list((subject / "scripts").glob("nativefinish.*.native-*.json")))
+
     def test_opt_in_rejects_pure_python_and_non_native_ga(self):
         _validate_topology_finish_backend("python", topology_backend="python-ga", backend="python")
         _validate_topology_finish_backend("conda-cpp", topology_backend="native", backend="native")
@@ -54,7 +154,7 @@ class NativeTopologyFinishTest(unittest.TestCase):
     def test_native_remesh_consumes_preclean_and_keeps_private_candidate(self):
         with tempfile.TemporaryDirectory() as directory:
             subject, source, _, faces = self._subject(directory)
-            preclean = subject / "surf/.lh.orig.native-preclean.candidate"
+            preclean = subject / "surf/lh.orig.native-preclean.candidate"
             shutil.copyfile(source, preclean)
             binary = Path(directory) / "mris_remesh"
             binary.write_bytes(b"mock native executable")
@@ -68,7 +168,7 @@ class NativeTopologyFinishTest(unittest.TestCase):
                 seconds = _run_native_remesh(binary, subject, "lh", Path(directory),
                                              input_path=preclean)
             self.assertGreaterEqual(seconds, 0)
-            candidate = subject / "surf/.lh.orig.native-remesh.candidate"
+            candidate = subject / "surf/lh.orig.native-remesh.candidate"
             xyz, output_faces, metadata = fs.read_geometry(str(candidate), read_metadata=True)
             self.assertTrue(np.isfinite(xyz).all())
             np.testing.assert_array_equal(output_faces, faces)
@@ -116,7 +216,7 @@ class NativeTopologyFinishTest(unittest.TestCase):
                         self.assertEqual(commands[2][1], commands[1][4])
                         self.assertEqual(source.read_bytes(), premesh_before)
                         for name in ("preclean", "remesh", "intersection"):
-                            self.assertTrue((subject / f"surf/.lh.orig.native-{name}.candidate").exists())
+                            self.assertTrue((subject / f"surf/lh.orig.native-{name}.candidate").exists())
                         receipt = json.loads((subject / "scripts/lh.native-intersection.json").read_text())
                         publication = json.loads((subject / "scripts/lh.native-topology-finish.json").read_text())
                         failed = bool(source_count or geometric_count)
@@ -135,7 +235,7 @@ class NativeTopologyFinishTest(unittest.TestCase):
         for change in ("faces", "geometry"):
             with self.subTest(change=change), tempfile.TemporaryDirectory() as directory:
                 subject, source, vertices, faces = self._subject(directory)
-                remesh = subject / "surf/.lh.orig.native-remesh.candidate"
+                remesh = subject / "surf/lh.orig.native-remesh.candidate"
                 shutil.copyfile(source, remesh)
                 orig = subject / "surf/lh.orig"
                 orig.write_bytes(b"previous accepted orig")

@@ -401,7 +401,7 @@ def _run_native_remesh(binary: Path, subject: Path, hemi: str, assets: Path,
     tick = time.perf_counter()
     surf = subject / "surf"
     premesh = surf / f"{hemi}.orig.premesh"
-    candidate = surf / f".{hemi}.orig.native-remesh.candidate"
+    candidate = surf / f"{hemi}.orig.native-remesh.candidate"
     receipt = subject / "scripts" / f"{hemi}.native-remesh.json"
     if candidate.exists() or receipt.exists():
         raise FileExistsError(f"preserve previous native remesh evidence: {candidate}")
@@ -454,9 +454,9 @@ def _run_native_intersection(binary: Path, subject: Path, hemi: str,
     tick = time.perf_counter()
     surf, scripts = subject / "surf", subject / "scripts"
     source = (surf / f"{hemi}.orig.premesh" if phase == "preclean" else
-              surf / f".{hemi}.orig.native-remesh.candidate")
-    candidate = (surf / f".{hemi}.orig.native-preclean.candidate" if phase == "preclean" else
-                 surf / f".{hemi}.orig.native-intersection.candidate")
+              surf / f"{hemi}.orig.native-remesh.candidate")
+    candidate = (surf / f"{hemi}.orig.native-preclean.candidate" if phase == "preclean" else
+                 surf / f"{hemi}.orig.native-intersection.candidate")
     receipt = scripts / f"{hemi}.native-{phase if phase == 'preclean' else 'intersection'}.json"
     if candidate.exists() or receipt.exists():
         raise FileExistsError(f"preserve previous native intersection evidence: {candidate}")
@@ -520,9 +520,9 @@ def _finish_native_topology(*, subject: Path, hemi: str, assets: Path,
     """
     surf, scripts = subject / "surf", subject / "scripts"
     premesh = surf / f"{hemi}.orig.premesh"
-    preclean = surf / f".{hemi}.orig.native-preclean.candidate"
-    final_candidate = surf / f".{hemi}.orig.native-intersection.candidate"
-    publication_candidate = surf / f".{hemi}.orig.native-publish.candidate"
+    preclean = surf / f"{hemi}.orig.native-preclean.candidate"
+    final_candidate = surf / f"{hemi}.orig.native-intersection.candidate"
+    publication_candidate = surf / f"{hemi}.orig.native-publish.candidate"
     orig = surf / f"{hemi}.orig"
     receipt = scripts / f"{hemi}.native-topology-finish.json"
     if receipt.exists() or publication_candidate.exists():
