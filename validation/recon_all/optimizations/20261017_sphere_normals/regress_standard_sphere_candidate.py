@@ -1,9 +1,9 @@
 """用既有完整sphere worker验证真实候选源码，共四侧trace，不重复ABBA。
 
 输入为SHA固定的私有plan：已有worker及其SHA、候选完整源码清单、同一份
-四侧自产输入清单、已完成v2目录、四份mode=trace/arm=B payload和新输出根。
+四侧自产输入清单、已完成法向ABBA控制目录、四份mode=trace/arm=B payload和新输出根。
 CUDA、线程与亲和性由外层共用锁launcher固定。复用worker原API/完整轨迹/
-FP32和FP64质量判据；不修改生产函数、质量门或已有v2目录。
+FP32和FP64质量判据；不修改生产函数、质量门或已有控制目录。
 输出summary.private.json、四份payload/log/report/trace/球面及逐项相等诊断。
 坐标为surface RAS毫米；trace用于同输入数值回归，不作为性能样本。
 必要文件未完成、SHA/参数不符在计算前报错；worker失败保留现场、不重试。
@@ -60,7 +60,7 @@ def bound(path, expected):
 
 
 def prepare_gate(plan):
-    """只读验证四侧v2已完成及真实source71参数，不运行球面。"""
+    """只读验证四侧法向ABBA已完成及真实source71参数，不运行球面。"""
     bound(plan["candidate_archive_manifest"], plan["candidate_archive_manifest_sha256"])
     require(sha(plan["python_interpreter"]) == plan["python_interpreter_sha256"],
             "declared interpreter changed")
@@ -88,10 +88,10 @@ def prepare_gate(plan):
     summary_path = root / "summary.private.json"
     summary = read(summary_path)
     require(summary.get("status") == "complete" and len(summary.get("comparisons", [])) == 4,
-            "all four original v2 ABBA+trace groups must complete first")
+            "all four bound control ABBA+trace groups must complete first")
     require(len(summary.get("runs", [])) == 24 and
             all(r.get("status") == "complete" and r.get("exit_code") == 0 for r in summary["runs"]),
-            "a v2 timing/trace child is incomplete")
+            "a bound control timing/trace child is incomplete")
     controls = {}
     for payload in plan["payloads"]:
         row = payload["row"]
@@ -113,18 +113,18 @@ def prepare_gate(plan):
                 old_payload["source_manifest_sha256"] == plan["baseline_manifest_sha256"] and
                 old.get("status") == "complete" and old.get("quality", {}).get("passed") is True and
                 old.get("benchmark_script_sha256") == plan["worker_sha256"],
-                "control is not the original complete v2 B trace")
+                "control is not the bound complete B trace")
         wanted = {"finish_device": "cuda:0", "averaging_device": "cuda:0", "normals_device": "cuda:0",
                   "bbox_mode": "source_float", "require_unfolded": True, "overlap_diagnostics": True}
         require(old.get("kwargs") == wanted, "control parameters differ")
         record = next((r for r in summary["runs"] if r.get("worker_report") == str(old_report_path)), None)
         require(record and record["worker_report_sha256"] == sha(old_report_path),
-                "control report changed after v2 controller")
+                "control report changed after its controller")
         bound(folder / "trace.private.json", old["trace_sha256"])
         bound(folder / (row["hemisphere"] + ".sphere"), old["quality"]["sha256"])
         controls[identifier] = {"folder": str(folder), "payload_sha256": sha(old_payload_path),
                                 "report_sha256": sha(old_report_path), "report": old}
-    return {"v2_summary_sha256": sha(summary_path), "changed_sphere_dependencies": changes,
+    return {"control_summary_sha256": sha(summary_path), "changed_sphere_dependencies": changes,
             "candidate_python_files": len(source["files"]), "controls": controls}
 
 
@@ -140,7 +140,7 @@ def run(plan):
     binding = prepare_gate(plan)
     root.mkdir(parents=True, mode=0o700)
     summary_path = root / "summary.private.json"
-    summary = {"status": "running", "scope": "candidate71 versus original v2 B, four complete same-input standard-sphere traces; not a performance ABBA or recon-all",
+    summary = {"status": "running", "scope": "candidate71 versus bound control B, four complete same-input standard-sphere traces; not a performance ABBA or recon-all",
                "candidate_commit": plan["candidate_commit"], "control_commit": plan["control_commit"],
                "preflight": binding, "runs": [], "comparisons": [],
                "strict_reproduction": "not_assessed", "overall_metric_equivalence": "not_assessed"}

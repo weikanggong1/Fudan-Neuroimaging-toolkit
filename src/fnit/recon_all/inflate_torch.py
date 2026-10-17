@@ -1,8 +1,10 @@
-"""固定 mris_inflate 配方的实验 Torch 积分；复用有序法向和平均器。
+"""固定 mris_inflate 配方的 Torch 积分；复用有序法向和平均器。
 
 坐标始终为 float32，标量全局统计和原规则动量的指定项为 float64。
 保留完整二环、档次、停止和 sulc 更新；不改变 TF32 或启用半精度。
-生产调度尚未接入，必须先完成同输入 surface/sulc 回归。
+生产调度可显式选择 inflate_backend="torch"，使用完整标准 inflation；
+设备、两半球 worker、缓存和线程要求由现有入口检查。更新共享平均器时
+须另核对同输入完整 surface/sulc，阶段结果不能代替整例性能结论。
 """
 from __future__ import annotations
 

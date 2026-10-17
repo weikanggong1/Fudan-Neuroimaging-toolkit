@@ -5,6 +5,8 @@
 timing无observer；trace另跑完整阶段，不将其墙钟混入ABBA。输出目录须不存在。
 完整阶段墙钟含函数内部读写/JIT/搬运，并在其前后同步目标CUDA；另记包含
 解释器启动、manifest校验及质量检查的父进程墙钟。显存不可归属时保持未知。
+保存后质量检查在CUDA不可见的新解释器中调用同一inspect_surface；原来的
+FP32/FP64和结构判据不变。子检查失败立即失败，不自动重试或补写旧报告。
 
 freeze子命令为冻结源码生成完整src/fnit/*.py SHA清单；prepare子命令只
 从两份成功生产benchmark.json的同级subject/surf读取双侧inflated/smoothwm。
@@ -276,6 +278,100 @@ def inspect_surface(path, inflated):
     return quality
 
 
+def quality_worker(args):
+    """绑定的保存球面→独立CPU原判据JSON；无GPU、重建、重试或门槛修改。
+
+    args.payload及payload_sha256指向本次GPU worker的冻结JSON及SHA；
+    surface_sha256绑定其已保存球面。输出固定为该worker目录中的
+    saved_quality.private.json，须不存在。完整源码/输入清单前后复验，
+    4个CPU线程、interop1，坐标仍为surface RAS/mm。失败保留phase/日志，
+    非零退出；旧SIGSEGV不被改为成功。该质量步骤没有独立官方CLI。
+    """
+    import faulthandler
+    faulthandler.enable(all_threads=True)
+    payload = read_bound(args.payload, args.payload_sha256)
+    output = Path(payload["output"]) / "saved_quality.private.json"
+    if output.exists():
+        raise FileExistsError(output)
+    report = {"status": "running", "phase": "validation", "payload_sha256": args.payload_sha256,
+              "surface_sha256": args.surface_sha256, "tool_sha256": sha(__file__),
+              "execution": "fresh_exec_CPU_original_predicates", "started_monotonic": time.monotonic()}
+    save(output, report)
+    try:
+        if os.environ.get("CUDA_VISIBLE_DEVICES") != "":
+            raise ValueError("saved quality process must hide CUDA explicitly")
+        verify_source(payload["source"], payload["source_manifest"], payload["source_manifest_sha256"])
+        inputs = verify_inputs(payload["inputs_manifest"], payload["inputs_manifest_sha256"])
+        if payload["row"] not in inputs["cases"]:
+            raise ValueError("quality input is not in frozen production manifest")
+        surface = regular(Path(payload["output"]) / (payload["row"]["hemisphere"] + ".sphere"))
+        if sha(surface) != args.surface_sha256:
+            raise ValueError("saved sphere changed before quality check")
+        sys.path.insert(0, str(Path(payload["source"]) / "src"))
+        import numba
+        import torch
+        torch.set_num_threads(4)
+        torch.set_num_interop_threads(1)
+        numba.set_num_threads(4)
+        report.update(phase="original_inspect_surface_running", threads={"torch": torch.get_num_threads(),
+            "interop": torch.get_num_interop_threads(), "numba": numba.get_num_threads()},
+            cuda_visible_devices=os.environ.get("CUDA_VISIBLE_DEVICES"), cuda_initialized=torch.cuda.is_initialized())
+        save(output, report)
+        report["quality"] = inspect_surface(surface, payload["row"]["inputs"]["inflated"]["path"])
+        if sha(surface) != args.surface_sha256:
+            raise ValueError("saved sphere changed during quality check")
+        verify_source(payload["source"], payload["source_manifest"], payload["source_manifest_sha256"])
+        verify_inputs(payload["inputs_manifest"], payload["inputs_manifest_sha256"])
+        report.update(status="complete" if report["quality"]["passed"] else "failed_quality",
+                      phase="original_inspect_surface_returned")
+    except BaseException as error:
+        report.update(status="failed", error_type=type(error).__name__, error=str(error),
+                      traceback=traceback.format_exc())
+    report["ended_monotonic"] = time.monotonic()
+    save(output, report)
+    return 0 if report["status"] == "complete" else 1
+
+
+def inspect_surface_fresh_process(*, payload_path, payload_sha256, python_interpreter):
+    """新CPU解释器调用原QA并校验子报告绑定，返回(quality,receipt)。
+
+    三个具名输入为本次worker的JSON路径/SHA及同一解释器路径。新QA报告
+    和日志写在payload.output，不修改输入/旧报告。非零退出、缺少或不匹配
+    的QA证据均抛RuntimeError；计时仅计外层验证，不纳入sphere API时间。
+    """
+    payload = read_bound(payload_path, payload_sha256)
+    output = Path(payload["output"])
+    report_path = output / "saved_quality.private.json"
+    log_path = output / "saved_quality.log"
+    if report_path.exists() or log_path.exists():
+        raise FileExistsError("preserve previous saved-quality evidence")
+    surface_sha256 = sha(regular(output / (payload["row"]["hemisphere"] + ".sphere")))
+    command = [str(python_interpreter), "-X", "faulthandler", "-u", str(Path(__file__).absolute()),
+               "quality-worker", "--payload", str(Path(payload_path).absolute()),
+               "--payload-sha256", payload_sha256, "--surface-sha256", surface_sha256]
+    environment = dict(os.environ, CUDA_VISIBLE_DEVICES="", OMP_NUM_THREADS="4", NUMBA_NUM_THREADS="4",
+                       OPENBLAS_NUM_THREADS="4", MKL_NUM_THREADS="4", NUMEXPR_NUM_THREADS="4")
+    started = time.perf_counter()
+    with log_path.open("x") as stream:
+        process = subprocess.run(command, env=environment, stdout=stream,
+                                 stderr=subprocess.STDOUT, check=False)
+    receipt = {"exit_code": process.returncode, "scope": "fresh exec CPU QA; outside GPU API time",
+               "report": str(report_path), "log": str(log_path), "log_sha256": sha(log_path),
+               "whole_quality_process_wall_seconds": time.perf_counter() - started,
+               "report_sha256": sha(report_path) if report_path.exists() else None}
+    save(output / "saved_quality_receipt.private.json", receipt)
+    if process.returncode != 0 or not report_path.is_file():
+        raise RuntimeError("saved-surface CPU quality process failed; preserve child receipt")
+    report = json.loads(report_path.read_text())
+    if (report.get("status") != "complete" or report.get("payload_sha256") != payload_sha256
+            or report.get("surface_sha256") != surface_sha256 or report.get("tool_sha256") != sha(__file__)
+            or report.get("cuda_visible_devices") != "" or report.get("cuda_initialized") is not False
+            or report.get("quality", {}).get("passed") is not True
+            or sha(regular(output / (payload["row"]["hemisphere"] + ".sphere"))) != surface_sha256):
+        raise RuntimeError("saved-surface QA evidence is incomplete or binding changed")
+    return report["quality"], receipt
+
+
 def worker(args):
     """一个独立冷进程执行一个完整sphere；失败也保存现场和非零退出。"""
     import faulthandler
@@ -374,7 +470,9 @@ def worker(args):
             report["trace_sha256"] = sha(output / "trace.private.json")
         report["phase"] = "saved_surface_quality_running"
         save(report_path, report)
-        report["quality"] = inspect_surface(output / (payload["row"]["hemisphere"] + ".sphere"), payload["row"]["inputs"]["inflated"]["path"])
+        report["quality"], report["saved_quality_execution"] = inspect_surface_fresh_process(
+            payload_path=args.payload, payload_sha256=args.payload_sha256,
+            python_interpreter=sys.executable)
         report["phase"] = "saved_surface_quality_returned"
         save(report_path, report)
         verify_source(payload["source"], payload["source_manifest"], payload["source_manifest_sha256"])
@@ -527,6 +625,11 @@ def main():
     child.add_argument("--payload", type=Path, required=True)
     child.add_argument("--payload-sha256", required=True)
     child.set_defaults(function=worker)
+    quality = commands.add_parser("quality-worker", help=argparse.SUPPRESS)
+    quality.add_argument("--payload", type=Path, required=True)
+    quality.add_argument("--payload-sha256", required=True)
+    quality.add_argument("--surface-sha256", required=True)
+    quality.set_defaults(function=quality_worker)
     args = parser.parse_args()
     return args.function(args)
 
