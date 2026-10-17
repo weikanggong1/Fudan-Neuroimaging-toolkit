@@ -5,7 +5,7 @@
 [`regress_standard_sphere_candidate.py`](regress_standard_sphere_candidate.py)
 补充标准球面已有法向A/B测试的覆盖：原A/B两臂均使用`5ca07f99`，只切换
 法向设备；生产候选`71cc9189`还修改了共享梯度平均器的缓冲复用。因此，
-四侧分别增加一次真实候选完整trace，对照原v2的B臂完整trace，覆盖候选
+四侧分别增加一次真实候选完整trace，对照已完成v3法向配对的B臂完整trace，覆盖候选
 实际调用的共享平均器。每侧不再重复ABBA。
 
 本工具复用同一份`benchmark_standard_sphere.py worker`及其质量算法。
@@ -15,10 +15,10 @@ normals和finish。trace包含观测开销，不能作为提速测量或原始T1
 
 ```mermaid
 flowchart LR
-    A[v2四侧ABBA和trace全部完成] --> B[源码639文件与自产输入SHA校验]
+    A[四侧法向ABBA和trace全部完成] --> B[源码639文件与自产输入SHA校验]
     B --> C[共用GPU锁内串行运行四侧候选完整trace]
     C --> D[既有FP32 FP64及结构质量检查]
-    D --> E[对照v2 B臂全部轨迹 指纹 文件SHA和字节数]
+    D --> E[对照控制B臂全部轨迹 指纹 文件SHA和字节数]
 ```
 
 ## 2．输入、Python调用和输出
@@ -29,13 +29,13 @@ flowchart LR
 
 | plan字段 | 含义与结构 |
 | --- | --- |
-| `worker/worker_sha256` | 本轮v2完整worker普通文件的绝对路径及64位SHA |
+| `worker/worker_sha256` | 本轮v3完整worker普通文件的绝对路径及64位SHA |
 | `candidate_source/candidate_commit` | 候选冻结源码根及完整40位提交 |
 | `candidate_manifest/candidate_manifest_sha256` | `fnit-sphere-source-v1`清单，覆盖`src/fnit`全部Python文件；当前639项 |
 | `candidate_archive_manifest/candidate_archive_manifest_sha256` | 原候选转移清单路径和预先声明SHA，用于绑定来源 |
-| `baseline_manifest/baseline_manifest_sha256/control_commit` | v2使用的完整源码清单和控制提交 |
+| `baseline_manifest/baseline_manifest_sha256/control_commit` | 法向配对使用的完整源码清单和控制提交 |
 | `inputs_manifest/inputs_manifest_sha256` | `fnit-sphere-production-inputs-v1`四侧清单；逐项绑定生产benchmark、runtime及两张表面 |
-| `control_root` | 已完成v2根；读取每侧`trace-01-B`，不会修补旧目录 |
+| `control_root` | 已完成法向配对根（本轮v3）；读取每侧`trace-01-B`，不会修补旧目录 |
 | `output_root` | 必须不存在的新运行根 |
 | `python_interpreter/python_interpreter_sha256` | 显式解释器普通文件目标及SHA |
 | `cuda_visible_devices` | 外层固定的物理卡可见性；worker内显式使用`cuda:0` |
@@ -51,13 +51,16 @@ import hashlib
 import json
 from pathlib import Path
 
-from regress_standard_sphere_candidate import run
+from regress_standard_sphere_candidate import bound, prepare_gate, run
 
 private_plan_path = Path("/data/fnit/new-task/trace-plan.private.json")  # 已核对的私有计划
 expected_plan_sha256 = "替换为准备回执中的64位SHA"  # 不根据运行结果改写
 plan_bytes = private_plan_path.read_bytes()  # 只读原计划
 assert hashlib.sha256(plan_bytes).hexdigest() == expected_plan_sha256
 private_plan = json.loads(plan_bytes)  # 结构见上表
+runner_script = Path("/data/fnit/tools/regress_standard_sphere_candidate.py")  # 本次实际脚本
+bound(path=runner_script, expected=private_plan["runner_sha256"])  # 先核对脚本自身SHA
+preflight_report = prepare_gate(plan=private_plan)  # 只验清单与四侧控制证据，不执行sphere
 # 在协调者已取得共用GPU锁、固定GPU和四线程环境后调用。
 exit_code = run(plan=private_plan)  # 0表示四侧执行完成；严格一致性另读summary
 ```
@@ -75,7 +78,7 @@ exit_code = run(plan=private_plan)  # 0表示四侧执行完成；严格一致�
 
 ## 3．命令行
 
-实际私有launcher先等待`task_gpu1.lock`，再检查v2全部24次子进程完成，
+实际私有launcher先取得同一主机的共用GPU锁，再检查控制组全部24次子进程完成，
 之后才开始四侧候选。下面使用说明路径，真实计划由准备回执绑定：
 
 ```bash
@@ -94,8 +97,14 @@ taskset --cpu-list 0-3 /data/fnit/env/bin/python \
 
 ## 5．本轮结果和更新记录
 
-目前为工具准备及契约检查，候选四侧trace尚未运行，精度和耗时均未判定。
-2026-10-17新增此覆盖，完整worker和质量判据继续使用v2固定版本。
+法向控制v3已完成24/24并通过四侧完整轨迹和全部质量门；实际71cc候选
+四侧trace已启动，完整比较尚未完成。保存后QA使用同一原函数的新CPU
+exec，算法和质量判据不变。trace包含观测开销，不能作为性能样本。
+
+前两次配置在科学目录创建前被门拒绝：一次因法向控制尚未完成，另一次
+因更新验证脚本后未同步`runner_sha256`。旧非零退出保留；当前新配置先
+实际执行`bound`和`prepare_gate`，逐项核对639个源文件、四侧自产输入、
+24份控制报告及四份完整trace，再从新目录执行候选。没有放宽任何门。
 最终原始T1整例速度、显存和官方误差由协调者另行汇总。
 
 ## 6．参考
