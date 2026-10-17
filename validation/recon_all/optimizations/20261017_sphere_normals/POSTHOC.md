@@ -153,6 +153,12 @@ Dice、surface、region、六套all_regions、no-th3、local及双方扩展质�
 
 ## 5．最终核查与报告
 
+本轮四项事后评估均已退出0且报告complete。
+[当前中文结果](WHOLE_RESULTS.md)与[逐项SHA绑定公开JSON](reports/whole_metrics.public.json)
+保留官方14/138、23/138及同期基线138/138数值门；零容差局部图失败、
+20/20空间但16/20表面记录覆盖、white/pial穿越和未知自有显存分别记录。
+没有把原失败改标通过或建立整体等效标准。
+
 - 检查所有launcher EXIT、`evaluation.json/pair.json` 的 `status`，以及
   `strict_reproduction.checked==138`。退出0不等于严格138通过。
 - geometry空间门须核对实际覆盖；有序拓扑不同的顶点图和注释保持

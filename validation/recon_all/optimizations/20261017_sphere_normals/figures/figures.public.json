@@ -1,0 +1,216 @@
+{
+  "schema": "fnit-recon-figure-bindings-v1",
+  "candidate_calculation_commit": "71cc91899bdf9713690cddbe32054386d8f58d63",
+  "control_calculation_commit": "5ca07f999375d02281ab60589cb2840e7b488790",
+  "plot_script_sha256": "c9adfdb8338f3a8213461320667013cb28ca6723217ee0d98702a6215acfe7eb",
+  "purpose": "qualitative localization of already computed results; no metric recomputation",
+  "space": "conformed T1 voxel slices; white/pial surface RAS in millimeters mapped by T1 tkRAS",
+  "scope": "existing geometry gates and file hashes verified; figures do not establish overall metric equivalence",
+  "figure_definitions": {
+    "t1_surface_overlay.png": "three orthogonal candidate T1 slices with reference/candidate white/pial",
+    "region_errors.png": "existing 68-region area, raw stats GrayVol and thickness signed relative errors; not a surface-distance heat map",
+    "local_region_boundary.png": "existing worst a2009s label boundary and Dice; reference identity follows comparison"
+  },
+  "comparisons": [
+    {
+      "case": "ds000114_sub-06",
+      "comparison": "candidate_vs_official",
+      "reference_kind": "archived official reference",
+      "primary_report_sha256": "2ff36ccbba536ec4051ac328e5ea10c5485e2c01e3624d0f904221dde20b93f5",
+      "geometry_report_sha256": "5c9f58758fcf95a8f4069d9df363b9f8173cf15bb4103f4287a175ea20ab3871",
+      "binding_manifest_sha256": "ee802c5afa336bc252e1b28979b8313904b54b1f0dcd5b572f187bf12b99b3e0",
+      "private_provenance_sha256": "94b34f30176cb3ba15846181858a5e43c497bb25bbaaf2c6e845f40827d0d1a4",
+      "geometry_surfaces_checked": 20,
+      "geometry_surfaces_comparable": 20,
+      "final_white_pial_footer_surfaces_checked": 4,
+      "final_white_pial_footer_surfaces_passed": 4,
+      "common_conform_and_tkras": true,
+      "inputs_sha256": {
+        "region_report": "1551549724f523b9af07d4e02f05527ad2fc7648c30544ebf89cfb5aa835c515",
+        "dice_report": "dfb9e1924308a943751d2b5513c45890a9aa321febfbb7caa115aaf77d42df01",
+        "candidate.orig.mgz": "37e07ecdf46c8bdc2e977b589b3d0cf0bde31fdc2e42b50625261c4601e5fad5",
+        "reference.orig.mgz": "fee095d7a5865fe8fc9daeb34dd5af749677b3e5f1b17ca8152740750398e2e6",
+        "candidate.aparc.a2009s+aseg.mgz": "acdf9889e069d556281e696c1adc3b587b9959f23d8a1a1f0c9c973af535fca1",
+        "reference.aparc.a2009s+aseg.mgz": "2233d02ad153874b7327d03e79e563c16978aa101976d5dc757a13218d4a532d",
+        "reference.lh.white": "b107628d276ec4531b1db78595c68f357a2d4f70f3401bf0ea1faf3842e31e34",
+        "reference.lh.pial": "7e15618a65d0f6cae148a581d9a13973532982e9278bd877ccc3ee6ed339a6f5",
+        "reference.rh.white": "48aa7b805fc9b6c42dd700ab98450e1ff37989aa9f41807257bb7e7c70f6fbbf",
+        "reference.rh.pial": "1c89610d8a222bcce8b4fade425b60f1d5444e2c7fbbfe1592c062bd30b2cb36",
+        "candidate.lh.white": "fb77ccdc3a633f7d73e15c7ef213f36947a399569be7f25fa88cd5b1262c469c",
+        "candidate.lh.pial": "8095bcda194d70889c973701485ee0f5cbc73811c4b6f85049652d02d2151d79",
+        "candidate.rh.white": "f85e7514e01688a695c51c26c4d399ad701bc338aa3c4bf80efa384ae82eeaff",
+        "candidate.rh.pial": "edb678bd3e3dec5618321cfd9eeec528c502ce9e722d842b6526df105b1d3c44"
+      },
+      "outputs": {
+        "t1_surface_overlay.png": {
+          "sha256": "abdcf1940b8228ca0c86e5fa503d2c7c1abc3742d5e22d9ffe5bccf85c741e0e",
+          "bytes": 729780,
+          "width": 2181,
+          "height": 806
+        },
+        "region_errors.png": {
+          "sha256": "38681990be42e209fcf274282c2eb0cada51c0f947d248aa4f7c79298ba047a1",
+          "bytes": 101541,
+          "width": 2399,
+          "height": 1122
+        },
+        "local_region_boundary.png": {
+          "sha256": "a11c52619c0eca6ab2f921d14d2484a76343e071bfbcb00b78dd9ec68f36f0e9",
+          "bytes": 59112,
+          "width": 1940,
+          "height": 783
+        }
+      }
+    },
+    {
+      "case": "ds000114_sub-06",
+      "comparison": "candidate_vs_control",
+      "reference_kind": "same-environment FNIT baseline",
+      "primary_report_sha256": "5326b3d7b0fd45fbd901caf9f4460665a1c6ff6acaba8e567700c25f78dcbca8",
+      "geometry_report_sha256": "d1987d5b66813bd99e85ade1ec7b5968c8a35b9c1c29c2db755ac6bc89739ed8",
+      "binding_manifest_sha256": "8264e175d4a3094ea51e6d8de3c5dc1db69b43029e8074db2ca8f345344766e3",
+      "private_provenance_sha256": "93cc4da205b461837e8fe26788f3db60c6e84d9872039922448a5cb0683bf950",
+      "geometry_surfaces_checked": 20,
+      "geometry_surfaces_comparable": 20,
+      "final_white_pial_footer_surfaces_checked": 4,
+      "final_white_pial_footer_surfaces_passed": 4,
+      "common_conform_and_tkras": true,
+      "inputs_sha256": {
+        "region_report": "53be6112d872cf4826c7e4a70796162a5cd946b1df705d7b1b3df16b0a4878ca",
+        "dice_report": "e49fd7702586e9e7c70499f85bd8eb90c649050682fc39d8ff46874f86a4573a",
+        "candidate.orig.mgz": "37e07ecdf46c8bdc2e977b589b3d0cf0bde31fdc2e42b50625261c4601e5fad5",
+        "reference.orig.mgz": "0ea93464ef5655c18ca65b9fc9e33b09ce054bc00dcc41c13d7d5b727f3c5b72",
+        "candidate.aparc.a2009s+aseg.mgz": "acdf9889e069d556281e696c1adc3b587b9959f23d8a1a1f0c9c973af535fca1",
+        "reference.aparc.a2009s+aseg.mgz": "acdf9889e069d556281e696c1adc3b587b9959f23d8a1a1f0c9c973af535fca1",
+        "reference.lh.white": "d61363f9bdadc1883b9b8bde7220ee4c832a618ee7cf90a05adc619167174cfe",
+        "reference.lh.pial": "fb47dad116ad05d818aecb356a8ecf0ed484905b6618ad798d12949f48094b33",
+        "reference.rh.white": "af0af20251ee70ca647adb02c90687e81320229a394bfeb27adbddd8ebf85078",
+        "reference.rh.pial": "bfb71c85b9b75da5a7c75dcc869bf59685fdd56a1d640784a04f84548cd7cd8a",
+        "candidate.lh.white": "fb77ccdc3a633f7d73e15c7ef213f36947a399569be7f25fa88cd5b1262c469c",
+        "candidate.lh.pial": "8095bcda194d70889c973701485ee0f5cbc73811c4b6f85049652d02d2151d79",
+        "candidate.rh.white": "f85e7514e01688a695c51c26c4d399ad701bc338aa3c4bf80efa384ae82eeaff",
+        "candidate.rh.pial": "edb678bd3e3dec5618321cfd9eeec528c502ce9e722d842b6526df105b1d3c44"
+      },
+      "outputs": {
+        "t1_surface_overlay.png": {
+          "sha256": "a4a5f95bfaa51acc8f446cd783195fea3ecf6746aef0bcff2e75092e27bc9668",
+          "bytes": 715702,
+          "width": 2181,
+          "height": 806
+        },
+        "region_errors.png": {
+          "sha256": "2bebbe180df28706b2306d55a473f23d22d3759ff663dc90a45e10e231b24ac1",
+          "bytes": 63359,
+          "width": 2399,
+          "height": 1122
+        },
+        "local_region_boundary.png": {
+          "sha256": "2cd2ee56112699a3d2948db1c5abd1be1a9b9a3b54ed7da49f4e1f6ae485d210",
+          "bytes": 226369,
+          "width": 1748,
+          "height": 808
+        }
+      }
+    },
+    {
+      "case": "ds000114_sub-07",
+      "comparison": "candidate_vs_official",
+      "reference_kind": "archived official reference",
+      "primary_report_sha256": "fbb502b85e15fa5052cdaa084135b9061aed1c09a281f50e4be30490ffa44d7d",
+      "geometry_report_sha256": "0e06e2c926cd7364e1917dd933c515ac5cd333513872ddba998a42cb67cc6820",
+      "binding_manifest_sha256": "2040ab633413aeceda941430f79a29c0e775e7ce8aca7404dca86409275ce175",
+      "private_provenance_sha256": "3f3ac11e1a155a4fa272f8b47f5fb4e92f2e765e733afcb45b107e6d44d7e6a3",
+      "geometry_surfaces_checked": 20,
+      "geometry_surfaces_comparable": 20,
+      "final_white_pial_footer_surfaces_checked": 4,
+      "final_white_pial_footer_surfaces_passed": 4,
+      "common_conform_and_tkras": true,
+      "inputs_sha256": {
+        "region_report": "8bed4c58d4414c61f474090eceb3e4dd35f4af52b4fc100037b867ddaa7e7dd1",
+        "dice_report": "4abb23195983762b0d443ba332ff8da073ef0c0f0501d07730b16596f8537d55",
+        "candidate.orig.mgz": "a0e2f42033f31e8999310df1b54b781cf0bf8e9cc57f6f58e311525fc936ba56",
+        "reference.orig.mgz": "5268c7e20df18f29dcfbd7513470fb334741ce6edc60415f0b83f0736e7edffc",
+        "candidate.aparc.a2009s+aseg.mgz": "5e8929e813ae0bcca05f8f89dfe6d1fc3f19f92081db563b5e343d9d9ff41954",
+        "reference.aparc.a2009s+aseg.mgz": "5d28a4f0a553b4da47128ed6a9befd143aa853680b6dd373a9af2ab6ba7829c3",
+        "reference.lh.white": "4bff790379b7dc2a18898b7c1332aadaec3b2e3fc320d80ce22391b1722590dc",
+        "reference.lh.pial": "b3c1b2b5f2d93a7aa9d8f067c41e4efc4a365588d38af97b99e32a93bc706f82",
+        "reference.rh.white": "1583a54bcfab9f762b530c56b92426ee2792ad855895726f6248f5a839d18149",
+        "reference.rh.pial": "bdfb3f3f22dfc0d95d129a08bf425aac9f6de56d7b0fe14ba9ac9e7a4289f551",
+        "candidate.lh.white": "b822ddb56918fcb07f568ffb6d82749aa0fbccf3f6bdd4aa2496c75efc48c563",
+        "candidate.lh.pial": "4559702fb509506775cc883e21901464e83a5b861295667b4f778e8e45e4eb75",
+        "candidate.rh.white": "b43dda8c505fc6b62d806eb8b91f4003986798fa32fb79884a0800abc957a32f",
+        "candidate.rh.pial": "c651bdd66ea8797d20c2dc38ed3b5faffd077131b9100eedf2b68a6541ee086b"
+      },
+      "outputs": {
+        "t1_surface_overlay.png": {
+          "sha256": "d55dcce78c352b53c08b21681699d746e4fa8b50b6f849483f118bdc42e5dcdd",
+          "bytes": 610093,
+          "width": 2181,
+          "height": 806
+        },
+        "region_errors.png": {
+          "sha256": "83c622965b3c020f495d8f600b623545f8c4fef79f364a5a22764a3cae58b7c3",
+          "bytes": 102396,
+          "width": 2400,
+          "height": 1122
+        },
+        "local_region_boundary.png": {
+          "sha256": "f3cc19960e0a0b9d77387452f309c57df1a1a23cf27cfdc76afd727cc6def2a6",
+          "bytes": 92943,
+          "width": 1919,
+          "height": 810
+        }
+      }
+    },
+    {
+      "case": "ds000114_sub-07",
+      "comparison": "candidate_vs_control",
+      "reference_kind": "same-environment FNIT baseline",
+      "primary_report_sha256": "21c0c210f3b0fb6e73d937fb226b8c51c5e91907506150356c72cc79ffbe12eb",
+      "geometry_report_sha256": "eda4eec3531d344942d7b124203df8a9e388e1a07b49109c701f594a444b029f",
+      "binding_manifest_sha256": "431f7d590a89698ec733e1bbe44f584acfd4f79917a99166c170994ffb04791b",
+      "private_provenance_sha256": "a461ffe531a79544252e4622f2b11cc021f27f3459596d58f829eeebd27ee606",
+      "geometry_surfaces_checked": 20,
+      "geometry_surfaces_comparable": 20,
+      "final_white_pial_footer_surfaces_checked": 4,
+      "final_white_pial_footer_surfaces_passed": 4,
+      "common_conform_and_tkras": true,
+      "inputs_sha256": {
+        "region_report": "c2b5202399acd662a7540ec95b1970f6235df1a4c3eda02ded7c9acf6ef9a6cb",
+        "dice_report": "2e301ffef5d7f049a3b065de788e5012f148bddddfedea534f13b2fbe6ff2801",
+        "candidate.orig.mgz": "a0e2f42033f31e8999310df1b54b781cf0bf8e9cc57f6f58e311525fc936ba56",
+        "reference.orig.mgz": "9d3a13b5f12968eec8a25de97ab27463e2a84f77587d9414b06b96f75d47e946",
+        "candidate.aparc.a2009s+aseg.mgz": "5e8929e813ae0bcca05f8f89dfe6d1fc3f19f92081db563b5e343d9d9ff41954",
+        "reference.aparc.a2009s+aseg.mgz": "5e8929e813ae0bcca05f8f89dfe6d1fc3f19f92081db563b5e343d9d9ff41954",
+        "reference.lh.white": "d724a200f40be7fdda7ee6eb5621e44031396026216cc6a83970c9350d66d9aa",
+        "reference.lh.pial": "124814d664450360da1ef71bed08d4922c098ac7525ceea1413b8240ac007191",
+        "reference.rh.white": "80abd5b2b1e5b68809cbcfaee706db7dc19c67c645334fadaef848e9bf35c1f8",
+        "reference.rh.pial": "b2a1e993317a9fa201837ceab7633fca5cdcc06c0e6e1a32dd2b864fe0fe92d1",
+        "candidate.lh.white": "b822ddb56918fcb07f568ffb6d82749aa0fbccf3f6bdd4aa2496c75efc48c563",
+        "candidate.lh.pial": "4559702fb509506775cc883e21901464e83a5b861295667b4f778e8e45e4eb75",
+        "candidate.rh.white": "b43dda8c505fc6b62d806eb8b91f4003986798fa32fb79884a0800abc957a32f",
+        "candidate.rh.pial": "c651bdd66ea8797d20c2dc38ed3b5faffd077131b9100eedf2b68a6541ee086b"
+      },
+      "outputs": {
+        "t1_surface_overlay.png": {
+          "sha256": "774b8d4834baec4ee7921552c3cdeab986b704e8aa8d214ad62d66796e13d67b",
+          "bytes": 600712,
+          "width": 2181,
+          "height": 806
+        },
+        "region_errors.png": {
+          "sha256": "2bebbe180df28706b2306d55a473f23d22d3759ff663dc90a45e10e231b24ac1",
+          "bytes": 63359,
+          "width": 2399,
+          "height": 1122
+        },
+        "local_region_boundary.png": {
+          "sha256": "0eb1eae4bd28704ce528dc692a0a2045bcb3b916c991a2291738f7c2444da312",
+          "bytes": 222223,
+          "width": 1760,
+          "height": 808
+        }
+      }
+    }
+  ]
+}

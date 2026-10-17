@@ -36,8 +36,9 @@ smoothwm 线搜索原先为距离目标和弹簧目标各计算一次完全相�
 `first_registration_sse(..., current_distances=None)` 的默认独立调用不变；
 显式提供的缓存必须为与当前坐标/邻接一致的 float32 `(N,K)` 弧距，单位
 为 mm，设备与坐标相同。形状、类型或设备错误抛出 `ValueError`。函数
-返回四项之和，或在 `return_terms=True` 时返回四项 Python float 字典；
-面积、距离和相关目标的权重与含义没有改变。该内部步骤没有独立原命令。
+返回四项之和，或在 `return_terms=True` 时返回 `sse_area`、`sse_nl_area`、
+`sse_dist`、`sse_corr` 四个 Python float 字段，分别为加权面积、非线性面积、
+弧距和曲率相关目标；其权重与含义没有改变。该内部步骤没有独立原命令。
 
 CUDA 平均器在同一网格实例中复用两个 float32 `(N,3)` 工作缓冲区，
 减少禁用 allocator 缓存时重复分配的开销。每次仍上传本次完整梯度，
@@ -97,9 +98,11 @@ folding TIFF；两个 `source/version` 为旧新冻结代码及其标识；两�
 刚体分数还有尾差，保存文件仍相同；[完整三种比较](../../validation/recon_all/optimizations/20261017_curvature_schedule/remaining_registration.public.json)
 保留原helper的非零退出，不将跨线程预算差异改称同预算失败或随机性。
 
-两例原始T1完整配对与显存仍待完成，[整例编排](RECON_NATIVE_SPEED_PAIR.md)
-明确记录其新空目录、两臂缓存与时钟范围。下文旧记录保留其原版本，
-不能替代本轮结果。
+两例原始T1四次新空目录配对及四项事后评估现已完成：CLI分别
+2398.175→2299.843秒、2198.098→2131.620秒，观察缩短4.10%/3.02%。
+同期138数值门、分割、最终几何与已报脑区量保持，局部GPU图仍有尾差，
+完整自有显存峰值未归属。见[当前完整结果与脑图](../../validation/recon_all/optimizations/20261017_sphere_normals/WHOLE_RESULTS.md)和
+[整例编排](RECON_NATIVE_SPEED_PAIR.md)。下文旧记录保留原版本，不替代本轮结果。
 
 ## 真实剖析找到了什么
 
@@ -158,7 +161,7 @@ int64(105,598,12)，有效列数为 int64(105,598)。运行前后输入文件、
 不是已提交的新版整例结果。
 
 主机为 accelerator-a-1，CPU 为 Xeon Gold 6430，目标 GPU 为 H100 PCIe，UUID
-`GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba`；Torch intraop/Numba 均为
+`GPU-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`；Torch intraop/Numba 均为
 4，Torch interop 64 沿用原值。使用 Torch 2.5.1、Numba 0.67.0、
 Triton 3.1.0、CUDA 11.8；float32，matmul/cuDNN TF32 开启，autocast 关闭。
 
@@ -489,7 +492,7 @@ GPU 测试的同时 CPU 对照；脚本不计算历史/当前速度比。完整�
 
 ```bash
 # 显式选择目标 GPU，沿用本次已测的关闭 allocator 缓存策略。
-CUDA_VISIBLE_DEVICES=GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba \
+CUDA_VISIBLE_DEVICES=GPU-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx \
 PYTORCH_NO_CUDA_MEMORY_CACHING=1 \
 python validation/recon_all/python_gpu_port/benchmark_register_saved_pair.py \
   --subject /data/full_sub01_1b8c36d_retry1 \
@@ -498,7 +501,7 @@ python validation/recon_all/python_gpu_port/benchmark_register_saved_pair.py \
   --source /data/frozen_gpu_candidate/src \
   --source-version commit-plus-archive-sha256 \
   --device cuda:0 \
-  --gpu-uuid GPU-e25cac06-0ce8-a833-abf9-09ab18c9c9ba \
+  --gpu-uuid GPU-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx \
   --output /data/validation/sub01_rh_register_saved_new \
   --threads 4
 ```

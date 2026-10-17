@@ -214,7 +214,9 @@ SHA 失败、未完成整例和未知 schema。测试不构成真实影像 bench
 列表内私有错误正文。该修正不重写旧公开摘要；新摘要需使用新的输出路径。
 本工具不产生新的影像精度、显存或时间测量，不生成或复制脑图。
 
-真实阶段及整例测量由协调者填写对应报告；整体指标等效仍未判定。
+当前[完整数值汇总](reports/whole_metrics.public.json)已覆盖四次整例、
+四项SHA绑定评估及外层监测，结果见[中文报告](WHOLE_RESULTS.md)；
+整体指标等效仍未判定，导出器不把零容差失败或未知显存改成通过。
 完整测试：[test_summarize_speed_reports.py](../../../../tests/recon_all/test_summarize_speed_reports.py)。
 
 ## 6. 相关工具

@@ -10,6 +10,12 @@
 
 本轮按用户要求显式选用[Conda 独立编译表面加速配方](NATIVE_TOPOLOGY_FINISH.md)，切换拓扑 GA、preclean/remesh/postclean 及已有原生 white/pial 路径，同时保留自有 GPU 指标与其他已优化阶段。[阶段回归与整例测评](../../validation/recon_all/optimizations/20261016_native_surface_hotspots/README.md)绑定冻结科学源码 `93affde8`；两例原始 T1 空目录整例与事后评估均已完成，病例外层墙钟为 2,218.68／2,010.32 秒，138 项输出和生产基本网格门通过。严格复现为 14／138、23／138，局部误差及自有显存归属仍需单列，整体指标等效未判定。
 
+**2026-10-17 球面优化配对**：同一H100/四线程，基线5ca与候选71cc完成
+两例四次原始T1及四项评估；完整CLI为2398.175→2299.843、2198.098→2131.620秒，
+观察缩短4.10%/3.02%。同期分割、最终几何、脑区量和138数值门保持，局部图
+零容差尾差保留；官方严格14/138、23/138，整体等效及自有20 GB验收未判定。
+见[完整时间、误差、质量和脑图](../../validation/recon_all/optimizations/20261017_sphere_normals/WHOLE_RESULTS.md)。
+
 [返回首页](../../README.md) · [完整旧文档与更早证据](../../validation/recon_all/readme_archive_20261005.md)
 
 | 项目 | 内容 |
@@ -434,6 +440,10 @@ recon-all -i subject_T1w.nii.gz -s sub01 -sd reference/subjects -all -openmp 4
 <a id="验证与边界"></a>
 
 ## 5. 最新精度和运行时间
+
+2026-10-17最新同机配对见上方[球面优化完整结果](../../validation/recon_all/optimizations/20261017_sphere_normals/WHOLE_RESULTS.md)：
+四次科学运行及四评估均完成，CLI观察缩短4.10%/3.02%，未达10分钟目标。
+以下旧结果保留其冻结版本，不作为本轮基线或新的同环境官方时间。
 
 **2026-10-16 cbaffa 两例原始 T1／空目录整例**均退出 0，138/138 输出与生产网格门通过；完整外层墙钟为 **19,448.046／12,094.283 秒**。严格逐文件诊断为 **14/138、23/138**，整体指标等效、受控退化和同环境提速均未判定；FNIT 自身显存峰值因进程归属未解析，不能据整卡采样判定 20 GB 预算。两例完成的 v2 事后评估包含分区 Dice、双向表面距离、脑区误差、局部异常和扩展网格检查，见[cbaffa 两例报告](../../validation/recon_all/optimizations/20261016_accelerator-a-1_cbaffa_two_case/README.md)。
 

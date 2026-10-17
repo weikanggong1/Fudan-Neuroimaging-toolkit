@@ -63,7 +63,9 @@ H/K 严格比较失败，原报告保持 `comparison_failed` / EXIT 2。同一 A
 消费者；注册、GCSA、脑区统计按几何计算自身特征，最终八图独立生成。
 这是阶段重复性定位和静态依赖审查，不是动态文件访问或整例误差证明。
 小型机器摘要见[重复性记录](../../validation/recon_all/optimizations/20261017_curvature_schedule/repeatability.public.json)。
-两例原始 T1 的本轮整例误差、总耗时和同时显存尚待统一验收。
+本轮两例原始T1的四次配对与四项评估已完成，见[完整结果](../../validation/recon_all/optimizations/20261017_sphere_normals/WHOLE_RESULTS.md)：
+CLI观察缩短4.10%/3.02%，同期已报脑区量无变化；各44张局部图仍有20张
+零容差失败，完整自有同时显存仍未知。没有将阶段尾差改成严格通过。
 独立契约测试见
 [`test_principal_curvature_schedule.py`](../../tests/recon_all/test_principal_curvature_schedule.py)。
 

@@ -1,0 +1,3019 @@
+{
+  "schema": "fnit-whole-timing-public-v1",
+  "extraction_scope": "existing SHA-bound metadata only; no image or GPU computation",
+  "exporter_sha256": "b01ea3889fa03a191da0160d563e5706f1d70cd3953f25a1a338da1bf4b9400f",
+  "evidence_bindings_sha256": "cd308cf59afa4e70811d70fa3272b22262495159523451dd6b2d081fe2b16d1a",
+  "pair_report_sha256": "f12b6c8f64f25730349bf176beecca26aef19ece54a1929e24969a2179fd465c",
+  "sources": {
+    "baseline": {
+      "commit": "5ca07f999375d02281ab60589cb2840e7b488790",
+      "benchmark_FNIT_source_mapping": {
+        "entries": 639,
+        "canonical_mapping_sha256": "d58427ee586c6bcad25ed38d784c253efc0a67b3f277a1cf56df5609ac2bdc59"
+      },
+      "pair_preflight_source_mapping": {
+        "entries": 944,
+        "canonical_mapping_sha256": "bded623db2859cb1de12f4ba6103e3fd3e2c54e5b84a98382bbecb45d997193f"
+      },
+      "benchmark_mapping_matches_pair_preflight": true,
+      "provided_archive_manifest": "not_provided"
+    },
+    "candidate": {
+      "commit": "71cc91899bdf9713690cddbe32054386d8f58d63",
+      "benchmark_FNIT_source_mapping": {
+        "entries": 639,
+        "canonical_mapping_sha256": "0b9d7eb372ff3f2e4a8d97572af5a34520040e1c133b43108420e9fe001df6df"
+      },
+      "pair_preflight_source_mapping": {
+        "entries": 944,
+        "canonical_mapping_sha256": "8699a686cd2cc74cf884b00e505b0510f3229f6fd10fd02c530ca3460d6db688"
+      },
+      "benchmark_mapping_matches_pair_preflight": true,
+      "provided_archive_manifest": {
+        "file_sha256": "6a09044e4bb2138f091c69f94b5bc7088458580c4487552e9c8154cb67e6946e",
+        "mapping": {
+          "entries": 2117,
+          "canonical_mapping_sha256": "28506fc198a9857b1f0048b88bca328963ada289df206c95a6c823b42b091aaa"
+        },
+        "639_mapping_matches": true
+      }
+    }
+  },
+  "configuration_sha256": {
+    "cases_json_sha256": "dcccb28d8a3699ce305a6b3226ece3b3e65162c831baeac3d281e43202ebb996",
+    "common_arguments_json_sha256": "99eac99a819e27ecdacf8960563052ec3cc8ed4d088f81c43300249ba28a23bd",
+    "dependency_pythonpath_json_sha256": "88054785e477b912f83bbeaf6e3b0a38e4ca94d14ded38e3d17c37ab305902f6",
+    "python_interpreter_sha256": "327e9040263cb69bcce8b2e6f441931f399489ad7f5d2d86f5d6ec60983c724b",
+    "script_sha256": "eaa1dd3d123e1ca00edc56741596f505f615f14a6c07ab406e7376469f20d1bd"
+  },
+  "changed_scientific_files": {
+    "src/fnit/recon_all/mris_register_average_numba.py": {
+      "baseline": "956616a920f751f49d201bf5a0a17867084a4b8e810336ab849d29fb60b0648b",
+      "candidate": "808d23e8a726587743ac76cc0bce8ef7b46993305afb70464afcaa852517dbd7"
+    },
+    "src/fnit/recon_all/mris_register_line_search.py": {
+      "baseline": "d087c9d4cca2e8eec84cdf17f4e945312522e853db7f7e5f9c2ad8ab15dcda96",
+      "candidate": "08ac26e875477f5bae2b40dfdc7861608f2a52b3989aac249105f557da57bbdf"
+    },
+    "src/fnit/recon_all/mris_register_smoothwm.py": {
+      "baseline": "b4ef242acdcfd2f237f0496208486ab50f5ce9fa54e4e78d42a5e80e7d5f907d",
+      "candidate": "e9e6086db79d07ad9015db273834f41e48786ab1510859697343af08190b1a8e"
+    },
+    "src/fnit/recon_all/mris_register_smoothwm_run.py": {
+      "baseline": "3060cc6da170d27796220633ea8222fd95f1b7131dff7335328c8b3620590ab2",
+      "candidate": "6d63125b6b787d528173c030f3c0d532d663b916b7cd141c461f1f8f53f6664f"
+    },
+    "src/fnit/recon_all/native_free.py": {
+      "baseline": "64412e3a161a12cd5ddc85caec5faccb5300183c4758d9bc9341793f83ecfb88",
+      "candidate": "8469b919ccc7193b4ea476747d8d3008400885bf7701bd2a018b1958dcd535e1"
+    }
+  },
+  "input_and_source_integrity_unchanged_after_runs": true,
+  "resources": {
+    "GPU_family": "H100 PCIe",
+    "logical_device": "cuda:0",
+    "total_CPU_threads": 4,
+    "CPU_affinity_count": 4,
+    "actual_same_physical_GPU_across_all_workers": true,
+    "same_budget_and_resource_checks": {
+      "host": true,
+      "cpu": true,
+      "cpu_affinity": true,
+      "threads": true,
+      "device": true,
+      "environment": true,
+      "resource_sha256": true,
+      "native_program_sha256": true,
+      "n4_runtime_dependencies": true
+    },
+    "same_strategy_except_sphere_normals": true,
+    "resource_mapping": {
+      "weights": {
+        "entries": 16,
+        "canonical_mapping_sha256": "026b2652ad34c0974442cb6dd869f8c8280353a890d5c3a768acdcc6a4d07e35"
+      },
+      "assets": {
+        "entries": 102,
+        "canonical_mapping_sha256": "6d5158d11154b91e4272f3eef592ecf0cdbba7b943acbb1cb51ee4ab2de0f2d5"
+      }
+    },
+    "native_program_mapping": {
+      "entries": 18,
+      "canonical_mapping_sha256": "8254fa8f31ecfb48b003952250462bfe9e642740f24c71553d2a3b1e64e4ea82"
+    },
+    "N4_runtime_dependencies_canonical_sha256": "56744cf29cfa50799de3a41e2cb227698facc66148d57a050c9c066c3cf65e0d",
+    "environment_canonical_sha256": "85ed58f7806c5a2b42b2a991a14d8308347f7c3a6a9bd06afa38570cbd089fb7"
+  },
+  "clock_scopes_seconds": {
+    "CLI": "benchmark child interpreter startup through exit, including validation, model loads, transfers, compute and IO",
+    "full_harness": "benchmark main entry including parsing, preflight/hash checks and prior report writes; excludes pre-main imports and final metadata publication",
+    "API": "reconstruction API entry through validation, thread restoration and output IO; excludes CLI startup and final public metadata publication",
+    "supervisor_case_outer": "supervisor Popen of benchmark interpreter through its exit and final publication",
+    "supervisor_API": "single-case supervisor run_cases including input validation and prior report writes; excludes interpreter imports and final publication",
+    "pair_supervisor_outer": "pair driver Popen of supervisor interpreter through its exit, including imports and final publication"
+  },
+  "partition_scope": "only 59 depth-zero synchronized parent stages; CLI residual closes partition; hemisphere workers and nested timers are not added",
+  "runs": [
+    {
+      "execution_index": 0,
+      "case_index": 0,
+      "arm": "baseline",
+      "source_commit": "5ca07f999375d02281ab60589cb2840e7b488790",
+      "input_sha256": "7e33afb28f631fac31d81e2428a6144f61aba4102859c694eeb49ee584de04f7",
+      "report_sha256": {
+        "benchmark": "e5b4b83b60f3efd5bd5dd42e980f97a8632c5835e8b1f37c087529dfb44b6d39",
+        "runtime": "bc8632e28d92a33df2af095615667190e34a7f5dd637f225f3e280f33a11ef9e",
+        "supervisor": "dfa475981e3483ee1b150294b46347bc2c6d22982d548c108608fcf343ce8bb5"
+      },
+      "scientific_exit_code": 0,
+      "execution": "complete",
+      "outputs": {
+        "expected": 138,
+        "present": 138
+      },
+      "production_grid_gate": "passed",
+      "seconds": {
+        "CLI": 2398.174761199043,
+        "full_harness": 2404.335346070002,
+        "API": 2394.289129906916,
+        "supervisor_case_outer": 2406.539578046999,
+        "supervisor_API": 2407.1758650039556,
+        "pair_supervisor_outer": 2407.755134086008
+      },
+      "nonoverlapping_parent_groups_seconds": {
+        "volume_prefix": 509.22853205294814,
+        "surface_group": 766.811776932911,
+        "register_group": 336.9835767990444,
+        "annotation_group": 81.32235872303136,
+        "finish_surface_group": 422.25125673308503,
+        "stats": 28.55439661303535,
+        "mni_mesh_parallel": 107.84002555289771,
+        "other_serial_stages": 117.51786706014536,
+        "CLI_residual": 27.664970731944777
+      },
+      "parent_stages": [
+        {
+          "stage": "input_talairach",
+          "group": "volume_prefix",
+          "seconds": 26.97116444504354
+        },
+        {
+          "stage": "n4",
+          "group": "volume_prefix",
+          "seconds": 143.94379670592025
+        },
+        {
+          "stage": "nu",
+          "group": "volume_prefix",
+          "seconds": 7.158767414977774
+        },
+        {
+          "stage": "T1_normalize",
+          "group": "volume_prefix",
+          "seconds": 41.43269845494069
+        },
+        {
+          "stage": "brainmask",
+          "group": "volume_prefix",
+          "seconds": 0.8976154379779473
+        },
+        {
+          "stage": "SynthSeg",
+          "group": "volume_prefix",
+          "seconds": 14.483931878930889
+        },
+        {
+          "stage": "mri_em_register",
+          "group": "volume_prefix",
+          "seconds": 32.99524976499379
+        },
+        {
+          "stage": "mri_ca_normalize",
+          "group": "volume_prefix",
+          "seconds": 30.83119097002782
+        },
+        {
+          "stage": "mri_cc",
+          "group": "volume_prefix",
+          "seconds": 17.2191394129768
+        },
+        {
+          "stage": "brain_second_normalize",
+          "group": "volume_prefix",
+          "seconds": 40.55638544098474
+        },
+        {
+          "stage": "entowm",
+          "group": "volume_prefix",
+          "seconds": 1.4548063890542835
+        },
+        {
+          "stage": "ants_denoise",
+          "group": "volume_prefix",
+          "seconds": 28.658110901946202
+        },
+        {
+          "stage": "mri_segment",
+          "group": "volume_prefix",
+          "seconds": 46.50065960001666
+        },
+        {
+          "stage": "mri_edit_wm_with_aseg",
+          "group": "volume_prefix",
+          "seconds": 17.46824261196889
+        },
+        {
+          "stage": "wm_pretess",
+          "group": "volume_prefix",
+          "seconds": 8.498473145067692
+        },
+        {
+          "stage": "wm_fix_ento",
+          "group": "volume_prefix",
+          "seconds": 1.431724951020442
+        },
+        {
+          "stage": "wm_fix_acj",
+          "group": "volume_prefix",
+          "seconds": 1.7387700650142506
+        },
+        {
+          "stage": "mri_fill",
+          "group": "volume_prefix",
+          "seconds": 33.67864424700383
+        },
+        {
+          "stage": "filled_auto_checkpoint",
+          "group": "volume_prefix",
+          "seconds": 0.004046524059958756
+        },
+        {
+          "stage": "mni_aux",
+          "group": "volume_prefix",
+          "seconds": 7.2341625419212505
+        },
+        {
+          "stage": "brain_finalsurfs",
+          "group": "volume_prefix",
+          "seconds": 6.070951149100438
+        },
+        {
+          "stage": "surface_hemisphere_group",
+          "group": "surface_group",
+          "seconds": 766.811776932911
+        },
+        {
+          "stage": "defects_lh",
+          "group": "other_serial_stages",
+          "seconds": 1.6919552190229297
+        },
+        {
+          "stage": "defects_rh",
+          "group": "other_serial_stages",
+          "seconds": 1.9997244350379333
+        },
+        {
+          "stage": "register_hemisphere_group",
+          "group": "register_group",
+          "seconds": 336.9835767990444
+        },
+        {
+          "stage": "annotation_hemisphere_group",
+          "group": "annotation_group",
+          "seconds": 81.32235872303136
+        },
+        {
+          "stage": "finish_surface_hemisphere_group",
+          "group": "finish_surface_group",
+          "seconds": 422.25125673308503
+        },
+        {
+          "stage": "finish_metrics_lh",
+          "group": "other_serial_stages",
+          "seconds": 18.072249194025062
+        },
+        {
+          "stage": "finish_metrics_rh",
+          "group": "other_serial_stages",
+          "seconds": 17.037575531983748
+        },
+        {
+          "stage": "exvivo_annotations",
+          "group": "other_serial_stages",
+          "seconds": 2.4245429169386625
+        },
+        {
+          "stage": "jacobian_lh",
+          "group": "other_serial_stages",
+          "seconds": 0.04984066798351705
+        },
+        {
+          "stage": "contrast_lh",
+          "group": "other_serial_stages",
+          "seconds": 1.926042689010501
+        },
+        {
+          "stage": "jacobian_rh",
+          "group": "other_serial_stages",
+          "seconds": 0.05925171996932477
+        },
+        {
+          "stage": "contrast_rh",
+          "group": "other_serial_stages",
+          "seconds": 1.9450367890531197
+        },
+        {
+          "stage": "ribbon",
+          "group": "other_serial_stages",
+          "seconds": 5.0163924500811845
+        },
+        {
+          "stage": "relabel_hypointensities",
+          "group": "other_serial_stages",
+          "seconds": 5.136871270951815
+        },
+        {
+          "stage": "aseg_ribbon_fix",
+          "group": "other_serial_stages",
+          "seconds": 6.922525228001177
+        },
+        {
+          "stage": "project_aparc_volumes",
+          "group": "other_serial_stages",
+          "seconds": 17.88084168394562
+        },
+        {
+          "stage": "project_wmparc",
+          "group": "other_serial_stages",
+          "seconds": 5.314331850036979
+        },
+        {
+          "stage": "brain_volume_stats",
+          "group": "other_serial_stages",
+          "seconds": 3.0178291000192985
+        },
+        {
+          "stage": "aseg_stats",
+          "group": "other_serial_stages",
+          "seconds": 15.95461154601071
+        },
+        {
+          "stage": "wmparc_stats",
+          "group": "other_serial_stages",
+          "seconds": 13.068244768073782
+        },
+        {
+          "stage": "stats_lh_aparc",
+          "group": "stats",
+          "seconds": 5.798150832997635
+        },
+        {
+          "stage": "stats_lh_aparc.a2009s",
+          "group": "stats",
+          "seconds": 0.2423742610262707
+        },
+        {
+          "stage": "stats_lh_aparc.DKTatlas",
+          "group": "stats",
+          "seconds": 0.11613490292802453
+        },
+        {
+          "stage": "stats_lh_aparc.pial",
+          "group": "stats",
+          "seconds": 5.651776397018693
+        },
+        {
+          "stage": "stats_lh_BA_exvivo",
+          "group": "stats",
+          "seconds": 0.06519877898972481
+        },
+        {
+          "stage": "stats_lh_BA_exvivo.thresh",
+          "group": "stats",
+          "seconds": 0.05853546503931284
+        },
+        {
+          "stage": "stats_lh_w-g.pct",
+          "group": "stats",
+          "seconds": 0.039015343063510954
+        },
+        {
+          "stage": "stats_lh_curv",
+          "group": "stats",
+          "seconds": 2.1828397510107607
+        },
+        {
+          "stage": "stats_rh_aparc",
+          "group": "stats",
+          "seconds": 5.7716484180418774
+        },
+        {
+          "stage": "stats_rh_aparc.a2009s",
+          "group": "stats",
+          "seconds": 0.24593322491273284
+        },
+        {
+          "stage": "stats_rh_aparc.DKTatlas",
+          "group": "stats",
+          "seconds": 0.13303502998314798
+        },
+        {
+          "stage": "stats_rh_aparc.pial",
+          "group": "stats",
+          "seconds": 5.734423173009418
+        },
+        {
+          "stage": "stats_rh_BA_exvivo",
+          "group": "stats",
+          "seconds": 0.07263048796448857
+        },
+        {
+          "stage": "stats_rh_BA_exvivo.thresh",
+          "group": "stats",
+          "seconds": 0.04921496903989464
+        },
+        {
+          "stage": "stats_rh_w-g.pct",
+          "group": "stats",
+          "seconds": 0.04390932398382574
+        },
+        {
+          "stage": "stats_rh_curv",
+          "group": "stats",
+          "seconds": 2.349576254026033
+        },
+        {
+          "stage": "mni_mesh_parallel",
+          "group": "mni_mesh_parallel",
+          "seconds": 107.84002555289771
+        }
+      ],
+      "strategy": {
+        "flags": {
+          "backend": "native",
+          "topology_backend": "native",
+          "topology_finish_backend": "conda-cpp",
+          "topology_distance_backend": "serial",
+          "topology_state_backend": "legacy",
+          "defects_backend": "torch",
+          "sphere_normals_backend": "numba",
+          "wm_edit_backend": "python",
+          "wm_backend": "torch-optimized",
+          "n4_backend": "simpleitk",
+          "n4_execution": "in-process",
+          "input_execution": "serial",
+          "normalization_controls_backend": "torch",
+          "normalization_initial_bias_backend": "torch",
+          "inflate_backend": "torch",
+          "sphere_finish_backend": "torch",
+          "surface_placement_backend": "native",
+          "annotation_gibbs_backend": "numba",
+          "remesh_scalar_storage": "numpy",
+          "mni_execution": "parallel-late",
+          "wm_execution": "isolated",
+          "gca_inverse_backend": "torch",
+          "gca_candidate_chunk": 4096,
+          "gca_reuse_atlas_context": true,
+          "gca_execution": "isolated",
+          "hemisphere_execution": "groups",
+          "fill_backend": "numba"
+        },
+        "native_optimizations": "torch",
+        "TF32_default": true,
+        "FP16_BF16_enabled": false,
+        "validated_stage_FP32_exceptions_preserved": [
+          "SynthStrip",
+          "SynthSeg",
+          "Talairach affine",
+          "MNI nonlinear CUDA",
+          "MNI152 affine matmul",
+          "EntoWM/MCA-dura/vsinus cuDNN"
+        ],
+        "worker_groups": [
+          {
+            "operation": "surface",
+            "workers": 2,
+            "threads_per_worker": 2,
+            "interop_threads_per_worker": 1,
+            "allocator_policy": "enabled"
+          },
+          {
+            "operation": "register",
+            "workers": 2,
+            "threads_per_worker": 2,
+            "interop_threads_per_worker": 1,
+            "allocator_policy": "disabled"
+          },
+          {
+            "operation": "annotation",
+            "workers": 2,
+            "threads_per_worker": 2,
+            "interop_threads_per_worker": 1,
+            "allocator_policy": "disabled"
+          },
+          {
+            "operation": "finish_surface",
+            "workers": 2,
+            "threads_per_worker": 2,
+            "interop_threads_per_worker": 1,
+            "allocator_policy": "disabled"
+          }
+        ]
+      },
+      "cache_order": {
+        "arm_case_ordinal": 1,
+        "arm_cache_reused_from_previous_case": false,
+        "cache_scope": "empty per arm at pair start; reused within arm across two cases"
+      },
+      "memory": {
+        "ownership_status": "ownership_unresolved",
+        "owned_simultaneous_peak_bytes": null,
+        "target_device_sampled_peak_bytes_including_other_jobs": 53401878528,
+        "target_compute_process_sum_sampled_peak_bytes_including_other_jobs": 53387198464,
+        "sampling_interval_seconds": 0.5,
+        "maximum_observed_interval_seconds": 0.8869586669607088,
+        "failed_samples": 0,
+        "20GB_owned_memory_acceptance": "not_assessed"
+      }
+    },
+    {
+      "execution_index": 1,
+      "case_index": 0,
+      "arm": "candidate",
+      "source_commit": "71cc91899bdf9713690cddbe32054386d8f58d63",
+      "input_sha256": "7e33afb28f631fac31d81e2428a6144f61aba4102859c694eeb49ee584de04f7",
+      "report_sha256": {
+        "benchmark": "f2fd9af0ba169fb09a219cfb8d51260874df599c46c4d2af2b55f1114f1127c4",
+        "runtime": "13a8da5e94a3992e14a07bb8e03873660c0ce7eef4b1fb42151eedf9c42f767b",
+        "supervisor": "5955e85bc0d6dc7afc0ba1602aa2a12aeae636c5cd88927f1c0ef8b6aae41e1d"
+      },
+      "scientific_exit_code": 0,
+      "execution": "complete",
+      "outputs": {
+        "expected": 138,
+        "present": 138
+      },
+      "production_grid_gate": "passed",
+      "seconds": {
+        "CLI": 2299.8430564639857,
+        "full_harness": 2306.408558356925,
+        "API": 2296.2497144730296,
+        "supervisor_case_outer": 2308.9360940810293,
+        "supervisor_API": 2309.5585239399225,
+        "pair_supervisor_outer": 2310.179915399058
+      },
+      "nonoverlapping_parent_groups_seconds": {
+        "volume_prefix": 494.1443335170625,
+        "surface_group": 729.502193907043,
+        "register_group": 306.47358847700525,
+        "annotation_group": 81.44039322098251,
+        "finish_surface_group": 423.90538761601783,
+        "stats": 18.54037689603865,
+        "mni_mesh_parallel": 105.26210430299398,
+        "other_serial_stages": 114.65718520677183,
+        "CLI_residual": 25.917493320070207
+      },
+      "parent_stages": [
+        {
+          "stage": "input_talairach",
+          "group": "volume_prefix",
+          "seconds": 25.837029143003747
+        },
+        {
+          "stage": "n4",
+          "group": "volume_prefix",
+          "seconds": 142.39796480105724
+        },
+        {
+          "stage": "nu",
+          "group": "volume_prefix",
+          "seconds": 6.904832478030585
+        },
+        {
+          "stage": "T1_normalize",
+          "group": "volume_prefix",
+          "seconds": 38.58199463807978
+        },
+        {
+          "stage": "brainmask",
+          "group": "volume_prefix",
+          "seconds": 0.8140598780009896
+        },
+        {
+          "stage": "SynthSeg",
+          "group": "volume_prefix",
+          "seconds": 13.038770516985096
+        },
+        {
+          "stage": "mri_em_register",
+          "group": "volume_prefix",
+          "seconds": 32.67094300093595
+        },
+        {
+          "stage": "mri_ca_normalize",
+          "group": "volume_prefix",
+          "seconds": 29.545316055999137
+        },
+        {
+          "stage": "mri_cc",
+          "group": "volume_prefix",
+          "seconds": 17.106587958987802
+        },
+        {
+          "stage": "brain_second_normalize",
+          "group": "volume_prefix",
+          "seconds": 39.279216330032796
+        },
+        {
+          "stage": "entowm",
+          "group": "volume_prefix",
+          "seconds": 1.3250842270208523
+        },
+        {
+          "stage": "ants_denoise",
+          "group": "volume_prefix",
+          "seconds": 26.49426719499752
+        },
+        {
+          "stage": "mri_segment",
+          "group": "volume_prefix",
+          "seconds": 46.01848508801777
+        },
+        {
+          "stage": "mri_edit_wm_with_aseg",
+          "group": "volume_prefix",
+          "seconds": 16.921028484008275
+        },
+        {
+          "stage": "wm_pretess",
+          "group": "volume_prefix",
+          "seconds": 8.341239453991875
+        },
+        {
+          "stage": "wm_fix_ento",
+          "group": "volume_prefix",
+          "seconds": 1.4394749630009755
+        },
+        {
+          "stage": "wm_fix_acj",
+          "group": "volume_prefix",
+          "seconds": 1.6758411090122536
+        },
+        {
+          "stage": "mri_fill",
+          "group": "volume_prefix",
+          "seconds": 32.58658158790786
+        },
+        {
+          "stage": "filled_auto_checkpoint",
+          "group": "volume_prefix",
+          "seconds": 0.003993920981884003
+        },
+        {
+          "stage": "mni_aux",
+          "group": "volume_prefix",
+          "seconds": 7.09465874300804
+        },
+        {
+          "stage": "brain_finalsurfs",
+          "group": "volume_prefix",
+          "seconds": 6.066963944002055
+        },
+        {
+          "stage": "surface_hemisphere_group",
+          "group": "surface_group",
+          "seconds": 729.502193907043
+        },
+        {
+          "stage": "defects_lh",
+          "group": "other_serial_stages",
+          "seconds": 1.6585350239183754
+        },
+        {
+          "stage": "defects_rh",
+          "group": "other_serial_stages",
+          "seconds": 1.9547738869441673
+        },
+        {
+          "stage": "register_hemisphere_group",
+          "group": "register_group",
+          "seconds": 306.47358847700525
+        },
+        {
+          "stage": "annotation_hemisphere_group",
+          "group": "annotation_group",
+          "seconds": 81.44039322098251
+        },
+        {
+          "stage": "finish_surface_hemisphere_group",
+          "group": "finish_surface_group",
+          "seconds": 423.90538761601783
+        },
+        {
+          "stage": "finish_metrics_lh",
+          "group": "other_serial_stages",
+          "seconds": 17.804882563999854
+        },
+        {
+          "stage": "finish_metrics_rh",
+          "group": "other_serial_stages",
+          "seconds": 16.98575748805888
+        },
+        {
+          "stage": "exvivo_annotations",
+          "group": "other_serial_stages",
+          "seconds": 2.2807125439867377
+        },
+        {
+          "stage": "jacobian_lh",
+          "group": "other_serial_stages",
+          "seconds": 0.04358725994825363
+        },
+        {
+          "stage": "contrast_lh",
+          "group": "other_serial_stages",
+          "seconds": 1.9042480199132115
+        },
+        {
+          "stage": "jacobian_rh",
+          "group": "other_serial_stages",
+          "seconds": 0.06044078792911023
+        },
+        {
+          "stage": "contrast_rh",
+          "group": "other_serial_stages",
+          "seconds": 1.9083867380395532
+        },
+        {
+          "stage": "ribbon",
+          "group": "other_serial_stages",
+          "seconds": 4.970738388015889
+        },
+        {
+          "stage": "relabel_hypointensities",
+          "group": "other_serial_stages",
+          "seconds": 4.887835736968555
+        },
+        {
+          "stage": "aseg_ribbon_fix",
+          "group": "other_serial_stages",
+          "seconds": 6.7263169509824365
+        },
+        {
+          "stage": "project_aparc_volumes",
+          "group": "other_serial_stages",
+          "seconds": 17.360971149988472
+        },
+        {
+          "stage": "project_wmparc",
+          "group": "other_serial_stages",
+          "seconds": 5.2355882480042055
+        },
+        {
+          "stage": "brain_volume_stats",
+          "group": "other_serial_stages",
+          "seconds": 2.9035618900088593
+        },
+        {
+          "stage": "aseg_stats",
+          "group": "other_serial_stages",
+          "seconds": 15.374200234073214
+        },
+        {
+          "stage": "wmparc_stats",
+          "group": "other_serial_stages",
+          "seconds": 12.596648295992054
+        },
+        {
+          "stage": "stats_lh_aparc",
+          "group": "stats",
+          "seconds": 5.654116903082468
+        },
+        {
+          "stage": "stats_lh_aparc.a2009s",
+          "group": "stats",
+          "seconds": 0.22739608900155872
+        },
+        {
+          "stage": "stats_lh_aparc.DKTatlas",
+          "group": "stats",
+          "seconds": 0.08476355497259647
+        },
+        {
+          "stage": "stats_lh_aparc.pial",
+          "group": "stats",
+          "seconds": 0.9468279259745032
+        },
+        {
+          "stage": "stats_lh_BA_exvivo",
+          "group": "stats",
+          "seconds": 0.028930415050126612
+        },
+        {
+          "stage": "stats_lh_BA_exvivo.thresh",
+          "group": "stats",
+          "seconds": 0.02030806103721261
+        },
+        {
+          "stage": "stats_lh_w-g.pct",
+          "group": "stats",
+          "seconds": 0.035368119017221034
+        },
+        {
+          "stage": "stats_lh_curv",
+          "group": "stats",
+          "seconds": 2.210521356901154
+        },
+        {
+          "stage": "stats_rh_aparc",
+          "group": "stats",
+          "seconds": 0.9905748149612918
+        },
+        {
+          "stage": "stats_rh_aparc.a2009s",
+          "group": "stats",
+          "seconds": 0.12748592102434486
+        },
+        {
+          "stage": "stats_rh_aparc.DKTatlas",
+          "group": "stats",
+          "seconds": 0.12147742102388293
+        },
+        {
+          "stage": "stats_rh_aparc.pial",
+          "group": "stats",
+          "seconds": 5.658351501100697
+        },
+        {
+          "stage": "stats_rh_BA_exvivo",
+          "group": "stats",
+          "seconds": 0.058032357948832214
+        },
+        {
+          "stage": "stats_rh_BA_exvivo.thresh",
+          "group": "stats",
+          "seconds": 0.06232710101176053
+        },
+        {
+          "stage": "stats_rh_w-g.pct",
+          "group": "stats",
+          "seconds": 0.03775988600682467
+        },
+        {
+          "stage": "stats_rh_curv",
+          "group": "stats",
+          "seconds": 2.2761354679241776
+        },
+        {
+          "stage": "mni_mesh_parallel",
+          "group": "mni_mesh_parallel",
+          "seconds": 105.26210430299398
+        }
+      ],
+      "strategy": {
+        "flags": {
+          "backend": "native",
+          "topology_backend": "native",
+          "topology_finish_backend": "conda-cpp",
+          "topology_distance_backend": "serial",
+          "topology_state_backend": "legacy",
+          "defects_backend": "torch",
+          "sphere_normals_backend": "torch",
+          "wm_edit_backend": "python",
+          "wm_backend": "torch-optimized",
+          "n4_backend": "simpleitk",
+          "n4_execution": "in-process",
+          "input_execution": "serial",
+          "normalization_controls_backend": "torch",
+          "normalization_initial_bias_backend": "torch",
+          "inflate_backend": "torch",
+          "sphere_finish_backend": "torch",
+          "surface_placement_backend": "native",
+          "annotation_gibbs_backend": "numba",
+          "remesh_scalar_storage": "numpy",
+          "mni_execution": "parallel-late",
+          "wm_execution": "isolated",
+          "gca_inverse_backend": "torch",
+          "gca_candidate_chunk": 4096,
+          "gca_reuse_atlas_context": true,
+          "gca_execution": "isolated",
+          "hemisphere_execution": "groups",
+          "fill_backend": "numba"
+        },
+        "native_optimizations": "torch",
+        "TF32_default": true,
+        "FP16_BF16_enabled": false,
+        "validated_stage_FP32_exceptions_preserved": [
+          "SynthStrip",
+          "SynthSeg",
+          "Talairach affine",
+          "MNI nonlinear CUDA",
+          "MNI152 affine matmul",
+          "EntoWM/MCA-dura/vsinus cuDNN"
+        ],
+        "worker_groups": [
+          {
+            "operation": "surface",
+            "workers": 2,
+            "threads_per_worker": 2,
+            "interop_threads_per_worker": 1,
+            "allocator_policy": "enabled"
+          },
+          {
+            "operation": "register",
+            "workers": 2,
+            "threads_per_worker": 2,
+            "interop_threads_per_worker": 1,
+            "allocator_policy": "disabled"
+          },
+          {
+            "operation": "annotation",
+            "workers": 2,
+            "threads_per_worker": 2,
+            "interop_threads_per_worker": 1,
+            "allocator_policy": "disabled"
+          },
+          {
+            "operation": "finish_surface",
+            "workers": 2,
+            "threads_per_worker": 2,
+            "interop_threads_per_worker": 1,
+            "allocator_policy": "disabled"
+          }
+        ]
+      },
+      "cache_order": {
+        "arm_case_ordinal": 1,
+        "arm_cache_reused_from_previous_case": false,
+        "cache_scope": "empty per arm at pair start; reused within arm across two cases"
+      },
+      "memory": {
+        "ownership_status": "ownership_unresolved",
+        "owned_simultaneous_peak_bytes": null,
+        "target_device_sampled_peak_bytes_including_other_jobs": 53401878528,
+        "target_compute_process_sum_sampled_peak_bytes_including_other_jobs": 53387198464,
+        "sampling_interval_seconds": 0.5,
+        "maximum_observed_interval_seconds": 0.9318748218938708,
+        "failed_samples": 0,
+        "20GB_owned_memory_acceptance": "not_assessed"
+      }
+    },
+    {
+      "execution_index": 2,
+      "case_index": 1,
+      "arm": "candidate",
+      "source_commit": "71cc91899bdf9713690cddbe32054386d8f58d63",
+      "input_sha256": "59ef7bed60d4db64d56d947ebed2ef62a9257c26fe879848fe24d10a490f74fc",
+      "report_sha256": {
+        "benchmark": "18670e147ea55505e5003cee15a4c5aaedccdf0a15424c6210289efba0d96c17",
+        "runtime": "c58e7a19bf43fc15bcba560645ee269e74643ac9941674df5458d71f6599a1fe",
+        "supervisor": "f36804b76d4e2fa287fc3e6d4e4f1aca481b9f5b2620530978ba50e82d2de19d"
+      },
+      "scientific_exit_code": 0,
+      "execution": "complete",
+      "outputs": {
+        "expected": 138,
+        "present": 138
+      },
+      "production_grid_gate": "passed",
+      "seconds": {
+        "CLI": 2131.619558923063,
+        "full_harness": 2138.1420286330394,
+        "API": 2128.4106836640276,
+        "supervisor_case_outer": 2140.6740436400287,
+        "supervisor_API": 2141.240494366968,
+        "pair_supervisor_outer": 2141.7461174199125
+      },
+      "nonoverlapping_parent_groups_seconds": {
+        "volume_prefix": 445.6033216937212,
+        "surface_group": 801.3092896540184,
+        "register_group": 227.71934531105217,
+        "annotation_group": 74.54949400096666,
+        "finish_surface_group": 347.75504053698387,
+        "stats": 24.945275571895763,
+        "mni_mesh_parallel": 92.52930781699251,
+        "other_serial_stages": 92.01748155697715,
+        "CLI_residual": 25.191002780455165
+      },
+      "parent_stages": [
+        {
+          "stage": "input_talairach",
+          "group": "volume_prefix",
+          "seconds": 26.041358823888004
+        },
+        {
+          "stage": "n4",
+          "group": "volume_prefix",
+          "seconds": 144.0204327070387
+        },
+        {
+          "stage": "nu",
+          "group": "volume_prefix",
+          "seconds": 6.600963880890049
+        },
+        {
+          "stage": "T1_normalize",
+          "group": "volume_prefix",
+          "seconds": 30.9886824489804
+        },
+        {
+          "stage": "brainmask",
+          "group": "volume_prefix",
+          "seconds": 0.811920823995024
+        },
+        {
+          "stage": "SynthSeg",
+          "group": "volume_prefix",
+          "seconds": 13.083887632004917
+        },
+        {
+          "stage": "mri_em_register",
+          "group": "volume_prefix",
+          "seconds": 33.20128726097755
+        },
+        {
+          "stage": "mri_ca_normalize",
+          "group": "volume_prefix",
+          "seconds": 29.52436566306278
+        },
+        {
+          "stage": "mri_cc",
+          "group": "volume_prefix",
+          "seconds": 11.921082920976914
+        },
+        {
+          "stage": "brain_second_normalize",
+          "group": "volume_prefix",
+          "seconds": 35.53501513903029
+        },
+        {
+          "stage": "entowm",
+          "group": "volume_prefix",
+          "seconds": 1.3586118730017915
+        },
+        {
+          "stage": "ants_denoise",
+          "group": "volume_prefix",
+          "seconds": 19.76797072496265
+        },
+        {
+          "stage": "mri_segment",
+          "group": "volume_prefix",
+          "seconds": 37.924294743919745
+        },
+        {
+          "stage": "mri_edit_wm_with_aseg",
+          "group": "volume_prefix",
+          "seconds": 9.610093259019777
+        },
+        {
+          "stage": "wm_pretess",
+          "group": "volume_prefix",
+          "seconds": 6.350795503007248
+        },
+        {
+          "stage": "wm_fix_ento",
+          "group": "volume_prefix",
+          "seconds": 1.2256818389287218
+        },
+        {
+          "stage": "wm_fix_acj",
+          "group": "volume_prefix",
+          "seconds": 1.5112765450030565
+        },
+        {
+          "stage": "mri_fill",
+          "group": "volume_prefix",
+          "seconds": 23.742360751028173
+        },
+        {
+          "stage": "filled_auto_checkpoint",
+          "group": "volume_prefix",
+          "seconds": 0.0034406890626996756
+        },
+        {
+          "stage": "mni_aux",
+          "group": "volume_prefix",
+          "seconds": 7.111185451969504
+        },
+        {
+          "stage": "brain_finalsurfs",
+          "group": "volume_prefix",
+          "seconds": 5.268613012973219
+        },
+        {
+          "stage": "surface_hemisphere_group",
+          "group": "surface_group",
+          "seconds": 801.3092896540184
+        },
+        {
+          "stage": "defects_lh",
+          "group": "other_serial_stages",
+          "seconds": 1.6126651340164244
+        },
+        {
+          "stage": "defects_rh",
+          "group": "other_serial_stages",
+          "seconds": 1.8837342950282618
+        },
+        {
+          "stage": "register_hemisphere_group",
+          "group": "register_group",
+          "seconds": 227.71934531105217
+        },
+        {
+          "stage": "annotation_hemisphere_group",
+          "group": "annotation_group",
+          "seconds": 74.54949400096666
+        },
+        {
+          "stage": "finish_surface_hemisphere_group",
+          "group": "finish_surface_group",
+          "seconds": 347.75504053698387
+        },
+        {
+          "stage": "finish_metrics_lh",
+          "group": "other_serial_stages",
+          "seconds": 5.521776211913675
+        },
+        {
+          "stage": "finish_metrics_rh",
+          "group": "other_serial_stages",
+          "seconds": 14.970386225031689
+        },
+        {
+          "stage": "exvivo_annotations",
+          "group": "other_serial_stages",
+          "seconds": 2.234363430994563
+        },
+        {
+          "stage": "jacobian_lh",
+          "group": "other_serial_stages",
+          "seconds": 0.07124181697145104
+        },
+        {
+          "stage": "contrast_lh",
+          "group": "other_serial_stages",
+          "seconds": 1.7209343509748578
+        },
+        {
+          "stage": "jacobian_rh",
+          "group": "other_serial_stages",
+          "seconds": 0.06312903098296374
+        },
+        {
+          "stage": "contrast_rh",
+          "group": "other_serial_stages",
+          "seconds": 1.7117346739396453
+        },
+        {
+          "stage": "ribbon",
+          "group": "other_serial_stages",
+          "seconds": 3.3569915569387376
+        },
+        {
+          "stage": "relabel_hypointensities",
+          "group": "other_serial_stages",
+          "seconds": 4.697795849991962
+        },
+        {
+          "stage": "aseg_ribbon_fix",
+          "group": "other_serial_stages",
+          "seconds": 6.298282062052749
+        },
+        {
+          "stage": "project_aparc_volumes",
+          "group": "other_serial_stages",
+          "seconds": 16.38691705407109
+        },
+        {
+          "stage": "project_wmparc",
+          "group": "other_serial_stages",
+          "seconds": 4.953086831024848
+        },
+        {
+          "stage": "brain_volume_stats",
+          "group": "other_serial_stages",
+          "seconds": 2.9047798070823774
+        },
+        {
+          "stage": "aseg_stats",
+          "group": "other_serial_stages",
+          "seconds": 12.180333766969852
+        },
+        {
+          "stage": "wmparc_stats",
+          "group": "other_serial_stages",
+          "seconds": 11.449329458991997
+        },
+        {
+          "stage": "stats_lh_aparc",
+          "group": "stats",
+          "seconds": 5.00481363304425
+        },
+        {
+          "stage": "stats_lh_aparc.a2009s",
+          "group": "stats",
+          "seconds": 0.23126405803486705
+        },
+        {
+          "stage": "stats_lh_aparc.DKTatlas",
+          "group": "stats",
+          "seconds": 0.12238349206745625
+        },
+        {
+          "stage": "stats_lh_aparc.pial",
+          "group": "stats",
+          "seconds": 4.98252948699519
+        },
+        {
+          "stage": "stats_lh_BA_exvivo",
+          "group": "stats",
+          "seconds": 0.06262528395745903
+        },
+        {
+          "stage": "stats_lh_BA_exvivo.thresh",
+          "group": "stats",
+          "seconds": 0.06903407699428499
+        },
+        {
+          "stage": "stats_lh_w-g.pct",
+          "group": "stats",
+          "seconds": 0.030408250982873142
+        },
+        {
+          "stage": "stats_lh_curv",
+          "group": "stats",
+          "seconds": 1.966884205932729
+        },
+        {
+          "stage": "stats_rh_aparc",
+          "group": "stats",
+          "seconds": 4.99511669005733
+        },
+        {
+          "stage": "stats_rh_aparc.a2009s",
+          "group": "stats",
+          "seconds": 0.2266513160429895
+        },
+        {
+          "stage": "stats_rh_aparc.DKTatlas",
+          "group": "stats",
+          "seconds": 0.11714516498614103
+        },
+        {
+          "stage": "stats_rh_aparc.pial",
+          "group": "stats",
+          "seconds": 5.034620199934579
+        },
+        {
+          "stage": "stats_rh_BA_exvivo",
+          "group": "stats",
+          "seconds": 0.0658005349105224
+        },
+        {
+          "stage": "stats_rh_BA_exvivo.thresh",
+          "group": "stats",
+          "seconds": 0.057325434987433255
+        },
+        {
+          "stage": "stats_rh_w-g.pct",
+          "group": "stats",
+          "seconds": 0.04105758701916784
+        },
+        {
+          "stage": "stats_rh_curv",
+          "group": "stats",
+          "seconds": 1.93761615594849
+        },
+        {
+          "stage": "mni_mesh_parallel",
+          "group": "mni_mesh_parallel",
+          "seconds": 92.52930781699251
+        }
+      ],
+      "strategy": {
+        "flags": {
+          "backend": "native",
+          "topology_backend": "native",
+          "topology_finish_backend": "conda-cpp",
+          "topology_distance_backend": "serial",
+          "topology_state_backend": "legacy",
+          "defects_backend": "torch",
+          "sphere_normals_backend": "torch",
+          "wm_edit_backend": "python",
+          "wm_backend": "torch-optimized",
+          "n4_backend": "simpleitk",
+          "n4_execution": "in-process",
+          "input_execution": "serial",
+          "normalization_controls_backend": "torch",
+          "normalization_initial_bias_backend": "torch",
+          "inflate_backend": "torch",
+          "sphere_finish_backend": "torch",
+          "surface_placement_backend": "native",
+          "annotation_gibbs_backend": "numba",
+          "remesh_scalar_storage": "numpy",
+          "mni_execution": "parallel-late",
+          "wm_execution": "isolated",
+          "gca_inverse_backend": "torch",
+          "gca_candidate_chunk": 4096,
+          "gca_reuse_atlas_context": true,
+          "gca_execution": "isolated",
+          "hemisphere_execution": "groups",
+          "fill_backend": "numba"
+        },
+        "native_optimizations": "torch",
+        "TF32_default": true,
+        "FP16_BF16_enabled": false,
+        "validated_stage_FP32_exceptions_preserved": [
+          "SynthStrip",
+          "SynthSeg",
+          "Talairach affine",
+          "MNI nonlinear CUDA",
+          "MNI152 affine matmul",
+          "EntoWM/MCA-dura/vsinus cuDNN"
+        ],
+        "worker_groups": [
+          {
+            "operation": "surface",
+            "workers": 2,
+            "threads_per_worker": 2,
+            "interop_threads_per_worker": 1,
+            "allocator_policy": "enabled"
+          },
+          {
+            "operation": "register",
+            "workers": 2,
+            "threads_per_worker": 2,
+            "interop_threads_per_worker": 1,
+            "allocator_policy": "disabled"
+          },
+          {
+            "operation": "annotation",
+            "workers": 2,
+            "threads_per_worker": 2,
+            "interop_threads_per_worker": 1,
+            "allocator_policy": "disabled"
+          },
+          {
+            "operation": "finish_surface",
+            "workers": 2,
+            "threads_per_worker": 2,
+            "interop_threads_per_worker": 1,
+            "allocator_policy": "disabled"
+          }
+        ]
+      },
+      "cache_order": {
+        "arm_case_ordinal": 2,
+        "arm_cache_reused_from_previous_case": true,
+        "cache_scope": "empty per arm at pair start; reused within arm across two cases"
+      },
+      "memory": {
+        "ownership_status": "ownership_unresolved",
+        "owned_simultaneous_peak_bytes": null,
+        "target_device_sampled_peak_bytes_including_other_jobs": 55012491264,
+        "target_compute_process_sum_sampled_peak_bytes_including_other_jobs": 53387198464,
+        "sampling_interval_seconds": 0.5,
+        "maximum_observed_interval_seconds": 0.9180896859616041,
+        "failed_samples": 0,
+        "20GB_owned_memory_acceptance": "not_assessed"
+      }
+    },
+    {
+      "execution_index": 3,
+      "case_index": 1,
+      "arm": "baseline",
+      "source_commit": "5ca07f999375d02281ab60589cb2840e7b488790",
+      "input_sha256": "59ef7bed60d4db64d56d947ebed2ef62a9257c26fe879848fe24d10a490f74fc",
+      "report_sha256": {
+        "benchmark": "1bf97281878b8f007257f9b4c0100bc9d4a5e8bc1157665eecbdf5b363350b7c",
+        "runtime": "65f00ddd15f8a570509a39d1113075dbfae0ff40511f9b0b8fb98fdd94839617",
+        "supervisor": "fb34ce3eb20716959861957d3674e6110a07bfd7100b6a203b5737baf00240fc"
+      },
+      "scientific_exit_code": 0,
+      "execution": "complete",
+      "outputs": {
+        "expected": 138,
+        "present": 138
+      },
+      "production_grid_gate": "passed",
+      "seconds": {
+        "CLI": 2198.0979946010048,
+        "full_harness": 2204.77772379003,
+        "API": 2194.7868397660786,
+        "supervisor_case_outer": 2207.28964203794,
+        "supervisor_API": 2207.8827440609457,
+        "pair_supervisor_outer": 2208.5128453350626
+      },
+      "nonoverlapping_parent_groups_seconds": {
+        "volume_prefix": 445.42898544704076,
+        "surface_group": 831.2115418220637,
+        "register_group": 257.9035455470439,
+        "annotation_group": 73.04928639705759,
+        "finish_surface_group": 348.71509814599995,
+        "stats": 24.852708276128396,
+        "mni_mesh_parallel": 89.85449028399307,
+        "other_serial_stages": 101.25613935396541,
+        "CLI_residual": 25.826199327711947
+      },
+      "parent_stages": [
+        {
+          "stage": "input_talairach",
+          "group": "volume_prefix",
+          "seconds": 25.713378860033117
+        },
+        {
+          "stage": "n4",
+          "group": "volume_prefix",
+          "seconds": 143.99036797694862
+        },
+        {
+          "stage": "nu",
+          "group": "volume_prefix",
+          "seconds": 6.559471295098774
+        },
+        {
+          "stage": "T1_normalize",
+          "group": "volume_prefix",
+          "seconds": 30.81640278699342
+        },
+        {
+          "stage": "brainmask",
+          "group": "volume_prefix",
+          "seconds": 0.7732199609745294
+        },
+        {
+          "stage": "SynthSeg",
+          "group": "volume_prefix",
+          "seconds": 13.080604996997863
+        },
+        {
+          "stage": "mri_em_register",
+          "group": "volume_prefix",
+          "seconds": 33.501120590022765
+        },
+        {
+          "stage": "mri_ca_normalize",
+          "group": "volume_prefix",
+          "seconds": 29.087980887969024
+        },
+        {
+          "stage": "mri_cc",
+          "group": "volume_prefix",
+          "seconds": 12.248615905060433
+        },
+        {
+          "stage": "brain_second_normalize",
+          "group": "volume_prefix",
+          "seconds": 35.88149860606063
+        },
+        {
+          "stage": "entowm",
+          "group": "volume_prefix",
+          "seconds": 1.4740583489183336
+        },
+        {
+          "stage": "ants_denoise",
+          "group": "volume_prefix",
+          "seconds": 20.137174020987004
+        },
+        {
+          "stage": "mri_segment",
+          "group": "volume_prefix",
+          "seconds": 37.45190915395506
+        },
+        {
+          "stage": "mri_edit_wm_with_aseg",
+          "group": "volume_prefix",
+          "seconds": 9.622186410007998
+        },
+        {
+          "stage": "wm_pretess",
+          "group": "volume_prefix",
+          "seconds": 6.58822286396753
+        },
+        {
+          "stage": "wm_fix_ento",
+          "group": "volume_prefix",
+          "seconds": 1.2003487859619781
+        },
+        {
+          "stage": "wm_fix_acj",
+          "group": "volume_prefix",
+          "seconds": 1.517967205028981
+        },
+        {
+          "stage": "mri_fill",
+          "group": "volume_prefix",
+          "seconds": 24.139115861966275
+        },
+        {
+          "stage": "filled_auto_checkpoint",
+          "group": "volume_prefix",
+          "seconds": 0.003042452037334442
+        },
+        {
+          "stage": "mni_aux",
+          "group": "volume_prefix",
+          "seconds": 6.619616887997836
+        },
+        {
+          "stage": "brain_finalsurfs",
+          "group": "volume_prefix",
+          "seconds": 5.022681590053253
+        },
+        {
+          "stage": "surface_hemisphere_group",
+          "group": "surface_group",
+          "seconds": 831.2115418220637
+        },
+        {
+          "stage": "defects_lh",
+          "group": "other_serial_stages",
+          "seconds": 1.524049702915363
+        },
+        {
+          "stage": "defects_rh",
+          "group": "other_serial_stages",
+          "seconds": 1.8067943210480735
+        },
+        {
+          "stage": "register_hemisphere_group",
+          "group": "register_group",
+          "seconds": 257.9035455470439
+        },
+        {
+          "stage": "annotation_hemisphere_group",
+          "group": "annotation_group",
+          "seconds": 73.04928639705759
+        },
+        {
+          "stage": "finish_surface_hemisphere_group",
+          "group": "finish_surface_group",
+          "seconds": 348.71509814599995
+        },
+        {
+          "stage": "finish_metrics_lh",
+          "group": "other_serial_stages",
+          "seconds": 14.879053122014739
+        },
+        {
+          "stage": "finish_metrics_rh",
+          "group": "other_serial_stages",
+          "seconds": 14.807478599948809
+        },
+        {
+          "stage": "exvivo_annotations",
+          "group": "other_serial_stages",
+          "seconds": 2.1969157439889386
+        },
+        {
+          "stage": "jacobian_lh",
+          "group": "other_serial_stages",
+          "seconds": 0.03882070502731949
+        },
+        {
+          "stage": "contrast_lh",
+          "group": "other_serial_stages",
+          "seconds": 1.6716742319986224
+        },
+        {
+          "stage": "jacobian_rh",
+          "group": "other_serial_stages",
+          "seconds": 0.04364220902789384
+        },
+        {
+          "stage": "contrast_rh",
+          "group": "other_serial_stages",
+          "seconds": 1.7031275919871405
+        },
+        {
+          "stage": "ribbon",
+          "group": "other_serial_stages",
+          "seconds": 3.311141659040004
+        },
+        {
+          "stage": "relabel_hypointensities",
+          "group": "other_serial_stages",
+          "seconds": 4.805790423997678
+        },
+        {
+          "stage": "aseg_ribbon_fix",
+          "group": "other_serial_stages",
+          "seconds": 6.3748014870798215
+        },
+        {
+          "stage": "project_aparc_volumes",
+          "group": "other_serial_stages",
+          "seconds": 16.233417807961814
+        },
+        {
+          "stage": "project_wmparc",
+          "group": "other_serial_stages",
+          "seconds": 4.94778164406307
+        },
+        {
+          "stage": "brain_volume_stats",
+          "group": "other_serial_stages",
+          "seconds": 2.7241829349659383
+        },
+        {
+          "stage": "aseg_stats",
+          "group": "other_serial_stages",
+          "seconds": 12.488655530964024
+        },
+        {
+          "stage": "wmparc_stats",
+          "group": "other_serial_stages",
+          "seconds": 11.69881163793616
+        },
+        {
+          "stage": "stats_lh_aparc",
+          "group": "stats",
+          "seconds": 4.854011919000186
+        },
+        {
+          "stage": "stats_lh_aparc.a2009s",
+          "group": "stats",
+          "seconds": 0.2317123080138117
+        },
+        {
+          "stage": "stats_lh_aparc.DKTatlas",
+          "group": "stats",
+          "seconds": 0.11600061296485364
+        },
+        {
+          "stage": "stats_lh_aparc.pial",
+          "group": "stats",
+          "seconds": 4.96283938200213
+        },
+        {
+          "stage": "stats_lh_BA_exvivo",
+          "group": "stats",
+          "seconds": 0.06471669999882579
+        },
+        {
+          "stage": "stats_lh_BA_exvivo.thresh",
+          "group": "stats",
+          "seconds": 0.057674665935337543
+        },
+        {
+          "stage": "stats_lh_w-g.pct",
+          "group": "stats",
+          "seconds": 0.03660346404649317
+        },
+        {
+          "stage": "stats_lh_curv",
+          "group": "stats",
+          "seconds": 2.042178518953733
+        },
+        {
+          "stage": "stats_rh_aparc",
+          "group": "stats",
+          "seconds": 5.076729471911676
+        },
+        {
+          "stage": "stats_rh_aparc.a2009s",
+          "group": "stats",
+          "seconds": 0.23127266101073474
+        },
+        {
+          "stage": "stats_rh_aparc.DKTatlas",
+          "group": "stats",
+          "seconds": 0.1067794180708006
+        },
+        {
+          "stage": "stats_rh_aparc.pial",
+          "group": "stats",
+          "seconds": 5.048937423038296
+        },
+        {
+          "stage": "stats_rh_BA_exvivo",
+          "group": "stats",
+          "seconds": 0.05898040102329105
+        },
+        {
+          "stage": "stats_rh_BA_exvivo.thresh",
+          "group": "stats",
+          "seconds": 0.05410242103971541
+        },
+        {
+          "stage": "stats_rh_w-g.pct",
+          "group": "stats",
+          "seconds": 0.041019994067028165
+        },
+        {
+          "stage": "stats_rh_curv",
+          "group": "stats",
+          "seconds": 1.8691489150514826
+        },
+        {
+          "stage": "mni_mesh_parallel",
+          "group": "mni_mesh_parallel",
+          "seconds": 89.85449028399307
+        }
+      ],
+      "strategy": {
+        "flags": {
+          "backend": "native",
+          "topology_backend": "native",
+          "topology_finish_backend": "conda-cpp",
+          "topology_distance_backend": "serial",
+          "topology_state_backend": "legacy",
+          "defects_backend": "torch",
+          "sphere_normals_backend": "numba",
+          "wm_edit_backend": "python",
+          "wm_backend": "torch-optimized",
+          "n4_backend": "simpleitk",
+          "n4_execution": "in-process",
+          "input_execution": "serial",
+          "normalization_controls_backend": "torch",
+          "normalization_initial_bias_backend": "torch",
+          "inflate_backend": "torch",
+          "sphere_finish_backend": "torch",
+          "surface_placement_backend": "native",
+          "annotation_gibbs_backend": "numba",
+          "remesh_scalar_storage": "numpy",
+          "mni_execution": "parallel-late",
+          "wm_execution": "isolated",
+          "gca_inverse_backend": "torch",
+          "gca_candidate_chunk": 4096,
+          "gca_reuse_atlas_context": true,
+          "gca_execution": "isolated",
+          "hemisphere_execution": "groups",
+          "fill_backend": "numba"
+        },
+        "native_optimizations": "torch",
+        "TF32_default": true,
+        "FP16_BF16_enabled": false,
+        "validated_stage_FP32_exceptions_preserved": [
+          "SynthStrip",
+          "SynthSeg",
+          "Talairach affine",
+          "MNI nonlinear CUDA",
+          "MNI152 affine matmul",
+          "EntoWM/MCA-dura/vsinus cuDNN"
+        ],
+        "worker_groups": [
+          {
+            "operation": "surface",
+            "workers": 2,
+            "threads_per_worker": 2,
+            "interop_threads_per_worker": 1,
+            "allocator_policy": "enabled"
+          },
+          {
+            "operation": "register",
+            "workers": 2,
+            "threads_per_worker": 2,
+            "interop_threads_per_worker": 1,
+            "allocator_policy": "disabled"
+          },
+          {
+            "operation": "annotation",
+            "workers": 2,
+            "threads_per_worker": 2,
+            "interop_threads_per_worker": 1,
+            "allocator_policy": "disabled"
+          },
+          {
+            "operation": "finish_surface",
+            "workers": 2,
+            "threads_per_worker": 2,
+            "interop_threads_per_worker": 1,
+            "allocator_policy": "disabled"
+          }
+        ]
+      },
+      "cache_order": {
+        "arm_case_ordinal": 2,
+        "arm_cache_reused_from_previous_case": true,
+        "cache_scope": "empty per arm at pair start; reused within arm across two cases"
+      },
+      "memory": {
+        "ownership_status": "ownership_unresolved",
+        "owned_simultaneous_peak_bytes": null,
+        "target_device_sampled_peak_bytes_including_other_jobs": 54945382400,
+        "target_compute_process_sum_sampled_peak_bytes_including_other_jobs": 53320089600,
+        "sampling_interval_seconds": 0.5,
+        "maximum_observed_interval_seconds": 1.002412509988062,
+        "failed_samples": 0,
+        "20GB_owned_memory_acceptance": "not_assessed"
+      }
+    }
+  ],
+  "within_case_comparisons": [
+    {
+      "case_index": 0,
+      "input_sha256": "7e33afb28f631fac31d81e2428a6144f61aba4102859c694eeb49ee584de04f7",
+      "measurements": [
+        {
+          "scope": "separate_clock_not_additive",
+          "measure": "CLI",
+          "baseline_seconds": 2398.174761199043,
+          "candidate_seconds": 2299.8430564639857,
+          "observed_saved_seconds": 98.33170473505743,
+          "observed_reduction_percent": 4.100272687629045
+        },
+        {
+          "scope": "separate_clock_not_additive",
+          "measure": "full_harness",
+          "baseline_seconds": 2404.335346070002,
+          "candidate_seconds": 2306.408558356925,
+          "observed_saved_seconds": 97.92678771307692,
+          "observed_reduction_percent": 4.07292551237259
+        },
+        {
+          "scope": "separate_clock_not_additive",
+          "measure": "API",
+          "baseline_seconds": 2394.289129906916,
+          "candidate_seconds": 2296.2497144730296,
+          "observed_saved_seconds": 98.03941543388646,
+          "observed_reduction_percent": 4.0947191468767175
+        },
+        {
+          "scope": "separate_clock_not_additive",
+          "measure": "supervisor_case_outer",
+          "baseline_seconds": 2406.539578046999,
+          "candidate_seconds": 2308.9360940810293,
+          "observed_saved_seconds": 97.60348396596964,
+          "observed_reduction_percent": 4.055760597346115
+        },
+        {
+          "scope": "separate_clock_not_additive",
+          "measure": "supervisor_API",
+          "baseline_seconds": 2407.1758650039556,
+          "candidate_seconds": 2309.5585239399225,
+          "observed_saved_seconds": 97.6173410640331,
+          "observed_reduction_percent": 4.055264199147855
+        },
+        {
+          "scope": "separate_clock_not_additive",
+          "measure": "pair_supervisor_outer",
+          "baseline_seconds": 2407.755134086008,
+          "candidate_seconds": 2310.179915399058,
+          "observed_saved_seconds": 97.5752186869504,
+          "observed_reduction_percent": 4.05253911851756
+        },
+        {
+          "scope": "nonoverlapping_parent_partition",
+          "measure": "volume_prefix",
+          "baseline_seconds": 509.22853205294814,
+          "candidate_seconds": 494.1443335170625,
+          "observed_saved_seconds": 15.084198535885662,
+          "observed_reduction_percent": 2.962166804572775
+        },
+        {
+          "scope": "nonoverlapping_parent_partition",
+          "measure": "surface_group",
+          "baseline_seconds": 766.811776932911,
+          "candidate_seconds": 729.502193907043,
+          "observed_saved_seconds": 37.30958302586805,
+          "observed_reduction_percent": 4.86554642849888
+        },
+        {
+          "scope": "nonoverlapping_parent_partition",
+          "measure": "register_group",
+          "baseline_seconds": 336.9835767990444,
+          "candidate_seconds": 306.47358847700525,
+          "observed_saved_seconds": 30.509988322039135,
+          "observed_reduction_percent": 9.053850223755372
+        },
+        {
+          "scope": "nonoverlapping_parent_partition",
+          "measure": "annotation_group",
+          "baseline_seconds": 81.32235872303136,
+          "candidate_seconds": 81.44039322098251,
+          "observed_saved_seconds": -0.11803449795115739,
+          "observed_reduction_percent": -0.14514396754422812
+        },
+        {
+          "scope": "nonoverlapping_parent_partition",
+          "measure": "finish_surface_group",
+          "baseline_seconds": 422.25125673308503,
+          "candidate_seconds": 423.90538761601783,
+          "observed_saved_seconds": -1.6541308829328045,
+          "observed_reduction_percent": -0.39174090226057506
+        },
+        {
+          "scope": "nonoverlapping_parent_partition",
+          "measure": "stats",
+          "baseline_seconds": 28.55439661303535,
+          "candidate_seconds": 18.54037689603865,
+          "observed_saved_seconds": 10.0140197169967,
+          "observed_reduction_percent": 35.069974871838845
+        },
+        {
+          "scope": "nonoverlapping_parent_partition",
+          "measure": "mni_mesh_parallel",
+          "baseline_seconds": 107.84002555289771,
+          "candidate_seconds": 105.26210430299398,
+          "observed_saved_seconds": 2.5779212499037385,
+          "observed_reduction_percent": 2.3905050436391226
+        },
+        {
+          "scope": "nonoverlapping_parent_partition",
+          "measure": "other_serial_stages",
+          "baseline_seconds": 117.51786706014536,
+          "candidate_seconds": 114.65718520677183,
+          "observed_saved_seconds": 2.860681853373535,
+          "observed_reduction_percent": 2.434252701258988
+        },
+        {
+          "scope": "nonoverlapping_parent_partition",
+          "measure": "CLI_residual",
+          "baseline_seconds": 27.664970731944777,
+          "candidate_seconds": 25.917493320070207,
+          "observed_saved_seconds": 1.74747741187457,
+          "observed_reduction_percent": 6.316570614899496
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "input_talairach",
+          "baseline_seconds": 26.97116444504354,
+          "candidate_seconds": 25.837029143003747,
+          "observed_saved_seconds": 1.1341353020397946,
+          "observed_reduction_percent": 4.204991980790111
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "n4",
+          "baseline_seconds": 143.94379670592025,
+          "candidate_seconds": 142.39796480105724,
+          "observed_saved_seconds": 1.5458319048630074,
+          "observed_reduction_percent": 1.0739135275285046
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "nu",
+          "baseline_seconds": 7.158767414977774,
+          "candidate_seconds": 6.904832478030585,
+          "observed_saved_seconds": 0.25393493694718927,
+          "observed_reduction_percent": 3.547187975626914
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "T1_normalize",
+          "baseline_seconds": 41.43269845494069,
+          "candidate_seconds": 38.58199463807978,
+          "observed_saved_seconds": 2.8507038168609142,
+          "observed_reduction_percent": 6.880323809855495
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "brainmask",
+          "baseline_seconds": 0.8976154379779473,
+          "candidate_seconds": 0.8140598780009896,
+          "observed_saved_seconds": 0.08355555997695774,
+          "observed_reduction_percent": 9.30861440676453
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "SynthSeg",
+          "baseline_seconds": 14.483931878930889,
+          "candidate_seconds": 13.038770516985096,
+          "observed_saved_seconds": 1.445161361945793,
+          "observed_reduction_percent": 9.977686818922443
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "mri_em_register",
+          "baseline_seconds": 32.99524976499379,
+          "candidate_seconds": 32.67094300093595,
+          "observed_saved_seconds": 0.3243067640578374,
+          "observed_reduction_percent": 0.98288925335522
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "mri_ca_normalize",
+          "baseline_seconds": 30.83119097002782,
+          "candidate_seconds": 29.545316055999137,
+          "observed_saved_seconds": 1.2858749140286818,
+          "observed_reduction_percent": 4.170694915025274
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "mri_cc",
+          "baseline_seconds": 17.2191394129768,
+          "candidate_seconds": 17.106587958987802,
+          "observed_saved_seconds": 0.11255145398899913,
+          "observed_reduction_percent": 0.6536415745851815
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "brain_second_normalize",
+          "baseline_seconds": 40.55638544098474,
+          "candidate_seconds": 39.279216330032796,
+          "observed_saved_seconds": 1.2771691109519452,
+          "observed_reduction_percent": 3.1491196689862964
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "entowm",
+          "baseline_seconds": 1.4548063890542835,
+          "candidate_seconds": 1.3250842270208523,
+          "observed_saved_seconds": 0.12972216203343123,
+          "observed_reduction_percent": 8.916799033152369
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "ants_denoise",
+          "baseline_seconds": 28.658110901946202,
+          "candidate_seconds": 26.49426719499752,
+          "observed_saved_seconds": 2.1638437069486827,
+          "observed_reduction_percent": 7.55054551345788
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "mri_segment",
+          "baseline_seconds": 46.50065960001666,
+          "candidate_seconds": 46.01848508801777,
+          "observed_saved_seconds": 0.48217451199889183,
+          "observed_reduction_percent": 1.036919725755286
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "mri_edit_wm_with_aseg",
+          "baseline_seconds": 17.46824261196889,
+          "candidate_seconds": 16.921028484008275,
+          "observed_saved_seconds": 0.5472141279606149,
+          "observed_reduction_percent": 3.132622669126857
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "wm_pretess",
+          "baseline_seconds": 8.498473145067692,
+          "candidate_seconds": 8.341239453991875,
+          "observed_saved_seconds": 0.15723369107581675,
+          "observed_reduction_percent": 1.8501404710218021
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "wm_fix_ento",
+          "baseline_seconds": 1.431724951020442,
+          "candidate_seconds": 1.4394749630009755,
+          "observed_saved_seconds": -0.0077500119805336,
+          "observed_reduction_percent": -0.5413059243683563
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "wm_fix_acj",
+          "baseline_seconds": 1.7387700650142506,
+          "candidate_seconds": 1.6758411090122536,
+          "observed_saved_seconds": 0.062928956001997,
+          "observed_reduction_percent": 3.619164906745806
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "mri_fill",
+          "baseline_seconds": 33.67864424700383,
+          "candidate_seconds": 32.58658158790786,
+          "observed_saved_seconds": 1.0920626590959728,
+          "observed_reduction_percent": 3.2425968548099333
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "filled_auto_checkpoint",
+          "baseline_seconds": 0.004046524059958756,
+          "candidate_seconds": 0.003993920981884003,
+          "observed_saved_seconds": 5.2603078074753284e-05,
+          "observed_reduction_percent": 1.2999571309923075
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "mni_aux",
+          "baseline_seconds": 7.2341625419212505,
+          "candidate_seconds": 7.09465874300804,
+          "observed_saved_seconds": 0.13950379891321063,
+          "observed_reduction_percent": 1.9284028815332808
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "brain_finalsurfs",
+          "baseline_seconds": 6.070951149100438,
+          "candidate_seconds": 6.066963944002055,
+          "observed_saved_seconds": 0.003987205098383129,
+          "observed_reduction_percent": 0.06567677783033936
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "surface_hemisphere_group",
+          "baseline_seconds": 766.811776932911,
+          "candidate_seconds": 729.502193907043,
+          "observed_saved_seconds": 37.30958302586805,
+          "observed_reduction_percent": 4.86554642849888
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "defects_lh",
+          "baseline_seconds": 1.6919552190229297,
+          "candidate_seconds": 1.6585350239183754,
+          "observed_saved_seconds": 0.033420195104554296,
+          "observed_reduction_percent": 1.9752411132874894
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "defects_rh",
+          "baseline_seconds": 1.9997244350379333,
+          "candidate_seconds": 1.9547738869441673,
+          "observed_saved_seconds": 0.044950548093765974,
+          "observed_reduction_percent": 2.2478371172632743
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "register_hemisphere_group",
+          "baseline_seconds": 336.9835767990444,
+          "candidate_seconds": 306.47358847700525,
+          "observed_saved_seconds": 30.509988322039135,
+          "observed_reduction_percent": 9.053850223755372
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "annotation_hemisphere_group",
+          "baseline_seconds": 81.32235872303136,
+          "candidate_seconds": 81.44039322098251,
+          "observed_saved_seconds": -0.11803449795115739,
+          "observed_reduction_percent": -0.14514396754422812
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "finish_surface_hemisphere_group",
+          "baseline_seconds": 422.25125673308503,
+          "candidate_seconds": 423.90538761601783,
+          "observed_saved_seconds": -1.6541308829328045,
+          "observed_reduction_percent": -0.39174090226057506
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "finish_metrics_lh",
+          "baseline_seconds": 18.072249194025062,
+          "candidate_seconds": 17.804882563999854,
+          "observed_saved_seconds": 0.267366630025208,
+          "observed_reduction_percent": 1.4794319575540333
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "finish_metrics_rh",
+          "baseline_seconds": 17.037575531983748,
+          "candidate_seconds": 16.98575748805888,
+          "observed_saved_seconds": 0.05181804392486811,
+          "observed_reduction_percent": 0.3041397752138666
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "exvivo_annotations",
+          "baseline_seconds": 2.4245429169386625,
+          "candidate_seconds": 2.2807125439867377,
+          "observed_saved_seconds": 0.1438303729519248,
+          "observed_reduction_percent": 5.932267560498848
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "jacobian_lh",
+          "baseline_seconds": 0.04984066798351705,
+          "candidate_seconds": 0.04358725994825363,
+          "observed_saved_seconds": 0.006253408035263419,
+          "observed_reduction_percent": 12.546798203690813
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "contrast_lh",
+          "baseline_seconds": 1.926042689010501,
+          "candidate_seconds": 1.9042480199132115,
+          "observed_saved_seconds": 0.021794669097289443,
+          "observed_reduction_percent": 1.1315776759074012
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "jacobian_rh",
+          "baseline_seconds": 0.05925171996932477,
+          "candidate_seconds": 0.06044078792911023,
+          "observed_saved_seconds": -0.0011890679597854614,
+          "observed_reduction_percent": -2.0068074992608724
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "contrast_rh",
+          "baseline_seconds": 1.9450367890531197,
+          "candidate_seconds": 1.9083867380395532,
+          "observed_saved_seconds": 0.036650051013566554,
+          "observed_reduction_percent": 1.884285748209857
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "ribbon",
+          "baseline_seconds": 5.0163924500811845,
+          "candidate_seconds": 4.970738388015889,
+          "observed_saved_seconds": 0.045654062065295875,
+          "observed_reduction_percent": 0.9100974957522914
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "relabel_hypointensities",
+          "baseline_seconds": 5.136871270951815,
+          "candidate_seconds": 4.887835736968555,
+          "observed_saved_seconds": 0.2490355339832604,
+          "observed_reduction_percent": 4.848000287480756
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "aseg_ribbon_fix",
+          "baseline_seconds": 6.922525228001177,
+          "candidate_seconds": 6.7263169509824365,
+          "observed_saved_seconds": 0.19620827701874077,
+          "observed_reduction_percent": 2.8343454239081813
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "project_aparc_volumes",
+          "baseline_seconds": 17.88084168394562,
+          "candidate_seconds": 17.360971149988472,
+          "observed_saved_seconds": 0.5198705339571461,
+          "observed_reduction_percent": 2.907416458051378
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "project_wmparc",
+          "baseline_seconds": 5.314331850036979,
+          "candidate_seconds": 5.2355882480042055,
+          "observed_saved_seconds": 0.0787436020327732,
+          "observed_reduction_percent": 1.4817215833487192
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "brain_volume_stats",
+          "baseline_seconds": 3.0178291000192985,
+          "candidate_seconds": 2.9035618900088593,
+          "observed_saved_seconds": 0.11426721001043916,
+          "observed_reduction_percent": 3.786404273512653
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "aseg_stats",
+          "baseline_seconds": 15.95461154601071,
+          "candidate_seconds": 15.374200234073214,
+          "observed_saved_seconds": 0.5804113119374961,
+          "observed_reduction_percent": 3.637890588960294
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "wmparc_stats",
+          "baseline_seconds": 13.068244768073782,
+          "candidate_seconds": 12.596648295992054,
+          "observed_saved_seconds": 0.4715964720817283,
+          "observed_reduction_percent": 3.608720837811795
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_lh_aparc",
+          "baseline_seconds": 5.798150832997635,
+          "candidate_seconds": 5.654116903082468,
+          "observed_saved_seconds": 0.1440339299151674,
+          "observed_reduction_percent": 2.48413561605644
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_lh_aparc.a2009s",
+          "baseline_seconds": 0.2423742610262707,
+          "candidate_seconds": 0.22739608900155872,
+          "observed_saved_seconds": 0.014978172024711967,
+          "observed_reduction_percent": 6.179770063574737
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_lh_aparc.DKTatlas",
+          "baseline_seconds": 0.11613490292802453,
+          "candidate_seconds": 0.08476355497259647,
+          "observed_saved_seconds": 0.031371347955428064,
+          "observed_reduction_percent": 27.01285071454418
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_lh_aparc.pial",
+          "baseline_seconds": 5.651776397018693,
+          "candidate_seconds": 0.9468279259745032,
+          "observed_saved_seconds": 4.70494847104419,
+          "observed_reduction_percent": 83.24725078518757
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_lh_BA_exvivo",
+          "baseline_seconds": 0.06519877898972481,
+          "candidate_seconds": 0.028930415050126612,
+          "observed_saved_seconds": 0.0362683639395982,
+          "observed_reduction_percent": 55.62736680285687
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_lh_BA_exvivo.thresh",
+          "baseline_seconds": 0.05853546503931284,
+          "candidate_seconds": 0.02030806103721261,
+          "observed_saved_seconds": 0.03822740400210023,
+          "observed_reduction_percent": 65.3063983969828
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_lh_w-g.pct",
+          "baseline_seconds": 0.039015343063510954,
+          "candidate_seconds": 0.035368119017221034,
+          "observed_saved_seconds": 0.003647224046289921,
+          "observed_reduction_percent": 9.348178844289036
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_lh_curv",
+          "baseline_seconds": 2.1828397510107607,
+          "candidate_seconds": 2.210521356901154,
+          "observed_saved_seconds": -0.027681605890393257,
+          "observed_reduction_percent": -1.268146499420094
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_rh_aparc",
+          "baseline_seconds": 5.7716484180418774,
+          "candidate_seconds": 0.9905748149612918,
+          "observed_saved_seconds": 4.781073603080586,
+          "observed_reduction_percent": 82.83722875660953
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_rh_aparc.a2009s",
+          "baseline_seconds": 0.24593322491273284,
+          "candidate_seconds": 0.12748592102434486,
+          "observed_saved_seconds": 0.11844730388838798,
+          "observed_reduction_percent": 48.162383887096965
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_rh_aparc.DKTatlas",
+          "baseline_seconds": 0.13303502998314798,
+          "candidate_seconds": 0.12147742102388293,
+          "observed_saved_seconds": 0.011557608959265053,
+          "observed_reduction_percent": 8.687643367862657
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_rh_aparc.pial",
+          "baseline_seconds": 5.734423173009418,
+          "candidate_seconds": 5.658351501100697,
+          "observed_saved_seconds": 0.07607167190872133,
+          "observed_reduction_percent": 1.3265793195516649
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_rh_BA_exvivo",
+          "baseline_seconds": 0.07263048796448857,
+          "candidate_seconds": 0.058032357948832214,
+          "observed_saved_seconds": 0.014598130015656352,
+          "observed_reduction_percent": 20.099176564521855
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_rh_BA_exvivo.thresh",
+          "baseline_seconds": 0.04921496903989464,
+          "candidate_seconds": 0.06232710101176053,
+          "observed_saved_seconds": -0.013112131971865892,
+          "observed_reduction_percent": -26.64256877056437
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_rh_w-g.pct",
+          "baseline_seconds": 0.04390932398382574,
+          "candidate_seconds": 0.03775988600682467,
+          "observed_saved_seconds": 0.006149437977001071,
+          "observed_reduction_percent": 14.004856871097019
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_rh_curv",
+          "baseline_seconds": 2.349576254026033,
+          "candidate_seconds": 2.2761354679241776,
+          "observed_saved_seconds": 0.07344078610185534,
+          "observed_reduction_percent": 3.125703452952995
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "mni_mesh_parallel",
+          "baseline_seconds": 107.84002555289771,
+          "candidate_seconds": 105.26210430299398,
+          "observed_saved_seconds": 2.5779212499037385,
+          "observed_reduction_percent": 2.3905050436391226
+        }
+      ]
+    },
+    {
+      "case_index": 1,
+      "input_sha256": "59ef7bed60d4db64d56d947ebed2ef62a9257c26fe879848fe24d10a490f74fc",
+      "measurements": [
+        {
+          "scope": "separate_clock_not_additive",
+          "measure": "CLI",
+          "baseline_seconds": 2198.0979946010048,
+          "candidate_seconds": 2131.619558923063,
+          "observed_saved_seconds": 66.47843567794189,
+          "observed_reduction_percent": 3.0243617819236013
+        },
+        {
+          "scope": "separate_clock_not_additive",
+          "measure": "full_harness",
+          "baseline_seconds": 2204.77772379003,
+          "candidate_seconds": 2138.1420286330394,
+          "observed_saved_seconds": 66.63569515699055,
+          "observed_reduction_percent": 3.022331659013829
+        },
+        {
+          "scope": "separate_clock_not_additive",
+          "measure": "API",
+          "baseline_seconds": 2194.7868397660786,
+          "candidate_seconds": 2128.4106836640276,
+          "observed_saved_seconds": 66.37615610205103,
+          "observed_reduction_percent": 3.0242643567666656
+        },
+        {
+          "scope": "separate_clock_not_additive",
+          "measure": "supervisor_case_outer",
+          "baseline_seconds": 2207.28964203794,
+          "candidate_seconds": 2140.6740436400287,
+          "observed_saved_seconds": 66.61559839791153,
+          "observed_reduction_percent": 3.017981742369201
+        },
+        {
+          "scope": "separate_clock_not_additive",
+          "measure": "supervisor_API",
+          "baseline_seconds": 2207.8827440609457,
+          "candidate_seconds": 2141.240494366968,
+          "observed_saved_seconds": 66.64224969397765,
+          "observed_reduction_percent": 3.0183781214487393
+        },
+        {
+          "scope": "separate_clock_not_additive",
+          "measure": "pair_supervisor_outer",
+          "baseline_seconds": 2208.5128453350626,
+          "candidate_seconds": 2141.7461174199125,
+          "observed_saved_seconds": 66.76672791515011,
+          "observed_reduction_percent": 3.023153252478396
+        },
+        {
+          "scope": "nonoverlapping_parent_partition",
+          "measure": "volume_prefix",
+          "baseline_seconds": 445.42898544704076,
+          "candidate_seconds": 445.6033216937212,
+          "observed_saved_seconds": -0.17433624668046832,
+          "observed_reduction_percent": -0.03913895421634971
+        },
+        {
+          "scope": "nonoverlapping_parent_partition",
+          "measure": "surface_group",
+          "baseline_seconds": 831.2115418220637,
+          "candidate_seconds": 801.3092896540184,
+          "observed_saved_seconds": 29.90225216804538,
+          "observed_reduction_percent": 3.597429855521245
+        },
+        {
+          "scope": "nonoverlapping_parent_partition",
+          "measure": "register_group",
+          "baseline_seconds": 257.9035455470439,
+          "candidate_seconds": 227.71934531105217,
+          "observed_saved_seconds": 30.18420023599174,
+          "observed_reduction_percent": 11.703677889331642
+        },
+        {
+          "scope": "nonoverlapping_parent_partition",
+          "measure": "annotation_group",
+          "baseline_seconds": 73.04928639705759,
+          "candidate_seconds": 74.54949400096666,
+          "observed_saved_seconds": -1.5002076039090753,
+          "observed_reduction_percent": -2.053692346499778
+        },
+        {
+          "scope": "nonoverlapping_parent_partition",
+          "measure": "finish_surface_group",
+          "baseline_seconds": 348.71509814599995,
+          "candidate_seconds": 347.75504053698387,
+          "observed_saved_seconds": 0.9600576090160757,
+          "observed_reduction_percent": 0.2753128884067185
+        },
+        {
+          "scope": "nonoverlapping_parent_partition",
+          "measure": "stats",
+          "baseline_seconds": 24.852708276128396,
+          "candidate_seconds": 24.945275571895763,
+          "observed_saved_seconds": -0.09256729576736689,
+          "observed_reduction_percent": -0.3724636153890718
+        },
+        {
+          "scope": "nonoverlapping_parent_partition",
+          "measure": "mni_mesh_parallel",
+          "baseline_seconds": 89.85449028399307,
+          "candidate_seconds": 92.52930781699251,
+          "observed_saved_seconds": -2.674817532999441,
+          "observed_reduction_percent": -2.976832348105747
+        },
+        {
+          "scope": "nonoverlapping_parent_partition",
+          "measure": "other_serial_stages",
+          "baseline_seconds": 101.25613935396541,
+          "candidate_seconds": 92.01748155697715,
+          "observed_saved_seconds": 9.238657796988264,
+          "observed_reduction_percent": 9.124047051302533
+        },
+        {
+          "scope": "nonoverlapping_parent_partition",
+          "measure": "CLI_residual",
+          "baseline_seconds": 25.826199327711947,
+          "candidate_seconds": 25.191002780455165,
+          "observed_saved_seconds": 0.6351965472567827,
+          "observed_reduction_percent": 2.459504548836987
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "input_talairach",
+          "baseline_seconds": 25.713378860033117,
+          "candidate_seconds": 26.041358823888004,
+          "observed_saved_seconds": -0.3279799638548866,
+          "observed_reduction_percent": -1.2755226205011634
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "n4",
+          "baseline_seconds": 143.99036797694862,
+          "candidate_seconds": 144.0204327070387,
+          "observed_saved_seconds": -0.030064730090089142,
+          "observed_reduction_percent": -0.020879681406816182
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "nu",
+          "baseline_seconds": 6.559471295098774,
+          "candidate_seconds": 6.600963880890049,
+          "observed_saved_seconds": -0.041492585791274905,
+          "observed_reduction_percent": -0.6325599110751212
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "T1_normalize",
+          "baseline_seconds": 30.81640278699342,
+          "candidate_seconds": 30.9886824489804,
+          "observed_saved_seconds": -0.17227966198697686,
+          "observed_reduction_percent": -0.5590518243735131
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "brainmask",
+          "baseline_seconds": 0.7732199609745294,
+          "candidate_seconds": 0.811920823995024,
+          "observed_saved_seconds": -0.03870086302049458,
+          "observed_reduction_percent": -5.005155709084109
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "SynthSeg",
+          "baseline_seconds": 13.080604996997863,
+          "candidate_seconds": 13.083887632004917,
+          "observed_saved_seconds": -0.0032826350070536137,
+          "observed_reduction_percent": -0.02509543715911468
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "mri_em_register",
+          "baseline_seconds": 33.501120590022765,
+          "candidate_seconds": 33.20128726097755,
+          "observed_saved_seconds": 0.29983332904521376,
+          "observed_reduction_percent": 0.8949949248399455
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "mri_ca_normalize",
+          "baseline_seconds": 29.087980887969024,
+          "candidate_seconds": 29.52436566306278,
+          "observed_saved_seconds": -0.4363847750937566,
+          "observed_reduction_percent": -1.5002236723630693
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "mri_cc",
+          "baseline_seconds": 12.248615905060433,
+          "candidate_seconds": 11.921082920976914,
+          "observed_saved_seconds": 0.3275329840835184,
+          "observed_reduction_percent": 2.674040778339701
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "brain_second_normalize",
+          "baseline_seconds": 35.88149860606063,
+          "candidate_seconds": 35.53501513903029,
+          "observed_saved_seconds": 0.34648346703033894,
+          "observed_reduction_percent": 0.9656326532911741
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "entowm",
+          "baseline_seconds": 1.4740583489183336,
+          "candidate_seconds": 1.3586118730017915,
+          "observed_saved_seconds": 0.11544647591654211,
+          "observed_reduction_percent": 7.8318796539673565
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "ants_denoise",
+          "baseline_seconds": 20.137174020987004,
+          "candidate_seconds": 19.76797072496265,
+          "observed_saved_seconds": 0.3692032960243523,
+          "observed_reduction_percent": 1.8334414533020764
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "mri_segment",
+          "baseline_seconds": 37.45190915395506,
+          "candidate_seconds": 37.924294743919745,
+          "observed_saved_seconds": -0.4723855899646878,
+          "observed_reduction_percent": -1.2613124421049766
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "mri_edit_wm_with_aseg",
+          "baseline_seconds": 9.622186410007998,
+          "candidate_seconds": 9.610093259019777,
+          "observed_saved_seconds": 0.012093150988221169,
+          "observed_reduction_percent": 0.1256798660192566
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "wm_pretess",
+          "baseline_seconds": 6.58822286396753,
+          "candidate_seconds": 6.350795503007248,
+          "observed_saved_seconds": 0.23742736096028239,
+          "observed_reduction_percent": 3.603814956819781
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "wm_fix_ento",
+          "baseline_seconds": 1.2003487859619781,
+          "candidate_seconds": 1.2256818389287218,
+          "observed_saved_seconds": -0.025333052966743708,
+          "observed_reduction_percent": -2.110474327379888
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "wm_fix_acj",
+          "baseline_seconds": 1.517967205028981,
+          "candidate_seconds": 1.5112765450030565,
+          "observed_saved_seconds": 0.006690660025924444,
+          "observed_reduction_percent": 0.440764464723512
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "mri_fill",
+          "baseline_seconds": 24.139115861966275,
+          "candidate_seconds": 23.742360751028173,
+          "observed_saved_seconds": 0.396755110938102,
+          "observed_reduction_percent": 1.643619067106064
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "filled_auto_checkpoint",
+          "baseline_seconds": 0.003042452037334442,
+          "candidate_seconds": 0.0034406890626996756,
+          "observed_saved_seconds": -0.0003982370253652334,
+          "observed_reduction_percent": -13.089344399793315
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "mni_aux",
+          "baseline_seconds": 6.619616887997836,
+          "candidate_seconds": 7.111185451969504,
+          "observed_saved_seconds": -0.4915685639716685,
+          "observed_reduction_percent": -7.425936761732263
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "brain_finalsurfs",
+          "baseline_seconds": 5.022681590053253,
+          "candidate_seconds": 5.268613012973219,
+          "observed_saved_seconds": -0.24593142291996628,
+          "observed_reduction_percent": -4.8964167548864825
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "surface_hemisphere_group",
+          "baseline_seconds": 831.2115418220637,
+          "candidate_seconds": 801.3092896540184,
+          "observed_saved_seconds": 29.90225216804538,
+          "observed_reduction_percent": 3.597429855521245
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "defects_lh",
+          "baseline_seconds": 1.524049702915363,
+          "candidate_seconds": 1.6126651340164244,
+          "observed_saved_seconds": -0.0886154311010614,
+          "observed_reduction_percent": -5.814471203370104
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "defects_rh",
+          "baseline_seconds": 1.8067943210480735,
+          "candidate_seconds": 1.8837342950282618,
+          "observed_saved_seconds": -0.07693997398018837,
+          "observed_reduction_percent": -4.258369261176199
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "register_hemisphere_group",
+          "baseline_seconds": 257.9035455470439,
+          "candidate_seconds": 227.71934531105217,
+          "observed_saved_seconds": 30.18420023599174,
+          "observed_reduction_percent": 11.703677889331642
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "annotation_hemisphere_group",
+          "baseline_seconds": 73.04928639705759,
+          "candidate_seconds": 74.54949400096666,
+          "observed_saved_seconds": -1.5002076039090753,
+          "observed_reduction_percent": -2.053692346499778
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "finish_surface_hemisphere_group",
+          "baseline_seconds": 348.71509814599995,
+          "candidate_seconds": 347.75504053698387,
+          "observed_saved_seconds": 0.9600576090160757,
+          "observed_reduction_percent": 0.2753128884067185
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "finish_metrics_lh",
+          "baseline_seconds": 14.879053122014739,
+          "candidate_seconds": 5.521776211913675,
+          "observed_saved_seconds": 9.357276910101064,
+          "observed_reduction_percent": 62.88892736229452
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "finish_metrics_rh",
+          "baseline_seconds": 14.807478599948809,
+          "candidate_seconds": 14.970386225031689,
+          "observed_saved_seconds": -0.16290762508288026,
+          "observed_reduction_percent": -1.1001712680742517
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "exvivo_annotations",
+          "baseline_seconds": 2.1969157439889386,
+          "candidate_seconds": 2.234363430994563,
+          "observed_saved_seconds": -0.037447687005624175,
+          "observed_reduction_percent": -1.7045572688932726
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "jacobian_lh",
+          "baseline_seconds": 0.03882070502731949,
+          "candidate_seconds": 0.07124181697145104,
+          "observed_saved_seconds": -0.03242111194413155,
+          "observed_reduction_percent": -83.51500036208945
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "contrast_lh",
+          "baseline_seconds": 1.6716742319986224,
+          "candidate_seconds": 1.7209343509748578,
+          "observed_saved_seconds": -0.04926011897623539,
+          "observed_reduction_percent": -2.9467535021665623
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "jacobian_rh",
+          "baseline_seconds": 0.04364220902789384,
+          "candidate_seconds": 0.06312903098296374,
+          "observed_saved_seconds": -0.0194868219550699,
+          "observed_reduction_percent": -44.651318961913525
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "contrast_rh",
+          "baseline_seconds": 1.7031275919871405,
+          "candidate_seconds": 1.7117346739396453,
+          "observed_saved_seconds": -0.008607081952504814,
+          "observed_reduction_percent": -0.5053691803831573
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "ribbon",
+          "baseline_seconds": 3.311141659040004,
+          "candidate_seconds": 3.3569915569387376,
+          "observed_saved_seconds": -0.045849897898733616,
+          "observed_reduction_percent": -1.3847156848018043
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "relabel_hypointensities",
+          "baseline_seconds": 4.805790423997678,
+          "candidate_seconds": 4.697795849991962,
+          "observed_saved_seconds": 0.10799457400571555,
+          "observed_reduction_percent": 2.2471761037777567
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "aseg_ribbon_fix",
+          "baseline_seconds": 6.3748014870798215,
+          "candidate_seconds": 6.298282062052749,
+          "observed_saved_seconds": 0.07651942502707243,
+          "observed_reduction_percent": 1.2003420840971875
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "project_aparc_volumes",
+          "baseline_seconds": 16.233417807961814,
+          "candidate_seconds": 16.38691705407109,
+          "observed_saved_seconds": -0.153499246109277,
+          "observed_reduction_percent": -0.9455756509512866
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "project_wmparc",
+          "baseline_seconds": 4.94778164406307,
+          "candidate_seconds": 4.953086831024848,
+          "observed_saved_seconds": -0.005305186961777508,
+          "observed_reduction_percent": -0.10722354670083904
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "brain_volume_stats",
+          "baseline_seconds": 2.7241829349659383,
+          "candidate_seconds": 2.9047798070823774,
+          "observed_saved_seconds": -0.18059687211643904,
+          "observed_reduction_percent": -6.629395911647803
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "aseg_stats",
+          "baseline_seconds": 12.488655530964024,
+          "candidate_seconds": 12.180333766969852,
+          "observed_saved_seconds": 0.3083217639941722,
+          "observed_reduction_percent": 2.468814703309959
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "wmparc_stats",
+          "baseline_seconds": 11.69881163793616,
+          "candidate_seconds": 11.449329458991997,
+          "observed_saved_seconds": 0.24948217894416302,
+          "observed_reduction_percent": 2.1325429168819006
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_lh_aparc",
+          "baseline_seconds": 4.854011919000186,
+          "candidate_seconds": 5.00481363304425,
+          "observed_saved_seconds": -0.15080171404406428,
+          "observed_reduction_percent": -3.106743793804403
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_lh_aparc.a2009s",
+          "baseline_seconds": 0.2317123080138117,
+          "candidate_seconds": 0.23126405803486705,
+          "observed_saved_seconds": 0.00044824997894465923,
+          "observed_reduction_percent": 0.19345108716363066
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_lh_aparc.DKTatlas",
+          "baseline_seconds": 0.11600061296485364,
+          "candidate_seconds": 0.12238349206745625,
+          "observed_saved_seconds": -0.006382879102602601,
+          "observed_reduction_percent": -5.50245290905188
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_lh_aparc.pial",
+          "baseline_seconds": 4.96283938200213,
+          "candidate_seconds": 4.98252948699519,
+          "observed_saved_seconds": -0.01969010499306023,
+          "observed_reduction_percent": -0.3967508008513619
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_lh_BA_exvivo",
+          "baseline_seconds": 0.06471669999882579,
+          "candidate_seconds": 0.06262528395745903,
+          "observed_saved_seconds": 0.002091416041366756,
+          "observed_reduction_percent": 3.2316481548112037
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_lh_BA_exvivo.thresh",
+          "baseline_seconds": 0.057674665935337543,
+          "candidate_seconds": 0.06903407699428499,
+          "observed_saved_seconds": -0.011359411058947444,
+          "observed_reduction_percent": -19.695668582949658
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_lh_w-g.pct",
+          "baseline_seconds": 0.03660346404649317,
+          "candidate_seconds": 0.030408250982873142,
+          "observed_saved_seconds": 0.006195213063620031,
+          "observed_reduction_percent": 16.925209744495668
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_lh_curv",
+          "baseline_seconds": 2.042178518953733,
+          "candidate_seconds": 1.966884205932729,
+          "observed_saved_seconds": 0.0752943130210042,
+          "observed_reduction_percent": 3.6869603867726335
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_rh_aparc",
+          "baseline_seconds": 5.076729471911676,
+          "candidate_seconds": 4.99511669005733,
+          "observed_saved_seconds": 0.0816127818543464,
+          "observed_reduction_percent": 1.6075857952622903
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_rh_aparc.a2009s",
+          "baseline_seconds": 0.23127266101073474,
+          "candidate_seconds": 0.2266513160429895,
+          "observed_saved_seconds": 0.0046213449677452445,
+          "observed_reduction_percent": 1.9982236324641676
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_rh_aparc.DKTatlas",
+          "baseline_seconds": 0.1067794180708006,
+          "candidate_seconds": 0.11714516498614103,
+          "observed_saved_seconds": -0.010365746915340424,
+          "observed_reduction_percent": -9.707626340937132
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_rh_aparc.pial",
+          "baseline_seconds": 5.048937423038296,
+          "candidate_seconds": 5.034620199934579,
+          "observed_saved_seconds": 0.01431722310371697,
+          "observed_reduction_percent": 0.28356903451382653
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_rh_BA_exvivo",
+          "baseline_seconds": 0.05898040102329105,
+          "candidate_seconds": 0.0658005349105224,
+          "observed_saved_seconds": -0.00682013388723135,
+          "observed_reduction_percent": -11.563390158263106
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_rh_BA_exvivo.thresh",
+          "baseline_seconds": 0.05410242103971541,
+          "candidate_seconds": 0.057325434987433255,
+          "observed_saved_seconds": -0.0032230139477178454,
+          "observed_reduction_percent": -5.957245324293161
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_rh_w-g.pct",
+          "baseline_seconds": 0.041019994067028165,
+          "candidate_seconds": 0.04105758701916784,
+          "observed_saved_seconds": -3.759295213967562e-05,
+          "observed_reduction_percent": -0.09164543534123229
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "stats_rh_curv",
+          "baseline_seconds": 1.8691489150514826,
+          "candidate_seconds": 1.93761615594849,
+          "observed_saved_seconds": -0.06846724089700729,
+          "observed_reduction_percent": -3.6630169135090807
+        },
+        {
+          "scope": "individual_parent_stage_included_in_partition",
+          "measure": "mni_mesh_parallel",
+          "baseline_seconds": 89.85449028399307,
+          "candidate_seconds": 92.52930781699251,
+          "observed_saved_seconds": -2.674817532999441,
+          "observed_reduction_percent": -2.976832348105747
+        }
+      ]
+    }
+  ],
+  "observed_two_case_CLI_sum": {
+    "baseline_seconds": 4596.272755800048,
+    "candidate_seconds": 4431.462615387049,
+    "saved_seconds": 164.81014041299932,
+    "reduction_percent": 3.5857345542651924
+  },
+  "interpretation": {
+    "shared_environment": true,
+    "stable_throughput": "not_assessed",
+    "individual_runs_are_not_repeated_same_input_trials": true,
+    "non_target_stage_drift_is_not_attributed_to_optimization": true,
+    "ten_minute_target_met": false,
+    "overall_metric_equivalence": "not_assessed_by_timing_export",
+    "20GB_owned_memory_acceptance": "not_assessed"
+  }
+}
