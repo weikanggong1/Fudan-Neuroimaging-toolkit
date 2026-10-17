@@ -9,9 +9,11 @@
 
 当前仅是法向子阶段，完整拓扑 GA、remesh、inflate、自相交修复及 white/pial
 顶点更新仍使用已有后端。`run_standard_sphere(normals_device=...)` 提供显式
-候选入口，默认 `None` 保留已验证的 Numba 法向。已完成sub-07左侧的完整
-冻结sphere对照，右侧、第二例完整sphere及原始T1整例尚未完成，不自动改变
-生产后端。所有依赖已在主页Conda环境中声明，无新增依赖。
+候选入口，默认 `None` 保留已验证的 Numba 法向。2026-10-17已完成两例
+双侧的24次完整sphere配对及实际候选的四侧完整轨迹回归；几何、轨迹和
+既有质量门均通过，见[最新阶段报告](../../validation/recon_all/optimizations/20261017_sphere_normals/README.md)。
+两例原始T1配对整例及事后评估仍在进行，未自动改变生产默认后端。
+所有依赖已在主页Conda环境中声明，无新增依赖。
 
 ## Python 调用、输入和输出
 
@@ -72,7 +74,8 @@ python -m fnit.recon_all.sphere_standard_run \
 有相同有序面和顶点编号。`--normals-device` 默认不设置，沿 Numba；显式
 cpu/cuda 只替换法向。平均和最终清理仍各按已有设备参数运行。
 报告增加 `normals_backend` 和 `normals_device`，不改变收敛规则。
-一例左侧冻结sphere的同输入对照见下；仍需双侧、多例和整例质量验证。
+下文保留2026-10-09单侧冻结sphere对照；最新两例四侧完整回归见上方链接。
+该CLI示例的CPU平均/清理设置与最新GPU完整阶段配方分别记录，不混用耗时。
 
 ## 对应原软件调用
 
@@ -82,6 +85,20 @@ cpu/cuda 只替换法向。平均和最终清理仍各按已有设备参数运�
 [pial](PYTHON_PIAL_PLACEMENT.md) 页面。生产内核不调用 FreeSurfer 命令。
 
 ## 本版真实数据精度和时间
+
+### 2026-10-17：两例四侧完整标准球面
+
+完整阶段固定CUDA有序平均及CUDA去翻折，仅切换Numba/Torch有序法向。
+四侧共24次运行全部退出0；16次正常ABBA的阶段API中位数缩短21.7%–24.1%，
+各侧六份保存文件、全部更新及清理轨迹精确一致，逐顶点最大/P99位移均为0。
+实际候选`71cc9189`的共享平均器另做四次完整trace，全部严格比较和质量门
+通过。trace耗时不作为性能样本，完整原报告SHA、源码与质量范围见
+[阶段报告](../../validation/recon_all/optimizations/20261017_sphere_normals/README.md)和
+[实际候选回归](../../validation/recon_all/optimizations/20261017_sphere_normals/CANDIDATE_TRACE_REGRESSION.md)。
+这些阶段结果不替代原始T1整例误差、完整时间或同时显存验收；整体指标等效
+仍未判定。以下保留较早的独立法向与单侧sphere测量，版本与计时范围不同。
+
+### 2026-10-09：独立法向与单侧球面
 
 2026-10-09 在同一 H100 节点测量公开 ds000114 sub-06/sub-07 的双侧
 `orig`、`white.preaparc`、`sphere`：12 张网格。比较基线是本项目已验证的
