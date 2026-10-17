@@ -1,0 +1,197 @@
+{
+  "schema": "fnit-remaining-registration-public-v1",
+  "date": "2026-10-17",
+  "scope": "three remaining hemispheres; one fresh-cache A/B per hemisphere; not whole reconstruction",
+  "actual_source_commits": {
+    "baseline": "5ca07f999375d02281ab60589cb2840e7b488790",
+    "candidate": "71cc91899bdf9713690cddbe32054386d8f58d63"
+  },
+  "historical_FNIT_producer_commit": "93affde8d369ee6ade22f2c105701ed6577e89a4",
+  "report_sha256": {
+    "original_helper": "712055838b9d8ce8da3dc6f686ed5af55ddc78e356de2245a0ca9c9770f289f8",
+    "three_field_summary": "62d33f9365185641c8e2b7f306e0f796b5b498cb6d1a647060594ed49332d39e"
+  },
+  "original_helper_status": "completed_with_historical_differences",
+  "original_launcher_exit": 3,
+  "thresholds_changed": false,
+  "cpu_threads_each_arm": 4,
+  "historical_worker_threads": 2,
+  "cache_policy": "Numba/Triton fresh and isolated per arm per hemisphere; no extra warm-up; matches first v3 pair",
+  "cuda_allocator_cache": "disabled",
+  "torch_allocator_peak": "unavailable",
+  "simultaneous_process_memory": "not_measured_in_this_stage",
+  "cases": [
+    {
+      "case": "ds000114_sub-06",
+      "hemisphere": "rh",
+      "same_input_same_thread_strict_AB": {
+        "status": "passed",
+        "baseline_exit": 0,
+        "candidate_exit": 0,
+        "coordinates_ordered_faces_footer_exact": true,
+        "reported_trajectory_exact": true,
+        "threads_each_arm": 4,
+        "precision": {
+          "dtype": "float32",
+          "matmul_tf32": true,
+          "cudnn_tf32": true,
+          "float16_or_bfloat16": false,
+          "autocast_cuda": false
+        }
+      },
+      "historical_saved_output_bytes_geometry": {
+        "same_file_bytes_by_SHA256": true,
+        "output_SHA256": "4122b53e4754c041501d312fe9f9b2407947f713d45084273ba58473d6887ef0",
+        "coordinates_ordered_faces_footer_exact": true,
+        "maximum_displacement_mm": 0
+      },
+      "historical_trajectory_differences": {
+        "exact": false,
+        "historical_threads": 2,
+        "current_threads": 4,
+        "different_fields": [
+          {
+            "field": ".sulc_pass.rigid_score",
+            "current": 281212.500515835,
+            "historical": 281212.5005300296,
+            "absolute_difference": 0.000014194578398019075
+          }
+        ],
+        "interpretation": "cross-budget diagnostic; does not prove thread count is the sole cause; every other saved trajectory field is identical"
+      },
+      "stage_seconds_including_IO_JIT_sync_init": {
+        "baseline": 165.2180168949999,
+        "candidate": 140.5573515560245
+      },
+      "observed_single_stage_reduction_percent": 14.926135661492557,
+      "numba_cache": {
+        "baseline": {
+          "cache_type": "NullCache",
+          "hits": 0,
+          "misses": 1
+        },
+        "candidate": {
+          "cache_type": "FunctionCache",
+          "hits": 0,
+          "misses": 1
+        }
+      }
+    },
+    {
+      "case": "ds000114_sub-07",
+      "hemisphere": "lh",
+      "same_input_same_thread_strict_AB": {
+        "status": "passed",
+        "baseline_exit": 0,
+        "candidate_exit": 0,
+        "coordinates_ordered_faces_footer_exact": true,
+        "reported_trajectory_exact": true,
+        "threads_each_arm": 4,
+        "precision": {
+          "dtype": "float32",
+          "matmul_tf32": true,
+          "cudnn_tf32": true,
+          "float16_or_bfloat16": false,
+          "autocast_cuda": false
+        }
+      },
+      "historical_saved_output_bytes_geometry": {
+        "same_file_bytes_by_SHA256": true,
+        "output_SHA256": "bd00045b72cdbd6e65de53c62996d1d932c718b67eb2a2a42446211175893af3",
+        "coordinates_ordered_faces_footer_exact": true,
+        "maximum_displacement_mm": 0
+      },
+      "historical_trajectory_differences": {
+        "exact": false,
+        "historical_threads": 2,
+        "current_threads": 4,
+        "different_fields": [
+          {
+            "field": ".sulc_pass.rigid_score",
+            "current": 233934.3918715554,
+            "historical": 233934.39187184375,
+            "absolute_difference": 2.8836075216531754e-7
+          }
+        ],
+        "interpretation": "cross-budget diagnostic; does not prove thread count is the sole cause; every other saved trajectory field is identical"
+      },
+      "stage_seconds_including_IO_JIT_sync_init": {
+        "baseline": 112.93329442408867,
+        "candidate": 103.71472234406974
+      },
+      "observed_single_stage_reduction_percent": 8.16284703906823,
+      "numba_cache": {
+        "baseline": {
+          "cache_type": "NullCache",
+          "hits": 0,
+          "misses": 1
+        },
+        "candidate": {
+          "cache_type": "FunctionCache",
+          "hits": 0,
+          "misses": 1
+        }
+      }
+    },
+    {
+      "case": "ds000114_sub-07",
+      "hemisphere": "rh",
+      "same_input_same_thread_strict_AB": {
+        "status": "passed",
+        "baseline_exit": 0,
+        "candidate_exit": 0,
+        "coordinates_ordered_faces_footer_exact": true,
+        "reported_trajectory_exact": true,
+        "threads_each_arm": 4,
+        "precision": {
+          "dtype": "float32",
+          "matmul_tf32": true,
+          "cudnn_tf32": true,
+          "float16_or_bfloat16": false,
+          "autocast_cuda": false
+        }
+      },
+      "historical_saved_output_bytes_geometry": {
+        "same_file_bytes_by_SHA256": true,
+        "output_SHA256": "53a9e0251e76c8e6a52e407757aad837dd7c84140847d08409c484fbf7ad6da3",
+        "coordinates_ordered_faces_footer_exact": true,
+        "maximum_displacement_mm": 0
+      },
+      "historical_trajectory_differences": {
+        "exact": false,
+        "historical_threads": 2,
+        "current_threads": 4,
+        "different_fields": [
+          {
+            "field": ".sulc_pass.rigid_score",
+            "current": 243325.23774210172,
+            "historical": 243325.23771100075,
+            "absolute_difference": 0.00003110096440650523
+          }
+        ],
+        "interpretation": "cross-budget diagnostic; does not prove thread count is the sole cause; every other saved trajectory field is identical"
+      },
+      "stage_seconds_including_IO_JIT_sync_init": {
+        "baseline": 122.17799305997323,
+        "candidate": 111.61816389695741
+      },
+      "observed_single_stage_reduction_percent": 8.642987905221476,
+      "numba_cache": {
+        "baseline": {
+          "cache_type": "NullCache",
+          "hits": 0,
+          "misses": 1
+        },
+        "candidate": {
+          "cache_type": "FunctionCache",
+          "hits": 0,
+          "misses": 1
+        }
+      }
+    }
+  ],
+  "strict_same_input_same_thread_AB": "passed",
+  "historical_whole_trajectory_strict": "not_passed",
+  "whole_run_speedup": "not_assessed",
+  "overall_metric_equivalence": "not_assessed"
+}

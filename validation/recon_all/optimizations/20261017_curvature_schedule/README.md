@@ -96,13 +96,114 @@ GPU 阶段前后同步明确设备，固定四核 CPU 亲和性及 Torch/Numba/�
 | 生产修改 | 已实现，候选尚待协调者整例验收 |
 | 本地语法、参数帮助与空白检查 | 通过 |
 | 本地 native stats 函数隔离测试 | 3 项通过；不代表完整包测试 |
-| 完整 8 项调度测试 | 待科学计算环境运行；本地缺少 NumPy/nibabel/Torch/Numba |
-| 两例四侧真实 ABBA | 未运行 |
-| 两例原始 T1 空目录整例及误差/显存 | 未运行，由协调者统一执行 |
+| 完整 8 项调度测试 | 通过，包含在冻结提交的统一 134 项测试中；统一测试 EXIT 0 |
+| 两例四侧真实 ABBA | 已完成，原严格比较保持 `comparison_failed` / EXIT 2，原因见下 |
+| 两例原始 T1 空目录整例及误差/显存 | 待协调者统一验收；本阶段报告不提供整例结果 |
 | 整体指标等效 | 未判定 |
 
 测试文件：[test_principal_curvature_schedule.py](../../../../tests/recon_all/test_principal_curvature_schedule.py)。
 生产结果与耗时以随后绑定实际提交/程序的机器报告为准。
+
+### 2026-10-17：曲率同输入 ABBA 与重复性
+
+实际计算源码为 `71cc91899bdf9713690cddbe32054386d8f58d63`。
+两种模式均调用该冻结源码：A 保留三表面早期拟合，B 延迟 smoothwm
+四图。下表为 A/B/B/A 各模式两次连续 API 的中位数，包含早期曲率、
+同一自编译程序的完整曲率统计及读写、搬运和同步；不含私有输入复制。
+首次惰性初始化成本仍在观察值内，各 trial 共用进程和分配缓存。
+
+| 公开 T1 | 半球 | A：兼容模式 / 秒 | B：延迟模式 / 秒 |
+| --- | --- | ---: | ---: |
+| ds000114 sub-06 | LH | 3.3505 | 2.6613 |
+| ds000114 sub-06 | RH | 3.1178 | 2.7380 |
+| ds000114 sub-07 | LH | 2.7465 | 2.4061 |
+| ds000114 sub-07 | RH | 2.6944 | 2.3592 |
+
+最终 smoothwm 八图的 96 次非自比较均字节及解码精确一致，完整 stats
+的 12 次非自比较也均字节、全部非注释行结构和数值精确一致。
+保留的 preaparc/inflated H/K 严格比较失败，原 `comparison_failed`
+和 EXIT 2 保留；没有放宽精度门。相同 A 模式的首次与末次也存在差异。
+
+固定 sub-06 LH 的两表面后另做四次原法线重复计算，并将同一法线固定
+后重复四次拟合。首个不同的计算结果出现在已有 `_normals` 的 CUDA
+`index_add_` 原子累加：法线最大差为 1.7881×10⁻⁷，P99 为
+5.9605×10⁻⁸。原有动态法线拟合的重复最大差可达 3.8719×10⁻⁴；固定
+同一法线后，两表面的四次拟合均精确一致。这将本次观察定位到原有
+GPU 法线累加重复性，未改成 CPU、未更改生产确定性或精度策略。
+
+生产调用图及实际所选原生 CLI 源码审查未发现上述早期四图的下游重建
+消费者：注册、GCSA 和脑区统计从几何计算特征，最终曲率统计独立生成
+离散八图。该结论属于静态调用/所选命令审查及上述阶段实测，尚非动态
+文件访问审计，也不表示整条 pipeline 的新增误差为零。
+详见小型[重复性摘要](repeatability.public.json)；原大报告继续保留私有。
+
+### 其余三侧注册回归：三种比较分别报告
+
+下表比较基线 `5ca07f999375d02281ab60589cb2840e7b488790` 与候选
+`71cc91899bdf9713690cddbe32054386d8f58d63`。各侧只做一次新缓存 A/B，
+均为同输入、同目标 GPU、四线程、float32/TF32；包含完整阶段读写、
+JIT、CUDA 初始化及同步。它们是单次阶段观察，不是整例提速。
+
+| 公开 T1 | 半球 | 基线 / 秒 | 候选 / 秒 | 同预算 A/B 严格比较 | 对历史 FNIT 保存输出 |
+| --- | --- | ---: | ---: | --- | --- |
+| ds000114 sub-06 | RH | 165.218 | 140.557 | 几何、footer、已保存轨迹精确一致 | 文件 SHA、几何精确一致 |
+| ds000114 sub-07 | LH | 112.933 | 103.715 | 几何、footer、已保存轨迹精确一致 | 文件 SHA、几何精确一致 |
+| ds000114 sub-07 | RH | 122.178 | 111.618 | 几何、footer、已保存轨迹精确一致 | 文件 SHA、几何精确一致 |
+
+历史整例每侧 worker 为两线程，本轮阶段为四线程。历史已保存轨迹均仅
+`rigid_score` 一项不同，绝对差依次为 1.4195×10⁻⁵、2.8836×10⁻⁷、
+3.1101×10⁻⁵，其余已保存字段一致。跨预算分数差异单列，不声称线程数
+是唯一已证原因；历史完整轨迹严格复现仍未通过。因此 helper 原状态
+`completed_with_historical_differences` / EXIT 3 保留，而同预算 A/B
+回归通过。所比较的历史保存结果来自 FNIT，不能称为官方重复性验证。
+三项比较、提交与报告 SHA 见[三侧注册摘要](remaining_registration.public.json)。
+两例端到端误差、完整耗时和同时显存仍由协调者统一验收。
+
+### 共享平均器的 inflation 覆盖
+
+`RegistrationGradientAverager` 也由标准 inflation 复用。参数化工具
+[benchmark_inflate_shared_average.py](benchmark_inflate_shared_average.py)
+复用已有完整 `run_standard_inflate`、源码清单校验和 inflation 比较器；
+没有另写积分器。准备清单已核对两例四侧的实际生产配方：同序 smoothwm
+输入、Torch CUDA 后端、`save_sulc=True`、`profile=False`、每侧两线程，
+surface worker 的 CUDA 分配缓存开启。父进程的缓存关闭不代表该 worker
+也关闭。输出为新空目录中的 inflated、sulc、机器报告和首侧 A/B 只读轨迹。
+
+```bash
+# 两份已成功完成的 FNIT 生产 benchmark；不会读取官方检查点。
+python benchmark_inflate_shared_average.py prepare \
+  --benchmark "${first_completed_benchmark}" \
+  --benchmark "${second_completed_benchmark}" \
+  --output "${new_inputs_manifest}"
+
+# 两份实际冻结源码、完整 Python SHA 清单及其 SHA；输出目录必须不存在。
+python benchmark_inflate_shared_average.py run \
+  --baseline-source "${baseline_source}" \
+  --baseline-manifest "${baseline_source_manifest}" \
+  --baseline-manifest-sha256 "${baseline_manifest_sha256}" \
+  --candidate-source "${candidate_source}" \
+  --candidate-manifest "${candidate_source_manifest}" \
+  --candidate-manifest-sha256 "${candidate_manifest_sha256}" \
+  --inputs-manifest "${new_inputs_manifest}" \
+  --inputs-manifest-sha256 "${inputs_manifest_sha256}" \
+  --output "${new_output_directory}" \
+  --device "cuda:0" \
+  --python-interpreter "${declared_python_interpreter}"
+```
+
+`prepare` 绑定生产报告、实际 API、smoothwm 及历史自产 inflated/sulc 的
+SHA；全部清单输入为 JSON。`run` 的 source 为仓库根目录，manifest 为
+已有完整源码清单，SHA 参数为其 64 位 SHA-256；`device` 为已由调度器
+映射到目标卡的显式 CUDA 设备，`python-interpreter` 为声明的环境解释器。
+调度器另持有 GPU 锁并核对实际卡身份。所有坐标为 surface RAS 毫米，
+sulc 为同顶点顺序的一维 float32 毫米值。
+
+首侧新 A/B 同时记录完整 60 步，只读观察会同步 GPU，因此其墙钟标为
+`diagnostic_not_performance_sample`；另三侧直接复用实际 API。历史 runtime
+只有步数、末次 RMS 和停止状态，历史比较仅覆盖这些已保存字段及输出，
+不能称为历史逐步轨迹复现。结构检查复用闭合流形、方向和零面积门，
+未执行一般三角面碰撞扫描。失败保留非零退出及报告；差异不会改成通过。
+准备完成不等于已运行，实际结果须由协调者调度后另行记录。
 
 ## 原命令、版本和参考
 

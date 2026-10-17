@@ -41,8 +41,30 @@ white.preaparc/inflated 的 H/K 继续由原有 PyTorch 函数生成。
 状态由对应 `stats_H_curv` 阶段及完整输出门确认。早期秒数已经包含在
 surface 半球墙钟内，不能再加到总耗时；生产路径不额外插入 CUDA 同步。
 
-2026-10-17 本次清理的真实同输入 ABBA 和两例整例验证由协调者执行；
-尚未填入实测结果时不宣称提速。独立契约测试见
+2026-10-17 已在冻结提交 `71cc91899bdf9713690cddbe32054386d8f58d63`
+完成两例四侧同输入 A/B/B/A。A 保留三表面拟合，B 延迟 smoothwm
+四图；下表为含早期计算、相同自编译完整统计及读写的 API 中位数。
+两模式共用进程，首次初始化成本和缓存边界见[阶段报告](../../validation/recon_all/optimizations/20261017_curvature_schedule/README.md)。
+
+| 公开 T1 | 半球 | A / 秒 | B / 秒 |
+| --- | --- | ---: | ---: |
+| ds000114 sub-06 | LH | 3.3505 | 2.6613 |
+| ds000114 sub-06 | RH | 3.1178 | 2.7380 |
+| ds000114 sub-07 | LH | 2.7465 | 2.4061 |
+| ds000114 sub-07 | RH | 2.6944 | 2.3592 |
+
+最终 smoothwm 八图和完整 stats 均精确一致；保留的 preaparc/inflated
+H/K 严格比较失败，原报告保持 `comparison_failed` / EXIT 2。同一 A
+模式重复也不同。固定 sub-06 LH 几何后，首个差异位于原有 CUDA 法线
+`index_add_` 累加（最大 1.7881×10⁻⁷）；固定同一法线后，两表面的
+主曲率拟合各四次精确一致。没有放宽门或为此改变 GPU 实现。
+
+静态生产调用及所选原生命令源码审查未发现这些早期 H/K 的下游重建
+消费者；注册、GCSA、脑区统计按几何计算自身特征，最终八图独立生成。
+这是阶段重复性定位和静态依赖审查，不是动态文件访问或整例误差证明。
+小型机器摘要见[重复性记录](../../validation/recon_all/optimizations/20261017_curvature_schedule/repeatability.public.json)。
+两例原始 T1 的本轮整例误差、总耗时和同时显存尚待统一验收。
+独立契约测试见
 [`test_principal_curvature_schedule.py`](../../tests/recon_all/test_principal_curvature_schedule.py)。
 
 ## `avg_curv`：`_run_avg_curv(...)`
