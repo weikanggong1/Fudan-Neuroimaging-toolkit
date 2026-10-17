@@ -80,6 +80,15 @@ GPU 阶段前后同步明确设备，固定四核 CPU 亲和性及 Torch/Numba/�
 它们不包括所有非 Torch 分配，也不将整卡其他进程计为 FNIT 自身。
 共享环境无法确认 PID 对应时自身峰值保留 null。
 
+每次 trial 在原有设备同步之后、peak reset 之前记录入口
+`allocated_entry_bytes`/`reserved_entry_bytes`，结束同步后记录
+`allocated_current_bytes`/`reserved_current_bytes` 及两个 peak。四次 trial
+在同一进程中运行，未清空缓存；`reset_peak_memory_stats` 只重置统计，
+因此 reserved 峰值和进程采样可能包含此前 trial 保留的缓存。入口基线
+也属于本次 peak 的范围，不能将这些值解释为各模式独立冷进程峰值，
+也不能用相减结果代替真实同时占用。若需判断独立峰值差异，另行进行
+冷进程显存回归。本次记录不改变 API 计时、A/B/B/A 顺序或算法。
+
 ## 本次验证状态
 
 | 范围 | 当前状态 |

@@ -2,7 +2,8 @@
 
 ## 1．功能与当前状态
 
-本目录准备了独立 benchmark，**尚未执行真实数据实验，未修改生产算法或默认值**。
+本目录提供独立 benchmark，未修改生产算法或默认值。首轮v1在首个A臂
+保存完整球面后以SIGSEGV退出，B臂尚未开始；完整配对与性能结论未完成。
 协调者完成球面配准验证后，再在同一设备和线程预算下运行。输入使用最近两例
 完成的 FNIT 生产被试的双侧 `inflated/smoothwm`，不重跑 inflation。
 
@@ -123,8 +124,8 @@ mkdir -p "$MANIFEST_DIR"
 自编译参考程序只能由隔离benchmark运行，不能作为本脚本的生产输入。
 法向属于命令内部步骤，没有独立官方CLI。
 
-目前仅完成脚本准备、语法与CLI检查；四侧真实配对、完整质量和时间均为
-`not_assessed`，不引用历史法向记录作为本轮实测。历史候选接口与先前局部
+目前完成工具合同检查，并保留v1失败现场；四侧真实配对、完整质量和时间
+仍未完成，不引用历史法向记录作为本轮实测。历史候选接口与先前局部
 证据见[已有GPU法向说明](../../../../docs/recon_all/SURFACE_NORMALS_TORCH_20261009.md)，
 整体当前基线见[已发布两例](../20261016_native_surface_hotspots/README.md)。
 
@@ -134,3 +135,54 @@ mkdir -p "$MANIFEST_DIR"
 - [固定原版球面入口](https://github.com/freesurfer/freesurfer/blob/d932c45b7941662ea380a05efef580568b98d41a/mris_sphere/mris_sphere.cpp)。
 - [FNIT已有有序法向](../../../../src/fnit/recon_all/place_surface_normals.py)。
 - [FNIT完整标准球面](../../../../src/fnit/recon_all/sphere_standard_run.py)。
+
+## 7．v1诊断与工具回执修正
+
+v1的sub-06左侧A臂进程退出`-11`，监督器没有产生任何配对结论。崩溃前
+写出的球面SHA为 `5d943f0eb3207d574dd82b60f2b1680d6363dfe16be7b019af5abcde66c15c3e`，
+与上一轮已完成生产及其独立输出清单的同一球面完全相同。两例四侧当前
+`inflated/smoothwm/sphere` 共12个文件也全部匹配旧独立评估的历史SHA。
+生产sphere报告未单独保存调用时输入SHA；不能把这项缺失写成已验证。
+这些证据支持继续定位API返回后的检查阶段，尚不足以指定底层崩溃函数。
+
+工具增加faulthandler和阶段回执：API同步计时截止后立即保存完整API结果，
+保存后质量检查前后另存`phase`；计时截止、算法和质量门均保持。原v1不
+覆盖。诊断用`NUMBA_BOUNDSCHECK=1`只能运行独立worker，报告明确标为
+`diagnostic_not_performance_sample`，ABBA入口拒绝该设置。
+
+协调者在原资源租约内，使用**新输出目录和新JIT缓存**进行一次A诊断；
+以下Python仅复制旧payload元数据并启动新worker，不读取参考、不补跑v1：
+
+```python
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+new_script = Path("/data/fnit/tools/benchmark_standard_sphere.py")  # 新工具，先核对SHA
+old_payload = Path("/data/fnit/runs/sphere-v1/sub06-lh/timing-00-A.payload.private.json")  # 只读v1启动参数
+diagnostic_root = Path("/data/fnit/runs/sphere-baseline-diagnostic-new")  # 必须不存在
+diagnostic_root.mkdir(parents=True, exist_ok=False)
+payload = json.loads(old_payload.read_text())  # 保留同一份自产输入及冻结源码清单
+payload["output"] = str(diagnostic_root / "A")  # 新阶段输出，不覆盖v1
+payload_path = diagnostic_root / "A.payload.private.json"
+payload_path.write_text(json.dumps(payload, indent=2) + "\n")
+environment = os.environ.copy()  # CUDA_VISIBLE_DEVICES继承同一已核对租约
+environment.update(
+    NUMBA_BOUNDSCHECK="1",  # 仅诊断，不进入ABBA速度统计
+    NUMBA_CACHE_DIR=str(diagnostic_root / "numba-cache"),  # 新JIT缓存
+    TRITON_CACHE_DIR=str(diagnostic_root / "triton-cache"),  # 新GPU内核缓存
+    OMP_NUM_THREADS="4", NUMBA_NUM_THREADS="4", OPENBLAS_NUM_THREADS="4", MKL_NUM_THREADS="4",
+)
+environment.pop("PYTORCH_NO_CUDA_MEMORY_CACHING", None)  # 与两臂原配置相同：启用缓存
+with (diagnostic_root / "A.log").open("w") as diagnostic_log:
+    result = subprocess.run(
+        args=[sys.executable, "-X", "faulthandler", "-u", str(new_script), "worker",
+              "--payload", str(payload_path), "--payload-sha256",
+              hashlib.sha256(payload_path.read_bytes()).hexdigest()],
+        env=environment, stdout=diagnostic_log, stderr=subprocess.STDOUT, check=False,
+    )
+(diagnostic_root / "launcher.EXIT").write_text(str(result.returncode) + "\n")
+```

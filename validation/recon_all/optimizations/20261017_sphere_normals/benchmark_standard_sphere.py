@@ -278,6 +278,8 @@ def inspect_surface(path, inflated):
 
 def worker(args):
     """一个独立冷进程执行一个完整sphere；失败也保存现场和非零退出。"""
+    import faulthandler
+    faulthandler.enable(all_threads=True)
     started = time.perf_counter()
     payload = read_bound(args.payload, args.payload_sha256)
     output = Path(payload["output"])
@@ -288,6 +290,9 @@ def worker(args):
               "payload_sha256": args.payload_sha256, "benchmark_script_sha256": sha(__file__),
               "python_version": sys.version, "python_executable": sys.executable,
               "python_executable_sha256": sha(Path(sys.executable).resolve()),
+              "phase": "source_and_input_validation",
+              "numba_boundscheck_environment": os.environ.get("NUMBA_BOUNDSCHECK"),
+              "timing_qualification": "diagnostic_not_performance_sample" if os.environ.get("NUMBA_BOUNDSCHECK") == "1" else "normal",
               "overall_metric_equivalence": "not_assessed"}
     observer = None
     trace_updates, trace_finish = [], []
@@ -333,6 +338,7 @@ def worker(args):
                                         "default_dtype": str(torch.get_default_dtype()),
                                         "autocast_cuda": torch.is_autocast_enabled("cuda"),
                                         "half_precision_requested": False})
+        report["phase"] = "complete_sphere_api_running"
         save(report_path, report)
         tick = time.perf_counter()
         if observer is not None:
@@ -357,16 +363,24 @@ def worker(args):
                             "owned_simultaneous_driver_peak_bytes": None,
                             "owned_driver_status": "not_sampled_in_this_worker; parent lease sampler required",
                             "target_gpu_free_after_bytes": torch.cuda.mem_get_info(device)[0]}
+        # 持久化真实API返回与同步计时后，再进入独立QA；后置JIT崩溃不能抹掉阶段证据。
+        report["phase"] = "complete_sphere_api_returned"
+        save(report_path, report)
         if observer is not None:
             if len(trace_updates) != len(api["updates"]) or len(trace_finish) != len(api["negative_counts"]):
                 raise RuntimeError("observer missed actual update/finish steps")
             save(output / "trace.private.json", {"updates": trace_updates, "finish": trace_finish,
                                                    "terminal_overlap": api["overlap_diagnostics"]})
             report["trace_sha256"] = sha(output / "trace.private.json")
+        report["phase"] = "saved_surface_quality_running"
+        save(report_path, report)
         report["quality"] = inspect_surface(output / (payload["row"]["hemisphere"] + ".sphere"), payload["row"]["inputs"]["inflated"]["path"])
+        report["phase"] = "saved_surface_quality_returned"
+        save(report_path, report)
         verify_source(payload["source"], payload["source_manifest"], payload["source_manifest_sha256"])
         verify_inputs(payload["inputs_manifest"], payload["inputs_manifest_sha256"])
         report["status"] = "complete" if report["quality"]["passed"] else "failed_quality"
+        report["phase"] = "completed_all_validation"
     except BaseException as error:
         report.update(status="failed", error_type=type(error).__name__, error=str(error), traceback=traceback.format_exc())
         if hasattr(error, "diagnostics"):
@@ -384,6 +398,8 @@ def run(args):
     """串行协调四个冻结输入的独立进程ABBA及独立trace，保留逐次结果。"""
     if args.output.exists():
         raise FileExistsError(args.output)
+    if os.environ.get("NUMBA_BOUNDSCHECK") == "1":
+        raise ValueError("NUMBA_BOUNDSCHECK=1 is diagnostic only; invoke an isolated worker payload, not ABBA")
     manifests = {arm: verify_source(getattr(args, name + "_source"), getattr(args, name + "_manifest"),
                                     getattr(args, name + "_manifest_sha256"))
                  for arm, name in (("A", "baseline"), ("B", "candidate"))}
@@ -429,7 +445,7 @@ def run(args):
                            TRITON_CACHE_DIR=str(folder.parent / "triton-cache" / name))
                 # 两臂同样显式开启缓存；不将cacheoff的0统计误当实际零显存。
                 env.pop("PYTORCH_NO_CUDA_MEMORY_CACHING", None)
-                command = [args.python_interpreter, "-u", str(Path(__file__).absolute()), "worker",
+                command = [args.python_interpreter, "-X", "faulthandler", "-u", str(Path(__file__).absolute()), "worker",
                            "--payload", str(payload_path), "--payload-sha256", sha(payload_path)]
                 tick = time.perf_counter()
                 with (folder.parent / (folder.name + ".log")).open("w") as stream:

@@ -259,6 +259,10 @@ def run(args):
                     thread.start()
                     try:
                         torch.cuda.synchronize(device)
+                        entry_memory = {
+                            "allocated_entry_bytes": int(torch.cuda.memory_allocated(device)),
+                            "reserved_entry_bytes": int(torch.cuda.memory_reserved(device)),
+                        }
                         torch.cuda.reset_peak_memory_stats(device)
                         tick = time.perf_counter()
                         pipeline._write_principal_curvature_maps(
@@ -272,8 +276,15 @@ def run(args):
                         native_seconds = time.perf_counter() - native_tick
                         torch.cuda.synchronize(device)
                         api_seconds = time.perf_counter() - tick
-                        memory = {"allocated_peak_bytes": int(torch.cuda.max_memory_allocated(device)),
-                                  "reserved_peak_bytes": int(torch.cuda.max_memory_reserved(device))}
+                        memory = {
+                            **entry_memory,
+                            "allocated_current_bytes": int(torch.cuda.memory_allocated(device)),
+                            "reserved_current_bytes": int(torch.cuda.memory_reserved(device)),
+                            "allocated_peak_bytes": int(torch.cuda.max_memory_allocated(device)),
+                            "reserved_peak_bytes": int(torch.cuda.max_memory_reserved(device)),
+                            "scope": "post-reset allocator peaks include entry baseline; reserved bytes may retain allocations from earlier trials in this process",
+                            "independent_cold_process_peak": False,
+                        }
                     finally:
                         stop.set()
                         thread.join()
@@ -294,6 +305,7 @@ def run(args):
                              "early_seconds_including_io": early_seconds, "native_stats_seconds_including_io": native_seconds,
                              "complete_api_seconds": api_seconds, "output_sha256": output_records,
                              "comparison_to_first_legacy": comparisons, "torch_memory": memory,
+                             "process_tree_memory_scope": "same-process trial sampling includes cache retained from earlier trials; not an independent cold-process peak",
                              "process_tree_memory": sampler.report(), "trial_total_seconds": time.perf_counter() - trial_start}
                     row["trials"].append(trial)
                     save(report_path, report)
