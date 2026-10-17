@@ -558,9 +558,97 @@ def evaluation_summary(value, reports=None, binding=None):
     return result
 
 
+MONITOR_SCOPE = "independent outer read-only process-tree monitor; original science reports remain unchanged"
+MONITOR_STATES = frozenset(("preflight", "monitoring", "complete_monitoring", "science_command_failed",
+                            "monitor_failed", "monitor_source_binding_changed"))
+MONITOR_FILE_ROLES = ("monitor", "diagnose_tool", "profiling", "nvml", "command_script", "source_manifest")
+
+
+def monitor_state(value):
+    return value if isinstance(value, str) and value in MONITOR_STATES else "unknown"
+
+
+def monitor_frame_totals(value, *, completed_and_bound):
+    """仅读取原监测器汇总；unknown/failed帧不成为完整own峰值或20GB通过。"""
+    value = value if isinstance(value, dict) else {}
+    names = ("sampled_frames", "resolved_frames", "unknown_or_failed_frames")
+    counts = {name: value.get(name) if type(value.get(name)) is int and value[name] >= 0 else None for name in names}
+    valid_counts = all(item is not None for item in counts.values()) and counts["sampled_frames"] == counts["resolved_frames"] + counts["unknown_or_failed_frames"]
+    own = number(value.get("owned_simultaneous_sampled_peak_bytes"))
+    resolved = bool(completed_and_bound and valid_counts and counts["sampled_frames"] > 0 and
+                    counts["unknown_or_failed_frames"] == 0 and own is not None and own >= 0)
+    return {**counts, "reported_counts_consistent": valid_counts,
+            "maximum_observed_interval_seconds": number(value.get("maximum_observed_interval_seconds")),
+            "owned_simultaneous_sampled_peak_bytes": own if resolved else None,
+            "owned_peak_assessment": "resolved_observed_samples_only" if resolved else "not_assessed",
+            **{name: number(value.get(name)) for name in ("partial_attributed_same_snapshot_peak_bytes",
+                "target_device_sampled_peak_bytes", "target_compute_process_sum_sampled_peak_bytes")},
+            "partial_attribution_scope": "lower-bound observation from verified processes in one sampler snapshot; never full own peak",
+            "target_device_scope": "samples can include other jobs; no hardware identifiers exported",
+            "20GB_owned_memory_acceptance": "not_assessed"}
+
+
+def outer_monitor_summary(value):
+    """读取outer monitor主JSON白名单；不读取样本JSONL或推断精确CLI边界。"""
+    if value.get("scope") != MONITOR_SCOPE or not isinstance(value.get("wrapper_totals"), dict):
+        return {"schema_status": "unsupported", "assessment": "not_assessed"}
+    status = monitor_state(value.get("status"))
+    files = value.get("files_sha256", {})
+    files = files if isinstance(files, dict) else {}
+    unchanged = value.get("files_unchanged_after_monitoring", {})
+    unchanged = unchanged if isinstance(unchanged, dict) else {}
+    source_bound = (all(digest(files.get(name)) and unchanged.get(name) is True for name in MONITOR_FILE_ROLES) and
+                    commit(value.get("source_commit")) is not None and digest(value.get("source_manifest_sha256")) is not None and
+                    files.get("source_manifest") == value["source_manifest_sha256"])
+    completed = (status == "complete_monitoring" and value.get("child_started") is True and
+                 type(value.get("command_exit_code")) is int and value["command_exit_code"] == 0 and
+                 value.get("cuda_initialized_at_entry") is False and value.get("cuda_initialized_after") is False and source_bound)
+    metadata, totals = value.get("run_metadata_observed", {}), value.get("per_run_observed_samples", {})
+    metadata = metadata if isinstance(metadata, dict) else {}
+    totals = totals if isinstance(totals, dict) else {}
+    runs = []
+    for private_key, row in metadata.items():
+        if not isinstance(row, dict) or row.get("run_id") != private_key or private_key not in totals:
+            continue
+        if (row.get("arm") not in ("baseline", "candidate") or not commit(row.get("code_version")) or
+                not digest(row.get("input_sha256")) or not digest(row.get("benchmark_report_sha256_observed")) or
+                not digest(row.get("pair_report_sha256_observed"))):
+            continue
+        runs.append({"run_index": len(runs), "arm": row["arm"], "actual_commit": commit(row["code_version"]),
+            "input_sha256": row["input_sha256"], "benchmark_report_sha256_observed": row["benchmark_report_sha256_observed"],
+            "pair_report_sha256_observed": row["pair_report_sha256_observed"],
+            "reported_run_status": state(row.get("status")), "reported_run_exit_code": number(row.get("exit_code")),
+            "benchmark_execution_status": state(row.get("benchmark_execution")),
+            "observed_frames": monitor_frame_totals(totals[private_key], completed_and_bound=completed)})
+    return {"schema_status": "recognized_outer_monitor_metadata", "monitoring_status": status,
+        "child_started": boolean(value.get("child_started")), "child_exit_code": number(value.get("command_exit_code")),
+        "monitor_error_present": bool(value.get("error_type") or value.get("traceback") or value.get("error")),
+        "source": {"actual_commit": commit(value.get("source_commit")),
+            "source_manifest_sha256": digest(value.get("source_manifest_sha256")),
+            "source_manifest_declared_files": number(value.get("source_manifest_declared_files")),
+            "file_sha256": {name: digest(files.get(name)) for name in MONITOR_FILE_ROLES},
+            "files_unchanged_after_monitoring": {name: boolean(unchanged.get(name)) for name in MONITOR_FILE_ROLES},
+            "declared_sources_bound_and_unchanged": bool(source_bound)},
+        "declared_samples_jsonl_sha256": digest(value.get("samples_jsonl_sha256")),
+        "samples_jsonl_read_or_verified_by_summary": False,
+        "sampling_interval_seconds": number(value.get("sampling_interval_seconds")),
+        "query_backend": value.get("query_backend") if value.get("query_backend") in ("nvml", "nvidia-smi") else "unknown",
+        "parent_cuda_initialized_at_entry": boolean(value.get("cuda_initialized_at_entry")),
+        "parent_cuda_initialized_after": boolean(value.get("cuda_initialized_after")),
+        "wrapper_observed_frames": monitor_frame_totals(value.get("wrapper_totals"), completed_and_bound=completed),
+        "reported_per_run_blocks": len(totals), "metadata_bound_run_blocks": len(runs),
+        "unbound_per_run_blocks": len(totals) - len(runs), "runs": runs,
+        "run_index_scope": "index within metadata-bound entries of this summary; private run IDs and case names are not parsed or exported",
+        "observation_scope": "stable live CLI identity observations only; no exact CLI monotonic start/end, wrapper gaps not assigned to individual runs",
+        "timing_scope": "monitor clocks and frame intervals only; scientific CLI/harness times remain in original speed-pair reports",
+        "scientific_E2E_completion": "not_assessed_by_monitor", "20GB_owned_memory_acceptance": "not_assessed",
+        "overall_metric_equivalence": "not_assessed"}
+
+
 ADAPTERS = {"register_v2": register_summary, "register_v3": register_summary,
             "curvature": curvature_summary, "standard_sphere": sphere_summary,
-            "speed_pair": speed_pair_summary, "evaluation": evaluation_summary}
+            "speed_pair": speed_pair_summary, "evaluation": evaluation_summary,
+            "outer_monitor": outer_monitor_summary}
 
 
 def summarize(inputs):
@@ -576,7 +664,7 @@ def summarize(inputs):
                 value = json.loads(Path(path).read_text())
                 if not isinstance(value, dict):
                     raise ValueError("JSON object required")
-                binding["original_status"] = state(value.get("status"))
+                binding["original_status"] = monitor_state(value.get("status")) if kind == "outer_monitor" else state(value.get("status"))
                 binding["original_script_sha256"] = digest(value.get("script_sha256"))
                 binding["original_error_present"] = bool(value.get("error") or value.get("exception") or value.get("traceback"))
                 if kind == "evaluation":

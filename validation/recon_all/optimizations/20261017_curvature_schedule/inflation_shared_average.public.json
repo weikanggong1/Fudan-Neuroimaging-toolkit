@@ -1,0 +1,411 @@
+{
+  "schema": "fnit-inflation-shared-average-stage-v1",
+  "scope": "fixed FNIT-produced smoothwm inputs; complete existing Torch API; not raw-T1 recon-all or official repeatability",
+  "status": "complete",
+  "original_launcher_exit": 0,
+  "original_summary_sha256": "ad31cc5c088125b4719ef875b04b7befac30f5a75f80fe805e8c545a059ff199",
+  "original_launcher_exit_sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+  "baseline_commit": "5ca07f999375d02281ab60589cb2840e7b488790",
+  "candidate_commit": "71cc91899bdf9713690cddbe32054386d8f58d63",
+  "historical_output_producer_commit": "93affde8d369ee6ade22f2c105701ed6577e89a4",
+  "source_manifest_sha256": {
+    "A": "7ecfb35f4392cd952cbe189fe1df769cee098751385d14c59464c2009d01da1a",
+    "B": "ec75f08006301b23f307be61a31fe0b876187df6ecd4787ade0b097eb2c76acd"
+  },
+  "input_manifest_sha256": "711f07e904a17835541d8021bd423a0cbcb5ca938b17a0fcbadb357f52f9c2db",
+  "validation_script_sha256": "5796a24f092518ecec68c700e068e5190b252c08fd5e612a49d72eaebaedf9cc",
+  "source_utility_sha256": "d89e48c8507dd073ac7774969ce8c634a070b526e2cf7df140c51fac67d49ab7",
+  "existing_comparator_sha256": "46efeca316d5155283d8f231c0af37993ed649fef6f3020aeb40141f8dac5a7e",
+  "same_input_first_side_AB": {
+    "inflated_bytes_equal": true,
+    "sulc_bytes_equal": true,
+    "actual_full_step_trace_equal": true,
+    "terminal_state_equal": true
+  },
+  "strict_current_AB": true,
+  "strict_historical_saved_output": true,
+  "historical_recorded_terminal_state_equal": true,
+  "historical_per_step_trajectory": "not_available; only recorded steps/final_rms/stopped_by_rms compared",
+  "coverage": {
+    "candidate_hemispheres": 4,
+    "baseline_hemispheres": 1,
+    "completed_workers": 5,
+    "expected_workers": 5,
+    "full_step_AB_traces": 2
+  },
+  "runs": [
+    {
+      "case": "ds000114_sub-06",
+      "hemisphere": "lh",
+      "arm": "A",
+      "code_version": "5ca07f999375d02281ab60589cb2840e7b488790",
+      "worker_exit": 0,
+      "worker_report_sha256": "c655bb1167d6b880a72f767ecd07d6f13978000c9d06623d7c7839748a9f1c1d",
+      "python_executable_sha256": "327e9040263cb69bcce8b2e6f441931f399489ad7f5d2d86f5d6ec60983c724b",
+      "input_and_historical_output_sha256": {
+        "inflated": "ef7c9b3387b63dd9939c33d1689b04cf64c75fbf72a5af53cd969afb2352cf93",
+        "smoothwm": "44a55ac32b23efe0cc551fb589095a01b87c78be612180db1dd6b2429f392cbe",
+        "sulc": "085335e57979e5e3ba4a6d6178607df31a5140411c74418cdcf9218509e5f470"
+      },
+      "threads": {
+        "torch": 2,
+        "numba": 2,
+        "interop": 1
+      },
+      "allocator_cache_enabled": true,
+      "precision": {
+        "matmul_tf32": true,
+        "cudnn_tf32": true,
+        "autocast_cuda": false,
+        "half_precision": false
+      },
+      "stage_seconds_including_io_and_synchronization": 6.593878629966639,
+      "timing_qualification": "read_only_trace_diagnostic_not_performance_sample",
+      "historical_saved_output": {
+        "same_ordered_topology": true,
+        "volume_geometry_fields_equal": true,
+        "inflated_bytes_equal": true,
+        "sulc_bytes_equal": true,
+        "coordinate_different_elements": 0,
+        "vertex_distance_max_mm": 0.0,
+        "vertex_distance_p99_mm": 0.0,
+        "sulc_different_elements": 0,
+        "sulc_max_abs_mm": 0.0,
+        "sulc_p99_abs_mm": 0.0
+      },
+      "historical_recorded_integrator_state": {
+        "exact_equal": true,
+        "terminal_state": {
+          "steps": 60,
+          "final_rms": 0.020381555254541498,
+          "stopped_by_rms": false
+        }
+      },
+      "quality": {
+        "passed": true,
+        "all_finite": true,
+        "vertices": 129674,
+        "faces": 259344,
+        "euler": 2,
+        "nonmanifold_vertices": 0,
+        "edge_orientation_conflicts": 0,
+        "zero_area_faces": 0
+      },
+      "memory": {
+        "pytorch_peak_allocated_bytes": 375884288,
+        "pytorch_peak_reserved_bytes": 473956352,
+        "owned_simultaneous_driver_peak_bytes": null,
+        "driver_status": "not_sampled"
+      },
+      "trace_sha256": "bdafd503d9aae82060bf9f71df88abd917d6b063ccf7fd82efeb17d1962b923a",
+      "trace_step_count": 60,
+      "quality_scope": "existing closed manifold/genus0/orientation/zero-area gate; no general triangle collision scan"
+    },
+    {
+      "case": "ds000114_sub-06",
+      "hemisphere": "lh",
+      "arm": "B",
+      "code_version": "71cc91899bdf9713690cddbe32054386d8f58d63",
+      "worker_exit": 0,
+      "worker_report_sha256": "4b28e2e44e97b63796d92ea22f10ef82f103ea855d41080381a83f5cfeac16d0",
+      "python_executable_sha256": "327e9040263cb69bcce8b2e6f441931f399489ad7f5d2d86f5d6ec60983c724b",
+      "input_and_historical_output_sha256": {
+        "inflated": "ef7c9b3387b63dd9939c33d1689b04cf64c75fbf72a5af53cd969afb2352cf93",
+        "smoothwm": "44a55ac32b23efe0cc551fb589095a01b87c78be612180db1dd6b2429f392cbe",
+        "sulc": "085335e57979e5e3ba4a6d6178607df31a5140411c74418cdcf9218509e5f470"
+      },
+      "threads": {
+        "torch": 2,
+        "numba": 2,
+        "interop": 1
+      },
+      "allocator_cache_enabled": true,
+      "precision": {
+        "matmul_tf32": true,
+        "cudnn_tf32": true,
+        "autocast_cuda": false,
+        "half_precision": false
+      },
+      "stage_seconds_including_io_and_synchronization": 6.502312580007128,
+      "timing_qualification": "read_only_trace_diagnostic_not_performance_sample",
+      "historical_saved_output": {
+        "same_ordered_topology": true,
+        "volume_geometry_fields_equal": true,
+        "inflated_bytes_equal": true,
+        "sulc_bytes_equal": true,
+        "coordinate_different_elements": 0,
+        "vertex_distance_max_mm": 0.0,
+        "vertex_distance_p99_mm": 0.0,
+        "sulc_different_elements": 0,
+        "sulc_max_abs_mm": 0.0,
+        "sulc_p99_abs_mm": 0.0
+      },
+      "historical_recorded_integrator_state": {
+        "exact_equal": true,
+        "terminal_state": {
+          "steps": 60,
+          "final_rms": 0.020381555254541498,
+          "stopped_by_rms": false
+        }
+      },
+      "quality": {
+        "passed": true,
+        "all_finite": true,
+        "vertices": 129674,
+        "faces": 259344,
+        "euler": 2,
+        "nonmanifold_vertices": 0,
+        "edge_orientation_conflicts": 0,
+        "zero_area_faces": 0
+      },
+      "memory": {
+        "pytorch_peak_allocated_bytes": 378685440,
+        "pytorch_peak_reserved_bytes": 473956352,
+        "owned_simultaneous_driver_peak_bytes": null,
+        "driver_status": "not_sampled"
+      },
+      "trace_sha256": "bdafd503d9aae82060bf9f71df88abd917d6b063ccf7fd82efeb17d1962b923a",
+      "trace_step_count": 60,
+      "quality_scope": "existing closed manifold/genus0/orientation/zero-area gate; no general triangle collision scan"
+    },
+    {
+      "case": "ds000114_sub-06",
+      "hemisphere": "rh",
+      "arm": "B",
+      "code_version": "71cc91899bdf9713690cddbe32054386d8f58d63",
+      "worker_exit": 0,
+      "worker_report_sha256": "0963fc8269ce65a7afe1e0987508eb0569820ce818850792ed466967fab45396",
+      "python_executable_sha256": "327e9040263cb69bcce8b2e6f441931f399489ad7f5d2d86f5d6ec60983c724b",
+      "input_and_historical_output_sha256": {
+        "inflated": "c90b9d9e414b52db401008cfc10065ba25328bb6decb22a6b779b8d5573ba656",
+        "smoothwm": "159b8e7a21fec97c502759ef26b6ca86621b47097ae714d7409569d282df3160",
+        "sulc": "4c953503c1ae8b7a1313537da35d03c0f03644d7188e4b5e78258838968b3b7b"
+      },
+      "threads": {
+        "torch": 2,
+        "numba": 2,
+        "interop": 1
+      },
+      "allocator_cache_enabled": true,
+      "precision": {
+        "matmul_tf32": true,
+        "cudnn_tf32": true,
+        "autocast_cuda": false,
+        "half_precision": false
+      },
+      "stage_seconds_including_io_and_synchronization": 4.310022644000128,
+      "timing_qualification": "single_cold_API_not_whole_pipeline_speedup",
+      "historical_saved_output": {
+        "same_ordered_topology": true,
+        "volume_geometry_fields_equal": true,
+        "inflated_bytes_equal": true,
+        "sulc_bytes_equal": true,
+        "coordinate_different_elements": 0,
+        "vertex_distance_max_mm": 0.0,
+        "vertex_distance_p99_mm": 0.0,
+        "sulc_different_elements": 0,
+        "sulc_max_abs_mm": 0.0,
+        "sulc_p99_abs_mm": 0.0
+      },
+      "historical_recorded_integrator_state": {
+        "exact_equal": true,
+        "terminal_state": {
+          "steps": 60,
+          "final_rms": 0.020512279971908656,
+          "stopped_by_rms": false
+        }
+      },
+      "quality": {
+        "passed": true,
+        "all_finite": true,
+        "vertices": 131507,
+        "faces": 263010,
+        "euler": 2,
+        "nonmanifold_vertices": 0,
+        "edge_orientation_conflicts": 0,
+        "zero_area_faces": 0
+      },
+      "memory": {
+        "pytorch_peak_allocated_bytes": 374614016,
+        "pytorch_peak_reserved_bytes": 457179136,
+        "owned_simultaneous_driver_peak_bytes": null,
+        "driver_status": "not_sampled"
+      },
+      "trace_sha256": null,
+      "trace_step_count": null,
+      "quality_scope": "existing closed manifold/genus0/orientation/zero-area gate; no general triangle collision scan"
+    },
+    {
+      "case": "ds000114_sub-07",
+      "hemisphere": "lh",
+      "arm": "B",
+      "code_version": "71cc91899bdf9713690cddbe32054386d8f58d63",
+      "worker_exit": 0,
+      "worker_report_sha256": "b950e51857e9c287d7326f4b545adfbc6da1075418972396357f4f6fd8afe185",
+      "python_executable_sha256": "327e9040263cb69bcce8b2e6f441931f399489ad7f5d2d86f5d6ec60983c724b",
+      "input_and_historical_output_sha256": {
+        "inflated": "9289af0b9967753ac23edce2326fd7a748222e4403f2d8481c8a9375d5bb7984",
+        "smoothwm": "378451f7e1603afd68d4c2b41fdf3e68428438c644682b5ee2187f8e0d2fd4c3",
+        "sulc": "1d298ad1fb1f81937f28f46e309bfe54de661c2e6a620dcb896fe6c42d8f64eb"
+      },
+      "threads": {
+        "torch": 2,
+        "numba": 2,
+        "interop": 1
+      },
+      "allocator_cache_enabled": true,
+      "precision": {
+        "matmul_tf32": true,
+        "cudnn_tf32": true,
+        "autocast_cuda": false,
+        "half_precision": false
+      },
+      "stage_seconds_including_io_and_synchronization": 4.151559229008853,
+      "timing_qualification": "single_cold_API_not_whole_pipeline_speedup",
+      "historical_saved_output": {
+        "same_ordered_topology": true,
+        "volume_geometry_fields_equal": true,
+        "inflated_bytes_equal": true,
+        "sulc_bytes_equal": true,
+        "coordinate_different_elements": 0,
+        "vertex_distance_max_mm": 0.0,
+        "vertex_distance_p99_mm": 0.0,
+        "sulc_different_elements": 0,
+        "sulc_max_abs_mm": 0.0,
+        "sulc_p99_abs_mm": 0.0
+      },
+      "historical_recorded_integrator_state": {
+        "exact_equal": true,
+        "terminal_state": {
+          "steps": 60,
+          "final_rms": 0.019027741401362156,
+          "stopped_by_rms": false
+        }
+      },
+      "quality": {
+        "passed": true,
+        "all_finite": true,
+        "vertices": 114237,
+        "faces": 228470,
+        "euler": 2,
+        "nonmanifold_vertices": 0,
+        "edge_orientation_conflicts": 0,
+        "zero_area_faces": 0
+      },
+      "memory": {
+        "pytorch_peak_allocated_bytes": 331008000,
+        "pytorch_peak_reserved_bytes": 396361728,
+        "owned_simultaneous_driver_peak_bytes": null,
+        "driver_status": "not_sampled"
+      },
+      "trace_sha256": null,
+      "trace_step_count": null,
+      "quality_scope": "existing closed manifold/genus0/orientation/zero-area gate; no general triangle collision scan"
+    },
+    {
+      "case": "ds000114_sub-07",
+      "hemisphere": "rh",
+      "arm": "B",
+      "code_version": "71cc91899bdf9713690cddbe32054386d8f58d63",
+      "worker_exit": 0,
+      "worker_report_sha256": "983c0062b9c41356e8917d552bc21ddbb5ddc9bc893961a679fc50f2ddcb3e2a",
+      "python_executable_sha256": "327e9040263cb69bcce8b2e6f441931f399489ad7f5d2d86f5d6ec60983c724b",
+      "input_and_historical_output_sha256": {
+        "inflated": "2fc382bee6a01684a040673c88522100fedf73de112969ef43661948647fdf46",
+        "smoothwm": "d0d297e928ee89ac3821ea7566bca150fb08ae6dbe6e577749e8bb97e45c3376",
+        "sulc": "0880e762390f5e41a78c006b8f74d5ffd35e7872b341365bb6e5aaccbb7c59d2"
+      },
+      "threads": {
+        "torch": 2,
+        "numba": 2,
+        "interop": 1
+      },
+      "allocator_cache_enabled": true,
+      "precision": {
+        "matmul_tf32": true,
+        "cudnn_tf32": true,
+        "autocast_cuda": false,
+        "half_precision": false
+      },
+      "stage_seconds_including_io_and_synchronization": 4.261186889954843,
+      "timing_qualification": "single_cold_API_not_whole_pipeline_speedup",
+      "historical_saved_output": {
+        "same_ordered_topology": true,
+        "volume_geometry_fields_equal": true,
+        "inflated_bytes_equal": true,
+        "sulc_bytes_equal": true,
+        "coordinate_different_elements": 0,
+        "vertex_distance_max_mm": 0.0,
+        "vertex_distance_p99_mm": 0.0,
+        "sulc_different_elements": 0,
+        "sulc_max_abs_mm": 0.0,
+        "sulc_p99_abs_mm": 0.0
+      },
+      "historical_recorded_integrator_state": {
+        "exact_equal": true,
+        "terminal_state": {
+          "steps": 60,
+          "final_rms": 0.020223045306559686,
+          "stopped_by_rms": false
+        }
+      },
+      "quality": {
+        "passed": true,
+        "all_finite": true,
+        "vertices": 115122,
+        "faces": 230240,
+        "euler": 2,
+        "nonmanifold_vertices": 0,
+        "edge_orientation_conflicts": 0,
+        "zero_area_faces": 0
+      },
+      "memory": {
+        "pytorch_peak_allocated_bytes": 326182912,
+        "pytorch_peak_reserved_bytes": 419430400,
+        "owned_simultaneous_driver_peak_bytes": null,
+        "driver_status": "not_sampled"
+      },
+      "trace_sha256": null,
+      "trace_step_count": null,
+      "quality_scope": "existing closed manifold/genus0/orientation/zero-area gate; no general triangle collision scan"
+    }
+  ],
+  "prior_launcher_failures": [
+    {
+      "attempt": "v1",
+      "launcher_exit": 71,
+      "scientific_stage_started": false,
+      "reason": "filesystem_advisory_lock_unavailable_before_scientific_API",
+      "log_sha256": "978ccf671246f9b4c114c1a0ebebe4dffec604ba691a90cc0f47198966192a20",
+      "exit_receipt_sha256": "826b6832e45ba17d625debc95ae8554e148550b00c05b47fa8f7be1c555bc83c"
+    },
+    {
+      "attempt": "v2_tmp_lock",
+      "launcher_exit": 1,
+      "scientific_stage_started": false,
+      "reason": "incompatible_manifest_schema_before_scientific_API",
+      "log_sha256": "ce8970b4e1479f0c6d9d39ad0740d90e859aa33a4ab17b1e69fa3716a6b54888",
+      "exit_receipt_sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    }
+  ],
+  "whole_pipeline_speedup": "not_assessed",
+  "whole_pipeline_numeric_regression": "not_assessed_by_this_stage",
+  "overall_metric_equivalence": "not_assessed",
+  "20GB_owned_process_acceptance": "not_assessed",
+  "scientific_module_sha256": {
+    "A": {
+      "place_surface_normals.py": "82d3c174f892f146f6a2b937cda8d457ca6f07f274ed146d5e5bc37f5e48e6b9",
+      "inflate_standard_run.py": "7eb0100a9b2e2fc8dd1a6e1da66ee37da0c29c71ec2cd2b207ef74687535dfb4",
+      "inflate_topology.py": "52245a1f107cf0f39f828dc334c3b033b3f57089454ccbcae83936883206c8f5",
+      "mris_register_average_numba.py": "956616a920f751f49d201bf5a0a17867084a4b8e810336ab849d29fb60b0648b",
+      "inflate_torch.py": "a782b5ec493d4c390131e8882b0b07ebf3d5b5e9ad39da59328b964500550aab"
+    },
+    "B": {
+      "place_surface_normals.py": "82d3c174f892f146f6a2b937cda8d457ca6f07f274ed146d5e5bc37f5e48e6b9",
+      "inflate_standard_run.py": "7eb0100a9b2e2fc8dd1a6e1da66ee37da0c29c71ec2cd2b207ef74687535dfb4",
+      "inflate_topology.py": "52245a1f107cf0f39f828dc334c3b033b3f57089454ccbcae83936883206c8f5",
+      "mris_register_average_numba.py": "808d23e8a726587743ac76cc0bce8ef7b46993305afb70464afcaa852517dbd7",
+      "inflate_torch.py": "a782b5ec493d4c390131e8882b0b07ebf3d5b5e9ad39da59328b964500550aab"
+    }
+  }
+}

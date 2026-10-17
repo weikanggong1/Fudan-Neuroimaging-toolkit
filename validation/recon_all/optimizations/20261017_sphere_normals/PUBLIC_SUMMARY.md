@@ -38,6 +38,7 @@ public_summary = summary_module.summarize(
         "speed_pair": [],  # 未完成整例不填历史记录替代
         "evaluation": [],  # 未完成评估保持 not_assessed
         "evaluation_bindings": [],  # 评估完成后显式提供下文的子报告SHA清单
+        "outer_monitor": [],  # 可选外层监测摘要；未完成整例时不填探针代替
     },
 )
 public_json_path = Path("/data/public/new_speed_summary.json")  # 使用新路径
@@ -57,6 +58,7 @@ with public_json_path.open("x") as public_stream:
 | `standard_sphere` | `benchmark_standard_sphere.py` 的 summary；仅在子报告实际 SHA 匹配时读取其 JSON，保存已记录 API、worker 和父进程墙钟。失败、trace 或 boundscheck 诊断不计为成功计时样本。 |
 | `speed_pair` | `benchmark_recon_native_speed_pair.py` 的 schema v1；保留四次实际整例的三层墙钟及退出/输出/网格摘要。仅同输入且两臂均成功时给出单次观察的 CLI 变化，不宣布稳定提速。 |
 | `evaluation` | 当前 `evaluate_native_pair.py` 的 `pair.json`，或已核对 `evaluate_recon_torch_run.py` 的 `evaluation.json`；保留执行、源码和严格138诊断。只有配套 SHA 清单通过时读取既有子报告中的 Dice、表面、脑区、no-th3、空间、局部误差与质量。 |
+| `outer_monitor` | `monitor_science_pair.py` 的 `report.private.json`；仅汇总已报帧数量、间隔、同期部分归属下界、目标卡峰值及原执行/源码SHA。探针完成不视为整例监测完成；不读取样本JSONL。 |
 | `evaluation_bindings` | 下文显式清单列表；只用于绑定对应 evaluation 主文件及其同目录子 JSON，不作为科学执行证明。缺少/重复/错误 SHA 均不读取对应未绑定数字。 |
 
 公开结果包含每份私有报告 SHA、实际完整代码提交（若原记录确实为 40 位
@@ -75,6 +77,31 @@ with public_json_path.open("x") as public_stream:
 `owned_simultaneous_peak_bytes=null`，缓存关闭时不将 Torch 的零计数当成
 实际零显存。曲率 ABBA 共用进程，其 reserved 与进程占用可含上轮缓存；
 这些不能当成各臂独立冷进程峰值。20 GB 自有同时显存验收单独保持未评估。
+
+### 外层显存监测的汇总
+
+可选的 `--outer-monitor` 可重复提供多份监测主报告，保留已完成、失败和
+未知状态。只读取主 JSON 中已有汇总，不跟随其中任何路径，不读取样本
+JSONL。`declared_samples_jsonl_sha256` 只是原监测器保存的摘要声明，本工具
+没有再次验证大样本文件。源码提交、源码清单SHA、监测/原科学脚本和两份
+监测模块的SHA分别保留；主机、账号、UID、PID、UUID、路径和错误正文不导出。
+
+wrapper 的全范围与各run观测分别列出：帧数、resolved/unknown数、最大
+实际间隔、部分已验证进程的同期合计观察下界、整卡/compute-sum采样峰值。
+源绑定未证实、运行失败/未知、计数不一致或含未知帧时，完整自有采样峰值
+保持 `null`。部分归属的零值不代表自有零显存。即使所有已采样帧可归属，
+也只称已观测样本峰值，20 GB验收始终为 `not_assessed`。
+
+各run仅在 `run_metadata_observed` 的原键与 `run_id` 相同，并有明确已知
+arm、提交、输入SHA和两份报告SHA时汇总对应帧。`run_index` 只是该份公开
+摘要内经过绑定条目的编号，不解析或导出原run名称、病例名或路径；缺少
+明确metadata的块另计未绑定数量。存活CLI的观测窗口不等于精确起止时间，
+wrapper空档不分摊给病例。科学CLI/harness耗时继续由 `speed_pair` 节提供，
+本节不导出监测器总墙钟冒充整例时间。
+
+已用既有无CUDA小探针主报告完成字段契约核对：保留其5帧、未知归属及
+0份整例绑定；其0.5秒采样目标不证明四次整例监测完成。本工具固定区分监测状态、科学执行、显存验收和
+整体等效；不修改原监测报告或既有公开数据。
 
 ### 评估子报告的显式绑定
 
@@ -140,7 +167,8 @@ python validation/recon_all/optimizations/20261017_sphere_normals/summarize_spee
 ```
 
 `--register-v2`、`--register-v3`、`--curvature`、`--standard-sphere`、
-`--speed-pair`、`--evaluation` 对应上表，均可选、可重复，默认不提供。
+`--speed-pair`、`--evaluation`、`--outer-monitor` 对应上表，均可选、
+可重复，默认不提供。
 `--evaluation-bindings` 也可重复，用于多例主评估的分别绑定；工具按主
 报告路径及 SHA 查找唯一匹配项。
 `--output` 必填且必须不存在；工具只写这一公开 JSON，打印其 SHA，不
@@ -176,6 +204,8 @@ SHA 失败、未完成整例和未知 schema。测试不构成真实影像 bench
 元数据核对该契约：各读取十类带 SHA 绑定的子报告，保留20个空间门、
 七张 Dice 图、八个最终表面方向、六套图谱及44图/12注释的实际覆盖。
 此检查只验证字段读取，不把既有数值作为本轮 benchmark。
+外层监测另覆盖失败/未知/部分归属不变成显存通过、来源/计数矛盾保留
+未知、只从明确metadata绑定run且隐藏私有标识。
 本工具不产生新的影像精度、显存或时间测量，不生成或复制脑图。
 
 真实阶段及整例测量由协调者填写对应报告；整体指标等效仍未判定。
@@ -187,6 +217,7 @@ SHA 失败、未完成整例和未知 schema。测试不构成真实影像 bench
 - [早期曲率验证](../20261017_curvature_schedule/benchmark_early_curvature.py)
 - [标准球面验证](benchmark_standard_sphere.py)
 - [两例整例配对](../../../../tools/benchmark_recon_native_speed_pair.py)
+- [独立外层监测](monitor_science_pair.py)
 - [现有发布隐私审查](../../../../tools/audit_public_privacy.py)
 - [既有全流程比较](../20261002_parallel/compare_whole_cases.py)
 - [既有评估适配器](evaluate_native_pair.py)

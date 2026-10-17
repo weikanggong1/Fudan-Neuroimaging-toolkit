@@ -111,6 +111,90 @@ class PublicSpeedSummaryTest(unittest.TestCase):
             self.assertEqual(output["overall_metric_equivalence"], "not_assessed")
             self.assertNotIn("private-value", json.dumps(output))
 
+    def _monitor_fixture(self):
+        totals = {"sampled_frames": 5, "resolved_frames": 0, "unknown_or_failed_frames": 5,
+            "maximum_observed_interval_seconds": .5002, "owned_simultaneous_sampled_peak_bytes": None,
+            "partial_attributed_same_snapshot_peak_bytes": 0, "target_device_sampled_peak_bytes": 42000000000,
+            "target_compute_process_sum_sampled_peak_bytes": 41000000000}
+        return {"scope": MODULE.MONITOR_SCOPE, "status": "complete_monitoring", "child_started": True,
+            "command_exit_code": 0, "cuda_initialized_at_entry": False, "cuda_initialized_after": False,
+            "source_commit": COMMIT, "source_manifest_sha256": SHA, "source_manifest_declared_files": 639,
+            "files_sha256": {name: SHA for name in MODULE.MONITOR_FILE_ROLES},
+            "files_unchanged_after_monitoring": {name: True for name in MODULE.MONITOR_FILE_ROLES},
+            "sampling_interval_seconds": .5, "query_backend": "nvml", "wrapper_totals": totals,
+            "per_run_observed_samples": {}, "run_metadata_observed": {}, "samples_jsonl_sha256": SHA,
+            "host": "private-host", "uid": 9999, "target_gpu_uuid": "GPU-private-uuid",
+            "command": ["/secret-user/science.sh"], "samples_path": "/secret-user/unreadable.jsonl"}
+
+    def test_outer_probe_is_not_whole_monitoring_and_unknown_own_stays_null(self):
+        raw = self._monitor_fixture()
+        raw["wrapper_totals"]["owned_simultaneous_sampled_peak_bytes"] = 123
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "report.private.json"
+            path.write_text(json.dumps(raw))
+            record = MODULE.summarize({"outer_monitor": [path]})["reports"]["outer_monitor"][0]
+            output = record["summary"]
+            self.assertEqual(record["original_status"], "complete_monitoring")
+            self.assertEqual(output["wrapper_observed_frames"]["sampled_frames"], 5)
+            self.assertIsNone(output["wrapper_observed_frames"]["owned_simultaneous_sampled_peak_bytes"])
+            self.assertEqual(output["metadata_bound_run_blocks"], 0)
+            self.assertFalse(output["samples_jsonl_read_or_verified_by_summary"])
+            self.assertEqual(output["scientific_E2E_completion"], "not_assessed_by_monitor")
+            self.assertEqual(output["20GB_owned_memory_acceptance"], "not_assessed")
+            for private in (directory, "secret-user", "private-host", "GPU-private-uuid", '"uid"'):
+                self.assertNotIn(private, json.dumps(record))
+
+    def test_outer_failure_and_partial_or_unknown_metadata_never_get_memory_acceptance(self):
+        raw = self._monitor_fixture()
+        raw.update(status="monitor_failed", command_exit_code=1, traceback="private-host secret-user 10.111.222.33")
+        raw["wrapper_totals"].update(resolved_frames=5, unknown_or_failed_frames=0,
+            owned_simultaneous_sampled_peak_bytes=100, maximum_observed_interval_seconds=float("nan"))
+        raw["20GB_owned_memory_acceptance"] = "passed"
+        output = MODULE.outer_monitor_summary(raw)
+        self.assertEqual(output["monitoring_status"], "monitor_failed")
+        self.assertEqual(output["child_exit_code"], 1)
+        self.assertTrue(output["monitor_error_present"])
+        self.assertIsNone(output["wrapper_observed_frames"]["owned_simultaneous_sampled_peak_bytes"])
+        self.assertIsNone(output["wrapper_observed_frames"]["maximum_observed_interval_seconds"])
+        self.assertEqual(output["20GB_owned_memory_acceptance"], "not_assessed")
+        self.assertNotIn("private-host", json.dumps(output, allow_nan=False))
+        raw["status"] = "some_future_complete"
+        self.assertEqual(MODULE.outer_monitor_summary(raw)["monitoring_status"], "unknown")
+
+    def test_outer_per_run_requires_explicit_metadata_and_never_parses_private_run_names(self):
+        raw = self._monitor_fixture()
+        private = "/private-case-user/path-case"
+        raw["per_run_observed_samples"] = {private: dict(raw["wrapper_totals"]), "missing-metadata": {}}
+        raw["run_metadata_observed"] = {private: {"run_id": private, "case": "private-case-name",
+            "arm": "candidate", "code_version": COMMIT, "input_sha256": SHA,
+            "benchmark_report_sha256_observed": SHA, "pair_report_sha256_observed": SHA,
+            "status": "complete", "exit_code": 0, "benchmark_execution": "complete"}}
+        output = MODULE.outer_monitor_summary(raw)
+        self.assertEqual(output["reported_per_run_blocks"], 2)
+        self.assertEqual(output["metadata_bound_run_blocks"], 1)
+        self.assertEqual(output["unbound_per_run_blocks"], 1)
+        self.assertEqual(output["runs"][0]["run_index"], 0)
+        self.assertEqual(output["runs"][0]["arm"], "candidate")
+        self.assertEqual(output["runs"][0]["observed_frames"]["partial_attributed_same_snapshot_peak_bytes"], 0)
+        self.assertNotIn("private-case", json.dumps(output))
+        self.assertNotIn("missing-metadata", json.dumps(output))
+
+    def test_outer_inconsistent_counts_or_manifest_cannot_be_resolved_peak(self):
+        raw = self._monitor_fixture()
+        raw["wrapper_totals"].update(resolved_frames=5, unknown_or_failed_frames=0, owned_simultaneous_sampled_peak_bytes=100)
+        output = MODULE.outer_monitor_summary(raw)
+        self.assertEqual(output["wrapper_observed_frames"]["owned_simultaneous_sampled_peak_bytes"], 100)
+        self.assertEqual(output["wrapper_observed_frames"]["20GB_owned_memory_acceptance"], "not_assessed")
+        raw["wrapper_totals"]["resolved_frames"] = 4
+        output = MODULE.outer_monitor_summary(raw)
+        self.assertFalse(output["wrapper_observed_frames"]["reported_counts_consistent"])
+        self.assertIsNone(output["wrapper_observed_frames"]["owned_simultaneous_sampled_peak_bytes"])
+        raw["wrapper_totals"]["resolved_frames"] = 5
+        raw["source_manifest_sha256"] = "c" * 64
+        output = MODULE.outer_monitor_summary(raw)
+        self.assertFalse(output["source"]["declared_sources_bound_and_unchanged"])
+        self.assertIsNone(output["wrapper_observed_frames"]["owned_simultaneous_sampled_peak_bytes"])
+
     def _evaluation_fixture(self, root, *, main_status="complete"):
         main = root / "evaluation.json"
         main.write_text(json.dumps({"status": main_status, "candidate_profile": "mixed-native-surfaces",
