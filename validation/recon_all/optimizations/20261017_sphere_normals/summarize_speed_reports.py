@@ -45,6 +45,13 @@ def number(value):
     return value if isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value) else None
 
 
+def failed_sample_count(value):
+    """兼容失败记录列表和非负整数计数，只公开数量，不公开错误记录。"""
+    if isinstance(value, list):
+        return len(value)
+    return value if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else None
+
+
 def boolean(value):
     return value if isinstance(value, bool) else None
 
@@ -109,7 +116,7 @@ def memory(sampler=None, torch_memory=None):
             "sampled_target_compute_process_sum_peak_bytes": number(sampler.get("peak_target_compute_process_sum_bytes")),
             "sampling_interval_seconds": number(sampler.get("sampling_interval_seconds")),
             "max_observed_interval_seconds": number(sampler.get("max_observed_interval_seconds")),
-            "failed_samples": number(sampler.get("failed_samples")),
+            "failed_samples": failed_sample_count(sampler.get("failed_samples")),
             "pytorch": scalar_fields(torch_memory, ("allocated_entry_bytes", "reserved_entry_bytes",
                 "allocated_current_bytes", "reserved_current_bytes", "allocated_peak_bytes", "reserved_peak_bytes",
                 "pytorch_peak_allocated_bytes", "pytorch_peak_reserved_bytes", "independent_cold_process_peak")),

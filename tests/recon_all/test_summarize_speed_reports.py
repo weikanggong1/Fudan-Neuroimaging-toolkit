@@ -15,6 +15,29 @@ COMMIT = "b" * 40
 
 
 class PublicSpeedSummaryTest(unittest.TestCase):
+    def test_memory_failed_sample_lists_export_only_count_and_keep_known_zero(self):
+        for failures in ([], ["private-host secret-user /private/error.json",
+                              {"error": "GPU-private-uuid 10.111.222.33"}]):
+            with self.subTest(failure_count=len(failures)):
+                output = MODULE.memory({"status": "ownership_unresolved", "failed_samples": failures})
+                self.assertEqual(output["failed_samples"], len(failures))
+                self.assertIsNone(output["owned_simultaneous_peak_bytes"])
+                self.assertEqual(output["20GB_owned_memory_acceptance"], "not_assessed")
+                serialized = json.dumps(output, allow_nan=False)
+                for private in ("private-host", "secret-user", "/private/error.json",
+                                "GPU-private-uuid", "10.111.222.33"):
+                    self.assertNotIn(private, serialized)
+
+    def test_memory_failed_sample_integer_counts_and_unknown_values(self):
+        for count in (0, 3):
+            with self.subTest(count=count):
+                self.assertEqual(MODULE.memory({"failed_samples": count})["failed_samples"], count)
+        for invalid in (None, True, False, -1, 0.0, 1.5, float("nan"), float("inf"),
+                        "0", {}, (), {"private-error"}):
+            with self.subTest(invalid=repr(invalid)):
+                self.assertIsNone(MODULE.memory({"failed_samples": invalid})["failed_samples"])
+        self.assertIsNone(MODULE.memory()["failed_samples"])
+
     def test_register_keeps_false_strict_and_hides_all_private_strings(self):
         child = {"status": "complete", "host": "private-host", "subject": "/secret-user/subject",
             "source_version": COMMIT, "output_sha256": SHA, "gpu_uuid_actual": "GPU-private-uuid",
