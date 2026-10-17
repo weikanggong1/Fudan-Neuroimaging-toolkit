@@ -2,9 +2,10 @@
 
 ## 1．功能与当前状态
 
-本目录提供独立 benchmark，未修改生产算法或默认值。首轮v1在首个A臂
-保存完整球面后以SIGSEGV退出，B臂尚未开始；完整配对与性能结论未完成。
-协调者完成球面配准验证后，再在同一设备和线程预算下运行。输入使用最近两例
+本目录提供独立 benchmark，未修改生产算法或默认值。v1和v2均在保存
+球面后的CPU质量检查中退出SIGSEGV，原失败保留。v3将同一检查函数
+隔离到新CPU解释器，从新目录重新运行全部配对，底层故障仍未定位。
+输入使用最近两例
 完成的 FNIT 生产被试的双侧 `inflated/smoothwm`，不重跑 inflation。
 
 两臂均调用完整 `run_standard_sphere`：CUDA 有序平均、完整 dense CUDA
@@ -26,7 +27,7 @@ flowchart LR
 
 ## 2．输入、输出和参数
 
-脚本 [`benchmark_standard_sphere.py`](benchmark_standard_sphere.py) 的四个子命令：
+脚本 [`benchmark_standard_sphere.py`](benchmark_standard_sphere.py) 的公开子命令：
 
 | 子命令 | 必需具名参数 | 含义与输出 |
 | --- | --- | --- |
@@ -38,6 +39,9 @@ flowchart LR
 | `run` | `--device`、`--python-interpreter` | 可选，默认 `cuda:0` 和当前解释器；必须显式可用CUDA，无CPU回退 |
 
 `worker --payload --payload-sha256` 由监督器内部调用，不作为独立用户入口。
+`quality-worker` 同样只供内部调用，绑定该payload及已保存球面SHA；新进程
+隐藏CUDA，以原四线程FP32/FP64和结构判据检查，输出独立报告、日志和退出
+回执。任一子检查失败使本轮失败，不自动重试；QA耗时不进入GPU API时间。
 每臂固定 Torch/Numba/BLAS 4线程，interop为1；每次独立进程。监督器每侧
 按 A、B、B、A 顺序跑完整阶段，再另外跑两次完整 trace。共24次完整阶段。
 两臂均显式开启分配缓存，首次JIT及后续调用保留在逐次报告中；没有改变
@@ -124,8 +128,21 @@ mkdir -p "$MANIFEST_DIR"
 自编译参考程序只能由隔离benchmark运行，不能作为本脚本的生产输入。
 法向属于命令内部步骤，没有独立官方CLI。
 
-目前完成工具合同检查，并保留v1失败现场；四侧真实配对、完整质量和时间
-仍未完成，不引用历史法向记录作为本轮实测。历史候选接口与先前局部
+第二轮已有两侧完成全部ABBA和独立完整轨迹，六份保存文件、有序几何及
+每次更新/finish轨迹均相同，位移最大/P99为0，结构与双径向门通过：
+
+| 第二轮已完成阶段 | A中位/秒 | B中位/秒 | 本块缩短 |
+| --- | ---: | ---: | ---: |
+| sub-06 LH | 143.047 | 119.583 | 16.40% |
+| sub-06 RH | 149.176 | 97.725 | 34.49% |
+
+第二轮随后在sub-07 LH保存后QA退出-11，整体仍为`failed`；不得用本表
+称四侧通过。两臂计算源码均为`5ca07f999375d02281ab60589cb2840e7b488790`，
+只切换已有法向后端；最终71cc共享平均器的四侧轨迹回归另做，不混入此表。
+第三轮及两例整例尚未完成；[故障与检查隔离](CPU_SQRT_DIAGNOSTIC.md)
+保留两次失败、同文件CPU诊断、原判据和新进程执行契约。
+
+历史候选接口与先前局部
 证据见[已有GPU法向说明](../../../../docs/recon_all/SURFACE_NORMALS_TORCH_20261009.md)，
 整体当前基线见[已发布两例](../20261016_native_surface_hotspots/README.md)。
 
