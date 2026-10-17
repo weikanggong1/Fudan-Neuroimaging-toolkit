@@ -177,7 +177,7 @@ python_reconstruction_report = run_recon_all_python(
 | `wm_execution` | 否 | `str` | `'in-process'` | isolated只允许torch-optimized，在新exec启用缓存，返回完整阶段报告；父CUDA/TF32保持 |
 | `defects_backend` | 否 | `str` | `'native'` | torch使用完整缺陷投射；保持双侧顺序/标签，采用确定性颜色 |
 | `wm_edit_backend` | 否 | `str` | `'native'` | native为原编辑对照；python为完整Numba CPU编辑；torch-hybrid为CUDA静态编辑加有序CPU核心。python配方固定python，输入证明失败报错 |
-| `sphere_normals_backend` | 否 | `str` | `'numba'` | torch迁移标准sphere法向；要求CUDA，完整优化与CPU finish保持 |
+| `sphere_normals_backend` | 否 | `str` | `'numba'` | torch仅迁移标准sphere法向，要求CUDA；其余优化及所选收尾后端保持，收尾由sphere_finish_backend独立选择 |
 | `gca_inverse_backend` | 否 | `str` | `'cpu'` | torch批量求逆；非默认设置仅允许CUDA的Torch GCA；python配方固定torch。 |
 | `gca_candidate_chunk` | 否 | `int` | `64` | 正整数完整候选分块，不删候选；非默认仅用于CUDA Torch GCA；python配方固定1024。 |
 | `gca_execution` | 否 | `str` | `'in-process'` | isolated为新exec中的局部CUDA缓存，父策略保持；仅Torch GCA；python配方固定isolated。 |
