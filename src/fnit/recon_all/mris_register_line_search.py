@@ -22,8 +22,23 @@ def first_registration_sse(positions: torch.Tensor, faces: torch.Tensor,
                            target_variance: torch.Tensor,
                            original_area: float,
                            total_area: float,
-                           *, return_terms: bool = False) -> float | dict[str, float]:
-    """Active first-pass terms: percentage area, nonlinear area, distance, correlation."""
+                           *, return_terms: bool = False,
+                           current_distances: torch.Tensor | None = None
+                           ) -> float | dict[str, float]:
+    """计算面积、非线性面积、弧距和曲率相关目标，保持原累计顺序。
+
+    positions 为 (N,3) surface RAS/mm；faces 为 (F,3) 有序整数面，
+    neighbors/degrees 为 (N,K)/(N,) 有序邻接。original_distances 为
+    同形弧距目标/mm，original_face_areas 为 (F,) 原面积/mm²，
+    curvature 为 (N,) 标量，target_mean/target_variance 为同尺寸二维
+    图谱。original_area/total_area 是原始及标准球面总面积/mm²。
+    return_terms 默认 False 返回四项总和；True 返回四个具名 Python
+    float，定义不变。current_distances 默认 None 现场计算弧距；调用者
+    可传同一 positions、同一邻接刚生成的 float32(N,K) 张量，避免
+    smoothwm 的距离项与弹簧项重复计算。不允许跨试步或坐标更新复用。
+    形状、类型或设备不匹配时抛 ValueError；未改变精度、权重或停止规则。
+    属于 mris_register 内部目标函数，没有独立官方 CLI。
+    """
     current_area, _ = face_area_normals(positions, faces, signed_sphere=True)
     area_scale = _float32(_float32(original_area) / _float32(total_area))
     difference = area_scale * current_area.double() - original_face_areas.double()
@@ -31,7 +46,12 @@ def first_registration_sse(positions: torch.Tensor, faces: torch.Tensor,
     ratio = (area_scale * current_area.double()).clamp(-40.0, 40.0)
     nonlinear_area_sse = float((torch.nn.functional.softplus(10.0 * ratio) / 10.0
                                 - ratio).sum())
-    current_distances = sphere_arc_distances(positions, neighbors, degrees)
+    if current_distances is None:
+        current_distances = sphere_arc_distances(positions, neighbors, degrees)
+    elif (current_distances.shape != neighbors.shape
+          or current_distances.dtype != torch.float32
+          or current_distances.device != positions.device):
+        raise ValueError("current_distances must be float32 (N,K) on positions.device")
     delta = (math.sqrt(area_scale) * current_distances.double()
              - original_distances.double())
     active = torch.arange(neighbors.shape[1], device=positions.device)[None, :] < degrees[:, None]

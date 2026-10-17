@@ -970,7 +970,8 @@ def _run_curvature_stats(binary: Path | None, subject: Path, hemi: str,
     python_only默认False保留参考程序，True复用自有Torch/Numba完整统计，
     device默认cpu且不回退。生产固定零平滑和source_libm源浮点规则，
     overwrite仅允许覆盖本阶段标准输出。返回完整路径/统计/读写秒数字典，
-    原生返回None；输入和写出失败抛异常，不复制参考。官方固定命令见下。
+    原生返回None；命令成功后要求stats与全部八图存在且非空，缺失或空文件
+    抛FileNotFoundError；输入和写出失败传播，不复制参考。官方命令见功能页。
     """
     if python_only:
         from .curvature_stats_python import write_curvature_stats
@@ -986,8 +987,8 @@ def _run_curvature_stats(binary: Path | None, subject: Path, hemi: str,
                     hemi, "curv", "sulc"], cwd=subject / "scripts",
                    env=env, check=True)
     for path in (output, *(subject / "surf" / f"{hemi}.smoothwm.{name}.crv"
-                           for name in ("BE", "C", "FI", "S"))):
-        if not path.is_file():
+                           for name in ("H", "K", "K1", "K2", "BE", "C", "FI", "S"))):
+        if not path.is_file() or path.stat().st_size == 0:
             raise FileNotFoundError(path)
 
 
@@ -1120,7 +1121,19 @@ def _run_native_pial(binary: Path, subject: Path, hemi: str,
 
 
 def _write_principal_curvature_maps(surf: Path, hemi: str,
-                                    device: str) -> None:
+                                    device: str, *, include_smoothwm: bool = True) -> None:
+    """从自产表面写连续拟合主曲率图；原顶点顺序及网格保持不变。
+
+    surf为包含H.white.preaparc/inflated的目录，hemi为lh/rh，device为
+    PyTorch设备。输入网格坐标为surface RAS/mm；始终输出上述两表面的
+    H/K float32(N,) morph，单位分别为mm⁻¹/mm⁻²。include_smoothwm
+    默认True，另读取H.smoothwm并输出smoothwm.H/K/K1/K2.crv；False
+    不读或计算该表面，也不删除或覆盖已有四图。该选项只延迟无下游消费
+    的早期四图，最终离散八图仍由完整curv.stats阶段生成，定义不能混用。
+    返回None；缺输入、网格、计算或写出异常原样传播；不复制或改写几何。
+    使用已有principal_curvatures实现和精度；属于曲率内部步骤，无独立
+    原软件CLI，命令对应及真实回归见CURVATURE_OUTPUTS.md。
+    """
     from .surface_roi_curvature_gpu import principal_curvatures
 
     for surface, prefix in (("white.preaparc", "white.preaparc"),
@@ -1131,12 +1144,13 @@ def _write_principal_curvature_maps(surf: Path, hemi: str,
                             ((k1 + k2) / 2).astype(np.float32))
         fs.write_morph_data(str(surf / f"{hemi}.{prefix}.K"),
                             (k1 * k2).astype(np.float32))
-    xyz, mesh = fs.read_geometry(str(surf / f"{hemi}.smoothwm"))
-    k1, k2 = principal_curvatures(xyz, mesh, device=device)
-    for name, values in (("H", (k1 + k2) / 2), ("K", k1 * k2),
-                         ("K1", k1), ("K2", k2)):
-        fs.write_morph_data(str(surf / f"{hemi}.smoothwm.{name}.crv"),
-                            np.asarray(values, np.float32))
+    if include_smoothwm:
+        xyz, mesh = fs.read_geometry(str(surf / f"{hemi}.smoothwm"))
+        k1, k2 = principal_curvatures(xyz, mesh, device=device)
+        for name, values in (("H", (k1 + k2) / 2), ("K", k1 * k2),
+                             ("K1", k1), ("K2", k2)):
+            fs.write_morph_data(str(surf / f"{hemi}.smoothwm.{name}.crv"),
+                                np.asarray(values, np.float32))
 
 
 def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
@@ -1168,6 +1182,9 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
     返回顶点/面数、组件、分阶段时间、预白质/球面实际报告及placement_pending；
     写出同序标准表面/标签，后续最终放置另行执行。输入、网格或计算失败
     传播；不读取参考，不占位。原命令/真实数据见recon-all各功能页。
+    early_curvature_maps单列含读写秒数及早期输出/生产者；native放置路径
+    将smoothwm四图延迟到完整curv.stats，python保留早期四图。该秒数已含
+    surface父阶段，不额外累加；最终统计生产者字段声明后续阶段而非已完成。
     topology_backend=python-ga显式使用完整自有GA文件接口，threads按本
     半球传入；其质量/SHA门和发布回执另见topology_genetic_publication。
     topology_finish_backend默认python；显式conda-cpp只用于native GA后续
@@ -1223,7 +1240,22 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
         normals_backend=sphere_normals_backend, inflate_backend=inflate_backend,
         sphere_finish_backend=sphere_finish_backend,
         require_unfolded=surface_placement_backend == "python")
-    _write_principal_curvature_maps(surf, hemi, device)
+    early_curvature_tick = time.perf_counter()
+    include_smoothwm = surface_placement_backend == "python"
+    _write_principal_curvature_maps(surf=surf, hemi=hemi, device=device,
+                                    include_smoothwm=include_smoothwm)
+    early_curvature = {
+        "seconds_including_io": time.perf_counter() - early_curvature_tick,
+        "producer": "fnit.recon_all.surface_roi_curvature_gpu.principal_curvatures",
+        "device": str(device), "include_smoothwm": include_smoothwm,
+        "written_outputs": [f"surf/{hemi}.{surface}.{name}"
+                            for surface in ("white.preaparc", "inflated") for name in ("H", "K")]
+                           + ([f"surf/{hemi}.smoothwm.{name}.crv" for name in ("H", "K", "K1", "K2")]
+                              if include_smoothwm else []),
+        "smoothwm_final_producer": ("fnit.recon_all.curvature_stats_python.write_curvature_stats"
+                                    if include_smoothwm else "conda-source-cpp:mris_curvature_stats"),
+        "smoothwm_final_stage": f"stats_{hemi}_curv",
+        "timing_scope": "included in surface hemisphere wall clock; not an additional stage"}
     white, faces = fs.read_geometry(str(surf / f"{hemi}.smoothwm"))
     return {"hemisphere": hemi, "vertices": len(white), "faces": len(faces),
             "raw_components": components, "cortex_vertices": len(base) + len(ga),
@@ -1240,6 +1272,7 @@ def _surface_pair(subject: Path, hemi: str, filled: Path, norm: Path,
             "sphere_seconds": {**pre_sphere_seconds, **sphere_timings},
             "standard_sphere_report": sphere_report,
             "white_preaparc_report": preaparc,
+            "early_curvature_maps": early_curvature,
             "placement_pending": True}
 
 

@@ -90,6 +90,9 @@ class RegistrationGradientAverager:
     缓冲区，保留每顶点邻接累加顺序，未开启半精度或改变全局 TF32 策略。
     返回 CPU 输入的结果会完成必要 D2H 同步；完整阶段必须计入此传输。
     Triton 已由主页 Conda 声明；CUDA 不可用、参数无效或编译失败时抛错。
+    同一实例按顺序复用两个 (N,3) CUDA 工作缓冲区；CUDA 返回值另取副本，
+    因此下一次调用不会改写此前结果。不缓存动态梯度或跨网格复用邻接；
+    并发调用须各自创建实例，不改变全局 CUDA allocator 或 TF32 配置。
     """
 
     def __init__(self, neighbors: torch.Tensor, degrees: torch.Tensor,
@@ -106,6 +109,7 @@ class RegistrationGradientAverager:
         self.device = torch.device(device)
         self.neighbors, self.degrees = neighbors, degrees
         self.kernel = None
+        self._cuda_buffers = None
         if self.device.type == "cuda":
             from .mris_register_average_gpu import average_on_cuda
             self.kernel = average_on_cuda
@@ -126,10 +130,14 @@ class RegistrationGradientAverager:
             return gradient.clone()
         if self.device.type == "cpu":
             return average_gradients_exact_cpu(gradient, self.neighbors, self.degrees, iterations)
-        current = gradient.to(self.device).contiguous()
-        if current.data_ptr() == gradient.data_ptr():
-            current = current.clone()
-        following = torch.empty_like(current)
+        if self._cuda_buffers is None:
+            self._cuda_buffers = (
+                torch.empty(gradient.shape, dtype=torch.float32, device=self.device),
+                torch.empty(gradient.shape, dtype=torch.float32, device=self.device))
+        current, following = self._cuda_buffers
+        current.copy_(gradient)
         result = self.kernel(current, following, self.gpu_neighbors, self.gpu_degrees,
                              self.gpu_reciprocals, iterations)
+        if gradient.device == result.device:
+            return result.clone()
         return result.to(gradient.device)

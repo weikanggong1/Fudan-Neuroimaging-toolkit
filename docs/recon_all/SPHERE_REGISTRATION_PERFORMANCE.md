@@ -28,6 +28,60 @@ flowchart LR
 CPU 调用把图中平均后端换为既有 Numba。GPU 只执行保序平均；目标函数、
 步长决策、全部迭代和末尾清理仍按同一算法执行，球面输出供后续图谱标注。
 
+## 2026-10-17：相同试步和工作缓冲复用
+
+smoothwm 线搜索原先为距离目标和弹簧目标各计算一次完全相同的球面弧距。
+现在每个试步计算一次，分别沿原来的 double 转换、平方和掩膜累计规则
+读取同一张量。试步坐标或邻接改变后立即重算，不在不同试步之间缓存。
+`first_registration_sse(..., current_distances=None)` 的默认独立调用不变；
+显式提供的缓存必须为与当前坐标/邻接一致的 float32 `(N,K)` 弧距，单位
+为 mm，设备与坐标相同。形状、类型或设备错误抛出 `ValueError`。函数
+返回四项之和，或在 `return_terms=True` 时返回四项 Python float 字典；
+面积、距离和相关目标的权重与含义没有改变。该内部步骤没有独立原命令。
+
+CUDA 平均器在同一网格实例中复用两个 float32 `(N,3)` 工作缓冲区，
+减少禁用 allocator 缓存时重复分配的开销。每次仍上传本次完整梯度，
+执行全部轮次并返回独立结果；下次调用不覆盖先前结果。它不改变全局
+allocator、TF32、半精度或模型驻留策略，并发调用需分别创建平均器。
+
+smoothwm 初始曲率的 `_source_order_fit` 仅增加 Numba 机器码缓存，显式
+`fastmath=False`；缓存不包含输入 Gram 矩阵、曲率或拟合结果。其内部
+两次原有 SVD、条件阈值及有序浮点运算保留。缓存首次生成成本、跨进程
+命中和共享节点时间分别记录，不能把首次编译耗时宣称为持续算术成本。
+
+以下为本轮同 GPU 后端 AB/BA 复现入口；两个源码目录须先冻结，四次
+完整配准均使用相同自产输入、目标 GPU 和四线程预算。指定设备的前后
+同步、导入/加载/传输/写出分别由既有 runner 记录。图谱路径表示声明
+资产，不是官方被试输出；可用 `--official-surface` 单独增加官方诊断。
+
+```bash
+python validation/recon_all/python_gpu_port/benchmark_register_pair.py \
+  --subject /data/fnit_subject \
+  --hemi lh \
+  --atlas /data/fnit_assets/average/lh.folding.atlas.acfb40.noaparc.i12.2016-08-02.tif \
+  --baseline-source /data/frozen_baseline/src \
+  --baseline-version baseline_commit \
+  --candidate-source /data/frozen_candidate/src \
+  --candidate-version candidate_commit \
+  --baseline-averaging-device cuda:0 \
+  --averaging-device cuda:0 \
+  --gpu-uuid GPU-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx \
+  --threads 4 \
+  --repetitions 2 \
+  --output /data/validation/register_gpu_reuse_new
+```
+
+逐项含义：`subject` 为冻结自产输入；`hemi` 为同一半球；`atlas` 为对应
+folding TIFF；两个 `source/version` 为旧新冻结代码及其标识；两个设备
+参数分别指定旧、新平均器，均为逻辑 CUDA 0；`gpu-uuid` 核验实际卡；
+`threads` 固定四线程；`repetitions=2` 依次执行 AB、BA；`output` 必须
+是新目录。`--baseline-averaging-device` 默认 `cpu`，保留旧脚本行为，
+本轮显式设为 `cuda:0`，避免把 CPU/GPU 后端差异误归因于新补丁。
+
+本段描述候选改动与复现方式。真实同输入精度、完整阶段时间、两例原始
+T1 整例时间及显存由协调者实测后补入；尚未测出的结果为 `not_assessed`。
+下文旧记录保留其原版本和范围，不能替代本轮结果。
+
 ## 真实剖析找到了什么
 
 本轮在 `accelerator-a-1` 对 sub01 左半球的 FNIT 自产冻结输入运行 cProfile，实际

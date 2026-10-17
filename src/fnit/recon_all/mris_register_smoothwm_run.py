@@ -56,6 +56,8 @@ def run_register_smoothwm(sphere: str | Path, smoothwm: str | Path,
     质量检查不延长原迭代次数、不修改坐标，也不判定整体指标等效。
     除首轮原有重复投影分支外，距离力复用本轮projected对应的法向
     和弧距；调用成熟distance_gradient，不跨坐标版本或轮次复用。
+    每个线搜索试步只计算一次弧距，距离 SSE 与弹簧 SSE 读取同一张量；
+    两项目标的 double 转换、平方、掩膜及累计顺序保持原定义。
     """
     started = time.perf_counter()
     sphere, smoothwm = Path(sphere), Path(smoothwm)
@@ -134,11 +136,12 @@ def run_register_smoothwm(sphere: str | Path, smoothwm: str | Path,
                                     dist_scale, l_spring)
 
         def objective(trial: torch.Tensor) -> float:
+            trial_distances = sphere_arc_distances(trial, neighbors, degrees)
             terms = first_registration_sse(
                 trial, triangles, neighbors, degrees, original_distances,
                 original_areas, curvature, mean_grid, variance_grid,
-                original_area, total_area, return_terms=True)
-            trial_distances = sphere_arc_distances(trial, neighbors, degrees)
+                original_area, total_area, return_terms=True,
+                current_distances=trial_distances)
             spring = area_scale * float(((trial_distances.double() ** 2) * active).sum())
             return ((l_parea / 0.2) * terms["sse_area"]
                     + l_nlarea * terms["sse_nl_area"]

@@ -2,7 +2,48 @@
 
 [返回阶段索引](CONDA_CPP_STAGES.md) · [单 T1 输出结构](README.md)
 
-标准流程先在每侧已配准球面上映射 folding atlas 的第 6 幅图，再对 `smoothwm` 计算曲率附图及统计。曲率统计已提供完整自有Python/Numba/PyTorch入口；原软件命令用于参数对应与独立benchmark。
+标准流程先在每侧已配准球面上映射 folding atlas 的第 6 幅图，再对 `smoothwm` 计算曲率附图及统计。曲率统计已提供完整自有Python/Numba/PyTorch入口；显式原生表面配方使用固定源码在 Conda 内独立构建的程序，不调用系统安装的软件。
+
+## 早期主曲率图：`_write_principal_curvature_maps(...)`
+
+输入 `surf` 是自产表面目录，`hemi` 为 `lh/rh`，`device` 为 PyTorch
+设备。函数读取同侧 `white.preaparc` 和 `inflated` 三角表面，坐标采用
+surface RAS/mm；写出 `H.white.preaparc.{H,K}` 和 `H.inflated.{H,K}`。
+这些文件为沿原顶点顺序的 float32 `(N,)` morph，均值曲率 H 的单位为
+mm⁻¹，高斯曲率 K 的单位为 mm⁻²。几何和有序面保持不变。
+
+`include_smoothwm=True` 默认保留兼容行为：另读取 `H.smoothwm`，生成
+`H.smoothwm.{H,K,K1,K2}.crv`，K1/K2 单位为 mm⁻¹。设置 False 时不读、
+不计算、不写出该表面的四图，也不删除已有文件。无返回值；输入、
+设备、计算或写出失败直接抛异常。这是 pipeline 内部函数，无独立 CLI。
+
+```python
+from pathlib import Path
+from fnit.recon_all.native_free import _write_principal_curvature_maps
+
+_write_principal_curvature_maps(
+    surf=Path("/data/subjects/sub01/surf"),  # 自产 preaparc/inflated 表面目录
+    hemi="lh",                             # 同侧有序顶点；右侧使用 rh
+    device="cuda:0",                       # 明确目标 GPU，沿用 float32/TF32
+    include_smoothwm=False,                 # 原生配方将四图留给最终完整统计
+)
+```
+
+生产调度在 `surface_placement_backend="native"` 时采用 False；Python
+放置路径保留 True。球面配准、GCSA 注释及脑区统计均从当前几何计算自身
+特征，不消费早期 smoothwm 四图。完整 138 项输出仍在最终曲率统计后检查。
+早期连续二次面拟合与最终离散曲率定义不同，不能缓存前者替代后者。
+white.preaparc/inflated 的 H/K 继续由原有 PyTorch 函数生成。
+
+半球报告 `early_curvature_maps` 保存实际早期生产函数、设备、已生成的
+相对文件列表、`include_smoothwm`、含读写秒数，以及最终 smoothwm
+曲率图对应的统计阶段和生产者。后两个字段声明后续生产路径，实际完成
+状态由对应 `stats_H_curv` 阶段及完整输出门确认。早期秒数已经包含在
+surface 半球墙钟内，不能再加到总耗时；生产路径不额外插入 CUDA 同步。
+
+2026-10-17 本次清理的真实同输入 ABBA 和两例整例验证由协调者执行；
+尚未填入实测结果时不宣称提速。独立契约测试见
+[`test_principal_curvature_schedule.py`](../../tests/recon_all/test_principal_curvature_schedule.py)。
 
 ## `avg_curv`：`_run_avg_curv(...)`
 
@@ -51,8 +92,13 @@ curvature_report = write_curvature_stats(
 
 返回路径清单、网格规模、全部统计及含检查/传输/读写的总墙钟。
 两例四侧完整同输入回归中，八图与完整统计文件均逐字节一致。
-全参数、单位、限制与失败行为见完整说明；原版固定源码程序只保留
-独立参考用途，不以近似四图摘要代替完整curv.stats。
+全参数、单位、限制与失败行为见完整说明。显式原生表面配方由
+`_run_curvature_stats(binary=..., subject=..., hemi=..., assets=...,
+device="cpu", python_only=False)` 调用同一固定命令；binary 必须是已校验的
+独立 Conda 构建程序，assets 为声明资产目录。该路径返回 None，要求
+`stats/H.curv.stats` 及八张 smoothwm 图全部存在且非空，否则抛
+FileNotFoundError；失败不会由早期近似四图补齐。`python_only=True`
+则使用上面的完整自有入口并返回其报告，不执行程序。
 
 ### 固定参考命令
 

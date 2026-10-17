@@ -4,7 +4,8 @@
 对应半球 folding TIFF。输入固定为 surf/H.sphere、H.smoothwm、H.sulc，
 surface RAS/mm、相同顶点/有序面；图谱不是官方被试结果。两个 --*-source
 指冻结 FNIT src 目录，--*-version 标记版本，实际源代码 SHA 另外保存。
---averaging-device 默认 cpu，可指定 cuda:N；只候选使用此设备，基线及
+--averaging-device 默认 cpu，可指定 cuda:N；--baseline-averaging-device
+默认 cpu 保留历史比较，可显式 cuda:N 做相同 GPU 后端的旧/新源码对照。
 两者 overlap 均 CPU。--gpu-uuid 可核对明确目标，建议同时以 UUID 设置
 CUDA_VISIBLE_DEVICES。Torch/Numba/OMP/BLAS 均固定 4 线程。--repetitions
 默认 1，设 2 则 AB/BA 两轮。--threads 只接受 4；--output 必须是新目录，
@@ -15,6 +16,8 @@ CUDA_VISIBLE_DEVICES。Torch/Numba/OMP/BLAS 均固定 4 线程。--repetitions
 进程墙钟包含导入/加载/传输/读写/JIT；阶段墙钟包含 CUDA 初始化（若有）、
 指定设备前后同步及 API 完整读写。报告保存源码/输入 SHA、实际设备 UUID、
 线程、float32/TF32、allocator 峰值、有序几何/footer误差、dt/state轨迹。
+API 完成后只读取 smoothwm 拟合 dispatcher 的 Numba cache hit/miss，
+签名转为字符串；计数表示本进程签名机器码装载/编译，不是拟合调用数。
 若 API 仅保存选中步长，不编造未记录的 rejected trial。严格复现是诊断，
 不另立数值/指标等效阈值；整例提速与指标等效均 not_assessed。
 结构/运行失败保存 failed JSON、退出非零；严格尾差单独记录，不伪装为失败
@@ -29,13 +32,14 @@ CUDA_VISIBLE_DEVICES。Torch/Numba/OMP/BLAS 均固定 4 线程。--repetitions
       --baseline-version 764607c \\
       --candidate-source /data/frozen_candidate/src \\
       --candidate-version snapshot-with-source-sha256 \\
+      --baseline-averaging-device cuda:0 \\
       --averaging-device cuda:0 \\
       --gpu-uuid GPU-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx \\
       --output /data/validation/register_pair_new_directory \\
       --threads 4 \\
       --repetitions 2
 参数注释：subject=自产冻结输入；hemi=同半球；atlas=声明图谱；两个source
-与version=计算代码快照/标识；averaging-device=仅候选平均内核设备；gpu-uuid=
+与version=计算代码快照/标识；两个averaging-device=两臂各自平均内核设备；gpu-uuid=
 明确设备核验；output=新诊断目录；threads=固定总线程；repetitions=反序配对次数。
 无半精度选项。
 """
@@ -228,6 +232,17 @@ def worker(args) -> int:
             torch.cuda.synchronize(device)
         report["wall_seconds_including_io_jit_sync_init"] = time.perf_counter() - tick
         report["stage_timing_scope"] = "CUDA init if used + explicit target synchronization before/after + full API IO/JIT/transfers; excludes Python imports"
+        from fnit.recon_all.mris_register_smoothwm import _source_order_fit
+        report["source_order_fit_numba_cache"] = {
+            "cache_type": type(getattr(_source_order_fit, "_cache", None)).__name__,
+            "hits": {str(signature): int(count) for signature, count in
+                     getattr(_source_order_fit, "_cache_hits", {}).items()},
+            "misses": {str(signature): int(count) for signature, count in
+                       getattr(_source_order_fit, "_cache_misses", {}).items()},
+            "compiled_signatures": [str(signature) for signature in
+                                    getattr(_source_order_fit, "signatures", ())],
+            "scope": "dispatcher signature machine-code loads/compiles in this process; not fit call counts",
+        }
         if device.type == "cuda" and not report["cuda_allocation_cache_disabled"]:
             report.update(gpu_peak_allocated_bytes=torch.cuda.max_memory_allocated(device),
                           gpu_peak_reserved_bytes=torch.cuda.max_memory_reserved(device))
@@ -272,6 +287,7 @@ def main() -> int:
     parser.add_argument("--candidate-source", type=Path, required=True)
     parser.add_argument("--candidate-version", required=True)
     parser.add_argument("--averaging-device", default="cpu")
+    parser.add_argument("--baseline-averaging-device", default="cpu")
     parser.add_argument("--gpu-uuid")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--threads", type=int, choices=(THREADS,), default=THREADS)
@@ -293,7 +309,8 @@ def main() -> int:
     report = {"status": "running", "scope": "same-real-input-register-stage-pair;not-whole",
               "subject": str(args.subject), "hemi": args.hemi,
               "baseline_version": args.baseline_version, "candidate_version": args.candidate_version,
-              "baseline_averaging_device": "cpu", "candidate_averaging_device": args.averaging_device,
+              "baseline_averaging_device": args.baseline_averaging_device,
+              "candidate_averaging_device": args.averaging_device,
               "overlap_device": "cpu", "threads": THREADS, "script_sha256": sha256(script),
               "input_sha256": None,
               "repetitions": args.repetitions, "timing_note": "AB/BA isolated processes; cache isolated by implementation, shared across repeats; cold first JIT included",
@@ -324,7 +341,7 @@ def main() -> int:
                 command = [sys.executable, str(script), "--worker", "--subject", str(args.subject),
                            "--hemi", args.hemi, "--atlas", str(args.atlas),
                            "--candidate-source", str(source), "--candidate-version", version,
-                           "--averaging-device", "cpu" if is_baseline else args.averaging_device,
+                           "--averaging-device", args.baseline_averaging_device if is_baseline else args.averaging_device,
                            "--output", str(folder), "--threads", str(THREADS)]
                 if args.gpu_uuid:
                     command.extend(["--gpu-uuid", args.gpu_uuid])

@@ -42,6 +42,14 @@ finally:
 | `iterations` | 每次调用的非负整数，无默认值；`0` 返回输入副本。每轮加入自身及全部有效邻点，再乘原 FP32 倒数。 |
 | `averaged_gradient` | 与输入同 shape、dtype、device 的新张量；不修改梯度、邻接或有效列数。CUDA 输入来自 CPU 时，结果完成必要 D2H 同步。 |
 
+2026-10-17 候选在单个 CUDA 平均器实例中复用两份 `(N,3)` float32
+工作缓冲，全部邻接轮次和原有内核不变；GPU 输入的返回值另取副本，
+后续调用不会覆盖已经返回的结果。CPU 输入仍返回独立 CPU 结果。
+同一实例用于顺序调用；并发调用分别创建实例。没有开启 CUDA Graph、
+全局 allocator 缓存或修改精度。真实阶段配对与整例结果见
+[球面配准性能页](../../../docs/recon_all/SPHERE_REGISTRATION_PERFORMANCE.md)；
+候选未完成的精度、时间和显存测量保持 `not_assessed`。
+
 `average_gradients_exact_cpu(gradient=..., neighbors=..., degrees=..., iterations=...)` 是相同 CPU 步骤的函数入口。公开平均类检查 shape、dtype、有效索引和非负轮数；该内部函数要求有效 CPU 输入。该功能不提供梯度反向传播。
 
 CPU 线程预算沿用原规则：不超过当前 Torch 线程数与 NumBa 配置池上限；小于 8,192 个顶点用一线程。调用后恢复进入前的 NumBa 掩码。C++ 每次接收该预算，仅对本次 OpenMP 区域设置 `num_threads`，不修改全局 OpenMP 设置；运行时若限制线程组大小，实际数量可小于请求数量。

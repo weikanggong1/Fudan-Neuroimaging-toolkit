@@ -40,9 +40,16 @@ def _three_hop_neighbors(faces: torch.Tensor, vertices: int
             torch.from_numpy(active).to(faces.device))
 
 
-@njit
+@njit(cache=True, fastmath=False)
 def _source_order_fit(gram: np.ndarray, rhs: np.ndarray
                       ) -> tuple[np.ndarray, np.ndarray]:
+    """按原 VNL 顺序拟合曲率系数，缓存的是机器码而非矩阵或结果。
+
+    gram 为 float32(N,3,3) Gram 矩阵，rhs 为 float32(N,3) 右端；
+    返回 float32(N,3) 系数和 float32(N,) 条件数。输入矩阵及邻接
+    相关数据不会跨调用缓存；每次仍执行完整双 SVD 和原阈值判断。
+    无可调参数或独立原 CLI；缓存目录沿用 Numba 配置，未开启 fastmath。
+    """
     coefficients = np.zeros((len(gram), 3), np.float32)
     condition = np.empty(len(gram), np.float32)
     for vertex in range(len(gram)):
